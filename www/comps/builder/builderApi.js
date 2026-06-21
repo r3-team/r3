@@ -1,6 +1,7 @@
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
 import {getTemplateQuery}     from '../shared/builderTemplate.js';
+import {getColumnTitle}       from '../shared/column.js';
 import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {
 	isAttributeBoolean,
@@ -174,8 +175,8 @@ const MyBuilderApiPreview = {
 	},
 	computed:{
 		// preview values
-		method:(s) => s.isAuth ? 'POST' : s.call,
-		paramsUrl:(s) => {
+		method:s => s.isAuth ? 'POST' : s.call,
+		paramsUrl:s => {
 			if(s.isAuth) return '';
 			
 			let out = [];
@@ -184,12 +185,12 @@ const MyBuilderApiPreview = {
 			if(s.isGet && s.offsetSet) out.push(`offset=${s.params.offset}`);
 			return out.length === 0 ? '' : `?${out.join('&')}`;
 		},
-		request:(s) => {
+		request:s => {
 			if(s.isAuth) return `{\n\t"username": "API_USER_NAME",\n\t"password": "API_USER_PASSWORD"\n}`;
 			if(s.isPost) return s.getBodyPreview(true);
 			return s.capApp.empty;
 		},
-		response:(s) => {
+		response:s => {
 			if(s.isAuth) return `{\n\t"token": "ACCESS_TOKEN"\n}`;
 			if(s.isGet)  return s.getBodyPreview(false);
 			
@@ -202,7 +203,7 @@ const MyBuilderApiPreview = {
 			}
 			return s.capApp.empty;
 		},
-		url:(s) => {
+		url:s => {
 			let base = `${location.protocol}//${location.host}/api/`;
 			switch(s.call) {
 				case 'AUTH': base += 'auth'; break;
@@ -215,20 +216,21 @@ const MyBuilderApiPreview = {
 		},
 		
 		// simple
-		isAuth:   (s) => s.call === 'AUTH',
-		isDelete: (s) => s.call === 'DELETE',
-		isGet:    (s) => s.call === 'GET',
-		isPost:   (s) => s.call === 'POST',
-		limitSet: (s) => s.params.limit  !== '' && s.params.limit  !== 0 && s.limitChanged,
-		offsetSet:(s) => s.params.offset !== '' && s.params.offset !== 0,
-		recordSet:(s) => s.recordId      !== '' && s.recordId      !== 0,
+		isAuth:   s => s.call === 'AUTH',
+		isDelete: s => s.call === 'DELETE',
+		isGet:    s => s.call === 'GET',
+		isPost:   s => s.call === 'POST',
+		limitSet: s => s.params.limit  !== '' && s.params.limit  !== 0 && s.limitChanged,
+		offsetSet:s => s.params.offset !== '' && s.params.offset !== 0,
+		recordSet:s => s.recordId      !== '' && s.recordId      !== 0,
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.api.preview,
-		capAppApi:     (s) => s.$store.getters.captions.builder.api,
-		capGen:        (s) => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
+		capApp:         s => s.$store.getters.captions.builder.api.preview,
+		capAppApi:      s => s.$store.getters.captions.builder.api,
+		capGen:         s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		// set defaults from API
@@ -237,6 +239,7 @@ const MyBuilderApiPreview = {
 	},
 	methods:{
 		// externals
+		getColumnTitle,
 		isAttributeBoolean,
 		isAttributeDecimal,
 		isAttributeFiles,
@@ -246,15 +249,38 @@ const MyBuilderApiPreview = {
 		isAttributeUuid,
 		
 		// display
-		getAttributeExampleValue(content,aggregator) {
-			let value;
-			if(this.isAttributeInteger(content))      value = 123;
-			if(this.isAttributeDecimal(content))      value = 123.45;
-			if(this.isAttributeString(content))       value = 'ABC';
-			if(this.isAttributeRelationship(content)) value = 456;
-			if(this.isAttributeUuid(content))         value = '064fc31d-479d-450d-22cd-71f874df3a50';
-			if(this.isAttributeBoolean(content))      value = true;
-			if(this.isAttributeFiles(content)) {
+		getColumnExampleValue(column) {
+			let contentDisplay = 'text';
+			let value          = '';
+			switch(column.content) {
+				case 'fnc_pg':
+					if(column.pgFunctionId !== null) {
+						// return content of function return
+						const fnc = this.pgFunctionIdMap[column.pgFunctionId];
+						contentDisplay = fnc.codeReturns.toLowerCase();
+					}
+				break;
+				case 'fnc_scalar':
+					if(column.arguments.length > 0) {
+						// return content of first argument
+						const arg = column.arguments[0];
+						value = arg.attributeId !== null ? this.attributeIdMap[arg.attributeId].content : 'text';
+					}
+				break;
+				case 'query': // fallthrough
+				case 'attribute':
+					// return content of returned attribute
+					contentDisplay = this.attributeIdMap[column.attributeId].content;
+				break;
+			}
+			
+			if(this.isAttributeInteger(contentDisplay))      value = 123;
+			if(this.isAttributeDecimal(contentDisplay))      value = 123.45;
+			if(this.isAttributeString(contentDisplay))       value = 'ABC';
+			if(this.isAttributeRelationship(contentDisplay)) value = 456;
+			if(this.isAttributeUuid(contentDisplay))         value = '064fc31d-479d-450d-22cd-71f874df3a50';
+			if(this.isAttributeBoolean(contentDisplay))      value = true;
+			if(this.isAttributeFiles(contentDisplay)) {
 				if(this.isPost) {
 					value = {
 						fileIdMapChange:{
@@ -289,8 +315,8 @@ const MyBuilderApiPreview = {
 				}
 			}
 			
-			if(aggregator !== null) {
-				switch(aggregator) {
+			if(column.aggregator !== null) {
+				switch(column.aggregator) {
 					case 'array': return [value,value];        break;
 					case 'list':  return `${value}, ${value}`; break;
 				}
@@ -304,41 +330,24 @@ const MyBuilderApiPreview = {
 			for(;rowCount > 0;rowCount--) {
 				if(!this.params.verbose) {
 					let row = [];
-					for(let column of this.columns) {
-						row.push(this.getAttributeExampleValue(
-							this.attributeIdMap[column.attributeId].content,column.aggregator));
+					for(const column of this.columns) {
+						row.push(this.getColumnExampleValue(column));
 					}
 					rows.push(row);
 				} else {
-					let row         = {};
-					let subQueryCtr = 0;
-					for(let join of this.joins) {
+					let row        = {};
+					let noTitleCtr = 0;
+					for(const join of this.joins) {
 						// relation reference (relation index + name): '0(person)' or '1(department)'
 						let relRef  = `${join.index}(${this.relationIdMap[join.relationId].name})`;
 						row[relRef] = {};
 						
-						for(let column of this.columns) {
+						for(const column of this.columns) {
 							if(column.index !== join.index)
 								continue;
-							
-							// new sub query columns do not have an attribute unless selected
-							if(column.attributeId === null) {
-								row[relRef][`[sub_query${subQueryCtr++}_no_attribute]`] = null;
-								continue;
-							}
-							
-							let colRef;
-							let atr = this.attributeIdMap[column.attributeId];
-							
-							if(typeof column.captions.columnTitle[this.builderLanguage] !== 'undefined') {
-								colRef = column.captions.columnTitle[this.builderLanguage];
-							} else {
-								colRef = column.content === 'query' ? `sub_query${subQueryCtr++}` : atr.name;
-								
-								if(column.aggregator !== null)
-									colRef = `${column.aggregator.toUpperCase()} (${colRef})`;
-							}
-							row[relRef][colRef] = this.getAttributeExampleValue(atr.content,column.aggregator);
+
+							const colRef = this.getColumnTitle(column,this.module.id,this.builderLanguage);
+							row[relRef][colRef !== '' ? colRef : `NO_TITLE${noTitleCtr++}`] = this.getColumnExampleValue(column);
 						}
 					}
 					rows.push(row);

@@ -113,7 +113,7 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 	} else {
 		// prepare keys for row template object: { "0(person)":{"firstname":"Hans", ...}, "1(department)":{"name":"IT"}...}
 		colRefByColumn := make([]string, len(api.Columns))
-		subQueryCtr := 0
+		noTitleCtr := 0
 		for i, c := range api.Columns {
 
 			colRef := ""
@@ -123,7 +123,7 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 			} else {
 				// fallbacks
 				switch c.Content {
-				case schema.ColumnContentAttribute:
+				case schema.ColumnContentAttribute, schema.ColumnContentQuery:
 					if !c.AttributeId.Valid {
 						return http.StatusServiceUnavailable, nil, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute)
 					}
@@ -131,7 +131,11 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 					atr := cache.AttributeIdMap[c.AttributeId.Bytes]
 					cache.Schema_mx.RUnlock()
 
-					colRef = atr.Name
+					if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
+						colRef = title
+					} else {
+						colRef = atr.Name
+					}
 
 				case schema.ColumnContentFncPg, schema.ColumnContentFncScalar:
 					parts := make([]string, 0)
@@ -141,7 +145,11 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 							atr := cache.AttributeIdMap[arg.AttributeId.Bytes]
 							cache.Schema_mx.RUnlock()
 
-							parts = append(parts, atr.Name)
+							if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
+								parts = append(parts, title)
+							} else {
+								parts = append(parts, atr.Name)
+							}
 						}
 					}
 					if c.Content == schema.ColumnContentFncScalar {
@@ -156,15 +164,11 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 					} else {
 						colRef = strings.Join(parts, ",")
 					}
-
-				case schema.ColumnContentQuery:
-					colRef = fmt.Sprintf("sub_query%d", subQueryCtr)
-					subQueryCtr++
 				}
-
-				if c.Aggregator.Valid {
-					colRef = fmt.Sprintf("%s (%s)", strings.ToUpper(c.Aggregator.String), colRef)
-				}
+			}
+			if colRef == "" {
+				colRef = fmt.Sprintf("NO_TITLE%d", noTitleCtr)
+				noTitleCtr++
 			}
 			colRefByColumn[i] = colRef
 		}
