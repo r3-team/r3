@@ -22,7 +22,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	overflow:auto;
-	max-height:400px;
+	min-height:300px;
 	border-bottom:1px solid var(--color-border);
 	border-radius:3px;
 }

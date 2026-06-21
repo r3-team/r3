@@ -72,6 +72,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showPolicies && lookups.relationIdsPolicies.length !== 0">
+						<td class="minimum"><my-label image="database.png" :caption="capGen.policies" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.relationIdsPolicies"
+									@trigger="open('relation',id,null,false)"
+									@trigger-middle="open('relation',id,null,true)"
+									:caption="relationIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showApis && lookups.apiIds.length !== 0">
 						<td class="minimum"><my-label image="api.png" :caption="capGen.apis" /></td>
 						<td>
@@ -244,6 +257,7 @@ const MyBuilderSchemaLookupModule = {
 		showFunctions:    { type:Boolean, required:true },
 		showPgIndex:      { type:Boolean, required:true },
 		showPgTriggers:   { type:Boolean, required:true },
+		showPolicies:     { type:Boolean, required:true },
 		showRelationships:{ type:Boolean, required:true },
 		showSearchBars:   { type:Boolean, required:true }
 	},
@@ -358,6 +372,7 @@ export default {
 				<my-button-check v-model="showFunctions"     :caption="capGen.functions" />
 				<my-button-check v-model="showPgIndex"       :caption="capGen.indexes" />
 				<my-button-check v-model="showPgTriggers"    :caption="capGen.triggers" />
+				<my-button-check v-model="showPolicies"      :caption="capGen.policies" />
 				<my-button-check v-model="showRelationships" :caption="capGen.relationships" />
 				<my-button-check v-model="showSearchBars"    :caption="capGen.searchBars" />
 			</div>
@@ -392,6 +407,7 @@ export default {
 						:showFunctions
 						:showPgIndex
 						:showPgTriggers
+						:showPolicies
 						:showRelationships
 						:showSearchBars
 					/>
@@ -423,6 +439,7 @@ export default {
 			showFunctions:true,
 			showPgIndex:true,
 			showPgTriggers:true,
+			showPolicies:true,
 			showRelationships:true,
 			showSearchBars:true
 		};

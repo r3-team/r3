@@ -315,14 +315,13 @@ export default {
 						/>
 
 						<!-- SQL preview -->
-						<div class="row" v-if="queryActive">
+						<div class="builder-preview-action" v-if="queryActive">
 							<my-button image="code.png"
 								@trigger="getSqlPreview(query,field.columns)"
 								:caption="capGen.sqlPreview"
 							/>
 						</div>
 
-						<br />
 						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="columns shade">
 							<my-builder-column-templates

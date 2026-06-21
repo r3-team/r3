@@ -24,6 +24,11 @@
 	filter:var(--image-filter);
 	cursor:move;
 }
+.builder-preview-action{
+	display:flex;
+	flex-flow:row nowrap;
+	margin:10px 0px 20px;
+}
 
 /* content */
 .builder .moduleSelect{

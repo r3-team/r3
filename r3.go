@@ -280,7 +280,7 @@ func main() {
 	// main executable can be used to open the app in default browser even if its not started (-open without -run)
 	// used for shortcuts in start menu when installed on Windows systems with desktop experience
 	// if dynamic port (0) is used, we cannot open app without starting it (port is not known)
-	if cli.open && config.File.Web.Port != 0 && !config.File.Portable {
+	if cli.open && !cli.run && config.File.Web.Port != 0 && !config.File.Portable {
 		protocol := "https"
 		if cli.http {
 			protocol = "http"

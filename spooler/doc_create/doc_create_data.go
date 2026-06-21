@@ -22,6 +22,10 @@ func getDataDoc(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64,
 	}
 	defer tx.Rollback(ctx)
 
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		return err
+	}
+
 	dataGet := types.DataGet{
 		RelationId:  q.RelationId.Bytes,
 		IndexSource: 0,
@@ -106,7 +110,7 @@ func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToSt
 	case "integer", "bigint":
 		switch atr.ContentUse {
 		case "default":
-			return true, fmt.Sprintf("%d", valueIf), nil
+			return true, tools.FormatStringNumber(fmt.Sprintf("%d", valueIf), font.NumberSepDec, font.NumberSepTho), nil
 		case "date", "datetime":
 			tUnix, err := getInt64FromInterface(valueIf)
 			if err != nil {

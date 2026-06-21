@@ -142,7 +142,7 @@ export default {
 					/>
 
 					<!-- SQL preview -->
-					<div class="row" v-if="queryActive">
+					<div class="builder-preview-action" v-if="queryActive">
 						<my-button image="code.png"
 							@trigger="getSqlPreview(query,searchBar.columns)"
 							:caption="capGen.sqlPreview"
