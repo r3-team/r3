@@ -397,10 +397,13 @@ function getReferencesAttribut(mod,atrId,lookups) {
 	};
 
 	const isInDocColumns = columns => columns.some(v => v.attributeId === atrId
-		|| (v.content === 'query' && isInQuery(v.query))
+		|| (v.content === 'query'      && isInQuery(v.query))
+		|| (v.content === 'fnc_pg'     && v.arguments.some(a => a.attributeId === atrId))
+		|| (v.content === 'fnc_scalar' && v.arguments.some(a => a.attributeId === atrId))
 		|| v.setsBody.some(s => s.attributeId === atrId)
 		|| v.setsFooter.some(s => s.attributeId === atrId)
-		|| v.setsHeader.some(s => s.attributeId === atrId));
+		|| v.setsHeader.some(s => s.attributeId === atrId)
+	);
 	
 	const isInDocField = field => {
 		if(field.sets.some(v => v.attributeId === atrId))
