@@ -97,7 +97,7 @@ type Column struct {
 	Scalar pgtype.Text `json:"scalar"` // built-in scalar function (COALESCE, CONCAT, ...)
 
 	// sub query expression
-	Query Query `json:"query"` // sub query
+	Query Query `json:"query"`
 
 	// expression options
 	Aggregator pgtype.Text  `json:"aggregator"` // aggregator (SUM, COUNT, ...)
@@ -118,7 +118,7 @@ type Column struct {
 	// legacy
 	BatchVertical bool `json:"batchVertical"`
 	Clipboard     bool `json:"clipboard"`
-	SubQuery      bool `json:"subQuery"` // column uses sub query?
+	SubQuery      bool `json:"subQuery"`
 	Wrap          bool `json:"wrap"`
 }
 type Deletion struct {

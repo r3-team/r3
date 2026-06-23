@@ -2033,7 +2033,8 @@
 			"008": "Une relation référencée est inconnue.",
 			"009": "Un attribut référencé est inconnu.",
 			"010": "A column does not include a valid attribute reference.",
-			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
+			"012": "A column does not include a valid backend function reference."
 		},
 		"CSV": {
 			"001": "Numéro invalide '{VALUE}' (un entier était attendu).",

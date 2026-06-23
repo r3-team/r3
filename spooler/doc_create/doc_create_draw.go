@@ -29,20 +29,20 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY float64, atr types.Attribute, valueIf any) error {
+func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY float64, content string, contentUse string, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
 	}
 
-	switch atr.Content {
+	switch content {
 	case "text", "varchar":
 		v, ok := valueIf.(string)
 		if !ok {
 			return fmt.Errorf("failed to parse text attribute value")
 		}
 
-		switch atr.ContentUse {
+		switch contentUse {
 		case "barcode":
 			var b textBarcode
 			if err := json.Unmarshal([]byte(v), &b); err != nil {

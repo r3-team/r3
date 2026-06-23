@@ -101,7 +101,7 @@ export function getTemplateColumn(attributeId,index,content) {
 	return {
 		id:getUuidV4(),
 		content:content,
-		pgFunctionIdCall:null,
+		pgFunctionId:null,
 		attributeId:attributeId,
 		index:index,
 		arguments:[],
@@ -153,19 +153,22 @@ export function getTemplateDoc(moduleId,language,name) {
 		}
 	};
 };
-export function getTemplateDocColumn(attributeId,attributeIndex,subQuery) {
+export function getTemplateDocColumn(attributeId,attributeIndex,content) {
 	return {
 		id:getUuidV4(),
+		pgFunctionId:null,
 		attributeId:attributeId,
 		attributeIndex:attributeIndex,
+		arguments:[],
 		aggregator:null,
 		aggregatorRow:null,
+		content:content,
 		distincted:false,
 		groupBy:false,
 		length:0,
 		query:getTemplateQuery(),
+		scalar:content === 'fnc_scalar' ? 'CONCAT' : null,
 		sizeX:0,
-		subQuery:subQuery,
 		textPostfix:'',
 		textPrefix:'',
 		setsBody:[],

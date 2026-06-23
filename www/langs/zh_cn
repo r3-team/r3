@@ -2033,7 +2033,8 @@
 			"008": "引用的关系未知。",
 			"009": "引用的属性未知。",
 			"010": "A column does not include a valid attribute reference.",
-			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
+			"012": "A column does not include a valid backend function reference."
 		},
 		"CSV": {
 			"001": "无效数字“{VALUE}”（应为整数）。",

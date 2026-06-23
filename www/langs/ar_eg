@@ -2033,7 +2033,8 @@
 			"008": "العلاقة المشار إليها غير معروفة.",
 			"009": "السمة المشار إليها غير معروفة.",
 			"010": "A column does not include a valid attribute reference.",
-			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
+			"012": "A column does not include a valid backend function reference."
 		},
 		"CSV": {
 			"001": "رقم غير صالح '{VALUE}' (من المتوقع أن يكون عددًا صحيحًا).",

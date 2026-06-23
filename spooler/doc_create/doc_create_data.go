@@ -61,13 +61,13 @@ func getDataDoc(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64,
 }
 
 // returns whether an attribute value can be returned as string and the string value itself if valid
-func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToString bool, valueIf any) (bool, string, error) {
+func getAttributeString(font types.DocFont, content string, contentUse string, decCount int, convertHtmlToString bool, valueIf any) (bool, string, error) {
 
 	if valueIf == nil {
 		return true, "", nil
 	}
 
-	switch atr.Content {
+	switch content {
 	case "real", "double precision":
 		return true, fmt.Sprintf("%f", valueIf), nil
 	case "regconfig":
@@ -78,7 +78,7 @@ func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToSt
 			return false, "", fmt.Errorf("failed to parse text attribute value")
 		}
 
-		switch atr.ContentUse {
+		switch contentUse {
 		case "default", "iframe", "textarea":
 			return true, v, nil
 		case "color":
@@ -108,7 +108,7 @@ func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToSt
 	case "files":
 		return false, "", nil
 	case "integer", "bigint":
-		switch atr.ContentUse {
+		switch contentUse {
 		case "default":
 			return true, tools.FormatStringNumber(fmt.Sprintf("%d", valueIf), font.NumberSepDec, font.NumberSepTho), nil
 		case "date", "datetime":
@@ -116,7 +116,7 @@ func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToSt
 			if err != nil {
 				return false, "", err
 			}
-			if atr.ContentUse == "datetime" {
+			if contentUse == "datetime" {
 				// print datetime at local server time
 				return true, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)), nil
 			} else {
@@ -142,10 +142,10 @@ func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToSt
 		if err != nil {
 			return false, "", err
 		}
-		return true, tools.FormatFloatNumber(f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho), nil
+		return true, tools.FormatFloatNumber(f.Float64, decCount, font.NumberSepDec, font.NumberSepTho), nil
 
 	default:
-		return false, "", fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
+		return false, "", fmt.Errorf("failed to add field, no definition for attribute content '%s'", content)
 	}
 	return false, "", nil
 }

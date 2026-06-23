@@ -47,6 +47,7 @@ const (
 	ErrCodeAppUnknownAttribute      int = 9
 	ErrCodeAppColumnNoAttribute     int = 10
 	ErrCodeAppColumnContentNoAtr    int = 11
+	ErrCodeAppColumnNoPgFunction    int = 12
 	ErrCodeCsvParseInt              int = 1
 	ErrCodeCsvParseFloat            int = 2
 	ErrCodeCsvParseDateTime         int = 3

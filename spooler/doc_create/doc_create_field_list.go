@@ -8,6 +8,7 @@ import (
 	"r3/data/data_query"
 	"r3/db"
 	"r3/handler"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 
@@ -15,15 +16,24 @@ import (
 )
 
 type cell struct {
-	atr      types.Attribute
-	atrValue any
-	font     types.DocFont
-	text     string
-	length   int
-	lines    int
-	postfix  string
-	prefix   string
-	width    float64
+	content    string
+	contentUse string
+	font       types.DocFont
+	text       string
+	length     int
+	lines      int
+	postfix    string
+	prefix     string
+	valueIf    any
+	width      float64
+}
+type columnMeta struct {
+	content    string // content from expression (text, integer, boolean, ...)
+	contentUse string // content use from attribute expressions (richtext, iframe, ...)
+	decCount   int    // count of decimals (numeric expression only)
+	fontBody   types.DocFont
+	fontFooter types.DocFont
+	fontHeader types.DocFont
 }
 
 func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64, f types.DocFieldList, font types.DocFont) error {
@@ -50,8 +60,11 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 
 	// build expressions from columns
 	for _, column := range f.Columns {
-		dataGet.Expressions = append(dataGet.Expressions,
-			data_query.ConvertDocumentColumnToExpression(column, loginId, doc.p.GetLang(), recordIdDoc))
+		expr, err := data_query.ConvertDocumentColumnToExpression(column, loginId, doc.p.GetLang(), recordIdDoc)
+		if err != nil {
+			return err
+		}
+		dataGet.Expressions = append(dataGet.Expressions, expr)
 	}
 
 	if len(dataGet.Expressions) == 0 {
@@ -98,11 +111,9 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 
 	// working variables
 	var sizeYHeader float64 = 0
+	noTitleCtr := 0
 	printAggregationRow := false
-	columnIndexMapAtr := make(map[int]types.Attribute)
-	columnIndexMapFontBody := make(map[int]types.DocFont)
-	columnIndexMapFontHeader := make(map[int]types.DocFont)
-	columnIndexMapFontFooter := make(map[int]types.DocFont)
+	columnIndexMapMeta := make(map[int]columnMeta)
 	columnIndexMapAggValueCnt := make(map[int]int)
 	columnIndexMapAggValueInt := make(map[int]int64)
 	columnIndexMapAggValueNum := make(map[int]float64)
@@ -122,39 +133,71 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 	for i, column := range f.Columns {
 
 		// parse & store column meta data
-		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[column.AttributeId]
-		cache.Schema_mx.RUnlock()
-		if !exists {
-			return handler.ErrSchemaUnknownAttribute(column.AttributeId)
+		column = applyToColumn(column.SetsHeader, column)
+		meta := columnMeta{
+			content:    "text",
+			contentUse: "default",
+			decCount:   0,
+			fontBody:   applyToFont(getSetDataResolved(doc, column.SetsBody), font),
+			fontFooter: applyToFont(getSetDataResolved(doc, column.SetsFooter), font),
+			fontHeader: applyToFont(getSetDataResolved(doc, column.SetsHeader), font),
 		}
 
-		column = applyToColumn(column.SetsHeader, column)
-		columnIndexMapAtr[i] = atr
-		columnIndexMapFontHeader[i] = applyToFont(getSetDataResolved(doc, column.SetsHeader), font)
-		columnIndexMapFontBody[i] = applyToFont(getSetDataResolved(doc, column.SetsBody), font)
-		columnIndexMapFontFooter[i] = applyToFont(getSetDataResolved(doc, column.SetsFooter), font)
+		// prepare header title & store attribute (if used) for later use
+		title, columnTitleExists := column.Captions["docColumnTitle"][doc.p.GetLang()]
 
-		// calcuclate header titles and row height
-		title, exists := column.Captions["docColumnTitle"][doc.p.GetLang()]
-		if !exists {
-			// fallback to attribute title
-			title, exists = atr.Captions["attributeTitle"][doc.p.GetLang()]
+		switch column.Content {
+		case schema.ColumnContentAttribute, schema.ColumnContentQuery:
+
+			if !column.AttributeId.Valid {
+				return fmt.Errorf("no attribute defined in column")
+			}
+
+			cache.Schema_mx.RLock()
+			atr, exists := cache.AttributeIdMap[column.AttributeId.Bytes]
+			cache.Schema_mx.RUnlock()
 			if !exists {
-				// fallback to column attribute name
-				title = atr.Name
+				return handler.ErrSchemaUnknownAttribute(column.AttributeId.Bytes)
+			}
+			meta.content = atr.Content
+			meta.contentUse = atr.ContentUse
+			meta.decCount = atr.LengthFract
+
+			if !columnTitleExists {
+				title, exists = atr.Captions["attributeTitle"][doc.p.GetLang()]
+				if !exists {
+					title = atr.Name
+				}
+			}
+
+		case schema.ColumnContentFncPg:
+			meta.content, meta.decCount, err = data_query.ConvertPgFunctionReturnToContent(column.PgFunctionId)
+			if err != nil {
+				return err
+			}
+
+		case schema.ColumnContentFncScalar:
+			meta.content, meta.contentUse, meta.decCount, err = data_query.ConvertScalarArgumentsToContent(column.Scalar.String, column.Arguments)
+			if err != nil {
+				return err
 			}
 		}
 
+		if title == "" {
+			title = fmt.Sprintf("NO_TITLE%d", noTitleCtr)
+			noTitleCtr++
+		}
 		title = getStringClean(title, column.TextPrefix, column.TextPostfix, column.Length)
-		sizeYCell, cellLines := getRowCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i]-sizeXReductionHeader, column.Length, title)
+
+		// calculate row height
+		sizeYCell, cellLines := getRowCellHeightLines(doc, meta.fontHeader, columnIndexMapWidth[i]-sizeXReductionHeader, column.Length, title)
 		sizeYCell += sizeYAdditionHeader
 		if sizeYHeader < sizeYCell {
 			sizeYHeader = sizeYCell
 		}
 
 		cellsHeader = append(cellsHeader, cell{
-			font:   columnIndexMapFontHeader[i],
+			font:   meta.fontHeader,
 			length: column.Length,
 			lines:  cellLines,
 			text:   title,
@@ -165,6 +208,9 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 		if column.AggregatorRow.Valid {
 			printAggregationRow = true
 		}
+
+		// store column meta data for later use
+		columnIndexMapMeta[i] = meta
 	}
 
 	posX := doc.p.GetX()
@@ -187,14 +233,13 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 		for i, column := range f.Columns {
 
 			column = applyToColumn(column.SetsBody, column)
-			atr := columnIndexMapAtr[i]
-			font := columnIndexMapFontBody[i]
+			meta := columnIndexMapMeta[i]
 
 			// collect values for aggregation
 			if printAggregationRow && column.AggregatorRow.Valid && row.Values[i] != nil {
 				columnIndexMapAggValueCnt[i]++
 
-				switch atr.Content {
+				switch meta.content {
 				case "numeric":
 					if _, exists := columnIndexMapAggValueNum[i]; !exists {
 						columnIndexMapAggValueNum[i] = 0
@@ -245,13 +290,13 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			var sizeYCell float64 = 0
 			var cellLines int = 1
 
-			isString, str, err := getAttributeString(font, atr, true, row.Values[i])
+			isString, str, err := getAttributeString(meta.fontBody, meta.content, meta.contentUse, meta.decCount, true, row.Values[i])
 			if err != nil {
 				return err
 			}
 			if isString {
 				str = getStringClean(str, column.TextPrefix, column.TextPostfix, column.Length)
-				sizeYCell, cellLines = getRowCellHeightLines(doc, font, columnIndexMapWidth[i]-sizeXReductionBody, column.Length, str)
+				sizeYCell, cellLines = getRowCellHeightLines(doc, meta.fontBody, columnIndexMapWidth[i]-sizeXReductionBody, column.Length, str)
 			}
 
 			sizeYCell += sizeYAdditionBody
@@ -260,15 +305,16 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			}
 
 			cells = append(cells, cell{
-				atr:      atr,
-				atrValue: row.Values[i],
-				font:     font,
-				length:   column.Length,
-				lines:    cellLines,
-				postfix:  column.TextPostfix,
-				prefix:   column.TextPrefix,
-				text:     str, // text is empty string if it cannot be parsed
-				width:    columnIndexMapWidth[i],
+				content:    meta.content,
+				contentUse: meta.contentUse,
+				font:       meta.fontBody,
+				length:     column.Length,
+				lines:      cellLines,
+				postfix:    column.TextPostfix,
+				prefix:     column.TextPrefix,
+				text:       str, // text is empty string if it cannot be parsed
+				valueIf:    row.Values[i],
+				width:      columnIndexMapWidth[i],
 			})
 		}
 
@@ -306,21 +352,22 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 		for i, column := range f.Columns {
 
 			column = applyToColumn(column.SetsFooter, column)
+			meta := columnIndexMapMeta[i]
 			text := ""
 
 			if column.AggregatorRow.Valid {
 				if column.AggregatorRow.String == "count" {
 					text = fmt.Sprintf("%d", columnIndexMapAggValueCnt[i])
 				} else {
-					atr := columnIndexMapAtr[i]
-
-					switch atr.Content {
+					switch meta.content {
 					case "numeric":
 						switch column.AggregatorRow.String {
 						case "avg":
-							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i]/float64(columnIndexMapAggValueCnt[i]), atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
+							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i]/float64(columnIndexMapAggValueCnt[i]),
+								meta.decCount, meta.fontFooter.NumberSepDec, meta.fontFooter.NumberSepTho)
 						case "max", "min", "sum":
-							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i], atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
+							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i], meta.decCount,
+								meta.fontFooter.NumberSepDec, meta.fontFooter.NumberSepTho)
 						}
 					case "integer", "bigint":
 						switch column.AggregatorRow.String {
@@ -335,14 +382,14 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 
 			// figure out row height
 			text = getStringClean(text, column.TextPrefix, column.TextPostfix, column.Length)
-			sizeYCell, cellLines := getRowCellHeightLines(doc, columnIndexMapFontFooter[i], columnIndexMapWidth[i]-sizeXReductionFooter, column.Length, text)
+			sizeYCell, cellLines := getRowCellHeightLines(doc, meta.fontFooter, columnIndexMapWidth[i]-sizeXReductionFooter, column.Length, text)
 			sizeYCell += sizeYAdditionFooter
 			if sizeYRow < sizeYCell {
 				sizeYRow = sizeYCell
 			}
 
 			cells = append(cells, cell{
-				font:   columnIndexMapFontFooter[i],
+				font:   meta.fontFooter,
 				length: column.Length,
 				lines:  cellLines,
 				text:   text,
@@ -404,7 +451,7 @@ func addListRow(doc *doc, b types.DocBorder, isFirstRow bool, cells []cell, padd
 		} else {
 			// non string attributes need to be drawn (QR codes, images from files, base64 images from drawings, etc.)
 			// only provide height to keep aspect ratio
-			if err := drawAttributeNonString(doc, c.font, 0, 0, sizeYContent, c.atr, c.atrValue); err != nil {
+			if err := drawAttributeNonString(doc, c.font, 0, 0, sizeYContent, c.content, c.contentUse, c.valueIf); err != nil {
 				return err
 			}
 		}

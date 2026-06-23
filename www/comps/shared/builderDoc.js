@@ -35,20 +35,18 @@ export function getDocEntityMapRef(doc) {
 	return refs;
 };
 
-export function getDocColumnIcon(column) {
-	if(column.subQuery) return 'code.png';
-	
-	const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-	return `${getAttributeIcon(atr.content,atr.contentUse,false,false)}`;
-};
-
 export function getDocColumnTitle(c) {
-	if(c.subQuery)
-		return 'SubQuery';
-
-	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-	const rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
-	return `${c.attributeIndex} ${rel.name}.${atr.name}`
+	switch(c.content) {
+		case 'attribute':
+			const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+			const rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
+			return `${c.attributeIndex} ${rel.name}.${atr.name}`
+		break;
+		case 'query':      return MyStore.getters.captions.generic.querySub;        break;
+		case 'fnc_pg':     return MyStore.getters.captions.generic.functionBackend; break;
+		case 'fnc_scalar': return MyStore.getters.captions.generic.valueMulti;      break;
+	}
+	return '';
 };
 
 export function getDocFieldIcon(field) {

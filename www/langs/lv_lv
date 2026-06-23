@@ -2033,7 +2033,8 @@
 			"008": "Atsauce uz attiecību nav zināma.",
 			"009": "Atsauce uz atribūtu nav zināma.",
 			"010": "A column does not include a valid attribute reference.",
-			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
+			"012": "A column does not include a valid backend function reference."
 		},
 		"CSV": {
 			"001": "Invalid number '{VALUE}' (expected an integer).",

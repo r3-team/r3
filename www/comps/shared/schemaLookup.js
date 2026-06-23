@@ -216,7 +216,24 @@ function getReferencesJsFunction(mod,fncId,lookups) {
 };
 
 function getReferencesPgFunction(mod,fncId,lookups) {
-	const isInColumns = columns => columns.some(v => v.pgFunctionId === fncId);
+	const isInColumns    = columns => columns.some(v => v.pgFunctionId === fncId);
+	const isInDocColumns = columns => columns.some(v => v.pgFunctionId === fncId);
+	const isInDocField = field => {
+		switch(field.content) {
+			case 'list': return isInDocColumns(field.columns); break;
+			case 'grid':       // fallthrough
+			case 'gridFooter': // fallthrough
+			case 'gridHeader': // fallthrough
+			case 'flowBody':   // fallthrough
+			case 'flow':
+				for(const f of field.fields) {
+					if(isInDocField(f))
+						return true;
+				}
+			break;
+		}
+		return false;
+	};
 	const lookupInFields = (formId,fields) => {
 		const add = fieldId => {
 			if(lookups.formIdMapFieldIds[formId] === undefined)
@@ -259,6 +276,18 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 			}
 		}
 	};
+	for(const d of mod.docs) {
+		if (
+			d.pages.some(v =>
+				isInDocField(v.fieldFlow) ||
+				(v.header.active && isInDocField(v.header.fieldGrid)) ||
+				(v.footer.active && isInDocField(v.footer.fieldGrid))
+			)
+		) {
+			lookups.docIds.push(d.id);
+			lookups.anyResults = true;
+		}
+	}
 	for(const r of mod.relations) {
 		if(r.policies.some(v => fncId === v.pgFunctionIdExcl || fncId === v.pgFunctionIdIncl)) {
 			lookups.relationIdsPolicies.push(r.id);
@@ -368,7 +397,7 @@ function getReferencesAttribut(mod,atrId,lookups) {
 	};
 
 	const isInDocColumns = columns => columns.some(v => v.attributeId === atrId
-		|| (v.subQuery && isInQuery(v.query))
+		|| (v.content === 'query' && isInQuery(v.query))
 		|| v.setsBody.some(s => s.attributeId === atrId)
 		|| v.setsFooter.some(s => s.attributeId === atrId)
 		|| v.setsHeader.some(s => s.attributeId === atrId));

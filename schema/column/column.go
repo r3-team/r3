@@ -133,17 +133,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 
 			return err
 		}
-		if c.Content == schema.ColumnContentQuery {
+		switch c.Content {
+		case schema.ColumnContentQuery:
 			if err := query.Set_tx(ctx, tx, schema.DbColumn, c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
-		}
-		if c.Content == schema.ColumnContentFncPg || c.Content == schema.ColumnContentFncScalar {
+		case schema.ColumnContentFncPg, schema.ColumnContentFncScalar:
 			if err := setArguments_tx(ctx, tx, c.Id, c.Arguments); err != nil {
-				return err
-			}
-		} else {
-			if err := delArguments_tx(ctx, tx, c.Id); err != nil {
 				return err
 			}
 		}

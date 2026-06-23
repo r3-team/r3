@@ -2033,7 +2033,8 @@
 			"008": "Relația la care se face referire nu este cunoscută.",
 			"009": "Atributul la care se face referire nu este cunoscut.",
 			"010": "A column does not include a valid attribute reference.",
-			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
+			"012": "A column does not include a valid backend function reference."
 		},
 		"CSV": {
 			"001": "Număr nevalid '{VALUE}' (număr întreg așteptat).",

@@ -108,7 +108,7 @@ export default {
 		// drag & drop
 		dragPreviewMoveTo(ind) {
 			if(this.dragPreviewIndex === -1) {
-				const column = this.getTemplateDocColumn(null,0,false);
+				const column = this.getTemplateDocColumn(null,0,'attribute');
 				this.columns.splice(ind,0,column);
 				this.columnIdPreview = column.id;
 				return;

@@ -94,8 +94,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.column ALTER COLUMN content
-			TYPE app.column_content USING content::TEXT::app.column_content;
+		ALTER TABLE app.column     ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
+		ALTER TABLE app.doc_column ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
 	*/
 
 	"3.12": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -128,7 +128,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			END;
 			$BODY$;
 
-			-- new expression options
+			-- PG functions as target for columns
+			ALTER TABLE app.pg_function ADD COLUMN is_column_exec boolean NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_function ALTER COLUMN is_column_exec DROP DEFAULT;
+
+			-- new options for field columns
 			CREATE TYPE app.column_content AS ENUM('attribute', 'query', 'fnc_scalar', 'fnc_pg');
 			CREATE TYPE app.scalar_function AS ENUM('COALESCE', 'CONCAT');
 
@@ -168,12 +172,48 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-
 			CREATE INDEX IF NOT EXISTS fki_column_argument_column_id_fkey    ON app.column_argument USING btree (column_id    ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_column_argument_attribute_id_fkey ON app.column_argument USING btree (attribute_id ASC NULLS LAST);
 
-			ALTER TABLE app.pg_function ADD COLUMN is_column_exec boolean NOT NULL DEFAULT false;
-			ALTER TABLE app.pg_function ALTER COLUMN is_column_exec DROP DEFAULT;
+			-- new options for document field columns
+			ALTER TABLE app.doc_column ADD COLUMN content TEXT NOT NULL DEFAULT 'attribute';
+			ALTER TABLE app.doc_column ALTER COLUMN content DROP DEFAULT;
+			UPDATE app.doc_column
+			SET content = 'query'
+			WHERE sub_query;
+			ALTER TABLE app.doc_column DROP COLUMN sub_query;
+
+			ALTER TABLE app.doc_column ADD COLUMN scalar_function app.scalar_function;
+			ALTER TABLE app.doc_column ALTER COLUMN attribute_id DROP NOT NULL;
+
+			ALTER TABLE app.doc_column ADD COLUMN pg_function_id_call UUID;
+			ALTER TABLE app.doc_column ADD CONSTRAINT pg_function_id_call_fkey FOREIGN KEY (pg_function_id_call)
+				REFERENCES app.pg_function (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_doc_column_pg_function_id_call_fkey ON app.doc_column USING btree (pg_function_id_call ASC NULLS LAST);
+
+			CREATE TABLE app.doc_column_argument(
+				doc_column_id uuid NOT NULL,
+				attribute_id uuid,
+				attribute_index integer,
+				value text COLLATE pg_catalog."default",
+				"position" integer NOT NULL,
+				CONSTRAINT doc_column_argument_pkey PRIMARY KEY (doc_column_id, "position"),
+				CONSTRAINT doc_column_argument_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_column_argument_doc_column_id_fkey FOREIGN KEY (doc_column_id)
+					REFERENCES app.doc_column (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_column_argument_column_id_fkey    ON app.doc_column_argument USING btree (doc_column_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_column_argument_attribute_id_fkey ON app.doc_column_argument USING btree (attribute_id  ASC NULLS LAST);
 		`)
 		return "3.13", err
 	},

@@ -5,6 +5,7 @@ import MyBuilderQuery      from './builderQuery.js';
 import MyInputColorWrap    from '../inputColorWrap.js';
 import MyInputDecimal      from '../inputDecimal.js';
 import MyInputRange        from '../inputRange.js';
+import {getColumnIcon}     from '../shared/column.js';
 import {getUuidV4}         from '../shared/crypto.js';
 import {copyValueDialog}   from '../shared/generic.js';
 import {
@@ -16,7 +17,6 @@ import {
 	MyBuilderDocMarginPadding
 } from './builderDocInput.js';
 import {
-	getDocColumnIcon,
 	getDocColumnTitle,
 	getDocFieldIcon,
 	getDocFieldTitle
@@ -177,7 +177,7 @@ export default {
 							:key="c.id"
 						>
 							<div class="builder-doc-button">
-								<img :src="'images/' + getDocColumnIcon(c)" />
+								<img :src="'images/' + getColumnIcon(c)" />
 							</div>
 							<span>{{ getDocColumnTitle(c) }}</span>
 						</div>
@@ -543,10 +543,12 @@ export default {
 					if(s.isAttributeRelationship(a.content))
 						continue;
 
-					out.push(s.getTemplateDocColumn(a.id,j.index,false));
+					out.push(s.getTemplateDocColumn(a.id,j.index,'attribute'));
 				}
 			}
-			out.push(s.getTemplateDocColumn(null,0,true));
+			out.push(s.getTemplateDocColumn(null,0,'query'));
+			out.push(s.getTemplateDocColumn(null,0,'fnc_pg'));
+			out.push(s.getTemplateDocColumn(null,0,'fnc_scalar'));
 			return out;
 		},
 		tabTargetListAreas:s => {
@@ -639,7 +641,7 @@ export default {
 	methods:{
 		// externals
 		copyValueDialog,
-		getDocColumnIcon,
+		getColumnIcon,
 		getDocColumnTitle,
 		getDocFieldIcon,
 		getDocFieldTitle,
@@ -711,7 +713,7 @@ export default {
 		},
 		removeIndex(index) {
 			for(let i = 0, j = this.field.columns.length; i < j; i++) {
-				if(!this.field.columns[i].subQuery && this.field.columns[i].attributeIndex === index) {
+				if(this.field.columns[i].content !== 'query' && this.field.columns[i].attributeIndex === index) {
 					this.field.columns.splice(i,1);
 					i--; j--;
 				}

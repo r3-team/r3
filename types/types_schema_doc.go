@@ -33,25 +33,43 @@ type DocBorder struct {
 	StyleJoin string      `json:"styleJoin"` // "bevel", "miter", "round"
 }
 type DocColumn struct {
-	Id             uuid.UUID   `json:"id"`
-	AttributeId    uuid.UUID   `json:"attributeId"`
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"` // content of column (attribute, query, fnc_scalar, fnc_pg)
+
+	// attribute expression
+	AttributeId    pgtype.UUID `json:"attributeId"`
 	AttributeIndex int         `json:"attributeIndex"` // attribute index
-	GroupBy        bool        `json:"groupBy"`        // group by column attribute value?
-	Aggregator     pgtype.Text `json:"aggregator"`     // aggregator (SUM, COUNT, etc.) for result content
-	AggregatorRow  pgtype.Text `json:"aggregatorRow"`  // aggregator (SUM, COUNT, etc.) for result row
-	Distincted     bool        `json:"distincted"`     // attribute values are distinct?
-	Length         int         `json:"length"`         // text length limit (in characters)
-	SubQuery       bool        `json:"subQuery"`       // column uses sub query?
-	SizeX          float64     `json:"sizeX"`          // width in mm (0 = auto calculated based on remaining space)
-	TextPostfix    string      `json:"textPostfix"`    // fixed postfix value
-	TextPrefix     string      `json:"textPrefix"`     // fixed prefix value
-	Query          Query       `json:"query"`          // sub query
-	Captions       CaptionMap  `json:"captions"`       // column titles
+
+	// PG function expression
+	PgFunctionId pgtype.UUID `json:"pgFunctionId"`
+
+	// scalar function expression
+	Scalar pgtype.Text `json:"scalar"` // built-in scalar function (COALESCE, CONCAT, ...)
+
+	// sub query expression
+	Query Query `json:"query"`
+
+	// expression options
+	Aggregator    pgtype.Text  `json:"aggregator"`    // aggregator (SUM, COUNT, etc.) for result content
+	AggregatorRow pgtype.Text  `json:"aggregatorRow"` // aggregator (SUM, COUNT, etc.) for result row
+	Arguments     []DataGetArg `json:"arguments"`     // for (scalar/PG) function expressions
+	Distincted    bool         `json:"distincted"`    // attribute values are distinct?
+	GroupBy       bool         `json:"groupBy"`       // group by column attribute value?
+
+	// presentation
+	Length      int        `json:"length"`      // text length limit (in characters)
+	SizeX       float64    `json:"sizeX"`       // width in mm (0 = auto calculated based on remaining space)
+	TextPostfix string     `json:"textPostfix"` // fixed postfix value
+	TextPrefix  string     `json:"textPrefix"`  // fixed prefix value
+	Captions    CaptionMap `json:"captions"`    // column titles
 
 	// overwrites
 	SetsBody   []DocSet `json:"setsBody"`
 	SetsFooter []DocSet `json:"setsFooter"`
 	SetsHeader []DocSet `json:"setsHeader"`
+
+	// legacy
+	SubQuery bool `json:"subQuery"`
 }
 type DocField struct {
 	Id      uuid.UUID `json:"id"`

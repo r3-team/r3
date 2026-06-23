@@ -51,7 +51,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 			if err != nil {
 				return nil, err
 			}
-			if columns[i].SubQuery {
+			if columns[i].Content == schema.ColumnContentQuery {
 				columns[i].Query, err = schema.ReplaceQueryIds(columns[i].Query, idMapReplaced)
 				if err != nil {
 					return nil, err

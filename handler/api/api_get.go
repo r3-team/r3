@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"r3/cache"
@@ -125,7 +126,7 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 				switch c.Content {
 				case schema.ColumnContentAttribute, schema.ColumnContentQuery:
 					if !c.AttributeId.Valid {
-						return http.StatusServiceUnavailable, nil, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute)
+						return http.StatusServiceUnavailable, nil, errors.New("column is missing an attribute")
 					}
 					cache.Schema_mx.RLock()
 					atr := cache.AttributeIdMap[c.AttributeId.Bytes]

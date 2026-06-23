@@ -2033,7 +2033,8 @@
 			"008": "Eine referenzierte Relation ist unbekannt.",
 			"009": "Ein referenziertes Attribut ist unbekannt.",
 			"010": "Einer Spalte fehlt eine valide Attributreferenz.",
-			"011": "Eine Spalte hat entweder mehrere Werte oder ist eine Backend-Funktion bzw. Unterabfrage - diese werden für Datenimport nicht unterstützt."
+			"011": "Eine Spalte hat entweder mehrere Werte oder ist eine Backend-Funktion bzw. Unterabfrage - diese werden für Datenimport nicht unterstützt.",
+			"012": "Einer Spalte fehlt eine valide Backend-Funktionreferenz."
 		},
 		"CSV": {
 			"001": "Ungültige Nummer '{VALUE}' (Integer wird erwartet).",

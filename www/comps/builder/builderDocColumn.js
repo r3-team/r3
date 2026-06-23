@@ -1,22 +1,23 @@
 import MyBuilderAggregatorInput       from './builderAggregatorInput.js';
 import MyBuilderCaption               from './builderCaption.js';
+import MyBuilderColumnArguments       from './builderColumnArguments.js';
 import MyBuilderDocSets               from './builderDocSets.js';
 import MyBuilderQuery                 from './builderQuery.js';
 import MyInputDecimal                 from '../inputDecimal.js';
 import MyInputRange                   from '../inputRange.js';
 import {getIndexAttributeIdsByJoins}  from '../shared/attribute.js';
+import {getDependentModules}          from '../shared/builder.js';
 import {getTemplateQuery}             from '../shared/builderTemplate.js';
+import {getColumnIcon}                from '../shared/column.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
-import {
-	getDocColumnIcon,
-	getDocColumnTitle
-} from '../shared/builderDoc.js';
+import {getDocColumnTitle}            from '../shared/builderDoc.js';
 
 export default {
 	name:'my-builder-doc-column',
 	components:{
 		MyBuilderAggregatorInput,
 		MyBuilderCaption,
+		MyBuilderColumnArguments,
 		MyBuilderDocSets,
 		MyBuilderQuery,
 		MyInputDecimal,
@@ -92,7 +93,7 @@ export default {
 						</td>
 					</tr>
 					<tr><td colspan="2"><b>{{ capGen.dataAccess }}</b></td></tr>
-					<template v-if="column.subQuery">
+					<template v-if="isWithQuery">
 						<tr>
 							<td colspan="2">
 								<my-builder-query
@@ -123,6 +124,59 @@ export default {
 							</td>
 						</tr>
 					</template>
+					<tr v-if="isFncPg">
+						<td>{{ capGen.functionBackend }}*</td>
+						<td>
+							<select
+								@input="column.pgFunctionId = $event.target.value === '' ? null : $event.target.value"
+								:disabled="readonly"
+								:value="column.pgFunctionId === null ? '' : column.pgFunctionId"
+							>
+								<option value="">-</option>
+								<option v-for="fnc in module.pgFunctions.filter(v => v.isColumnExec)" :value="fnc.id">
+									{{ fnc.name }}
+								</option>
+								<optgroup
+									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.pgFunctions.filter(v => v.isColumnExec).length !== 0)"
+									:label="mod.name"
+								>
+									<option v-for="fnc in mod.pgFunctions.filter(v => v.isColumnExec)" :value="fnc.id">
+										{{ fnc.name }}
+									</option>
+								</optgroup>
+							</select>
+						</td>
+					</tr>
+					<tr v-if="isFncScalar">
+						<td>{{ capGen.mode }}</td>
+						<td>
+							<select v-model="column.scalar" :disabled="readonly">
+								<option value="CONCAT">{{ capGen.scalarFunction.CONCAT }}</option>
+								<option value="COALESCE">{{ capGen.scalarFunction.COALESCE }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr v-if="isWithArgs">
+						<td>
+							<div class="column gap">
+								<span v-if="isFncScalar">{{ capGen.values }}</span>
+								<span v-if="isFncPg">{{ capGen.arguments }}</span>
+								<my-button image="add.png"
+									@trigger="addArgument"
+									:active="!readonly"
+									:caption="capGen.button.add"
+									:naked="true"
+								/>
+							</div>
+						</td>
+						<td>
+							<my-builder-column-arguments
+								v-model="column.arguments"
+								:joinsParents="[joinsParent]"
+								:readonly
+							/>
+						</td>
+					</tr>
 					<tr>
 						<td>{{ capGen.aggregator }}</td>
 						<td><my-builder-aggregator-input v-model="column.aggregator" :readonly /></td>
@@ -226,26 +280,41 @@ export default {
 		},
 
 		// simple
-		icon:             s => s.getDocColumnIcon(s.column),
-		isWithQuery:      s => s.column.subQuery,
-		indexAttributeIds:s => s.column.subQuery ? s.getIndexAttributeIdsByJoins(s.query.joins,[]) : [],
+		icon:             s => s.getColumnIcon(s.column),
+		isFncPg:          s => s.column.content === 'fnc_pg',
+		isFncScalar:      s => s.column.content === 'fnc_scalar',
+		isWithArgs:       s => s.isFncScalar || s.isFncPg,
+		isWithQuery:      s => s.column.content === 'query',
+		indexAttributeIds:s => s.isWithQuery ? s.getIndexAttributeIdsByJoins(s.query.joins,[]) : [],
+		module:           s => s.moduleIdMap[s.moduleId],
 		query:            s => s.isWithQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		title:            s => s.getDocColumnTitle(s.column),
 		titleBar:         s => `${s.capGen.column}: ${s.title}`,
 
 		// stores
-		capApp:s => s.$store.getters.captions.builder.doc,
-		capGen:s => s.$store.getters.captions.generic
+		capApp:     s => s.$store.getters.captions.builder.doc,
+		capGen:     s => s.$store.getters.captions.generic,
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap']
 	},
 	methods:{
 		// externals
 		getCaptionByIndexAttributeId,
+		getDependentModules,
 		getIndexAttributeIdsByJoins,
-		getDocColumnIcon,
+		getColumnIcon,
 		getDocColumnTitle,
 		getTemplateQuery,
 
 		// actions
+		addArgument() {
+			let v = JSON.parse(JSON.stringify(this.column.arguments));
+			v.push({
+				attributeIndex:0,
+				attributeId:null,
+				value:null
+			});
+			this.column.arguments = v;
+		},
 		setIndexAttribute(indexAttributeId) {
 			const p = indexAttributeId.split('_');
 			if(p[1] === 'null') {

@@ -26,6 +26,16 @@ func FixMissingColumnContent(column types.Column) types.Column {
 	}
 	return column
 }
+func FixMissingDocColumnContent(column types.DocColumn) types.DocColumn {
+	if column.Content == "" {
+		if column.SubQuery {
+			column.Content = schema.ColumnContentQuery
+		} else {
+			column.Content = schema.ColumnContentAttribute
+		}
+	}
+	return column
+}
 
 // < 3.12
 func FixMissingZeroRelease(releases []types.Release) []types.Release {
