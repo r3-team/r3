@@ -199,15 +199,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		columnNames := make([]string, len(get.Expressions))
 		for i, expr := range get.Expressions {
 
-			// handle non-attribute expression
-			if !expr.AttributeId.Valid {
-				columnNames[i] = "[ --- ]"
-				continue
-			}
-
 			// choose best caption for header
 			columnNames[i] = getCaption(columns[i].Captions, "columnTitle", login.LanguageCode)
 			if columnNames[i] != "" {
+				continue
+			}
+
+			// handle non-attribute expression
+			if !expr.AttributeId.Valid {
+				columnNames[i] = "[ --- ]"
 				continue
 			}
 
