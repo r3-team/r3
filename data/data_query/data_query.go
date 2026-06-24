@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -288,7 +289,7 @@ func ConvertQueryToDataOrders(orders []types.QueryOrder) []types.DataGetOrder {
 }
 
 // returns usable content type (integer, text, boolean, ...) as well as decimal count if numeric, based on return of PG function
-func ConvertPgFunctionReturnToContent(fncId pgtype.UUID) (string, int, error) {
+func GetContentFromPgFunctionReturn(fncId pgtype.UUID) (string, int, error) {
 
 	if !fncId.Valid {
 		return "", 0, fmt.Errorf("no backend function set in column")
@@ -345,7 +346,7 @@ func ConvertPgFunctionReturnToContent(fncId pgtype.UUID) (string, int, error) {
 }
 
 // returns usable content type (integer, text, boolean, ...), content use (default, richtext, iframe, ...) and decimal count (case: numeric), based on attribute types in scalar function arguments
-func ConvertScalarArgumentsToContent(scalar string, args []types.DataGetArg) (string, string, int, error) {
+func GetContentFromScalarArgs(scalar string, args []types.DataGetArg) (string, string, int, error) {
 	switch scalar {
 	case "COALESCE", "CONCAT":
 		for _, arg := range args {
@@ -370,4 +371,68 @@ func ConvertScalarArgumentsToContent(scalar string, args []types.DataGetArg) (st
 	}
 	return "text", "default", 0, nil
 
+}
+
+func GetTitleFromExpression(expr types.DataGetExpression, languageCode string) (string, error) {
+
+	var getTitleFromArgs = func(args []types.DataGetArg, scalar pgtype.Text) (string, error) {
+		parts := make([]string, 0)
+		for _, arg := range args {
+			if arg.AttributeId.Valid {
+				cache.Schema_mx.RLock()
+				atr := cache.AttributeIdMap[arg.AttributeId.Bytes]
+				cache.Schema_mx.RUnlock()
+
+				if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
+					parts = append(parts, title)
+				} else {
+					parts = append(parts, atr.Name)
+				}
+			}
+		}
+		if scalar.Valid {
+			switch scalar.String {
+			case "COALESCE":
+				return strings.Join(parts, "/"), nil
+			case "CONCAT":
+				return strings.Join(parts, "+"), nil
+			default:
+				return strings.Join(parts, ","), nil
+			}
+		}
+		return strings.Join(parts, ","), nil
+	}
+
+	if expr.PgFunctionId.Valid || expr.Scalar.Valid {
+		return getTitleFromArgs(expr.Arguments, expr.Scalar)
+	}
+
+	isQuery := expr.Query.RelationId != uuid.Nil && len(expr.Query.Expressions) == 1
+	if expr.AttributeId.Valid || isQuery {
+
+		var atrId pgtype.UUID
+		if isQuery {
+			atrId = expr.Query.Expressions[0].AttributeId
+		} else {
+			atrId = expr.AttributeId
+		}
+
+		if !atrId.Valid {
+			return "", errors.New("expression is missing an attribute")
+		}
+		cache.Schema_mx.RLock()
+		atr, exists := cache.AttributeIdMap[atrId.Bytes]
+		cache.Schema_mx.RUnlock()
+
+		if !exists {
+			return "", handler.ErrSchemaUnknownAttribute(atrId.Bytes)
+		}
+
+		if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
+			return title, nil
+		} else {
+			return atr.Name, nil
+		}
+	}
+	return "", nil
 }

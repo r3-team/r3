@@ -3,16 +3,13 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"r3/cache"
 	"r3/data"
 	"r3/data/data_query"
 	"r3/handler"
-	"r3/schema"
 	"r3/types"
-	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -119,52 +116,11 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 
 			colRef := ""
 			if ref, exists := c.Captions["columnTitle"][languageCode]; exists {
-				// column title exists, use it
 				colRef = ref
 			} else {
-				// fallbacks
-				switch c.Content {
-				case schema.ColumnContentAttribute, schema.ColumnContentQuery:
-					if !c.AttributeId.Valid {
-						return http.StatusServiceUnavailable, nil, errors.New("column is missing an attribute")
-					}
-					cache.Schema_mx.RLock()
-					atr := cache.AttributeIdMap[c.AttributeId.Bytes]
-					cache.Schema_mx.RUnlock()
-
-					if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
-						colRef = title
-					} else {
-						colRef = atr.Name
-					}
-
-				case schema.ColumnContentFncPg, schema.ColumnContentFncScalar:
-					parts := make([]string, 0)
-					for _, arg := range c.Arguments {
-						if arg.AttributeId.Valid {
-							cache.Schema_mx.RLock()
-							atr := cache.AttributeIdMap[arg.AttributeId.Bytes]
-							cache.Schema_mx.RUnlock()
-
-							if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
-								parts = append(parts, title)
-							} else {
-								parts = append(parts, atr.Name)
-							}
-						}
-					}
-					if c.Content == schema.ColumnContentFncScalar {
-						switch c.Scalar.String {
-						case "COALESCE":
-							colRef = strings.Join(parts, "/")
-						case "CONCAT":
-							colRef = strings.Join(parts, "+")
-						default:
-							colRef = strings.Join(parts, ",")
-						}
-					} else {
-						colRef = strings.Join(parts, ",")
-					}
+				colRef, err = data_query.GetTitleFromExpression(dataGet.Expressions[i], languageCode)
+				if err != nil {
+					return http.StatusServiceUnavailable, err, fmt.Errorf(handler.ErrGeneral)
 				}
 			}
 			if colRef == "" {

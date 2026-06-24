@@ -1,7 +1,9 @@
-import {isAttributeDecimal}  from './shared/attribute.js';
-import {resolveErrCode}      from './shared/error.js';
-import {getQueryExpressions} from './shared/query.js';
-import MyInputNumberSep      from './inputNumberSep.js';
+import {isAttributeDecimal}     from './shared/attribute.js';
+import {getColumnTitleFallback} from './shared/column.js';
+import {resolveErrCode}         from './shared/error.js';
+import {getCaption}             from './shared/language.js';
+import {getQueryExpressions}    from './shared/query.js';
+import MyInputNumberSep         from './inputNumberSep.js';
 
 export default {
 	name:'my-list-csv',
@@ -120,6 +122,7 @@ export default {
 		isImport:     { type:Boolean,required:true },
 		joins:        { type:Array,  required:true },
 		loginOptions: { type:Object, required:true },
+		moduleId:     { type:String, required:true },
 		orders:       { type:Array,  required:true },
 		query:        { type:Object, required:true }
 	},
@@ -147,8 +150,11 @@ export default {
 		this.action    = this.isExport ? 'export' : 'import';
 		this.charComma = this.$root.getOrFallback(this.loginOptions,'csvCharComma',',');
 		
-		for(let i = 0, j = this.columns.length; i < j; i++) {
-			const atr = this.attributeIdMap[this.columns[i].attributeId];
+		for(const c of this.columns) {
+			if(c.content !== 'attribute')
+				continue;
+
+			const atr = this.attributeIdMap[c.attributeId];
 			if(this.isAttributeDecimal(atr.content)) this.hasDecimal  = true;
 			if(atr.content    === 'boolean')         this.hasBool     = true;
 			if(atr.contentUse === 'date')            this.hasDate     = true; 
@@ -161,14 +167,11 @@ export default {
 		clearInterval(this.setCacheDenialTimestamp);
 	},
 	computed:{
-		columnsCsv:s => {
+		columnCaptions:s => {
 			let out = [];
 			for(const c of s.columnsSorted) {
-				// only keep relevant data
-				out.push({
-					attributeId:c.attributeId,
-					captions:c.captions
-				});
+				const cap = s.getCaption('columnTitle',s.moduleId,c.id,c.captions,'');
+				out.push(cap !== '' ? cap : s.getColumnTitleFallback(c,s.moduleId));
 			}
 			return out;
 		},
@@ -186,6 +189,7 @@ export default {
 				`token=${s.token}`,
 				`bool_false=${s.boolNative ? 'false' : s.capGen.option.no}`,
 				`bool_true=${s.boolNative ? 'true' : s.capGen.option.yes}`,
+				`captions=${encodeURIComponent(JSON.stringify(s.columnCaptions))}`,
 				`char_comma=${encodeURIComponent(s.charComma)}`,
 				`char_dec=${encodeURIComponent(s.charDec)}`,
 				`char_thou=${encodeURIComponent(s.charThou)}`,
@@ -193,7 +197,6 @@ export default {
 				`timezone=${encodeURIComponent(s.timezone)}`,
 				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
 				`relation_id=${s.query.relationId}`,
-				`columns=${encodeURIComponent(JSON.stringify(s.columnsCsv))}`,
 				`joins=${encodeURIComponent(JSON.stringify(s.joins))}`,
 				`expressions=${encodeURIComponent(JSON.stringify(s.expressions))}`,
 				`filters=${encodeURIComponent(JSON.stringify(s.filters))}`,
@@ -223,6 +226,8 @@ export default {
 	},
 	methods:{
 		// externals
+		getCaption,
+		getColumnTitleFallback,
 		getQueryExpressions,
 		isAttributeDecimal,
 		resolveErrCode,

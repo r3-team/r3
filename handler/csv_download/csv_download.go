@@ -12,6 +12,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/data"
+	"r3/data/data_query"
 	"r3/db"
 	"r3/handler"
 	"r3/log"
@@ -97,7 +98,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	columnsString, err := handler.ReadGetterFromUrl(r, "columns")
+	columnsCaptionsString, err := handler.ReadGetterFromUrl(r, "captions")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
@@ -117,8 +118,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	var columns []types.CsvExportColumn
-	if err := json.Unmarshal([]byte(columnsString), &columns); err != nil {
+	var columnCaptions []string
+	if err := json.Unmarshal([]byte(columnsCaptionsString), &columnCaptions); err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
@@ -156,7 +157,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	ignoreHeader := ignoreHeaderString == "true"
 
 	// check invalid parameters
-	if len(get.Expressions) != len(columns) {
+	if len(get.Expressions) != len(columnCaptions) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, errors.New("expression count != column count"),
 			handler.ErrGeneral)
 
@@ -197,48 +198,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// place header line
 	if !ignoreHeader {
-		columnNames := make([]string, len(get.Expressions))
-		for i, expr := range get.Expressions {
-
-			// choose best caption for header
-			columnNames[i] = getCaption(columns[i].Captions, "columnTitle", login.LanguageCode)
-			if columnNames[i] != "" {
-				continue
+		noTitleCtr := 0
+		for i, _ := range columnCaptions {
+			if columnCaptions[i] == "" {
+				columnCaptions[i] = fmt.Sprintf("NO_TITLE%d", noTitleCtr)
 			}
-
-			// handle non-attribute expression
-			if !expr.AttributeId.Valid {
-				columnNames[i] = "[ --- ]"
-				continue
-			}
-
-			// fallback to attribute title
-			cache.Schema_mx.RLock()
-			atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
-			cache.Schema_mx.RUnlock()
-
-			if !exists {
-				handler.AbortRequest(w, handler.ContextCsvDownload, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes), handler.ErrGeneral)
-				return
-			}
-
-			columnNames[i] = getCaption(atr.Captions, "attributeTitle", login.LanguageCode)
-			if columnNames[i] != "" {
-				continue
-			}
-
-			// fallback to attribute + relation name
-			cache.Schema_mx.RLock()
-			rel, exists := cache.RelationIdMap[atr.RelationId]
-			cache.Schema_mx.RUnlock()
-
-			if !exists {
-				handler.AbortRequest(w, handler.ContextCsvDownload, handler.ErrSchemaUnknownRelation(atr.RelationId), handler.ErrGeneral)
-				return
-			}
-			columnNames[i] = rel.Name + "." + atr.Name
 		}
-		if err := writer.Write(columnNames); err != nil {
+		if err := writer.Write(columnCaptions); err != nil {
 			handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 			return
 		}
@@ -258,25 +224,49 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// store attribute content use for each column
-	columnAttributeContentUse := make([]string, len(columns))
-	for i, column := range columns {
-		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[column.AttributeId]
-		cache.Schema_mx.RUnlock()
+	// store content use for each column for response value processing
+	expressionsContentUse := make([]string, len(get.Expressions))
+	for i, expr := range get.Expressions {
+		isSubQuery := expr.Query.RelationId != uuid.Nil && len(expr.Query.Expressions) == 1
 
-		if !exists {
-			handler.AbortRequest(w, handler.ContextCsvDownload, nil,
-				handler.ErrSchemaUnknownAttribute(column.AttributeId).Error())
+		if expr.AttributeId.Valid || isSubQuery {
 
-			return
+			var atrId pgtype.UUID
+			if isSubQuery {
+				atrId = expr.Query.Expressions[0].AttributeId
+			} else {
+				atrId = expr.AttributeId
+			}
+			if !atrId.Valid {
+				handler.AbortRequest(w, handler.ContextCsvDownload, fmt.Errorf("no attribute defined in column"), handler.ErrGeneral)
+				return
+			}
+
+			cache.Schema_mx.RLock()
+			atr, exists := cache.AttributeIdMap[atrId.Bytes]
+			cache.Schema_mx.RUnlock()
+			if !exists {
+				handler.AbortRequest(w, handler.ContextCsvDownload, nil, handler.ErrSchemaUnknownAttribute(atrId.Bytes).Error())
+				return
+			}
+			expressionsContentUse[i] = atr.ContentUse
+
+		} else if expr.Scalar.Valid {
+			_, expressionsContentUse[i], _, err = data_query.GetContentFromScalarArgs(expr.Scalar.String, expr.Arguments)
+			if err != nil {
+				handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
+				return
+			}
+
+		} else {
+			// PG function expressions cannot define content use, stay "default"
+			expressionsContentUse[i] = "default"
 		}
-		columnAttributeContentUse[i] = atr.ContentUse
 	}
 
 	for {
 		total, err := dataToCsv(ctx, writer, get, locUser, boolTrue, boolFalse,
-			dateFormat, charDec, charThou, columnAttributeContentUse, login.Id)
+			dateFormat, charDec, charThou, expressionsContentUse, login.Id)
 
 		if err != nil {
 			handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
@@ -306,7 +296,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location, boolTrue string,
-	boolFalse string, dateFormat string, charDec string, charThou string, columnAttributeContentUse []string, loginId int64) (int64, error) {
+	boolFalse string, dateFormat string, charDec string, charThou string, expressionsContentUse []string, loginId int64) (int64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -362,9 +352,9 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 			case string:
 				stringValues[pos] = v
 			case int32:
-				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], int64(v))
+				stringValues[pos] = parseIntegerValues(expressionsContentUse[pos], int64(v))
 			case int64:
-				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], v)
+				stringValues[pos] = parseIntegerValues(expressionsContentUse[pos], v)
 			case float32, float64:
 				stringValues[pos] = tools.FormatStringNumber(fmt.Sprintf("%g", v), charDec, charThou)
 			case pgtype.Numeric:
@@ -383,16 +373,4 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 		}
 	}
 	return total, nil
-}
-
-func getCaption(captionMap map[string]map[string]string, contentName string, languageCode string) string {
-	content, exists := captionMap[contentName]
-	if !exists {
-		return ""
-	}
-	value, exists := content[languageCode]
-	if !exists {
-		return ""
-	}
-	return value
 }

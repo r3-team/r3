@@ -86,6 +86,7 @@ export default {
 						:isImport="csvImport"
 						:joins="relationsJoined"
 						:loginOptions
+						:moduleId
 						:orders
 						:query
 					/>

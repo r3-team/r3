@@ -171,13 +171,13 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			}
 
 		case schema.ColumnContentFncPg:
-			meta.content, meta.decCount, err = data_query.ConvertPgFunctionReturnToContent(column.PgFunctionId)
+			meta.content, meta.decCount, err = data_query.GetContentFromPgFunctionReturn(column.PgFunctionId)
 			if err != nil {
 				return err
 			}
 
 		case schema.ColumnContentFncScalar:
-			meta.content, meta.contentUse, meta.decCount, err = data_query.ConvertScalarArgumentsToContent(column.Scalar.String, column.Arguments)
+			meta.content, meta.contentUse, meta.decCount, err = data_query.GetContentFromScalarArgs(column.Scalar.String, column.Arguments)
 			if err != nil {
 				return err
 			}
