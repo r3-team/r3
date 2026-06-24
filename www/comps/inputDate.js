@@ -49,7 +49,8 @@ const MyInputDateEntryInput = {
 			if(onBlur && v !== '' && v.length < this.size)
 				v = v.padStart(this.size,'0');
 
-			if(v.length < this.size)
+			// abort if length not reached or no change occurred
+			if(v.length < this.size || v === this.modelValue)
 				return;
 
 			this.$emit('update:modelValue',v);
