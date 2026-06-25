@@ -350,8 +350,8 @@ export default {
 		module:s => s.moduleIdMap[s.moduleId],
 		query:s => s.isSubQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		indexAttributeIds:s => !s.isSubQuery && s.column.query !== null
-			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[]),
-		
+			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[],[]),
+
 		// inputs
 		alignment:{
 			get()  {
@@ -370,7 +370,7 @@ export default {
 				this.set('styles',styles);
 			}
 		},
-		
+
 		// simple
 		isBarcode:  s => s.isString  && s.attribute.contentUse === 'barcode',
 		isBoolean:  s => s.isAttributeBoolean(s.attribute.content),
@@ -384,7 +384,7 @@ export default {
 		isSubQuery: s => s.column.content === 'query',
 		isUuid:     s => s.isAttributeUuid(s.attribute.content),
 		isWithArgs: s => s.isFncScalar || s.isFncPg,
-		
+
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
@@ -404,7 +404,7 @@ export default {
 		isAttributeInteger,
 		isAttributeString,
 		isAttributeUuid,
-		
+
 		// actions
 		addArgument() {
 			let v = JSON.parse(JSON.stringify(this.column.arguments));
@@ -422,13 +422,13 @@ export default {
 		setInt(name,val,allowNull) {
 			if(val !== '')
 				return this.$emit('set',name,parseInt(val));
-			
+
 			if(allowNull) return this.$emit('set',name,null);
 			else          return this.$emit('set',name,0);
 		},
 		setIndexAttribute(indexAttributeId) {
 			let v = indexAttributeId.split('_');
-			
+
 			if(v[1] === 'null') {
 				this.set('index',0);
 				this.set('attributeId',null);
@@ -440,10 +440,10 @@ export default {
 		setStyle(name,val) {
 			let styles = JSON.parse(JSON.stringify(this.column.styles));
 			const pos  = styles.indexOf(name);
-			
+
 			if(pos === -1 && val)  styles.push(name);
 			if(pos !== -1 && !val) styles.splice(pos,1);
-			
+
 			this.set('styles',styles);
 		}
 	}

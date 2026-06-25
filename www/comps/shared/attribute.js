@@ -19,7 +19,7 @@ export function getIndexAttributeId(index,attributeId,outsideIn,attributeIdNm) {
 	if(index         === null) index         = 'null';
 	if(attributeId   === null) attributeId   = 'null';
 	if(attributeIdNm === null) attributeIdNm = 'null';
-	
+
 	return [
 		index,
 		attributeId,
@@ -37,17 +37,20 @@ export function getIndexAttributeIdByField(f,altAttribute) {
 	);
 };
 
-export function getIndexAttributeIdsByJoins(joins,atrContentWhitelist) {
+export function getIndexAttributeIdsByJoins(joins,atrContentWhitelist,atrContentBlacklist) {
 	const atrContentWhitelistUsed = atrContentWhitelist.length !== 0;
+	const atrContentBlacklistUsed = atrContentBlacklist.length !== 0;
 	let out = [];
 	for(const j of joins) {
 		const r = MyStore.getters['schema/relationIdMap'][j.relationId];
-		
+
 		for(const a of r.attributes) {
-			if(atrContentWhitelistUsed && !atrContentWhitelist.includes(a.content))
-				continue;
-			
-			out.push(String(j.index)+'_'+a.id);
+			if (
+				(!atrContentWhitelistUsed || atrContentWhitelist.includes(a.content)) &&
+				(!atrContentBlacklistUsed || !atrContentBlacklist.includes(a.content))
+			) {
+				out.push(String(j.index)+'_'+a.id);
+			}
 		}
 	}
 	return out;
@@ -60,7 +63,7 @@ export function getDetailsFromIndexAttributeId(indexAttributeId) {
 		outsideIn:false,
 		attributeIdNm:null
 	};
-	
+
 	let d = indexAttributeId.split('_');
 	return {
 		index:d[0] === 'null' ? null : parseInt(d[0]),
@@ -84,10 +87,10 @@ export function getAttributeFileVersionHref(attributeId,id,name,version,token) {
 export function getValueFromQuery(content,queryValue) {
 	if(isAttributeInteger(content) || isAttributeRelationship(content))
 		return parseInt(queryValue);
-	
+
 	if(isAttributeDecimal(content))
 		return parseFloat(queryValue);
-	
+
 	return queryValue;
 };
 
@@ -106,16 +109,16 @@ export function getAttributeValueFromString(content,value) {
 export function getAttributeValuesFromGetter(getter) {
 	let map  = {};
 	let atrs = getter.split(',');
-	
+
 	for(let i = 0, j = atrs.length; i < j; i++) {
-		
+
 		let parts = atrs[i].split('_');
 		if(parts.length !== 2)
 			continue;
-		
+
 		let atrId = parts[0];
 		let value = parts[1];
-		
+
 		if(typeof MyStore.getters['schema/attributeIdMap'][atrId] !== 'undefined')
 			map[atrId] = getValueFromQuery(
 				MyStore.getters['schema/attributeIdMap'][atrId].content,value);
@@ -158,10 +161,10 @@ export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
 	if(isAttributeRegconfig(content))      return 'languages.png';
 	if(isAttributeRelationship11(content)) return 'link1.png';
 	if(isAttributeRelationship1N(content)) return 'link2.png';
-	
+
 	if(isAttributeRelationshipN1(content)) {
 		if(isNm) return 'link4.png';
-		
+
 		return outsideIn ? 'link2.png' : 'link3.png';
 	}
 	return 'noPic.png';
@@ -199,7 +202,7 @@ export function getAttributeContentUse(content,use) {
 	if(isAttributeRelationship11(content)) return 'relationship11';
 	if(isAttributeRelationshipN1(content)) return 'relationshipN1';
 	if(isAttributeRelationship1N(content)) return 'relationship1N';
-	
+
 	return 'text';
 }
 export function getAttributeContentsByUse(usedFor,length,largeNumbers) {

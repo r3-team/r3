@@ -136,7 +136,7 @@ const MyBuilderDocSetTarget = {
 			if(s.isString)         return '';
 			return '';
 		},
-		
+
 		// inputs
 		value:{
 			get()  { return this.set.value; },
@@ -145,7 +145,7 @@ const MyBuilderDocSetTarget = {
 
 		// simple
 		active:           s => s.setIndex !== -1,
-		indexAttributeIds:s => s.getIndexAttributeIdsByJoins(s.joins,s.atrContentWhitelist),
+		indexAttributeIds:s => s.getIndexAttributeIdsByJoins(s.joins,s.atrContentWhitelist,[]),
 		isBool:           s => targetTypes.bool.includes(s.target),
 		isColor:          s => targetTypes.color.includes(s.target),
 		isDateFormat:     s => targetTypes.dateFormat.includes(s.target),
@@ -224,7 +224,7 @@ const MyBuilderDocSetTarget = {
 		toggle() {
 			if(!this.active)
 				return this.$emit('apply',this.set);
-			
+
 			this.$emit('remove');
 			this.setType = false;
 		},
@@ -335,7 +335,7 @@ export default {
 
 			if(pos !== -1) v[pos] = value;
 			else           v.push(value);
-			
+
 			this.$emit('update:modelValue',v);
 		},
 		remove(target) {

@@ -28,7 +28,7 @@ export default {
 			<img :src="'images/' + icon" />
 			<span>{{ title }}</span>
 		</div>
-		
+
 		<teleport v-if="isOptionsShow" :to="elmOptions">
 			<div class="top lower">
 				<div class="area">
@@ -196,7 +196,7 @@ export default {
 					</tr>
 				</tbody>
 			</table>
-			
+
 			<div class="content grow">
 				<div class="builder-doc-sub-settings">
 					<my-tabs
@@ -285,7 +285,7 @@ export default {
 		isFncScalar:      s => s.column.content === 'fnc_scalar',
 		isWithArgs:       s => s.isFncScalar || s.isFncPg,
 		isWithQuery:      s => s.column.content === 'query',
-		indexAttributeIds:s => s.isWithQuery ? s.getIndexAttributeIdsByJoins(s.query.joins,[]) : [],
+		indexAttributeIds:s => s.isWithQuery ? s.getIndexAttributeIdsByJoins(s.query.joins,[],[]) : [],
 		module:           s => s.moduleIdMap[s.moduleId],
 		query:            s => s.isWithQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		title:            s => s.getDocColumnTitle(s.column),

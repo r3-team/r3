@@ -138,7 +138,7 @@ const MyBuilderQueryFilter = {
 		add(indexTarget) {
 			let f = this.getTemplateQueryFilter();
 			f.index = indexTarget;
-			
+
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v.push(f);
 			this.$emit('update:modelValue',v);
@@ -165,14 +165,14 @@ const MyBuilderQueryChoice = {
 	},
 	template:`<div class="query-choice">
 		<div class="query-choice-details">
-			
+
 			<my-button
 				:active="false"
 				:caption="capApp.choice"
 				:naked="true"
 			/>
 			<input v-model="nameInput" :disabled="readonly" :placeholder="capGen.name" />
-			
+
 			<my-builder-caption
 				@update:modelValue="updateCaption('queryChoiceTitle',$event)"
 				:contentName="capGen.title"
@@ -180,7 +180,7 @@ const MyBuilderQueryChoice = {
 				:modelValue="choice.captions.queryChoiceTitle"
 				:readonly
 			/>
-			
+
 			<my-button image="arrowDown.png"
 				v-if="moveDown"
 				@trigger="$emit('move-down')"
@@ -199,7 +199,7 @@ const MyBuilderQueryChoice = {
 				:naked="true"
 			/>
 		</div>
-		
+
 		<my-builder-query-filter
 			v-model="filtersInput"
 			:entityIdMapRef
@@ -238,7 +238,7 @@ const MyBuilderQueryChoice = {
 			get()  { return this.choice.name; },
 			set(v) { this.update('name',v); }
 		},
-		
+
 		// stores
 		capApp:s => s.$store.getters.captions.builder.query,
 		capGen:s => s.$store.getters.captions.generic
@@ -288,7 +288,7 @@ const MyBuilderQueryLookupItem = {
 			}
 			return out;
 		},
-		
+
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap']
@@ -344,13 +344,13 @@ const MyBuilderQueryLookups = {
 					break;
 				}
 			}
-			
+
 			if(pgIndexId !== null)
 				lookups.push({
 					pgIndexId:pgIndexId,
 					index:join.index
 				});
-			
+
 			this.$emit('update',lookups);
 		}
 	}
@@ -359,7 +359,7 @@ const MyBuilderQueryLookups = {
 const MyBuilderQueryOrderItem = {
 	name:'my-builder-query-order-item',
 	template:`<div class="query-order-item">
-	
+
 		<!-- index attribute -->
 		<select
 			@change="setIndexAttribute($event.target.value)"
@@ -371,13 +371,13 @@ const MyBuilderQueryOrderItem = {
 				{{ getCaptionByIndexAttributeId(ia) }}
 			</option>
 		</select>
-		
+
 		<!-- direction -->
 		<select v-model="ascendingInput" :disabled="readonly">
 			<option :value="true">{{ capGen.option.sortAsc }}</option>
 			<option :value="false">{{ capGen.option.sortDesc }}</option>
 		</select>
-		
+
 		<!-- delete -->
 		<my-button image="cancel.png"
 			@trigger="$emit('remove')"
@@ -407,10 +407,10 @@ const MyBuilderQueryOrderItem = {
 			get()  { return this.index; },
 			set(v) { this.$emit('set-index',v); }
 		},
-		
+
 		// simple
-		indexAttributeIds:(s) => s.getIndexAttributeIdsByJoins(s.joins,[]),
-		
+		indexAttributeIds:(s) => s.getIndexAttributeIdsByJoins(s.joins,[],[]),
+
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -420,17 +420,17 @@ const MyBuilderQueryOrderItem = {
 		// externals
 		getCaptionByIndexAttributeId,
 		getIndexAttributeIdsByJoins,
-		
+
 		// actions
 		setIndexAttribute(indexAttributeId) {
 			let v = indexAttributeId.split('_');
-			
+
 			if(v[1] === 'null') {
 				this.indexInput       = 0;
 				this.attributeIdInput = null;
 				return;
 			}
-			
+
 			this.indexInput       = parseInt(v[0]);
 			this.attributeIdInput = v[1];
 		}
@@ -482,24 +482,24 @@ const MyBuilderQueryOrders = {
 const MyBuilderQueryNestedJoin = {
 	name:'my-builder-query-nested-join',
 	template:`<div class="nested-join" :class="{ nested:index !== 0 }">
-	
+
 		<!-- descriptive summary line with relation options -->
 		<div class="summary">
 			<img class="relationship" :src="'images/'+iconRelationship" :title="iconRelationshipTitle" />
-			
+
 			<span>{{ index }}</span>
 			<span>{{ joinRelation.name }}</span>
 			<span v-if="!isBaseRelation" :title="joinReferenceFull">({{ joinReference }})</span>
-		
+
 			<!-- relation options -->
 			<div class="options" v-if="!readonly">
 				<img v-if="index !== 0" class="option clickable" :src="iconJoin" :title="iconJoinTitle" @click="toggleConnector" />
-				
+
 				<img class="option clickable" src="images/databaseAdd.png"
 					@click="relationAddShow = !relationAddShow"
 					:title="capApp.joinAddHint"
 				/>
-				
+
 				<img class="option clickable toggle" src="images/recordCreate.png"
 					@click="toggleApply('create')"
 					:class="{ off:!applyCreate }"
@@ -515,13 +515,13 @@ const MyBuilderQueryNestedJoin = {
 					:class="{ off:!applyDelete }"
 					:title="capApp.joinApplyDeleteHint"
 				/>
-				
+
 				<!-- delete only if last relation in chain -->
 				<img v-if="joins.length === 0" class="option clickable" src="images/cancel.png" @click="$emit('relation-remove',index)" />
 				<img v-else class="option" src="images/clear.png" />
 			</div>
 		</div>
-		
+
 		<!-- candidates for joined relations -->
 		<select class="default"
 			v-if="relationAddShow"
@@ -533,7 +533,7 @@ const MyBuilderQueryNestedJoin = {
 				{{ displayJoinOption(atr) }}
 			</option>
 		</select>
-		
+
 		<!-- child joins -->
 		<div class="children">
 			<my-builder-query-nested-join
@@ -583,14 +583,14 @@ const MyBuilderQueryNestedJoin = {
 			for(const atr of s.getDependentAttributes(s.module)) {
 				if(!s.isAttributeRelationship(atr.content))
 					continue;
-				
+
 				// relationship attribute is from current relation or pointing to it
 				if(atr.relationId === s.joinRelationId || atr.relationshipId === s.joinRelationId)
 					atrs.push(atr);
 			}
 			return atrs;
 		},
-		
+
 		// simple
 		hasNoJoinOptions:(s) => s.attributesUnused.length === 0,
 		iconJoin:        (s) => {
@@ -626,7 +626,7 @@ const MyBuilderQueryNestedJoin = {
 		joinReference:    (s) => !s.isOutsideIn ? s.joinAttribute.name : s.joinReferenceFull,
 		joinReferenceFull:(s) => `${s.relationIdMap[s.joinAttribute.relationId].name}.${s.joinAttribute.name}`,
 		joinRelation:     (s) => s.relationIdMap[s.joinRelationId],
-		
+
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -638,7 +638,7 @@ const MyBuilderQueryNestedJoin = {
 		getDependentAttributes,
 		isAttributeRelationship,
 		isAttributeRelationship11,
-		
+
 		// actions
 		relationAdd(event) {
 			this.$emit('relation-add',this.index,this.joinRelationId,this.relationAddId,'LEFT');
@@ -656,7 +656,7 @@ const MyBuilderQueryNestedJoin = {
 				case 'FULL':  this.$emit('relation-connector-set',this.index,'INNER'); break;
 			}
 		},
-		
+
 		// presentation
 		displayApply(content) {
 			switch(content) {
@@ -671,10 +671,10 @@ const MyBuilderQueryNestedJoin = {
 			let relIdPartner = !outsideIn ? atr.relationshipId : atr.relationId;
 			let atrRel       = this.relationIdMap[atr.relationId];
 			let relType      = outsideIn ? '1:n' : 'n:1';
-			
+
 			if(this.isAttributeRelationship11(atr.content))
 				relType = '1:1';
-			
+
 			return `[${relType}] ${this.relationIdMap[relIdPartner].name} (${atrRel.name}.${atr.name})`;
 		},
 		displayCheck(state) {
@@ -694,7 +694,7 @@ export default {
 	},
 	template:`<div class="builder-query default-inputs">
 		<div class="query-component">
-			
+
 			<!-- start relation -->
 			<div class="row gap centered" v-if="relationId === null && !readonly">
 				<my-label :caption="capGen.query" image="database.png" />
@@ -733,7 +733,7 @@ export default {
 					:modelValue="expertMode"
 				/>
 			</div>
-			
+
 			<my-builder-query-nested-join
 				v-show="showRelations"
 				v-if="relationsNested !== false"
@@ -754,7 +754,7 @@ export default {
 				:readonly="!allowJoinEdit || readonly"
 			/>
 		</div>
-		
+
 		<!-- orders -->
 		<div class="query-component" v-if="allowOrders && joins.length !== 0">
 			<div class="query-title">
@@ -781,7 +781,7 @@ export default {
 				:readonly
 			/>
 		</div>
-		
+
 		<!-- filters -->
 		<div class="query-component" v-if="allowFilters && joins.length !== 0">
 			<my-builder-query-filter
@@ -798,7 +798,7 @@ export default {
 				:readonly
 			/>
 		</div>
-		
+
 		<!-- choice filters -->
 		<div class="query-component" v-if="expertMode && allowChoices && allowFilters && joins.length !== 0">
 			<div class="query-title">
@@ -820,12 +820,12 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<template v-if="showChoices && choices.length > 0">
 				<span><i>{{ capApp.choicesHint }}</i></span>
 				<br /><br />
 			</template>
-			
+
 			<my-builder-query-choice
 				v-show="showChoices"
 				v-for="(c,i) in choices"
@@ -849,7 +849,7 @@ export default {
 				:readonly
 			/>
 		</div>
-		
+
 		<!-- lookups -->
 		<div class="query-component" v-if="allowLookups && joins.length !== 0">
 			<div class="query-title">
@@ -871,7 +871,7 @@ export default {
 				:readonly
 			/>
 		</div>
-		
+
 		<!-- fixed limit -->
 		<div class="fixed-limit" v-if="expertMode && allowFixedLimit && joins.length !== 0">
 			<my-button
@@ -929,7 +929,7 @@ export default {
 				// if source relation not set, but default given: set
 				if(v === null && this.relationIdStart !== null)
 					return this.set('relationId',this.relationIdStart);
-				
+
 				// if source relation set, but not added as join yet: add
 				if(v !== null && this.joins.length === 0)
 					return this.relationAdd(-1,v,null,'INNER');
@@ -952,7 +952,7 @@ export default {
 				for(const j of s.joins) {
 					if(j.indexFrom !== indexFrom)
 						continue;
-					
+
 					let join = JSON.parse(JSON.stringify(j));
 					rels.push({
 						applyCreate:join.applyCreate,
@@ -967,10 +967,10 @@ export default {
 				}
 				return rels;
 			};
-			
+
 			if(!s.module || !s.relation || s.joins.length === 0)
 				return false;
-			
+
 			// source relation with all relations deep-nested
 			return {
 				applyCreate:s.joins[0].applyCreate,
@@ -984,7 +984,7 @@ export default {
 				name:s.relation.name
 			};
 		},
-		
+
 		// simple
 		module:    (s) => s.moduleIdMap[s.moduleId]     === undefined ? false : s.moduleIdMap[s.moduleId],
 		relation:  (s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
@@ -996,7 +996,7 @@ export default {
 		lookups:   (s) => s.modelValue.lookups,
 		orders:    (s) => s.modelValue.orders,
 		relationId:(s) => s.modelValue.relationId,
-		
+
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -1013,18 +1013,18 @@ export default {
 		builderOptionSet,
 		getDependentModules,
 		getTemplateQueryChoice,
-		
+
 		// presentation
 		displayArrow(state,count) {
 			return state && count !== 0 ? 'triangleDown.png' : 'triangleRight.png';
 		},
-		
+
 		// actions
 		choiceAdd() {
 			let v = JSON.parse(JSON.stringify(this.choices));
 			v.push(this.getTemplateQueryChoice());
 			this.set('choices',v);
-			
+
 			if(!this.showChoices)
 				this.showChoices = true;
 		},
@@ -1053,7 +1053,7 @@ export default {
 				index:0
 			});
 			this.set('orders',v);
-			
+
 			if(!this.showOrders)
 				this.showOrders = true;
 		},
@@ -1071,7 +1071,7 @@ export default {
 				image:'question.png'
 			});
 		},
-		
+
 		// relation manipulation
 		relationAdd(indexFrom,relationIdFrom,attributeId,connector) {
 			let isSource = indexFrom === -1;
@@ -1083,7 +1083,7 @@ export default {
 				relId = relationIdFrom;
 			}
 			let v = JSON.parse(JSON.stringify(this.joins));
-			
+
 			v.push({
 				applyCreate:isSource ? true : false,
 				applyUpdate:isSource ? true : false,
@@ -1102,7 +1102,7 @@ export default {
 				joins:this.joins.filter(v => v.index !== index),
 				lookups:this.lookups.filter(v => v.index !== index)
 			};
-			
+
 			if(index === 0) {
 				// source relation has changed
 				changes.relationId = null;

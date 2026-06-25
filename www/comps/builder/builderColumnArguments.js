@@ -39,7 +39,7 @@ export default {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		indexAttributeIds:s => s.joinsParents.length === 0 ? [] : s.getIndexAttributeIdsByJoins(s.joinsParents[0],[]),
+		indexAttributeIds:s => s.joinsParents.length === 0 ? [] : s.getIndexAttributeIdsByJoins(s.joinsParents[0],[],['files']),
 
 		// stores
 		capGen:s => s.$store.getters.captions.generic
