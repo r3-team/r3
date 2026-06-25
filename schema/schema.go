@@ -286,7 +286,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		INNER JOIN app.module AS m
 			ON  m.id = r.module_id
 			AND m.id = $1
-		
+
 		-- dependency
 		WHERE a.relationship_id NOT IN (
 			SELECT id
@@ -311,45 +311,54 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(
 			CASE
+				-- main entities
 				WHEN q.api_id        IS NOT NULL THEN FORMAT('API "%s"', a.name)
 				WHEN q.collection_id IS NOT NULL THEN FORMAT('collection "%s"', c.name)
 				WHEN q.doc_id        IS NOT NULL THEN FORMAT('PDF "%s"', d.name)
-				WHEN q.field_id      IS NOT NULL THEN FORMAT('field in form "%s"', lf.name)
 				WHEN q.form_id       IS NOT NULL THEN FORMAT('form "%s"', f.name)
 				WHEN q.search_bar_id IS NOT NULL THEN FORMAT('search bar "%s"', s.name)
+
+				-- sub entities
+				WHEN q.doc_field_id  IS NOT NULL THEN FORMAT('field in PDF "%s"', ed.name)
+				WHEN q.field_id      IS NOT NULL THEN FORMAT('field in form "%s"', lf.name)
 			END, ' & '
 		)
 		FROM app.query AS q
+
+		-- main entities
 		LEFT JOIN app.api        AS a  ON a.id  = q.api_id        -- query for API
 		LEFT JOIN app.collection AS c  ON c.id  = q.collection_id -- query for collection
 		LEFT JOIN app.doc        AS d  ON d.id  = q.doc_id        -- query for document
 		LEFT JOIN app.form       AS f  ON f.id  = q.form_id       -- query for form
+		LEFT JOIN app.search_bar AS s  ON s.id  = q.search_bar_id -- query for search bar
+
+		-- sub entities
 		LEFT JOIN app.field      AS l  ON l.id  = q.field_id      -- query for list/data field
 		LEFT JOIN app.form       AS lf ON lf.id = l.form_id       -- form of list/data field
-		LEFT JOIN app.search_bar AS s  ON s.id  = q.search_bar_id -- query for search bar
-		INNER JOIN app.module AS m
-			ON m.id = $1
-			AND (
-				f.module_id     = m.id
-				OR lf.module_id = m.id
-				OR a.module_id  = m.id
-				OR c.module_id  = m.id
-				OR d.module_id  = m.id
-				OR s.module_id  = m.id
-			)
-		
+
+		LEFT JOIN app.doc_field  AS e  ON e.id  = q.doc_field_id  -- query for list document field
+		LEFT JOIN app.doc_page   AS ep ON ep.id = e.doc_page_id   -- page of list document field
+		LEFT JOIN app.doc        AS ed ON ed.id = ep.doc_id       -- document of page of list document field
+
+		WHERE (
+			f.module_id     = $1
+			OR lf.module_id = $1
+			OR a.module_id  = $1
+			OR c.module_id  = $1
+			OR d.module_id  = $1
+			OR s.module_id  = $1
+			OR ed.module_id = $1
+		)
+
 		-- dependency
-		AND (
-			q.relation_id IS NOT NULL
-			AND q.relation_id NOT IN (
-				SELECT id
-				FROM app.relation
-				WHERE module_id = m.id
-				OR module_id IN (
-					SELECT module_id_on
-					FROM app.module_depends
-					WHERE module_id = m.id
-				)
+		AND q.relation_id NOT IN (
+			SELECT id
+			FROM app.relation
+			WHERE module_id = $1
+			OR module_id IN (
+				SELECT module_id_on
+				FROM app.module_depends
+				WHERE module_id = $1
 			)
 		)
 	`, moduleId).Scan(&cnt, &name1); err != nil {
@@ -371,7 +380,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		INNER JOIN app.module AS m
 			ON m.id  = f3.module_id
 			AND m.id = $1
-		
+
 		-- dependency
 		WHERE f1.id NOT IN (
 			SELECT id
@@ -402,7 +411,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		INNER JOIN app.module AS m
 			ON m.id  = c.module_id
 			AND m.id = $1
-		
+
 		-- dependency
 		WHERE f.id NOT IN (
 			SELECT id
@@ -431,7 +440,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		INNER JOIN app.relation AS t ON t.id = rp.relation_id
 		INNER JOIN app.module   AS m ON m.id = t.module_id
 			AND m.id = $1
-		
+
 		-- dependency
 		WHERE r.id NOT IN (
 			SELECT id
@@ -458,7 +467,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		FROM app.pg_trigger AS t
 		INNER JOIN app.relation AS r ON r.id = t.relation_id
 		INNER JOIN app.module   AS m ON m.id = t.module_id AND m.id = $1
-		
+
 		-- dependency
 		WHERE r.id NOT IN (
 			SELECT id
@@ -487,7 +496,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		INNER JOIN app.module AS m
 			ON m.id = h.module_id
 			AND m.id = $1
-		
+
 		-- dependency
 		WHERE f.id NOT IN (
 			SELECT id
@@ -517,7 +526,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		INNER JOIN app.module   AS m
 			ON  m.id = mt.module_id
 			AND m.id = $1
-		
+
 		-- dependency
 		WHERE f.id NOT IN (
 			SELECT id
@@ -547,16 +556,16 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			SELECT icon_id
 			FROM app.module
 			WHERE id = $1
-			
+
 			UNION
-			
+
 			-- form icons
 			SELECT icon_id
 			FROM app.form
 			WHERE module_id = $2
-			
+
 			UNION
-			
+
 			-- field icons
 			SELECT icon_id
 			FROM app.field
@@ -565,9 +574,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				FROM app.form
 				WHERE module_id = $3
 			)
-			
+
 			UNION
-			
+
 			-- menu icons
 			SELECT icon_id
 			FROM app.menu
@@ -598,7 +607,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				WHERE module_id = $7
 			)
 		)
-		
+
 		-- dependency
 		AND id NOT IN (
 			SELECT id
@@ -632,9 +641,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				INNER JOIN app.pg_function AS f ON f.id = d.pg_function_id
 				WHERE f.module_id = $1
 			)
-			
+
 			UNION
-		
+
 			-- dependent on modules
 			SELECT id
 			FROM app.module
@@ -644,9 +653,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				INNER JOIN app.pg_function AS f ON f.id = d.pg_function_id
 				WHERE f.module_id = $2
 			)
-			
+
 			UNION
-			
+
 			-- dependent on relations
 			SELECT module_id
 			FROM app.relation
@@ -668,7 +677,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				)
 			)
 		)
-	
+
 		-- dependency
 		AND id <> $5
 		AND id NOT IN (
@@ -698,9 +707,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
 				WHERE f.module_id = $1
 			)
-			
+
 			UNION
-			
+
 			-- dependent on JS functions
 			SELECT module_id
 			FROM app.js_function
@@ -710,9 +719,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
 				WHERE f.module_id = $2
 			)
-			
+
 			UNION
-			
+
 			-- dependent on forms
 			SELECT module_id
 			FROM app.form
@@ -733,9 +742,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 					WHERE f.module_id = $4
 				)
 			)
-			
+
 			UNION
-			
+
 			-- dependent on roles
 			SELECT module_id
 			FROM app.role
@@ -746,7 +755,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				WHERE f.module_id = $5
 			)
 		)
-	
+
 		-- dependency
 		AND id <> $6
 		AND id NOT IN (
@@ -779,9 +788,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 					FROM app.form
 					WHERE module_id = $1
 				)
-				
+
 				UNION
-				
+
 				SELECT fd.js_function_id
 				FROM app.field_data AS fd
 				JOIN app.field      AS f ON f.id = fd.field_id
@@ -792,7 +801,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				)
 
 				UNION
-				
+
 				SELECT fv.js_function_id
 				FROM app.field_variable AS fv
 				JOIN app.field          AS f ON f.id = fv.field_id
@@ -801,9 +810,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 					FROM app.form
 					WHERE module_id = $2
 				)
-				
+
 				UNION
-				
+
 				SELECT js_function_id
 				FROM app.form_function
 				WHERE form_id IN (
@@ -813,7 +822,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				)
 			)
 		)
-	
+
 		-- dependency
 		AND id <> $4
 		AND id NOT IN (
@@ -836,7 +845,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		INNER JOIN app.module AS m
 			ON m.id = r.module_id
 			AND m.id = $1
-		
+
 		WHERE r.id IN (
 			SELECT role_id
 			FROM app.role_child
@@ -911,9 +920,9 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 					)
 				))
 			)
-			
+
 			UNION
-			
+
 			-- presets from field default values
 			SELECT preset_id
 			FROM app.field_data_relationship_preset
