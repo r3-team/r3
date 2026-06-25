@@ -33,7 +33,7 @@ const MyKanbanCard = {
 			:class="{ dragAnchor:!isTemplate }"
 			:style="headerStyle"
 		></div>
-		
+
 		<div class="kanban-card-content"
 			@click.ctrl.exact="$emit('click-middle')"
 			@click.left.exact="$emit('click')"
@@ -41,7 +41,7 @@ const MyKanbanCard = {
 			:class="{ clickable:clickable, template:isTemplate }"
 		>
 			<span v-if="isTemplate">{{ capGen.button.new }}</span>
-			
+
 			<table v-if="!isTemplate">
 				<tbody>
 					<tr v-for="b in columnBatches">
@@ -83,7 +83,7 @@ const MyKanbanCard = {
 		values:       { type:Array,   required:true }
 	},
 	computed:{
-		capGen:(s) => s.$store.getters.captions.generic
+		capGen:s => s.$store.getters.captions.generic
 	}
 };
 
@@ -103,9 +103,9 @@ const MyKanbanBox = {
 				@click-middle="click(element,false,true)"
 				@clipboard="$emit('clipboard')"
 				:clickable="hasUpdate"
-				:columns="columns"
-				:columnBatches="columnBatches"
-				:headerStyle="headerStyle"
+				:columns
+				:columnBatches
+				:headerStyle
 				:isTemplate="false"
 				:values="element.values"
 			/>
@@ -116,9 +116,9 @@ const MyKanbanBox = {
 				@click="click(null,true,false)"
 				@click-middle="click(null,true,true)"
 				:clickable="hasCreate"
-				:columns="columns"
-				:columnBatches="columnBatches"
-				:headerStyle="headerStyle"
+				:columns
+				:columnBatches
+				:headerStyle
 				:isTemplate="true"
 				:values="[]"
 			/>
@@ -138,22 +138,24 @@ const MyKanbanBox = {
 		search:           { type:String,  required:true }
 	},
 	computed:{
-		cardsShown:(s) => {
+		cardsShown:s => {
 			let cards = JSON.parse(JSON.stringify(s.cards));
-			
+
 			// filter cards by active search
 			if(s.search !== '') {
 				for(let i = 0, j = cards.length; i < j; i++) {
 					let searchStr = '';
-					
+
 					for(const colIndex of s.columnIndexesData) {
 						if(cards[i].values[colIndex] === null)
 							continue;
-						
-						const atr = s.attributeIdMap[s.columns[colIndex].attributeId];
-						
-						if(!s.isAttributeFiles(atr.content) && !s.isAttributeBoolean(atr.content))
-							searchStr += cards[i].values[colIndex];
+
+						const c = s.columns[colIndex];
+						if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
+							if(s.isAttributeFiles(s.attributeIdMap[c.attributeId].content))
+								continue;
+						}
+						searchStr += cards[i].values[colIndex];
 					}
 					if(!searchStr.toLowerCase().includes(s.search.toLowerCase())) {
 						cards.splice(i,1);
@@ -163,22 +165,22 @@ const MyKanbanBox = {
 			}
 			return cards;
 		},
-		
+
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap']
 	},
 	methods:{
 		// external
 		isAttributeBoolean,
 		isAttributeFiles,
-		
+
 		changed(e) {
 			let event = '';
 			if     (typeof e.added   !== 'undefined') event = 'added';
 			else if(typeof e.moved   !== 'undefined') event = 'moved';
 			else if(typeof e.removed !== 'undefined') event = 'removed';
 			else return;
-			
+
 			this.$emit('cards-changed',
 				e[event].element.indexRecordIds[this.relationIndexData],
 				event,
@@ -188,10 +190,10 @@ const MyKanbanBox = {
 		click(element,isTemplate,middleClick) {
 			if(isTemplate  && !this.hasCreate) return;
 			if(!isTemplate && !this.hasUpdate) return;
-			
+
 			if(isTemplate)
 				return this.$emit('card-create',middleClick);
-			
+
 			return this.$emit('open-form',element,middleClick);
 		}
 	}
@@ -204,7 +206,7 @@ const MyKanban = {
 		MyKanbanBox
 	},
 	template:`<div class="kanban" :class="{ isSingleField:isSingleField }">
-		
+
 		<!-- header -->
 		<div class="top lower">
 			<div class="area nowrap"></div>
@@ -263,7 +265,7 @@ const MyKanban = {
 				/>
 			</div>
 		</div>
-		
+
 		<!-- content -->
 		<div class="kanban-wrap">
 			<div class="kanban-content">
@@ -272,14 +274,14 @@ const MyKanban = {
 						<!-- X axis labels -->
 						<tr>
 							<th class="kanban-table-label top-left" v-if="relationIndexAxisY !== null"></th>
-							
+
 							<!-- label for NULL assignment -->
 							<th class="kanban-table-label" v-if="hasNullsInX">
 								<div class="kanban-table-label-line unassigned">
 									{{ capGen.unassigned }}
 								</div>
 							</th>
-							
+
 							<!-- labels for X assignment -->
 							<th class="kanban-table-label" v-for="x in axisEntriesX"
 								:class="{ clickable: hasCreate }"
@@ -309,7 +311,7 @@ const MyKanban = {
 					</thead>
 					<tbody v-if="dataReady">
 						<!-- Y axis -->
-						
+
 						<!-- line for NULL Y assignment / or no Y axis at all -->
 						<tr v-if="hasNullsInY || relationIndexAxisY === null">
 							<td class="kanban-table-label" v-if="relationIndexAxisY !== null">
@@ -325,14 +327,14 @@ const MyKanban = {
 									@drag-active="dragActive = $event"
 									@open-form="openForm"
 									:cards="recordIdMapAxisXY['null']['null']"
-									:columns="columns"
-									:columnBatches="columnBatches"
-									:columnIndexesData="columnIndexesData"
-									:dragActive="dragActive"
-									:hasCreate="hasCreate"
-									:hasUpdate="hasUpdate"
-									:relationIndexData="relationIndexData"
-									:search="search"
+									:columns
+									:columnBatches
+									:columnIndexesData
+									:dragActive
+									:hasCreate
+									:hasUpdate
+									:relationIndexData
+									:search
 								/>
 							</td>
 							<td v-for="x in axisEntriesX">
@@ -343,19 +345,19 @@ const MyKanban = {
 									@drag-active="dragActive = $event"
 									@open-form="openForm"
 									:cards="recordIdMapAxisXY[x.id]['null']"
-									:columns="columns"
-									:columnBatches="columnBatches"
-									:columnIndexesData="columnIndexesData"
-									:dragActive="dragActive"
-									:hasCreate="hasCreate"
-									:hasUpdate="hasUpdate"
+									:columns
+									:columnBatches
+									:columnIndexesData
+									:dragActive
+									:hasCreate
+									:hasUpdate
 									:headerStyle="x.style"
-									:relationIndexData="relationIndexData"
-									:search="search"
+									:relationIndexData
+									:search
 								/>
 							</td>
 						</tr>
-						
+
 						<!-- lines for XY assignment -->
 						<tr v-for="y in axisEntriesY">
 							<!-- label for Y assignment -->
@@ -383,7 +385,7 @@ const MyKanban = {
 									/>
 								</div>
 							</td>
-							
+
 							<!-- X axis NULL data field -->
 							<td v-if="hasNullsInX">
 								<my-kanban-box
@@ -393,18 +395,18 @@ const MyKanban = {
 									@drag-active="dragActive = $event"
 									@open-form="openForm"
 									:cards="recordIdMapAxisXY['null'][y.id]"
-									:columns="columns"
-									:columnBatches="columnBatches"
-									:columnIndexesData="columnIndexesData"
-									:dragActive="dragActive"
-									:hasCreate="hasCreate"
-									:hasUpdate="hasUpdate"
+									:columns
+									:columnBatches
+									:columnIndexesData
+									:dragActive
+									:hasCreate
+									:hasUpdate
 									:headerStyle="y.style"
-									:relationIndexData="relationIndexData"
-									:search="search"
+									:relationIndexData
+									:search
 								/>
 							</td>
-							
+
 							<!-- X axis data fields -->
 							<td v-for="x in axisEntriesX">
 								<my-kanban-box
@@ -414,15 +416,15 @@ const MyKanban = {
 									@drag-active="dragActive = $event"
 									@open-form="openForm"
 									:cards="recordIdMapAxisXY[x.id][y.id]"
-									:columns="columns"
-									:columnBatches="columnBatches"
-									:columnIndexesData="columnIndexesData"
-									:dragActive="dragActive"
-									:hasCreate="hasCreate"
-									:hasUpdate="hasUpdate"
+									:columns
+									:columnBatches
+									:columnIndexesData
+									:dragActive
+									:hasCreate
+									:hasUpdate
 									:headerStyle="x.style !== '' ? x.style : y.style"
-									:relationIndexData="relationIndexData"
-									:search="search"
+									:relationIndexData
+									:search
 								/>
 							</td>
 						</tr>
@@ -436,7 +438,7 @@ const MyKanban = {
 					</tfoot>
 				</table>
 			</div>
-			
+
 			<!-- inline form -->
 			<my-form class="inline"
 				v-if="popUpFormInline !== null"
@@ -492,7 +494,7 @@ const MyKanban = {
 		};
 	},
 	computed:{
-		columnIndexesData:(s) => {
+		columnIndexesData:s => {
 			let out = [];
 			for(let i = 0, j = s.columns.length; i < j; i++) {
 				if(!s.columnIndexesAxisX.includes(i) && !s.columnIndexesAxisY.includes(i))
@@ -500,38 +502,38 @@ const MyKanban = {
 			}
 			return out;
 		},
-		
+
 		// simple
-		attributeIdAxisX:  (s) => s.getAttributeIdFromAxisJoin(s.relationIndexData,s.relationIndexAxisX),
-		attributeIdAxisY:  (s) => s.getAttributeIdFromAxisJoin(s.relationIndexData,s.relationIndexAxisY),
-		choiceFilters:     (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		columnBatches:     (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],[],s.showCaptions),
-		columnIndexesAxisX:(s) => s.getAxisColumnIndexes([]),
-		columnIndexesAxisY:(s) => s.relationIndexAxisY === null ? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),
-		columnStyleVars:   (s) => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
-		columnWidthMin:    (s) => s.zoom * 40,
-		columnWidthMax:    (s) => s.columnWidthMin * 1.5,
-		dataReady:         (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
-		expressions:       (s) => s.getQueryExpressions(s.columns),
-		hasChoices:        (s) => s.choices.length > 1,
-		hasCreate:         (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
-		hasUpdate:         (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		hasNullsInX:       (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
-		hasNullsInY:       (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
-		joins:             (s) => s.fillRelationRecordIds(s.query.joins),
-		joinsIndexMap:     (s) => s.getJoinsIndexMap(s.joins),
+		attributeIdAxisX:  s => s.getAttributeIdFromAxisJoin(s.relationIndexData,s.relationIndexAxisX),
+		attributeIdAxisY:  s => s.getAttributeIdFromAxisJoin(s.relationIndexData,s.relationIndexAxisY),
+		choiceFilters:     s => s.getChoiceFilters(s.choices,s.choiceId),
+		columnBatches:     s => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],[],s.showCaptions),
+		columnIndexesAxisX:s => s.getAxisColumnIndexes([]),
+		columnIndexesAxisY:s => s.relationIndexAxisY === null ? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),
+		columnStyleVars:   s => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
+		columnWidthMin:    s => s.zoom * 40,
+		columnWidthMax:    s => s.columnWidthMin * 1.5,
+		dataReady:         s => typeof s.recordIdMapAxisXY.null !== 'undefined',
+		expressions:       s => s.getQueryExpressions(s.columns),
+		hasChoices:        s => s.choices.length > 1,
+		hasCreate:         s => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:         s => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		hasNullsInX:       s => s.attributeIdMap[s.attributeIdAxisX].nullable,
+		hasNullsInY:       s => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
+		joins:             s => s.fillRelationRecordIds(s.query.joins),
+		joinsIndexMap:     s => s.getJoinsIndexMap(s.joins),
 
 		// login options
-		choiceId:    (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		showCaptions:(s) => s.$root.getOrFallback(s.loginOptions,'kanbanShowCaptions',false),
-		zoom:        (s) => s.$root.getOrFallback(s.loginOptions,'kanbanZoom',s.zoomDefault),
-		
+		choiceId:    s => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		showCaptions:s => s.$root.getOrFallback(s.loginOptions,'kanbanShowCaptions',false),
+		zoom:        s => s.$root.getOrFallback(s.loginOptions,'kanbanZoom',s.zoomDefault),
+
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
-		isMobile:      (s) => s.$store.getters.isMobile,
-		capApp:        (s) => s.$store.getters.captions.calendar,
-		capGen:        (s) => s.$store.getters.captions.generic
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
+		isMobile:      s => s.$store.getters.isMobile,
+		capApp:        s => s.$store.getters.captions.calendar,
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
@@ -576,7 +578,7 @@ const MyKanban = {
 		routeChangeFieldReload,
 		routeParseParams,
 		srcBase64Icon,
-		
+
 		// actions
 		cardCreate(recordIdX,recordIdY,middleClick) {
 			if(!this.hasCreate)
@@ -585,23 +587,23 @@ const MyKanban = {
 			let attributes = [];
 			if(recordIdX !== null) attributes.push(`${this.attributeIdAxisX}_${recordIdX}`);
 			if(recordIdY !== null) attributes.push(`${this.attributeIdAxisY}_${recordIdY}`);
-			
+
 			const args = attributes.length === 0 ? [] : [`attributes=${attributes.join(',')}`];
 			this.$emit('open-form',[],args,middleClick);
 		},
 		openForm(row,middleClick) {
 			this.$emit('open-form',[row],[],middleClick);
 		},
-		
+
 		// presentation
 		displayColorColumn(color) {
 			if(color === null) return '';
-			
+
 			let bg   = this.colorAdjustBg(color);
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},
-		
+
 		// processing
 		getAttributeIdFromAxisJoin(relIndexData,relIndexAxis) {
 			if(relIndexAxis === null || typeof this.joinsIndexMap[relIndexAxis] === undefined)
@@ -617,13 +619,13 @@ const MyKanban = {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				if(columnIndexesIgnore.includes(i))
 					continue;
-				
+
 				const c = this.columns[i];
-				
+
 				if(batchIndexUsed === null) {
 					batchIndexUsed = c.batch;
 					out.push(i);
-					
+
 					// if column is not part of a batch, use first column only
 					if(batchIndexUsed === null)
 						return out;
@@ -637,12 +639,12 @@ const MyKanban = {
 		getAxisEntries(relationIndex,columnIndexes,rows) {
 			if(relationIndex === null || columnIndexes.length === 0)
 				return [];
-			
+
 			let recordIds         = [];
 			let recordIdMapColors = {};
 			let recordIdMapValues = {};
 			let columnIndexColor  = -1;
-			
+
 			for(const columnIndex of columnIndexes) {
 				const atr = this.attributeIdMap[this.columns[columnIndex].attributeId];
 				if(atr.contentUse === 'color') {
@@ -650,26 +652,26 @@ const MyKanban = {
 					break;
 				}
 			}
-			
+
 			for(let r of rows) {
 				const recordId = r.indexRecordIds[relationIndex];
 				if(recordId === undefined)
 					return [];
-				
+
 				// store first occurrence of record only
 				if(recordId === null || recordIdMapValues[recordId] !== undefined)
 					continue;
-				
+
 				let values = [];
 				for(const columnIndex of columnIndexes) {
 					if(columnIndex === columnIndexColor)
 						continue;
-					
+
 					const column = this.columns[columnIndex];
-					
+
 					if(column.hidden || (this.isMobile && !column.onMobile))
 						continue;
-					
+
 					values.push({
 						columnIndex:columnIndex,
 						value:r.values[columnIndex]
@@ -680,7 +682,7 @@ const MyKanban = {
 				recordIdMapValues[recordId] = values;
 				recordIds.push(recordId);
 			}
-			
+
 			// add entries in order of appearance to keep sort order of results
 			let out = [];
 			for(let id of recordIds) {
@@ -692,12 +694,12 @@ const MyKanban = {
 			}
 			return out;
 		},
-		
+
 		// backend calls
 		get() {
 			if(this.formLoading || (this.isHidden && !this.loadWhileHidden))
 				return;
-			
+
 			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.joins),
@@ -711,7 +713,7 @@ const MyKanban = {
 						this.relationIndexAxisX,this.columnIndexesAxisX,res.payload.rows);
 					this.axisEntriesY = this.getAxisEntries(
 						this.relationIndexAxisY,this.columnIndexesAxisY,res.payload.rows);
-					
+
 					// prepare record ID map for both axis (X/Y)
 					this.recordIdMapAxisXY = { null:{ null:[] } };
 					for(const x of this.axisEntriesX) {
@@ -722,7 +724,7 @@ const MyKanban = {
 							this.recordIdMapAxisXY[v][y.id] = [];
 						}
 					}
-					
+
 					// stop if no rows or relation indexes for either axis is invalid
 					if(res.payload.rows.length === 0 ||
 						res.payload.rows[0].indexRecordIds[this.relationIndexAxisX] === undefined ||
@@ -734,16 +736,16 @@ const MyKanban = {
 						this.$emit('record-count-change',0);
 						return;
 					}
-					
+
 					// fill row values into prepared map
 					let rowCount = 0;
 					for(const r of res.payload.rows) {
 						if(r.indexRecordIds[this.relationIndexData] === null)
 							continue;
-						
+
 						const keyY = this.relationIndexAxisY === null
 							? 'null' : r.indexRecordIds[this.relationIndexAxisY];
-						
+
 						this.recordIdMapAxisXY[r.indexRecordIds[this.relationIndexAxisX]][keyY].push(r);
 						rowCount++;
 					}
@@ -755,10 +757,10 @@ const MyKanban = {
 		set(recordIdX,recordIdY,recordIdData,event,newCards) {
 			const relationIdCards = this.joinsIndexMap[this.relationIndexData].relationId;
 			let requests = [];
-			
+
 			// update cards values
 			this.recordIdMapAxisXY[recordIdX][recordIdY] = newCards;
-			
+
 			if(event === 'added') {
 				// update card values if added to another kanban box
 				let attributes = [{
@@ -783,7 +785,7 @@ const MyKanban = {
 					attributes:attributes
 				}}));
 			}
-			
+
 			if(this.attributeIdSort !== null && ['added','moved'].includes(event)) {
 				// update card sort values within same kanban box
 				for(let i = 0, j = this.recordIdMapAxisXY[recordIdX][recordIdY].length; i < j; i++) {
@@ -802,7 +804,7 @@ const MyKanban = {
 					}}));
 				}
 			}
-			
+
 			if(requests.length !== 0) {
 				ws.sendMultiple(requests,true).then(
 					() => {},
