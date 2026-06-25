@@ -1,6 +1,5 @@
-import {getDependentModules} from '../shared/builder.js';
-import {dialogDeleteAsk}     from '../shared/dialog.js';
-import {copyValueDialog}     from '../shared/generic.js';
+import {dialogDeleteAsk} from '../shared/dialog.js';
+import {copyValueDialog} from '../shared/generic.js';
 import {
 	isAttributeFiles,
 	isAttributeRelationship
@@ -30,7 +29,7 @@ const MyBuilderPresetValue = {
 					<option :value="null">[{{ attribute.content }}]</option>
 					<option v-for="p in relationship.presets" :value="p.id">{{ p.name }}</option>
 				</select>
-				
+
 				<textarea class="dynamic startAsOneLine"
 					v-if="!isRelationship"
 					v-model="valueInput"
@@ -66,7 +65,7 @@ const MyBuilderPresetValue = {
 	computed:{
 		isRelationship:(s) => s.isAttributeRelationship(s.attribute.content),
 		relationship:  (s) => !s.isRelationship ? false : s.relationIdMap[s.attribute.relationshipId],
-		
+
 		// inputs
 		presetIdReferInput:{
 			get()  { return this.presetIdRefer; },
@@ -80,7 +79,7 @@ const MyBuilderPresetValue = {
 			get()  { return this.value === null ? '' : this.value; },
 			set(v) { return this.$emit('set',this.presetIdRefer,this.protected,v); }
 		},
-		
+
 		// stores
 		relationIdMap:(s) => s.$store.getters['schema/relationIdMap'],
 		capApp:       (s) => s.$store.getters.captions.builder.preset
@@ -135,7 +134,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content default-inputs builder-preset no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -219,7 +218,7 @@ export default {
 		canSave:        (s) => s.values !== null && s.values.name !== '' && s.hasChanges,
 		hasChanges:     (s) => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
 		isNew:          (s) => s.id === null,
-		
+
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.builder.preset,
@@ -236,12 +235,11 @@ export default {
 		// externals
 		copyValueDialog,
 		dialogDeleteAsk,
-		getDependentModules,
 		getTemplatePreset,
 		getTemplatePresetValue,
 		isAttributeFiles,
 		isAttributeRelationship,
-		
+
 		// actions
 		childAllAddMissing() {
 			for(const atr of this.attributesValid) {
@@ -283,11 +281,11 @@ export default {
 		},
 		childSet(atrId,presetIdRefer,protec,value) {
 			const atr = this.attributeIdMap[atrId];
-			
+
 			// no preset value yet for attribute, create one
 			if(this.attributeIdMapValue[atrId] === undefined)
 				return this.values.values.push(this.getTemplatePresetValue(atrId,presetIdRefer,protec,value));
-			
+
 			// update existing preset value
 			for(let i = 0, j = this.values.values.length; i < j; i++) {
 				if(this.values.values[i].attributeId !== atrId)
@@ -295,7 +293,7 @@ export default {
 
 				if(value === '')
 					value = null;
-				
+
 				this.values.values[i].presetIdRefer = presetIdRefer;
 				this.values.values[i].protected     = protec;
 				this.values.values[i].value         = value;
@@ -330,7 +328,7 @@ export default {
 			}
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('preset','del',this.id,true).then(
