@@ -79,28 +79,28 @@ const MyGanttLineRecord = {
 		style() {
 			let d0 = new Date(this.date0.getTime());
 			let d1 = new Date(this.date1.getTime());
-			
+
 			// limit record date to gantt presentation range
 			if(this.date0Range > d0) d0 = this.date0Range;
 			if(this.date1Range < d1) d1 = this.date1Range;
-			
+
 			// calculate width and offset to gantt start
 			let secOffset = (d0 - this.date0Range) / 1000;
 			let secWidth  = (d1 - d0) / 1000;
-			
+
 			// correction for DST change in day mode
 			if(this.isDays) {
 				let secDst0 = this.date0Range.getTimezoneOffset()*60;
 				let secDst1 = d0.getTimezoneOffset()*60;
 				secOffset += secDst0 - secDst1;
 			}
-			
+
 			const offset = secOffset * this.pxPerSec;
 			const width  = secWidth  * this.pxPerSec;
-			
+
 			if(width < 1)
 				return 'display:none';
-			
+
 			// max-width is overwritten by CSS if hovered over (show full entry)
 			return [`min-width:${width}px`,`max-width:${width}px`,`left:${offset}px`].join(';');
 		},
@@ -115,7 +115,7 @@ const MyGanttLineRecord = {
 		// externals
 		colorAdjustBg,
 		colorMakeContrastFont,
-		
+
 		// actions
 		clickRecord(middleClick) {
 			if(this.hasUpdate)
@@ -166,10 +166,10 @@ const MyGantt = {
 		MyInputCollection
 	},
 	template:`<div class="gantt-wrap" :class="{ isSingleField:isSingleField }" v-if="ready">
-		
+
 		<!-- header -->
 		<div class="top lower">
-			
+
 			<!-- keep div for flex layout -->
 			<div class="area nowrap">
 				<my-button image="new.png"
@@ -186,7 +186,7 @@ const MyGantt = {
 					:image="showGroupLabels ? 'visible1.png' : 'visible0.png'"
 				/>
 			</div>
-			
+
 			<div class="area nowrap">
 				<img class="icon"
 					v-if="iconId !== null"
@@ -196,17 +196,17 @@ const MyGantt = {
 					@trigger="pageChange(-1)"
 					:naked="true"
 				/>
-				
+
 				<div class="date-range-label">
 					{{ dateRangeLabel }}
 				</div>
-				
+
 				<my-button image="pageNext.png"
 					@trigger="pageChange(1)"
 					:naked="true"
 				/>
 			</div>
-			
+
 			<div class="area nowrap default-inputs">
 				<my-button image="refresh.png"
 					@trigger="get"
@@ -221,7 +221,7 @@ const MyGantt = {
 					:image="isDays ? 'clock.png' : 'clock24.png'"
 					:naked="true"
 				/>
-				
+
 				<my-button image="search.png"
 					v-if="!isMobile"
 					@trigger="$emit('set-login-option','ganttStepZoom',stepZoomDefault)"
@@ -229,7 +229,7 @@ const MyGantt = {
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 				/>
-				
+
 				<input class="zoom-factor clickable" type="range"
 					v-if="!isMobile"
 					@change="$emit('set-login-option','ganttStepZoom',parseInt($event.target.value))"
@@ -237,7 +237,7 @@ const MyGantt = {
 					:min="stepZoomMin"
 					:value="stepZoom"
 				/>
-				
+
 				<my-input-collection class="selector"
 					v-for="c in collections"
 					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
@@ -248,7 +248,7 @@ const MyGantt = {
 					:multiValue="c.flags.includes('multiValue')"
 					:previewCount="isMobile ? 0 : 2"
 				/>
-				
+
 				<select class="selector"
 					v-if="hasChoices"
 					:value="choiceId"
@@ -258,7 +258,7 @@ const MyGantt = {
 						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
 				</select>
-				
+
 				<my-button image="calendarDot.png"
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"
@@ -266,7 +266,7 @@ const MyGantt = {
 				/>
 			</div>
 		</div>
-		
+
 		<!-- gantt content -->
 		<div class="gantt">
 			<div class="gantt-content">
@@ -276,7 +276,7 @@ const MyGantt = {
 						<my-button image="add.png"    @trigger="groupWidthSet(true)"  :naked="true" />
 					</div>
 					<div class="gantt-header-dates">
-						
+
 						<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
 						<div class="gantt-header-dates-upper">
 							<div class="gantt-header-item"
@@ -286,7 +286,7 @@ const MyGantt = {
 								{{ displayHeaderMetaItem(i.value) }}
 							</div>
 						</div>
-						
+
 						<!-- header line: shows step entities (hours, days, ...) -->
 						<div class="gantt-header-dates-lower">
 							<div class="gantt-header-item lower"
@@ -328,16 +328,16 @@ const MyGantt = {
 						</div>
 					</div>
 					<div class="gantt-lines" ref="content">
-						
+
 						<div class="gantt-group" v-for="(g,i) in groups">
 							<my-gantt-line
 								v-for="(l,li) in g.lines"
 								@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
 								:class="{ 'show-line':li === g.lines.length-1 }"
-								:columns="columns"
+								:columns
 								:date0Range="date0"
 								:date1Range="date1"
-								:hasUpdate="hasUpdate"
+								:hasUpdate
 								:indexesHidden="group0LabelExpressionIndexes"
 								:isDays="isDays"
 								:pxPerSec="pxPerSec"
@@ -352,7 +352,7 @@ const MyGantt = {
 					</div>
 				</div>
 			</div>
-			
+
 			<!-- inline form -->
 			<my-form class="inline"
 				v-if="popUpFormInline !== null"
@@ -427,7 +427,7 @@ const MyGantt = {
 	},
 	computed:{
 		// unix date range points, 0=gantt start, 1=gantt end
-		date0:(s) => {
+		date0:s => {
 			let d = new Date(s.dateStart.getTime());
 			// start 3 steps before page start point
 			switch(s.stepType) {
@@ -436,7 +436,7 @@ const MyGantt = {
 			}
 			return d;
 		},
-		date1:(s) => {
+		date1:s => {
 			let d = new Date(s.dateStart.getTime());
 			switch(s.stepType) {
 				case 'days':  d.setDate(d.getDate()   + s.steps - 3 + (s.page*s.steps)); break;
@@ -444,8 +444,8 @@ const MyGantt = {
 			}
 			return d;
 		},
-		
-		dateRangeLabel:(s) => {
+
+		dateRangeLabel:s => {
 			let d0 = new Date(s.date0.getTime());
 			let d1 = new Date(s.date1.getTime());
 			let format = s.isDays ? s.settings.dateFormat : s.settings.dateFormat+' H:i';
@@ -457,19 +457,19 @@ const MyGantt = {
 			if(s.isHours) {
 				if(s.isMobile)
 					return s.getDateFormat(d0,format);
-				
+
 				if(d0.getDate() === d1.getDate())
 					return s.getDateFormat(d0,format) + '-' +s.getDateFormat(d1,'H:i');
-				
+
 				return s.getDateFormat(d0,format) + ' - ' +s.getDateFormat(d1,format);
 			}
 			return '';
 		},
-		
+
 		// records in gantt are always grouped (basically 1 calendar line per group)
 		//  currently only 1 group level exists (group 0), more could be added to allow nesting
-		//  group 0 label expression indexes define, which expression index(es) hold grouping label value(s)
-		group0LabelExpressionIndexes:(s) => {
+		//  group 0 label expression indexes define, which expression index(es) hold grouping label values
+		group0LabelExpressionIndexes:s => {
 			let out = [];
 			let batchIndexUsed;
 			for(let i = 0, j = s.columns.length; i < j; i++) {
@@ -477,59 +477,59 @@ const MyGantt = {
 					// get all columns from first used batch index
 					batchIndexUsed = s.columns[i].batch;
 					out.push(i);
-					
+
 					// if no batch index is used, only use first column
 					if(batchIndexUsed === null) break;
-					
+
 				} else if(s.columns[i].batch === batchIndexUsed) {
 					out.push(i);
 				}
 			}
 			return out;
 		},
-		
+
 		// presentation
-		pxPerSec:(s) => {
+		pxPerSec:s => {
 			if     (s.isHours) return s.stepPixels / 3600;
 			else if(s.isDays)  return s.stepPixels / 86400;
 			return 0.0;
 		},
-		styleLine:(s) => {
+		styleLine:s => {
 			return [
 				`max-width:${s.stepPixels * s.steps}px`,
 				`background-size:${s.stepPixels}px ${s.linePixels}px`
 			].join(';');
 		},
-		
+
 		// simple
-		expressions:      (s) => s.getQueryExpressions(s.columns),
-		hasChoices:       (s) => s.choices.length > 1,
-		hasColor:         (s) => s.attributeIdColor !== null,
-		hasCreate:        (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
-		hasUpdate:        (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		isDays:           (s) => s.stepType === 'days',
-		isEmpty:          (s) => s.groups.length === 0,
-		isHours:          (s) => s.stepType === 'hours',
-		joins:            (s) => s.fillRelationRecordIds(s.query.joins),
-		stepPixels:       (s) => s.stepBase * s.stepZoom,
-		styleHeaderItem:  (s) => `width:${s.stepPixels}px;`,
-		styleGroupLabel:  (s) => `width:${s.groupWidth > s.groupWidthMin ? s.groupWidth : s.groupWidthMin}px;`,
+		expressions:      s => s.getQueryExpressions(s.columns),
+		hasChoices:       s => s.choices.length > 1,
+		hasColor:         s => s.attributeIdColor !== null,
+		hasCreate:        s => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:        s => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		isDays:           s => s.stepType === 'days',
+		isEmpty:          s => s.groups.length === 0,
+		isHours:          s => s.stepType === 'hours',
+		joins:            s => s.fillRelationRecordIds(s.query.joins),
+		stepPixels:       s => s.stepBase * s.stepZoom,
+		styleHeaderItem:  s => `width:${s.stepPixels}px;`,
+		styleGroupLabel:  s => `width:${s.groupWidth > s.groupWidthMin ? s.groupWidth : s.groupWidthMin}px;`,
 
 		// login options
-		choiceId:       (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		groupWidth:     (s) => s.$root.getOrFallback(s.loginOptions,'ganttGroupWidth',180),
-		stepType:       (s) => s.$root.getOrFallback(s.loginOptions,'ganttStepType',s.stepTypeDefault), // gantt step type (hours, days)
-		stepZoom:       (s) => s.$root.getOrFallback(s.loginOptions,'ganttStepZoom',7),                 // zoom factor for step, 7 is default (7*8=56)
-		showGroupLabels:(s) => s.$root.getOrFallback(s.loginOptions,'ganttShowGroupLabels',true),
-		
+		choiceId:       s => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		groupWidth:     s => s.$root.getOrFallback(s.loginOptions,'ganttGroupWidth',180),
+		stepType:       s => s.$root.getOrFallback(s.loginOptions,'ganttStepType',s.stepTypeDefault), // gantt step type (hours, days)
+		stepZoom:       s => s.$root.getOrFallback(s.loginOptions,'ganttStepZoom',7),                 // zoom factor for step, 7 is default (7*8=56)
+		showGroupLabels:s => s.$root.getOrFallback(s.loginOptions,'ganttShowGroupLabels',true),
+
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
-		appResized:    (s) => s.$store.getters.appResized,
-		capApp:        (s) => s.$store.getters.captions.calendar,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		isMobile:      (s) => s.$store.getters.isMobile,
-		settings:      (s) => s.$store.getters.settings
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
+		appResized:    s => s.$store.getters.appResized,
+		capApp:        s => s.$store.getters.captions.calendar,
+		capGen:        s => s.$store.getters.captions.generic,
+		isMobile:      s => s.$store.getters.isMobile,
+		settings:      s => s.$store.getters.settings
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
@@ -598,12 +598,12 @@ const MyGantt = {
 		routeChangeFieldReload,
 		routeParseParams,
 		srcBase64Icon,
-		
+
 		createHeaderItems() {
 			let that = this;
 			this.headerItems     = [];
 			this.headerItemsMeta = [];
-			
+
 			let addMeta = function(steps,value) {
 				that.headerItemsMeta.push({
 					steps:steps,
@@ -614,14 +614,14 @@ const MyGantt = {
 				let caption;
 				if(that.isHours) caption = d.getHours();
 				if(that.isDays)  caption = `${d.getDate()}.`;
-				
+
 				that.headerItems.push({
 					caption:caption,
 					isWeekend:d.getDay() === 0 || d.getDay() === 6,
 					unixTime:that.getUnixFromDate(d)
 				});
 			};
-			
+
 			// create one header item for each date step
 			// create one meta header item for each meta switch (new day/new month)
 			let stepsTaken = 0;
@@ -629,33 +629,33 @@ const MyGantt = {
 			for(; d < this.date1;) {
 				stepsTaken++;
 				add(d);
-				
+
 				if(this.isDays) {
 					d.setDate(d.getDate()+1);
-					
+
 					// next month meta item
 					if(d.getDate() === 1) {
 						let dCopy = new Date(d.getTime());
 						dCopy.setDate(dCopy.getDate() - 1);
-						
+
 						addMeta(stepsTaken,dCopy.getMonth());
 						stepsTaken = 0;
 					}
 				}
 				else if(this.isHours) {
 					d.setHours(d.getHours()+1);
-					
+
 					// next day meta item
 					if(d.getHours() === 0) {
 						let dCopy = new Date(d.getTime());
 						dCopy.setHours(dCopy.getHours() - 1);
-						
+
 						addMeta(stepsTaken,dCopy.getDate());
 						stepsTaken = 0;
 					}
 				}
 			}
-			
+
 			// add last meta header item
 			if(stepsTaken !== 0) {
 				switch(this.stepType) {
@@ -664,18 +664,18 @@ const MyGantt = {
 				}
 			}
 		},
-		
+
 		// actions
 		clickHeaderItem(unix,mousedown) {
 			if(!this.hasCreate) return;
-			
+
 			this.unixInputActive = mousedown;
 			if(mousedown) {
 				this.unixInput0 = unix;
 				this.unixInput1 = unix;
 				return;
 			}
-			
+
 			if(this.unixInput0 !== null && this.unixInput1 !== null) {
 				let attributes = [
 					`${this.attributeIdDate0}_${this.isDays ? this.getUnixShifted(this.unixInput0,false) : this.unixInput0}`,
@@ -694,7 +694,7 @@ const MyGantt = {
 		},
 		hoverHeaderItem(unix) {
 			if(!this.unixInputActive) return;
-			
+
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;
 		},
@@ -714,17 +714,17 @@ const MyGantt = {
 		scrollToNow() {
 			if(this.page !== 0)
 				return this.pageChange(this.page-(this.page*2));
-			
+
 			let d = this.getDateNowRounded();
 			let secFromStart = (d-this.date0) / 1000;
-			
+
 			// target a couple of steps before now for better overview
 			if(this.isHours) secFromStart -= 3600  * 3; // 3 hours
 			if(this.isDays)  secFromStart -= 86400 * 3; // 3 days
-			
+
 			this.$refs.content.scrollLeft = this.pxPerSec * secFromStart;
 		},
-		
+
 		// page routing
 		paramsUpdate(pushHistory) {
 			if(this.usesPageHistory)
@@ -740,12 +740,12 @@ const MyGantt = {
 					this.get();
 			}
 		},
-		
+
 		// presentation
 		displayHeaderMetaItem(value) {
 			if(this.isHours) // add days as: 12., 13., ...
 				return `${value}.`;
-			
+
 			if(this.isDays) // add month as: January, ...
 				return this.capApp['month'+value];
 		},
@@ -755,31 +755,31 @@ const MyGantt = {
 				this.$refs.content.offsetWidth /
 				(this.stepBase * this.stepZoom)
 			);
-			
+
 			if(stepsNew === this.steps && !forceReload)
 				return;
-			
+
 			this.steps = stepsNew;
 			this.get();
 		},
 		styleLabel(group) {
 			return `height:${group.lines.length*this.linePixels}px;`;
 		},
-		
+
 		// helpers
 		getDateNowRounded() {
 			let d = new Date();
-			
+
 			// round point in times depending on the gantt step type
 			if(this.isHours || this.isDays) {
 				d.setMinutes(0);
 				d.setSeconds(0);
 				d.setMilliseconds(0);
 			}
-			
+
 			if(this.isDays)
 				d.setHours(0);
-			
+
 			return d;
 		},
 		getFreeLineIndex(lines,date0,date1) {
@@ -798,12 +798,12 @@ const MyGantt = {
 			}
 			return index;
 		},
-		
+
 		// backend calls
 		get() {
 			if(this.formLoading || this.isHidden)
 				return;
-			
+
 			this.createHeaderItems();
 
 			ws.send('data','get',{
@@ -825,37 +825,41 @@ const MyGantt = {
 				res => {
 					// clear existing groups
 					this.groups = [];
-					
+
 					// parse result rows to gantt groups
-					let groups           = []; // groups 
+					let groups           = []; // groups
 					let groupBy          = []; // group by criteria (can be identical to label)
 					let groupColumns     = []; // group column values
 					let groupIndexByName = {}; // map of group indexes, key: group name
 					let values           = [];
-					
+
 					for(const r of res.payload.rows) {
 						groupBy      = [];
 						groupColumns = [];
-						
+
 						// collect special calendar values first
 						let date0       = this.getDateFromUnix(r.values[0]);
 						let date1       = this.getDateFromUnix(r.values[1]);
 						const color     = this.hasColor ? r.values[2] : null;
 						const isFullDay = this.isUnixUtcZero(r.values[0]) && this.isUnixUtcZero(r.values[1]);
-						
+
 						// parse non-calendar expression values
 						values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
-						
+
 						for(let i = 0, j = values.length; i < j; i++) {
-							
+
 							if(!this.group0LabelExpressionIndexes.includes(i))
 								continue;
-							
+
 							// add non-file attributes as group criteria
-							const atr = this.attributeIdMap[this.columns[i].attributeId];
-							if(atr.content !== 'files')
+							const c = this.columns[i];
+							if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
+								if(!s.isAttributeFiles(s.attributeIdMap[c.attributeId].content))
+									groupBy.push(values[i]);
+							} else {
 								groupBy.push(values[i]);
-							
+							}
+
 							groupColumns.push({
 								index:i,
 								value:values[i],
@@ -863,7 +867,7 @@ const MyGantt = {
 							});
 						}
 						const name = groupBy.join(' ');
-						
+
 						// add group if not there yet
 						if(groupIndexByName[name] === undefined) {
 							groupIndexByName[name] = groups.length;
@@ -880,14 +884,14 @@ const MyGantt = {
 							date1 = this.getDateShifted(date1,true);
 							date1.setDate(date1.getDate()+1);
 						}
-						
+
 						// check in which line record fits (no overlapping)
 						let lineIndex = this.getFreeLineIndex(groups[groupIndexByName[name]].lines,date0,date1);
 						if(lineIndex === -1) {
 							lineIndex = groups[groupIndexByName[name]].lines.length;
 							groups[groupIndexByName[name]].lines.push([]);
 						}
-						
+
 						groups[groupIndexByName[name]].lines[lineIndex].push({
 							color:color,
 							date0:date0,
@@ -897,10 +901,10 @@ const MyGantt = {
 						});
 					}
 					this.groups = groups;
-					
+
 					if(this.notScrolled) {
 						this.notScrolled = false;
-						
+
 						if(this.page === 0)
 							this.scrollToNow();
 					}
