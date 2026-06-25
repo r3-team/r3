@@ -74,7 +74,7 @@ export default {
 			<div class="calendar-days-line-content">
 				<div class="calendar-days-line-day" v-for="d in events.fullDays" :class="{ weekend:d.weekend }">
 					<div class="events-full" :style="events.fullDaysHeight">
-						
+
 						<!-- date input (days) -->
 						<div class="dayInput"
 							@mousedown.left="dateClick(d.unix,true,true)"
@@ -82,15 +82,15 @@ export default {
 							@mouseup.left="dateClick(d.unix,false,true)"
 							:class="{ active:dateInputActive(d.unix,true), clickable:hasCreate || isInput }"
 						></div>
-						
+
 						<my-calendar-days-event class="full"
 							v-for="ei in d.eventIndexes"
 							@click="eventClick(events.fullDaysEvents[ei].row,false)"
 							@click-middle="eventClick(events.fullDaysEvents[ei].row,true)"
 							@clipboard="$emit('clipboard')"
-							:columns="columns"
-							:columnBatches="columnBatches"
-							:hasUpdate="hasUpdate"
+							:columns
+							:columnBatches
+							:hasUpdate
 							:row="events.fullDaysEvents[ei].row"
 							:style="events.fullDaysEvents[ei].style"
 							:styleCard="events.fullDaysEvents[ei].styleCard"
@@ -108,7 +108,7 @@ export default {
 			</div>
 			<div class="calendar-days-line-content">
 				<div class="calendar-days-line-day" v-for="(d,i) in events.partDays" :class="{ weekend:d.weekend }">
-					
+
 					<!-- date input (hours) -->
 					<div class="hourInput"
 						v-for="h in d.hours"
@@ -118,15 +118,15 @@ export default {
 						:class="{ active:dateInputActive(h,false), clickable:hasCreate || isInput }"
 						:style="heightHourStyle"
 					></div>
-					
+
 					<my-calendar-days-event
 						v-for="e in d.events"
 						@click="eventClick(e.row,false)"
 						@click-middle="eventClick(e.row,true)"
 						@clipboard="$emit('clipboard')"
-						:columns="columns"
-						:columnBatches="columnBatches"
-						:hasUpdate="hasUpdate"
+						:columns
+						:columnBatches
+						:hasUpdate
 						:row="e.row"
 						:style="e.style"
 						:styleCard="e.styleCard"
@@ -175,11 +175,11 @@ export default {
 				fullDaysHeight:'',  // total height of all full day events
 				partDays:[]         // partial day events (each day has their own event blocks/lanes to manage)
 			};
-			
+
 			for(let i = 0; i < s.daysShow; i++) {
 				let d = new Date(s.date0.getTime());
 				d.setDate(d.getDate() + i);
-				
+
 				events.fullDays.push({
 					caption:`${s.capApp[dayLabel+d.getDay()]},${dayLabelBr + s.getDateFormatNoYear(d,s.settings.dateFormat)}`,
 					eventIndexes:[],
@@ -187,12 +187,12 @@ export default {
 					unix:unix0CalDay + (i * 86400),
 					weekend:[0,6].includes(d.getDay())
 				});
-				
+
 				let hours = [];
 				for(let x = 0; x < 24; x++) {
 					hours.push(unix0Cal + (i * 86400) + (x * 3600));
 				}
-				
+
 				events.partDays.push({
 					blocks:[], // blocks of event lanes, used to separate events with overlapping times
 					events:[],
@@ -200,7 +200,7 @@ export default {
 					weekend:[0,6].includes(d.getDay())
 				});
 			}
-			
+
 			// each row is one event (partial day, full day or spanning multiple days)
 			for(const row of s.rows) {
 				let ev = {
@@ -211,65 +211,65 @@ export default {
 					unix1:row.values[1],
 					values:[]
 				};
-				
+
 				if(s.hasColor && row.values[2] !== null) {
 					const bg   = s.colorAdjustBg(row.values[2]);
 					const font = s.colorMakeContrastFont(bg);
 					ev.styleCard = `background-color:${bg};color:${font};`;
 				}
-				
+
 				// add non-hidden values
 				const values = s.hasColor ? row.values.slice(3) : row.values.slice(2);
 				for(let x = 0, y = values.length; x < y; x++) {
 					ev.values.push(values[x]);
 				}
-				
+
 				// check for full day event (stored as UTC zero)
 				const isFullDay = s.isUnixUtcZero(ev.unix0) && s.isUnixUtcZero(ev.unix1);
-				
+
 				if(isFullDay) {
 					let unix0EvCal = ev.unix0 < unix0CalDay ? unix0CalDay : ev.unix0; // start of event within calendar
 					let eventDays  = ((ev.unix1 - unix0EvCal) / 86400) + 1;           // event day count from start of calendar
 					let dayIndex   = Math.floor((unix0EvCal - unix0CalDay) / 86400);  // day in which event starts
-					
+
 					// cut off event length, if it goes over calendar
 					if(dayIndex + eventDays > s.daysShow)
 						eventDays = s.daysShow - dayIndex;
-					
+
 					if(dayIndex < 0 || dayIndex >= events.fullDays.length)
 						continue;
-					
+
 					const eventIndexNew = events.fullDaysEvents.length;
 					events.fullDays[dayIndex].eventIndexes.push(eventIndexNew);
 					events.fullDaysEvents.push(ev);
-					
+
 					const laneIndex = s.addToFreeLane(
 						events.fullDaysLanes,events.fullDaysEvents,ev,eventIndexNew,true);
-					
+
 					ev.style =
 						`width:${100 * eventDays}%;`+
 						`height:${s.heightHourPxFull}px;`+
 						`top:${s.heightHourPxFull * laneIndex}px;`
-					
+
 					continue;
 				}
-				
+
 				// partial day event - like Monday 19:00 to Tuesday 03:00
 				const processEvent = function(evPart) {
 					const d0 = new Date(evPart.unix0 * 1000);
 					const d1 = new Date(evPart.unix1 * 1000);
-					
+
 					const hoursStart  = d0.getHours() + (d0.getMinutes() / 60);
 					const hoursLength = (d1.getTime() - d0.getTime()) / 1000 / 3600;
 					const intoNextDay = hoursStart + hoursLength > 24;
-					
+
 					const hoursLengthThisDay = !intoNextDay
 						? hoursLength : hoursLength - (hoursStart + hoursLength - 24);
-					
-					evPart.style = 
+
+					evPart.style =
 						`height:${hoursLengthThisDay * s.heightHourPx}px;`+
 						`top:${hoursStart * s.heightHourPx}px;`;
-					
+
 					// add event if it starts within calendar
 					const dayIndex = s.getDaysBetween(s.date0,d0);
 					if(dayIndex >= 0 && dayIndex < events.partDays.length) {
@@ -277,23 +277,23 @@ export default {
 						const day           = events.partDays[dayIndex];
 						const eventIndexNew = day.events.length;
 						day.events.push(evPart);
-						
+
 						// check if a block with overlapping time already exists
 						let blockFound = false;
 						for(let block of day.blocks) {
 							if(evPart.unix0 >= block.unix1 || block.unix0 >= evPart.unix1)
 								continue;
-							
+
 							// add event to next free lane
 							s.addToFreeLane(block.lanes,day.events,evPart,eventIndexNew,false);
-							
+
 							// if events did fit in block, extend block time range
 							if(block.unix0 > evPart.unix0) block.unix0 = evPart.unix0;
 							if(block.unix1 < evPart.unix1) block.unix1 = evPart.unix1;
 							blockFound = true;
 							break;
 						}
-						
+
 						if(!blockFound) {
 							// no block found, create new one and add event to first lane
 							day.blocks.push({
@@ -303,7 +303,7 @@ export default {
 							});
 						}
 					}
-					
+
 					// if event goes into next day, duplicate event entry for next day
 					if(intoNextDay) {
 						let evPartCopy = JSON.parse(JSON.stringify(evPart));
@@ -313,18 +313,18 @@ export default {
 				};
 				processEvent(ev);
 			}
-			
+
 			// calculate total full day event height (add 1 lane for date input)
 			events.fullDaysHeight = s.isInput ? '0px' : `height:${(events.fullDaysLanes.length + 1) * s.heightHourPxFull}px;`;
-			
+
 			// calculate part day event widths and positions
 			for(let day of events.partDays) {
 				for(let block of day.blocks) {
 					const laneCount = block.lanes.length;
-					
+
 					for(let laneIndex = 0; laneIndex < laneCount; laneIndex++) {
 						for(let eventIndex of block.lanes[laneIndex]) {
-							
+
 							// check if adjacent lanes have free space for current event to take
 							const ev = day.events[eventIndex];
 							let lanesAvailable = 1;
@@ -336,18 +336,18 @@ export default {
 										break;
 									}
 								}
-								
+
 								// no need to check further lanes if current one already overlaps
 								if(eventsOverlap)
 									break;
-								
+
 								lanesAvailable++;
 							}
 							// leave some percent free for mouse-hover inputs
 							const percLane  = 94 / laneCount;
 							const percWidth = percLane * lanesAvailable;
 							const percLeft  = percLane * laneIndex;
-							
+
 							day.events[eventIndex].style += `width:${ percWidth }%;left:${ percLeft }%;`;
 						}
 					}
@@ -355,7 +355,7 @@ export default {
 			}
 			return events;
 		},
-		
+
 		// simple
 		columnBatches:   s => s.getColumnBatches(null,s.columns,[],[],[],false),
 		heightHourPx:    s => (s.isInput ? 3 : 11) * s.zoom,
@@ -364,7 +364,7 @@ export default {
 		isWithData:      s => s.rows.length !== 0,
 		unixSelect0:     s => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
 		unixSelect1:     s => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
-		
+
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		capApp:        s => s.$store.getters.captions.calendar,
@@ -382,7 +382,7 @@ export default {
 				this.$nextTick(() => {
 					this.scrolledToStart = true;
 					if(this.$refs.days !== undefined)
-						this.$refs.days.scrollTo(0,this.heightHourPx * 7);	
+						this.$refs.days.scrollTo(0,this.heightHourPx * 7);
 				});
 			});
 		}
@@ -397,11 +397,11 @@ export default {
 		getStringFilled,
 		getUnixNowDate,
 		isUnixUtcZero,
-		
+
 		// actions
 		dateClick(unix,mousedown,isDay) {
 			if(!this.hasCreate && !this.isInput) return;
-			
+
 			this.unixInputActive = mousedown;
 			if(mousedown) {
 				this.unixInput0   = unix;
@@ -409,16 +409,16 @@ export default {
 				this.unixInputDay = isDay;
 				return;
 			}
-			
+
 			if(this.unixInput0 !== null && this.unixInput1 !== null)
 				this.$emit('date-selected',this.unixInput0,this.unixInput1+(isDay ? 0 : 3600),false);
-			
+
 			this.unixInput0 = null;
 			this.unixInput1 = null;
 		},
 		dateHover(unix) {
 			if(!this.isRange || !this.unixInputActive) return;
-			
+
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;
 		},
@@ -426,7 +426,7 @@ export default {
 			if(this.hasUpdate)
 				this.$emit('open-form',[row],[],middleClick);
 		},
-		
+
 		// presentation
 		dateInputActive(unix,dayInput) {
 			return ( // hour is selected as new input
@@ -440,18 +440,18 @@ export default {
 				unix === this.unixSelect0
 			);
 		},
-		
+
 		// processing
 		addToFreeLane(lanes,events,event,eventIndexNew,touchMatch) {
 			let laneIndex = 0;
-			
+
 			// if lanes are empty, add first one
 			if(lanes.length === 0)
 				lanes.push([]);
-			
+
 			while(true) {
 				let eventsOverlap = false;
-				
+
 				// check whether event can fit in current lane (no overlaps)
 				for(let eventIndex of lanes[laneIndex]) {
 					const ev = events[eventIndex];
@@ -463,10 +463,10 @@ export default {
 						break;
 					}
 				}
-				
+
 				if(eventsOverlap) {
 					laneIndex++;
-					
+
 					if(lanes.length <= laneIndex)
 						lanes.push([]);
 				} else {
