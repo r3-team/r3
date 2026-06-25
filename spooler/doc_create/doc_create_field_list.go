@@ -143,9 +143,21 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			fontHeader: applyToFont(getSetDataResolved(doc, column.SetsHeader), font),
 		}
 
-		// prepare header title & store attribute (if used) for later use
+		// prepare column header title
 		title, columnTitleExists := column.Captions["docColumnTitle"][doc.p.GetLang()]
+		if !columnTitleExists {
+			title, err = data_query.GetTitleFromExpression(dataGet.Expressions[i], doc.p.GetLang())
+			if err != nil {
+				return err
+			}
+		}
+		if title == "" {
+			title = fmt.Sprintf("NO_TITLE%d", noTitleCtr)
+			noTitleCtr++
+		}
+		title = getStringClean(title, column.TextPrefix, column.TextPostfix, column.Length)
 
+		// figure out data content types
 		switch column.Content {
 		case schema.ColumnContentAttribute, schema.ColumnContentQuery:
 
@@ -163,13 +175,6 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			meta.contentUse = atr.ContentUse
 			meta.decCount = atr.LengthFract
 
-			if !columnTitleExists {
-				title, exists = atr.Captions["attributeTitle"][doc.p.GetLang()]
-				if !exists {
-					title = atr.Name
-				}
-			}
-
 		case schema.ColumnContentFncPg:
 			meta.content, meta.decCount, err = data_query.GetContentFromPgFunctionReturn(column.PgFunctionId)
 			if err != nil {
@@ -182,12 +187,6 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 				return err
 			}
 		}
-
-		if title == "" {
-			title = fmt.Sprintf("NO_TITLE%d", noTitleCtr)
-			noTitleCtr++
-		}
-		title = getStringClean(title, column.TextPrefix, column.TextPostfix, column.Length)
 
 		// calculate row height
 		sizeYCell, cellLines := getRowCellHeightLines(doc, meta.fontHeader, columnIndexMapWidth[i]-sizeXReductionHeader, column.Length, title)
@@ -203,8 +202,6 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			text:   title,
 			width:  columnIndexMapWidth[i],
 		})
-
-		// enable aggregation
 		if column.AggregatorRow.Valid {
 			printAggregationRow = true
 		}
