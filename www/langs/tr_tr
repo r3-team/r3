@@ -2428,6 +2428,7 @@
 		"conditions": "Koşullar",
 		"content": "İçerik",
 		"contextHelp": "Bağlam yardımı",
+		"custom": "Custom",
 		"dark": "Karanlık",
 		"data": "Veri",
 		"dataAccess": "Data access",

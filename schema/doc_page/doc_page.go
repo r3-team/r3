@@ -15,7 +15,7 @@ import (
 func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, size, margins, orientation, state,
+		SELECT id, size, size_custom_x, size_custom_y, margins, orientation, state,
 			doc_page_id_footer_inherit,
 			doc_page_id_header_inherit,
 			(
@@ -54,8 +54,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 		var m []float64
 		var fieldIdBody uuid.UUID
 		var fieldIdFooter, fieldIdHeader pgtype.UUID
-		if err := rows.Scan(&p.Id, &p.Size, &m, &p.Orientation, &p.State, &p.Footer.DocPageIdInherit,
-			&p.Header.DocPageIdInherit, &fieldIdBody, &fieldIdFooter, &fieldIdHeader); err != nil {
+		if err := rows.Scan(&p.Id, &p.Size, &p.SizeCustomX, &p.SizeCustomY, &m, &p.Orientation,
+			&p.State, &p.Footer.DocPageIdInherit, &p.Header.DocPageIdInherit, &fieldIdBody,
+			&fieldIdFooter, &fieldIdHeader); err != nil {
 
 			return nil, err
 		}
@@ -127,15 +128,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 		pageIds = append(pageIds, p.Id)
 
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.doc_page (id, doc_id, size, orientation, margins, state,
-				doc_page_id_footer_inherit, doc_page_id_header_inherit, position)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+			INSERT INTO app.doc_page (id, doc_id, size, size_custom_x, size_custom_y, orientation,
+				margins, state, doc_page_id_footer_inherit, doc_page_id_header_inherit, position)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 			ON CONFLICT(id)
 			DO UPDATE SET
-				size = $3, orientation = $4, margins = $5, state = $6,
-				doc_page_id_footer_inherit = $7, doc_page_id_header_inherit = $8, position = $9
-		`, p.Id, docId, p.Size, p.Orientation, []float64{p.Margin.T, p.Margin.R, p.Margin.B, p.Margin.L},
-			p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i); err != nil {
+				size = $3, size_custom_x = $4, size_custom_y = $5, orientation = $6, margins = $7, state = $8,
+				doc_page_id_footer_inherit = $9, doc_page_id_header_inherit = $10, position = $11
+		`, p.Id, docId, p.Size, p.SizeCustomX, p.SizeCustomY, p.Orientation, []float64{p.Margin.T, p.Margin.R,
+			p.Margin.B, p.Margin.L}, p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i); err != nil {
 
 			return err
 		}

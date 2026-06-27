@@ -2428,6 +2428,7 @@
 		"conditions": "条件",
 		"content": "内容",
 		"contextHelp": "上下文帮助",
+		"custom": "Custom",
 		"dark": "Dark",
 		"data": "数据",
 		"dataAccess": "Data access",

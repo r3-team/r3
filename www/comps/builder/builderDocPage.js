@@ -114,21 +114,30 @@ export default {
 					<tr>
 						<td>{{ capGen.size }}</td>
 						<td>
-							<div class="row gap centered">
-								<select class="short" v-model="page.size" :disabled="readonly">
-									<option v-for="p in pageSizes">{{ p }}</option>
-								</select>
-								<span>{{ pageSizeX + ' x ' + pageSizeY }}mm</span>
+							<div class="column gap">
+								<div class="row gap centered">
+									<select
+										@input="page.size = $event.target.value === '' ? null : $event.target.value"
+										:disabled="readonly"
+										:value="page.size === null ? '' : page.size"
+									>
+										<option value="">{{ capGen.custom }}</option>
+										<option v-for="p in pageSizes">{{ p }}</option>
+									</select>
+									<select v-model="page.orientation" :disabled="readonly || page.size === null">
+										<option value="landscape">{{ capGen.orientationLandscape }}</option>
+										<option value="portrait">{{ capGen.orientationPortrait }}</option>
+									</select>
+								</div>
+								<div class="row gap centered">
+									<input class="short" v-if="page.size !== null" disabled :value="pageSizeX" />
+									<my-input-decimal class="short" v-else v-model="page.sizeCustomX" :readonly="readonly" :allowNull="true" :length="5" :lengthFract="0" />
+									<span>x</span>
+									<input class="short" v-if="page.size !== null" disabled :value="pageSizeY" />
+									<my-input-decimal class="short" v-else v-model="page.sizeCustomY" :readonly="readonly" :allowNull="true" :length="5" :lengthFract="0" />
+									<span>mm</span>
+								</div>
 							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.orientation }}</td>
-						<td>
-							<select v-model="page.orientation" :disabled="readonly">
-								<option value="landscape">{{ capGen.orientationLandscape }}</option>
-								<option value="portrait">{{ capGen.orientationPortrait }}</option>
-							</select>
 						</td>
 					</tr>
 					<my-builder-doc-margin-padding
@@ -216,8 +225,8 @@ export default {
 		headerInherit:s => s.page.header.docPageIdInherit !== null,
 		isPageFirst:  s => s.pages.findIndex(v => v.id === s.page.id) === 0,
 		isPageLast:   s => s.pages.findIndex(v => v.id === s.page.id) === s.pages.length -1,
-		pageSizeX:    s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][0] : pageSizeMapMm[s.page.size][1],
-		pageSizeY:    s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][1] : pageSizeMapMm[s.page.size][0],
+		pageSizeX:    s => s.getPageSize(true),
+		pageSizeY:    s => s.getPageSize(false),
 		pageSizes:    s => Object.keys(pageSizeMapMm),
 		styleBody:    s => `top:${s.margin.t*s.zoom}mm;right:${s.margin.r*s.zoom}mm;bottom:${s.margin.b*s.zoom}mm;left:${s.margin.l*s.zoom}mm`,
 		styleFooter:  s => `width:${s.pageSizeX*s.zoom}mm;bottom:0mm;left:0mm;height:${s.margin.b*s.zoom}mm`,
@@ -245,6 +254,15 @@ export default {
 		getPageMarginById(id) {
 			const ind = this.pages.findIndex(v => v.id === id);
 			return ind === -1 ? {t:0,r:0,b:0,l:0} : this.pages[ind].margin;
+		},
+		getPageSize(isX) {
+			if (this.page.size !== null) {
+				const size = this.page.size;
+				if(isX) return this.page.orientation === 'portrait' ? pageSizeMapMm[size][0] : pageSizeMapMm[size][1];
+				else    return this.page.orientation === 'portrait' ? pageSizeMapMm[size][1] : pageSizeMapMm[size][0];
+			}
+			if(isX) return this.page.sizeCustomX === null ? 210 : this.page.sizeCustomX;
+			else    return this.page.sizeCustomY === null ? 297 : this.page.sizeCustomY;
 		}
 	}
 };

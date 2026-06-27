@@ -9,6 +9,7 @@ import (
 	"r3/types"
 	"strings"
 
+	"codeberg.org/go-pdf/fpdf"
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/net/html"
 )
@@ -328,6 +329,33 @@ func getTextFromHtml(htmlString string) (string, error) {
 	}
 	traverse(n, -1)
 	return strings.TrimSuffix(out.String(), "\n"), nil
+}
+
+func getSizeForPage(p types.DocPage) (fpdf.SizeType, error) {
+	var sizeX, sizeY float64
+	if p.Size.Valid {
+		size, exists := pageSizeMapMm[p.Size.String]
+		if !exists {
+			return fpdf.SizeType{}, fmt.Errorf("invalid page size '%s'", p.Size.String)
+		}
+		if p.Orientation == "portrait" {
+			sizeX = size.Wd
+			sizeY = size.Ht
+		} else {
+			sizeX = size.Ht
+			sizeY = size.Wd
+		}
+	} else {
+		if !p.SizeCustomX.Valid || !p.SizeCustomY.Valid {
+			return fpdf.SizeType{}, fmt.Errorf("custom page sizes expected but not defined")
+		}
+		sizeX = p.SizeCustomX.Float64
+		sizeY = p.SizeCustomY.Float64
+	}
+	return fpdf.SizeType{
+		Wd: sizeX,
+		Ht: sizeY,
+	}, nil
 }
 
 func setBorder(doc *doc, b types.DocBorder) {

@@ -251,6 +251,8 @@ export function getTemplateDocPage() {
 		id:getUuidV4(),
 		fieldFlow:getTemplateDocField('flowBody'),
 		size:'A4',
+		sizeCustomX:null,
+		sizeCustomY:null,
 		orientation:'portrait',
 		margin:{t:24,r:15,b:12,l:15},
 		footer:{
@@ -396,7 +398,7 @@ export function getTemplateFieldData(index,attribute,outsideIn,attributeIdNm) {
 			fieldTitle:{},
 			fieldHelp:{}
 		},
-		
+
 		// legacy
 		collectionIdDef:null,
 		columnIdDef:null

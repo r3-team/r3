@@ -214,6 +214,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE INDEX IF NOT EXISTS fki_doc_column_argument_column_id_fkey    ON app.doc_column_argument USING btree (doc_column_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_column_argument_attribute_id_fkey ON app.doc_column_argument USING btree (attribute_id  ASC NULLS LAST);
+
+			-- custom doc page sizes
+			ALTER TABLE app.doc_page
+				ADD COLUMN size_custom_x real,
+				ADD COLUMN size_custom_y real,
+				ALTER COLUMN size DROP NOT NULL;
 		`)
 		return "3.13", err
 	},
@@ -229,7 +235,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- new log context
 			INSERT INTO instance.config (name,value) VALUES ('logDoc',2);
 			ALTER TYPE instance.log_context ADD VALUE 'doc';
-			
+
 			-- document entity
 			CREATE TYPE app.font_family AS ENUM(
 				'Arimo','ComicNeue','CourierPrime','Cousine','NotoSans','NotoSansArabic',
@@ -244,7 +250,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE app.doc_set_target    AS ENUM(
 				'author','filename','language','title',
 				'border.color','border.draw','border.size',
-				'bodyBorder.cell',  'bodyBorder.color',  'bodyBorder.draw',  'bodyBorder.size',  
+				'bodyBorder.cell',  'bodyBorder.color',  'bodyBorder.draw',  'bodyBorder.size',
 				'footerBorder.cell','footerBorder.color','footerBorder.draw','footerBorder.size',
 				'headerBorder.cell','headerBorder.color','headerBorder.draw','headerBorder.size',
 				'bodyRow.colorFillEven','bodyRow.colorFillOdd','footerRow.colorFill','headerRow.colorFill',
@@ -275,7 +281,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					DEFERRABLE INITIALLY DEFERRED
 			);
 			CREATE INDEX IF NOT EXISTS fki_doc_module_fkey ON app.doc USING btree (module_id ASC NULLS LAST);
-			
+
 			CREATE TABLE IF NOT EXISTS app.doc_font (
 				doc_id uuid NOT NULL,
 				align character(2) NOT NULL,
@@ -450,7 +456,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE INDEX IF NOT EXISTS fki_doc_column_doc_field_id_fkey ON app.doc_column USING btree (doc_field_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_column_attribute_id_fkey ON app.doc_column USING btree (attribute_id ASC NULLS LAST);
-			
+
 			CREATE TABLE IF NOT EXISTS app.doc_border (
 				doc_field_id uuid,
 				context app.doc_place_context NOT NULL,
@@ -468,7 +474,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					DEFERRABLE INITIALLY DEFERRED
 			);
 			CREATE INDEX IF NOT EXISTS fki_doc_border_doc_field_id_fkey ON app.doc_border USING btree (doc_field_id ASC NULLS LAST);
-			
+
 			CREATE TABLE IF NOT EXISTS app.doc_set (
 				doc_id uuid,
 				doc_column_id uuid,
@@ -598,7 +604,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_field_id_fkey ON app.doc_state_effect USING btree (doc_field_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_state_id_fkey ON app.doc_state_effect USING btree (doc_state_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_page_id_fkey  ON app.doc_state_effect USING btree (doc_page_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.caption ADD COLUMN     doc_id uuid;
 			ALTER TABLE app.caption ADD COLUMN     doc_column_id uuid;
 			ALTER TABLE app.caption ADD COLUMN     doc_field_id uuid;
@@ -617,11 +623,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_doc_id_fkey        ON app.caption USING BTREE (doc_id        ASC NULLS LAST);
 			CREATE INDEX fki_caption_doc_column_id_fkey ON app.caption USING BTREE (doc_column_id ASC NULLS LAST);
 			CREATE INDEX fki_caption_doc_field_id_fkey  ON app.caption USING BTREE (doc_field_id  ASC NULLS LAST);
-			
+
 			ALTER TABLE instance.caption ADD COLUMN doc_id uuid;
 			ALTER TABLE instance.caption ADD COLUMN doc_column_id uuid;
 			ALTER TABLE instance.caption ADD COLUMN doc_field_id uuid;
@@ -640,11 +646,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_doc_id_fkey        ON instance.caption USING BTREE (doc_id ASC        NULLS LAST);
 			CREATE INDEX fki_caption_doc_column_id_fkey ON instance.caption USING BTREE (doc_column_id ASC NULLS LAST);
 			CREATE INDEX fki_caption_doc_field_id_fkey  ON instance.caption USING BTREE (doc_field_id ASC  NULLS LAST);
-			
+
 			ALTER TABLE app.query ADD COLUMN     doc_id        uuid;
 			ALTER TABLE app.query ADD COLUMN     doc_column_id uuid;
 			ALTER TABLE app.query ADD COLUMN     doc_field_id  uuid;
@@ -663,11 +669,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 			    ON DELETE CASCADE
 			    DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_query_doc_id_fkey        ON app.query USING btree (doc_id        ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_query_doc_field_id_fkey  ON app.query USING btree (doc_field_id  ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_query_doc_column_id_fkey ON app.query USING btree (doc_column_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
 			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
 				CASE WHEN api_id                IS NULL THEN 0 ELSE 1 END +
@@ -724,7 +730,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_open_form_form_action_id_fkey ON app.open_form USING btree (form_action_id ASC NULLS LAST);
 
 			-- make JS function optional for form actions
@@ -764,7 +770,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			INSERT INTO instance.task (name,interval_seconds,cluster_master_only,embedded_only,active_only,active)
 			VALUES ('docsGenerate',15,true,false,false,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('docsGenerate',0,0);
 
@@ -856,7 +862,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			DELETE FROM instance.config
 			WHERE name = ANY('{repoUrl,repoUser,repoPass,repoSkipVerify,repoFeedback,repoChecked}'::TEXT[]);
-			
+
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'reposChanged';
 
 			ALTER TABLE instance.repo_module      ADD COLUMN repo_id UUID;
@@ -962,7 +968,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- relation title
 			ALTER TYPE app.caption_content ADD VALUE 'relationTitle';
-			
+
 			ALTER TABLE app.caption ADD COLUMN     relation_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_relation_id_fkey FOREIGN KEY (relation_id)
 				REFERENCES app.relation (id) MATCH SIMPLE
@@ -1008,7 +1014,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.data_log ADD COLUMN comment TEXT;
 			ALTER TABLE instance.data_log ALTER COLUMN login_id_wofk DROP NOT NULL;
 			CREATE INDEX IF NOT EXISTS fki_data_log_relation_id_fkey ON instance.data_log USING btree (relation_id ASC NULLS LAST);
-			
+
 			CREATE OR REPLACE FUNCTION instance.data_log_comment_create(
 				_relation_id uuid,
 				_record_id bigint,
@@ -1135,7 +1141,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						'loginIds', COALESCE(login_ids, ARRAY[]::INTEGER[])
 					)::TEXT
 				FROM instance_cluster.node;
-				
+
 				RETURN 0;
 			END;
 			$BODY$;
@@ -1213,20 +1219,20 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_search_bar_module_id_fkey ON app.search_bar USING btree (module_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_search_bar_icon_id_fkey   ON app.search_bar USING btree (icon_id   ASC NULLS LAST);
-			
+
 			ALTER TABLE app.column ADD COLUMN     search_bar_id uuid;
 			ALTER TABLE app.column ADD CONSTRAINT column_search_bar_id_fkey FOREIGN KEY (search_bar_id)
 				REFERENCES app.search_bar (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 			    ON DELETE CASCADE
 			    DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_column_search_bar_id_fkey
 			    ON app.column USING btree (search_bar_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.column DROP CONSTRAINT column_single_parent;
 			ALTER TABLE app.column ADD  CONSTRAINT column_single_parent CHECK (1 = (
 				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
@@ -1235,17 +1241,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CASE WHEN search_bar_id IS NULL THEN 0 ELSE 1
 				END
 			));
-			
+
 			ALTER TABLE app.query ADD COLUMN     search_bar_id uuid;
 			ALTER TABLE app.query ADD CONSTRAINT query_search_bar_id_fkey FOREIGN KEY (search_bar_id)
 				REFERENCES app.search_bar (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 			    ON DELETE CASCADE
 			    DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_query_search_bar_id_fkey
 			    ON app.query USING btree (search_bar_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
 			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
 				CASE WHEN api_id                IS NULL THEN 0 ELSE 1 END +
@@ -1257,7 +1263,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CASE WHEN search_bar_id         IS NULL THEN 0 ELSE 1
 				END
 			));
-			
+
 			ALTER TABLE app.role_access ADD COLUMN     search_bar_id uuid;
 			ALTER TABLE app.role_access ADD CONSTRAINT role_access_search_bar_id_fkey
 				FOREIGN KEY (search_bar_id)
@@ -1265,19 +1271,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON UPDATE CASCADE
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_role_access_search_bar_id_fkey
    				ON app.role_access USING btree(search_bar_id ASC NULLS LAST);
-			
+
 			ALTER TYPE app.caption_content ADD VALUE 'searchBarTitle';
-			
+
 			ALTER TABLE app.caption ADD COLUMN     search_bar_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_search_bar_id_fkey FOREIGN KEY (search_bar_id)
 				REFERENCES app.search_bar (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_search_bar_id_fkey
 				ON app.caption USING BTREE (search_bar_id ASC NULLS LAST);
 
@@ -1287,17 +1293,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_search_bar_id_fkey
 				ON instance.caption USING BTREE (search_bar_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.open_form ADD COLUMN     search_bar_id UUID;
 			ALTER TABLE app.open_form ADD CONSTRAINT open_form_search_bar_id_fkey FOREIGN KEY (search_bar_id)
 				REFERENCES app.search_bar (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_open_form_search_bar_id_fkey ON app.open_form
 				USING BTREE (search_bar_id ASC NULLS LAST);
 
@@ -1338,7 +1344,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON instance.file_spool USING BTREE (file_id ASC NULLS LAST);
 			CREATE INDEX fki_file_spool_pg_function_id_fkey
 				ON instance.file_spool USING BTREE (pg_function_id ASC NULLS LAST);
-			
+
 			INSERT INTO instance.config (name,value) VALUES ('logFile',2);
 			ALTER TYPE instance.log_context ADD VALUE 'file';
 
@@ -1346,7 +1352,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				name,interval_seconds,cluster_master_only,
 				embedded_only,active_only,active
 			) VALUES ('filesProcess',10,true,false,false,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('filesProcess',0,0);
 
@@ -1379,7 +1385,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN 0;
 				END;
 			$BODY$;
-			
+
 			CREATE FUNCTION instance.file_export_text(
 				file_path text,
 				file_text_content text,
@@ -1514,7 +1520,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN 0;
 				END;
 			$BODY$;
-			
+
 			-- form record conditions
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayCreate';
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayDelete';
@@ -1567,10 +1573,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				REFERENCES instance.login_template (id) MATCH SIMPLE
 				ON UPDATE SET NULL
 				ON DELETE SET NULL;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_oauth_client_login_template_id_fkey
 				ON instance.oauth_client USING btree (login_template_id ASC NULLS LAST);
-			
+
 			INSERT INTO instance.config (name,value) VALUES ('logOauth',2);
 			ALTER TYPE instance.log_context ADD VALUE 'oauth';
 
@@ -1603,7 +1609,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX IF NOT EXISTS fki_login_meta_map_ldap_id_fkey
 				ON instance.login_meta_map USING btree (ldap_id ASC NULLS LAST);
-			
+
 			-- migrating LDAP group mapping to generalized login role mapping
 			ALTER TABLE instance.ldap_role RENAME COLUMN  group_dn TO search_string;
 			ALTER TABLE instance.ldap_role ALTER  COLUMN  ldap_id  DROP NOT NULL;
@@ -1682,11 +1688,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM instance.mail_account
 					WHERE name = account_name;
 				END IF;
-				
-				IF to_list  IS NULL THEN to_list  := ''; END IF; 
-				IF cc_list  IS NULL THEN cc_list  := ''; END IF; 
+
+				IF to_list  IS NULL THEN to_list  := ''; END IF;
+				IF cc_list  IS NULL THEN cc_list  := ''; END IF;
 				IF bcc_list IS NULL THEN bcc_list := ''; END IF;
-				
+
 				INSERT INTO instance.mail_spool (to_list,cc_list,bcc_list,
 					subject,body,outgoing,date,mail_account_id,record_id_wofk,attribute_id)
 				VALUES (to_list,cc_list,bcc_list,subject,body,TRUE,EXTRACT(epoch from now()),
@@ -1705,7 +1711,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE app.pg_function ALTER volatility
 				TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
-			
+
 			-- join query filter
 			ALTER TABLE app.query             ADD   COLUMN     query_filter_index SMALLINT;
 			ALTER TABLE app.query             DROP  CONSTRAINT query_filter_subquery_fkey;
@@ -1726,7 +1732,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			ALTER TABLE app.query ADD CONSTRAINT query_filter_subquery_fkey FOREIGN KEY (query_filter_query_id, query_filter_index, query_filter_position, query_filter_side)
 				REFERENCES app.query_filter_side (query_id, query_filter_index, query_filter_position, side) MATCH SIMPLE
 				ON UPDATE CASCADE
@@ -1748,7 +1754,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP NOT NULL;
 			ALTER TABLE app.collection_consumer ADD   COLUMN flags TEXT[] NOT NULL DEFAULT '{}';
 			ALTER TABLE app.collection_consumer ALTER COLUMN flags DROP DEFAULT;
-			
+
 			UPDATE app.collection_consumer SET flags = ARRAY_APPEND(flags, 'multiValue')     WHERE multi_value;
 			UPDATE app.collection_consumer SET flags = ARRAY_APPEND(flags, 'noDisplayEmpty') WHERE no_display_empty;
 
@@ -1786,7 +1792,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX IF NOT EXISTS fki_menu_tab_module_id_fkey
 				ON app.menu_tab USING btree (module_id ASC NULLS LAST);
-			
+
 			-- menu tab captions
 			ALTER TYPE app.caption_content ADD VALUE 'menuTabTitle';
 
@@ -1796,7 +1802,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_menu_tab_id_fkey ON app.caption USING BTREE (menu_tab_id ASC NULLS LAST);
 
 			ALTER TABLE instance.caption ADD COLUMN menu_tab_id uuid;
@@ -1805,7 +1811,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_menu_tab_id_fkey ON instance.caption USING BTREE (menu_tab_id ASC NULLS LAST);
 
 			-- generate first menu tab
@@ -1820,7 +1826,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			UPDATE app.menu AS m
 			SET menu_tab_id = (
 				SELECT id
@@ -1835,10 +1841,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_form_state_id_result_fkey
     			ON app.form_state_condition_side USING btree (form_state_id_result ASC NULLS LAST);
-			
+
 			ALTER TYPE app.filter_side_content ADD VALUE 'formState';
 
 			-- persistent login config
@@ -1929,7 +1935,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_id_on_login_fkey ON app.module USING btree (js_function_id_on_login ASC NULLS LAST);
 
 			-- file_unlink() instance function
@@ -1997,7 +2003,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						attribute_id = attach_attribute_id
 					WHERE id = mail_id
 					AND outgoing = FALSE;
-					
+
 					RETURN 0;
 				END;
 			$BODY$;
@@ -2014,7 +2020,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE app.column ALTER COLUMN styles
 				TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
-			
+
 			-- limited logins
 			ALTER TABLE instance.login DROP  COLUMN date_auth_last;
 			ALTER TABLE instance.login ADD   COLUMN limited BOOL NOT NULL DEFAULT FALSE;
@@ -2032,7 +2038,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- new login session managements
 			CREATE TYPE instance.login_session_device AS ENUM ('browser','fatClient');
-			
+
 			CREATE TABLE IF NOT EXISTS instance.login_session (
 				id UUID NOT NULL,
 				device instance.login_session_device NOT NULL,
@@ -2057,7 +2063,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_login_session_date          ON instance.login_session USING btree (date     ASC NULLS LAST);
 
 			ALTER TABLE instance_cluster.node DROP COLUMN stat_sessions;
-			
+
 			-- login sync
 			CREATE TABLE IF NOT EXISTS instance.login_meta (
 				login_id integer NOT NULL,
@@ -2110,7 +2116,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_pg_function_id_login_sync_fkey ON app.module USING btree (pg_function_id_login_sync ASC NULLS LAST);
 
 			ALTER TABLE app.pg_function ADD COLUMN is_login_sync BOOL NOT NULL DEFAULT FALSE;
@@ -2189,7 +2195,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					_d.is_admin   := _rec.admin;
 					_d.is_limited := _rec.limited;
 					_d.is_public  := _rec.no_auth;
-					
+
 					-- meta
 					_d.department     := COALESCE(_rec.department, '');
 					_d.email          := COALESCE(_rec.email, '');
@@ -2201,13 +2207,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					_d.organization   := COALESCE(_rec.organization, '');
 					_d.phone_fax      := COALESCE(_rec.phone_fax, '');
 					_d.phone_mobile   := COALESCE(_rec.phone_mobile, '');
-					_d.phone_landline := COALESCE(_rec.phone_landline, ''); 
-				
+					_d.phone_landline := COALESCE(_rec.phone_landline, '');
+
 					EXECUTE _sql USING _event, _d;
 				END LOOP;
 			END;
 			$BODY$;
-			
+
 			CREATE OR REPLACE FUNCTION instance.user_sync_all(_module_id UUID)
 				RETURNS integer
 				LANGUAGE 'plpgsql'
@@ -2229,7 +2235,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					_pg_function_name
 				FROM app.module AS m
 				WHERE m.id = _module_id;
-				
+
 				IF _module_name IS NULL OR _pg_function_name IS NULL THEN
 					RETURN 1;
 				END IF;
@@ -2364,10 +2370,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						file.version          := rec.version;
 						file.date_change      := rec.date_change;
 						file.date_delete      := rec.date_delete;
-						
+
 						files := ARRAY_APPEND(files,file);
 					END LOOP;
-					
+
 					RETURN files;
 				END;
 			$BODY$;
@@ -2415,7 +2421,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				name,interval_seconds,cluster_master_only,
 				embedded_only,active_only,active
 			) VALUES ('systemMsgMaintenance',30,true,false,true,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('systemMsgMaintenance',0,0);
 
@@ -2440,12 +2446,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_variable_module_id_fkey ON app.variable USING btree (module_id ASC NULLS LAST);
 			CREATE INDEX fki_variable_form_id_fkey   ON app.variable USING btree (form_id   ASC NULLS LAST);
 			CREATE UNIQUE INDEX ind_variable_name_global_unique ON app.variable (module_id, name)          WHERE form_id IS NULL;
 			CREATE UNIQUE INDEX ind_variable_name_form_unique   ON app.variable (module_id, name, form_id) WHERE form_id IS NOT NULL;
-			
+
 			ALTER TABLE app.js_function_depends ADD COLUMN variable_id_on UUID;
 			ALTER TABLE app.js_function_depends ADD CONSTRAINT js_function_depends_variable_id_on_fkey FOREIGN KEY (variable_id_on)
 				REFERENCES app.variable (id) MATCH SIMPLE
@@ -2454,7 +2460,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_variable_id_on_fkey ON app.js_function_depends
 				USING BTREE (variable_id_on ASC NULLS LAST);
-			
+
 			ALTER TABLE app.form_state_condition_side
 				ADD COLUMN variable_id UUID,
 				ADD CONSTRAINT form_state_condition_side_variable_id_fkey FOREIGN KEY (variable_id)
@@ -2465,7 +2471,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX fki_form_state_condition_side_variable_id_fkey ON app.form_state_condition_side
 				USING btree (variable_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.query_filter_side
 				ADD COLUMN variable_id UUID,
 				ADD CONSTRAINT query_filter_side_variable_id_fkey FOREIGN KEY (variable_id)
@@ -2476,7 +2482,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX fki_query_filter_side_variable_id_fkey ON app.query_filter_side
 				USING btree (variable_id ASC NULLS LAST);
-			
+
 			ALTER TYPE app.filter_side_content ADD VALUE 'variable';
 			ALTER TYPE app.attribute_content   ADD VALUE '1:n';
 
@@ -2513,7 +2519,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX IF NOT EXISTS fki_field_variable_js_function_id
 				ON app.field_variable USING btree (js_function_id ASC NULLS LAST);
-			
+
 			-- remove not needed configuration option
 			DELETE FROM instance.config WHERE name = 'tokenReauthHours';
 		`)
@@ -2528,7 +2534,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- new column styles + cleanup of old ones
 			ALTER TABLE app.column ADD COLUMN hidden BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN hidden DROP DEFAULT;
-			
+
 			UPDATE app.column
 			SET hidden = TRUE, display = 'default'
 			WHERE display = 'hidden';
@@ -2592,7 +2598,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_form_action_id_fkey ON app.caption USING BTREE (form_action_id ASC NULLS LAST);
 
 			ALTER TABLE instance.caption ADD COLUMN form_action_id uuid;
@@ -2601,7 +2607,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_form_action_id_fkey ON instance.caption USING BTREE (form_action_id ASC NULLS LAST);
 
 			-- form action states
@@ -2611,25 +2617,25 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_effect_form_action_id_fkey
 				ON app.form_state_effect USING btree (form_action_id ASC NULLS LAST);
 
 			-- fractional definition for numeric attributes
 			ALTER TABLE app.attribute ADD COLUMN length_fract INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE app.attribute ALTER COLUMN length_fract DROP NOT NULL;
-			
+
 			-- new cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'jsFunctionCalled';
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'clientEventsChanged';
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'keystrokesRequested';
-			
+
 			-- cluster event target filters
 			ALTER TABLE instance_cluster.node_event
 				ADD COLUMN target_address TEXT,
 				ADD COLUMN target_device SMALLINT,
 				ADD COLUMN target_login_id INTEGER;
-			
+
 			-- cleanup outdated cluster node events
 			DELETE FROM instance_cluster.node_event;
 
@@ -2638,7 +2644,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE app.client_event_argument        AS ENUM ('clipboard', 'hostname', 'username', 'windowTitle');
 			CREATE TYPE app.client_event_event           AS ENUM ('onConnect', 'onDisconnect', 'onHotkey');
 			CREATE TYPE app.client_event_hotkey_modifier AS ENUM ('ALT', 'CMD', 'CTRL', 'SHIFT');
-			
+
 			CREATE TABLE IF NOT EXISTS app.client_event(
 				id uuid NOT NULL,
 				module_id uuid NOT NULL,
@@ -2702,7 +2708,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_client_event_id_fkey ON app.caption USING BTREE (client_event_id ASC NULLS LAST);
 
 			ALTER TABLE instance.caption ADD COLUMN client_event_id uuid;
@@ -2711,7 +2717,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_client_event_id_fkey ON instance.caption USING BTREE (client_event_id ASC NULLS LAST);
 
 			-- client event permissions
@@ -2724,7 +2730,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX IF NOT EXISTS fki_role_access_client_event_id_fkey
 				ON app.role_access USING btree (client_event_id ASC NULLS LAST);
-			
+
 			-- client event option for JS functions
 			ALTER TABLE app.js_function ADD COLUMN is_client_event_exec BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.js_function ALTER COLUMN is_client_event_exec DROP NOT NULL;
@@ -2763,7 +2769,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					'
 					USING login_id, record_id
 					INTO key_enc;
-					
+
 					RETURN key_enc;
 				END;
 			$BODY$;
@@ -2778,12 +2784,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- cleanup from last release
 			ALTER TABLE instance.login_widget_group_item ALTER COLUMN content
 				TYPE instance.widget_content USING content::text::instance.widget_content;
-			
+
 			-- migrate PG triggers from relation to module
 			ALTER TABLE app.pg_trigger ADD COLUMN module_id UUID;
-			
+
 			CREATE INDEX fki_pg_trigger_module_id_fkey ON app.pg_trigger USING btree (module_id ASC NULLS LAST);
-			
+
 			UPDATE app.pg_trigger AS t
 			SET module_id = (
 				SELECT module_id
@@ -2797,11 +2803,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- consolidate module meta data + add module change date
 			ALTER TABLE instance.module_option RENAME TO module_meta;
 			ALTER TABLE instance.module_meta ADD COLUMN hash character(44);
-			
+
 			UPDATE instance.module_meta AS m SET hash = (
 				SELECT hash
 				FROM instance.module_hash
@@ -2809,14 +2815,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			ALTER TABLE instance.module_meta ALTER COLUMN hash SET NOT NULL;
 			DROP TABLE instance.module_hash;
-			
+
 			ALTER TABLE instance.module_meta ADD COLUMN date_change BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW());
-			
+
 			DELETE FROM instance.config WHERE name = 'schemaTimestamp';
-			
+
 			-- oauth2 clients
 			ALTER TYPE instance.mail_account_auth_method ADD VALUE 'xoauth2';
-			
+
 			CREATE TABLE IF NOT EXISTS instance.oauth_client (
 				id SERIAL NOT NULL,
 			    name CHARACTER VARYING(64) NOT NULL,
@@ -2835,10 +2841,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_mail_account_oauth_client_id_fkey
 			    ON instance.mail_account USING btree (oauth_client_id ASC NULLS LAST);
-			
+
 			-- caption map
 			ALTER TABLE instance.module_meta ADD COLUMN languages_custom CHARACTER(5)[];
 			CREATE TABLE IF NOT EXISTS instance.caption(
@@ -2951,11 +2957,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_caption_role_id_fkey         ON instance.caption USING btree (role_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_caption_tab_id_fkey          ON instance.caption USING btree (tab_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_caption_widget_id_fkey       ON instance.caption USING btree (widget_id ASC NULLS LAST);
-			
+
 			-- proxy config & admin notifications
 			INSERT INTO instance.config (name,value) VALUES ('proxyUrl','');
 			INSERT INTO instance.config (name,value) VALUES ('adminMails','');
-			
+
 			-- admin notification mails
 			CREATE TABLE IF NOT EXISTS instance.admin_mail(
 				reason TEXT NOT NULL,
@@ -2966,14 +2972,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			VALUES
 				('licenseExpiration','{10,30,90}',0),
 				('oauthClientExpiration','{10,30,90}',0);
-			
+
 			CREATE TYPE instance.admin_mail_reason AS ENUM ('licenseExpiration','oauthClientExpiration');
-			
+
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,
 				embedded_only,active_only,active
 			) VALUES ('adminMails',86400,true,false,false,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('adminMails',0,0);
 		`)
@@ -2986,13 +2992,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_setting DROP COLUMN menu_colored;
 			ALTER TABLE instance.login_setting DROP COLUMN compact;
 			ALTER TABLE instance.login_setting DROP COLUMN page_limit;
-			
+
 			ALTER TABLE instance.login_setting ADD COLUMN borders_squared BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN borders_squared DROP DEFAULT;
 			UPDATE instance.login_setting SET borders_squared = true WHERE borders_corner = 'squared';
 			ALTER TABLE instance.login_setting DROP COLUMN borders_corner;
 			DROP TYPE instance.login_setting_border_corner;
-			
+
 			ALTER TABLE instance.login_setting ADD   COLUMN color_classic_mode  BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN color_classic_mode  DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD   COLUMN color_header        CHARACTER(6);
@@ -3009,19 +3015,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_setting ALTER COLUMN number_sep_decimal  DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD   COLUMN number_sep_thousand CHARACTER(1) NOT NULL DEFAULT ',';
 			ALTER TABLE instance.login_setting ALTER COLUMN number_sep_thousand DROP DEFAULT;
-			
+
 			-- menu colors
 			ALTER TABLE app.menu ADD COLUMN color CHARACTER(6);
-			
+
 			-- more config options: login background images, stay-logged-in option
 			INSERT INTO instance.config (name,value) VALUES ('companyLoginImage','');
 			INSERT INTO instance.config (name,value) VALUES ('loginBackgrounds','[2,5,6,9,11]');
 			INSERT INTO instance.config (name,value) VALUES ('tokenKeepEnable','1');
-			
+
 			-- add NULL to module color
 			ALTER TABLE app.module ALTER COLUMN color1 DROP NOT NULL;
 			UPDATE app.module SET color1 = null WHERE color1 = '      ';
-			
+
 			-- widgets
 			CREATE TABLE app.widget (
 			    id uuid NOT NULL,
@@ -3041,21 +3047,21 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_widget_form_id_fkey ON app.widget USING btree (form_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.caption ADD COLUMN widget_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_widget_id_fkey FOREIGN KEY (widget_id)
 				REFERENCES app.widget (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_widget_id_fkey
 				ON app.caption USING BTREE (widget_id ASC NULLS LAST);
-			
+
 			ALTER TYPE app.caption_content ADD VALUE 'widgetTitle';
-			
+
 			ALTER TABLE app.collection_consumer ADD COLUMN widget_id UUID;
 			ALTER TABLE app.collection_consumer
 				ADD CONSTRAINT collection_consumer_widget_id_fkey FOREIGN KEY (widget_id)
@@ -3063,12 +3069,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_collection_consumer_widget_id_fkey ON app.collection_consumer
 				USING BTREE (widget_id ASC NULLS LAST);
-			
+
 			ALTER TYPE app.collection_consumer_content ADD VALUE 'widgetDisplay';
-			
+
 			-- widget permissions
 			ALTER TABLE app.role_access ADD COLUMN widget_id uuid;
 			ALTER TABLE app.role_access ADD CONSTRAINT role_access_widget_id_fkey FOREIGN KEY (widget_id)
@@ -3076,10 +3082,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_role_access_widget_id_fkey
 			    ON app.role_access USING btree (widget_id ASC NULLS LAST);
-			
+
 			-- login widget data
 			CREATE TABLE instance.login_widget_group (
 				id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -3098,7 +3104,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				USING BTREE (login_id ASC NULLS LAST);
 			CREATE INDEX ind_login_widget_group_position ON instance.login_widget_group
 				USING BTREE (position ASC NULLS LAST);
-			
+
 			CREATE TABLE instance.login_widget_group_item (
 				login_widget_group_id uuid NOT NULL,
 				"position" smallint NOT NULL,
@@ -3130,12 +3136,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				USING BTREE (module_id ASC NULLS LAST);
 			CREATE INDEX ind_login_widget_group_item_position ON instance.login_widget_group_item
 				USING BTREE (position ASC NULLS LAST);
-			
+
 			CREATE TYPE instance.widget_content AS ENUM ('moduleWidget','systemModuleMenu');
-			
+
 			-- drawing attribute use
 			ALTER TYPE app.attribute_content_use ADD VALUE 'drawing';
-			
+
 			-- fix wrong constraint action for form frontend functions
 			ALTER TABLE app.js_function DROP CONSTRAINT js_function_form_id_fkey;
 			ALTER TABLE app.js_function ADD  CONSTRAINT js_function_form_id_fkey FOREIGN KEY (form_id)
@@ -3153,10 +3159,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			 TYPE app.open_form_pop_up_type USING pop_up_type::text::app.open_form_pop_up_type;
 			ALTER TABLE instance.mail_account ALTER COLUMN auth_method
 			 TYPE instance.mail_account_auth_method USING auth_method::text::instance.mail_account_auth_method;
-			
+
 			-- kanban fields
 			ALTER TYPE app.field_content ADD VALUE 'kanban';
-			
+
 			CREATE TABLE IF NOT EXISTS app.field_kanban (
 			    field_id uuid NOT NULL,
 				relation_index_data smallint NOT NULL,
@@ -3175,32 +3181,32 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE SET NULL
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_field_kanban_attribute_id_sort_fkey
 				ON app.field_kanban USING btree (attribute_id_sort ASC NULLS LAST);
-			
+
 			-- make frontend function names unique only within their scope (global, form)
 			ALTER TABLE app.js_function DROP CONSTRAINT js_function_module_id_name_key;
 			CREATE UNIQUE INDEX ind_js_function_name_global_unique ON app.js_function
 				(module_id, name) WHERE form_id IS NULL;
 			CREATE UNIQUE INDEX ind_js_function_name_form_unique ON app.js_function
 				(module_id, name, form_id) WHERE form_id IS NOT NULL;
-			
+
 			-- cleanup, extend open-form
 			ALTER TABLE app.open_form RENAME relation_index TO relation_index_apply;
 			ALTER TABLE app.open_form ADD COLUMN relation_index_open INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE app.open_form ALTER COLUMN relation_index_open DROP DEFAULT;
-			
+
 			-- add richtext option to header field
 			ALTER TABLE app.field_header ADD COLUMN richtext BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.field_header ALTER COLUMN richtext DROP DEFAULT;
-			
+
 			-- add options to calendar field
 			ALTER TABLE app.field_calendar ADD COLUMN days SMALLINT NOT NULL DEFAULT 42;
 			ALTER TABLE app.field_calendar ALTER COLUMN days DROP DEFAULT;
 			ALTER TABLE app.field_calendar ADD COLUMN days_toggle BOOLEAN NOT NULL DEFAULT false;
 			ALTER TABLE app.field_calendar ALTER COLUMN days_toggle DROP DEFAULT;
-			
+
 			-- add field focus on form load option
 			ALTER TABLE app.form ADD COLUMN field_id_focus UUID;
 			ALTER TABLE app.form ADD CONSTRAINT form_field_id_focus_fkey FOREIGN KEY (field_id_focus)
@@ -3208,10 +3214,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		        ON UPDATE SET NULL
 		        ON DELETE SET NULL
 		        DEFERRABLE INITIALLY DEFERRED;
-				
+
 			CREATE INDEX IF NOT EXISTS fki_form_field_id_focus_fkey
 				ON app.form USING btree (field_id_focus ASC NULLS LAST);
-			
+
 			-- separate module options from transfer hash
 			CREATE TABLE instance.module_hash (
 			    module_id uuid NOT NULL,
@@ -3222,13 +3228,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON UPDATE CASCADE
 			        ON DELETE CASCADE
 			);
-			
+
 			INSERT INTO instance.module_hash (module_id, hash)
 				SELECT module_id, COALESCE(hash, '00000000000000000000000000000000000000000000')
 				FROM instance.module_option;
-			
+
 			ALTER TABLE instance.module_option DROP COLUMN hash;
-			
+
 			-- mail traffic log
 			CREATE TABLE instance.mail_traffic (
 				mail_account_id integer,
@@ -3246,34 +3252,34 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE SET NULL
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_mail_traffic_mail_account_id_fkey ON instance.mail_traffic USING btree (mail_account_id ASC NULLS LAST);
 			CREATE INDEX ind_mail_traffic_date                 ON instance.mail_traffic USING btree (date DESC NULLS LAST);
 			CREATE INDEX ind_mail_traffic_outgoing             ON instance.mail_traffic USING btree (outgoing ASC NULLS LAST);
-			
+
 			-- missing mail spool index
 			CREATE INDEX fki_mail_spool_mail_account_id_fkey ON instance.mail_spool USING btree (mail_account_id ASC NULLS LAST);
-			
+
 			-- mail traffic config & cleanup task
 			INSERT INTO instance.config (name,value) VALUES ('mailTrafficKeepDays','90');
-			
+
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,
 				embedded_only,active_only,active
 			) VALUES ('cleanupMailTraffic',604800,true,false,false,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('cleanupMailTraffic',0,0);
-			
+
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,
 				embedded_only,active_only,active
 			) VALUES ('dbOptimize',2580000,true,false,false,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('dbOptimize',0,0);
-			
+
 			-- mark relevant instance functions as STABLE to optimize their use
 			ALTER FUNCTION instance.files_get STABLE;
 			ALTER FUNCTION instance.get_login_id STABLE;
@@ -3284,7 +3290,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER FUNCTION instance.has_role STABLE;
 			ALTER FUNCTION instance.has_role_any STABLE;
 			ALTER FUNCTION instance.mail_get_next STABLE;
-			
+
 			-- fix wrong return type for get preset record function
 			DROP FUNCTION instance.get_preset_record_id(uuid);
 			CREATE OR REPLACE FUNCTION instance.get_preset_record_id(_preset_id uuid)
@@ -3310,25 +3316,25 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.attribute ALTER COLUMN content_use DROP DEFAULT;
 			ALTER TABLE app.attribute ALTER COLUMN content_use
 				TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
-			
+
 			-- text indexing
 			ALTER TYPE app.attribute_content ADD VALUE 'regconfig';
-			
+
 			CREATE TYPE app.pg_index_method AS ENUM ('BTREE','GIN');
-			
+
 			ALTER TABLE app.pg_index ADD COLUMN method app.pg_index_method NOT NULL DEFAULT 'BTREE';
 			ALTER TABLE app.pg_index ALTER COLUMN method DROP DEFAULT;
-			
+
 			ALTER TABLE app.pg_index ADD COLUMN attribute_id_dict UUID;
 			ALTER TABLE app.pg_index ADD CONSTRAINT pg_index_attribute_id_dict_fkey FOREIGN KEY (attribute_id_dict)
 				REFERENCES app.attribute (id) MATCH SIMPLE
 		        ON UPDATE CASCADE
 		        ON DELETE CASCADE
 		        DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_pg_index_attribute_id_dict_fkey
 				ON app.pg_index USING btree (attribute_id_dict ASC NULLS LAST);
-			
+
 			CREATE TABLE IF NOT EXISTS instance.login_search_dict (
 				login_id integer,
 				login_template_id integer,
@@ -3345,34 +3351,34 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_login_search_dict_login_id_fkey
 				ON instance.login_search_dict USING btree (login_id ASC NULLS LAST);
-			
+
 			CREATE INDEX fki_login_search_dict_login_template_id_fkey
 				ON instance.login_search_dict USING btree (login_template_id ASC NULLS LAST);
-			
+
 			CREATE UNIQUE INDEX ind_login_search_dict ON instance.login_search_dict USING BTREE
 				(login_id ASC NULLS LAST, login_template_id ASC NULLS LAST, name ASC NULLS LAST);
-			
+
 			-- create initial text search config based on user languages
 			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'english'  FROM instance.login_setting WHERE language_code = 'en_us';
 			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'german'   FROM instance.login_setting WHERE language_code = 'de_de';
 			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'italian'  FROM instance.login_setting WHERE language_code = 'it_it';
 			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'romanian' FROM instance.login_setting WHERE language_code = 'ro_ro';
-			
+
 			-- new tasks
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,
 				embedded_only,active_only,active
 			) VALUES ('restExecute',15,true,false,false,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('restExecute',0,0);
-			
+
 			-- REST calls
 			CREATE TYPE instance.rest_method AS ENUM ('DELETE','GET','PATCH','POST','PUT');
-			
+
 			CREATE TABLE instance.rest_spool (
 			    id uuid NOT NULL DEFAULT gen_random_uuid(),
 				pg_function_id_callback uuid,
@@ -3391,13 +3397,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_rest_spool_pg_function_id_callback_fkey
 				ON instance.rest_spool USING btree (pg_function_id_callback ASC NULLS LAST);
-			
+
 			CREATE INDEX ind_rest_spool_date_added ON instance.rest_spool
 				USING btree (date_added ASC NULLS LAST);
-			
+
 			CREATE OR REPLACE FUNCTION instance.rest_call(http_method TEXT, url TEXT, body TEXT, headers JSONB DEFAULT NULL, tls_skip_verify BOOLEAN DEFAULT FALSE, callback_function_id UUID DEFAULT NULL, callback_value TEXT DEFAULT NULL)
 				RETURNS integer
 				LANGUAGE 'plpgsql'
@@ -3408,35 +3414,35 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				BEGIN
 					INSERT INTO instance.rest_spool(pg_function_id_callback, method, headers, url, body, date_added, skip_verify, callback_value)
 					VALUES (callback_function_id, http_method::instance.rest_method, headers, url, body, EXTRACT(EPOCH FROM NOW()), tls_skip_verify, callback_value);
-					
+
 					RETURN 0;
 				END;
 			$BODY$;
-			
+
 			-- PWA changes
 			ALTER TABLE app.module ADD COLUMN name_pwa character varying(60);
 			ALTER TABLE app.module ADD COLUMN name_pwa_short character varying(12);
 			ALTER TABLE app.module ADD COLUMN icon_id_pwa1 UUID;
 			ALTER TABLE app.module ADD COLUMN icon_id_pwa2 UUID;
 			ALTER TABLE app.module ADD CONSTRAINT module_icon_id_pwa1_fkey FOREIGN KEY (icon_id_pwa1)
-				REFERENCES app.icon (id) MATCH SIMPLE 
+				REFERENCES app.icon (id) MATCH SIMPLE
 				ON UPDATE SET NULL
 				ON DELETE SET NULL
 				DEFERRABLE INITIALLY DEFERRED;
 			ALTER TABLE app.module ADD CONSTRAINT module_icon_id_pwa2_fkey FOREIGN KEY (icon_id_pwa2)
-				REFERENCES app.icon (id) MATCH SIMPLE 
+				REFERENCES app.icon (id) MATCH SIMPLE
 				ON UPDATE SET NULL
 				ON DELETE SET NULL
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_module_icon_id_pwa1_fkey ON app.module USING btree (icon_id_pwa1 ASC NULLS LAST);
 			CREATE INDEX fki_module_icon_id_pwa2_fkey ON app.module USING btree (icon_id_pwa2 ASC NULLS LAST);
-			
+
 			-- custom CSS & PWA icons
 			INSERT INTO instance.config (name,value) VALUES ('css','');
 			INSERT INTO instance.config (name,value) VALUES ('iconPwa1','');
 			INSERT INTO instance.config (name,value) VALUES ('iconPwa2','');
-			
+
 			-- PWA sub domains
 			CREATE TABLE instance.pwa_domain (
 				module_id UUID NOT NULL,
@@ -3448,45 +3454,45 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			-- remove outdated config
 			DELETE FROM instance.config WHERE name = 'defaultLanguageCode';
-			
+
 			-- add last login date
 			ALTER TABLE instance.login ADD COLUMN date_auth_last BIGINT;
 			CREATE INDEX ind_login_date_auth_last ON instance.login USING BTREE (date_auth_last ASC NULLS LAST);
-			
+
 			-- iframes
 			ALTER TYPE app.attribute_content_use ADD VALUE 'iframe';
-			
+
 			-- more list column options
 			CREATE TYPE app.column_style AS ENUM('bold','italic');
 			ALTER TABLE app.column ADD COLUMN styles app.column_style[];
-			
+
 			ALTER TABLE app.column ADD COLUMN batch_vertical BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN batch_vertical DROP DEFAULT;
-			
+
 			-- bulk update forms
 			CREATE TYPE app.open_form_context AS ENUM('bulk');
 			ALTER TABLE app.open_form ADD COLUMN context app.open_form_context;
-			
+
 			-- inline pop-up forms
 			CREATE TYPE app.open_form_pop_up_type AS ENUM('float','inline');
 			ALTER TABLE app.open_form ADD COLUMN pop_up_type TEXT;
 			UPDATE app.open_form SET pop_up_type = 'float' WHERE pop_up;
 			ALTER TABLE app.open_form DROP COLUMN pop_up;
-			
+
 			-- mail account authentication methods
 			ALTER TABLE instance.mail_account ADD COLUMN auth_method TEXT NOT NULL DEFAULT 'plain';
 			ALTER TABLE instance.mail_account ALTER COLUMN auth_method DROP DEFAULT;
-			
+
 			UPDATE instance.mail_account
 			SET auth_method = 'login'
 			WHERE mode = 'smtp'
 			AND LOWER(host_name) = 'smtp.office365.com';
-			
+
 			CREATE TYPE instance.mail_account_auth_method AS ENUM ('plain','login');
-			
+
 			-- fix missing primary key references (rare but we found 1 relevant case)
 			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key, method)
 				SELECT gen_random_uuid(), r.id, false, true, true, 'BTREE'
@@ -3497,7 +3503,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					WHERE relation_id = r.id
 					AND primary_key
 				);
-			
+
 			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
 				SELECT id, 0, true, (
 					SELECT id
@@ -3512,7 +3518,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM app.pg_index_attribute
 					WHERE pg_index_id = pgi.id
 				);
-			
+
 			-- fix duplicate primary key references (clean up query lookup references, then delete duplicate PK index references)
 			UPDATE app.query_lookup AS ql
 			SET pg_index_id = (
@@ -3546,7 +3552,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM app.relation AS r
 				)
 			);
-			
+
 			DELETE FROM app.pg_index
 			WHERE primary_key
 			AND id NOT IN (
@@ -3561,7 +3567,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				)
 				FROM app.relation AS r
 			);
-			
+
 			-- update schema as apps have changed
 			UPDATE instance.config
 			SET value = EXTRACT(EPOCH FROM NOW() at time zone 'utc')::BIGINT
@@ -3574,20 +3580,20 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- clean up from last release
 			ALTER TABLE app.caption ALTER COLUMN content
 				TYPE app.caption_content USING content::text::app.caption_content;
-			
+
 			-- new user setting
 			ALTER TABLE instance.login_setting ADD COLUMN tab_remember BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN tab_remember DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD COLUMN field_clean BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN field_clean DROP DEFAULT;
-			
+
 			-- new attribute content
 			ALTER TYPE app.attribute_content ADD VALUE 'uuid';
-			
+
 			-- attribute content used as option
 			CREATE TYPE app.attribute_content_use AS ENUM ('default', 'textarea', 'richtext', 'date', 'datetime', 'time', 'color');
 			ALTER TABLE app.attribute ADD COLUMN content_use VARCHAR(8) NOT NULL DEFAULT 'default';
-			
+
 			-- migrate integer/bigint attributes
 			UPDATE app.attribute AS a
 			SET content_use = (
@@ -3641,7 +3647,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				END
 			)
 			WHERE content IN ('integer','bigint');
-			
+
 			-- migrate text/varchar attributes
 			UPDATE app.attribute AS a
 			SET content_use = (
@@ -3689,35 +3695,35 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				END
 			)
 			WHERE content IN ('text','varchar');
-			
+
 			UPDATE app.field_data SET display = 'default'
 			WHERE display IN ('datetime','date','time','richtext','textarea','color');
-			
+
 			UPDATE app.column SET display = 'default'
 			WHERE display IN ('datetime','date','time','richtext','textarea','color');
-			
+
 			-- remove invalid data display options
 			ALTER TYPE app.data_display RENAME TO data_display_old;
 			CREATE TYPE app.data_display AS ENUM ('default', 'email', 'gallery', 'hidden', 'login', 'password', 'phone', 'slider', 'url');
 			ALTER TABLE app.field_data ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
 			ALTER TABLE app.column ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
 			DROP TYPE app.data_display_old;
-			
+
 			-- new filter options
 			ALTER TYPE app.filter_side_content ADD VALUE 'nowDate';
 			ALTER TYPE app.filter_side_content ADD VALUE 'nowDatetime';
 			ALTER TYPE app.filter_side_content ADD VALUE 'nowTime';
-			
+
 			ALTER TABLE app.query_filter_side ADD COLUMN now_offset INTEGER;
-			
+
 			-- new tab field option
 			ALTER TABLE app.tab ADD COLUMN content_counter bool NOT NULL DEFAULT false;
 			ALTER TABLE app.tab ALTER COLUMN content_counter DROP DEFAULT;
-			
+
 			-- new API entity
 			ALTER TYPE instance.log_context ADD VALUE 'api';
 			INSERT INTO instance.config (name,value) VALUES ('logApi','2');
-			
+
 			CREATE TABLE app.api (
 				id uuid NOT NULL,
 				module_id uuid NOT NULL,
@@ -3740,17 +3746,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        DEFERRABLE INITIALLY DEFERRED
 			        NOT VALID
 			);
-			
+
 			ALTER TABLE app.query ADD COLUMN api_id uuid;
 			ALTER TABLE app.query ADD CONSTRAINT query_api_id_fkey FOREIGN KEY (api_id)
 				REFERENCES app.api (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_query_api_id_fkey
 				ON app.query USING btree (api_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
 			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
 				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
@@ -3761,17 +3767,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1
 				END
 			));
-			
+
 			ALTER TABLE app.column ADD COLUMN api_id uuid;
 			ALTER TABLE app.column ADD CONSTRAINT column_api_id_fkey FOREIGN KEY (api_id)
 				REFERENCES app.api (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_column_api_id_fkey
 			    ON app."column" USING btree (api_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.column DROP CONSTRAINT column_single_parent;
 			ALTER TABLE app.column ADD  CONSTRAINT column_single_parent CHECK (1 = (
 				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
@@ -3779,20 +3785,20 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CASE WHEN field_id      IS NULL THEN 0 ELSE 1
 				END
 			));
-			
+
 			ALTER TABLE app.role_access ADD COLUMN api_id uuid;
 			ALTER TABLE app.role_access ADD CONSTRAINT role_access_api_id_fkey FOREIGN KEY (api_id)
 				REFERENCES app.api (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_role_access_api_id_fkey
 			    ON app.role_access USING btree (api_id ASC NULLS LAST);
-			
+
 			-- relation comments
 			ALTER TABLE app.relation ADD COLUMN comment text;
-			
+
 			-- login templates
 			CREATE TABLE instance.login_template (
 				id SERIAL NOT NULL,
@@ -3815,18 +3821,18 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				UNIQUE (login_id) DEFERRABLE INITIALLY DEFERRED;
 			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_login_template_id_unique
 				UNIQUE (login_template_id) DEFERRABLE INITIALLY DEFERRED;
-			
+
 			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_single_parent CHECK (1 = (
 				CASE WHEN login_id          IS NULL THEN 0 ELSE 1 END +
 				CASE WHEN login_template_id IS NULL THEN 0 ELSE 1 END
 			));
-			
+
 			CREATE INDEX IF NOT EXISTS fki_login_setting_login_id_fkey
 			    ON instance.login_setting USING btree (login_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_login_setting_login_template_id_fkey
 			    ON instance.login_setting USING btree (login_template_id ASC NULLS LAST);
-			
+
 			ALTER TABLE instance.ldap ADD COLUMN login_template_id INTEGER;
 			ALTER TABLE instance.ldap ADD CONSTRAINT ldap_login_template_id_fkey
 				FOREIGN KEY (login_template_id)
@@ -3834,14 +3840,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE SET NULL
 				ON DELETE SET NULL
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_ldap_login_template_id_fkey
 			    ON instance.ldap USING btree (login_template_id ASC NULLS LAST);
-			
+
 			-- default login template
 			INSERT INTO instance.login_template (name) VALUES ('GLOBAL');
 			INSERT INTO instance.login_setting (login_template_id, language_code, date_format,
-				sunday_first_dow, font_size, borders_all, borders_corner, page_limit, 
+				sunday_first_dow, font_size, borders_all, borders_corner, page_limit,
 				header_captions, spacing, dark, compact, hint_update_version,
 				mobile_scroll_form, warn_unsaved, menu_colored, pattern, font_family,
 				tab_remember, field_clean)
@@ -3849,17 +3855,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				true, 0, true, true, false, 'bubbles', 'helvetica', true, true
 			FROM instance.login_template
 			WHERE name = 'GLOBAL';
-			
+
 			-- new filter condition: field invalid
 			ALTER TYPE app.filter_side_content ADD VALUE 'fieldValid';
-			
+
 			-- missing index: query filter side preset & content
 			CREATE INDEX IF NOT EXISTS fki_query_filter_side_preset_id_fkey
 			    ON app.query_filter_side USING btree (preset_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_query_filter_side_content_fkey
 			    ON app.query_filter_side USING btree (content ASC NULLS LAST);
-			
+
 			-- add function to retrieve all nested presets inside queries (for schema checks)
 			CREATE OR REPLACE FUNCTION app.get_preset_ids_inside_queries(query_ids_in uuid[])
 			    RETURNS uuid[]
@@ -3873,13 +3879,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				IF array_length(query_ids_in,1) = 0 THEN
 					RETURN preset_ids;
 				END IF;
-			
+
 				-- collect preset directly
 				SELECT ARRAY_AGG(preset_id) INTO preset_ids
 				FROM app.query_filter_side
 				WHERE query_id = ANY(query_ids_in)
 				AND   content  = 'preset';
-			
+
 				-- collect presets from filters inside sub queries
 				SELECT ARRAY_AGG(q.id) INTO query_ids_sub
 				FROM app.query_filter_side AS s
@@ -3889,15 +3895,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					AND q.query_filter_side     = s.side
 				WHERE s.query_id = ANY(query_ids_in)
 				AND   s.content  = 'subQuery';
-			
+
 				IF array_length(query_ids_sub,1) <> 0 THEN
 					preset_ids := array_cat(preset_ids, app.get_preset_ids_inside_queries(query_ids_sub));
 				END IF;
-				
+
 				RETURN preset_ids;
 			END;
 			$BODY$;
-			
+
 			-- add new instance function: get record ID from preset
 			CREATE OR REPLACE FUNCTION instance.get_preset_record_id(preset_id_in UUID)
 			    RETURNS text
@@ -3914,14 +3920,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					);
 				END;
 			$BODY$;
-			
+
 			-- add references for PKs as PG indexes (used for API)
 			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
 			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;
-			
+
 			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key)
 				SELECT gen_random_uuid(), id, false, true, true FROM app.relation;
-			
+
 			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
 				SELECT id, 0, true, (
 					SELECT id
@@ -3939,7 +3945,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- new tabs field
 			ALTER TYPE app.field_state RENAME TO state_effect;
 			ALTER TYPE app.field_content ADD VALUE 'tabs';
-			
+
 			CREATE TABLE app.tab (
 				id uuid NOT NULL,
 				field_id uuid NOT NULL,
@@ -3954,42 +3960,42 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_tab_field_id_fkey
 				ON app.tab USING btree (field_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.field ADD COLUMN tab_id uuid;
 			ALTER TABLE app.field ADD CONSTRAINT tab_id_fkey FOREIGN KEY (tab_id)
 				REFERENCES app.tab (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_tab_id_fkey
 				ON app.field USING btree (tab_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.caption ADD COLUMN tab_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_tab_id_fkey FOREIGN KEY (tab_id)
 				REFERENCES app.tab (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_tab_id_fkey
 				ON app.caption USING btree (tab_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.form_state_effect ADD COLUMN tab_id uuid;
 			ALTER TABLE app.form_state_effect ADD CONSTRAINT form_state_effect_tab_id_fkey FOREIGN KEY (tab_id)
 				REFERENCES app.tab (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_effect_tab_id_fkey
 				ON app.form_state_effect USING btree (tab_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.form_state_effect ALTER COLUMN field_id DROP NOT NULL;
-			
+
 			-- new entity: articles
 			CREATE TABLE app.article (
 				id UUID NOT NULL,
@@ -4006,7 +4012,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE INDEX fki_article_module_id_fkey
 				ON app.article USING btree (module_id ASC NULLS LAST);
-			
+
 			CREATE TABLE app.article_form (
 				article_id UUID NOT NULL,
 				form_id UUID NOT NULL,
@@ -4026,7 +4032,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON app.article_form USING btree (article_id ASC NULLS LAST);
 			CREATE INDEX fki_article_form_form_id_fkey
 				ON app.article_form USING btree (form_id ASC NULLS LAST);
-			
+
 			CREATE TABLE app.article_help (
 				article_id UUID NOT NULL,
 				module_id uuid NOT NULL,
@@ -4046,7 +4052,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON app.article_help USING btree (article_id ASC NULLS LAST);
 			CREATE INDEX fki_article_help_module_id_fkey
 				ON app.article_help USING btree (module_id ASC NULLS LAST);
-			
+
 			-- new caption reference: articles
 			ALTER TABLE app.caption ADD COLUMN article_id UUID;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_article_id_fkey FOREIGN KEY (article_id)
@@ -4056,15 +4062,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX fki_caption_article_id_fkey
 			    ON app.caption USING btree (article_id ASC NULLS LAST);
-		
+
 			-- update caption (missing index, new content, new reference)
 			CREATE INDEX fki_caption_js_function_id_fkey
 				ON app.caption USING btree (js_function_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.caption ALTER COLUMN content TYPE TEXT;
 			CREATE INDEX ind_caption_content ON app.caption
 				USING btree (content ASC NULLS LAST);
-			
+
 			DROP TYPE app.caption_content;
 			CREATE TYPE app.caption_content AS ENUM (
 				'articleBody', 'articleTitle', 'attributeTitle', 'columnTitle',
@@ -4073,7 +4079,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'pgFunctionTitle', 'pgFunctionDesc', 'loginFormTitle',
 				'jsFunctionTitle', 'jsFunctionDesc', 'tabTitle'
 			);
-			
+
 			-- migrate module help to articles
 			INSERT INTO app.article (id, module_id, name)
 				SELECT gen_random_uuid(), id, 'Migrated from application help'
@@ -4083,19 +4089,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM app.caption
 					WHERE content = 'moduleHelp'
 				);
-			
+
 			INSERT INTO app.caption (article_id, content, language_code, value)
 				SELECT a.id, 'articleBody', c.language_code, c.value
 				FROM app.article AS a
 				JOIN app.caption AS c
 					ON  a.module_id = c.module_id
 					AND c.content   = 'moduleHelp';
-			
+
 			DELETE FROM app.caption WHERE content = 'moduleHelp';
-			
+
 			INSERT INTO app.article_help (article_id, module_id, position)
 				SELECT id, module_id, 0 FROM app.article;
-			
+
 			-- migrate form help to articles
 			INSERT INTO app.article (id, module_id, name)
 				SELECT gen_random_uuid(), module_id, CONCAT('Migrated from form help of ', name)
@@ -4105,7 +4111,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        FROM app.caption
 			        WHERE content = 'formHelp'
 			    );
-			
+
 			INSERT INTO app.caption (article_id, content, language_code, value)
 				SELECT a.id, 'articleBody', c.language_code, c.value
 				FROM app.caption AS c
@@ -4113,7 +4119,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				JOIN app.article AS a ON a.module_id = f.module_id
 					AND a.name = CONCAT('Migrated from form help of ', f.name)
 				WHERE c.content = 'formHelp';
-			
+
 			INSERT INTO app.article_form (article_id, form_id, position)
 				SELECT (
 					SELECT id
@@ -4127,47 +4133,47 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        FROM app.caption
 			        WHERE content = 'formHelp'
 			    );
-			
+
 			DELETE FROM app.caption WHERE content = 'formHelp';
-			
+
 			-- icon names
 			ALTER TABLE app.icon ADD COLUMN name CHARACTER VARYING(64) NOT NULL DEFAULT '';
 			ALTER TABLE app.icon ALTER COLUMN name DROP DEFAULT;
-			
+
 			-- increase preset name length to 64
 			ALTER TABLE app.preset ALTER COLUMN name TYPE CHARACTER VARYING(64);
-			
+
 			-- increase SQL entity name length to 60
 			ALTER TABLE app.module      ALTER COLUMN name TYPE CHARACTER VARYING(60);
 			ALTER TABLE app.attribute   ALTER COLUMN name TYPE CHARACTER VARYING(60);
 			ALTER TABLE app.pg_function ALTER COLUMN name TYPE CHARACTER VARYING(60);
 			ALTER TABLE app.relation    ALTER COLUMN name TYPE CHARACTER VARYING(60);
-			
+
 			-- added missing flex property value
 			ALTER TYPE app.field_container_align_content ADD VALUE 'space-evenly';
-			
+
 			-- enable backup tasks for non-embedded systems
 			UPDATE instance.task
 			SET embedded_only = false, name = 'backupRun'
 			WHERE name = 'embeddedBackup';
-			
+
 			UPDATE instance.schedule
 			SET task_name = 'backupRun'
 			WHERE task_name = 'embeddedBackup';
-			
+
 			-- MFA
 			ALTER TABLE instance.login_token_fixed DROP CONSTRAINT login_token_fixed_pkey;
 			ALTER TABLE instance.login_token_fixed ADD COLUMN id SERIAL PRIMARY KEY;
-			
+
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'totp';
-			
+
 			-- file reference counter & retention settings
 			ALTER TABLE instance.file ADD COLUMN ref_counter INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE instance.file ALTER COLUMN ref_counter DROP DEFAULT;
-			
+
 			CREATE INDEX IF NOT EXISTS ind_file_ref_counter
 				ON instance.file USING btree (ref_counter ASC NULLS LAST);
-			
+
 			CREATE OR REPLACE FUNCTION instance.trg_file_ref_counter_update()
 			    RETURNS trigger
 			    LANGUAGE 'plpgsql'
@@ -4180,17 +4186,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					WHERE id = NEW.file_id;
 					RETURN NEW;
 				END IF;
-				
+
 				UPDATE instance.file
 				SET ref_counter = ref_counter - 1
 				WHERE id = OLD.file_id;
 				RETURN OLD;
 			END;
 			$BODY$;
-			
+
 			INSERT INTO instance.config (name,value) VALUES ('fileVersionsKeepCount','30');
 			INSERT INTO instance.config (name,value) VALUES ('fileVersionsKeepDays','90');
-			
+
 			-- outdated config key that was in 3.0 init script until 3.2
 			DELETE FROM instance.config WHERE name = 'exportPrivateKey';
 		`); err != nil {
@@ -4268,14 +4274,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
 			ALTER TABLE instance.login_setting ALTER COLUMN pattern
 				TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
-			
+
 			-- new log contexts
 			ALTER TYPE instance.log_context ADD VALUE 'imager';
 			ALTER TYPE instance.log_context ADD VALUE 'websocket';
-			
+
 			-- fix bad config name
 			UPDATE instance.config SET name = 'logModule' WHERE name = 'logApplication';
-			
+
 			-- fix logging function
 			CREATE OR REPLACE FUNCTION instance.log(level integer,message text,app_name text DEFAULT NULL::text)
 			    RETURNS void
@@ -4289,11 +4295,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					SELECT value::INT INTO level_show
 					FROM instance.config
 					WHERE name = 'logModule';
-					
+
 					IF level_show < level THEN
 						RETURN;
 					END IF;
-					
+
 					-- resolve module ID if possible
 					-- if not possible: log with module_id = NULL (better than not to log)
 					IF app_name IS NOT NULL THEN
@@ -4301,34 +4307,34 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						FROM app.module
 						WHERE name = app_name;
 					END IF;
-					
+
 					INSERT INTO instance.log (level,context,module_id,message,date_milli)
 					VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
-				END;	
+				END;
 			$BODY$;
-			
+
 			-- new cluster event
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'filesCopied';
-			
+
 			-- new config options
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysDeleted','90');
 			INSERT INTO instance.config (name,value) VALUES ('imagerThumbWidth','300');
 			INSERT INTO instance.config (name,value) VALUES ('logImager',2);
 			INSERT INTO instance.config (name,value) VALUES ('logWebsocket',2);
-			
+
 			-- changes to fixed tokens
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';
 			ALTER TABLE instance.login_token_fixed ADD COLUMN name CHARACTER VARYING(64);
-			
+
 			-- new cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'fileRequested';
-			
+
 			-- new file relations
 			CREATE TABLE instance.file (
 				id uuid NOT NULL,
 			    CONSTRAINT "file_pkey" PRIMARY KEY (id)
 			);
-			
+
 			CREATE TABLE instance.file_version (
 				file_id uuid NOT NULL,
 				version int NOT NULL,
@@ -4348,19 +4354,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE SET NULL
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX "fki_file_version_login_id_fkey"
 				ON instance.file_version USING btree (login_id ASC NULLS LAST);
-			
+
 			CREATE INDEX "ind_file_version_version"
 				ON instance.file_version USING btree (version ASC NULLS LAST);
-			
+
 			CREATE INDEX "fki_file_version_file_id_fkey"
 				ON instance.file_version USING btree (file_id ASC NULLS LAST);
-			
+
 			-- new schema, type and functions
 			CREATE SCHEMA instance_file;
-			
+
 			CREATE TYPE instance.file_meta AS (
 				id UUID,
 				login_id_creator INTEGER,
@@ -4371,7 +4377,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				date_change BIGINT,
 				date_delete BIGINT
 			);
-			
+
 			CREATE FUNCTION instance.files_get(attribute_id UUID,record_id BIGINT,include_deleted BOOLEAN DEFAULT false)
 				RETURNS instance.file_meta[]
 				LANGUAGE 'plpgsql'
@@ -4404,14 +4410,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						file.version          := rec.version;
 						file.date_change      := rec.date_change;
 						file.date_delete      := rec.date_delete;
-						
+
 						files := ARRAY_APPEND(files,file);
 					END LOOP;
-					
+
 					RETURN files;
 				END;
 			$BODY$;
-			
+
 			CREATE FUNCTION instance.file_link(file_id UUID,file_name TEXT,attribute_id UUID,record_id BIGINT)
 				RETURNS VOID
 				LANGUAGE 'plpgsql'
@@ -4481,13 +4487,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED
 				);
-				
+
 				CREATE INDEX "ind_%s_date_delete"
 					ON instance_file."%s" USING btree (date_delete ASC NULLS LAST);
-				
+
 				CREATE INDEX "fki_%s_file_id_fkey"
 					ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
-				
+
 				CREATE INDEX "fki_%s_record_id_fkey"
 					ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
 			`, tNameR, tNameR, tNameR, tNameR, fa.moduleName, fa.relationName,
@@ -4595,7 +4601,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- cleanup from last release
 			ALTER TABLE app.form_state_condition_side ALTER COLUMN content
 				TYPE app.filter_side_content USING content::text::app.filter_side_content;
-			
+
 			-- new role content
 			ALTER TABLE app.role ADD COLUMN content TEXT NOT NULL DEFAULT 'user';
 			ALTER TABLE app.role ALTER COLUMN content DROP DEFAULT;
@@ -4603,7 +4609,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			UPDATE app.role SET content = 'other' WHERE name ILIKE '%data%' OR name ILIKE '%csv%';
 			UPDATE app.role SET content = 'everyone' WHERE name = 'everyone';
 			CREATE TYPE app.role_content AS ENUM ('admin','everyone','other','user');
-			
+
 			-- new JS function dependency
 			ALTER TABLE app.js_function_depends ADD COLUMN collection_id_on UUID;
 			ALTER TABLE app.js_function_depends ADD CONSTRAINT js_function_depends_collection_id_on_fkey FOREIGN KEY (collection_id_on)
@@ -4613,11 +4619,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_collection_id_on_fkey ON app.js_function_depends
 				USING BTREE (collection_id_on ASC NULLS LAST);
-			
+
 			-- collection consumer changes / additions
 			CREATE TYPE app.collection_consumer_content AS ENUM(
 				'fieldDataDefault','fieldFilterSelector','headerDisplay','menuDisplay');
-			
+
 			ALTER TABLE app.collection_consumer ADD COLUMN menu_id UUID;
 			ALTER TABLE app.collection_consumer
 				ADD CONSTRAINT collection_consumer_menu_id_fkey FOREIGN KEY (menu_id)
@@ -4627,7 +4633,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_collection_consumer_menu_id_fkey ON app.collection_consumer
 				USING BTREE (menu_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.collection_consumer ADD COLUMN id UUID PRIMARY KEY DEFAULT gen_random_uuid();
 			ALTER TABLE app.collection_consumer ADD COLUMN on_mobile BOOLEAN NOT NULL DEFAULT false;
 			ALTER TABLE app.collection_consumer ADD COLUMN no_display_empty BOOLEAN NOT NULL DEFAULT false;
@@ -4636,7 +4642,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.collection_consumer ALTER COLUMN on_mobile DROP DEFAULT;
 			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP DEFAULT;
 			ALTER TABLE app.collection_consumer ALTER COLUMN content DROP DEFAULT;
-			
+
 			INSERT INTO app.collection_consumer (
 				id, collection_id, column_id_display, field_id, content,
 				multi_value, on_mobile, no_display_empty
@@ -4645,11 +4651,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					field_id, 'fieldDataDefault', false, false, false
 				FROM app.field_data
 				WHERE collection_id_def IS NOT NULL;
-			
+
 			ALTER TABLE app.field_data
 				DROP COLUMN collection_id_def,
 				DROP COLUMN column_id_def;
-			
+
 			-- open form collection consumer
 			ALTER TABLE app.open_form ADD COLUMN collection_consumer_id UUID;
 			ALTER TABLE app.open_form ADD CONSTRAINT open_form_collection_consumer_id_fkey FOREIGN KEY (collection_consumer_id)
@@ -4659,33 +4665,33 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_open_form_collection_consumer_id_fkey ON app.open_form
 				USING BTREE (collection_consumer_id ASC NULLS LAST);
-			
+
 			-- new login settings
 			ALTER TABLE instance.login_setting ADD COLUMN menu_colored BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN menu_colored DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD COLUMN font_family TEXT NOT NULL DEFAULT 'helvetica';
 			ALTER TABLE instance.login_setting ALTER COLUMN font_family DROP DEFAULT;
-			
+
 			CREATE TYPE instance.login_setting_font_family AS ENUM (
 				'calibri','comic_sans_ms','consolas','georgia','helvetica',
 				'lucida_console','segoe_script','segoe_ui','times_new_roman',
 				'trebuchet_ms','verdana'
 			);
-			
+
 			CREATE TYPE instance.login_setting_pattern AS ENUM ('bubbles','waves');
 			ALTER TABLE instance.login_setting ADD COLUMN pattern TEXT DEFAULT 'bubbles';
 			ALTER TABLE instance.login_setting ALTER COLUMN pattern DROP DEFAULT;
-			
+
 			-- new schema for cluster operation
 			CREATE SCHEMA instance_cluster;
-			
+
 			-- new type for cluster event
 			CREATE TYPE instance_cluster.node_event_content AS ENUM (
 				'collectionUpdated','configChanged','loginDisabled',
 				'loginReauthorized','loginReauthorizedAll','masterAssigned',
 				'schemaChanged','shutdownTriggered','tasksChanged','taskTriggered'
 			);
-			
+
 			-- new cluster tables
 			CREATE TABLE IF NOT EXISTS instance_cluster.node (
 			    id uuid NOT NULL,
@@ -4699,7 +4705,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				running bool NOT NULL,
 			    CONSTRAINT node_pkey PRIMARY KEY (id)
 			);
-			
+
 			CREATE TABLE IF NOT EXISTS instance_cluster.node_event (
 			    node_id uuid NOT NULL,
 				content instance_cluster.node_event_content NOT NULL,
@@ -4710,42 +4716,42 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_node_event_node_fkey ON instance_cluster.node_event
 				USING BTREE (node_id ASC NULLS LAST);
-			
+
 			-- new cluster logging context
 			ALTER TYPE instance.log_context ADD VALUE 'cluster';
 			INSERT INTO instance.config (name,value) VALUES ('logCluster',2);
-			
+
 			ALTER TABLE instance.log ADD COLUMN node_id UUID;
 			ALTER TABLE instance.log ADD CONSTRAINT log_node_id_fkey FOREIGN KEY (node_id)
 		        REFERENCES instance_cluster.node (id) MATCH SIMPLE
 		        ON UPDATE CASCADE
 		        ON DELETE CASCADE
 		        DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_log_node_fkey ON instance.log
 				USING BTREE (node_id ASC NULLS LAST);
-			
+
 			-- new config option
 			INSERT INTO instance.config (name,value)
 			VALUES ('clusterNodeMissingAfter','180');
-			
+
 			-- new task option: Execute only by cluster master
 			ALTER TABLE instance.task ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.task ALTER COLUMN cluster_master_only DROP DEFAULT;
 			UPDATE instance.task SET cluster_master_only = FALSE
 			WHERE name IN ('cleanupBruteforce','httpCertRenew');
-			
+
 			-- new task option: Cannot be disabled
 			ALTER TABLE instance.task ADD COLUMN active_only BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.task ALTER COLUMN active_only DROP DEFAULT;
-			
+
 			-- rename instance schedule, add PK
 			ALTER TABLE instance.scheduler RENAME TO schedule;
 			ALTER TABLE instance.schedule ADD COLUMN id SERIAL PRIMARY KEY;
-			
+
 			-- add node schedule table
 			CREATE TABLE IF NOT EXISTS instance_cluster.node_schedule (
 			    node_id uuid NOT NULL,
@@ -4764,13 +4770,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_node_schedule_node_id_fkey ON instance_cluster.node_schedule
 				USING BTREE (node_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_node_schedule_schedule_id_fkey ON instance_cluster.node_schedule
 				USING BTREE (schedule_id ASC NULLS LAST);
-			
+
 			-- new tasks
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,
@@ -4779,10 +4785,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			VALUES
 				('clusterCheckIn',60,false,false,true,true),
 				('clusterProcessEvents',5,false,false,true,true);
-			
+
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('clusterCheckIn',0,0),('clusterProcessEvents',0,0);
-			
+
 			-- new function: Request master role
 			CREATE OR REPLACE FUNCTION instance_cluster.master_role_request(
 				node_id_requested uuid)
@@ -4798,33 +4804,33 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			    SELECT value::INT INTO master_missing_after
 			    FROM instance.config
 			    WHERE name = 'clusterNodeMissingAfter';
-				
+
 			    SELECT date_check_in INTO unix_master_check_in
 			    FROM instance_cluster.node
 			    WHERE cluster_master;
-			    
+
 			    IF EXTRACT(EPOCH FROM NOW()) < unix_master_check_in + master_missing_after THEN
 			        -- current master is not missing
 			        RETURN 0;
 			    END IF;
-			    
+
 			    -- new master accepted, switch over
 			    UPDATE instance_cluster.node
 			    SET cluster_master = FALSE;
-			    
+
 			    UPDATE instance_cluster.node
 			    SET cluster_master = TRUE
 			    WHERE id = node_id_requested;
-			    
+
 			    -- assign master switch over tasks to all nodes
 			    INSERT INTO instance_cluster.node_event (node_id,content,payload)
 			        SELECT id, 'masterAssigned', '{"state":false}'
 			        FROM instance_cluster.node
 			        WHERE cluster_master = FALSE;
-			    
+
 			    INSERT INTO instance_cluster.node_event (node_id,content,payload)
 			    VALUES (node_id_requested, 'masterAssigned', '{"state":true}');
-				
+
 				RETURN 0;
 			END;
 			$BODY$;
@@ -4844,31 +4850,31 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					SELECT cluster_master_only INTO needs_master
 					FROM instance.task
 					WHERE name = task_name;
-					
+
 					IF needs_master IS NULL THEN
 						RETURN 1;
 					END IF;
-				
+
 					-- run system task
 					INSERT INTO instance_cluster.node_event (node_id, content, payload)
 						SELECT id, 'taskTriggered', CONCAT('{"taskName":"',task_name,'"}')
 						FROM instance_cluster.node
 						WHERE needs_master = FALSE
 						OR cluster_master;
-					
+
 					RETURN 0;
 				END IF;
-				
+
 				-- run PG function by schedule (always run by cluster master)
 				INSERT INTO instance_cluster.node_event (node_id, content, payload)
 					SELECT id, 'taskTriggered', CONCAT('{"pgFunctionId":"',pg_function_id,'","pgFunctionScheduleId":"',pg_function_schedule_id,'"}')
 					FROM instance_cluster.node
 					WHERE cluster_master;
-				
+
 				RETURN 0;
 			END;
 			$BODY$;
-			
+
 			-- new collection update call
 			CREATE OR REPLACE FUNCTION instance.update_collection(
 				collection_id UUID,
@@ -4883,7 +4889,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				INSERT INTO instance_cluster.node_event (node_id,content,payload)
 					SELECT id, 'collectionUpdated', CONCAT('{"collectionId":"',collection_id,'","loginIds":',TO_JSON(login_ids),'}')
 					FROM instance_cluster.node;
-				
+
 				RETURN 0;
 			END;
 			$BODY$;
@@ -4895,7 +4901,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- extend and rename query filter side content (to be used by form state condition as well)
 			ALTER TYPE app.query_filter_side_content ADD VALUE 'fieldChanged';
 			ALTER TYPE app.query_filter_side_content RENAME TO filter_side_content;
-			
+
 			-- clean up of form state conditions
 			CREATE TABLE IF NOT EXISTS app.form_state_condition_side (
 			    form_state_id uuid NOT NULL,
@@ -4946,29 +4952,29 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_collection_id_fkey
 			    ON app.form_state_condition_side USING btree (collection_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_column_id_fkey
 			    ON app.form_state_condition_side USING btree (column_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_field_id_fkey
 			    ON app.form_state_condition_side USING btree (field_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_form_state_id_fkey
 			    ON app.form_state_condition_side USING btree (form_state_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_preset_id_fkey
 			    ON app.form_state_condition_side USING btree (preset_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_role_id_fkey
 			    ON app.form_state_condition_side USING btree (role_id ASC NULLS LAST);
-			
+
 			-- new form option
 			ALTER TABLE app.form ADD COLUMN no_data_actions BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.form ALTER COLUMN no_data_actions DROP DEFAULT;
-			
+
 			-- new collection icon
 			ALTER TABLE app.collection ADD COLUMN icon_id uuid;
 			ALTER TABLE app.collection ADD CONSTRAINT collection_icon_id_fkey FOREIGN KEY (icon_id)
@@ -4976,14 +4982,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_collection_icon_id_fkey
 				ON app.collection USING btree (icon_id ASC NULLS LAST);
-			
+
 			-- new collection consumer option
 			ALTER TABLE app.collection_consumer ADD COLUMN multi_value BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.collection_consumer ALTER COLUMN multi_value DROP DEFAULT;
-			
+
 			-- fix collection consumer constraint
 			ALTER TABLE app.collection_consumer DROP CONSTRAINT collection_consumer_field_id_fkey;
 			ALTER TABLE app.collection_consumer ADD CONSTRAINT collection_consumer_field_id_fkey
@@ -4992,46 +4998,46 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- new condition operators
 			ALTER TYPE app.condition_operator ADD VALUE '@>';
 			ALTER TYPE app.condition_operator ADD VALUE '<@';
 			ALTER TYPE app.condition_operator ADD VALUE '&&';
-			
+
 			-- new aggregator
 			ALTER TYPE app.aggregator ADD VALUE 'json';
-			
+
 			-- new instance task
 			INSERT INTO instance.task (name,interval_seconds,embedded_only,active) VALUES
 				('httpCertRenew',86400,false,true);
-			
+
 			INSERT INTO instance.scheduler (task_name,date_attempt,date_success) VALUES
 				('httpCertRenew',0,0);
-			
+
 			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN mobile_scroll_form BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN mobile_scroll_form DROP DEFAULT;
-			
+
 			-- remove deprecated login setting
 			ALTER TABLE instance.login_setting DROP COLUMN hint_first_steps;
-			
+
 			-- new LDAP option
 			ALTER TABLE instance.ldap RENAME COLUMN tls TO starttls;
 			ALTER TABLE instance.ldap ADD COLUMN tls BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.ldap ALTER COLUMN tls DROP DEFAULT;
-			
+
 			-- query table changes
 			DELETE FROM app.query WHERE relation_id IS NULL;
 			ALTER TABLE app.query ALTER COLUMN relation_id SET NOT NULL;
-			
+
 			-- new column option: copy to clipboard
 			ALTER TABLE app.column ADD COLUMN clipboard BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN clipboard DROP DEFAULT;
-			
+
 			-- new data field option: copy to clipboard
 			ALTER TABLE app.field_data ADD COLUMN clipboard BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.field_data ALTER COLUMN clipboard DROP DEFAULT;
-			
+
 			-- user key management
 			ALTER TABLE instance.login
 				ADD COLUMN salt_kdf TEXT NOT NULL DEFAULT 'PLACEHOLDER',
@@ -5249,10 +5255,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN warn_unsaved BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN warn_unsaved DROP DEFAULT;
-			
+
 			-- new form state condition
 			ALTER TABLE app.form_state_condition ADD COLUMN login1 BOOLEAN;
-			
+
 			-- new open form entity
 			CREATE TABLE IF NOT EXISTS app.open_form (
 			    field_id uuid,
@@ -5290,14 +5296,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON app.open_form USING btree (column_id ASC NULLS LAST);
 			CREATE INDEX fki_open_form_attribute_id_apply_fkey
 				ON app.open_form USING btree (attribute_id_apply ASC NULLS LAST);
-			
+
 			-- new data display type: password
 			ALTER TYPE app.data_display ADD VALUE 'password';
-			
+
 			-- clean up missing NOT NULL constraints in PG functions
 			ALTER TABLE app.pg_function ALTER COLUMN code_args SET NOT NULL;
 			ALTER TABLE app.pg_function ALTER COLUMN code_returns SET NOT NULL;
-			
+
 			-- new options for PG functions
 			ALTER TABLE app.pg_function ADD COLUMN is_frontend_exec boolean NOT NULL DEFAULT false;
 			ALTER TABLE app.pg_function ALTER COLUMN is_frontend_exec DROP DEFAULT;
@@ -5310,7 +5316,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				FROM app.pg_function
 				WHERE UPPER(code_returns) = 'TRIGGER'
 			);
-			
+
 			-- JS functions
 			CREATE TABLE IF NOT EXISTS app.js_function (
 			    id uuid NOT NULL,
@@ -5336,10 +5342,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE INDEX IF NOT EXISTS fki_js_function_form_id
 			    ON app.js_function USING btree (form_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_module_id
 			    ON app.js_function USING btree (module_id ASC NULLS LAST);
-				
+
 			CREATE TABLE IF NOT EXISTS app.js_function_depends (
 			    js_function_id uuid NOT NULL,
 			    js_function_id_on uuid,
@@ -5378,29 +5384,29 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_field_id_on
 			    ON app.js_function_depends USING btree (field_id_on ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_form_id_on
 			    ON app.js_function_depends USING btree (form_id_on ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_role_id_on
 			    ON app.js_function_depends USING btree (role_id_on ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_js_function_id
 			    ON app.js_function_depends USING btree (js_function_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_js_function_id_on
 			    ON app.js_function_depends USING btree (js_function_id_on ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_pg_function_id_on
 			    ON app.js_function_depends USING btree (pg_function_id_on ASC NULLS LAST);
-			
+
 			-- caption updates for JS functions
 			ALTER TYPE app.caption_content ADD VALUE 'jsFunctionTitle';
 			ALTER TYPE app.caption_content ADD VALUE 'jsFunctionDesc';
-			
+
 			ALTER TABLE app.caption ADD COLUMN js_function_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_js_function_id_fkey
 				FOREIGN KEY (js_function_id)
@@ -5408,7 +5414,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- JS function triggers
 			ALTER TABLE app.field_button ADD COLUMN js_function_id UUID;
 			ALTER TABLE app.field_button ADD CONSTRAINT field_button_js_function_id_fkey
@@ -5417,10 +5423,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_field_button_js_function_id
 			    ON app.field_button USING btree (js_function_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.field_data ADD COLUMN js_function_id UUID;
 			ALTER TABLE app.field_data ADD CONSTRAINT field_data_js_function_id_fkey
 				FOREIGN KEY (js_function_id)
@@ -5428,13 +5434,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_field_data_js_function_id
 			    ON app.field_data USING btree (js_function_id ASC NULLS LAST);
-			
+
 			-- JS functions form events
 			CREATE TYPE app.form_function_event AS ENUM ('open', 'save', 'delete');
-			
+
 			CREATE TABLE IF NOT EXISTS app.form_function (
 			    form_id uuid NOT NULL,
 			    "position" integer NOT NULL,
@@ -5453,13 +5459,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_function_form_id
 			    ON app.form_function USING btree (form_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_form_function_js_function_id
 			    ON app.form_function USING btree (js_function_id ASC NULLS LAST);
-			
+
 			-- new collection entity
 			CREATE TABLE IF NOT EXISTS app.collection (
 			    id uuid NOT NULL,
@@ -5472,10 +5478,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_collection_module_id_fkey
 			    ON app.collection USING btree (module_id ASC NULLS LAST);
-			
+
 			-- updates to columns, allowing them to reference collections
 			ALTER TABLE app.column ALTER COLUMN field_id DROP NOT NULL;
 			ALTER TABLE app.column ADD COLUMN collection_id uuid;
@@ -5484,13 +5490,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 			    ON DELETE CASCADE
 			    DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_column_collection_id_fkey
 			    ON app.column USING btree (collection_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.column ADD CONSTRAINT column_single_parent
 			CHECK ((field_id IS NULL) <> (collection_id IS NULL));
-			
+
 			-- adding collection to query as parent
 			ALTER TABLE app.query ADD COLUMN collection_id uuid;
 			ALTER TABLE app.query ADD CONSTRAINT query_collection_id_fkey FOREIGN KEY (collection_id)
@@ -5498,10 +5504,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 			    ON DELETE CASCADE
 			    DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_query_collection_id_fkey
 			    ON app.query USING btree (collection_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.query ADD CONSTRAINT query_single_parent
 			CHECK (1 = (
 				(CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END) +
@@ -5510,30 +5516,30 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				(CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END) +
 				(CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END)
 			));
-			
+
 			-- add collection as filter option
 			ALTER TYPE app.query_filter_side_content ADD VALUE 'collection';
-			
+
 			ALTER TABLE app.query_filter_side ADD COLUMN collection_id uuid;
 			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_collection_id_fkey FOREIGN KEY (collection_id)
 				REFERENCES app.collection (id) MATCH SIMPLE
 				ON UPDATE NO ACTION
 			    ON DELETE NO ACTION
 			    DEFERRABLE INITIALLY DEFERRED;
-			
+
 			ALTER TABLE app.query_filter_side ADD COLUMN column_id uuid;
 			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_column_id_fkey FOREIGN KEY (column_id)
 				REFERENCES app.column (id) MATCH SIMPLE
 				ON UPDATE NO ACTION
 			    ON DELETE NO ACTION
 			    DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_query_filter_side_collection_id_fkey
 			    ON app.query_filter_side USING btree (collection_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_query_filter_side_column_id_fkey
 			    ON app.query_filter_side USING btree (column_id ASC NULLS LAST);
-			
+
 			-- add collection access via role
 			ALTER TABLE app.role_access ADD COLUMN collection_id uuid;
 			ALTER TABLE app.role_access ADD CONSTRAINT role_access_collection_id_fkey
@@ -5542,10 +5548,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON UPDATE CASCADE
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX IF NOT EXISTS fki_role_access_collection_id_fkey
    				ON app.role_access USING btree(collection_id ASC NULLS LAST);
-			
+
 			-- add collection consumer: fields
 			CREATE TABLE IF NOT EXISTS app.collection_consumer (
 			    collection_id uuid NOT NULL,
@@ -5567,37 +5573,37 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_collection_consumer_collection_id_fkey
    				ON app.collection_consumer USING btree(collection_id ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_collection_consumer_column_id_display_fkey
    				ON app.collection_consumer USING btree(column_id_display ASC NULLS LAST);
-			
+
 			CREATE INDEX IF NOT EXISTS fki_collection_consumer_field_id_fkey
    				ON app.collection_consumer USING btree(field_id ASC NULLS LAST);
-			
+
 			-- data field default values from collections
 			ALTER TABLE app.field_data ADD COLUMN collection_id_def uuid;
 			ALTER TABLE app.field_data ADD COLUMN column_id_def uuid;
-			
+
 			ALTER TABLE app.field_data ADD CONSTRAINT field_data_collection_id_def_fkey
 				FOREIGN KEY (collection_id_def)
 				REFERENCES app.collection (id) MATCH SIMPLE
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			ALTER TABLE app.field_data ADD CONSTRAINT field_data_column_id_def_fkey
 				FOREIGN KEY (column_id_def)
 				REFERENCES app.column (id) MATCH SIMPLE
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_field_data_collection_id_def_fkey
 				ON app.field_data USING btree (collection_id_def ASC NULLS LAST);
-			
+
 			CREATE INDEX fki_field_data_column_id_def_fkey
 				ON app.field_data USING btree (column_id_def ASC NULLS LAST);
 		`); err != nil {
@@ -5676,7 +5682,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		_, err := tx.Exec(ctx, `
 			-- repo change logs
 			ALTER TABLE instance.repo_module ADD COLUMN change_log TEXT;
-			
+
 			-- relation policies
 			CREATE TABLE app.relation_policy (
 			    relation_id uuid NOT NULL,
@@ -5721,7 +5727,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON app.relation_policy USING btree (relation_id ASC NULLS LAST);
 			CREATE INDEX fki_relation_policy_role_id_fkey
 				ON app.relation_policy USING btree (role_id ASC NULLS LAST);
-			
+
 			-- missing record attribute on calendar fields
 			ALTER TABLE app.field_calendar ADD COLUMN attribute_id_record UUID;
 			ALTER TABLE app.field_calendar ADD CONSTRAINT field_calendar_attribute_id_record_fkey
@@ -5730,7 +5736,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- start forms
 			CREATE TABLE IF NOT EXISTS app.module_start_form(
 			    module_id uuid NOT NULL,
@@ -5760,11 +5766,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			    ON app.module_start_form USING btree (role_id ASC NULLS LAST);
 			CREATE INDEX fki_module_start_form_form_id_fkey
 			    ON app.module_start_form USING btree (form_id ASC NULLS LAST);
-			
+
 			-- new config
 			INSERT INTO instance.config (name,value)
 			VALUES ('builderMode','0');
-			
+
 			-- new preset filter criteria
 			ALTER TYPE app.query_filter_side_content ADD VALUE 'preset';
 			ALTER TABLE app.query_filter_side ADD COLUMN preset_id UUID;
@@ -5774,11 +5780,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- new query fixed limit
 			ALTER TABLE app.query ADD COLUMN fixed_limit INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE app.query ALTER COLUMN fixed_limit DROP DEFAULT;
-			
+
 			-- update log function
 			CREATE OR REPLACE FUNCTION instance.log(
 				level integer,
@@ -5797,11 +5803,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				SELECT value::INT INTO level_show
 				FROM instance.config
 				WHERE name = 'logApplication';
-				
+
 				IF level_show < level THEN
 					RETURN;
 				END IF;
-			
+
 				-- resolve module ID if possible
 				-- if not possible: log with module_id = NULL (better than not to log)
 				IF app_name IS NOT NULL THEN
@@ -5809,7 +5815,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM app.module
 					WHERE name = app_name;
 				END IF;
-			
+
 				INSERT INTO instance.log (level,context,module_id,message,date_milli)
 				VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
 			END;
@@ -5829,27 +5835,27 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			ALTER TYPE app.field_content ADD VALUE 'chart';
 			ALTER TYPE app.aggregator ADD VALUE 'array';
-			
+
 			-- pgx fixes (pgtype.Int2 is required to deal with nullable SMALLINT, but does not support unmarshal)
 			ALTER TABLE app.relation ALTER COLUMN retention_count TYPE INTEGER;
 			ALTER TABLE app.relation ALTER COLUMN retention_days TYPE INTEGER;
 			ALTER TABLE app.field_calendar ALTER COLUMN index_color TYPE INTEGER;
 			ALTER TABLE app.column ALTER COLUMN batch TYPE INTEGER;
-			
+
 			-- new config settings
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutCsv','120');
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataRest','60');
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataWs','60');
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutIcs','30');
 			INSERT INTO instance.config (name,value) VALUES ('schemaTimestamp','0');
-			
+
 			-- new gantt option
 			ALTER TABLE app.field_calendar ADD COLUMN gantt_steps_toggle BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.field_calendar ALTER COLUMN gantt_steps_toggle DROP DEFAULT;
-			
+
 			-- new role instance functions
 			CREATE FUNCTION instance.get_role_ids(login_id INTEGER, inherited BOOLEAN DEFAULT FALSE)
 				RETURNS UUID[]
@@ -5881,7 +5887,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						FROM instance.login_role AS lr
 						WHERE lr.login_id = login
 					) INTO role_ids;
-					
+
 					RETURN role_ids;
 				ELSE
 					SELECT ARRAY(
@@ -5889,12 +5895,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						FROM instance.login_role AS lr
 						WHERE lr.login_id = login
 					) INTO role_ids;
-					
+
 					RETURN role_ids;
 				END IF;
 			END;
 			$BODY$;
-			
+
 			CREATE FUNCTION instance.has_role(login_id INTEGER, role_id UUID, inherited BOOLEAN DEFAULT FALSE)
 				RETURNS BOOLEAN
 				LANGUAGE 'plpgsql'
@@ -5904,18 +5910,18 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				r UUID;
 			BEGIN
 				SELECT instance.get_role_ids(login_id, inherited) INTO roles_access;
-				
+
 				FOREACH r IN ARRAY roles_access
 				LOOP
 					IF r = role_id THEN
 						RETURN TRUE;
 					END IF;
 				END LOOP;
-				
+
 				RETURN FALSE;
 			END;
 			$BODY$;
-			
+
 			CREATE FUNCTION instance.has_role_any(login_id INTEGER, role_ids UUID[], inherited BOOLEAN DEFAULT FALSE)
 				RETURNS BOOLEAN
 				LANGUAGE 'plpgsql'
@@ -5926,7 +5932,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				r2 UUID;
 			BEGIN
 				SELECT instance.get_role_ids(login_id, inherited) INTO roles_access;
-				
+
 				FOREACH r1 IN ARRAY roles_access
 				LOOP
 					FOREACH r2 IN ARRAY role_ids
@@ -5936,7 +5942,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						END IF;
 					END LOOP;
 				END LOOP;
-				
+
 				RETURN FALSE;
 			END;
 			$BODY$;
@@ -5976,10 +5982,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_login_form_module_fkey
 				ON app.login_form USING btree (module_id ASC NULLS LAST);
-			
+
 			ALTER TABLE app.caption ADD COLUMN login_form_id UUID;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_login_form_id_fkey FOREIGN KEY (login_form_id)
 				REFERENCES app.login_form (id) MATCH SIMPLE
@@ -5988,9 +5994,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX fki_caption_login_form_id_fkey
 			    ON app.caption USING btree (login_form_id ASC NULLS LAST);
-			
+
 			ALTER TYPE app.caption_content ADD VALUE 'loginFormTitle';
-			
+
 			-- new admin user settings
 			ALTER TABLE instance.login_setting ADD COLUMN hint_first_steps BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN hint_first_steps DROP DEFAULT;
@@ -6062,17 +6068,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		if _, err := tx.Exec(ctx, `
 			ALTER TABLE instance.scheduler DROP COLUMN pg_function_id;
 			ALTER TABLE instance.scheduler DROP COLUMN pg_function_schedule_position;
-			
+
 			ALTER TABLE app.pg_function_schedule DROP COLUMN position;
 			ALTER TABLE app.pg_function_schedule ADD CONSTRAINT pg_function_schedule_pkey PRIMARY KEY (id);
-			
+
 			ALTER TABLE instance.scheduler ADD CONSTRAINT scheduler_pg_function_schedule_id_fkey
 				FOREIGN KEY (pg_function_schedule_id)
 				REFERENCES app.pg_function_schedule (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-				
+
 			-- other changes
 			-- user settings
 			ALTER TABLE instance.login_setting ADD COLUMN spacing INTEGER NOT NULL DEFAULT 3;
@@ -6081,11 +6087,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_setting ALTER COLUMN dark DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD COLUMN compact BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN compact DROP DEFAULT;
-			
+
 			-- company logo URL
 			INSERT INTO instance.config (name,value)
 			VALUES ('companyLogoUrl','');
-			
+
 			-- PG functions title/description captions
 			ALTER TABLE app.caption ADD COLUMN pg_function_id UUID;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_pg_function_id_fkey
@@ -6094,19 +6100,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_pg_function_id_fkey
 				ON app.caption USING btree (pg_function_id ASC NULLS LAST);
-			
+
 			ALTER TYPE app.caption_content ADD VALUE 'pgFunctionTitle';
 			ALTER TYPE app.caption_content ADD VALUE 'pgFunctionDesc';
-			
+
 			-- new schedule type: once
 			ALTER TYPE app.pg_function_schedule_interval ADD VALUE 'once';
-			
+
 			-- backend application logs
 			INSERT INTO instance.config (name,value) VALUES ('logApplication','2');
-			
+
 			ALTER TABLE instance.log ADD COLUMN module_id UUID;
 			ALTER TABLE instance.log ADD CONSTRAINT log_module_id_fkey
 				FOREIGN KEY (module_id)
@@ -6114,9 +6120,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			ALTER TYPE instance.log_context ADD VALUE 'module';
-			
+
 			CREATE FUNCTION instance.log(level integer,message text,app_name text DEFAULT NULL)
 			    RETURNS void
 			    LANGUAGE 'plpgsql'
@@ -6129,11 +6135,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				SELECT value::INT INTO level_show
 				FROM instance.config
 				WHERE name = 'logApplication';
-				
+
 				IF level_show < level THEN
 					RETURN;
 				END IF;
-			
+
 				-- resolve module ID if possible
 				-- if not possible: log with module_id = NULL (better than not to log)
 				IF app_name IS NOT NULL THEN
@@ -6141,12 +6147,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM app.module
 					WHERE name = app_name;
 				END IF;
-			
+
 				INSERT INTO instance.log (level,context,module_id,message,date_milli)
 				VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT);
 			END;
 			$BODY$;
-			
+
 			CREATE FUNCTION instance.log_info(message TEXT,app_name TEXT DEFAULT NULL)
 				RETURNS VOID
 				LANGUAGE 'plpgsql'
@@ -6156,7 +6162,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				PERFORM instance.log(3,message,app_name);
 			END;
 			$BODY$;
-			
+
 			CREATE FUNCTION instance.log_warning(message TEXT,app_name TEXT DEFAULT NULL)
 				RETURNS VOID
 				LANGUAGE 'plpgsql'
@@ -6166,7 +6172,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				PERFORM instance.log(2,message,app_name);
 			END;
 			$BODY$;
-			
+
 			CREATE FUNCTION instance.log_error(message TEXT,app_name TEXT DEFAULT NULL)
 				RETURNS VOID
 				LANGUAGE 'plpgsql'
@@ -6176,7 +6182,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				PERFORM instance.log(1,message,app_name);
 			END;
 			$BODY$;
-			
+
 			-- backend error function
 			CREATE FUNCTION instance.abort_show_message(message TEXT)
 			    RETURNS VOID
@@ -6189,10 +6195,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				RAISE EXCEPTION 'R3_MSG: %', message;
 			END;
 			$BODY$;
-			
+
 			-- new form state condition
 			ALTER TABLE app.form_state_condition ADD COLUMN field_changed BOOLEAN;
-			
+
 			-- mail_send function update
 			CREATE OR REPLACE FUNCTION instance.mail_send(
 				subject TEXT,
@@ -6216,20 +6222,20 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM instance.mail_account
 					WHERE name = account_name;
 				END IF;
-				
-				IF to_list  IS NULL THEN to_list  := ''; END IF; 
-				IF cc_list  IS NULL THEN cc_list  := ''; END IF; 
+
+				IF to_list  IS NULL THEN to_list  := ''; END IF;
+				IF cc_list  IS NULL THEN cc_list  := ''; END IF;
 				IF bcc_list IS NULL THEN bcc_list := ''; END IF;
-				
+
 				INSERT INTO instance.mail_spool (to_list,cc_list,bcc_list,
 					subject,body,outgoing,date,mail_account_id,record_id_wofk,attribute_id)
 				VALUES (to_list,cc_list,bcc_list,subject,body,TRUE,EXTRACT(epoch from now()),
 					account_id,attach_record_id,attach_attribute_id);
-			
+
 				RETURN 0;
 			END;
 			$BODY$;
-			
+
 			-- clean up from last release
 			ALTER TABLE instance.mail_account ALTER COLUMN mode TYPE instance.mail_account_mode
 				USING mode::text::instance.mail_account_mode;
@@ -6244,9 +6250,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- consolidated field default state
 			ALTER TABLE app.field ADD COLUMN state app.field_state NOT NULL DEFAULT 'default';
 			ALTER TABLE app.field ALTER COLUMN state DROP DEFAULT;
-			
+
 			ALTER TYPE app.field_state ADD VALUE 'optional';
-			
+
 			UPDATE app.field SET state = 'readonly' WHERE id IN (
 				SELECT field_id
 				FROM app.field_data
@@ -6263,31 +6269,31 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				WHERE display = 'hidden'
 			);
 			UPDATE app.field_data SET display = 'default' WHERE display = 'hidden';
-			
+
 			ALTER TABLE app.field_data
 				DROP COLUMN readonly,
 				DROP COLUMN required;
-			
+
 			-- new list auto renewal option
 			ALTER TABLE app.field_list ADD COLUMN auto_renew INTEGER;
-			
+
 			-- column changes
 			ALTER TABLE app.column ADD COLUMN length SMALLINT NOT NULL DEFAULT 0;
 			ALTER TABLE app.column ALTER COLUMN length DROP DEFAULT;
-			
+
 			ALTER TABLE app.column ADD COLUMN wrap BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN wrap DROP DEFAULT;
-			
+
 			-- remove export key configuration
 			DELETE FROM instance.config WHERE name = 'exportPrivateKey';
-			
+
 			-- remove unused form state option
 			ALTER TABLE app.form_state DROP COLUMN position;
-			
+
 			-- module export option
 			ALTER TABLE instance.module_option ADD COLUMN owner BOOLEAN DEFAULT FALSE;
 			ALTER TABLE instance.module_option ALTER COLUMN owner DROP DEFAULT;
-			
+
 			-- fix missing 'from' in mail_get_next()
 			DROP FUNCTION instance.mail_get_next;
 			DROP TYPE instance.mail;
@@ -6299,7 +6305,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				subject text,
 				body text
 			);
-			
+
 			CREATE FUNCTION instance.mail_get_next(
 				account_name text DEFAULT NULL::text)
 			    RETURNS instance.mail
@@ -6326,15 +6332,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				)
 				ORDER BY id ASC
 				LIMIT 1;
-			
+
 				RETURN m;
 			END;
 			$BODY$;
-			
+
 			-- clean up from last release
 			ALTER TABLE app.field_calendar ALTER COLUMN gantt_steps TYPE app.field_calendar_gantt_steps
 				USING gantt_steps::text::app.field_calendar_gantt_steps;
-			
+
 			-- prepare for clean in next release
 			CREATE TYPE instance.mail_account_mode AS ENUM ('imap', 'smtp');
 		`); err != nil {
@@ -6363,10 +6369,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.field_calendar ALTER COLUMN gantt DROP DEFAULT;
 			ALTER TABLE app.field_calendar ALTER COLUMN date_range0 DROP DEFAULT;
 			ALTER TABLE app.field_calendar ALTER COLUMN date_range1 DROP DEFAULT;
-			
+
 			-- prepare for next release (ENUMs to replace next time)
 			CREATE TYPE app.field_calendar_gantt_steps AS ENUM ('days','hours');
-			
+
 			-- mail changes
 			CREATE TABLE instance.mail_account (
 				id serial NOT NULL,
@@ -6384,17 +6390,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				USING BTREE (name DESC NULLS LAST);
 			CREATE INDEX ind_mail_account_mode ON instance.mail_account
 				USING BTREE (mode DESC NULLS LAST);
-			
+
 			INSERT INTO instance.task (name,interval_seconds,embedded_only,active) VALUES
 				('mailAttach',30,false,true),
 				('mailRetrieve',60,false,true),
 				('mailSend',10,false,true);
-			
+
 			INSERT INTO instance.scheduler (task_name,date_attempt,date_success) VALUES
 				('mailAttach',0,0),
 				('mailRetrieve',0,0),
 				('mailSend',0,0);
-			
+
 			ALTER TABLE instance.mail_spool ADD COLUMN mail_account_id integer;
 			ALTER TABLE instance.mail_spool ADD CONSTRAINT mail_spool_mail_account_fkey
 				FOREIGN KEY (mail_account_id)
@@ -6402,7 +6408,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE SET NULL
 				ON DELETE SET NULL
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			ALTER TABLE instance.mail_spool ADD COLUMN from_list text NOT NULL DEFAULT '';
 			ALTER TABLE instance.mail_spool ADD COLUMN date bigint NOT NULL DEFAULT 0;
 			ALTER TABLE instance.mail_spool ALTER COLUMN date DROP DEFAULT;
@@ -6417,12 +6423,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE SET NULL
 				ON DELETE SET NULL
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX ind_mail_spool_outgoing ON instance.mail_spool
 				USING BTREE (outgoing DESC NULLS LAST);
 			CREATE INDEX ind_mail_spool_date ON instance.mail_spool
 				USING BTREE (date DESC NULLS LAST);
-			
+
 			CREATE TABLE instance.mail_spool_file(
 				mail_id integer NOT NULL,
 				position integer NOT NULL,
@@ -6436,7 +6442,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE OR REPLACE FUNCTION instance.mail_send(
 				subject text,
 				body text,
@@ -6457,24 +6463,24 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM instance.mail_account
 					WHERE name = account_name;
 				END IF;
-				
+
 				IF cc_list IS NULL THEN
 					cc_list := '';
 				END IF;
-				
+
 				IF bcc_list IS NULL THEN
 					bcc_list := '';
 				END IF;
-				
+
 				INSERT INTO instance.mail_spool (to_list,cc_list,bcc_list,
 					subject,body,outgoing,date,mail_account_id,record_id_wofk,attribute_id)
 				VALUES (to_list,cc_list,bcc_list,subject,body,TRUE,EXTRACT(epoch from now()),
 					account_id,attach_record_id,attach_attribute_id);
-			
+
 				RETURN 0;
 			END;
 			$BODY$;
-			
+
 			CREATE TYPE instance.mail AS (
 				id integer,
 				to_list TEXT,
@@ -6482,7 +6488,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				subject TEXT,
 				body TEXT
 			);
-			
+
 			CREATE OR REPLACE FUNCTION instance.mail_get_next(account_name TEXT DEFAULT NULL)
 			    RETURNS instance.mail
 			    LANGUAGE 'plpgsql'
@@ -6506,11 +6512,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				)
 				ORDER BY id ASC
 				LIMIT 1;
-			
+
 				RETURN m;
 			END;
 			$BODY$;
-			
+
 			CREATE OR REPLACE FUNCTION instance.mail_delete(mail_id integer)
 			    RETURNS integer
 			    LANGUAGE 'plpgsql'
@@ -6519,11 +6525,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			BEGIN
 				DELETE FROM instance.mail_spool
 				WHERE id = mail_id;
-				
+
 				RETURN 0;
 			END;
 			$BODY$;
-			
+
 			CREATE OR REPLACE FUNCTION instance.mail_delete_after_attach(
 				mail_id integer,
 				attach_record_id integer,
@@ -6539,11 +6545,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					attribute_id = attach_attribute_id
 				WHERE id = mail_id
 				AND outgoing = FALSE;
-				
+
 				RETURN 0;
 			END;
 			$BODY$;
-			
+
 			-- generic system functions
 			CREATE OR REPLACE FUNCTION instance.get_login_id()
 				RETURNS integer
@@ -6553,15 +6559,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				setting text;
 			BEGIN
 				SELECT CURRENT_SETTING('r3.login_id',TRUE) INTO setting;
-				
+
 				IF setting IS NULL OR setting = '' THEN
 					RETURN NULL;
 				END IF;
-				
+
 				RETURN setting::int;
 			END;
 			$BODY$;
-			
+
 			CREATE OR REPLACE FUNCTION instance.get_login_language_code()
 				RETURNS text
 				LANGUAGE 'plpgsql'
@@ -6571,19 +6577,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				setting text;
 			BEGIN
 				SELECT CURRENT_SETTING('r3.login_id',TRUE) INTO setting;
-				
+
 				IF setting IS NULL OR setting = '' THEN
 					RETURN NULL;
 				END IF;
-				
+
 				SELECT language_code INTO code
 				FROM instance.login_setting
 				WHERE login_id = setting::int;
-				
+
 				RETURN code;
 			END;
 			$BODY$;
-			
+
 			CREATE OR REPLACE FUNCTION instance.get_public_hostname()
 				RETURNS text
 				LANGUAGE 'plpgsql'
@@ -6594,11 +6600,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				SELECT value INTO output
 				FROM instance.config
 				WHERE name = 'publicHostName';
-				
+
 				RETURN output;
 			END;
 			$BODY$;
-			
+
 			CREATE OR REPLACE FUNCTION instance.get_name()
 				RETURNS text
 				LANGUAGE 'plpgsql'
@@ -6609,15 +6615,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				SELECT value INTO output
 				FROM instance.config
 				WHERE name = 'appName';
-				
+
 				RETURN output;
 			END;
 			$BODY$;
-			
+
 			-- config change
 			UPDATE instance.config SET name = 'publicHostName'
 				WHERE name = 'mailThisHost';
-			
+
 			-- trigger changes
 			ALTER TABLE app.pg_trigger ADD COLUMN is_constraint boolean NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.pg_trigger ALTER COLUMN is_constraint DROP DEFAULT;
@@ -6625,39 +6631,39 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.pg_trigger ALTER COLUMN is_deferrable DROP DEFAULT;
 			ALTER TABLE app.pg_trigger ADD COLUMN is_deferred boolean NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.pg_trigger ALTER COLUMN is_deferred DROP DEFAULT;
-			
+
 			-- new display options
 			ALTER TYPE app.data_display ADD VALUE 'phone';
 			ALTER TYPE app.data_display ADD VALUE 'email';
-			
+
 			--
 			-- clean-up from last release
 			DROP TYPE app.deletion_entity;
-			
+
 			-- switch to enum type for fixed token
 			ALTER TABLE instance.login_token_fixed DROP COLUMN context;
 			ALTER TABLE instance.login_token_fixed ADD COLUMN context instance.token_fixed_context;
 			UPDATE instance.login_token_fixed SET context = 'ics';
 			ALTER TABLE instance.login_token_fixed ALTER COLUMN context SET NOT NULL;
-			
+
 			-- remove bad NOT NULL syntax for operator
 			ALTER TYPE app.condition_operator RENAME TO condition_operator_old;
-			
+
 			ALTER TABLE app.query_filter ALTER COLUMN operator TYPE app.condition_operator_new
 				USING operator::text::app.condition_operator_new;
-			
+
 			ALTER TABLE app.form_state_condition ALTER COLUMN operator TYPE app.condition_operator_new
 				USING operator::text::app.condition_operator_new;
-			
+
 			DROP TYPE app.condition_operator_old;
 			ALTER TYPE app.condition_operator_new RENAME TO condition_operator;
-			
+
 			-- remove not used query filter columns
 			ALTER TABLE app.query_filter_side DROP COLUMN language_code;
 			ALTER TABLE app.query_filter_side DROP COLUMN login;
 			ALTER TABLE app.query_filter_side DROP COLUMN record;
 			ALTER TABLE app.query_filter_side DROP COLUMN sub_query;
-			
+
 			-- switch to enum type query filter side content
 			ALTER TABLE app.query_filter_side ALTER COLUMN content TYPE app.query_filter_side_content
 				USING content::text::app.query_filter_side_content;
@@ -6670,7 +6676,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		var mailFrom, mailHost, mailPass, mailPort, mailUser string
 
 		if err := tx.QueryRow(ctx, `
-			SELECT 
+			SELECT
 				(SELECT value FROM instance.config WHERE name = 'mailFrom'),
 				(SELECT value FROM instance.config WHERE name = 'mailHost'),
 				(SELECT value FROM instance.config WHERE name = 'mailPass'),
@@ -6709,13 +6715,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.field_calendar ADD COLUMN ics boolean NOT NULL DEFAULT false;
 			ALTER TABLE app.field_calendar ALTER COLUMN ics DROP DEFAULT;
 			CREATE INDEX ind_field_calendar_ics ON app.field_calendar USING btree (ics ASC NULLS LAST);
-			
+
 			-- ICS config
 			INSERT INTO instance.config (name,value) VALUES
 				('icsDownload','1'),
 				('icsDaysPost','365'),
 				('icsDaysPre','365');
-			
+
 			-- new fixed login tokens
 			CREATE TABLE instance.login_token_fixed (
 			    login_id integer NOT NULL,
@@ -6729,16 +6735,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			-- regex data field check
 			ALTER TABLE app.field_data ADD COLUMN regex_check text;
-			
+
 			-- set default values for to be removed columns (next release)
 			ALTER TABLE app.query_filter_side ALTER COLUMN language_code SET DEFAULT FALSE;
 			ALTER TABLE app.query_filter_side ALTER COLUMN login SET DEFAULT FALSE;
 			ALTER TABLE app.query_filter_side ALTER COLUMN record SET DEFAULT FALSE;
 			ALTER TABLE app.query_filter_side ALTER COLUMN sub_query SET DEFAULT FALSE;
-			
+
 			-- new filter criteria: user role
 			ALTER TABLE app.query_filter_side ADD COLUMN role_id uuid;
 			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_role_id_fkey
@@ -6747,21 +6753,21 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_query_filter_side_role_id_fkey
 			    ON app.query_filter_side USING btree (role_id ASC NULLS LAST);
-			
+
 			-- switch to 'content' definition for query filters
 			ALTER TABLE app.query_filter_side ADD COLUMN content character varying(16) NOT NULL DEFAULT 'value';
 			ALTER TABLE app.query_filter_side ALTER COLUMN content DROP DEFAULT;
-			
+
 			UPDATE app.query_filter_side SET content = 'attribute' WHERE attribute_id IS NOT NULL;
 			UPDATE app.query_filter_side SET content = 'field' WHERE field_id IS NOT NULL;
 			UPDATE app.query_filter_side SET content = 'languageCode' WHERE language_code = true;
 			UPDATE app.query_filter_side SET content = 'login' WHERE login = true;
 			UPDATE app.query_filter_side SET content = 'record' WHERE record = true;
 			UPDATE app.query_filter_side SET content = 'subQuery' WHERE sub_query = true;
-			
+
 			-- clean up bad NOT NULL syntax for query filter operator
 			UPDATE app.query_filter SET operator = 'IS NOT NULL' WHERE operator = 'NOT NULL';
 			UPDATE app.form_state_condition SET operator = 'IS NOT NULL' WHERE operator = 'NOT NULL';
@@ -6769,10 +6775,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'=', '<>', '<', '>', '<=', '>=', 'IS NULL', 'IS NOT NULL',
 				'LIKE', 'ILIKE', 'NOT LIKE', 'NOT ILIKE', '= ANY', '<> ALL'
 			);
-			
+
 			-- prepare for next release (ENUMs to replace next time)
 			CREATE TYPE instance.token_fixed_context AS ENUM ('ics');
-			
+
 			CREATE TYPE app.query_filter_side_content AS ENUM (
 				'attribute', 'field', 'javascript', 'languageCode', 'login',
 				'record', 'recordNew', 'role', 'subQuery', 'true', 'value'
@@ -6785,11 +6791,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- prepare clean up of bad NOT NULL operator type in next version
 			--  (new ENUM value cannot be used in same TX)
 			ALTER TYPE app.condition_operator ADD VALUE 'IS NOT NULL';
-			
+
 			-- new PG function scheduler
 			CREATE TYPE app.pg_function_schedule_interval AS ENUM
 				('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years');
-		
+
 			CREATE TABLE app.pg_function_schedule (
 			    pg_function_id uuid NOT NULL,
 			    "position" smallint NOT NULL,
@@ -6808,11 +6814,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE INDEX fki_pg_function_schedule_pg_function_id_fkey
 				ON app.pg_function_schedule USING btree (pg_function_id ASC NULLS LAST);
-			
+
 			-- new scheduler log context
 			ALTER TYPE instance.log_context ADD VALUE 'scheduler';
 			INSERT INTO instance.config (name,value) VALUES ('logScheduler', '2');
-			
+
 			-- consolidate system tasks with PG function scheduler
 			CREATE TABLE instance.scheduler (
 			    pg_function_id uuid,
@@ -6833,13 +6839,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			INSERT INTO instance.scheduler (task_name, date_attempt, date_success)
 				SELECT name, date_attempt, date_success FROM instance.task;
-			
+
 			ALTER TABLE instance.task DROP COLUMN date_attempt;
 			ALTER TABLE instance.task DROP COLUMN date_success;
-			
+
 			-- new attribute record open for relationship fields
 			ALTER TABLE app.field_data_relationship ADD COLUMN attribute_id_record uuid;
 			ALTER TABLE app.field_data_relationship ADD
@@ -6848,10 +6854,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON UPDATE NO ACTION
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- move to consolidated query filter criteria sides (0&1 for left&right)
 			ALTER TYPE app.column_aggregator RENAME TO aggregator;
-			
+
 			CREATE TABLE app.query_filter_side (
 			    query_id uuid NOT NULL,
 			    query_filter_position smallint NOT NULL,
@@ -6889,31 +6895,31 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_query_filter_side_attribute_id_fkey
 				ON app.query_filter_side USING btree (attribute_id ASC NULLS LAST);
-			
+
 			CREATE INDEX fki_query_filter_side_field_id_fkey
 				ON app.query_filter_side USING btree (field_id ASC NULLS LAST);
-			
+
 			CREATE INDEX fki_query_filter_side_query_id_fkey
 				ON app.query_filter_side USING btree (query_id ASC NULLS LAST);
-			
+
 			INSERT INTO app.query_filter_side (
 				query_id, query_filter_position, side, attribute_id, attribute_index, attribute_nested,
 				brackets, language_code, login, record, sub_query)
 			SELECT query_id, position, 0, attribute_id0, index0, nested0, brackets0, false, false, false, false
 			FROM app.query_filter;
-			
+
 			INSERT INTO app.query_filter_side (
 				query_id, query_filter_position, side, attribute_id, attribute_index, attribute_nested,
 				field_id, brackets, language_code, login, record, sub_query, value)
 			SELECT query_id, position, 1, attribute_id1, index1, nested1, field_id1, brackets1, language_code1, login1, record1, sub_query, value1
 			FROM app.query_filter;
-			
+
 			ALTER TABLE app.query ADD COLUMN query_filter_side smallint;
 			UPDATE app.query SET query_filter_side = 1 WHERE query_filter_query_id IS NOT NULL;
-			
+
 			ALTER TABLE app.query DROP CONSTRAINT query_filter_subquery_fkey;
 			ALTER TABLE app.query ADD CONSTRAINT query_filter_subquery_fkey
 				FOREIGN KEY (query_filter_side, query_filter_position, query_filter_query_id)
@@ -6921,7 +6927,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			ALTER TABLE app.query_filter
 				DROP COLUMN attribute_id0,
 				DROP COLUMN attribute_id1,
@@ -6937,7 +6943,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DROP COLUMN nested0,
 				DROP COLUMN nested1,
 				DROP COLUMN sub_query;
-			
+
 			-- add attribute icon
 			ALTER TABLE app.attribute ADD COLUMN icon_id uuid;
 			ALTER TABLE app.attribute ADD CONSTRAINT attribute_icon_id_fkey FOREIGN KEY (icon_id)
@@ -6945,10 +6951,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_attribute_icon_id_fkey
 				ON app.attribute USING btree (icon_id ASC NULLS LAST);
-			
+
 			-- add missing indexes
 			CREATE INDEX fki_query_choice_query_id_fkey
 				ON app.query_choice USING btree (query_id ASC NULLS LAST);
@@ -7026,7 +7032,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			ALTER TABLE app.query_filter ADD COLUMN query_choice_id uuid;
 			ALTER TABLE app.query_filter ADD CONSTRAINT query_filter_query_choice_id_fkey
 				FOREIGN KEY (query_choice_id)
@@ -7034,10 +7040,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_query_filter_query_choice_id_fkey
 				ON app.query_filter USING btree (query_choice_id ASC NULLS LAST);
-			
+
 			ALTER TYPE app.caption_content ADD VALUE 'queryChoiceTitle';
 			ALTER TABLE app.caption ADD COLUMN query_choice_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_query_choice_id_fkey
@@ -7046,7 +7052,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_caption_query_choice_id_fkey
 			    ON app.caption USING btree (query_choice_id ASC NULLS LAST);
 		`)
@@ -7056,7 +7062,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		_, err := tx.Exec(ctx, `
 			ALTER TYPE app.data_display ADD VALUE 'url';
 			ALTER TYPE app.field_state ADD VALUE 'default';
-			
+
 			-- add field list option
 			ALTER TABLE app.field_list ADD COLUMN attribute_id_record uuid;
 			ALTER TABLE app.field_list ADD CONSTRAINT field_list_attribute_id_record_fkey
@@ -7065,19 +7071,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- fix bad operator types
 			ALTER TYPE app.condition_operator RENAME TO condition_operator_old;
-			
+
 			CREATE TYPE app.condition_operator AS ENUM
 			    ('=', '<>', '<', '>', '<=', '>=', 'IS NULL', 'NOT NULL', 'LIKE', 'ILIKE', 'NOT LIKE', 'NOT ILIKE', '= ANY', '<> ALL');
-			
+
 			ALTER TABLE app.form_state_condition ALTER COLUMN operator TYPE app.condition_operator
 				USING operator::text::app.condition_operator;
-			
+
 			ALTER TABLE app.query_filter ALTER COLUMN operator TYPE app.condition_operator
 				USING operator::text::app.condition_operator;
-			
+
 			DROP TYPE app.condition_operator_old;
 		`)
 		return "1.6", err
@@ -7132,11 +7138,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- remove legacy primary key definition from relation
 			ALTER TABLE app.relation DROP COLUMN pkey_type;
 			DROP TYPE app.relation_pkey_type;
-			
+
 			-- add column queries
 			ALTER TABLE app.column ADD COLUMN sub_query boolean NOT NULL DEFAULT false;
 			ALTER TABLE app.column ALTER COLUMN sub_query DROP DEFAULT;
-			
+
 			ALTER TABLE app.query ADD COLUMN column_id uuid;
 			ALTER TABLE app.query
 			ADD CONSTRAINT query_column_id_fkey FOREIGN KEY (column_id)
@@ -7145,17 +7151,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED
 				NOT VALID;
-			
+
 			-- add nested parameters to query filters
 			ALTER TABLE app.query_filter ADD COLUMN nested0 integer NOT NULL DEFAULT 0;
 			ALTER TABLE app.query_filter ADD COLUMN nested1 integer NOT NULL DEFAULT 0;
 			ALTER TABLE app.query_filter ALTER COLUMN nested0 DROP DEFAULT;
 			ALTER TABLE app.query_filter ALTER COLUMN nested1 DROP DEFAULT;
-			
+
 			-- add filter queries
 			ALTER TABLE app.query_filter ADD COLUMN sub_query boolean NOT NULL DEFAULT false;
 			ALTER TABLE app.query_filter ALTER COLUMN sub_query DROP DEFAULT;
-			
+
 			ALTER TABLE app.query ADD COLUMN query_filter_query_id uuid;
 			ALTER TABLE app.query ADD COLUMN query_filter_position smallint;
 			ALTER TABLE app.query
@@ -7165,7 +7171,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED
 				NOT VALID;
-			
+
 			-- new condition operators
 			ALTER TYPE app.condition_operator ADD VALUE 'ANY';
 			ALTER TYPE app.condition_operator ADD VALUE 'ALL';
@@ -7183,7 +7189,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			    ON DELETE NO ACTION
 			    DEFERRABLE INITIALLY DEFERRED
 			    NOT VALID;
-			
+
 			ALTER TABLE app.form DROP CONSTRAINT form_icon_id_fkey;
 			ALTER TABLE app.form
 			    ADD CONSTRAINT form_icon_id_fkey FOREIGN KEY (icon_id)
@@ -7192,7 +7198,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			    ON DELETE NO ACTION
 			    DEFERRABLE INITIALLY DEFERRED
 			    NOT VALID;
-			
+
 			ALTER TABLE app.module DROP CONSTRAINT module_parent_id_fkey;
 			ALTER TABLE app.module
 			    ADD CONSTRAINT module_parent_id_fkey FOREIGN KEY (parent_id)
@@ -7201,7 +7207,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			    ON DELETE NO ACTION
 			    DEFERRABLE INITIALLY DEFERRED
 			    NOT VALID;
-			
+
 			-- new condition operators
 			ALTER TYPE app.condition_operator ADD VALUE 'NOT LIKE';
 			ALTER TYPE app.condition_operator ADD VALUE 'NOT ILIKE';
@@ -7226,13 +7232,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-			
+
 			CREATE INDEX fki_field_data_relationship_preset_field_id
 				ON app.field_data_relationship_preset USING btree (field_id);
-			
+
 			CREATE INDEX fki_field_data_relationship_preset_preset_id
 				ON app.field_data_relationship_preset USING btree (preset_id);
-			
+
 			-----
 			ALTER TABLE app.preset ADD COLUMN name character varying(32);
 			UPDATE app.preset SET name = REPLACE(id::text,'-','');
@@ -7244,18 +7250,18 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 	"1.1": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			ALTER TYPE app.data_display ADD VALUE 'gallery';
-			
+
 			ALTER TABLE app.column ADD COLUMN basis smallint NOT NULL DEFAULT 0;
 			ALTER TABLE app.column ALTER COLUMN basis DROP DEFAULT;
-			
+
 			CREATE TYPE app.field_list_layout AS ENUM ('table','cards');
 			ALTER TABLE app.field_list ADD COLUMN layout app.field_list_layout NOT NULL DEFAULT 'table';
 			ALTER TABLE app.field_list ALTER COLUMN layout DROP DEFAULT;
 			ALTER TABLE app.field_list DROP COLUMN filter_expert;
-			
+
 			ALTER TABLE app.column ADD COLUMN distincted BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN distincted DROP DEFAULT;
-			
+
 			ALTER TYPE instance.log_context ADD VALUE 'csv';
 			INSERT INTO instance.config (name,value) VALUES ('logCsv','2');
 		`)
@@ -7272,10 +7278,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		_, err := tx.Exec(ctx, `
 			INSERT INTO instance.config (name,value)
 				VALUES ('updateCheckUrl','https://rei3.de/version');
-			
+
 			INSERT INTO instance.config (name,value)
 				VALUES ('updateCheckVersion','');
-			
+
 			INSERT INTO instance.task (
 				name,date_attempt,date_success,
 				interval_seconds,embedded_only,active

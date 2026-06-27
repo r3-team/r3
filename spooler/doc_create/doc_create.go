@@ -373,7 +373,16 @@ func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pa
 	docDef.Font = applyToFont(set, docDef.Font)
 
 	// generate document
-	doc.p = fpdf.New(docDef.Pages[0].Orientation, pageUnit, docDef.Pages[0].Size, "")
+	sizePage0, err := getSizeForPage(docDef.Pages[0])
+	if err != nil {
+		return "", err
+	}
+	doc.p = fpdf.NewCustom(&fpdf.InitType{
+		OrientationStr: "portrait",
+		UnitStr:        pageUnit,
+		Size:           sizePage0,
+		FontDirStr:     "",
+	})
 	doc.p.SetAuthor(docDef.Author, true)
 	doc.p.SetLang(docDef.Language)
 	if v, exists := docDef.Captions["docTitle"][docDef.Language]; exists {
@@ -417,9 +426,12 @@ func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pa
 		doc.p.SetMargins(page.Margin.L, page.Margin.T, page.Margin.R)
 		doc.p.SetAutoPageBreak(true, page.Margin.B)
 
-		sizeXPage, sizeYPage := doc.p.GetPageSize()
-		sizeXPageUsable := sizeXPage - page.Margin.L - page.Margin.R
-		sizeYPageUsable := sizeYPage - page.Margin.T - page.Margin.B
+		size, err := getSizeForPage(page)
+		if err != nil {
+			return "", err
+		}
+		sizeXPageUsable := size.Wd - page.Margin.L - page.Margin.R
+		sizeYPageUsable := size.Ht - page.Margin.T - page.Margin.B
 
 		// set header for page
 		doc.p.SetHeaderFuncMode(func() {
@@ -427,11 +439,11 @@ func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pa
 			if page.Header.DocPageIdInherit.Valid {
 				e = docDef.Pages[pageIdMapIndex[page.Header.DocPageIdInherit.Bytes]].Header
 			}
-			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, 0, sizeXPage, page.Margin.T)
+			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, 0, size.Wd, page.Margin.T)
 		}, true)
 
-		log.Info(log.ContextDoc, fmt.Sprintf("adding page %d (%s)", i+1, page.Size))
-		doc.p.AddPageFormat(page.Orientation, pageSizeMapMm[page.Size])
+		log.Info(log.ContextDoc, fmt.Sprintf("adding page %d (%.2f x %.2fmm)", i+1, size.Wd, size.Ht))
+		doc.p.AddPageFormat("portrait", size)
 		doc.p.SetHomeXY()
 
 		// set footer for page
@@ -441,7 +453,7 @@ func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pa
 			if page.Footer.DocPageIdInherit.Valid {
 				e = docDef.Pages[pageIdMapIndex[page.Footer.DocPageIdInherit.Bytes]].Footer
 			}
-			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, sizeYPage-page.Margin.B, sizeXPage, page.Margin.B)
+			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, size.Ht-page.Margin.B, size.Wd, page.Margin.B)
 		})
 
 		// a page is always a single flow field on root level
