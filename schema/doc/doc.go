@@ -9,6 +9,7 @@ import (
 	"r3/schema/doc_page"
 	"r3/schema/doc_set"
 	"r3/schema/query"
+	"r3/schema/tag"
 	"r3/types"
 	"strings"
 
@@ -223,7 +224,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT d.id, d.name, d.comment, d.filename, d.author, d.language,
 			f.align, f.bool_false, f.bool_true, f.color, f.date_format, f.family,
-			f.line_factor, f.number_sep_dec, f.number_sep_tho, f.size, f.style
+			f.line_factor, f.number_sep_dec, f.number_sep_tho, f.size, f.style, ARRAY(
+				SELECT tag_id
+				FROM app.tag_assign
+				WHERE doc_id = d.id
+			)
 		FROM app.doc      AS d
 		JOIN app.doc_font AS f ON f.doc_id = d.id
 		WHERE true
@@ -238,9 +243,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	docs := make([]types.Doc, 0)
 	for rows.Next() {
 		var d types.Doc
-		if err := rows.Scan(&d.Id, &d.Name, &d.Comment, &d.Filename, &d.Author, &d.Language,
-			&d.Font.Align, &d.Font.BoolFalse, &d.Font.BoolTrue, &d.Font.Color, &d.Font.DateFormat, &d.Font.Family,
-			&d.Font.LineFactor, &d.Font.NumberSepDec, &d.Font.NumberSepTho, &d.Font.Size, &d.Font.Style); err != nil {
+		if err := rows.Scan(&d.Id, &d.Name, &d.Comment, &d.Filename, &d.Author, &d.Language, &d.Font.Align,
+			&d.Font.BoolFalse, &d.Font.BoolTrue, &d.Font.Color, &d.Font.DateFormat, &d.Font.Family, &d.Font.LineFactor,
+			&d.Font.NumberSepDec, &d.Font.NumberSepTho, &d.Font.Size, &d.Font.Style, &d.TagIds); err != nil {
 
 			return nil, err
 		}
@@ -308,6 +313,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 		return err
 	}
 	if err := setStates_tx(ctx, tx, d.Id, d.States); err != nil {
+		return err
+	}
+	if err := tag.SetAssign_tx(ctx, tx, schema.DbDoc, d.Id, d.TagIds); err != nil {
 		return err
 	}
 	return caption.Set_tx(ctx, tx, d.Id, d.Captions)

@@ -11,6 +11,7 @@ import (
 	"r3/schema/compatible"
 	"r3/schema/field"
 	"r3/schema/query"
+	"r3/schema/tag"
 	"r3/types"
 	"strings"
 
@@ -166,7 +167,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 			FROM app.article_form
 			WHERE form_id = f.id
 			ORDER BY position ASC
-		) AS "articleIdsHelp"
+		) AS "articleIdsHelp", ARRAY(
+			SELECT tag_id
+			FROM app.tag_assign
+			WHERE form_id = f.id
+		)
 		FROM app.form AS f
 		WHERE true
 		%s
@@ -181,8 +186,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	for rows.Next() {
 		var f types.Form
 
-		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.FieldIdFocus,
-			&f.Name, &f.NoDataActions, &f.RecordTitle, &f.ArticleIdsHelp); err != nil {
+		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.FieldIdFocus, &f.Name,
+			&f.NoDataActions, &f.RecordTitle, &f.ArticleIdsHelp, &f.TagIds); err != nil {
 
 			return nil, err
 		}
@@ -269,6 +274,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	if err := article.Assign_tx(ctx, tx, schema.DbForm, frm.Id, frm.ArticleIdsHelp); err != nil {
 		return err
 	}
+	if err := tag.SetAssign_tx(ctx, tx, schema.DbForm, frm.Id, frm.TagIds); err != nil {
+		return err
+	}
+
 	// fix imports < 3.2: Migration from help captions to help articles
 	var err error
 	frm.Captions, err = compatible.FixCaptions_tx(ctx, tx, "form", frm.Id, frm.Captions)

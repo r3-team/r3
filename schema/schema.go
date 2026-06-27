@@ -60,6 +60,7 @@ const (
 	DbRole                  DbEntity = "role"
 	DbSearchBar             DbEntity = "search_bar"
 	DbTab                   DbEntity = "tab"
+	DbTag                   DbEntity = "tag"
 	DbVariable              DbEntity = "variable"
 	DbWidget                DbEntity = "widget"
 )
@@ -109,6 +110,13 @@ var (
 	}
 	DbAssignedTab = []DbEntity{
 		DbField,
+	}
+	DbAssignedTag = []DbEntity{
+		DbDoc,
+		DbForm,
+		DbJsFunction,
+		DbPgFunction,
+		DbRelation,
 	}
 
 	// elements optionally bound to DB entities

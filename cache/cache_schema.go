@@ -29,6 +29,7 @@ import (
 	"r3/schema/relation"
 	"r3/schema/role"
 	"r3/schema/searchBar"
+	"r3/schema/tag"
 	"r3/schema/variable"
 	"r3/schema/widget"
 	"r3/tools"
@@ -219,6 +220,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		mod.Docs = make([]types.Doc, 0)
 		mod.ClientEvents = make([]types.ClientEvent, 0)
 		mod.SearchBars = make([]types.SearchBar, 0)
+		mod.Tags = make([]types.Tag, 0)
 		mod.Variables = make([]types.Variable, 0)
 		mod.Widgets = make([]types.Widget, 0)
 		ModuleApiNameMapId[mod.Name] = make(map[string]uuid.UUID)
@@ -385,6 +387,13 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		// get search bars
 		log.Info(log.ContextCache, "load search bars")
 		mod.SearchBars, err = searchBar.Get_tx(ctx, tx, mod.Id)
+		if err != nil {
+			return err
+		}
+
+		// get tags
+		log.Info(log.ContextCache, "load tags")
+		mod.Tags, err = tag.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
 			return err
 		}

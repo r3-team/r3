@@ -8,6 +8,7 @@ import (
 	"r3/schema/attribute"
 	"r3/schema/caption"
 	"r3/schema/pgFunction"
+	"r3/schema/tag"
 	"r3/types"
 
 	"github.com/gofrs/uuid/v5"
@@ -81,6 +82,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relatio
 			SELECT ARRAY_AGG(attribute_id ORDER BY position ASC)
 			FROM app.relation_record_title
 			WHERE relation_id = r.id
+		),ARRAY(
+			SELECT tag_id
+			FROM app.tag_assign
+			WHERE relation_id = r.id
 		)
 		FROM app.relation AS r
 		WHERE r.module_id = $2
@@ -95,7 +100,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relatio
 	for rows.Next() {
 		var r types.Relation
 		if err := rows.Scan(&r.Id, &r.Name, &r.Comment, &r.Encryption, &r.RetentionCount,
-			&r.RetentionDays, &r.AttributeIdPk, &r.AttributeIdsTitle); err != nil {
+			&r.RetentionDays, &r.AttributeIdPk, &r.AttributeIdsTitle, &r.TagIds); err != nil {
 
 			return nil, err
 		}
@@ -223,11 +228,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) 
 	`, rel.Id, len(rel.AttributeIdsTitle)); err != nil {
 		return err
 	}
-
+	if err := tag.SetAssign_tx(ctx, tx, schema.DbRelation, rel.Id, rel.TagIds); err != nil {
+		return err
+	}
 	if err := caption.Set_tx(ctx, tx, rel.Id, rel.Captions); err != nil {
 		return err
 	}
-
-	// set policies
 	return setPolicies_tx(ctx, tx, rel.Id, rel.Policies)
 }

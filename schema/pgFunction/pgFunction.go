@@ -8,6 +8,7 @@ import (
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
+	"r3/schema/tag"
 	"r3/types"
 	"regexp"
 	"slices"
@@ -37,8 +38,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, code_args, code_function, code_returns, is_column_exec,
-			is_frontend_exec, is_login_sync, is_trigger, volatility, cost
-		FROM app.pg_function
+			is_frontend_exec, is_login_sync, is_trigger, volatility, cost, ARRAY(
+				SELECT tag_id
+				FROM app.tag_assign
+				WHERE pg_function_id = p.id
+			)
+		FROM app.pg_function AS p
 		WHERE module_id = $1
 		ORDER BY name ASC
 	`, moduleId)
@@ -52,7 +57,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 		var f types.PgFunction
 
 		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns, &f.IsColumnExec,
-			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost); err != nil {
+			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost, &f.TagIds); err != nil {
 
 			return nil, err
 		}
@@ -237,7 +242,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	`, fnc.Id, scheduleIds); err != nil {
 		return err
 	}
-
+	if err := tag.SetAssign_tx(ctx, tx, schema.DbPgFunction, fnc.Id, fnc.TagIds); err != nil {
+		return err
+	}
 	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
 		return err
 	}

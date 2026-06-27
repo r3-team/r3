@@ -8,16 +8,17 @@ import (
 )
 
 type Doc struct {
-	Id       uuid.UUID  `json:"id"`
-	ModuleId uuid.UUID  `json:"moduleId"`
-	Name     string     `json:"name"`
-	Comment  string     `json:"comment"`
-	Filename string     `json:"filename"`
-	Font     DocFont    `json:"font"`
-	Pages    []DocPage  `json:"pages"` // pages in order
-	Query    Query      `json:"query"`
-	States   []DocState `json:"states"`
-	Sets     []DocSet   `json:"sets"` // overwrites
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"`
+	TagIds   []uuid.UUID `json:"tagIds"`
+	Name     string      `json:"name"`
+	Comment  string      `json:"comment"`
+	Filename string      `json:"filename"`
+	Font     DocFont     `json:"font"`
+	Pages    []DocPage   `json:"pages"` // pages in order
+	Query    Query       `json:"query"`
+	States   []DocState  `json:"states"`
+	Sets     []DocSet    `json:"sets"` // overwrites
 
 	// meta
 	Author   string     `json:"author"`

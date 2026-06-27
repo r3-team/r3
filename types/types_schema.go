@@ -351,6 +351,7 @@ type Form struct {
 	PresetIdOpen   pgtype.UUID    `json:"presetIdOpen"`
 	FieldIdFocus   pgtype.UUID    `json:"fieldIdFocus"` // field to set focus to on form load
 	IconId         pgtype.UUID    `json:"iconId"`
+	TagIds         []uuid.UUID    `json:"tagIds"`
 	Name           string         `json:"name"`
 	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
 	RecordTitle    bool           `json:"recordTitle"`   // show record title in form header
@@ -420,6 +421,7 @@ type JsFunction struct {
 	Id                uuid.UUID   `json:"id"`
 	ModuleId          uuid.UUID   `json:"moduleId"`
 	FormId            pgtype.UUID `json:"formId"`
+	TagIds            []uuid.UUID `json:"tagIds"`
 	Name              string      `json:"name"`
 	CodeArgs          string      `json:"codeArgs"`
 	CodeFunction      string      `json:"codeFunction"`
@@ -495,6 +497,7 @@ type Module struct {
 	Roles                []Role            `json:"roles"`
 	SearchBars           []SearchBar       `json:"searchBars"`
 	StartForms           []ModuleStartForm `json:"startForms"` // start forms, assigned via role membership
+	Tags                 []Tag             `json:"tags"`
 	Variables            []Variable        `json:"variables"`
 	Widgets              []Widget          `json:"widgets"`
 
@@ -549,6 +552,7 @@ type Role struct {
 type PgFunction struct {
 	Id             uuid.UUID            `json:"id"`
 	ModuleId       uuid.UUID            `json:"moduleId"`
+	TagIds         []uuid.UUID          `json:"tagIds"`
 	Name           string               `json:"name"`
 	CodeArgs       string               `json:"codeArgs"`
 	CodeFunction   string               `json:"codeFunction"`
@@ -620,7 +624,8 @@ type PresetValue struct {
 type Relation struct {
 	Id                uuid.UUID        `json:"id"`
 	ModuleId          uuid.UUID        `json:"moduleId"`
-	AttributeIdPk     uuid.UUID        `json:"attributeIdPk"`  // read only, ID of PK attribute
+	AttributeIdPk     uuid.UUID        `json:"attributeIdPk"` // read only, ID of PK attribute
+	TagIds            []uuid.UUID      `json:"tagIds"`
 	Name              string           `json:"name"`           // unique (within module) relation name
 	Comment           pgtype.Text      `json:"comment"`        // author comment
 	Encryption        bool             `json:"encryption"`     // relation supports encrypted attribute values
@@ -671,6 +676,12 @@ type Tab struct {
 	State          string     `json:"state"`          // tab default state (default, hidden)
 	Fields         []any      `json:"fields"`         // fields assigned to tab
 	Captions       CaptionMap `json:"captions"`
+}
+type Tag struct {
+	Id      uuid.UUID   `json:"id"`
+	IconId  pgtype.UUID `json:"iconId"`
+	Name    string      `json:"name"`
+	Comment string      `json:"comment"`
 }
 type Variable struct {
 	Id         uuid.UUID   `json:"id"`

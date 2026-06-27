@@ -220,6 +220,82 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ADD COLUMN size_custom_x real,
 				ADD COLUMN size_custom_y real,
 				ALTER COLUMN size DROP NOT NULL;
+
+			-- builder tags
+			CREATE TABLE IF NOT EXISTS app.tag (
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				icon_id uuid,
+				name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+				comment text COLLATE pg_catalog."default",
+				CONSTRAINT tag_pk PRIMARY KEY (id),
+				CONSTRAINT tag_name_key UNIQUE (module_id, name)
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_icon_id_fkey FOREIGN KEY (icon_id)
+					REFERENCES app.icon (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_tag_module_id_fkey ON app.tag USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_tag_icon_id_fkey   ON app.tag USING btree (icon_id   ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.tag_assign (
+				tag_id uuid NOT NULL,
+				doc_id uuid,
+				form_id uuid,
+				js_function_id uuid,
+				pg_function_id uuid,
+				relation_id uuid,
+				CONSTRAINT tag_assign_tag_id_fkey FOREIGN KEY (tag_id)
+					REFERENCES app.tag (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_assign_doc_id_fkey FOREIGN KEY (doc_id)
+					REFERENCES app.doc (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_assign_form_id_fkey FOREIGN KEY (form_id)
+					REFERENCES app.form (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_assign_js_function_id_fkey FOREIGN KEY (js_function_id)
+					REFERENCES app.js_function (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_assign_pg_function_id_fkey FOREIGN KEY (pg_function_id)
+					REFERENCES app.pg_function (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_assign_relation_id_fkey FOREIGN KEY (relation_id)
+					REFERENCES app.relation (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT tag_assign_single_parent CHECK (1 = (
+					CASE WHEN doc_id         IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN form_id        IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN js_function_id IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN pg_function_id IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN relation_id    IS NULL THEN 0 ELSE 1 END
+				))
+			);
+			CREATE INDEX IF NOT EXISTS fki_tag_assign_tag_id_fkey         ON app.tag_assign USING btree (tag_id         ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_tag_assign_doc_id_fkey         ON app.tag_assign USING btree (doc_id         ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_tag_assign_form_id_fkey        ON app.tag_assign USING btree (form_id        ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_tag_assign_js_function_id_fkey ON app.tag_assign USING btree (js_function_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_tag_assign_pg_function_id_fkey ON app.tag_assign USING btree (pg_function_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_tag_assign_relation_id_fkey    ON app.tag_assign USING btree (relation_id    ASC NULLS LAST);
 		`)
 		return "3.13", err
 	},

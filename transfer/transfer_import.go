@@ -35,6 +35,7 @@ import (
 	"r3/schema/relation"
 	"r3/schema/role"
 	"r3/schema/searchBar"
+	"r3/schema/tag"
 	"r3/schema/variable"
 	"r3/schema/widget"
 	"r3/tools"
@@ -214,10 +215,25 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		return err
 	}
 	if run {
-		log.Info(log.ContextTransfer, fmt.Sprintf("set module '%s' v%d, %s",
-			mod.Name, mod.ReleaseBuild, mod.Id))
+		log.Info(log.ContextTransfer, fmt.Sprintf("set module '%s' v%d, %s", mod.Name, mod.ReleaseBuild, mod.Id))
 
 		if err := importCheckResultAndApply(ctx, tx, module.Set_tx(ctx, tx, mod, false), mod.Id, idMapSkipped); err != nil {
+			return err
+		}
+	}
+
+	// tags
+	for _, e := range mod.Tags {
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info(log.ContextTransfer, fmt.Sprintf("set tag %s", e.Id))
+
+		if err := importCheckResultAndApply(ctx, tx, tag.Set_tx(ctx, tx, mod.Id, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/tag"
 	"r3/types"
 	"regexp"
 	"slices"
@@ -29,8 +30,12 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunction, error) {
 	rows, err := tx.Query(ctx, `
-		SELECT id, form_id, name, code_args, code_function, code_returns, is_client_event_exec
-		FROM app.js_function
+		SELECT id, form_id, name, code_args, code_function, code_returns, is_client_event_exec, ARRAY(
+			SELECT tag_id
+			FROM app.tag_assign
+			WHERE js_function_id = j.id
+		)
+		FROM app.js_function AS j
 		WHERE module_id = $1
 		ORDER BY form_id ASC, name ASC -- sort by both as name is only in unique in combination
 	`, moduleId)
@@ -42,7 +47,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunct
 	functions := make([]types.JsFunction, 0)
 	for rows.Next() {
 		var f types.JsFunction
-		if err := rows.Scan(&f.Id, &f.FormId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns, &f.IsClientEventExec); err != nil {
+		if err := rows.Scan(&f.Id, &f.FormId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns, &f.IsClientEventExec, &f.TagIds); err != nil {
 			return nil, err
 		}
 		functions = append(functions, f)
@@ -76,7 +81,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
 	`, fnc.Id, fnc.ModuleId, fnc.FormId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec); err != nil {
 		return err
 	}
-
+	if err := tag.SetAssign_tx(ctx, tx, schema.DbJsFunction, fnc.Id, fnc.TagIds); err != nil {
+		return err
+	}
 	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
 		return err
 	}

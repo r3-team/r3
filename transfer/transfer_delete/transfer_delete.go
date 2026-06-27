@@ -28,6 +28,7 @@ import (
 	"r3/schema/role"
 	"r3/schema/searchBar"
 	"r3/schema/tab"
+	"r3/schema/tag"
 	"r3/schema/variable"
 	"r3/schema/widget"
 	"r3/types"
@@ -131,6 +132,11 @@ func NotExisting_tx(ctx context.Context, tx pgx.Tx, module types.Module) error {
 
 	// JS functions
 	if err := deleteJsFunctions_tx(ctx, tx, module.Id, module.JsFunctions); err != nil {
+		return err
+	}
+
+	// tags
+	if err := deleteTags_tx(ctx, tx, module.Id, module.Tags); err != nil {
 		return err
 	}
 	return nil
@@ -568,6 +574,23 @@ func deleteSearchBars_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, bar
 	for _, id := range idsDelete {
 		log.Info(log.ContextTransfer, fmt.Sprintf("del search bar %s", id.String()))
 		if err := searchBar.Del_tx(ctx, tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func deleteTags_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, tags []types.Tag) error {
+	idsKeep := make([]uuid.UUID, 0)
+	for _, entity := range tags {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbTag, moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
+	for _, id := range idsDelete {
+		log.Info(log.ContextTransfer, fmt.Sprintf("del tag %s", id.String()))
+		if err := tag.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
