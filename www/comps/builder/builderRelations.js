@@ -1,6 +1,4 @@
-export {MyBuilderRelations as default};
-
-let MyBuilderRelations = {
+export default {
 	name:'my-builder-relations',
 	template:`<div class="contentBox grow builder-relations">
 		<div class="top lower">
@@ -12,10 +10,10 @@ let MyBuilderRelations = {
 				<input v-model="filter" placeholder="..." />
 			</div>
 		</div>
-		
+
 		<div class="content default-inputs" v-if="module">
 			<div class="generic-entry-list">
-			
+
 				<div class="entry"
 					v-if="!readonly"
 					@click="$emit('createNew','relation')"
@@ -26,12 +24,12 @@ let MyBuilderRelations = {
 						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
-				
+
 				<router-link class="entry clickable"
 					v-for="r in module.relations.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					:key="r.id"
 					:title="r.comment"
-					:to="'/builder/relation/'+r.id" 
+					:to="'/builder/relation/'+r.id"
 				>
 					<div class="lines">
 						<span>{{ r.name }}</span>
@@ -71,15 +69,14 @@ let MyBuilderRelations = {
 		};
 	},
 	computed:{
-		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
-		
+		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.relation,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.relation,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	methods:{
-		// presentation
 		displayRetention(rel) {
 			let count = rel.retentionCount !== null ? rel.retentionCount : 0;
 			let days  = rel.retentionDays  !== null ? rel.retentionDays  : 0;

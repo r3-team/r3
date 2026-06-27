@@ -51,7 +51,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -137,32 +137,28 @@ export default {
 	emits:['close','next-language'],
 	data() {
 		return {
-			// widget values
 			values:null,
 			valuesOrg:null
 		};
 	},
 	computed:{
-		nameTaken:(s) => {
+		nameTaken:s => {
 			for(let w of s.module.widgets) {
 				if(w.id !== s.widgetId && w.name === s.values.name)
 					return true;
 			}
 			return false;
 		},
-		
+
 		// simple
-		canSave:   (s) => !s.readonly && s.hasChanges && !s.nameTaken,
-		hasChanges:(s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		title:     (s) => s.capApp.edit.replace('{NAME}',s.values.name),
-		
+		canSave:   s => !s.readonly && s.hasChanges && !s.nameTaken,
+		hasChanges:s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		title:     s => s.capApp.edit.replace('{NAME}',s.values.name),
+
 		// stores
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.widget,
-		capGen:         (s) => s.$store.getters.captions.generic
+		widgetIdMap:s => s.$store.getters['schema/widgetIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.widget,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();
@@ -175,7 +171,7 @@ export default {
 		// external
 		copyValueDialog,
 		dialogDeleteAsk,
-		
+
 		// actions
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's' && this.canSave) {
@@ -200,13 +196,13 @@ export default {
 						widgetTitle:{}
 					}
 				};
-			
+
 			this.resetOrg();
 		},
 		resetOrg() {
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('widget','del',this.widgetId,true).then(

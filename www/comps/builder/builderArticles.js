@@ -56,7 +56,7 @@ const MyBuilderArticlesItem = {
 								<img class="icon" src="images/question.png" />
 								<h1>{{ article.name }}</h1>
 							</div>
-							
+
 							<div class="area">
 								<span>{{ capGen.title }}</span>
 								<my-builder-caption
@@ -70,7 +70,7 @@ const MyBuilderArticlesItem = {
 									:caption="builderLanguage"
 								/>
 							</div>
-							
+
 							<div class="area">
 								<my-button image="save.png"
 									@trigger="set"
@@ -110,24 +110,24 @@ const MyBuilderArticlesItem = {
 		return {
 			captions:JSON.parse(JSON.stringify(this.article.captions)),
 			name:this.article.name,
-			
+
 			// states
 			showContent:false
 		};
 	},
 	computed:{
-		hasChanges:(s) => s.name !== s.article.name
+		hasChanges:s => s.name !== s.article.name
 			|| JSON.stringify(s.captions) !== JSON.stringify(s.article.captions),
-		
+
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.articles,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.builder.articles,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		copyValueDialog,
 		dialogDeleteAsk,
-		
+
 		// actions
 		close() {
 			if(this.showContent) {
@@ -150,7 +150,7 @@ const MyBuilderArticlesItem = {
 		nextLanguage() {
 			this.$emit('nextLanguage');
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('article','del',this.article.id,true).then(
@@ -171,7 +171,7 @@ const MyBuilderArticlesItem = {
 				() => {
 					if(this.isNew)
 						this.$emit('reset-new');
-					
+
 					this.$root.schemaReload(this.module.id);
 				},
 				this.$root.genericError
@@ -193,7 +193,7 @@ export default {
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 		</div>
-		
+
 		<div class="builder-articles-wrap">
 			<div class="builder-articles-edit content default-inputs" v-if="module">
 				<table>
@@ -206,7 +206,7 @@ export default {
 							<th colspan="2">{{ capApp.body }}</th>
 						</tr>
 					</thead>
-					
+
 					<!-- new article -->
 					<my-builder-articles-item
 						v-if="articleNew !== false"
@@ -219,7 +219,7 @@ export default {
 						:module
 						:readonly
 					/>
-					
+
 					<!-- existing articles -->
 					<my-builder-articles-item
 						v-for="art in module.articles"
@@ -233,10 +233,10 @@ export default {
 					/>
 				</table>
 			</div>
-			
+
 			<div class="builder-articles-assign content default-inputs" v-if="module">
 				<h2>{{ capApp.titleAssign }}</h2>
-				
+
 				<table>
 					<tbody>
 						<!-- article target -->
@@ -258,7 +258,7 @@ export default {
 								</select>
 							</td>
 						</tr>
-						
+
 						<!-- add article -->
 						<tr v-if="assignTarget !== 'form' || formIdAssignTo !== null">
 							<td>{{ capApp.addArticle }}</td>
@@ -279,7 +279,7 @@ export default {
 						</tr>
 					</tbody>
 				</table>
-				
+
 				<div class="actions">
 					<my-button image="save.png"
 						@trigger="assign"
@@ -291,7 +291,7 @@ export default {
 						:caption="capGen.preview"
 					/>
 				</div>
-				
+
 				<!-- assigned articles list -->
 				<h3 v-if="articleIdsAssigned.length !== 0">{{ capApp.titleAssigned }}</h3>
 				<draggable handle=".dragAnchor" group="articles" itemKey="id" animation="100"
@@ -301,10 +301,10 @@ export default {
 					<template #item="{element,index}">
 				    	<div class="builder-article-line">
 							<img v-if="!readonly" class="action dragAnchor" src="images/drag.png" />
-							
+
 							<span v-if="articleIdMap[element].moduleId === id">{{ articleIdMap[element].name }}</span>
 							<span v-else>{{ moduleIdMap[articleIdMap[element].moduleId].name + ': ' + articleIdMap[element].name }}</span>
-							
+
 							<my-button image="cancel.png"
 								@trigger="articleRemove(element)"
 								:active="!readonly"
@@ -314,7 +314,7 @@ export default {
 					</template>
 				</draggable>
 			</div>
-			
+
 			<!-- articles preview -->
 			<div class="app-sub-window under-header" v-if="showPreview" @mousedown.self="showPreview = false">
 				<my-articles class="builder-articles-preview float"
@@ -342,7 +342,7 @@ export default {
 			articleIdAdd:null,     // article to add
 			assignTarget:'module', // module/form
 			formIdAssignTo:null,   // form to add article to (if target is 'form')
-			
+
 			// states
 			articleNew:false,
 			articleIdsAssigned:[],
@@ -351,15 +351,15 @@ export default {
 		};
 	},
 	computed:{
-		hasChanges:(s) => JSON.stringify(s.articleIdsAssigned) !== JSON.stringify(s.articleIdsAssignedOrg),
-		
+		hasChanges:s => JSON.stringify(s.articleIdsAssigned) !== JSON.stringify(s.articleIdsAssignedOrg),
+
 		// stores
-		module:      (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		moduleIdMap: (s) => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:   (s) => s.$store.getters['schema/formIdMap'],
-		articleIdMap:(s) => s.$store.getters['schema/articleIdMap'],
-		capApp:      (s) => s.$store.getters.captions.builder.articles,
-		capGen:      (s) => s.$store.getters.captions.generic
+		module:      s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:   s => s.$store.getters['schema/formIdMap'],
+		articleIdMap:s => s.$store.getters['schema/articleIdMap'],
+		capApp:      s => s.$store.getters.captions.builder.articles,
+		capGen:      s => s.$store.getters.captions.generic
 	},
 	watch:{
 		module:{
@@ -371,13 +371,13 @@ export default {
 		// externals
 		getDependentModules,
 		getTemplateArticle,
-		
+
 		// states
 		reset() {
 			this.resetArticleNew();
 			this.articleIdsAssigned    = [];
 			this.articleIdsAssignedOrg = [];
-			
+
 			if(this.assignTarget === 'module') {
 				this.articleIdsAssigned    = JSON.parse(JSON.stringify(this.module.articleIdsHelp));
 				this.articleIdsAssignedOrg = JSON.parse(JSON.stringify(this.module.articleIdsHelp));
@@ -393,7 +393,7 @@ export default {
 		resetArticleNew() {
 			this.articleNew = this.getTemplateArticle(this.module.id);
 		},
-		
+
 		// actions
 		articleAdd(id) {
 			this.articleIdsAssigned.push(id);
@@ -404,7 +404,7 @@ export default {
 			if(pos !== -1)
 				this.articleIdsAssigned.splice(pos,1);
 		},
-		
+
 		// backend calls
 		assign() {
 			ws.send('article','assign',{

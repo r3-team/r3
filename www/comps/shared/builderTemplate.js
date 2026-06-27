@@ -927,6 +927,14 @@ export function getTemplateTab() {
 		}
 	};
 };
+export function getTemplateTag(name) {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		name:name,
+		comment:''
+	};
+};
 export function getTemplateVariable(moduleId,formId,name) {
 	return {
 		id:getUuidV4(),

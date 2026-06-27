@@ -1,12 +1,14 @@
-import {srcBase64} from '../shared/image.js';
+import MyBuilderTag from './builderTag.js';
+import {srcBase64}  from '../shared/image.js';
 
 export default {
-	name:'my-builder-search-bars',
-	template:`<div class="builder-search-bars contentBox grow">
+	name: 'my-builder-tags',
+	components:{ MyBuilderTag },
+	template:`<div class="builder-tags contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
-				<img class="icon" src="images/search.png" />
-				<h1 class="title">{{ capApp.title }}</h1>
+				<img class="icon" src="images/tag.png" />
+				<h1 class="title">{{ capGen.tags }}</h1>
 			</div>
 			<div class="area default-inputs">
 				<input v-model="filter" placeholder="..." />
@@ -18,7 +20,7 @@ export default {
 
 				<div class="entry"
 					v-if="!readonly"
-					@click="$emit('createNew','searchBar')"
+					@click="$emit('createNew','tag')"
 					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
@@ -27,43 +29,53 @@ export default {
 					</div>
 				</div>
 
-				<router-link class="entry clickable"
-					v-for="b in module.searchBars.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
-					:key="b.id"
-					:to="'/builder/search-bar/'+b.id"
+				<div class="entry clickable"
+					v-for="t in module.tags.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
+					:key="t.id"
+					@click="tagIdEdit = t.id"
 				>
 					<div class="lines">
-						<span>{{ b.name }}</span>
+						<span>{{ t.name }}</span>
 					</div>
 					<div class="row gap">
 						<my-button
-							v-if="b.iconId !== null"
+							v-if="t.iconId !== null"
 							:active="false"
 							:captionTitle="capGen.icon"
-							:imageBase64="srcBase64(iconIdMap[b.iconId].file)"
+							:imageBase64="srcBase64(iconIdMap[t.iconId].file)"
 							:naked="true"
 						/>
 					</div>
-				</router-link>
+				</div>
 			</div>
 		</div>
+
+		<!-- tag dialog -->
+		<my-builder-tag
+			v-if="module && tagIdEdit !== null"
+			@close="tagIdEdit = null"
+			:id="tagIdEdit"
+			:module
+			:readonly
+		/>
 	</div>`,
 	props:{
-		id:      { type:String,  required:true },
-		readonly:{ type:Boolean, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data() {
 		return {
 			filter:'',
+			tagIdEdit:null
 		};
 	},
 	computed:{
 		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
 		iconIdMap:  s => s.$store.getters['schema/iconIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.searchBar,
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
 		capGen:     s => s.$store.getters.captions.generic
 	},
 	methods:{

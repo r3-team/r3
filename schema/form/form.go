@@ -167,7 +167,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 			FROM app.article_form
 			WHERE form_id = f.id
 			ORDER BY position ASC
-		) AS "articleIdsHelp", ARRAY(
+		), ARRAY(
 			SELECT tag_id
 			FROM app.tag_assign
 			WHERE form_id = f.id

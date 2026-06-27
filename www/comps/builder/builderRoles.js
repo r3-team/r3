@@ -1,9 +1,7 @@
-export {MyBuilderRoles as default};
-
-let MyBuilderRoles = {
+export default {
 	name:'my-builder-roles',
 	template:`<div class="builder-roles contentBox grow">
-		
+
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/personMultiple.png" />
@@ -13,10 +11,10 @@ let MyBuilderRoles = {
 				<input v-model="filter" placeholder="..." />
 			</div>
 		</div>
-		
+
 		<div class="content default-inputs" v-if="module">
 			<div class="generic-entry-list">
-				
+
 				<div class="entry"
 					v-if="!readonly"
 					@click="$emit('createNew','role')"
@@ -27,11 +25,11 @@ let MyBuilderRoles = {
 						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
-				
+
 				<router-link class="entry clickable"
 					v-for="r in module.roles.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					:key="r.id"
-					:to="'/builder/role/'+r.id" 
+					:to="'/builder/role/'+r.id"
 				>
 					<div class="lines">
 						<span>{{ r.name }}</span>
@@ -46,7 +44,7 @@ let MyBuilderRoles = {
 							:captionTitle="capApp.assignable"
 							:naked="true"
 						/>
-						
+
 						<my-button image="department.png"
 							v-if="r.childrenIds.length !== 0"
 							:active="false"
@@ -70,11 +68,11 @@ let MyBuilderRoles = {
 		};
 	},
 	computed:{
-		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
-		
+		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.role,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.role,
+		capGen:     s => s.$store.getters.captions.generic
 	}
 };

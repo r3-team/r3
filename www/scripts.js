@@ -69,6 +69,7 @@ import MyBuilderRoles       from './comps/builder/builderRoles.js';
 import MyBuilderSearchBar   from './comps/builder/builderSearchBar.js';
 import MyBuilderSearchBars  from './comps/builder/builderSearchBars.js';
 import MyBuilderStart       from './comps/builder/builderStart.js';
+import MyBuilderTags        from './comps/builder/builderTags.js';
 import MyBuilderVariables   from './comps/builder/builderVariables.js';
 import MyBuilderWidgets     from './comps/builder/builderWidgets.js';
 
@@ -259,6 +260,11 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderApi,
 				props:true
 			},{
+				path:'tags/:id',
+				meta:{ nav:'tags', target:'module' },
+				component:MyBuilderTags,
+				props:true
+			},{
 				path:'releases/:id',
 				meta:{ nav:'releases', target:'module' },
 				component:MyBuilderReleases,
@@ -285,24 +291,24 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/home'
 	}],
 	scrollBehavior(to,from,savedPosition) {
-		
+
 		// recover scroll position of form element if available
 		if(MyRouterPositions[to.path] !== undefined) {
 			let e = document.getElementById(MyStore.getters.constants.scrollFormId);
-			
+
 			if(e !== null)
 				setTimeout(() => e.scrollTop = MyRouterPositions[to.path],50);
-			
+
 			return { top:0 };
 		}
-		
+
 		// hash scrolling for HTML anchors
 		if(to.hash !== '') {
 			let parts = to.hash.substr(1).split('#')
-			
+
 			if(parts.length > 0) {
 				let e = document.getElementById(parts[0]);
-				
+
 				if(e !== null)
 					e.scrollIntoView();
 			}
@@ -316,12 +322,12 @@ MyRouter.beforeEach((to,from) => {
 		const lastGuard = MyStore.getters.routingGuards[MyStore.getters.routingGuards.length-1];
 		if(!lastGuard()) return false;
 	}
-	
+
 	// store scroll position of form element if available
 	const e = document.getElementById(MyStore.getters.constants.scrollFormId);
 	if(e !== null)
 		MyRouterPositions[from.path] = e.scrollTop;
-	
+
 	return true;
 });
 MyRouter.afterEach((to,from) => {
@@ -350,7 +356,7 @@ const app = Vue.createApp(MyApp)
 app.directive('click-outside',{
 	beforeMount(el,binding,vnode) {
 		el.clickOutsideEvent = function(event) {
-			
+
 			if(el !== event.target && !el.contains(event.target))
 				binding.value();
 		};
@@ -373,11 +379,11 @@ if('serviceWorker' in navigator) {
 			.then(function(reg) {
 				if(!navigator.serviceWorker.controller || reg.waiting || reg.installing)
 					return;
-				
+
 				reg.addEventListener('updatefound',function() {
 					let worker = reg.installing;
 					worker.addEventListener('statechange',function() {
-						
+
 						// reload page if new worker has been activated
 						if(worker.state === 'activated')
 							location.reload(false);

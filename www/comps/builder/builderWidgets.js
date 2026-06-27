@@ -1,8 +1,7 @@
 import MyBuilderWidget    from './builderWidget.js';
 import {routeParseParams} from '../shared/router.js';
-export {MyBuilderWidgets as default};
 
-let MyBuilderWidgets = {
+export default {
 	name:'my-builder-widgets',
 	components:{ MyBuilderWidget },
 	template:`<div class="builder-widgets contentBox grow">
@@ -15,10 +14,10 @@ let MyBuilderWidgets = {
 				<input v-model="filter" placeholder="..." />
 			</div>
 		</div>
-		
+
 		<div class="content default-inputs" v-if="module">
 			<div class="generic-entry-list">
-				
+
 				<div class="entry"
 					v-if="!readonly"
 					@click="$emit('createNew','widget')"
@@ -29,7 +28,7 @@ let MyBuilderWidgets = {
 						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
-				
+
 				<div class="entry clickable"
 					v-for="w in module.widgets.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					@click="widgetIdEdit = w.id"
@@ -61,7 +60,7 @@ let MyBuilderWidgets = {
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- widget dialog -->
 		<my-builder-widget
 			v-if="module && widgetIdEdit !== false"
@@ -86,17 +85,17 @@ let MyBuilderWidgets = {
 		};
 	},
 	computed:{
-		module:(s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		
+		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.widget,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.widget,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		let params = { widgetIdEdit:{ parse:'string', value:null } };
 		this.routeParseParams(params);
-		
+
 		if(params.widgetIdEdit.value !== null)
 			this.widgetIdEdit = params.widgetIdEdit.value;
 	},

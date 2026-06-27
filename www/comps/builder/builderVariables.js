@@ -1,13 +1,12 @@
 import MyBuilderVariable  from './builderVariable.js';
 import {getAttributeIcon} from '../shared/attribute.js';
 import {routeParseParams} from '../shared/router.js';
-export {MyBuilderVariables as default};
 
-let MyBuilderVariables = {
+export default {
 	name:'my-builder-variables',
 	components:{MyBuilderVariable},
 	template:`<div class="contentBox grow builder-variables">
-		
+
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/variable.png" />
@@ -17,7 +16,7 @@ let MyBuilderVariables = {
 				<input v-model="filter" placeholder="..." />
 			</div>
 		</div>
-		
+
 		<div class="content" v-if="module">
 			<div class="generic-entry-list">
 				<div class="entry"
@@ -30,7 +29,7 @@ let MyBuilderVariables = {
 						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
-				
+
 				<div class="entry clickable"
 					v-for="v in module.variables.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					@click="variableIdEdit = v.id"
@@ -53,7 +52,7 @@ let MyBuilderVariables = {
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- variable dialog -->
 		<my-builder-variable
 			v-if="module && variableIdEdit !== false"
@@ -77,17 +76,17 @@ let MyBuilderVariables = {
 	mounted() {
 		let params = { variableIdEdit:{ parse:'string', value:null } };
 		this.routeParseParams(params);
-		
+
 		if(params.variableIdEdit.value !== null)
 			this.variableIdEdit = params.variableIdEdit.value;
 	},
 	computed:{
 		// stores
-		module:     (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.variable,
-		capGen:     (s) => s.$store.getters.captions.generic
+		module:     s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:  s => s.$store.getters['schema/formIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.variable,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

@@ -1676,6 +1676,7 @@
 			"relationEncryptionHint": "لتمكين التشفير من طرف إلى طرف (E2EE) للسمات الموجودة في هذه العلاقة. ",
 			"role": "دور جديد",
 			"searchBar": "New search bar",
+			"tag": "New tag",
 			"template": {
 				"loginSync": "User sync function",
 				"mailsFromSpooler": "معالجة البريد الإلكتروني (الوارد)",
@@ -1903,6 +1904,12 @@
 			"titleRelationsHint": "لتخزين وإضافة البيانات إلى السجلات.",
 			"titleRoles": "تحضير الأدوار",
 			"titleRolesHint": "حدد ما يمكن للجميع فعله أو رؤيته."
+		},
+		"tag": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this tag?"
+			},
+			"titleOne": "Tag '{NAME}'"
 		},
 		"transfer": {
 			"button": {
@@ -2662,6 +2669,8 @@
 		"system": "System",
 		"systemModes": "System modes",
 		"tab": "Tab",
+		"tag": "Tag",
+		"tags": "Tags",
 		"text": "Text",
 		"textSearch": "البحث عن النص",
 		"threeDots": "...",

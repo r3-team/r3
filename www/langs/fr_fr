@@ -1676,6 +1676,7 @@
 			"relationEncryptionHint": "Active le chiffrement de bout en bout (E2EE) pour les attributs de cette relation. E2EE a des avantages et des inconvénients - veuillez lire attentivement la documentation du Builder avant de l'utiliser. Ce paramètre ne peut pas être modifié ultérieurement.",
 			"role": "Nouveau rôle",
 			"searchBar": "New search bar",
+			"tag": "New tag",
 			"template": {
 				"loginSync": "User sync function",
 				"mailsFromSpooler": "Traitement des e-mails (entrants)",
@@ -1903,6 +1904,12 @@
 			"titleRelationsHint": "Pour stocker et ajouter des données aux enregistrements.",
 			"titleRoles": "Préparer les rôles",
 			"titleRolesHint": "Définissez ce que chacun peut faire ou voir."
+		},
+		"tag": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this tag?"
+			},
+			"titleOne": "Tag '{NAME}'"
 		},
 		"transfer": {
 			"button": {
@@ -2662,6 +2669,8 @@
 		"system": "System",
 		"systemModes": "System modes",
 		"tab": "Tab",
+		"tag": "Tag",
+		"tags": "Tags",
 		"text": "Text",
 		"textSearch": "Recherche de texte",
 		"threeDots": "...",

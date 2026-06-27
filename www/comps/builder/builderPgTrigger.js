@@ -46,7 +46,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content default-inputs no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -202,27 +202,26 @@ export default {
 		};
 	},
 	computed:{
-		// simple
-		canSave:         (s) => s.values !== null && s.values.pgFunctionId !== null && s.values.relationId !== null && s.hasChanges,
-		constraintOk:    (s) => s.values !== null && s.values.fires === 'AFTER' && s.values.perRow,
-		hasChanges:      (s) => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		isExternal:      (s) => s.isFromRelation && s.values.pgFunctionId !== null && s.module.id !== s.pgFunctionIdMap[s.values.pgFunctionId].moduleId,
-		isFromPgFunction:(s) => s.contextEntity === 'pgFunction',
-		isFromRelation:  (s) => s.contextEntity === 'relation',
-		isNew:           (s) => s.id === null,
-		
+		canSave:         s => s.values !== null && s.values.pgFunctionId !== null && s.values.relationId !== null && s.hasChanges,
+		constraintOk:    s => s.values !== null && s.values.fires === 'AFTER' && s.values.perRow,
+		hasChanges:      s => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		isExternal:      s => s.isFromRelation && s.values.pgFunctionId !== null && s.module.id !== s.pgFunctionIdMap[s.values.pgFunctionId].moduleId,
+		isFromPgFunction:s => s.contextEntity === 'pgFunction',
+		isFromRelation:  s => s.contextEntity === 'relation',
+		isNew:           s => s.id === null,
+
 		// stores
-		module:(s) => {
+		module:s => {
 			if(s.isFromRelation)   return s.moduleIdMap[s.relationIdMap[s.contextId].moduleId];
 			if(s.isFromPgFunction) return s.moduleIdMap[s.pgFunctionIdMap[s.contextId].moduleId];
 			return false;
 		},
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
-		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
-		pgTriggerIdMap: (s) => s.$store.getters['schema/pgTriggerIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.pgTrigger,
-		capGen:         (s) => s.$store.getters.captions.generic
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
+		pgTriggerIdMap: s => s.$store.getters['schema/pgTriggerIdMap'],
+		capApp:         s => s.$store.getters.captions.builder.pgTrigger,
+		capGen:         s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();
@@ -237,7 +236,7 @@ export default {
 		dialogDeleteAsk,
 		getDependentModules,
 		getTemplatePgTrigger,
-		
+
 		// actions
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's' && this.canSave) {
@@ -252,7 +251,7 @@ export default {
 		open() {
 			if(this.isFromPgFunction)
 				this.$router.push('/builder/relation/'+this.values.relationId);
-			
+
 			if(this.isFromRelation)
 				this.$router.push('/builder/pg-function/'+this.values.pgFunctionId);
 		},
@@ -264,7 +263,7 @@ export default {
 					this.isFromRelation   ? this.contextId : null,
 					this.isFromPgFunction ? this.contextId : null
 				);
-			
+
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
 		setDeferred(state) {
@@ -274,7 +273,7 @@ export default {
 			this.values.isDeferrable = state;
 			this.values.isDeferred   = state;
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('pgTrigger','del',this.id,true).then(
@@ -297,7 +296,7 @@ export default {
 			} else if(!this.values.isDeferrable) {
 				this.values.isDeferred   = false;
 			}
-			
+
 			ws.send('pgTrigger','set',this.values,true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);

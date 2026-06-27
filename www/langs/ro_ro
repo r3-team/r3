@@ -1676,6 +1676,7 @@
 			"relationEncryptionHint": "Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
 			"role": "New role",
 			"searchBar": "New search bar",
+			"tag": "New tag",
 			"template": {
 				"loginSync": "Login sync function",
 				"mailsFromSpooler": "Email processing (incoming)",
@@ -1903,6 +1904,12 @@
 			"titleRelationsHint": "To store and add data to records.",
 			"titleRoles": "Prepare roles",
 			"titleRolesHint": "Define what everyone can do or see."
+		},
+		"tag": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this tag?"
+			},
+			"titleOne": "Tag '{NAME}'"
 		},
 		"transfer": {
 			"button": {
@@ -2662,6 +2669,8 @@
 		"system": "System",
 		"systemModes": "System modes",
 		"tab": "Tab",
+		"tag": "Tag",
+		"tags": "Tags",
 		"text": "Text",
 		"textSearch": "Căutare text",
 		"threeDots": "...",

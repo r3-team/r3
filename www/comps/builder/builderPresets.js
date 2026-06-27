@@ -1,7 +1,6 @@
 import MyBuilderPreset from './builderPreset.js';
-export {MyBuilderPresets as default};
 
-const MyBuilderPresets = {
+export default {
 	name:'my-builder-presets',
 	components:{MyBuilderPreset},
 	template:`<div class="generic-entry-list">
@@ -15,7 +14,7 @@ const MyBuilderPresets = {
 				<span>{{ capGen.button.new }}</span>
 			</div>
 		</div>
-		
+
 		<div class="entry clickable"
 			@click="idEdit = p.id"
 			v-for="p in relation.presets.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
@@ -30,7 +29,7 @@ const MyBuilderPresets = {
 				<span class="subtitle">{{ getPreview(p) }}</span>
 			</div>
 		</div>
-		
+
 		<my-builder-preset
 			v-if="idEdit !== false"
 			@close="idEdit = false"
@@ -50,12 +49,10 @@ const MyBuilderPresets = {
 		};
 	},
 	computed:{
-		// stores
-		capApp:(s) => s.$store.getters.captions.builder.preset,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.builder.preset,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
-		// presentation
 		getPreview(preset) {
 			let items = [];
 			for(let v of preset.values) {

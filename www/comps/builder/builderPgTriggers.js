@@ -15,7 +15,7 @@ export default {
 				<span>{{ capGen.button.new }}</span>
 			</div>
 		</div>
-		
+
 		<div class="entry clickable"
 			@click="idEdit = trg.id"
 			v-for="trg in triggers"
@@ -61,7 +61,7 @@ export default {
 				:naked="true"
 			/>
 		</div>
-		
+
 		<my-builder-pg-trigger
 			v-if="idEdit !== false"
 			@close="idEdit = false"
@@ -83,27 +83,27 @@ export default {
 		};
 	},
 	computed:{
-		module:(s) => {
+		module:s => {
 			if(s.isFromRelation)   return s.moduleIdMap[s.relationIdMap[s.contextId].moduleId];
 			if(s.isFromPgFunction) return s.moduleIdMap[s.pgFunctionIdMap[s.contextId].moduleId];
 			return false;
 		},
-		triggers:(s) => {
+		triggers:s => {
 			if(s.module === false) return [];
-			
+
 			let out = [];
-			
+
 			// check relevant modules
 			const modules = s.isFromPgFunction ? s.getDependentModules(s.module) : s.modules;
 			for(const mod of modules) {
 				for(const trg of mod.pgTriggers) {
 					if(
-						(s.isFromRelation   && trg.relationId   === s.contextId) || 
+						(s.isFromRelation   && trg.relationId   === s.contextId) ||
 						(s.isFromPgFunction && trg.pgFunctionId === s.contextId)
 					) out.push(trg);
 				}
 			}
-			
+
 			// sort by execution event & deferred
 			// BEFORE trigger first, then AFTER trigger, then AFTER DEFERRED trigger
 			out.sort((a,b) => {
@@ -112,18 +112,18 @@ export default {
 			});
 			return out;
 		},
-		
+
 		// simple
-		isFromPgFunction:(s) => s.contextEntity === 'pgFunction',
-		isFromRelation:  (s) => s.contextEntity === 'relation',
-		
+		isFromPgFunction:s => s.contextEntity === 'pgFunction',
+		isFromRelation:  s => s.contextEntity === 'relation',
+
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
-		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.pgTrigger,
-		capGen:         (s) => s.$store.getters.captions.generic
+		modules:        s => s.$store.getters['schema/modules'],
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
+		capApp:         s => s.$store.getters.captions.builder.pgTrigger,
+		capGen:         s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// external

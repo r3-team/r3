@@ -24,7 +24,7 @@ export default {
 					:captionTitle="capGen.help"
 				/>
 			</div>
-			
+
 			<!-- module navigation -->
 			<div class="moduleSelect default-inputs transparent">
 				<my-module-select v-model="moduleIdInput" />
@@ -34,10 +34,10 @@ export default {
 					:captionTitle="capApp.backHint"
 				/>
 			</div>
-			
+
 			<!-- language selection -->
 			<div class="moduleSelect translation default-inputs transparent">
-				
+
 				<span>{{ capApp.language }}</span>
 				<select class="dynamic" v-model="builderLanguage">
 					<option
@@ -51,7 +51,7 @@ export default {
 					:captionTitle="capApp.languageNextHint"
 				/>
 			</div>
-			
+
 			<!-- module read only -->
 			<div class="moduleNoOwner"
 				v-if="!moduleOwner"
@@ -62,7 +62,7 @@ export default {
 					@trigger="$router.push('/admin/modules')"
 				/>
 			</div>
-			
+
 			<!-- module component navigation -->
 			<div class="navigation-two-columns" v-if="module">
 				<div class="navigation-column">
@@ -70,42 +70,47 @@ export default {
 						<img src="images/flag.png" />
 						<span>{{ capApp.navigationStart }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/module/'+module.id">
 						<img src="images/module.png" />
 						<span>{{ capGen.module }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/relations/'+module.id">
 						<img src="images/database.png" />
 						<span>{{ capGen.relations }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/forms/'+module.id">
 						<img src="images/fileText.png" />
 						<span>{{ capGen.forms }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/menu/'+module.id">
 						<img src="images/menu.png" />
 						<span>{{ capGen.menus }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/roles/'+module.id">
 						<img src="images/personMultiple.png" />
 						<span>{{ capGen.roles }}</span>
 					</router-link>
-					
-					<router-link class="entry clickable" :to="'/builder/docs/'+module.id">
-						<img src="images/document.png" />
-						<span>{{ capGen.pdfs }}</span>
-					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/icons/'+module.id">
 						<img src="images/fileImage.png" />
 						<span>{{ capGen.icons }}</span>
 					</router-link>
-					
+
+					<router-link class="entry clickable" :to="'/builder/docs/'+module.id">
+						<img src="images/document.png" />
+						<span>{{ capGen.pdfs }}</span>
+					</router-link>
+
+					<router-link class="entry clickable" :to="'/builder/articles/'+module.id">
+						<img src="images/question.png" />
+						<span>{{ capGen.articles }}</span>
+					</router-link>
+
 					<router-link class="entry clickable" :to="'/builder/caption-map/'+module.id">
 						<img src="images/languages.png" />
 						<span>{{ capApp.navigationCaptionMap }}</span>
@@ -116,57 +121,57 @@ export default {
 						<img src="images/codeDatabase.png" />
 						<span>{{ capGen.pgFunctions }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/js-functions/'+module.id">
 						<img src="images/codeScreen.png" />
 						<span>{{ capGen.jsFunctions }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/collections/'+module.id">
 						<img src="images/tray.png" />
 						<span>{{ capGen.collections }}</span>
 					</router-link>
-					
-					<router-link class="entry clickable" :to="'/builder/search-bars/'+module.id">
-						<img src="images/search.png" />
-						<span>{{ capGen.searchBars }}</span>
-					</router-link>
-					
+
 					<router-link class="entry clickable" v-if="hasLoginForms" :to="'/builder/login-forms/'+module.id">
 						<img src="images/personCog.png" />
 						<span>{{ capGen.loginForms }}</span>
 					</router-link>
-					
-					<router-link class="entry clickable" :to="'/builder/articles/'+module.id">
-						<img src="images/question.png" />
-						<span>{{ capGen.articles }}</span>
-					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/apis/'+module.id">
 						<img src="images/api.png" />
 						<span>{{ capGen.apis }}</span>
 					</router-link>
-					
+
+					<router-link class="entry clickable" :to="'/builder/search-bars/'+module.id">
+						<img src="images/search.png" />
+						<span>{{ capGen.searchBars }}</span>
+					</router-link>
+
+					<router-link class="entry clickable" :to="'/builder/tags/'+module.id">
+						<img src="images/tag.png" />
+						<span>{{ capGen.tags }}</span>
+					</router-link>
+
 					<router-link class="entry clickable" :to="'/builder/variables/'+module.id">
 						<img src="images/variable.png" />
 						<span>{{ capGen.variables }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/widgets/'+module.id">
 						<img src="images/tiles.png" />
 						<span>{{ capGen.widgets }}</span>
 					</router-link>
-					
+
 					<router-link class="entry clickable" :to="'/builder/releases/'+module.id">
 						<img src="images/versionHistory.png" />
 						<span>{{ capGen.versionHistory }}</span>
 					</router-link>
-					
+
 					<!-- so router link is not last child (CSS) -->
 					<div />
 				</div>
 			</div>
-			
+
 			<!-- module sub component navigation header -->
 			<div class="navigation-entities-header" v-if="subMenu">
 				<router-link class="entry isTitle grow clickable"
@@ -246,113 +251,113 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<!-- module sub component navigation -->
 			<div class="navigation-entities" v-if="subMenu">
-				
+
 				<!-- relations -->
 				<template v-if="navigation === 'relations'">
 					<router-link class="entry clickable"
 						v-for="rel in module.relations.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="rel.id"
-						:to="'/builder/relation/'+rel.id" 
+						:to="'/builder/relation/'+rel.id"
 					>{{ rel.name }}</router-link>
 				</template>
-				
+
 				<!-- forms -->
 				<template v-if="navigation === 'forms'">
 					<router-link class="entry clickable"
 						v-for="frm in module.forms.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="frm.id"
-						:to="'/builder/form/'+frm.id" 
+						:to="'/builder/form/'+frm.id"
 					>{{ frm.name }}</router-link>
 				</template>
-				
+
 				<!-- roles -->
 				<template v-if="navigation === 'roles'">
 					<router-link class="entry clickable"
 						v-for="rol in module.roles.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="rol.id"
-						:to="'/builder/role/'+rol.id" 
+						:to="'/builder/role/'+rol.id"
 					>{{ rol.name }}</router-link>
 				</template>
-				
+
 				<!-- collections -->
 				<template v-if="navigation === 'collections'">
 					<router-link class="entry clickable"
 						v-for="c in module.collections.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="c.id"
-						:to="'/builder/collection/'+c.id" 
+						:to="'/builder/collection/'+c.id"
 					>{{ c.name }}</router-link>
 				</template>
-				
+
 				<!-- search bars -->
 				<template v-if="navigation === 'search-bars'">
 					<router-link class="entry clickable"
 						v-for="b in module.searchBars.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="b.id"
-						:to="'/builder/search-bar/'+b.id" 
+						:to="'/builder/search-bar/'+b.id"
 					>{{ b.name }}</router-link>
 				</template>
-				
+
 				<!-- APIs -->
 				<template v-if="navigation === 'apis'">
 					<router-link class="entry clickable"
 						v-for="a in module.apis.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="a.id"
-						:to="'/builder/api/'+a.id" 
+						:to="'/builder/api/'+a.id"
 					>{{ a.name + ' (v' + a.version + ')' }}</router-link>
 				</template>
-				
+
 				<!-- documents -->
 				<template v-if="navigation === 'docs'">
 					<router-link class="entry clickable"
 						v-for="a in module.docs.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="a.id"
-						:to="'/builder/doc/'+a.id" 
+						:to="'/builder/doc/'+a.id"
 					>{{ a.name }}</router-link>
 				</template>
-				
+
 				<!-- variables -->
 				<template v-if="navigation === 'variables'">
 					<router-link class="entry clickable"
 						v-for="a in module.variables.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="a.id"
-						:to="'/builder/variable/'+a.id" 
+						:to="'/builder/variable/'+a.id"
 					>{{ a.name }}</router-link>
 				</template>
-				
+
 				<!-- widgets -->
 				<template v-if="navigation === 'widgets'">
 					<router-link class="entry clickable"
 						v-for="a in module.widgets.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="a.id"
-						:to="'/builder/widget/'+a.id" 
+						:to="'/builder/widget/'+a.id"
 					>{{ a.name }}</router-link>
 				</template>
-				
+
 				<!-- PG functions -->
 				<template v-if="navigation === 'pg-functions'">
 					<router-link class="entry clickable"
 						v-for="fnc in module.pgFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 						:key="fnc.id"
-						:to="'/builder/pg-function/'+fnc.id" 
+						:to="'/builder/pg-function/'+fnc.id"
 					>{{ fnc.name }}</router-link>
 				</template>
-				
+
 				<!-- JS functions -->
 				<template v-if="navigation === 'js-functions'">
 					<router-link class="entry clickable"
 						v-for="fnc in jsFunctions"
 						:key="fnc.id"
-						:to="'/builder/js-function/'+fnc.id" 
+						:to="'/builder/js-function/'+fnc.id"
 					>
 						<span><b v-if="fnc.formId !== null">{{ formIdMap[fnc.formId].name }}: </b>{{ fnc.name }}</span>
 					</router-link>
 				</template>
 			</div>
 		</div>
-		
+
 		<router-view
 			v-if="isReady"
 			v-show="!showHelp"
@@ -362,12 +367,12 @@ export default {
 			:builderLanguage
 			:readonly="!moduleOwner"
 		/>
-		
+
 		<my-builder-help
 			v-if="showHelp"
 			@close="showHelp = false"
 		/>
-		
+
 		<!-- new entity dialog -->
 		<my-builder-new
 			v-if="createNewOpen"
@@ -404,23 +409,23 @@ export default {
 					});
 					return this.$router.push('/');
 				}
-				
+
 				if(!this.builderEnabled)
 					return this.$router.push('/');
-				
+
 				if(typeof val.meta.nav === 'undefined') {
 					this.moduleId = '';
 					this.isReady  = true;
 					return;
 				}
-				
+
 				// ascertain navigation
 				this.navigation = val.meta.nav;
-				
+
 				// ascertain module ID to be loaded
 				const isModule    = ['module','start'].includes(val.meta.target);
 				let   targetIdMap = this.moduleIdMap;
-				
+
 				if(!isModule) {
 					switch(val.meta.target) {
 						case 'api':         targetIdMap = this.apiIdMap;        break;
@@ -436,7 +441,7 @@ export default {
 						case 'widget':      targetIdMap = this.widgetIdMap;     break;
 					}
 				}
-				
+
 				// reroute if invalid target (usually navigating back to deleted entity)
 				if(targetIdMap[val.params.id] === undefined) {
 					this.$router.replace('/builder/modules');
@@ -447,18 +452,18 @@ export default {
 				// close global search if routed to anywhere in the Builder
 				if(this.globalSearchInput !== null)
 					this.$store.commit('globalSearchInput',null);
-				
+
 				// apply module ID from target
 				this.moduleId = isModule ? val.params.id : targetIdMap[val.params.id].moduleId;
-				
+
 				// set module translation language
 				const mod = this.moduleIdMap[this.moduleId];
-				
+
 				if(mod.languages.indexOf(this.settings.languageCode) !== -1)
 					this.builderLanguage = this.settings.languageCode;
 				else if(mod.languages.length !== 0)
 					this.builderLanguage = mod.languages[0];
-				
+
 				this.isReady = true;
 			},
 			immediate:true
@@ -475,7 +480,7 @@ export default {
 			s.navigation === 'docs'         && s.module.docs.length        !== 0 ||
 			s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0 ||
 			s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
-		
+
 		// inputs
 		moduleIdInput:{
 			get()  { return !this.module ? null : this.module.id; },
@@ -484,7 +489,7 @@ export default {
 				else         this.$router.push(`/builder/${this.navigation}/${v}`);
 			}
 		},
-		
+
 		// simple
 		createNewOpen:s => s.createNewEntity !== null,
 		hasLoginForms:s => !s.isNew && s.module.loginForms.length !== 0,
@@ -492,7 +497,7 @@ export default {
 		jsFunctions:  s => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
 		module:       s => s.isNew ? false : s.moduleIdMap[s.moduleId],
 		moduleOwner:  s => s.isNew ? true  : s.moduleIdMapMeta[s.moduleId].owner,
-		
+
 		// stores
 		apiIdMap:         s => s.$store.getters['schema/apiIdMap'],
 		attributeIdMap:   s => s.$store.getters['schema/attributeIdMap'],
@@ -532,7 +537,7 @@ export default {
 		getCaptionForLang,
 		getJsFunctionsProcessed,
 		srcBase64Icon,
-		
+
 		// actions
 		add() {
 			let entity;
@@ -546,6 +551,7 @@ export default {
 				case 'relations':    entity = 'relation';   break;
 				case 'roles':        entity = 'role';       break;
 				case 'search-bars':  entity = 'searchBar';  break;
+				case 'tags':         entity = 'tag';        break;
 				case 'variables':    entity = 'variable';   break;
 				case 'widgets':      entity = 'widget';     break;
 			}
@@ -557,11 +563,11 @@ export default {
 		},
 		nextLanguage() {
 			if(this.createNewOpen) return;
-			
+
 			const pos = this.module.languages.indexOf(this.builderLanguage);
 			if(pos === -1 || pos >= this.module.languages.length - 1)
 				return this.builderLanguage = this.module.languages[0];
-			
+
 			return this.builderLanguage = this.module.languages[pos+1];
 		}
 	}

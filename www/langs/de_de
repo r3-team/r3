@@ -1676,6 +1676,7 @@
 			"relationEncryptionHint": "Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
 			"role": "Neue Rolle",
 			"searchBar": "Neue Suchleiste",
+			"tag": "Neues Schlagwort",
 			"template": {
 				"loginSync": "Benutzer-Sync-Funktion",
 				"mailsFromSpooler": "E-Mail-Verarbeitung (eingehend)",
@@ -1903,6 +1904,12 @@
 			"titleRelationsHint": "Um Datensätze zu speichern und Daten zuweisen.",
 			"titleRoles": "Rollen vorbereiten",
 			"titleRolesHint": "Festlegen, was man sehen und tun darf."
+		},
+		"tag": {
+			"dialog": {
+				"delete": "Bist du sicher, dass du dieses Schlagwort löschen möchtest?"
+			},
+			"titleOne": "Schlagwort '{NAME}'"
 		},
 		"transfer": {
 			"button": {
@@ -2662,6 +2669,8 @@
 		"system": "System",
 		"systemModes": "Betriebsarten",
 		"tab": "Tab",
+		"tag": "Schlagwort",
+		"tags": "Schlagwörter",
 		"text": "Text",
 		"textSearch": "Textsuche",
 		"threeDots": "...",

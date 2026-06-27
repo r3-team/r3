@@ -286,6 +286,12 @@
 .builder-widget{
 	min-height:650px;
 }
+.builder-tag{
+	max-width:600px;
+	min-width:300px;
+	width:100%;
+	min-height:600px;
+}
 
 /* caption */
 .builder-caption{

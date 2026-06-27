@@ -631,6 +631,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return SearchBarSet_tx(ctx, tx, reqJson)
 		}
+	case "tag":
+		switch action {
+		case "del":
+			return TagDel_tx(ctx, tx, reqJson)
+		case "set":
+			return TagSet_tx(ctx, tx, reqJson)
+		}
 	case "task":
 		switch action {
 		case "informChanged":
