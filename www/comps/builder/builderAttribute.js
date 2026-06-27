@@ -85,7 +85,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content default-inputs no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -116,14 +116,7 @@ export default {
 						</tr>
 						<tr>
 							<td>{{ capGen.icon }}</td>
-							<td>
-								<my-builder-icon-input
-									@input="values.iconId = $event"
-									:iconIdSelected="values.iconId"
-									:module="module"
-									:readonly="readonly"
-								/>
-							</td>
+							<td><my-builder-icon-input v-model="values.iconId" :module :readonly /></td>
 							<td>{{ capApp.iconHint }}</td>
 						</tr>
 						<tr v-if="!isId">
@@ -168,7 +161,7 @@ export default {
 							</td>
 							<td>{{ capApp.usedForHint[usedFor] }}</td>
 						</tr>
-						
+
 						<!-- relationship settings -->
 						<template v-if="isRelationship">
 							<tr>
@@ -182,7 +175,7 @@ export default {
 										<option v-for="rel in module.relations" :value="rel.id">
 											{{ rel.name }}
 										</option>
-										
+
 										<!-- relations from other modules -->
 										<optgroup
 											v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.relations.length !== 0)"
@@ -221,21 +214,21 @@ export default {
 								<td>{{ capApp.option.relationshipActionsHintsOnUpdate }}</td>
 							</tr>
 						</template>
-						
+
 						<!-- bigint -->
 						<tr v-if="isInteger && !isTime">
 							<td>{{ isDate || isDatetime ? capApp.bigintDates : capApp.bigint }}</td>
 							<td><my-bool v-model="bigint" :readonly="readonly" /></td>
 							<td>{{ isDate || isDatetime ? capApp.bigintDatesHint : capApp.bigintHint }}</td>
 						</tr>
-						
+
 						<!-- double precision -->
 						<tr v-if="isFloat">
 							<td>{{ capApp.doublePrecision }}</td>
 							<td><my-bool v-model="doublePrecision" :readonly="readonly" /></td>
 							<td>{{ capApp.doublePrecisionHint }}</td>
 						</tr>
-						
+
 						<!-- text/files length -->
 						<tr v-if="hasLength && !hasLengthFract">
 							<td>{{ lengthTitle }}</td>
@@ -248,7 +241,7 @@ export default {
 							</td>
 							<td></td>
 						</tr>
-						
+
 						<!-- decimal length -->
 						<tr v-if="hasLengthFract">
 							<td>{{ capApp.lengthNumeric }}</td>
@@ -283,21 +276,21 @@ export default {
 							</td>
 							<td v-else>{{ capApp.lengthFractHintMax }}</td>
 						</tr>
-						
+
 						<!-- encrypted -->
 						<tr v-if="canEncrypt">
 							<td>{{ capApp.encrypted }}</td>
 							<td><my-bool v-model="values.encrypted" :readonly="readonly" /></td>
 							<td>{{ capApp.encryptedHint }}</td>
 						</tr>
-						
+
 						<!-- nullable -->
 						<tr v-if="!isId">
 							<td>{{ capApp.nullable }}</td>
 							<td><my-bool v-model="values.nullable" :readonly="readonly || isId" :reversed="true" /></td>
 							<td>{{ capApp.nullableHint }}</td>
 						</tr>
-						
+
 						<!-- defaults -->
 						<tr v-if="!isId && !isFiles && !isRelationship">
 							<td>{{ capApp.defaults }}</td>
@@ -318,7 +311,7 @@ export default {
 							</td>
 							<td>{{ capApp.defaultsHint }}</td>
 						</tr>
-						
+
 						<!-- expert info -->
 						<tr>
 							<td>{{ capApp.content }}</td>
@@ -352,7 +345,7 @@ export default {
 			defaultsOption:'fixed',
 			hasReferences:false,
 			showLookup:false,
-			
+
 			// attribute values
 			values:null,
 			valuesOrg:null
@@ -403,71 +396,71 @@ export default {
 						this.values.contentUse = 'barcode';
 						this.values.length     = 0;
 					break;
-					
+
 					// boolean uses
 					case 'boolean':
 						this.values.content    = 'boolean';
 						this.values.contentUse = 'default';
 					break;
-					
+
 					// integer uses
 					case 'date':     // fallthrough
 					case 'datetime': // fallthrough
 					case 'time':
 						if(this.isNew)
 							this.values.content = v === 'time' ? 'integer' : 'bigint';
-						
+
 						this.values.contentUse = v;
 					break;
 					case 'number':
 						this.values.content    = this.isNew ? 'integer' : this.values.content;
 						this.values.contentUse = 'default';
 					break;
-					
+
 					// numeric uses
 					case 'decimal':
 						this.values.content    = 'numeric';
 						this.values.contentUse = 'default';
 					break;
-					
+
 					// files uses
 					case 'files':
 						this.values.content    = 'files';
 						this.values.contentUse = 'default';
 					break;
-					
+
 					// float uses
 					case 'float':
 						this.values.content    = this.isNew ? 'real' : this.values.content;
 						this.values.contentUse = 'default';
 					break;
-					
+
 					// relationship uses
 					case 'relationship11': // fallthrough
 					case 'relationshipN1':
 						this.values.content    = v === 'relationship11' ? '1:1' : 'n:1';
 						this.values.contentUse = 'default';
 					break;
-					
+
 					// regconfig uses
 					case 'regconfig':
 						this.values.content    = 'regconfig';
 						this.values.contentUse = 'default';
 					break;
-					
+
 					// UUID uses
 					case 'uuid':
 						this.values.content    = 'uuid';
 						this.values.contentUse = 'default';
 					break;
 				}
-				
+
 				// reset defaults
 				this.values.def     = '';
 				this.defaultsOption = 'fixed';
 			}
 		},
-		
+
 		lengthTitle:(s) => {
 			if(s.isString)  return s.capApp.lengthText;
 			if(s.isNumeric) return s.capApp.lengthNumeric;
@@ -480,7 +473,7 @@ export default {
 			}
 			return false;
 		},
-		
+
 		// simple
 		canEncrypt:    (s) => s.relation.encryption && s.values.content === 'text',
 		canSave:       (s) => !s.readonly && s.hasChanges && !s.nameTaken,
@@ -490,7 +483,7 @@ export default {
 		isId:          (s) => !s.isNew && s.values.name === 'id',
 		isNew:         (s) => s.attributeId === null,
 		title:         (s) => s.isNew ? s.capApp.new : s.capApp.edit.replace('{NAME}',s.values.name),
-		
+
 		// content
 		isBoolean:       (s) => s.isAttributeBoolean(s.values.content),
 		isFiles:         (s) => s.isAttributeFiles(s.values.content),
@@ -503,7 +496,7 @@ export default {
 		isRelationshipN1:(s) => s.isAttributeRelationshipN1(s.values.content),
 		isString:        (s) => s.isAttributeString(s.values.content),
 		isUuid:          (s) => s.isAttributeUuid(s.values.content),
-		
+
 		// content use
 		isBarcode: (s) => s.isString  && s.values.contentUse === 'barcode',
 		isColor:   (s) => s.isString  && s.values.contentUse === 'color',
@@ -516,7 +509,7 @@ export default {
 		isText:    (s) => s.isString  && s.values.contentUse === 'default',
 		isTextarea:(s) => s.isString  && s.values.contentUse === 'textarea',
 		isTime:    (s) => s.isInteger && s.values.contentUse === 'time',
-		
+
 		// stores
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		apiIdMap:       (s) => s.$store.getters['schema/apiIdMap'],
@@ -559,7 +552,7 @@ export default {
 		isAttributeRelationshipN1,
 		isAttributeString,
 		isAttributeUuid,
-		
+
 		// actions
 		changedUsedFor() {
 			if(!this.isRelationship && this.values.relationshipId !== null)
@@ -579,9 +572,9 @@ export default {
 			this.values = this.attributeId !== null
 				? JSON.parse(JSON.stringify(this.attributeIdMap[this.attributeId]))
 				: this.getTemplateAttribute(this.relation.moduleId,this.relation.id);
-			
+
 			this.resetOrg();
-			
+
 			// set defaults option
 			switch(this.values.def) {
 				case 'EXTRACT(EPOCH FROM CURRENT_DATE)': this.defaultsOption = 'date';     break;
@@ -623,7 +616,7 @@ export default {
 			}
 			this.values[name] = newValue;
 		},
-		
+
 		// backend calls
 		delCheck() {
 			this.hasReferences = this.getHasAnyReferences(this.module,'attribute',this.attributeId);
@@ -644,14 +637,14 @@ export default {
 		set(saveAndNew) {
 			if(this.values.encrypted && !this.canEncrypt)
 				this.values.encrypted = false;
-			
+
 			ws.sendMultiple([
 				ws.prepare('attribute','set',this.values),
 				ws.prepare('schema','check',{ moduleId:this.module.id })
 			],true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					
+
 					if(saveAndNew) {
 						this.$emit('new-record');
 						this.values.id   = this.getUuidV4();

@@ -65,11 +65,10 @@ export default {
 							<td>{{ capGen.icon }}</td>
 							<td>
 								<my-builder-icon-input
-									@input="tag.iconId = $event"
-									:iconIdSelected="tag.iconId"
+									v-model="tag.iconId"
 									:module
-									:title="capGen.icon"
 									:readonly
+									:title="capGen.icon"
 								/>
 							</td>
 						</tr>

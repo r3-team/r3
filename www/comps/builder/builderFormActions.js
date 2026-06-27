@@ -24,12 +24,7 @@ const MyBuilderFormAction = {
 				:image="open ? 'triangleDown.png' : 'triangleRight.png'"
 				:naked="true"
 			/>
-			<my-builder-icon-input
-				@input="iconId = $event"
-				:icon-id-selected="iconId"
-				:module
-				:readonly
-			/>
+			<my-builder-icon-input v-model="iconId" :module :readonly />
 			<my-builder-caption
 				v-model="captions.formActionTitle"
 				:contentName="capGen.title"
@@ -69,7 +64,7 @@ const MyBuilderFormAction = {
 									>{{ f.name }}</option>
 								</optgroup>
 							</select>
-							
+
 							<my-button image="add.png"
 								v-if="jsFunctionId === ''"
 								@trigger="$emit('createNew','jsFunction',{formId:formId})"
@@ -158,7 +153,7 @@ const MyBuilderFormAction = {
 			get()  { return this.modelValue.state; },
 			set(v) { this.update('state',v); }
 		},
-		
+
 		// store
 		module:         s => s.moduleIdMap[s.formIdMap[s.formId].moduleId],
 		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
@@ -171,7 +166,7 @@ const MyBuilderFormAction = {
 		// externals
 		getDependentModules,
 		openLink,
-		
+
 		// actions
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));

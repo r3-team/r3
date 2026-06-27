@@ -76,11 +76,11 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding">
-				
+
 				<div class="builder-search-bar-columns">
-				
+
 					<!-- query columns -->
 					<div class="builder-search-bar-columns-active">
 						<h2>{{ capGen.columnsActive }}</h2>
@@ -95,7 +95,7 @@ export default {
 							:readonly
 						/>
 					</div>
-					
+
 					<div class="builder-search-bar-columns-available">
 						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-search-bar-column-templates">
@@ -110,7 +110,7 @@ export default {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
 			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
@@ -118,14 +118,14 @@ export default {
 					<h1>{{ capGen.searchBar }}</h1>
 				</div>
 			</div>
-			
+
 			<template v-if="!columnShow">
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','properties']"
 					:entriesText="[capGen.content,capGen.properties]"
 				/>
-				
+
 				<!-- content -->
 				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
@@ -148,7 +148,7 @@ export default {
 							:caption="capGen.sqlPreview"
 						/>
 					</div>
-					
+
 					<!-- no global search input warning -->
 					<template v-if="!anySearchInput">
 						<br />
@@ -158,7 +158,7 @@ export default {
 						/>
 					</template>
 				</div>
-				
+
 				<!-- properties -->
 				<div class="content no-padding" v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical default-inputs">
@@ -189,8 +189,7 @@ export default {
 								<td>{{ capGen.icon }}</td>
 								<td>
 									<my-builder-icon-input
-										@input="searchBar.iconId = $event"
-										:iconIdSelected="searchBar.iconId"
+										v-model="searchBar.iconId"
 										:module
 										:title="capGen.icon"
 										:readonly
@@ -213,7 +212,7 @@ export default {
 					</table>
 				</div>
 			</template>
-				
+
 			<!-- column options -->
 			<my-builder-column-options
 				v-if="columnShow !== false"
@@ -246,7 +245,7 @@ export default {
 			// inputs
 			searchBar:false,
 			searchBarCopy:{},
-			
+
 			// state
 			columnIdShow:null,
 			filtersDisable:[
@@ -260,14 +259,14 @@ export default {
 	computed:{
 		columnShow:s => {
 			if(s.columnIdShow === null) return false;
-			
+
 			for(let i = 0, j = s.searchBar.columns.length; i < j; i++) {
 				if(s.searchBar.columns[i].id === s.columnIdShow)
 					return s.searchBar.columns[i];
 			}
 			return false;
 		},
-		
+
 		// simple
 		anySearchInput: s => s.getIsContentInAnyFilter(s.query.filters,s.searchBar.columns,'globalSearch'),
 		hasChanges:     s => !s.deepIsEqual(s.searchBar,s.searchBarSchema),
@@ -276,7 +275,7 @@ export default {
 		query:          s => s.searchBar.query !== null ? s.searchBar.query : s.getTemplateQuery(),
 		queryActive:    s => s.searchBar.query !== null && s.searchBar.query.relationId !== null,
 		searchBarSchema:s => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
-		
+
 		// stores
 		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
@@ -299,7 +298,7 @@ export default {
 		getJoinsIndexMap,
 		getSqlPreview,
 		getTemplateQuery,
-		
+
 		// actions
 		columnSet(name,value) {
 			this.columnShow[name] = value;
@@ -321,11 +320,11 @@ export default {
 		},
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
-			
+
 			if(this.columnIdShow !== null)
 				this.tabTarget = 'content';
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('searchBar','del',this.searchBar.id,true).then(

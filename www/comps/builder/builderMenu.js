@@ -28,7 +28,7 @@ const MyBuilderMenuItems = {
 		<template #item="{element,index}">
 	    	<div class="builder-menu">
 				<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
-				
+
 				<div class="inputs">
 					<div class="line">
 						<!-- color preview -->
@@ -36,15 +36,10 @@ const MyBuilderMenuItems = {
 							@click="showOptionsIndex = index"
 							:style="colorStyle(element.color)"
 						></div>
-						
+
 						<!-- icon input -->
-						<my-builder-icon-input
-							@input="element.iconId = $event"
-							:icon-id-selected="element.iconId"
-							:module="module"
-							:readonly="readonly"
-						/>
-						
+						<my-builder-icon-input v-model="element.iconId" :module :readonly />
+
 						<!-- caption inputs -->
 						<my-builder-caption
 							v-model="element.captions.menuTitle"
@@ -52,7 +47,7 @@ const MyBuilderMenuItems = {
 							:language="builderLanguage"
 							:readonly="readonly"
 						/>
-						
+
 						<!-- form open input -->
 						<my-builder-form-input
 							v-model="element.formId"
@@ -60,7 +55,7 @@ const MyBuilderMenuItems = {
 							:module="module"
 							:readonly="readonly"
 						/>
-						
+
 						<!-- show options -->
 						<my-button image="settings.png"
 							@trigger="showOptionsIndex = index"
@@ -68,7 +63,7 @@ const MyBuilderMenuItems = {
 						/>
 					</div>
 				</div>
-				
+
 				<!-- options -->
 				<div class="app-sub-window under-header"
 					v-if="showOptionsIndex === index"
@@ -87,7 +82,7 @@ const MyBuilderMenuItems = {
 								/>
 							</div>
 						</div>
-						
+
 						<div class="content default-inputs">
 							<table class="generic-table-vertical default-inputs">
 								<tbody>
@@ -158,14 +153,14 @@ const MyBuilderMenuItems = {
 						</div>
 					</div>
 				</div>
-				
+
 				<my-button image="delete.png"
 					@trigger="remove(index)"
 					:active="!readonly"
 					:cancel="true"
 					:captionTitle="capGen.button.delete"
 				/>
-				
+
 				<!-- nested menus -->
 				<my-builder-menu-items class="nested"
 					:builderLanguage="builderLanguage"
@@ -199,13 +194,13 @@ const MyBuilderMenuItems = {
 	methods:{
 		// externals
 		getTemplateCollectionConsumer,
-		
+
 		// presentation
 		colorStyle(color) {
 			const c = color !== null ? color : (this.colorParent !== null ? this.colorParent : 'transparent');
 			return `background-color:#${c}`;
 		},
-		
+
 		// actions
 		applyColor(input) {
 			return input === '' ? null : input;
@@ -239,11 +234,11 @@ const MyBuilderMenuTabOptions = {
 				<td>{{ capGen.icon }}</td>
 				<td>
 					<my-builder-icon-input
-						@input="set('iconId',$event)"
-						:icon-id-selected="modelValue.iconId"
+						@update:modelValue="set('iconId',$event)"
 						:module
-						:title="capGen.icon"
+						:modelValue="modelValue.iconId"
 						:readonly
+						:title="capGen.icon"
 					/>
 				</td>
 			</tr>
@@ -306,7 +301,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content row no-padding default-inputs">
 			<div class="builder-menus-main">
 				<my-builder-menu-tab-select
@@ -352,7 +347,7 @@ export default {
 					:module="module"
 					:readonly
 				/>
-				
+
 				<!-- actions -->
 				<span>{{ capApp.copy }}</span>
 				<div class="row gap centered">
@@ -427,7 +422,7 @@ export default {
 		canDelete: (s) => !s.readonly && s.menuTabs.length > 1,
 		hasChanges:(s) => JSON.stringify(s.menuTabs) !== JSON.stringify(s.module.menuTabs) || s.menuTabIdsRemoved.length !== 0,
 		module:    (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		
+
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.menu,
@@ -441,7 +436,7 @@ export default {
 		getTemplateMenu,
 		getTemplateMenuTab,
 		getUuidV4,
-		
+
 		// actions
 		addEntry() {
 			this.menuTabs[this.menuTabsIndexShown].menus.unshift(this.getTemplateMenu());
@@ -487,7 +482,7 @@ export default {
 			if(this.menuTabsIndexShown > this.menuTabs.length - 1)
 				this.menuTabsIndexShown = 0;
 		},
-		
+
 		// backend functions
 		del() {
 			this.menuTabIdsRemoved.push(this.menuTabs[this.menuTabsIndexShown].id);
@@ -503,7 +498,7 @@ export default {
 				requests.push(ws.prepare('menuTab','del',id));
 			}
 			requests.push(ws.prepare('schema','check',{moduleId:this.module.id}));
-			
+
 			ws.sendMultiple(requests,true).then(
 				() => {
 					this.menuTabIdsRemoved = [];

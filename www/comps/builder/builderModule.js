@@ -53,7 +53,7 @@ const MyBuilderModuleStartForm = {
 			get()  { return this.modelValue.roleId; },
 			set(v) { this.update('roleId',v); }
 		},
-		
+
 		// stores
 		capApp:s => s.$store.getters.captions.builder.module,
 		capGen:s => s.$store.getters.captions.generic
@@ -62,7 +62,7 @@ const MyBuilderModuleStartForm = {
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
-			
+
 			this.$emit('update:modelValue',v);
 		}
 	}
@@ -106,7 +106,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content default-inputs no-padding">
 			<table class="generic-table-vertical w1200">
 				<tbody>
@@ -153,8 +153,7 @@ export default {
 						<td>{{ capGen.icon }}</td>
 						<td>
 							<my-builder-icon-input
-								@input="inputs.iconId = $event"
-								:icon-id-selected="inputs.iconId"
+								v-model="inputs.iconId"
 								:module="moduleSchema"
 								:readonly
 							/>
@@ -267,7 +266,7 @@ export default {
 						</td>
 						<td>{{ capApp.languageMainHint }}</td>
 					</tr>
-					
+
 					<tr>
 						<td colspan="2"><b>{{ capApp.pwa }}</b></td>
 						<td>{{ capApp.pwaHint }}</td>
@@ -300,16 +299,14 @@ export default {
 							<div class="row gap centered">
 								<span>192x192 px</span>
 								<my-builder-icon-input
-									@input="inputs.iconIdPwa1 = $event"
-									:icon-id-selected="inputs.iconIdPwa1"
+									v-model="inputs.iconIdPwa1"
 									:module="moduleSchema"
 									:readonly
 								/>
 								<span></span>
 								<span>512x512 px</span>
 								<my-builder-icon-input
-									@input="inputs.iconIdPwa2 = $event"
-									:icon-id-selected="inputs.iconIdPwa2"
+									v-model="inputs.iconIdPwa2"
 									:module="moduleSchema"
 									:readonly
 								/>
@@ -317,7 +314,7 @@ export default {
 						</td>
 						<td>{{ capApp.iconPwaHint }}</td>
 					</tr>
-					
+
 					<tr>
 						<td colspan="3"><b>{{ capGen.functions }}</b></td>
 					</tr>
@@ -376,7 +373,7 @@ export default {
 						</td>
 						<td>{{ capApp.pgFunctionIdLoginSyncHint }}</td>
 					</tr>
-					
+
 					<tr>
 						<td colspan="2">
 							<div class="column gap">
@@ -393,7 +390,7 @@ export default {
 											<span>{{ capGen.button.new }}</span>
 										</div>
 									</div>
-									
+
 									<div class="entry clickable"
 										@click="clientEventIdEdit = ce.id"
 										v-for="ce in inputs.clientEvents"
@@ -420,7 +417,7 @@ export default {
 						</td>
 						<td>{{ capApp.clientEventsHint }}</td>
 					</tr>
-					
+
 					<tr><td colspan="3"><b>{{ capApp.release }}</b></td></tr>
 					<tr>
 						<td>{{ capApp.releaseLogCategories }}</td>
@@ -481,7 +478,7 @@ export default {
 			inputs:{},
 			inputsCopy:{}, // copy of inputs, to be compared against schema on change
 			isReady:false,
-			
+
 			// states
 			clientEventIdEdit:false,
 			moduleIdDependsOnInput:null,
@@ -495,7 +492,7 @@ export default {
 		displayReleaseDate:s => s.moduleSchema.releaseDate === 0 ? '-' : s.getUnixFormat(s.moduleSchema.releaseDate,'Y-m-d H:i'),
 		isChanged:         s => !s.deepIsEqual(s.inputs,s.inputsCopy),
 		moduleSchema:      s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		
+
 		// stores
 		attributeIdMap:   s => s.$store.getters['schema/attributeIdMap'],
 		jsFunctionIdMap:  s => s.$store.getters['schema/jsFunctionIdMap'],
@@ -522,7 +519,7 @@ export default {
 		getTemplatePgFunction,
 		getUnixFormat,
 		srcBase64Icon,
-		
+
 		reset(manuelReset) {
 			if(this.moduleSchema === false)
 				return;
@@ -534,7 +531,7 @@ export default {
 				this.isReady    = true;
 			}
 		},
-		
+
 		// actions
 		addStartForm() {
 			this.inputs.startForms.push({
@@ -591,7 +588,7 @@ export default {
 
 			return '-';
 		},
-		
+
 		// backend calls
 		set() {
 			// for module change comparissons

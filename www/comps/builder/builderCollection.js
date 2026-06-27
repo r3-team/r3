@@ -75,9 +75,9 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding">
-				
+
 				<!-- collection value preview -->
 				<div class="preview" v-if="showPreview">
 					<table>
@@ -96,9 +96,9 @@ export default {
 					</table>
 					<p>{{ capApp.previewHint }}</p>
 				</div>
-				
+
 				<div class="builder-collection-columns">
-				
+
 					<!-- collection query columns -->
 					<div class="builder-collection-columns-active">
 						<h2>{{ capGen.columnsActive }}</h2>
@@ -115,7 +115,7 @@ export default {
 							:readonly
 						/>
 					</div>
-					
+
 					<div class="builder-collection-columns-available">
 						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-collection-column-templates">
@@ -131,7 +131,7 @@ export default {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
 			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
@@ -139,14 +139,14 @@ export default {
 					<h1>{{ capGen.collection }}</h1>
 				</div>
 			</div>
-			
+
 			<template v-if="columnShow === false">
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','properties']"
 					:entriesText="[capGen.content,capGen.properties]"
 				/>
-				
+
 				<!-- collection content -->
 				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
@@ -175,11 +175,10 @@ export default {
 								<td>{{ capGen.icon }}</td>
 								<td>
 									<my-builder-icon-input
-										@input="collection.iconId = $event"
-										:iconIdSelected="collection.iconId"
+										v-model="collection.iconId"
 										:module
-										:title="capGen.icon"
 										:readonly
+										:title="capGen.icon"
 									/>
 								</td>
 							</tr>
@@ -215,7 +214,7 @@ export default {
 					</table>
 				</div>
 			</template>
-			
+
 			<!-- column options -->
 			<my-builder-column-options
 				v-if="columnShow !== false"
@@ -266,7 +265,7 @@ export default {
 			const col = s.$store.getters.collectionIdMap[s.collection.id];
 			if(col === undefined)
 				return [];
-			
+
 			let out = [];
 			for(const r of col) {
 				out.push(r.values);
@@ -275,20 +274,20 @@ export default {
 		},
 		columnShow:s => {
 			if(s.columnIdShow === null) return false;
-			
+
 			for(let i = 0, j = s.collection.columns.length; i < j; i++) {
 				if(s.collection.columns[i].id === s.columnIdShow)
 					return s.collection.columns[i];
 			}
 			return false;
 		},
-		
+
 		// simple
 		collectionSchema:s => s.collectionIdMap[s.id] === undefined ? false : s.collectionIdMap[s.id],
 		hasChanges:      s => !s.deepIsEqual(s.collection,s.collectionSchema),
 		module:          s => s.moduleIdMap[s.collection.moduleId],
 		query:           s => s.collection.query !== null ? s.collection.query : s.getTemplateQuery(),
-		
+
 		// stores
 		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
@@ -310,7 +309,7 @@ export default {
 		getItemTitleColumn,
 		getTemplateCollectionConsumer,
 		getTemplateQuery,
-		
+
 		// actions
 		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.collection.inHeader));
@@ -346,11 +345,11 @@ export default {
 		},
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
-			
+
 			if(this.columnIdShow !== null)
 				this.tabTarget = 'content';
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('collection','del',this.collection.id,true).then(

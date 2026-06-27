@@ -8,29 +8,24 @@ export default {
 			@click="click"
 			:class="{ clickable:!readonly, disabled:readonly }"
 		>
-			<img class="builder-icon"
-				v-if="iconSelected"
-				:src="srcBase64(iconSelected.file)"
-			/>
-			<img class="builder-icon not-set" src="images/noPic.png"
-				v-if="!iconSelected"
-			/>
+			<img class="builder-icon" v-if="icon" :src="srcBase64(icon.file)" />
+			<img class="builder-icon not-set" src="images/noPic.png" v-else />
 		</div>
-		
+
 		<template v-if="naked">
 			<img class="builder-icon naked"
-				v-if="iconSelected"
+				v-if="icon"
 				@click="click"
 				:class="{ clickable:!readonly }"
-				:src="srcBase64(iconSelected.file)"
+				:src="srcBase64(icon.file)"
 			/>
 			<img class="builder-icon naked" src="images/noPic.png"
-				v-if="!iconSelected"
+				v-if="!icon"
 				@click="click"
 				:class="{ clickable:!readonly }"
 			/>
 		</template>
-		
+
 		<div class="app-sub-window under-header" v-if="showInput && iconIdMap !== null" @click.self="close">
 			<div class="build-icon-input-window">
 				<div class="contentBox float">
@@ -58,8 +53,8 @@ export default {
 						</div>
 						<div class="area">
 							<my-button image="remove.png"
-								@trigger="select(null)"
-								:active="iconSelected !== false"
+								@trigger="$emit('update:modelValue',null)"
+								:active="icon !== false"
 								:caption="capGen.button.clear"
 								:cancel="true"
 							/>
@@ -70,13 +65,13 @@ export default {
 							v-for="(mod,i) in getDependentModules(module).filter(v => v.icons.length !== 0)"
 						>
 							<span>{{ mod.name }}</span>
-							
+
 							<img class="builder-icon clickable"
-								v-for="icon in mod.icons.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
-								@click="select(icon.id)"
-								:class="{ active:iconIdSelected === icon.id }"
-								:src="srcBase64(icon.file)"
-								:title="icon.name"
+								v-for="ic in mod.icons.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
+								@click="$emit('update:modelValue',ic.id)"
+								:class="{ active:modelValue === ic.id }"
+								:src="srcBase64(ic.file)"
+								:title="ic.name"
 							/>
 						</div>
 					</div>
@@ -85,12 +80,12 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		iconIdSelected:{ required:true },
-		module:        { type:Object,  required:true},
-		naked:         { type:Boolean, required:false, default:false },
-		readonly:      { type:Boolean, required:false, default:false }
+		module:    { type:Object,        required:true},
+		modelValue:{ type:[String,null], required:true },
+		naked:     { type:Boolean,       required:false, default:false },
+		readonly:  { type:Boolean,       required:false, default:false }
 	},
-	emits:['input'],
+	emits:['update:modelValue'],
 	data() {
 		return {
 			filter:'',
@@ -98,17 +93,17 @@ export default {
 		};
 	},
 	computed:{
-		iconSelected:(s) => s.iconIdSelected === null ? false : s.iconIdMap[s.iconIdSelected],
-		
+		icon:s => s.modelValue === null ? false : s.iconIdMap[s.modelValue],
+
 		// stores
-		iconIdMap:(s) => s.$store.getters['schema/iconIdMap'],
-		capGen:   (s) => s.$store.getters.captions.generic
+		iconIdMap:s => s.$store.getters['schema/iconIdMap'],
+		capGen:   s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getDependentModules,
 		srcBase64,
-		
+
 		// actions
 		click() {
 			if(!this.readonly)
@@ -116,9 +111,6 @@ export default {
 		},
 		close() {
 			this.showInput = false;
-		},
-		select(iconId) {
-			this.$emit('input',iconId);
 		}
 	}
 };

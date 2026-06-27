@@ -53,21 +53,20 @@ export default {
 	},
 	template:`<div class="builder-form" v-if="form !== false">
 		<div class="contentBox builder-form-main">
-			
+
 			<div class="builder-form-content">
 				<div class="top nowrap">
 					<div class="area nowrap overflowHidden">
 						<img class="icon" src="images/fileText.png" />
 						<h1 class="title">{{ capApp.titleOne.replace('{NAME}',form.name) }}</h1>
 					</div>
-					
+
 					<div class="area nowrap">
 						<my-builder-icon-input
-							@input="form.iconId = $event"
-							:icon-id-selected="form.iconId"
+							v-model="form.iconId"
 							:module
-							:title="capApp.icon"
 							:readonly
+							:title="capApp.icon"
 						/>
 						<my-builder-caption class="title"
 							v-model="form.captions.formTitle"
@@ -77,7 +76,7 @@ export default {
 							:readonly
 						/>
 					</div>
-					
+
 					<div class="area">
 						<my-button
 							@trigger="showSidebar = !showSidebar"
@@ -130,7 +129,7 @@ export default {
 						/>
 					</div>
 				</div>
-				
+
 				<!-- empty form assistant -->
 				<div class="builder-form-assistant" v-if="form.fields.length === 0">
 					<h2>{{ capApp.dragDrop }}</h2>
@@ -143,7 +142,7 @@ export default {
 						/>
 					</div>
 				</div>
-				
+
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
 					@createNew="(...args) => $emit('createNew',...args)"
@@ -168,9 +167,9 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="contentBox sidebar scroll" v-show="showSidebar">
-		
+
 			<!-- form builder sidebar -->
 			<div class="top lower" :class="{ clickable:sideFieldShow }" @click="fieldIdShow = null">
 				<div class="area">
@@ -178,17 +177,17 @@ export default {
 					<h1>{{ capGen.form }}</h1>
 				</div>
 			</div>
-			
+
 			<template v-if="!sideFieldShow">
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','states','actions','functions','properties']"
 					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',form.states.length),capApp.tabActions.replace('{CNT}',form.actions.length),capApp.tabFunctions.replace('{CNT}',form.functions.length),capGen.properties]"
 				/>
-				
+
 				<!-- form content -->
 				<div class="content grow" :class="{ 'no-padding':tabTarget === 'properties' }">
-					
+
 					<template v-if="tabTarget === 'content'">
 						<!-- form record query -->
 						<h2 v-if="!queryActive">{{ capGen.dataAccess }}</h2>
@@ -205,7 +204,7 @@ export default {
 							:moduleId="module.id"
 							:readonly
 						/>
-						
+
 						<!-- 1:n join warning -->
 						<div v-if="hasAny1nJoin" class="warning clickable"
 							@click="showMessage(capApp.warning.joinN1,capApp.warning.joinN1Hint,'link2.png')"
@@ -213,7 +212,7 @@ export default {
 							<img src="images/link2.png" />
 							<span>{{ capApp.warning.joinN1Hint }}</span>
 						</div>
-						
+
 						<!-- template fields -->
 						<div class="templates-wrap">
 							<h2>{{ capGen.fields }}</h2>
@@ -232,7 +231,7 @@ export default {
 								<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
 								<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
 							</div>
-							
+
 							<div class="templates">
 								<my-builder-fields flexDirParent="column"
 									v-if="fieldsShow === 'add'"
@@ -304,7 +303,7 @@ export default {
 						:joinsIndexMap
 						:readonly
 					/>
-					
+
 					<!-- form functions -->
 					<my-builder-form-functions
 						v-if="tabTarget === 'functions'"
@@ -337,11 +336,10 @@ export default {
 								<td>{{ capGen.icon }}</td>
 								<td>
 									<my-builder-icon-input
-										@input="form.iconId = $event"
-										:iconIdSelected="form.iconId"
+										v-model="form.iconId"
 										:module
-										:title="capApp.icon"
 										:readonly
+										:title="capApp.icon"
 									/>
 								</td>
 							</tr>
@@ -388,7 +386,7 @@ export default {
 					</table>
 				</div>
 			</template>
-			
+
 			<!-- field options -->
 			<div class="content flex column grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
 		</div>
@@ -411,7 +409,7 @@ export default {
 			fieldIdsRemove:[], // IDs of fields to remove
 			form:false,        // form being edited in this component
 			formCopy:{},       // copy of form from schema when component last reset
-			
+
 			// state
 			fieldsShow:'add',     // which fields to show (add = template fields, edit = existing data fields)
 			fieldIdShow:null,     // field ID which is shown in sidebar to be edited
@@ -435,7 +433,7 @@ export default {
 			const collect = function(fields) {
 				for(let f of fields) {
 					map[f.id] = f;
-					
+
 					switch(f.content) {
 						case 'container': collect(f.fields); break;
 						case 'tabs':
@@ -453,9 +451,9 @@ export default {
 			get() {
 				if(!this.form)
 					return [];
-				
+
 				let fields = [];
-				
+
 				// relation-independent fields
 				fields.push(this.getTemplateFieldContainer()); // container
 				fields.push(this.getTemplateFieldTabs());      // tabs
@@ -467,7 +465,7 @@ export default {
 				fields.push(this.getTemplateFieldHeader());    // header
 				fields.push(this.getTemplateFieldButton());    // button
 				fields.push(this.getTemplateFieldVariable());  // variable
-				
+
 				// data fields from relations
 				if(this.relation) {
 					for(const j of this.query.joins) {
@@ -481,7 +479,7 @@ export default {
 		indexAttributeIdsUsed:s => {
 			const getIndexIds = function(fields) {
 				let indexIds = [];
-				
+
 				for(const f of fields) {
 					switch(f.content) {
 						case 'data':
@@ -506,9 +504,9 @@ export default {
 			for(let j of s.query.joins) {
 				if(j.index === 0)
 					continue;
-				
+
 				const joinAtr = s.attributeIdMap[j.attributeId];
-				
+
 				// join via 1:n attribute (outside-in join)
 				// ignore self-join as its currently only allowed as n:1
 				if(s.isAttributeRelationshipN1(joinAtr.content) &&
@@ -518,7 +516,7 @@ export default {
 			}
 			return false;
 		},
-		
+
 		// simple
 		canSave:          s => s.hasChanges && !s.readonly,
 		dataFields:       s => s.getDataFields(s.form.fields),
@@ -532,7 +530,7 @@ export default {
 		queryActive:      s => s.form.query !== null && s.form.query.relationId !== null,
 		relation:         s => s.relationIdMap[s.query.relationId] === undefined ? false : s.relationIdMap[s.query.relationId],
 		sideFieldShow:    s => s.fieldIdShow !== null,
-		
+
 		// stores
 		module:        s => s.moduleIdMap[s.form.moduleId],
 		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
@@ -580,13 +578,13 @@ export default {
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		routeParseParams,
-		
+
 		// actions
 		addLayoutColumns(count) {
 			let parent = this.getTemplateFieldContainer();
 			parent.direction = 'row';
 			parent.wrap      = true;
-			
+
 			for(; count > 0; count--) {
 				let child = this.getTemplateFieldContainer();
 				child.basis = 300;
@@ -606,7 +604,7 @@ export default {
 					fields.push(this.getTemplateFieldData(index,atr,false,null));
 				}
 			}
-			
+
 			// relationship attributes
 			for(let atr of relation.attributes) {
 				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
@@ -615,45 +613,45 @@ export default {
 					fields.push(this.getTemplateFieldData(index,atr,false,null));
 				}
 			}
-			
+
 			// relationship attributes from outside (1:n)
 			for(const rel of this.getDependentRelations(this.module)) {
-				
+
 				// relationship attributes referencing this relation (can be self reference)
 				for(const atr of rel.attributes) {
 					if(atr.relationshipId !== relation.id)
 						continue;
-					
+
 					if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,true,null)))
 						continue;
-					
+
 					if(!this.isAttributeRelationship(atr.content))
 						continue;
-					
+
 					fields.push(this.getTemplateFieldData(index,atr,true,null));
 				}
-				
+
 				// relationship attributes that can be used to build n:m relationships
 				let atrsN1 = [];
 				for(const atr of rel.attributes) {
 					if(this.isAttributeRelationshipN1(atr.content))
 						atrsN1.push(atr);
 				}
-				
+
 				for(const atrN1 of atrsN1) {
-					
+
 					// find attributes in relationship with us
 					if(atrN1.relationshipId !== relation.id)
 						continue;
-					
+
 					// offer n:m together with every other n:1 attribute
 					for(let atrNm of atrsN1) {
 						if(atrNm.id === atrN1.id)
 							continue;
-						
+
 						if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atrN1.id,true,atrNm.id)))
 							continue;
-						
+
 						fields.push(this.getTemplateFieldData(index,atrN1,true,atrNm.id));
 					}
 				}
@@ -670,14 +668,14 @@ export default {
 		removeDataFields(fields,index) {
 			for(let i = 0, j = fields.length; i < j; i++) {
 				let field = fields[i];
-				
+
 				if(field.content === 'data' && field.index === index) {
 					fields.splice(i,1);
 					this.removeFieldById(field.id);
 					i--; j--;
 					continue;
 				}
-				
+
 				switch(field.content) {
 					case 'container': this.removeDataFields(field.fields,index); break;
 					case 'tabs':
@@ -691,18 +689,18 @@ export default {
 		removeFieldById(fieldId) {
 			if(this.fieldIdShow === fieldId)
 				this.fieldIdShow = null;
-			
+
 			this.fieldIdsRemove.push(fieldId);
-			
+
 			// remove field from array
 			const remove = function(fields) {
 				for(let i = 0, j = fields.length; i < j; i++) {
 					let f = fields[i];
-					
+
 					// children of tabs/containers are removed via DB cascade
 					if(f.id === fieldId)
 						return fields.splice(i,1);
-					
+
 					switch(f.content) {
 						case 'container': remove(f.fields); break;
 						case 'tabs': for(let t of f.tabs) { remove(t.fields); } break;
@@ -744,7 +742,7 @@ export default {
 		showMessage(msg,top,image) {
 			this.$store.commit('dialog',{captionTop:top,captionBody:msg,image:image});
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('form','del',this.form.id,true).then(
@@ -769,20 +767,20 @@ export default {
 						return this.showMessage(this.capApp.error.formStateFieldRemovedEffect.replace('{NAME}',s.description));
 				}
 			}
-			
+
 			// clear focus on removed field
 			if(this.fieldIdsRemove.includes(this.form.fieldIdFocus))
 				this.form.fieldIdFocus = null;
-			
+
 			// save form and delete removed fields
 			let requests = [];
 			for(const fieldId of this.fieldIdsRemove) {
 				requests.push(ws.prepare('field','del',fieldId));
 			}
-			
+
 			requests.push(ws.prepare('form','set',this.form));
 			requests.push(ws.prepare('schema','check',{moduleId:this.form.moduleId}));
-			
+
 			ws.sendMultiple(requests,true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
