@@ -11,6 +11,7 @@
 	align-items:center;
 	gap:6px;
 	font-size:90%;
+	color:var(--color-font);
 	text-align:center;
 	border-bottom:1px solid var(--color-border);
 	border-right:1px solid var(--color-border);

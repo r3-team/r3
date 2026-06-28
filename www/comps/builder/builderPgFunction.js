@@ -1,6 +1,7 @@
 import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderPgTriggers             from './builderPgTriggers.js';
 import MyBuilderSchemaLookup           from './builderSchemaLookup.js';
+import MyBuilderTagInput               from './builderTagInput.js';
 import MyCodeEditor                    from '../codeEditor.js';
 import {getTemplatePgFunctionSchedule} from '../shared/builderTemplate.js';
 import {dialogDeleteAsk}               from '../shared/dialog.js';
@@ -22,7 +23,7 @@ import {
 const MyBuilderPgFunctionItemSchedule = {
 	name:'my-builder-pg-function-item-schedule',
 	template:`<div class="schedule">
-		
+
 		<div class="line">
 			<!-- interval at which to run -->
 			<select class="dynamic" v-model="runOnce" :disabled="readonly">
@@ -31,11 +32,11 @@ const MyBuilderPgFunctionItemSchedule = {
 					<option :value="false">{{ capApp.runRegular }}</option>
 				</optgroup>
 			</select>
-			
+
 			<template v-if="intervalType !== 'once'">
 				<span>{{ capApp.intervalEvery }}</span>
 				<input class="dynamic" v-model.number="intervalValue" :disabled="readonly" />
-				
+
 				<select class="dynamic" v-model="intervalType" :disabled="readonly">
 					<option value="seconds">{{ capApp.option.intervalSeconds }}</option>
 					<option value="minutes">{{ capApp.option.intervalMinutes }}</option>
@@ -47,7 +48,7 @@ const MyBuilderPgFunctionItemSchedule = {
 				</select>
 			</template>
 		</div>
-		
+
 		<div class="line">
 			<!-- for weeks/months/years scheduler - on which day to run -->
 			<template v-if="['weeks','months','years'].includes(intervalType)">
@@ -56,7 +57,7 @@ const MyBuilderPgFunctionItemSchedule = {
 				<span v-if="intervalType === 'years'" >{{ capApp.intervalAtDayForYears }}</span>
 				<input class="short" v-model.number="atDay" :disabled="readonly" placeholder="DD" />
 			</template>
-			
+
 			<!-- target time, at which hour:minute:second to run -->
 			<template v-if="['days','weeks','months','years'].includes(intervalType)">
 				<span>{{ capApp.intervalAtTime }}</span>
@@ -66,7 +67,7 @@ const MyBuilderPgFunctionItemSchedule = {
 				<div>:</div>
 				<input class="dynamic" placeholder="SS" :disabled="readonly" v-model.number="atSecond" />
 			</template>
-			
+
 			<my-button image="delete.png"
 				@trigger="$emit('remove')"
 				:active="!readonly"
@@ -112,7 +113,7 @@ const MyBuilderPgFunctionItemSchedule = {
 				else  this.update('intervalType','days');
 			}
 		},
-		
+
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.function
 	},
@@ -132,6 +133,7 @@ export default {
 		MyBuilderPgFunctionItemSchedule,
 		MyBuilderPgTriggers,
 		MyBuilderSchemaLookup,
+		MyBuilderTagInput,
 		MyCodeEditor
 	},
 	template:`<div class="builder-function" v-if="fnc !== false">
@@ -192,7 +194,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding function-details">
 				<my-code-editor mode="pgsql"
 					v-model="fncBody"
@@ -203,7 +205,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<!-- sidebar -->
 		<div class="contentBox sidebar right" v-if="showSidebar">
 			<div class="top lower">
@@ -211,16 +213,16 @@ export default {
 					<h1 class="title">{{ capGen.settings }}</h1>
 				</div>
 			</div>
-			
+
 			<my-tabs
 				v-model="tabTarget"
 				:entries="tabs.keys"
 				:entriesIcon="tabs.icons"
 				:entriesText="tabs.labels"
 			/>
-			
+
 			<div class="content default-inputs" :class="{ 'no-padding':tabTarget !== 'content' }">
-				
+
 				<template v-if="tabTarget === 'content'">
 					<div class="row gap">
 						<my-button
@@ -239,9 +241,9 @@ export default {
 						/>
 					</div>
 					<br />
-					
+
 					<div class="message" v-html="capApp.entityInput"></div>
-					
+
 					<!-- module data -->
 					<div class="entities-title">
 						<my-button
@@ -302,7 +304,7 @@ export default {
 							</div>
 						</template>
 					</div>
-					
+
 					<!-- presets -->
 					<div class="entities-title">
 						<my-button
@@ -354,7 +356,7 @@ export default {
 							</div>
 						</template>
 					</div>
-					
+
 					<!-- module functions -->
 					<div class="entities-title">
 						<my-button
@@ -388,7 +390,7 @@ export default {
 										:image="radioIcon('pgFunction',fnc.id)"
 										:naked="true"
 									/>
-									
+
 									<div class="row gap centered">
 										<my-button image="question.png"
 											@trigger="showHelp(fnc.name+'()',getFunctionHelp('pg',fnc,builderLanguage))"
@@ -404,7 +406,7 @@ export default {
 							</div>
 						</template>
 					</div>
-					
+
 					<!-- instance functions -->
 					<div class="entities-title">
 						<my-button
@@ -437,7 +439,7 @@ export default {
 							</div>
 						</div>
 					</div>
-					
+
 					<!-- documents -->
 					<div class="entities-title">
 						<my-button
@@ -496,7 +498,7 @@ export default {
 						</template>
 					</div>
 				</template>
-				
+
 				<template v-if="tabTarget === 'exec'">
 					<table class="generic-table-vertical">
 						<tbody>
@@ -530,7 +532,7 @@ export default {
 						</tbody>
 					</table>
 				</template>
-				
+
 				<table v-if="tabTarget === 'properties'" class="generic-table-vertical">
 					<tbody>
 						<tr>
@@ -643,6 +645,12 @@ export default {
 								/>
 							</td>
 						</tr>
+						<tr>
+							<td>{{ capGen.tags }}</td>
+							<td colspan="2">
+								<my-builder-tag-input v-model="fnc.tagIds" :module :readonly />
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
@@ -671,7 +679,7 @@ export default {
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		
+
 		// set defaults
 		this.holderDocModuleId      = this.module.id;
 		this.holderFunctionModuleId = this.module.id;
@@ -686,11 +694,11 @@ export default {
 			// inputs
 			fnc:false,  // function being edited in this component
 			fncCopy:{}, // copy of function from schema when component last reset
-			
+
 			// execution
 			execArgs:[],
 			execResponse:'',
-			
+
 			// states
 			addNew:false,
 			addOld:false,
@@ -730,10 +738,10 @@ export default {
 		insertEntity:s => {
 			if(s.entityId === null)
 				return null;
-			
+
 			let text = null;
 			let mod, rel, prs, atr, fnc, args, pat;
-			
+
 			// build unique placeholder name
 			// relation:    {module_name}.[relation_name]
 			// pg function: {module_name}.[function_name]()
@@ -745,7 +753,7 @@ export default {
 					rel  = s.relationIdMap[atr.relationId];
 					mod  = s.moduleIdMap[rel.moduleId];
 					text = `(${mod.name}.${rel.name}.${atr.name})`;
-					
+
 					if(s.addNew) text = 'NEW.'+text;
 					if(s.addOld) text = 'OLD.'+text;
 				break;
@@ -803,7 +811,7 @@ export default {
 			get()  { return this.placeholdersSet(this.fnc.codeFunction); },
 			set(v) { this.fnc.codeFunction = this.placeholdersUnset(v,false); }
 		},
-		
+
 		// simple
 		execArgInputs:s => s.fnc.codeArgs.trim() === '' ? [] : s.fnc.codeArgs.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/),
 		fncSchema:    s => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
@@ -813,7 +821,7 @@ export default {
 		modulesData:  s => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
 		modulesFnc:   s => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
 		preview:      s => !s.showPreview ? '' : s.placeholdersUnset(s.fncBody,true),
-		
+
 		// stores
 		docIdMap:       s => s.$store.getters['schema/docIdMap'],
 		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
@@ -837,7 +845,7 @@ export default {
 		getTemplatePgFunctionSchedule,
 		getValidDbCharsForRx,
 		isAttributeFiles,
-		
+
 		// presentation
 		radioIcon(entity,id) {
 			return this.entity === entity && this.entityId === id
@@ -846,7 +854,7 @@ export default {
 		titleAttribute(atr) {
 			return atr.nullable ? atr.name : this.capApp.attributeNotNull.replace('{ATR}',atr.name);
 		},
-		
+
 		// actions
 		addSchedule() {
 			this.fnc.schedules.push(this.getTemplatePgFunctionSchedule());
@@ -859,7 +867,7 @@ export default {
 				this.resetExec();
 				this.addNew = false;
 				this.addOld = false;
-				
+
 				if(this.fnc.isTrigger && this.tabTarget === 'exec')
 					this.tabTarget = 'content';
 			}
@@ -867,7 +875,7 @@ export default {
 		resetExec() {
 			this.execArgs     = [];
 			this.execResponse = '';
-			
+
 			for(let a of this.execArgInputs) {
 				this.execArgs.push(null);
 			}
@@ -875,7 +883,7 @@ export default {
 		selectEntity(entity,id) {
 			if(entity === this.entity && id === this.entityId)
 				return this.entityId = null;
-			
+
 			this.entity   = entity;
 			this.entityId = id;
 		},
@@ -909,7 +917,7 @@ export default {
 		updateCost(value) {
 			this.fnc.cost = value === '' ? 0 : parseInt(value);
 		},
-		
+
 		// placeholders are used for storing entities via ID instead of name (which can change)
 		// attribute: (MOD_NAME.REL_NAME.ATR_NAME)              <-> (ATR_ID)
 		// relation:  {MOD_NAME}[REL_NAME]                      <-> {MOD_ID}[REL_ID]
@@ -927,7 +935,7 @@ export default {
 			body = body.replace(/\(([a-z0-9\-]{36})\)/g,(match,id) => {
 				const atr = this.attributeIdMap[id];
 				if(atr === undefined) return match;
-				
+
 				const rel = this.relationIdMap[atr.relationId];
 				const mod = this.moduleIdMap[rel.moduleId];
 				return `(${mod.name}.${rel.name}.${atr.name})`;
@@ -944,7 +952,7 @@ export default {
 
 				if(prs !== undefined && !pat.test(prs.name))
 					return `{PRESET::${mod.name}.${rel.name}.${prs.name}}`;
-				
+
 				return match;
 			});
 
@@ -961,103 +969,103 @@ export default {
 		},
 		placeholdersUnset(body,previewMode) {
 			let dbChars = this.getValidDbCharsForRx();
-			
+
 			// attributes
 			let pat = /\(([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\)/g;
 			body = body.replace(pat,(match,modName,relName,atrName) => {
-				
+
 				// resolve module by name
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
-				
+
 				const mod = this.moduleNameMap[modName];
-				
+
 				// resolve relation by name
 				let rel = false;
 				for(let i = 0, j = mod.relations.length; i < j; i++) {
 					if(mod.relations[i].name !== relName)
 						continue;
-					
+
 					rel = mod.relations[i];
 					break;
 				}
 				if(rel === false)
 					return match;
-				
+
 				// resolve attribute by name
 				let atr = false;
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
 					if(rel.attributes[i].name !== atrName)
 						continue;
-					
+
 					atr = rel.attributes[i];
 					break;
 				}
 				if(atr === false)
 					return match;
-				
+
 				// replace placeholder
 				if(previewMode)
 					return atr.name;
-				
+
 				return `(${atr.id})`;
 			});
-			
+
 			// functions
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]\(/g;
 			body = body.replace(pat,(match,modName,fncName) => {
-				
+
 				// resolve module by name
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
-				
+
 				const mod = this.moduleNameMap[modName];
-				
+
 				// resolve function by name
 				let fnc = false;
 				for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
 					if(mod.pgFunctions[i].name !== fncName)
 						continue;
-					
+
 					fnc = mod.pgFunctions[i];
 					break;
 				}
 				if(fnc === false)
 					return match;
-				
+
 				// replace placeholder
 				if(previewMode)
 					return `${mod.name}.${fnc.name}(`;
-				
+
 				return `{${mod.id}}.[${fnc.id}](`;
 			});
-			
+
 			// relations
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]/g;
 			body = body.replace(pat,(match,modName,relName) => {
-				
+
 				// resolve module by name
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
-				
+
 				const mod = this.moduleNameMap[modName];
-				
+
 				// resolve relation by name
 				let rel = false;
 				for(let i = 0, j = mod.relations.length; i < j; i++) {
 					if(mod.relations[i].name !== relName)
 						continue;
-					
+
 					rel = mod.relations[i];
 					break;
 				}
 				if(rel === false)
 					return match;
-				
+
 				// replace placeholder
 				if(previewMode)
 					return `${mod.name}.${rel.name}`;
-				
+
 				return `{${mod.id}}.[${rel.id}]`;
 			});
 
@@ -1069,7 +1077,7 @@ export default {
 					for(let r of mod.relations) {
 						if(r.name !== relName)
 							continue;
-	
+
 						for(let p of r.presets) {
 							if(p.name === presetName)
 								return `instance\.get_preset_record_id('${p.id}')`;
@@ -1093,7 +1101,7 @@ export default {
 			});
 			return body;
 		},
-		
+
 		// backend calls
 		delCheck() {
 			this.hasReferences = this.getHasAnyReferences(this.module,'pgFunction',this.id);

@@ -83,6 +83,17 @@
 }
 
 
+/* tag input */
+.builder-tag-input{
+	display:flex;
+	flex-flow:column wrap;
+}
+.builder-tag-input-sep{
+	height:1px;
+	border-bottom:1px solid var(--color-border);
+}
+
+
 /* modules */
 .builder-modules{
 	flex:1 1 auto;

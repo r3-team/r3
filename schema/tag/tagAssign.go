@@ -32,7 +32,7 @@ func SetAssign_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entity
 		WHERE id =  ANY($2)
 		AND   id <> ALL(
 			SELECT tag_id
-			FROM tag_assign
+			FROM app.tag_assign
 			WHERE %s_id = $1
 		)
 	`, entity, entity), entityId, tagIds)

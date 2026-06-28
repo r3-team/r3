@@ -1,9 +1,10 @@
 import MyBuilderCaption          from './builderCaption.js';
-import MyBuilderQuery            from './builderQuery.js';
 import MyBuilderDocFont          from './builderDocFont.js';
 import MyBuilderDocPage          from './builderDocPage.js';
 import MyBuilderDocSets          from './builderDocSets.js';
 import MyBuilderDocStates        from './builderDocStates.js';
+import MyBuilderQuery            from './builderQuery.js';
+import MyBuilderTagInput         from './builderTagInput.js';
 import MyInputDecimal            from '../inputDecimal.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {getUuidV4}               from '../shared/crypto.js';
@@ -30,6 +31,7 @@ export default {
 		MyBuilderDocSets,
 		MyBuilderDocStates,
 		MyBuilderQuery,
+		MyBuilderTagInput,
 		MyInputDecimal
 	},
 	template:`<div class="builder-doc" v-if="doc !== false">
@@ -126,7 +128,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
 			<div class="top lower" @click="sideFieldIdShow = null" :class="{ clickable:sideFieldShow }">
 				<div class="area">
@@ -134,7 +136,7 @@ export default {
 					<h1>{{ capGen.pdf }}</h1>
 				</div>
 			</div>
-			
+
 			<!-- document / page options -->
 			<div v-show="sideDocShow">
 				<my-tabs
@@ -185,7 +187,7 @@ export default {
 						:readonly
 					/>
 				</div>
-				
+
 				<!-- properties -->
 				<div class="content grow no-padding" v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical default-inputs">
@@ -226,6 +228,12 @@ export default {
 								<td>{{ capGen.author }}</td>
 								<td><input class="long" v-model="doc.author" :disabled="readonly" /></td>
 							</tr>
+							<tr>
+								<td>{{ capGen.tags }}</td>
+								<td colspan="2">
+									<my-builder-tag-input v-model="doc.tagIds" :module :readonly />
+								</td>
+							</tr>
 
 							<tr><td colspan="2"><b>{{ capGen.font }}</b></td></tr>
 							<my-builder-doc-font
@@ -253,7 +261,7 @@ export default {
 						:showFont="true"
 					/>
 				</div>
-				
+
 				<!-- page options -->
 				<div class="content grow no-padding" ref="pageOptions" v-show="tabTarget === 'page'"></div>
 			</div>
@@ -290,7 +298,7 @@ export default {
 			recordId:null,
 			zoom:1,
 			zoomOrg:1,
-			
+
 			// state
 			pageOptions:null,
 			sideFieldIdShow:null,
@@ -366,7 +374,7 @@ export default {
 		query:          s => s.doc.query !== null ? s.doc.query : s.getTemplateQuery(),
 		sideDocShow:    s => !s.sideFieldShow,
 		sideFieldShow:  s => s.sideFieldIdShow !== null,
-		
+
 		// stores
 		docIdMap:     s => s.$store.getters['schema/docIdMap'],
 		moduleIdMap:  s => s.$store.getters['schema/moduleIdMap'],
@@ -398,7 +406,7 @@ export default {
 		setCacheDenialTimestamp() {
 			this.cacheDenialTimestamp = Math.floor(new Date().getTime() / 1000);
 		},
-		
+
 		// actions
 		fieldDragStart(e,field) {
 			let f = JSON.parse(JSON.stringify(field));
@@ -465,7 +473,7 @@ export default {
 		resetPageTab() {
 			this.tabPageIdShow = this.doc.pages[0].id;
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('doc','del',this.doc.id,true).then(

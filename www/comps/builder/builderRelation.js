@@ -4,6 +4,7 @@ import MyBuilderPreset             from './builderPreset.js';
 import MyBuilderPgIndex            from './builderPgIndex.js';
 import MyBuilderPgTriggers         from './builderPgTriggers.js';
 import MyBuilderPresets            from './builderPresets.js';
+import MyBuilderTagInput           from './builderTagInput.js';
 import MyBuilderSchemaLookup       from './builderSchemaLookup.js';
 import MyInputDecimal              from '../inputDecimal.js';
 import MyInputOffset               from '../inputOffset.js';
@@ -86,13 +87,13 @@ const MyBuilderRelationsItemPolicy = {
 			let out = [];
 			for(let i = 0, j = this.module.pgFunctions.length; i < j; i++) {
 				let f = this.module.pgFunctions[i];
-				
+
 				if(pat.test(f.codeReturns))
 					out.push(f);
 			}
 			return out;
 		},
-		
+
 		// inputs
 		actionDelete:{
 			get()  { return this.modelValue.actionDelete; },
@@ -118,7 +119,7 @@ const MyBuilderRelationsItemPolicy = {
 			get()  { return this.modelValue.roleId; },
 			set(v) { this.update('roleId',v); }
 		},
-		
+
 		// stores
 		module:s => s.$store.getters['schema/moduleIdMap'][s.moduleId],
 		capApp:s => s.$store.getters.captions.builder.relation
@@ -126,11 +127,11 @@ const MyBuilderRelationsItemPolicy = {
 	methods:{
 		// external
 		getDependentModules,
-		
+
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
-			
+
 			this.$emit('update:modelValue',v);
 		}
 	}
@@ -147,6 +148,7 @@ export default {
 		MyBuilderPgTriggers,
 		MyBuilderPresets,
 		MyBuilderRelationsItemPolicy,
+		MyBuilderTagInput,
 		MyBuilderSchemaLookup,
 		MyInputDecimal,
 		MyInputOffset
@@ -187,7 +189,7 @@ export default {
 				:entries="['attributes','properties','indexes','triggers','presets','policies','relationships','data']"
 				:entriesText="tabCaptions"
 			/>
-			
+
 			<!-- attributes -->
 			<div class="generic-entry-list tab-content" v-if="tabTarget === 'attributes'">
 				<div class="entry"
@@ -200,7 +202,7 @@ export default {
 						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
-				
+
 				<div class="entry clickable"
 					@click="attributeIdEdit = atr.id"
 					v-for="atr in relation.attributes.filter(v => nameFilter === '' || v.name.includes(nameFilter.toLowerCase()))"
@@ -244,7 +246,7 @@ export default {
 						:naked="true"
 					/>
 				</div>
-				
+
 				<!-- attribute dialog -->
 				<my-builder-attribute
 					v-if="attributeIdEdit !== false"
@@ -275,7 +277,7 @@ export default {
 						/>
 					</div>
 				</div>
-				
+
 				<div class="content default-inputs no-padding">
 					<table class="generic-table-vertical default-inputs">
 						<tbody>
@@ -349,11 +351,17 @@ export default {
 								<td><my-bool v-model="relation.encryption" :readonly="true" /></td>
 								<td>{{ capApp.encryptionHint }}</td>
 							</tr>
+							<tr>
+								<td>{{ capGen.tags }}</td>
+								<td colspan="2">
+									<my-builder-tag-input v-model="relation.tagIds" :dynamic="true" :module :readonly />
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
 			</div>
-			
+
 			<!-- indexes -->
 			<div class="generic-entry-list tab-content" v-if="tabTarget === 'indexes'">
 				<div class="entry"
@@ -366,7 +374,7 @@ export default {
 						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
-				
+
 				<div class="entry clickable"
 					@click="indexIdEdit = ind.id"
 					v-for="ind in relation.indexes"
@@ -408,7 +416,7 @@ export default {
 						:naked="true"
 					/>
 				</div>
-				
+
 				<!-- index dialog -->
 				<my-builder-pg-index
 					v-if="indexIdEdit !== false"
@@ -419,17 +427,17 @@ export default {
 					:relation
 				/>
 			</div>
-			
+
 			<!-- triggers -->
 			<div class="tab-content" v-if="tabTarget === 'triggers'">
 				<my-builder-pg-triggers :contextEntity="'relation'" :contextId="relation.id" :readonly />
 			</div>
-			
+
 			<!-- presets -->
 			<div class="tab-content" v-if="tabTarget === 'presets'">
 				<my-builder-presets :filter="nameFilter" :relation :readonly />
 			</div>
-			
+
 			<!-- policies -->
 			<div class="tab-content" v-if="tabTarget === 'policies'">
 				<table class="default-inputs">
@@ -470,7 +478,7 @@ export default {
 				<p style="width:900px;" v-if="relation.policies.length !== 0">
 					{{ capApp.policyExplanation }}
 				</p>
-				
+
 				<div class="row gap">
 					<my-button image="add.png"
 						@trigger="addPolicy"
@@ -495,7 +503,7 @@ export default {
 					:theme="settings.dark ? 'dark' : ''"
 				/>
 			</div>
-			
+
 			<!-- data view -->
 			<div class="tab-content builder-relation-preview default-inputs" v-if="tabTarget === 'data'">
 				<div class="row gap centered space-between">
@@ -508,7 +516,7 @@ export default {
 							<option v-for="i in 10" :value="i*10">{{ i*10 }}</option>
 						</select>
 					</div>
-					
+
 					<my-input-offset
 						@input="previewOffset = $event; getPreview()"
 						:caption="true"
@@ -516,13 +524,13 @@ export default {
 						:offset="previewOffset"
 						:total="previewRowCount"
 					/>
-					
+
 					<my-button image="refresh.png"
 						@trigger="getPreview"
 						:caption="capGen.button.refresh"
 					/>
 				</div>
-				
+
 				<div class="builder-relation-preview-data shade">
 					<table>
 						<thead>
@@ -635,26 +643,26 @@ export default {
 				symbolSize:50,
 				value:''
 			}];
-			
+
 			// relationships to and from base relation
 			for(const a of s.getDependentAttributes(s.module)) {
 				if(!s.isAttributeRelationship(a.content))
 					continue;
-				
+
 				// relationship to or from base relation
 				if(a.relationshipId !== s.relation.id && a.relationId !== s.relation.id)
 					continue;
-				
+
 				let relIn = a.relationshipId === s.relation.id;
 				let rSource = relIn ? s.relationIdMap[a.relationshipId] : s.relationIdMap[a.relationId];
 				let rTarget = relIn ? s.relationIdMap[a.relationId] : s.relationIdMap[a.relationshipId];
-				
+
 				let category = 1;
 				if(!s.isAttributeRelationship11(a.content))
 					category = relIn ? 3 : 2;
-				
+
 				let external = rTarget.moduleId !== s.relation.moduleId;
-				
+
 				nodes.push({
 					id:relIn ? `${rTarget.id}.${a.id}` : `${rSource.id}.${a.id}`,
 					name:external ? `${s.moduleIdMap[rTarget.moduleId].name}.${rTarget.name}` : rTarget.name,
@@ -675,7 +683,7 @@ export default {
 				{name:'n:1'},
 				{name:'1:n'}
 			];
-			
+
 			return {
 				backgroundColor:'transparent',
 				label: { position:'right' },
@@ -712,7 +720,7 @@ export default {
 		isChanged:         s => !s.deepIsEqual(s.relation,s.relationSchema),
 		module:            s => s.moduleIdMap[s.relation.moduleId],
 		relationSchema:    s => s.relationIdMap[s.id] === undefined ? false : s.relationIdMap[s.id],
-		
+
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		modules:       s => s.$store.getters['schema/modules'],
@@ -741,7 +749,7 @@ export default {
 		isAttributeUuid,
 		isAttributeWithLength,
 		srcBase64,
-		
+
 		// presentation
 		displayDataValue(v) {
 			return typeof v !== 'string' || v.length < this.previewValueLength
@@ -750,14 +758,14 @@ export default {
 		displayIndexName(ind) {
 			if(ind.method === 'GIN')
 				return `${this.attributeIdMap[ind.attributes[0].attributeId].name}`;
-			
+
 			let atrs = [];
 			for(let indAtr of ind.attributes) {
 				atrs.push(`${this.attributeIdMap[indAtr.attributeId].name} (${indAtr.orderAsc ? 'ASC' : 'DESC'})`);
 			}
 			return atrs.join(', ');
 		},
-		
+
 		// actions
 		addPolicy() {
 			this.relation.policies.push(this.getTemplateRelationPolicy());
@@ -796,7 +804,7 @@ export default {
 					this.previewReload();
 			}
 		},
-		
+
 		// backend calls
 		delCheck() {
 			this.hasReferences = this.getHasAnyReferences(this.module,'relation',this.id);

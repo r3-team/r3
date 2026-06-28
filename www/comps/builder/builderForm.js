@@ -1,10 +1,11 @@
 import MyBuilderCaption       from './builderCaption.js';
-import MyBuilderIconInput     from './builderIconInput.js';
+import MyBuilderFields        from './builderFields.js';
 import MyBuilderFormActions   from './builderFormActions.js';
 import MyBuilderFormFunctions from './builderFormFunctions.js';
 import MyBuilderFormStates    from './builderFormStates.js';
+import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderQuery         from './builderQuery.js';
-import MyBuilderFields        from './builderFields.js';
+import MyBuilderTagInput      from './builderTagInput.js';
 import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {getJoinsIndexMap}     from '../shared/query.js';
 import {routeParseParams}     from '../shared/router.js';
@@ -49,7 +50,8 @@ export default {
 		MyBuilderFormFunctions,
 		MyBuilderFormStates,
 		MyBuilderIconInput,
-		MyBuilderQuery
+		MyBuilderQuery,
+		MyBuilderTagInput
 	},
 	template:`<div class="builder-form" v-if="form !== false">
 		<div class="contentBox builder-form-main">
@@ -380,6 +382,12 @@ export default {
 											>F{{ ref }}</option>
 										</template>
 									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.tags }}</td>
+								<td colspan="2">
+									<my-builder-tag-input v-model="form.tagIds" :module :readonly />
 								</td>
 							</tr>
 						</tbody>

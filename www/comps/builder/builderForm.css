@@ -101,7 +101,7 @@
 	box-sizing:border-box;
 	flex:0 1 auto;
 	background-color:var(--color-form-builder-container);
-	
+
 	/* to overwrite bad size inputs */
 	min-width:50px !important;
 }
@@ -211,7 +211,7 @@
 .builder-field-header>.title{
 	flex:1 0 auto;
 	padding:0px 3px;
-	
+
 	/* auto cutting text */
 	width:10px;
 	min-width:0px;

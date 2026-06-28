@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderQuery        from './builderQuery.js';
 import MyBuilderSchemaLookup from './builderSchemaLookup.js';
+import MyBuilderTagInput     from './builderTagInput.js';
 import MyCodeEditor          from '../codeEditor.js';
 import {dialogDeleteAsk}     from '../shared/dialog.js';
 import {getFieldMap}         from '../shared/form.js';
@@ -32,6 +33,7 @@ export default {
 		MyBuilderCaption,
 		MyBuilderQuery,
 		MyBuilderSchemaLookup,
+		MyBuilderTagInput,
 		MyCodeEditor
 	},
 	template:`<div class="builder-function" v-if="fnc !== false">
@@ -92,7 +94,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding function-details">
 				<my-code-editor mode="javascript"
 					v-model="fncBody"
@@ -103,26 +105,26 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="contentBox sidebar right" v-if="showSidebar">
 			<div class="top lower">
 				<div class="area nowrap">
 					<h1 class="title">{{ capGen.settings }}</h1>
 				</div>
 			</div>
-			
+
 			<my-tabs
 				v-model="tabTarget"
 				:entries="['content','properties']"
 				:entriesIcon="['images/database.png','images/edit.png']"
 				:entriesText="[capGen.placeholders,capGen.properties]"
 			/>
-			
+
 			<div class="content default-inputs" :class="{ 'no-padding':tabTarget !== 'content' }">
-				
+
 				<template v-if="tabTarget === 'content'">
 					<div class="message" v-html="capApp.entityInput"></div>
-					
+
 					<template v-if="form !== false">
 						<div class="row gap centered">
 							<router-link :to="'/builder/form/'+form.id">
@@ -133,7 +135,7 @@ export default {
 								/>
 							</router-link>
 						</div>
-						
+
 						<div class="placeholders" v-if="form.query !== null">
 							<my-builder-query
 								:allowChoices="false"
@@ -146,7 +148,7 @@ export default {
 								:readonly
 							/>
 						</div>
-						
+
 						<!-- current form fields -->
 						<div class="entities-title">
 							<my-button
@@ -244,7 +246,7 @@ export default {
 							</div>
 						</div>
 					</template>
-					
+
 					<!-- collection input -->
 					<div class="entities-title">
 						<my-button
@@ -295,7 +297,7 @@ export default {
 							</div>
 						</div>
 					</div>
-					
+
 					<!-- presets -->
 					<div class="entities-title">
 						<my-button
@@ -344,7 +346,7 @@ export default {
 							</div>
 						</template>
 					</div>
-					
+
 					<!-- frontend functions -->
 					<div class="entities-title">
 						<my-button
@@ -388,7 +390,7 @@ export default {
 							</div>
 						</div>
 					</div>
-					
+
 					<!-- backend functions -->
 					<div class="entities-title">
 						<my-button
@@ -432,7 +434,7 @@ export default {
 							</div>
 						</div>
 					</div>
-					
+
 					<!-- instance functions -->
 					<div class="entities-title">
 						<my-button
@@ -462,7 +464,7 @@ export default {
 							</div>
 						</div>
 					</div>
-					
+
 					<!-- variable input -->
 					<div class="entities-title">
 						<my-button
@@ -511,7 +513,7 @@ export default {
 						</div>
 					</div>
 				</template>
-				
+
 				<template v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical">
 						<tbody>
@@ -581,6 +583,12 @@ export default {
 									</div>
 								</td>
 							</tr>
+							<tr>
+								<td>{{ capGen.tags }}</td>
+								<td colspan="2">
+									<my-builder-tag-input v-model="fnc.tagIds" :module :readonly />
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</template>
@@ -610,7 +618,7 @@ export default {
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		
+
 		// set defaults
 		this.holderCollectionModuleId  = this.module.id;
 		this.holderFncBackendModuleId  = this.module.id;
@@ -719,7 +727,7 @@ export default {
 		insertEntity:s => {
 			if(s.entityId === null)
 				return null;
-			
+
 			let text    = '';
 			let prefix  = 'app';
 			let postfix = '';
@@ -728,7 +736,7 @@ export default {
 				+ '\n\terr => { }  // if error: error message in \'err\'\n)'
 			;
 			let mod, rel, col, fnc, frm, opt, args, prs, pat;
-			
+
 			// build unique placeholder name
 			switch(s.entity) {
 				case 'appFunction':
@@ -800,7 +808,7 @@ export default {
 		},
 		jsFunctionsSorted:s => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.fnc.formId && s.fnc.formId !== null).concat(
 			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null)),
-		
+
 		// inputs
 		fncBody:{
 			get()  { return this.placeholdersSet(this.fnc.codeFunction); },
@@ -818,7 +826,7 @@ export default {
 		modulesFncBackend: s => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.pgFunctions.filter(v => v.isFrontendExec).length !== 0),
 		modulesFncFrontend:s => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.jsFunctions.length !== 0),
 		preview:           s => !s.showPreview ? '' : s.placeholdersUnset(s.fncBody),
-		
+
 		// stores
 		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  s => s.$store.getters['schema/moduleNameMap'],
@@ -850,7 +858,7 @@ export default {
 		getItemTitlePath,
 		getValidDbCharsForRx,
 		isAttributeFiles,
-		
+
 		// presentation
 		displayFieldName(fieldId) {
 			const f = this.fieldIdMap[fieldId];
@@ -859,7 +867,7 @@ export default {
 		radioIcon(entity,id) {
 			return this.entity === entity && this.entityId === id ? 'radio1.png' : 'radio0.png';
 		},
-		
+
 		// actions
 		openForm() {
 			this.$router.push('/builder/form/'+this.fnc.formId);
@@ -873,7 +881,7 @@ export default {
 		selectEntity(entity,id) {
 			if(entity === this.entity && id === this.entityId)
 				return this.entityId = null;
-			
+
 			this.entity   = entity;
 			this.entityId = id;
 		},
@@ -915,25 +923,25 @@ export default {
 				captionBody:text
 			});
 		},
-		
+
 		// placeholders are used for storing entities via ID instead of name (which can change)
 		placeholdersSet(body) {
 			let uuid   = '[a-z0-9\-]{36}';
 			let prefix = 'app';
 			let pat;
-			
+
 			// replace collection & column IDs with placeholders
 			pat = new RegExp(`${prefix}\.collection_(read|update)\\('(${uuid})'(,\\[([a-z0-9\\-\\s,']*)\\])?`,'g');
 			body = body.replace(pat,(match,mode,collectionId,optional,columnArray) => {
 				if(this.collectionIdMap[collectionId] === 'undefined')
 					return match;
-				
+
 				let collection = this.collectionIdMap[collectionId];
 				let module     = this.moduleIdMap[collection.moduleId];
-				
+
 				if(mode === 'update')
 					return `${prefix}.collection_update({${module.name}.${collection.name}}`;
-				
+
 				let columns = [];
 				let matches = columnArray.match(new RegExp(`${uuid}`,'g'));
 				for(let i = 0, j = matches.length; i < j; i++) {
@@ -944,17 +952,17 @@ export default {
 				}
 				return `${prefix}.collection_read({${module.name}.${collection.name}},[${columns.join(',')}]`;
 			});
-			
+
 			// replace field IDs with placeholders
 			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,mode,part,id) => this.fieldIdMap[id] !== undefined
 				? `${prefix}.${mode}_field_${part}({${this.displayFieldName(id)}}` : match
 			);
-			
+
 			// replace function IDs with placeholders
 			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,fncMode,id) => {
-				
+
 				if(fncMode === 'backend' && this.pgFunctionIdMap[id] !== 'undefined') {
 					const fnc = this.pgFunctionIdMap[id];
 					const mod = this.moduleIdMap[fnc.moduleId];
@@ -963,22 +971,22 @@ export default {
 				else if(fncMode === 'frontend' && this.jsFunctionIdMap[id] !== 'undefined') {
 					const fnc = this.jsFunctionIdMap[id];
 					const mod = this.moduleIdMap[fnc.moduleId];
-					
+
 					if(fnc.formId === null)
 						return `${prefix}.call_frontend({${mod.name}.${fnc.name}}`;
-					
+
 					const form = this.formIdMap[fnc.formId];
 					return `${prefix}.call_${fncMode}({${mod.name}.${form.name}.${fnc.name}}`;
 				}
 				return match;
 			});
-			
+
 			// replace variable IDs with placeholders
 			pat = new RegExp(`${prefix}\.(get|set)_variable\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,mode,variableId) => {
 				if(this.variableIdMap[variableId] === 'undefined')
 					return match;
-				
+
 				const variable = this.variableIdMap[variableId];
 				const module   = this.moduleIdMap[variable.moduleId];
 				const frmOpt   = variable.formId === null ? '' : `.${this.formIdMap[variable.formId].name}`;
@@ -997,7 +1005,7 @@ export default {
 
 				if(prs !== undefined && !pat.test(prs.name))
 					return `${prefix}.get_preset_record_id({${mod.name}.${rel.name}.${prs.name}})`;
-				
+
 				return match;
 			});
 			return body;
@@ -1006,41 +1014,41 @@ export default {
 			let dbChars = this.getValidDbCharsForRx();
 			let prefix  = 'app';
 			let pat;
-			
+
 			// replace collection & column placeholders
 			// stored as: app.collection_read({module.collection},[column1,column2,...])
 			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbChars})\.(${dbChars})\}(,\\[(.*)\\])?`,'g');
 			body = body.replace(pat,(match,mode,modName,colName,optional,columnArray) => {
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
-				
+
 				let mod = this.moduleNameMap[modName];
 				let col = false;
-				
+
 				for(let k in this.collectionIdMap) {
 					if(this.collectionIdMap[k].moduleId === mod.id && this.collectionIdMap[k].name === colName)
 						col = this.collectionIdMap[k];
 				}
 				if(col === false)
 					return false;
-				
+
 				if(mode === 'update')
 					return `${prefix}\.collection_update('${col.id}'`;
-				
+
 				let columnIds = [];
 				let columns   = columnArray.split(',');
-				
+
 				for(let c of columns) {
 					let columnIndex = parseInt(c.replace('{column:','').replace('}',''));
-					
+
 					if(col.columns.length <= columnIndex)
 						return match;
-					
+
 					columnIds.push(`'${col.columns[columnIndex].id}'`);
 				}
 				return `${prefix}\.collection_read('${col.id}',[${columnIds.join(',')}]`;
 			});
-			
+
 			// replace field get/set value/caption/error/focus/etc. placeholders
 			// stored as: app.get_field_value({F12::0 display_name... or app.get_field_value({F13: Container...
 			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\(\{F(\\d+)\\:\\:.*?\}`,'g');
@@ -1051,63 +1059,63 @@ export default {
 				}
 				return match;
 			});
-			
+
 			// replace backend function placeholders
 			// stored as: app.call_backend({module.function},12...
 			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbChars})\.(${dbChars})\}`,'g');
 			body = body.replace(pat,(match,modName,fncName) => {
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
-				
+
 				let mod = this.moduleNameMap[modName];
 				let fnc = false;
-				
+
 				for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
 					if(mod.pgFunctions[i].name !== fncName)
 						continue;
-					
+
 					fnc = mod.pgFunctions[i];
 					break;
 				}
-				
+
 				if(fnc === false)
 					return match;
-				
+
 				return `${prefix}\.call_backend('${fnc.id}'`;
 			});
-			
+
 			// replace global frontend function placeholders
 			// stored as: app.call_frontend({module.function},12...
 			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,modName,fncName) => {
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
-				
+
 				const mod = this.moduleNameMap[modName];
-				
+
 				for(let f of mod.jsFunctions) {
 					if(f.formId === null && f.name === fncName)
 						return `${prefix}\.call_frontend('${f.id}'`;
 				}
 				return match;
 			});
-			
+
 			// replace form assigned frontend function placeholders
 			// stored as: app.call_frontend({module.form.function},12...
 			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,modName,frmName,fncName) => {
 				if(this.form === false || this.moduleNameMap[modName] === undefined)
 					return match;
-				
+
 				const mod = this.moduleNameMap[modName];
-				
+
 				for(let f of mod.jsFunctions) {
 					if(f.formId !== null && f.formId === this.form.id && frmName === this.form.name && f.name === fncName)
 						return `${prefix}\.call_frontend('${f.id}'`;
 				}
 				return match;
 			});
-			
+
 			// replace global variable placeholders
 			// stored as: app.get_variable({module.variable})
 			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
@@ -1122,7 +1130,7 @@ export default {
 				}
 				return match;
 			});
-			
+
 			// replace form assigned variable placeholders
 			// stored as: app.get_variable({module.form.variable})
 			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
@@ -1148,7 +1156,7 @@ export default {
 					for(let r of mod.relations) {
 						if(r.name !== relName)
 							continue;
-	
+
 						for(let p of r.presets) {
 							if(p.name === presetName)
 								return `${prefix}\.get_preset_record_id('${p.id}')`;
@@ -1159,7 +1167,7 @@ export default {
 			});
 			return body;
 		},
-		
+
 		// backend calls
 		delCheck() {
 			this.hasReferences = this.getHasAnyReferences(this.module,'jsFunction',this.id);
