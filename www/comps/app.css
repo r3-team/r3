@@ -8,19 +8,18 @@
 	--z-index-header-entry:60;
 	--z-index-header:50;               /* header, main menu, top of the page */
 	--z-index-form-pop-up:40;
-	--z-index-input-toolbar:20;        /* toolbars can include hover elements (TinyMCE code view) */
 	--z-index-input-date-month:19;
-	
+
 	/* builder / admin */
 	--z-index-builder-break-out:11;
 	--z-index-admin-table-sticky-top:11;
-	
+
 	/* list header */
 	--z-index-kanban-header-top-left:11;
 	--z-index-kanban-header:10;
 	--z-index-list-header:11;
 	--z-index-list-footer:10;
-	
+
 	/* calendar elements */
 	--z-index-gantt-hover:5;
 	--z-index-calendar-month-header:5;
@@ -28,7 +27,7 @@
 	--z-index-calendar-month-line:2;
 	--z-index-calendar-days-full-values:4;
 	--z-index-calendar-days-full-day:2;
-	
+
 	/* input field elements */
 	--z-index-field-file-list:2;
 	--z-index-field-toggle-bool-first:3;
@@ -36,15 +35,15 @@
 	--z-index-field-toggle-first:2;
 	--z-index-field-toggle-last:3;
 	--z-index-builder-hover-input:2;
-	
+
 	/* tab elements */
 	--z-index-tab-active:2;
-	
+
 	/* home */
 	--z-index-widget-header:1;
 	--z-index-widget-entry:1;
 	--z-index-widget-watermark:0;
-	
+
 	/**/
 	/* spacing */
 	--spacing:16px;
@@ -52,7 +51,7 @@
 	--spacing-field-padding:8px;
 	--spacing-field-header-padding:3px 8px;
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
-	
+
 	/**/
 	/* heights */
 	--app-header-height:65px;
@@ -64,7 +63,7 @@
 	/**/
 	/* font families */
 	--font-family-monospace:Consolas,Courier,monospace;
-	
+
 	/**/
 	/* images */
 	--image-filter:             invert(1) brightness(10%);
@@ -76,7 +75,7 @@
 	--image-filter-dark-shade:  invert(1) brightness(10%) drop-shadow(1px 1px 2px rgba(0,0,0,0.6));
 	--image-filter-error:       invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(78%);
 	--image-filter-success:     invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(88%);
-	
+
 	/**/
 	/* colors */
 	--color-bg:                     #f7f7f7;
@@ -101,7 +100,7 @@
 	--color-shade-bright:           #dddddd;
 	--color-shade-input:            #757575;
 	--color-hover-underlay:         rgba(0,0,0,0.35);
-	
+
 	--color-accent1:       hsl(311,57%,40%); /* input outlines */
 	--color-accent2:       hsl(127,86%,96%); /* calendar/gantt weekend */
 	--color-accent3:       hsl(199,11%,96%); /* menu/list/calendar entry hover */
@@ -119,7 +118,7 @@
 	--color-flow:          hsl(0, 0%, 97%);
 	--color-flow-active:   hsl(106, 18%, 51%);
 	--color-success:       hsl(113,84%,44%);
-	
+
 	--color-form-builder-actions:     hsl(196deg 45% 86%);
 	--color-form-builder-actions-bg:  hsl(200deg 30% 94%);
 	--color-form-builder-columns:     hsl(226deg 25% 77%);
@@ -132,7 +131,7 @@
 
 	--color-doc-builder-field: hsl(0, 0%, 100%);
 	--color-doc-padding-margin:hsl(60, 9%, 87%);
-	
+
 	/**/
 	/* shadows */
 	--shadow-input:0px 0px 1px 0px rgba(0,0,0,0.6) inset;
@@ -162,7 +161,7 @@ body{
 	font-family:'Roboto','Arial','Helvetica',sans-serif;
 	font-size:11pt;
 	color:var(--color-font);
-	
+
 	/* disable pull-down-to-refresh on mobile */
 	overscroll-behavior-y:contain;
 }
@@ -595,7 +594,7 @@ hr{
 	flex-flow:row nowrap;
 	align-items:center;
 }
-.contentBox .content .contentPartHeader.space-between{	
+.contentBox .content .contentPartHeader.space-between{
 	justify-content:space-between;
 }
 .contentBox .content .contentPartHeader>img{
@@ -1478,7 +1477,7 @@ table td.maximum{
 	--color-shade:         #1b1b1b;
 	--color-shade-bright:  #222222;
 	--color-shade-input:   #080808;
-	
+
 	--color-accent1:       hsl(316, 7%, 40%);
 	--color-accent2:       hsl(128, 4%,30%);
 	--color-accent3:       hsl(199, 11%, 27%);
@@ -1495,7 +1494,7 @@ table td.maximum{
 	--color-success:       hsl(113, 53%, 27%);
 	--color-flow:          hsl(0, 1%, 37%);
 	--color-flow-active:   hsl(105, 13%, 32%);
-	
+
 	--color-hover-underlay:           rgba(0,0,0,0.50);
 	--color-form-builder-actions:     hsl(195,17%,29%,1.00);
 	--color-form-builder-actions-bg:  hsl(195deg 3% 25%);
@@ -1509,11 +1508,11 @@ table td.maximum{
 
 	--color-doc-builder-field: hsl(0, 0%, 21%);
 	--color-doc-padding-margin:hsl(0, 0%, 17%);
-	
+
 	--border-input:1px solid var(--color-border);
 	--outline-input-focus:2px solid var(--color-accent1);
 	--shadow-input:0px 0px 2px 0px rgba(0,0,0,0.7) inset;
-	
+
 	--image-filter:        invert(1) brightness(90%);
 	--image-filter-alt:    invert(1) brightness(40%);
 	--image-filter-bg:     var(--image-filter);
