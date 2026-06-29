@@ -85,8 +85,8 @@ const MyBuilderDocSetTarget = {
 						<input                           v-if="isString"         v-model="value" :disabled="readonly" />
 						<input v-if="isInteger"
 							@input="value = $event.target.value === '' ? 0 : parseInt($event.target.value)"
-							:modelValue="String(value)"
 							:disabled="readonly"
+							:value="String(value)"
 						/>
 					</template>
 				</template>
@@ -136,7 +136,7 @@ const MyBuilderDocSetTarget = {
 			if(s.isString)         return '';
 			return '';
 		},
-		
+
 		// inputs
 		value:{
 			get()  { return this.set.value; },
@@ -224,7 +224,7 @@ const MyBuilderDocSetTarget = {
 		toggle() {
 			if(!this.active)
 				return this.$emit('apply',this.set);
-			
+
 			this.$emit('remove');
 			this.setType = false;
 		},
@@ -335,7 +335,7 @@ export default {
 
 			if(pos !== -1) v[pos] = value;
 			else           v.push(value);
-			
+
 			this.$emit('update:modelValue',v);
 		},
 		remove(target) {
