@@ -2838,7 +2838,8 @@
 		},
 		"orderBy": "Ordonează după",
 		"pageLimit": "Results per page",
-		"quick": "Filtrați rezultatele în toate coloanele"
+		"quick": "Filtrați rezultatele în toate coloanele",
+		"valueLimit": "Only the first {CNT} values are loaded"
 	},
 	"settings": {
 		"account": {

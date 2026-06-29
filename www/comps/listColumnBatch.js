@@ -17,7 +17,7 @@ export default {
 			:captionTitle="capApp.button.columnFilters"
 			:naked="true"
 		/>
-		
+
 		<my-button
 			v-if="showIconOrder"
 			@trigger="$emit('set-order',!isOrderedAsc)"
@@ -28,14 +28,14 @@ export default {
 			:image="isOrderedAsc ? 'triangleUp.png' : 'triangleDown.png'"
 			:naked="true"
 		/>
-		
+
 		<div class="columBatchHeaderCaption"
 			v-click-outside="clickOutside"
 			@click.stop="click"
 			:class="{ clickable:canOpen, dropdownActive:dropdownShow, hasIcons:showIconFilter || showIconOrder }"
 			:title="columnBatch.caption"
 		>{{ columnBatch.caption }}</div>
-		
+
 		<teleport to="#dropdown" v-if="dropdownShow">
 			<div class="columnBatchOption default-inputs" data-dropdown-border-simple data-dropdown-margin-x="-4" data-dropdown-width="320">
 				<!-- sorting -->
@@ -58,7 +58,7 @@ export default {
 						:naked="true"
 					/>
 				</div>
-				
+
 				<!-- aggregation -->
 				<div class="columnBatchOptionItem" v-if="aggrColumn !== null">
 					<my-button image="sum.png"
@@ -77,7 +77,7 @@ export default {
 						<option value="sum">{{ capGen.aggregatorItem.sum }}</option>
 					</select>
 				</div>
-				
+
 				<!-- filter by text -->
 				<div class="columnBatchOptionItem" v-if="showFilterText">
 					<my-button image="filter.png"
@@ -98,7 +98,7 @@ export default {
 						:naked="true"
 					/>
 				</div>
-				
+
 				<!-- filter by items -->
 				<template v-if="showFilterItems">
 					<my-button
@@ -117,8 +117,12 @@ export default {
 							:naked="true"
 						/>
 					</div>
+					<my-label image="question.png"
+						v-if="isValueLimitFull"
+						:caption="capApp.valueLimit.replace('{CNT}',valueLimit)"
+					/>
 				</template>
-				
+
 				<!-- filter actions -->
 				<div class="row space-between">
 					<my-button image="remove.png"
@@ -153,9 +157,10 @@ export default {
 	emits:['del-aggregator','del-order','set-aggregator','set-filters','set-order','set-order-only'],
 	data() {
 		return {
-			inputSel:[], // value input for selection filter
-			inputTxt:'', // value input for text filter
-			values:[],   // values available to filter with (all values a list could have for column)
+			inputSel:[],     // value input for selection filter
+			inputTxt: '',    // value input for text filter
+			values:[],       // values available to filter with (all values a list could have for column)
+			valueLimit:1000, // max. number of values loaded
 			zeroSelection:false
 		};
 	},
@@ -197,32 +202,32 @@ export default {
 				else         this.$emit('set-aggregator',this.aggrColumn.id,v);
 			}
 		},
-		
+
 		// returns column of the column batch that is used for filtering (null if none is available)
 		columnUsedFilter:s => {
 			for(let ind of s.columnBatch.columnIndexes) {
 				let c = s.columns[ind];
 				let a = s.attributeIdMap[c.attributeId];
-				
+
 				// ignore color/drawing display, sub query, aggregator, encrypted and file attribute columns
 				if(a.contentUse !== 'color' && a.contentUse !== 'drawing' && c.query === null && c.aggregator === null &&
 					!a.encrypted && !s.isAttributeFiles(a.content)) {
-					
+
 					return c;
 				}
 			}
 			return null;
 		},
-		
+
 		// indexes of column user filters that this column is responsible for
 		columnFilterIndexes:s => {
 			if(!s.isValidFilter)
 				return [];
-			
+
 			let atrId    = s.columnUsedFilter.attributeId;
 			let atrIndex = s.columnUsedFilter.index;
 			let out      = [];
-			
+
 			for(let i = 0, j = s.filtersColumn.length; i < j; i++) {
 				const f = s.filtersColumn[i];
 				if(f.side0.attributeId === atrId && f.side0.attributeIndex === atrIndex)
@@ -230,7 +235,7 @@ export default {
 			}
 			return out;
 		},
-		
+
 		// simple
 		aggrColumn:       s => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
 		canOpen:          s => s.rowCount > 1 || s.isFiltered,
@@ -242,12 +247,13 @@ export default {
 		isOrdered:        s => s.columnBatch.orderIndexesUsed.length !== 0 && !s.isOrderedOrginal,
 		isOrderedAsc:     s => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
 		isValidFilter:    s => s.columnUsedFilter !== null,
+		isValueLimitFull: s => s.values.length === s.valueLimit,
 		showFilterAny:    s => s.showFilterItems || s.showFilterText,
-		showFilterItems:  s => s.values.length != 0,
+		showFilterItems:  s => s.values.length !== 0,
 		showFilterText:   s => !s.isDateOrTime && s.isValidFilter,
 		showIconFilter:   s => s.isValidFilter && s.isFiltered,
 		showIconOrder:    s => s.isOrdered && !s.isOrderedOrginal,
-		
+
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		capApp:        s => s.$store.getters.captions.list,
@@ -262,17 +268,17 @@ export default {
 		getUnixShifted,
 		getUtcTimeStringFromUnix,
 		isAttributeFiles,
-		
+
 		// presentation
 		displayValue(v) {
 			if(v === null)
 				return '[' + this.capGen.button.empty + ']';
-			
+
 			const atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
-			
+
 			if(atr.content === 'boolean')
 				return v ? this.capGen.option.yes : this.capGen.option.no;
-			
+
 			switch(atr.contentUse) {
 				case 'date':     return this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
 				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
@@ -301,10 +307,10 @@ export default {
 					return true;
 				}),
 				orders:[{ascending:true,expressionPos:0}],
-				limit:1000
+				limit:this.valueLimit
 			};
 		},
-		
+
 		// actions
 		clear() {
 			this.inputTxt = '';
@@ -324,7 +330,7 @@ export default {
 				this.dropdownSet(!this.dropdownShow);
 		},
 		clickOutside() {
-			this.dropdownSet(false);	
+			this.dropdownSet(false);
 		},
 		dropdownSet(state) {
 			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
@@ -340,7 +346,7 @@ export default {
 
 			if(this.zeroSelection && this.inputSel.length === 0)
 				this.inputSel = JSON.parse(JSON.stringify(this.values));
-			
+
 			const p = this.inputSel.indexOf(v);
 			if(p !== -1) this.inputSel.splice(p,1);
 			else         this.inputSel.push(v);
@@ -375,12 +381,12 @@ export default {
 				this.$root.genericError
 			);
 		},
-		
+
 		// retrieval
 		loadSelectionValues() {
 			if(!this.dropdownShow || !this.isValidFilter)
 				return;
-			
+
 			ws.send('data','get',this.prepareDataGet(),false).then(
 				res => {
 					this.values = [];
@@ -391,16 +397,16 @@ export default {
 				this.$root.genericError
 			);
 		},
-		
+
 		// updates
 		set() {
 			if(!this.isValidFilter)
 				return;
-			
+
 			const atrId     = this.columnUsedFilter.attributeId;
 			const atrIndex  = this.columnUsedFilter.index;
 			const filterTxt = this.inputTxt !== '';
-			
+
 			// remove existing filters for this column
 			let filters = JSON.parse(JSON.stringify(this.filtersColumn))
 				.filter((v,i) => !this.columnFilterIndexes.includes(i));
@@ -425,7 +431,7 @@ export default {
 						value:filterTxt ? this.inputTxt : this.inputSel.filter(v => v !== null)
 					}
 				});
-				
+
 				if(!filterTxt) {
 					filters.push({
 						connector:exclNull ? 'AND' : 'OR',

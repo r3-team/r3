@@ -2838,7 +2838,8 @@
 		},
 		"orderBy": "اطلب بواسطة",
 		"pageLimit": "النتائج لكل صفحة",
-		"quick": "تصفية النتائج في كافة الأعمدة"
+		"quick": "تصفية النتائج في كافة الأعمدة",
+		"valueLimit": "Only the first {CNT} values are loaded"
 	},
 	"settings": {
 		"account": {

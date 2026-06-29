@@ -2838,7 +2838,8 @@
 		},
 		"orderBy": "Sortieren nach",
 		"pageLimit": "Ergebnisse pro Seite",
-		"quick": "Ergebnisse in allen Spalten filtern"
+		"quick": "Ergebnisse in allen Spalten filtern",
+		"valueLimit": "Es werden nur die ersten {CNT} Werte geladen"
 	},
 	"settings": {
 		"account": {

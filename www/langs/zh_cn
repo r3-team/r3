@@ -2838,7 +2838,8 @@
 		},
 		"orderBy": "排序方式",
 		"pageLimit": "Results per page",
-		"quick": "在所有列中快速筛选结果"
+		"quick": "在所有列中快速筛选结果",
+		"valueLimit": "Only the first {CNT} values are loaded"
 	},
 	"settings": {
 		"account": {

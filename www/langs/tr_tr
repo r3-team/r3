@@ -2838,7 +2838,8 @@
 		},
 		"orderBy": "Sırala",
 		"pageLimit": "Sayfa başına sonuçlar",
-		"quick": "Sonuçları tüm sütunlarda filtrele"
+		"quick": "Sonuçları tüm sütunlarda filtrele",
+		"valueLimit": "Only the first {CNT} values are loaded"
 	},
 	"settings": {
 		"account": {

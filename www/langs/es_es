@@ -2838,7 +2838,8 @@
 		},
 		"orderBy": "Ordenar por",
 		"pageLimit": "Resultados por página",
-		"quick": "Filtrar resultados en todas las columnas"
+		"quick": "Filtrar resultados en todas las columnas",
+		"valueLimit": "Only the first {CNT} values are loaded"
 	},
 	"settings": {
 		"account": {
