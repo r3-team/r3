@@ -416,12 +416,9 @@ func addListRow(doc *doc, b types.DocBorder, isFirstRow bool, cells []cell, padd
 	return nil
 }
 
-func getRowCellHeightLines(doc *doc, font types.DocFont, sizeX float64, length int, s string) (float64, int) {
+func getRowCellHeightLines(doc *doc, font types.DocFont, sizeX float64, lengthChars int, s string) (float64, int) {
 	setFont(doc, font)
-	if length != 0 && len(s) > length-3 {
-		s = fmt.Sprintf("%s...", s[:length-3])
-	}
-	lineCount := len(doc.p.SplitText(s, sizeX))
+	lineCount := len(doc.p.SplitText(getStringClean(s, "", "", lengthChars), sizeX))
 	return getLineHeight(font) * float64(lineCount), lineCount
 }
 
