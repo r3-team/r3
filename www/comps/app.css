@@ -8,7 +8,6 @@
 	--z-index-header-entry:60;
 	--z-index-header:50;               /* header, main menu, top of the page */
 	--z-index-form-pop-up:40;
-	--z-index-input-toolbar:20;        /* toolbars can include hover elements (TinyMCE code view) */
 	--z-index-input-date-month:19;
 
 	/* builder / admin */

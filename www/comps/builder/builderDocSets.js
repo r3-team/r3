@@ -85,8 +85,8 @@ const MyBuilderDocSetTarget = {
 						<input                           v-if="isString"         v-model="value" :disabled="readonly" />
 						<input v-if="isInteger"
 							@input="value = $event.target.value === '' ? 0 : parseInt($event.target.value)"
-							:modelValue="String(value)"
 							:disabled="readonly"
+							:value="String(value)"
 						/>
 					</template>
 				</template>

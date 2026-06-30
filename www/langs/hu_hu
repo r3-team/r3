@@ -2861,7 +2861,8 @@
 		},
 		"orderBy": "Rendezési szempont",
 		"pageLimit": "Results per page",
-		"quick": "Eredmények szűrése minden oszlopban"
+		"quick": "Eredmények szűrése minden oszlopban",
+		"valueLimit": "Only the first {CNT} values are loaded"
 	},
 	"settings": {
 		"account": {

@@ -8,6 +8,7 @@ import (
 	"r3/tools"
 	"r3/types"
 	"strings"
+	"unicode/utf8"
 
 	"codeberg.org/go-pdf/fpdf"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -18,8 +19,8 @@ func getStringClean(s string, prefix, postfix string, lengthChars int) string {
 	if prefix != "" || postfix != "" {
 		s = fmt.Sprintf("%s%s%s", prefix, s, postfix)
 	}
-	if lengthChars != 0 && lengthChars >= 3 && len(s) > lengthChars-3 {
-		s = fmt.Sprintf("%s...", s[:lengthChars-3])
+	if lengthChars != 0 && lengthChars >= 3 && utf8.RuneCountInString(s) > lengthChars-3 {
+		s = fmt.Sprintf("%s...", string([]rune(s)[:lengthChars-3]))
 	}
 	return s
 }
