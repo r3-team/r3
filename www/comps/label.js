@@ -1,6 +1,6 @@
 export default {
 	name:'my-label',
-	template:`<div class="label" :class="{ darkBg, disabled, error, large, wrap }">
+	template:`<div class="label" :class="{ bold, darkBg, disabled, error, large, wrap }">
 		<img draggable="false"
 			v-if="image !== '' || imageBase64 !== ''"
 			:src="image !== '' ? 'images/'+image : imageBase64"
@@ -13,8 +13,9 @@ export default {
 		error:      { type:Boolean, required:false, default:false },
 		image:      { type:String,  required:false, default:'' },
 		imageBase64:{ type:String,  required:false, default:'' },
-		
+
 		// style props
+		bold:    { type:Boolean, required:false, default:false },
 		darkBg:  { type:Boolean, required:false, default:false },
 		large:   { type:Boolean, required:false, default:false },
 		disabled:{ type:Boolean, required:false, default:false },

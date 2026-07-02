@@ -76,7 +76,7 @@ export default {
 						<span>{{ capGen.module }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" :to="'/builder/relations/'+module.id">
+					<router-link class="entry clickable" :to="'/builder/relations/'+module.id" :class="{ 'router-link-active':$route.meta.nav === 'relations' }">
 						<img src="images/database.png" />
 						<span>{{ capGen.relations }}</span>
 					</router-link>

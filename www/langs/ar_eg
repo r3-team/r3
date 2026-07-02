@@ -1830,7 +1830,8 @@
 			"title": "العلاقات",
 			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "العلاقة '{NAME}'",
-			"triggers": "المشغلات ({CNT})"
+			"triggers": "المشغلات ({CNT})",
+			"useOverview": "Open overview by default"
 		},
 		"releases": {
 			"button": {
@@ -2601,6 +2602,7 @@
 		"orientation": "Orientation",
 		"orientationLandscape": "Landscape",
 		"orientationPortrait": "Portrait",
+		"overview": "Overview",
 		"overwrite": "Overwrite",
 		"overwrites": "Overwrites",
 		"page": "Page",

@@ -1830,7 +1830,8 @@
 			"title": "Relationen",
 			"titleHint": "Der Titel kann in die verfügbaren Anwendungssprachen übersetzt werden. Er wird angezeigt, wenn eine Relation in einer Benutzeroberfläche angezeigt wird - wie z. B. in der Änderungshistorie.",
 			"titleOne": "Relation \"{NAME}\"",
-			"triggers": "Trigger ({CNT})"
+			"triggers": "Trigger ({CNT})",
+			"useOverview": "Übersicht zuerst öffnen"
 		},
 		"releases": {
 			"button": {
@@ -2601,6 +2602,7 @@
 		"orientation": "Orientation",
 		"orientationLandscape": "Landscape",
 		"orientationPortrait": "Portrait",
+		"overview": "Übersicht",
 		"overwrite": "Überschreiben",
 		"overwrites": "Überschreibungen",
 		"page": "Seite",

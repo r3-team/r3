@@ -1830,7 +1830,8 @@
 			"title": "İlişkiler",
 			"titleHint": "Başlık mevcut uygulama dillerine çevrilebilir. Değişiklik günlüklerini gösterirken olduğu gibi, kullanıcı arayüzünde bir ilişkiye başvurulduğunda görüntülenir.",
 			"titleOne": "İlişki '{NAME}'",
-			"triggers": "Tetikleyiciler ({CNT})"
+			"triggers": "Tetikleyiciler ({CNT})",
+			"useOverview": "Open overview by default"
 		},
 		"releases": {
 			"button": {
@@ -2601,6 +2602,7 @@
 		"orientation": "Oryantasyon",
 		"orientationLandscape": "Manzara",
 		"orientationPortrait": "Portre",
+		"overview": "Overview",
 		"overwrite": "Üzerine yaz",
 		"overwrites": "Üzerine yazar",
 		"page": "Sayfa",

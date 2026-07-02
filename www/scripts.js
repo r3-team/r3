@@ -63,6 +63,7 @@ import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
 import MyBuilderPgFunctions from './comps/builder/builderPgFunctions.js';
 import MyBuilderRelation    from './comps/builder/builderRelation.js';
 import MyBuilderRelations   from './comps/builder/builderRelations.js';
+import MyBuilderRelationsShow from './comps/builder/builderRelationsShow.js';
 import MyBuilderReleases    from './comps/builder/builderReleases.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
@@ -153,7 +154,32 @@ const MyRouter = VueRouter.createRouter({
 				path:'relations/:id',
 				meta:{ nav:'relations', target:'module' },
 				component:MyBuilderRelations,
+				props: true
+			},{
+				path:'relations/:id/all',
+				meta:{ nav:'relations', target:'module' },
+				component:MyBuilderRelationsShow,
 				props:true
+			},{
+				path:'relations/:id/changelog/:changelog',
+				meta:{ nav:'relations', target:'module' },
+				component:MyBuilderRelationsShow,
+				props:true
+			},{
+				path:'relations/:id/encryption/:encryption',
+				meta:{ nav:'relations', target:'module' },
+				component:MyBuilderRelationsShow,
+				props:true
+			},{
+				path:'relations/:id/tag/:tagId',
+				meta:{ nav:'relations', target:'module' },
+				component:MyBuilderRelationsShow,
+				props:true
+			},{
+				path:'relations/:id/overview/:directOpen',
+				meta:{ nav:'relations', target:'module' },
+				component:MyBuilderRelations,
+				props: true
 			},{
 				path:'relation/:id',
 				meta:{ nav:'relations', target:'relation' },

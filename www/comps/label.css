@@ -45,6 +45,11 @@
 }
 
 /* wrap */
+.label.bold span{
+	font-weight:bold;
+}
+
+/* wrap */
 .label.wrap span{
 	text-wrap:auto;
 }
