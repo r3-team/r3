@@ -1005,6 +1005,17 @@
 	border-bottom:1px solid var(--color-border);
 }
 
+/* filter sidebar */
+.builder-filter-sidebar{
+	max-width:400px;
+	flex:1 1 auto;
+	border-left:1px solid var(--color-border);
+}
+.builder-filter-sidebar.fullscreen{
+	max-width:unset;
+	border-left:none;
+}
+
 /* attributes */
 .builder-attribute .error{
 	color:var(--color-error);

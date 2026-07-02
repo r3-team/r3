@@ -2415,6 +2415,7 @@
 		},
 		"category": "Kategorie",
 		"certificate": "Zertifikat",
+		"changeLogs": "Änderungshistorien",
 		"changedBy": "Geändert von",
 		"clientEvent": "Client-Ereignis",
 		"clientEvents": "Client-Ereignisse",

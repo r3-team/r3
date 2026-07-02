@@ -2415,6 +2415,7 @@
 		},
 		"category": "Kategorija",
 		"certificate": "Certificate",
+		"changeLogs": "Change logs",
 		"changedBy": "Changed by",
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",

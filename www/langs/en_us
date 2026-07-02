@@ -2416,6 +2416,7 @@
 		"category": "Category",
 		"certificate": "Certificate",
 		"changedBy": "Changed by",
+		"changeLogs": "Change logs",
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",
 		"clipboard": "Clipboard",
