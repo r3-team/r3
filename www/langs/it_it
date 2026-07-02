@@ -387,6 +387,8 @@
 					"tls": "SSL/TLS"
 				}
 			},
+			"resendCount": "Max. resend attempts",
+			"sendCount": "Max. number of emails",
 			"subject": "Oggetto",
 			"testAccount": "Seleziona account",
 			"testOk": "L'e-mail di prova è stata aggiunta con successo allo spooler.",
@@ -2477,6 +2479,7 @@
 		"errorTitle": "Errore",
 		"event": "Event",
 		"events": "Events",
+		"every": "Every",
 		"everything": "Everything",
 		"expert": "Expert",
 		"favorites": "Favorites",
@@ -2648,6 +2651,7 @@
 		"searchBars": "Search bars",
 		"searchCompleted": "Search completed",
 		"searchRunning": "Search is running",
+		"seconds": "Seconds",
 		"selected": "Selected",
 		"selectedMaxOne": "Selected (max. 1)",
 		"sessionStart": "Session start",

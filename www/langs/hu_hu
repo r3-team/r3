@@ -387,6 +387,8 @@
 					"tls": "SSL/TLS"
 				}
 			},
+			"resendCount": "Max. resend attempts",
+			"sendCount": "Max. number of emails",
 			"subject": "Tárgy",
 			"testAccount": "Fiók kiválasztása",
 			"testOk": "A teszt e-mail sikeresen hozzá lett adva a várólistához.",
@@ -2477,6 +2479,7 @@
 		"errorTitle": "Hiba",
 		"event": "Event",
 		"events": "Events",
+		"every": "Every",
 		"everything": "Everything",
 		"expert": "Expert",
 		"favorites": "Favorites",
@@ -2648,6 +2651,7 @@
 		"searchBars": "Search bars",
 		"searchCompleted": "Search completed",
 		"searchRunning": "Search is running",
+		"seconds": "Seconds",
 		"selected": "Kiválasztva",
 		"selectedMaxOne": "Kiválasztva (max. 1)",
 		"sessionStart": "Session start",

@@ -387,6 +387,8 @@
 					"tls": "SSL/TLS"
 				}
 			},
+			"resendCount": "Max. resend attempts",
+			"sendCount": "Max. number of emails",
 			"subject": "Temats",
 			"testAccount": "Izvēlieties kontu",
 			"testOk": "Pārbaudes e-pasts veiksmīgi pievienots rezervētuvē.",
@@ -2477,6 +2479,7 @@
 		"errorTitle": "Kļūda",
 		"event": "Event",
 		"events": "Events",
+		"every": "Every",
 		"everything": "Viss",
 		"expert": "Expert",
 		"favorites": "Favorites",
@@ -2648,6 +2651,7 @@
 		"searchBars": "Search bars",
 		"searchCompleted": "Search completed",
 		"searchRunning": "Search is running",
+		"seconds": "Seconds",
 		"selected": "Izvēlēts",
 		"selectedMaxOne": "Izvēlēts (maks. 1)",
 		"sessionStart": "Session start",

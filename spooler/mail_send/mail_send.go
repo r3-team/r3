@@ -20,27 +20,37 @@ import (
 	"github.com/wneessen/go-mail"
 )
 
-var (
-	accountMode          = "smtp"
-	sendAttempts     int = 5  // send attempts per mails
-	sendAttemptEvery int = 60 // repeat attempts every x seconds
-)
+var accountMode = "smtp"
 
 func DoAll() error {
 	if !cache.GetMailAccountsExist() {
 		log.Info(log.ContextMail, "cannot start sending, no accounts defined")
 		return nil
 	}
-	now := tools.GetTimeUnix()
 
 	rows, err := db.Pool.Query(context.Background(), `
-		SELECT id, to_list, cc_list, bcc_list, subject, body, attempt_count,
-			mail_account_id, record_id_wofk, attribute_id
-		FROM instance.mail_spool
-		WHERE outgoing
-		AND attempt_count < $1
-		AND attempt_date  < $2
-	`, sendAttempts, now-int64(sendAttemptEvery))
+		SELECT s.id, s.to_list, s.cc_list, s.bcc_list, s.subject, s.body,
+			s.attempt_count, s.mail_account_id, s.record_id_wofk, s.attribute_id
+		FROM      instance.mail_spool   AS s
+		LEFT JOIN instance.mail_account AS a ON a.id = s.mail_account_id
+		WHERE s.outgoing
+
+		-- send limits for mail account (if defined for mail)
+		AND (
+			s.mail_account_id IS NULL
+			OR a.send_count IS NULL
+			OR a.send_count > (
+				SELECT COUNT(*)
+				FROM instance.mail_traffic AS t
+				WHERE t.mail_account_id =  s.mail_account_id
+				AND   t.date            >= EXTRACT(EPOCH FROM NOW()) - a.send_seconds
+			)
+		)
+
+		-- resend limits for mail
+		AND s.attempt_count < COALESCE(a.resend_count, 5)
+		AND s.attempt_date  < EXTRACT(EPOCH FROM NOW()) - COALESCE(a.resend_seconds, 60)
+	`)
 	if err != nil {
 		return err
 	}
@@ -70,9 +80,9 @@ func DoAll() error {
 
 			if _, err := db.Pool.Exec(context.Background(), `
 				UPDATE instance.mail_spool
-				SET attempt_count = $1, attempt_date = $2
-				WHERE id = $3
-			`, m.AttemptCount+1, now, m.Id); err != nil {
+				SET attempt_count = $1, attempt_date = EXTRACT(EPOCH FROM NOW())
+				WHERE id = $2
+			`, m.AttemptCount+1, m.Id); err != nil {
 				return err
 			}
 			continue

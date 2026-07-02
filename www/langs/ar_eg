@@ -387,6 +387,8 @@
 					"tls": "طبقة المقابس الآمنة/طبقة النقل الآمنة"
 				}
 			},
+			"resendCount": "Max. resend attempts",
+			"sendCount": "Max. number of emails",
 			"subject": "موضوع",
 			"testAccount": "اختر الحساب",
 			"testOk": "تمت إضافة البريد الإلكتروني التجريبي بنجاح إلى التخزين المؤقت.",
@@ -2477,6 +2479,7 @@
 		"errorTitle": "خطأ",
 		"event": "حدث",
 		"events": "Events",
+		"every": "Every",
 		"everything": "كل شئ",
 		"expert": "Expert",
 		"favorites": "Favorites",
@@ -2648,6 +2651,7 @@
 		"searchBars": "Search bars",
 		"searchCompleted": "Search completed",
 		"searchRunning": "Search is running",
+		"seconds": "Seconds",
 		"selected": "مختارة",
 		"selectedMaxOne": "محدد (الحد الأقصى 1)",
 		"sessionStart": "Session start",

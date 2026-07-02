@@ -296,6 +296,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_tag_assign_js_function_id_fkey ON app.tag_assign USING btree (js_function_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_tag_assign_pg_function_id_fkey ON app.tag_assign USING btree (pg_function_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_tag_assign_relation_id_fkey    ON app.tag_assign USING btree (relation_id    ASC NULLS LAST);
+
+			-- mail (re)send options
+			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER;
+			ALTER TABLE instance.mail_account ADD   COLUMN send_seconds   INTEGER NOT NULL DEFAULT 60;
+			ALTER TABLE instance.mail_account ALTER COLUMN send_seconds   DROP DEFAULT;
+			ALTER TABLE instance.mail_account ADD   COLUMN resend_count   INTEGER NOT NULL DEFAULT 5;
+			ALTER TABLE instance.mail_account ALTER COLUMN resend_count   DROP DEFAULT;
+			ALTER TABLE instance.mail_account ADD   COLUMN resend_seconds INTEGER NOT NULL DEFAULT 60;
+			ALTER TABLE instance.mail_account ALTER COLUMN resend_seconds DROP DEFAULT;
 		`)
 		return "3.13", err
 	},

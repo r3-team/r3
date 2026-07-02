@@ -1,3 +1,4 @@
+import MyInputDecimal from '../inputDecimal.js';
 import {deepIsEqual} from '../shared/generic.js';
 import {
 	dialogCloseAsk,
@@ -5,9 +6,10 @@ import {
 } from '../shared/dialog.js';
 
 export default {
-	name:'my-admin-mail-account',
+	name: 'my-admin-mail-account',
+	components: {MyInputDecimal},
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
-		
+
 		<div class="contentBox scroll float">
 			<div class="top">
 				<div class="area nowrap">
@@ -49,7 +51,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -156,6 +158,36 @@ export default {
 							<td><input v-model.number="inputs.hostPort" /></td>
 							<td></td>
 						</tr>
+						<tr v-if="isSmtp">
+							<td>{{ capApp.sendCount }}</td>
+							<td colspan="2">
+								<div class="row gap centered">
+									<my-button image="cancel.png"
+										v-if="inputs.sendCount === null"
+										@trigger="inputs.sendCount = 50"
+										:caption="capGen.noLimit"
+										:naked="true"
+									/>
+									<template v-if="inputs.sendCount !== null">
+										<my-input-decimal class="short" v-model="inputs.sendCount" :min="0" :allowNull="true" :lengthFract="0" />
+										<span>{{ capGen.every }}</span>
+										<my-input-decimal class="short" v-model="inputs.sendSeconds" :min="1" :allowNull="false" :lengthFract="0" />
+										<span>{{ capGen.seconds }}</span>
+									</template>
+								</div>
+							</td>
+						</tr>
+						<tr v-if="isSmtp">
+							<td>{{ capApp.resendCount }}</td>
+							<td colspan="2">
+								<div class="row gap centered">
+									<my-input-decimal class="short" v-model="inputs.resendCount" :min="0" :allowNull="false" :lengthFract="0" />
+									<span>{{ capGen.every }}</span>
+									<my-input-decimal class="short" v-model="inputs.resendSeconds" :min="0" :allowNull="false" :lengthFract="0" />
+									<span>{{ capGen.seconds }}</span>
+								</div>
+							</td>
+						</tr>
 						<tr>
 							<td>{{ capGen.comments }}</td>
 							<td colspan="2"><textarea v-model="inputs.comment"></textarea></td>
@@ -199,9 +231,13 @@ export default {
 			oauthClientId:null,
 			smimeSign:false,
 			smimePathCrt:null,
-			smimePathKey:null
+			smimePathKey: null,
+			sendCount: null,
+			sendSeconds: 60,
+			resendCount: 5,
+			resendSeconds: 60
 		} : s.mailAccountIdMap[s.id],
-		
+
 		// simple states
 		canSave:s =>
 			s.isReady &&
@@ -227,7 +263,7 @@ export default {
 		isOauth:    s => s.inputs.authMethod === 'xoauth2',
 		isSmimeSign:s => s.inputs.smimeSign,
 		isSmtp:     s => s.inputs.mode       === 'smtp',
-		
+
 		// stores
 		capApp:s => s.$store.getters.captions.admin.mails,
 		capGen:s => s.$store.getters.captions.generic
@@ -248,7 +284,7 @@ export default {
 			if(e.ctrlKey && e.key === 's') {
 				if(this.canSave)
 					this.set();
-				
+
 				e.preventDefault();
 			}
 			if(e.key === 'Escape') {
@@ -256,7 +292,7 @@ export default {
 				e.preventDefault();
 			}
 		},
-		
+
 		// actions
 		closeAsk() {
 			this.dialogCloseAsk(this.close,this.isChanged);
@@ -274,7 +310,7 @@ export default {
 			this.inputs  = JSON.parse(JSON.stringify(this.inputsOrg));
 			this.isReady = true;
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('mailAccount','del',this.id,true).then(

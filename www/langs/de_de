@@ -387,6 +387,8 @@
 					"tls": "SSL/TLS"
 				}
 			},
+			"resendCount": "Max. erneute Sendeversuche",
+			"sendCount": "Max. E-Mail-Anzahl",
 			"subject": "Betreff",
 			"testAccount": "Account auswählen",
 			"testOk": "Test-E-Mail wurde erfolgreich zur Warteschlange hinzugefügt.",
@@ -2477,6 +2479,7 @@
 		"errorTitle": "Fehler",
 		"event": "Ereignis",
 		"events": "Ereignisse",
+		"every": "Alle",
 		"everything": "Alles",
 		"expert": "Expert",
 		"favorites": "Favoriten",
@@ -2648,6 +2651,7 @@
 		"searchBars": "Suchleisten",
 		"searchCompleted": "Suche abgeschlossen",
 		"searchRunning": "Suche läuft",
+		"seconds": "Sekunden",
 		"selected": "Ausgewählt",
 		"selectedMaxOne": "Ausgewählt (max. 1)",
 		"sessionStart": "Sitzungsstart",

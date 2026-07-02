@@ -5,7 +5,7 @@ export {MyAdminMailSpooler as default};
 let MyAdminMailSpooler = {
 	name:'my-admin-mail-spooler',
 	template:`<div class="admin-mail-spooler contentBox grow">
-		
+
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/mail_spool.png" />
@@ -39,16 +39,16 @@ let MyAdminMailSpooler = {
 					:active="offset-limit >= 0"
 					:naked="true"
 				/>
-				
+
 				<span>{{ String((offset / limit) + 1) + ' / ' + pages  }}</span>
-				
+
 				<my-button image="triangleRight.png"
 					@trigger="offsetSet(true)"
 					@trigger-shift="startAtPageLast"
 					:active="offset+limit < total"
 					:naked="true"
 				/>
-				
+
 				<select v-model.number="limit" @change="startAtPageFirst">
 					<option>10</option>
 					<option>25</option>
@@ -64,10 +64,10 @@ let MyAdminMailSpooler = {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="content mails default-inputs" :class="{ 'no-padding':!noMails }">
 			<span v-if="noMails"><i>{{ capApp.noMailsInSpool }}</i></span>
-			
+
 			<table class="generic-table bright shade" v-if="!noMails">
 				<thead>
 					<tr>
@@ -125,12 +125,12 @@ let MyAdminMailSpooler = {
 			limit:50,
 			offset:0,
 			search:'',
-			
+
 			// mails
 			mails:[],
 			mailIdsSelected:[],
 			total:0,
-			
+
 			// mail accounts
 			accountIdMap:{}
 		};
@@ -142,31 +142,34 @@ let MyAdminMailSpooler = {
 	},
 	computed:{
 		// simple
-		noMails:(s) => s.total === 0,
-		pages:  (s) => Math.ceil(s.total / s.limit),
-		
+		noMails:s => s.total === 0,
+		pages:  s => Math.ceil(s.total / s.limit),
+
 		// stores
-		capApp:  (s) => s.$store.getters.captions.admin.mails,
-		capGen:  (s) => s.$store.getters.captions.generic,
-		settings:(s) => s.$store.getters.settings
+		capApp:  s => s.$store.getters.captions.admin.mails,
+		capGen:  s => s.$store.getters.captions.generic,
+		settings:s => s.$store.getters.settings
 	},
 	methods:{
 		// externals
 		getSizeReadable,
 		getUnixFormat,
-		
+
 		// presentation
-		displaySendAttempts(mail) {
-			if(!mail.outgoing)          return '';
-			if(mail.attemptCount === 0) return '-';
-			return `${mail.attemptCount}/5 (${this.getUnixFormat(mail.attemptDate,this.settings.dateFormat+' H:i')})`;
-		},
 		displayAttach(mail) {
 			if(mail.outgoing)    return `<i>${this.capApp.attachmentsNoPreview}</i>`;
 			if(mail.files === 0) return '-';
 			return `${mail.files} (${this.getSizeReadable(mail.filesSize)})`;
 		},
-		
+		displaySendAttempts(mail) {
+			const resendCount = mail.accountId !== null && this.accountIdMap[mail.accountId] !== undefined
+				? this.accountIdMap[mail.accountId].resendCount : 5;
+
+			if(!mail.outgoing)          return '';
+			if (mail.attemptCount === 0) return '-';
+			return `${mail.attemptCount}/${resendCount} (${this.getUnixFormat(mail.attemptDate,this.settings.dateFormat+' H:i')})`;
+		},
+
 		// actions
 		showMail(mail) {
 			this.$store.commit('dialog',{
@@ -195,7 +198,7 @@ let MyAdminMailSpooler = {
 				this.mailIdsSelected = [];
 				return;
 			}
-			
+
 			this.mailIdsSelected = [];
 			for(let i = 0, j = this.mails.length; i < j; i++) {
 				this.mailIdsSelected.push(this.mails[i].id);
@@ -203,11 +206,11 @@ let MyAdminMailSpooler = {
 		},
 		toggleMailId(id) {
 			const pos = this.mailIdsSelected.indexOf(id);
-			
+
 			if(pos === -1) this.mailIdsSelected.push(id);
 			else           this.mailIdsSelected.splice(pos,1);
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('mailSpooler','del',{ids:this.mailIdsSelected},true).then(

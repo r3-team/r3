@@ -387,6 +387,8 @@
 					"tls": "SSL/TLS"
 				}
 			},
+			"resendCount": "Max. resend attempts",
+			"sendCount": "Max. number of emails",
 			"subject": "主题",
 			"testAccount": "选择帐户",
 			"testOk": "测试邮件已成功添加到电子邮件池。",
@@ -2477,6 +2479,7 @@
 		"errorTitle": "错误",
 		"event": "Event",
 		"events": "Events",
+		"every": "Every",
 		"everything": "全部",
 		"expert": "Expert",
 		"favorites": "Favorites",
@@ -2648,6 +2651,7 @@
 		"searchBars": "Search bars",
 		"searchCompleted": "Search completed",
 		"searchRunning": "Search is running",
+		"seconds": "Seconds",
 		"selected": "已选",
 		"selectedMaxOne": "已选（最多1个）",
 		"sessionStart": "Session start",

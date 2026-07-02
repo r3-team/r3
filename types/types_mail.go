@@ -43,6 +43,14 @@ type MailAccount struct {
 	SmimePathCrt pgtype.Text `json:"smimePathCrt"`
 	SmimePathKey pgtype.Text `json:"smimePathKey"`
 	SmimeSign    bool        `json:"smimeSign"`
+
+	// send limits
+	SendCount   pgtype.Int4 `json:"sendCount"`   // how many mails to be sent with time limit
+	SendSeconds pgtype.Int4 `json:"sendSeconds"` // time limit (seconds before now) to count send mails in
+
+	// resend limits
+	ResendCount   int32 `json:"resendCount"`   // resend mail at most X times
+	ResendSeconds int32 `json:"resendSeconds"` // resend mail every X seconds
 }
 type MailFile struct {
 	Id   uuid.UUID `json:"id"`

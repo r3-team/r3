@@ -387,6 +387,8 @@
 					"tls": "SSL/TLS"
 				}
 			},
+			"resendCount": "Max. resend attempts",
+			"sendCount": "Max. number of emails",
 			"subject": "Ders",
 			"testAccount": "Hesap seçin",
 			"testOk": "Test e-postası biriktiriciye başarıyla eklendi.",
@@ -2477,6 +2479,7 @@
 		"errorTitle": "Hata",
 		"event": "Etkinlik",
 		"events": "Events",
+		"every": "Every",
 		"everything": "Her şey",
 		"expert": "Uzman",
 		"favorites": "Favoriler",
@@ -2648,6 +2651,7 @@
 		"searchBars": "Arama çubukları",
 		"searchCompleted": "Arama tamamlandı",
 		"searchRunning": "Arama çalışıyor",
+		"seconds": "Seconds",
 		"selected": "Seçildi",
 		"selectedMaxOne": "Seçildi (maks. 1)",
 		"sessionStart": "Session start",
