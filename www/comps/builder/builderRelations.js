@@ -65,6 +65,10 @@ export default {
 							<my-label :caption="capGen.policies + ' (' + module.relations.filter(v => v.policies.length !== 0).length + ')'" />
 							<img class="preview" src="images/personTemplate.png" />
 						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/triggers'">
+							<my-label :caption="capGen.triggers + ' (' + module.relations.filter(v => module.pgTriggers.some(t => t.relationId === v.id)).length + ')'" />
+							<img class="preview" src="images/databasePlay.png" />
+						</router-link>
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/encryption'">
 							<my-label :caption="capGen.encryption + ' (' + module.relations.filter(v => v.encryption).length + ')'" />
 							<img class="preview" src="images/lock.png" />

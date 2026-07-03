@@ -140,6 +140,25 @@ export default {
 						</div>
 					</div>
 					<div class="row gap space-between">
+						<my-label image="databasePlay.png" :bold="filterTriggers1 || filterTriggers0" :caption="capGen.triggers" />
+						<div class="row gap wrap">
+							<my-button
+								@trigger="filterTriggers1 = !filterTriggers1"
+								:active="!filterTriggers0"
+								:caption="capGen.option.yes"
+								:image="filterTriggers1 ? 'checkbox1.png' : 'checkbox0.png'"
+								:naked="true"
+							/>
+							<my-button
+								@trigger="filterTriggers0 = !filterTriggers0"
+								:active="!filterTriggers1"
+								:caption="capGen.option.no"
+								:image="filterTriggers0 ? 'checkbox1.png' : 'checkbox0.png'"
+								:naked="true"
+							/>
+						</div>
+					</div>
+					<div class="row gap space-between">
 						<my-label image="lock.png" :bold="filterEncryption1 || filterEncryption0" :caption="capGen.encryption" />
 						<div class="row gap wrap">
 							<my-button
@@ -176,6 +195,8 @@ export default {
 			filterPolicies1: false,
 			filterRetention0: false,
 			filterRetention1: false,
+			filterTriggers0: false,
+			filterTriggers1: false,
 			filterText: '',
 			filterTagIds: [],
 			showSidebar: true
@@ -192,6 +213,8 @@ export default {
 					&& (!s.filterEncryption1 || r.encryption)
 					&& (!s.filterPolicies0 || r.policies.length === 0)
 					&& (!s.filterPolicies1 || r.policies.length !== 0)
+					&& (!s.filterTriggers0 || !s.module.pgTriggers.some(t => t.relationId === r.id))
+					&& (!s.filterTriggers1 || s.module.pgTriggers.some(t => t.relationId === r.id))
 					&& (!s.filterRetention0 || (r.retentionCount === null && r.retentionDays === null))
 					&& (!s.filterRetention1 || r.retentionCount !== null || r.retentionDays !== null)
 					&& (s.filterTagIds.length === 0 || (
@@ -226,6 +249,7 @@ export default {
 		if (this.filter === 'changelog')  this.filterRetention1  = true;
 		if (this.filter === 'encryption') this.filterEncryption1 = true;
 		if (this.filter === 'policies')   this.filterPolicies1   = true;
+		if (this.filter === 'triggers')   this.filterTriggers1   = true;
 	},
 	methods: {
 		// externals
