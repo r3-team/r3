@@ -297,6 +297,32 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_tag_assign_pg_function_id_fkey ON app.tag_assign USING btree (pg_function_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_tag_assign_relation_id_fkey    ON app.tag_assign USING btree (relation_id    ASC NULLS LAST);
 
+			-- tab field options
+			ALTER TABLE app.tab ADD COLUMN icon_id UUID;
+			ALTER TABLE app.tab ADD CONSTRAINT tabs_icon_id_fkey FOREIGN KEY (icon_id)
+				REFERENCES app.icon (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX IF NOT EXISTS fki_tab_icon_id_fkey ON app.tab USING btree (icon_id ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.field_tabs (
+				field_id uuid NOT NULL PRIMARY KEY,
+				collapse_allow BOOLEAN NOT NULL,
+				collapse_default BOOLEAN NOT NULL,
+				CONSTRAINT field_tabs_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			INSERT INTO app.field_tabs (field_id, collapse_allow, collapse_default)
+			SELECT id, FALSE, FALSE
+			FROM app.field
+			WHERE content = 'tabs';
+
 			-- mail (re)send options
 			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER;
 			ALTER TABLE instance.mail_account ADD   COLUMN send_seconds   INTEGER NOT NULL DEFAULT 60;

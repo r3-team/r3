@@ -570,7 +570,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			-- form icons
 			SELECT icon_id
 			FROM app.form
-			WHERE module_id = $2
+			WHERE module_id = $1
 
 			UNION
 
@@ -580,7 +580,22 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			WHERE form_id IN (
 				SELECT id
 				FROM app.form
-				WHERE module_id = $3
+				WHERE module_id = $1
+			)
+
+			UNION
+
+			-- tab icons
+			SELECT icon_id
+			FROM app.tab
+			WHERE field_id IN (
+				SELECT id
+				FROM app.field
+				WHERE form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $1
+				)
 			)
 
 			UNION
@@ -588,21 +603,21 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			-- menu icons
 			SELECT icon_id
 			FROM app.menu
-			WHERE module_id = $4
+			WHERE module_id = $1
 
 			UNION
 
 			-- collection icons
 			SELECT icon_id
 			FROM app.collection
-			WHERE module_id = $5
+			WHERE module_id = $1
 
 			UNION
 
 			-- search bar icons
 			SELECT icon_id
 			FROM app.search_bar
-			WHERE module_id = $6
+			WHERE module_id = $1
 
 			UNION
 
@@ -612,7 +627,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			WHERE relation_id IN (
 				SELECT id
 				FROM app.relation
-				WHERE module_id = $7
+				WHERE module_id = $1
 			)
 		)
 
@@ -620,14 +635,14 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		AND id NOT IN (
 			SELECT id
 			FROM app.icon
-			WHERE module_id = $8
+			WHERE module_id = $1
 			OR module_id IN (
 				SELECT module_id_on
 				FROM app.module_depends
-				WHERE module_id = $9
+				WHERE module_id = $1
 			)
 		)
-	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+	`, moduleId).Scan(&cnt); err != nil {
 		return err
 	}
 

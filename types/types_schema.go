@@ -319,15 +319,18 @@ type FieldList struct {
 	Captions     CaptionMap           `json:"captions"`
 }
 type FieldTabs struct {
-	Id       uuid.UUID   `json:"id"`
-	TabId    pgtype.UUID `json:"tabId"`
-	IconId   pgtype.UUID `json:"iconId"`
-	Content  string      `json:"content"`
-	State    string      `json:"state"`
-	Flags    []string    `json:"flags"`
-	OnMobile bool        `json:"onMobile"`
-	Captions CaptionMap  `json:"captions"`
-	Tabs     []Tab       `json:"tabs"`
+	Id              uuid.UUID   `json:"id"`
+	TabId           pgtype.UUID `json:"tabId"`
+	IconId          pgtype.UUID `json:"iconId"`
+	Content         string      `json:"content"`
+	State           string      `json:"state"`
+	Flags           []string    `json:"flags"`
+	OnMobile        bool        `json:"onMobile"`
+	Captions        CaptionMap  `json:"captions"`
+	Tabs            []Tab       `json:"tabs"`
+	CollapseAllow   bool        `json:"collapseAllow"`   // tab field can be collapsed
+	CollapseDefault bool        `json:"collapseDefault"` // tab field is collapsed by default
+
 }
 type FieldVariable struct {
 	Id           uuid.UUID   `json:"id"`
@@ -670,12 +673,13 @@ type SearchBar struct {
 	Captions CaptionMap  `json:"captions"`
 }
 type Tab struct {
-	Id             uuid.UUID  `json:"id"`
-	Position       int        `json:"position"`
-	ContentCounter bool       `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
-	State          string     `json:"state"`          // tab default state (default, hidden)
-	Fields         []any      `json:"fields"`         // fields assigned to tab
-	Captions       CaptionMap `json:"captions"`
+	Id             uuid.UUID   `json:"id"`
+	IconId         pgtype.UUID `json:"iconId"`
+	Position       int         `json:"position"`
+	ContentCounter bool        `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
+	State          string      `json:"state"`          // tab default state (default, hidden)
+	Fields         []any       `json:"fields"`         // fields assigned to tab
+	Captions       CaptionMap  `json:"captions"`
 }
 type Tag struct {
 	Id      uuid.UUID   `json:"id"`

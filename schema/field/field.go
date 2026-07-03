@@ -34,48 +34,51 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT f.id, f.parent_id, f.tab_id, f.icon_id, f.content, f.state,
 		f.flags, f.on_mobile, a.content,
-		
+
 		-- button field
 		fb.js_function_id,
-		
+
 		-- calendar field
 		fn.attribute_id_date0, fn.attribute_id_date1, fn.attribute_id_color,
 		fn.index_date0, fn.index_date1, fn.index_color, fn.ics, fn.gantt,
 		fn.gantt_steps, fn.gantt_steps_toggle, fn.date_range0, fn.date_range1,
 		fn.days, fn.days_toggle,
-		
+
 		-- chart field
 		fa.chart_option,
-		
+
 		-- container field
 		fc.direction, fc.justify_content, fc.align_items, fc.align_content,
 		fc.wrap, fc.grow, fc.shrink, fc.basis, fc.per_min, fc.per_max,
-		
+
 		-- header field
 		fh.richtext, fh.size,
-		
+
 		-- data field
 		fd.attribute_id, fd.attribute_id_alt, fd.index, fd.display, fd.min,
 		fd.max, fd.def, fd.regex_check, fd.js_function_id,
-		
+
 		-- data relationship field
 		fr.attribute_id_nm, fr.filter_quick, fr.outside_in, fr.auto_select, (
 			SELECT COALESCE(ARRAY_AGG(preset_id), '{}')
 			FROM app.field_data_relationship_preset
 			WHERE field_id = fr.field_id
 		) AS preset_ids,
-		
+
 		-- kanban field
 		fk.relation_index_data, fk.relation_index_axis_x,
 		fk.relation_index_axis_y, fk.attribute_id_sort,
-		
+
 		-- list field
 		fl.auto_renew, fl.csv_export, fl.csv_import, fl.layout,
 		fl.filter_quick, fl.result_limit,
 
+		-- tab field
+		ft.collapse_allow, ft.collapse_default,
+
 		-- variable field
 		fv.variable_id, fv.js_function_id
-		
+
 		FROM app.field AS f
 		LEFT JOIN app.field_button            AS fb ON fb.field_id = f.id
 		LEFT JOIN app.field_calendar          AS fn ON fn.field_id = f.id
@@ -86,6 +89,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 		LEFT JOIN app.field_header            AS fh ON fh.field_id = f.id
 		LEFT JOIN app.field_kanban            AS fk ON fk.field_id = f.id
 		LEFT JOIN app.field_list              AS fl ON fl.field_id = f.id
+		LEFT JOIN app.field_tab               AS ft ON ft.field_id = f.id
 		LEFT JOIN app.field_variable          AS fv ON fv.field_id = f.id
 		LEFT JOIN app.attribute               AS a  ON a.id        = fd.attribute_id
 		WHERE f.form_id = $1
@@ -132,8 +136,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 			attributeIdDate1, attributeIdColor, attributeIdKanbanSort,
 			fieldParentId, iconId, jsFunctionIdButton, jsFunctionIdData,
 			jsFunctionIdVariable, tabId, variableId pgtype.UUID
-		var csvExport, csvImport, daysToggle, filterQuick, filterQuickList,
-			gantt, ganttStepsToggle, ics, outsideIn, richtext, wrap pgtype.Bool
+		var collapseAllow, collapseDefault, csvExport, csvImport, daysToggle,
+			filterQuick, filterQuickList, gantt, ganttStepsToggle, ics, outsideIn,
+			richtext, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 		var flags []string
 
@@ -145,11 +150,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 			&direction, &justifyContent, &alignItems, &alignContent, &wrap,
 			&grow, &shrink, &basis, &perMin, &perMax, &richtext, &size,
 			&attributeId, &attributeIdAlt, &index, &display, &min, &max, &def,
-			&regexCheck, &jsFunctionIdData, &attributeIdNm,
-			&filterQuick, &outsideIn, &autoSelect, &defPresetIds,
-			&relationIndexKanbanData, &relationIndexKanbanAxisX,
-			&relationIndexKanbanAxisY, &attributeIdKanbanSort, &autoRenew,
-			&csvExport, &csvImport, &layout, &filterQuickList, &resultLimit,
+			&regexCheck, &jsFunctionIdData, &attributeIdNm, &filterQuick, &outsideIn,
+			&autoSelect, &defPresetIds, &relationIndexKanbanData, &relationIndexKanbanAxisX,
+			&relationIndexKanbanAxisY, &attributeIdKanbanSort, &autoRenew, &csvExport,
+			&csvImport, &layout, &filterQuickList, &resultLimit, &collapseAllow, &collapseDefault,
 			&variableId, &jsFunctionIdVariable); err != nil {
 
 			return nil, err
@@ -360,15 +364,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 
 		case "tabs":
 			fields = append(fields, types.FieldTabs{
-				Id:       fieldId,
-				TabId:    tabId,
-				IconId:   iconId,
-				Content:  content,
-				State:    state,
-				Flags:    flags,
-				OnMobile: onMobile,
-				Captions: types.CaptionMap{},
-				Tabs:     []types.Tab{},
+				Id:              fieldId,
+				TabId:           tabId,
+				IconId:          iconId,
+				Content:         content,
+				State:           state,
+				Flags:           flags,
+				OnMobile:        onMobile,
+				Captions:        types.CaptionMap{},
+				Tabs:            []types.Tab{},
+				CollapseAllow:   collapseAllow.Bool,
+				CollapseDefault: collapseDefault.Bool,
 			})
 			posTabsLookup = append(posTabsLookup, pos)
 			posParentLookup = append(posParentLookup, pos)
@@ -828,6 +834,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 			if len(f.Tabs) == 0 {
 				return fmt.Errorf("tabs field '%s' has 0 tabs", f.Id)
 			}
+			if err := setTabs_tx(ctx, tx, f); err != nil {
+				return err
+			}
 
 			// insert/update/delete tabs
 			idsKeep := make([]uuid.UUID, 0)
@@ -1094,6 +1103,16 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.FieldList) error {
 		return err
 	}
 	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+}
+func setTabs_tx(ctx context.Context, tx pgx.Tx, f types.FieldTabs) error {
+	_, err := tx.Exec(ctx, `
+		INSERT INTO app.field_tabs (field_id, collapse_allow, collapse_default)
+		VALUES ($1,$2,$3)
+		ON CONFLICT (field_id)
+		DO UPDATE SET collapse_allow = $2, collapse_default = $3
+	`, f.Id, f.CollapseAllow, f.CollapseDefault)
+
+	return err
 }
 func setVariable_tx(ctx context.Context, tx pgx.Tx, f types.FieldVariable) error {
 	if _, err := tx.Exec(ctx, `
