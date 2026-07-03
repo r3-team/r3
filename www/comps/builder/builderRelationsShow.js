@@ -121,6 +121,25 @@ export default {
 						</div>
 					</div>
 					<div class="row gap space-between">
+						<my-label image="personTemplate.png" :bold="filterPolicies1 || filterPolicies0" :caption="capGen.policies" />
+						<div class="row gap wrap">
+							<my-button
+								@trigger="filterPolicies1 = !filterPolicies1"
+								:active="!filterPolicies0"
+								:caption="capGen.option.yes"
+								:image="filterPolicies1 ? 'checkbox1.png' : 'checkbox0.png'"
+								:naked="true"
+							/>
+							<my-button
+								@trigger="filterPolicies0 = !filterPolicies0"
+								:active="!filterPolicies1"
+								:caption="capGen.option.no"
+								:image="filterPolicies0 ? 'checkbox1.png' : 'checkbox0.png'"
+								:naked="true"
+							/>
+						</div>
+					</div>
+					<div class="row gap space-between">
 						<my-label image="lock.png" :bold="filterEncryption1 || filterEncryption0" :caption="capGen.encryption" />
 						<div class="row gap wrap">
 							<my-button
@@ -144,16 +163,17 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		changelog: { type:[String,null], required:false, default:null },
-		encryption:{ type:[String,null], required:false, default:null },
-		id:        { type:String,        required:true },
-		readonly:  { type:Boolean,       required:true },
-		tagId:     { type:[String,null], required:false, default:null }
+		filter:  { type:[String,null], required:false, default:null },
+		id:      { type:String,        required:true },
+		readonly:{ type:Boolean,       required:true },
+		tagId:   { type:[String,null], required:false, default:null }
 	},
 	data() {
 		return {
 			filterEncryption0: false,
 			filterEncryption1: false,
+			filterPolicies0: false,
+			filterPolicies1: false,
 			filterRetention0: false,
 			filterRetention1: false,
 			filterText: '',
@@ -170,6 +190,8 @@ export default {
 					(filterName === '' || r.name.toLowerCase().includes(filterName))
 					&& (!s.filterEncryption0 || !r.encryption)
 					&& (!s.filterEncryption1 || r.encryption)
+					&& (!s.filterPolicies0 || r.policies.length === 0)
+					&& (!s.filterPolicies1 || r.policies.length !== 0)
 					&& (!s.filterRetention0 || (r.retentionCount === null && r.retentionDays === null))
 					&& (!s.filterRetention1 || r.retentionCount !== null || r.retentionDays !== null)
 					&& (s.filterTagIds.length === 0 || (
@@ -200,11 +222,10 @@ export default {
 		capGen:      s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		if (this.tagId !== null) this.filterTagIds.push(this.tagId);
-		if (this.encryption === '1') this.filterEncryption1 = true;
-		if (this.encryption === '0') this.filterEncryption0 = true;
-		if (this.changelog === '1') this.filterRetention1 = true;
-		if (this.changelog === '0') this.filterRetention0 = true;
+		if (this.tagId !== null)          this.filterTagIds.push(this.tagId);
+		if (this.filter === 'changelog')  this.filterRetention1  = true;
+		if (this.filter === 'encryption') this.filterEncryption1 = true;
+		if (this.filter === 'policies')   this.filterPolicies1   = true;
 	},
 	methods: {
 		// externals

@@ -161,12 +161,7 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderRelationsShow,
 				props:true
 			},{
-				path:'relations/:id/changelog/:changelog',
-				meta:{ nav:'relations', target:'module' },
-				component:MyBuilderRelationsShow,
-				props:true
-			},{
-				path:'relations/:id/encryption/:encryption',
+				path:'relations/:id/filter/:filter',
 				meta:{ nav:'relations', target:'module' },
 				component:MyBuilderRelationsShow,
 				props:true

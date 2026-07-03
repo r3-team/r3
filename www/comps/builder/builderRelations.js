@@ -31,7 +31,7 @@ export default {
 						@click="$emit('createNew','relation')"
 						:class="{ clickable:!readonly }"
 					>
-						<my-label :caption="capGen.button.new" />
+						<my-label :caption="capAppNew.relation" />
 						<img class="preview" src="images/add.png" />
 					</div>
 				</div>
@@ -55,30 +55,18 @@ export default {
 
 				<!-- special -->
 				<div class="column gap-large">
-					<my-label image="add.png" :caption="capGen.more" :large="true" />
+					<my-label image="filter.png" :caption="capGen.filters" :large="true" />
 					<div class="row wrap gap-large">
-						<router-link class="builder-startscreen-box clickable" tag="div"
-							:to="'/builder/relations/'+id+'/changelog/1'"
-						>
-							<my-label :caption="capGen.changeLogs + ': ' + capGen.option.yes + ' (' + module.relations.filter(v => v.retentionCount !== null || v.retentionDays !== null).length + ')'" />
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/changelog'">
+							<my-label :caption="capGen.changeLogs + ' (' + module.relations.filter(v => v.retentionCount !== null || v.retentionDays !== null).length + ')'" />
 							<img class="preview" src="images/time.png" />
 						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div"
-							:to="'/builder/relations/'+id+'/changelog/0'"
-						>
-							<my-label :caption="capGen.changeLogs + ': ' + capGen.option.no + ' (' + module.relations.filter(v => v.retentionCount === null && v.retentionDays === null).length + ')'" />
-							<img class="preview" src="images/time.png" />
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/policies'">
+							<my-label :caption="capGen.policies + ' (' + module.relations.filter(v => v.policies.length !== 0).length + ')'" />
+							<img class="preview" src="images/personTemplate.png" />
 						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div"
-							:to="'/builder/relations/'+id+'/encryption/1'"
-						>
-							<my-label :caption="capGen.encryption + ': ' + capGen.option.yes + ' (' + module.relations.filter(v => v.encryption).length + ')'" />
-							<img class="preview" src="images/lock.png" />
-						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div"
-							:to="'/builder/relations/'+id+'/encryption/0'"
-						>
-							<my-label :caption="capGen.encryption + ': ' + capGen.option.no + ' (' + module.relations.filter(v => !v.encryption).length + ')'" />
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/encryption'">
+							<my-label :caption="capGen.encryption + ' (' + module.relations.filter(v => v.encryption).length + ')'" />
 							<img class="preview" src="images/lock.png" />
 						</router-link>
 					</div>
@@ -121,6 +109,7 @@ export default {
 
 		// stores
 		capApp:     s => s.$store.getters.captions.builder.relation,
+		capAppNew:  s => s.$store.getters.captions.builder.new,
 		capGen:     s => s.$store.getters.captions.generic,
 		iconIdMap:  s => s.$store.getters['schema/iconIdMap'],
 		moduleIdMap:s => s.$store.getters['schema/moduleIdMap']
