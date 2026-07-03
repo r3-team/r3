@@ -112,8 +112,8 @@ export default {
 
 		// inputs
 		useOverview: {
-			get()  { return this.builderOptionGet('overviewRelationsUse', true); },
-			set(v) { this.builderOptionSet('overviewRelationsUse', v); }
+			get()  { return this.builderOptionGet('relationsOverviewUse', true); },
+			set(v) { this.builderOptionSet('relationsOverviewUse', v); }
 		},
 
 		// simple

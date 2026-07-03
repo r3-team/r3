@@ -1,4 +1,8 @@
 import MyBuilderTagInput from './builderTagInput.js';
+import {
+	builderOptionGet,
+	builderOptionSet
+} from '../shared/builder.js';
 
 export default {
 	name:'my-builder-relations-show',
@@ -154,7 +158,6 @@ export default {
 			filterRetention1: false,
 			filterText: '',
 			filterTagIds: [],
-			filterTagsAnd: true,
 			showSidebar: true
 		};
 	},
@@ -180,6 +183,12 @@ export default {
 			return out;
 		},
 
+		// inputs
+		filterTagsAnd: {
+			get()  { return this.builderOptionGet('relationsFilterTagsAnd', true); },
+			set(v) { this.builderOptionSet('relationsFilterTagsAnd', v); }
+		},
+
 		// simple
 		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
@@ -197,7 +206,12 @@ export default {
 		if (this.changelog === '1') this.filterRetention1 = true;
 		if (this.changelog === '0') this.filterRetention0 = true;
 	},
-	methods:{
+	methods: {
+		// externals
+		builderOptionGet,
+		builderOptionSet,
+
+		// presentation
 		displayRetention(rel) {
 			let count = rel.retentionCount !== null ? rel.retentionCount : 0;
 			let days  = rel.retentionDays  !== null ? rel.retentionDays  : 0;
