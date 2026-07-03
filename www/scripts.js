@@ -156,25 +156,15 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderRelations,
 				props: true
 			},{
-				path:'relations/:id/all',
-				meta:{ nav:'relations', target:'module' },
-				component:MyBuilderRelationsShow,
-				props:true
-			},{
-				path:'relations/:id/filter/:filter',
-				meta:{ nav:'relations', target:'module' },
-				component:MyBuilderRelationsShow,
-				props:true
-			},{
-				path:'relations/:id/tag/:tagId',
-				meta:{ nav:'relations', target:'module' },
-				component:MyBuilderRelationsShow,
-				props:true
-			},{
 				path:'relations/:id/overview/:directOpen',
 				meta:{ nav:'relations', target:'module' },
 				component:MyBuilderRelations,
 				props: true
+			},{
+				path:'relations/:id/show/:filter',
+				meta:{ nav:'relations', target:'module' },
+				component:MyBuilderRelationsShow,
+				props:true
 			},{
 				path:'relation/:id',
 				meta:{ nav:'relations', target:'relation' },

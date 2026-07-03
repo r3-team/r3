@@ -1,4 +1,5 @@
-import MyBuilderTagInput from './builderTagInput.js';
+import MyBuilderTagInput        from './builderTagInput.js';
+import MyBuilderFilterPairInput from './builderFilterPairInput.js';
 import {
 	builderOptionGet,
 	builderOptionSet
@@ -6,7 +7,7 @@ import {
 
 export default {
 	name:'my-builder-relations-show',
-	components:{ MyBuilderTagInput },
+	components:{ MyBuilderFilterPairInput, MyBuilderTagInput },
 	template:`<div class="row grow nowrap builder-relations" v-if="module">
 
 		<div class="contentBox grow">
@@ -98,85 +99,39 @@ export default {
 								:naked="true"
 							/>
 						</div>
-						<my-builder-tag-input v-model="filterTagIds" :dynamic="true" :module :readonly="false" />
+						<my-builder-tag-input
+							v-model="filterTagIds"
+							@update:modelValue="updateFilterArgs"
+							:dynamic="true"
+							:module
+							:readonly="false"
+						/>
 					</div>
 
-					<div class="row gap space-between">
-						<my-label image="time.png" :bold="filterRetention1 || filterRetention0" :caption="capGen.changeLogs" />
-						<div class="row gap wrap">
-							<my-button
-								@trigger="filterRetention1 = !filterRetention1"
-								:active="!filterRetention0"
-								:caption="capGen.option.yes"
-								:image="filterRetention1 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-							<my-button
-								@trigger="filterRetention0 = !filterRetention0"
-								:active="!filterRetention1"
-								:caption="capGen.option.no"
-								:image="filterRetention0 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-						</div>
-					</div>
-					<div class="row gap space-between">
-						<my-label image="personTemplate.png" :bold="filterPolicies1 || filterPolicies0" :caption="capGen.policies" />
-						<div class="row gap wrap">
-							<my-button
-								@trigger="filterPolicies1 = !filterPolicies1"
-								:active="!filterPolicies0"
-								:caption="capGen.option.yes"
-								:image="filterPolicies1 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-							<my-button
-								@trigger="filterPolicies0 = !filterPolicies0"
-								:active="!filterPolicies1"
-								:caption="capGen.option.no"
-								:image="filterPolicies0 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-						</div>
-					</div>
-					<div class="row gap space-between">
-						<my-label image="databasePlay.png" :bold="filterTriggers1 || filterTriggers0" :caption="capGen.triggers" />
-						<div class="row gap wrap">
-							<my-button
-								@trigger="filterTriggers1 = !filterTriggers1"
-								:active="!filterTriggers0"
-								:caption="capGen.option.yes"
-								:image="filterTriggers1 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-							<my-button
-								@trigger="filterTriggers0 = !filterTriggers0"
-								:active="!filterTriggers1"
-								:caption="capGen.option.no"
-								:image="filterTriggers0 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-						</div>
-					</div>
-					<div class="row gap space-between">
-						<my-label image="lock.png" :bold="filterEncryption1 || filterEncryption0" :caption="capGen.encryption" />
-						<div class="row gap wrap">
-							<my-button
-								@trigger="filterEncryption1 = !filterEncryption1"
-								:active="!filterEncryption0"
-								:caption="capGen.option.yes"
-								:image="filterEncryption1 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-							<my-button
-								@trigger="filterEncryption0 = !filterEncryption0"
-								:active="!filterEncryption1"
-								:caption="capGen.option.no"
-								:image="filterEncryption0 ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-						</div>
-					</div>
+					<my-builder-filter-pair-input image="time.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterRetention0"
+						v-model:value1="filterRetention1"
+						:caption="capGen.changeLogs"
+					/>
+					<my-builder-filter-pair-input image="personTemplate.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterPolicies0"
+						v-model:value1="filterPolicies1"
+						:caption="capGen.policies"
+					/>
+					<my-builder-filter-pair-input image="databasePlay.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterTriggers0"
+						v-model:value1="filterTriggers1"
+						:caption="capGen.triggers"
+					/>
+					<my-builder-filter-pair-input image="lock.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterEncryption0"
+						v-model:value1="filterEncryption1"
+						:caption="capGen.encryption"
+					/>
 				</div>
 			</div>
 		</div>
@@ -184,8 +139,7 @@ export default {
 	props:{
 		filter:  { type:[String,null], required:false, default:null },
 		id:      { type:String,        required:true },
-		readonly:{ type:Boolean,       required:true },
-		tagId:   { type:[String,null], required:false, default:null }
+		readonly:{ type:Boolean,       required:true }
 	},
 	data() {
 		return {
@@ -240,21 +194,55 @@ export default {
 		// stores
 		iconIdMap:   s => s.$store.getters['schema/iconIdMap'],
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		tagIdMap:    s => s.$store.getters['schema/tagIdMap'],
 		capApp:      s => s.$store.getters.captions.builder.relation,
 		capAppFilter:s => s.$store.getters.captions.filter,
 		capGen:      s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		if (this.tagId !== null)          this.filterTagIds.push(this.tagId);
-		if (this.filter === 'changelog')  this.filterRetention1  = true;
-		if (this.filter === 'encryption') this.filterEncryption1 = true;
-		if (this.filter === 'policies')   this.filterPolicies1   = true;
-		if (this.filter === 'triggers')   this.filterTriggers1   = true;
+		if (this.filter !== null) {
+			const f = decodeURIComponent(this.filter);
+			if (f.includes('changelog1')) this.filterRetention1 = true;
+			if (f.includes('changelog0')) this.filterRetention0 = true;
+			if (f.includes('encryption1')) this.filterEncryption1 = true;
+			if (f.includes('encryption0')) this.filterEncryption0 = true;
+			if (f.includes('policies1')) this.filterPolicies1 = true;
+			if (f.includes('policies0')) this.filterPolicies0 = true;
+			if (f.includes('triggers1')) this.filterTriggers1 = true;
+			if (f.includes('triggers0')) this.filterTriggers0 = true;
+
+			let tagIds = [];
+			for (const m of f.matchAll(/t\-([0-9a-f\-]{36})/g)) {
+				if (this.tagIdMap[m[1]] !== undefined)
+					tagIds.push(m[1]);
+			}
+			this.filterTagIds = tagIds;
+		}
 	},
 	methods: {
 		// externals
 		builderOptionGet,
 		builderOptionSet,
+
+		// actions
+		updateFilterArgs() {
+			let parts = [];
+			if (this.filterRetention1) parts.push('changelog1');
+			if (this.filterRetention0) parts.push('changelog0');
+			if (this.filterEncryption1) parts.push('encryption1');
+			if (this.filterEncryption0) parts.push('encryption0');
+			if (this.filterPolicies1) parts.push('policies1');
+			if (this.filterPolicies0) parts.push('policies0');
+			if (this.filterTriggers1) parts.push('triggers1');
+			if (this.filterTriggers0) parts.push('triggers0');
+			for (const tagId of this.filterTagIds) {
+				parts.push(`t-${tagId}`);
+			}
+			this.$router.replace(parts.length === 0
+				? `/builder/relations/${this.module.id}/show/all`
+				: `/builder/relations/${this.module.id}/show/${encodeURIComponent(parts.join('+'))}`
+			);
+		},
 
 		// presentation
 		displayRetention(rel) {

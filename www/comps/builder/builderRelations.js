@@ -21,7 +21,7 @@ export default {
 
 				<div class="row wrap gap-large">
 					<router-link class="builder-startscreen-box clickable" tag="div"
-						:to="'/builder/relations/'+id+'/all'"
+						:to="'/builder/relations/'+id+'/show/all'"
 					>
 						<my-label :caption="capGen.button.showAll + ' (' + module.relations.length + ')'" />
 						<img class="preview" src="images/checkbox1.png" />
@@ -43,7 +43,7 @@ export default {
 					<div class="row wrap gap-large" v-if="tagsOrdered.length !== 0">
 						<router-link class="builder-startscreen-box clickable" tag="div"
 							v-for="t in tagsOrdered"
-							:to="'/builder/relations/'+id+'/tag/'+t.id"
+							:to="'/builder/relations/'+id+'/show/t-'+t.id"
 						>
 							<my-label :caption="t.name + ' (' + tagIdMapCount[t.id] + ')'" />
 							<img class="preview"
@@ -57,19 +57,19 @@ export default {
 				<div class="column gap-large">
 					<my-label image="filter.png" :caption="capGen.filters" :large="true" />
 					<div class="row wrap gap-large">
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/changelog'">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/show/changelog1'">
 							<my-label :caption="capGen.changeLogs + ' (' + module.relations.filter(v => v.retentionCount !== null || v.retentionDays !== null).length + ')'" />
 							<img class="preview" src="images/time.png" />
 						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/policies'">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/show/policies1'">
 							<my-label :caption="capGen.policies + ' (' + module.relations.filter(v => v.policies.length !== 0).length + ')'" />
 							<img class="preview" src="images/personTemplate.png" />
 						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/triggers'">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/show/triggers1'">
 							<my-label :caption="capGen.triggers + ' (' + module.relations.filter(v => module.pgTriggers.some(t => t.relationId === v.id)).length + ')'" />
 							<img class="preview" src="images/databasePlay.png" />
 						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/filter/encryption'">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/show/encryption1'">
 							<my-label :caption="capGen.encryption + ' (' + module.relations.filter(v => v.encryption).length + ')'" />
 							<img class="preview" src="images/lock.png" />
 						</router-link>
@@ -120,7 +120,7 @@ export default {
 	},
 	mounted() {
 		if (this.directOpen === null && !this.useOverview)
-			this.$router.replace(`/builder/relations/${this.id}/all`);
+			this.$router.replace(`/builder/relations/${this.id}/show/all`);
 	},
 	methods: {
 		// externals
