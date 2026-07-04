@@ -71,13 +71,6 @@
 .builder-new{
 	width:520px;
 }
-.builder-new .content{
-	display:flex;
-	flex-flow:column nowrap;
-}
-.builder-new .options{
-	flex:1 1 auto;
-}
 .builder-new .error{
 	color:var(--color-error);
 }

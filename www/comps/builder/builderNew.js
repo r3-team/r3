@@ -1,5 +1,6 @@
 import {getDependentModules} from '../shared/builder.js';
-import MyBuilderFormInput    from './builderFormInput.js';
+import MyBuilderFormInput from './builderFormInput.js';
+import MyBuilderTagInput from './builderTagInput.js';
 import {
 	getTemplateApi,
 	getTemplateCollection,
@@ -18,7 +19,7 @@ import {
 
 export default {
 	name:'my-builder-new',
-	components:{ MyBuilderFormInput },
+	components:{ MyBuilderFormInput, MyBuilderTagInput },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-new float">
 			<div class="top lower">
@@ -34,7 +35,7 @@ export default {
 				</div>
 			</div>
 
-			<div class="content gap default-inputs">
+			<div class="content flex column gap default-inputs">
 				<div class="row gap centered">
 					<span>{{ capGen.name }}</span>
 					<input spellcheck="false" v-model="inputs.name" v-focus />
@@ -46,8 +47,8 @@ export default {
 				></div>
 
 				<!-- additional options -->
-				<div class="options" v-if="showOptions">
-					<h2>{{ capApp.options }}</h2>
+				<div class="column gap" v-if="showOptions">
+					<my-label image="cog.png" :caption="capApp.options" />
 
 					<!-- doc: duplicate document -->
 					<template v-if="entity === 'doc'">
@@ -67,15 +68,13 @@ export default {
 					</template>
 
 					<!-- form: duplicate form -->
-					<template v-if="entity === 'form'">
-						<div class="row centered gap">
-							<span>{{ capApp.formIdDuplicate }}</span>
-							<my-builder-form-input
-								v-model="inputs.formIdDuplicate"
-								:module="module"
-							/>
-						</div>
-					</template>
+					<div class="row centered gap" v-if="entity === 'form'">
+						<span>{{ capApp.formIdDuplicate }}</span>
+						<my-builder-form-input
+							v-model="inputs.formIdDuplicate"
+							:module
+						/>
+					</div>
 
 					<!-- JS function: assigned form -->
 					<template v-if="entity === 'jsFunction'">
@@ -86,7 +85,7 @@ export default {
 								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
 							</select>
 						</div>
-						<p v-html="capApp.jsFunctionFormIdHint"></p>
+						<span v-html="capApp.jsFunctionFormIdHint"></span>
 					</template>
 
 					<!-- variable: assigned form -->
@@ -98,7 +97,7 @@ export default {
 								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
 							</select>
 						</div>
-						<p v-html="capApp.variableFormIdHint"></p>
+						<span v-html="capApp.variableFormIdHint"></span>
 					</template>
 
 					<!-- PG function: trigger/function template -->
@@ -122,7 +121,7 @@ export default {
 							<span>{{ capApp.pgFunctionTrigger }}</span>
 							<my-bool v-model="inputs.isTrigger" />
 						</div>
-						<p v-html="capApp.pgFunctionTriggerHint"></p>
+						<span v-html="capApp.pgFunctionTriggerHint"></span>
 					</template>
 
 					<!-- relation: E2EE encryption -->
@@ -131,12 +130,23 @@ export default {
 							<span>{{ capApp.relationEncryption }}</span>
 							<my-bool v-model="inputs.encryption" />
 						</div>
-						<p v-html="capApp.relationEncryptionHint"></p>
+						<span v-html="capApp.relationEncryptionHint"></span>
 					</template>
 				</div>
 
-				<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
-				<p class="error" v-if="nameTooLong">{{ capGen.error.nameTooLong.replace('{LEN}',nameMaxLength) }}</p>
+				<!-- tags -->
+				<div class="column gap" v-if="showTags">
+					<my-label image="tag.png" :caption="capGen.tags" />
+					<my-builder-tag-input
+						v-model="inputs.tagIds"
+						:dynamic="true"
+						:module
+						:readonly="false"
+					/>
+				</div>
+
+				<span class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</span>
+				<span class="error" v-if="nameTooLong">{{ capGen.error.nameTooLong.replace('{LEN}',nameMaxLength) }}</span>
 
 				<div class="row">
 					<my-button image="save.png"
@@ -159,21 +169,18 @@ export default {
 		return {
 			inputs:{
 				// all
-				name:'',
-
+				name: '',
+				// many
+				tagIds: [],
 				// doc
-				docIdDuplicate:'',
-
+				docIdDuplicate: '',
 				// form
 				formIdDuplicate:null,
-
 				// JS function
 				formId:null,
-
 				// PG function
 				isTrigger:false,
 				template:'',
-
 				// relation
 				encryption:false
 			}
@@ -272,9 +279,10 @@ export default {
 		},
 
 		// simple
-		canSave:    s => s.inputs.name !== '' && !s.nameTaken && !s.nameTooLong,
-		nameTooLong:s => s.inputs.name !== '' && s.inputs.name.length > s.nameMaxLength,
-		showOptions:s => ['doc','form','jsFunction','pgFunction','relation','variable'].includes(s.entity),
+		canSave:     s => s.inputs.name !== '' && !s.nameTaken && !s.nameTooLong,
+		nameTooLong: s => s.inputs.name !== '' && s.inputs.name.length > s.nameMaxLength,
+		showOptions: s => ['doc', 'form', 'jsFunction', 'pgFunction', 'relation', 'variable'].includes(s.entity),
+		showTags:    s => ['doc', 'form', 'jsFunction', 'pgFunction', 'relation'].includes(s.entity),
 
 		// stores
 		module:     s => s.moduleIdMap[s.moduleId],
@@ -329,10 +337,10 @@ export default {
 			switch(this.entity) {
 				case 'api':	       request = this.getTemplateApi(this.module.id,this.inputs.name); break;
 				case 'collection': request = this.getTemplateCollection(this.module.id,this.inputs.name); break;
-				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId,this.inputs.formId,this.inputs.name); break;
+				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId,this.inputs.formId,this.inputs.name,this.inputs.tagIds); break;
 				case 'module':     request = this.getTemplateModule(this.inputs.name); break;
-				case 'pgFunction': request = this.getTemplatePgFunction(this.moduleId,this.inputs.name,this.inputs.template,this.inputs.isTrigger); break;
-				case 'relation':   request = this.getTemplateRelation(this.module.id,this.inputs.name,this.inputs.encryption); break;
+				case 'pgFunction': request = this.getTemplatePgFunction(this.moduleId,this.inputs.name,this.inputs.tagIds,this.inputs.template,this.inputs.isTrigger); break;
+				case 'relation':   request = this.getTemplateRelation(this.module.id,this.inputs.name,this.inputs.tagIds,this.inputs.encryption); break;
 				case 'role':       request = this.getTemplateRole(this.moduleId,this.inputs.name); break;
 				case 'searchBar':  request = this.getTemplateSearchBar(this.moduleId,this.inputs.name); break;
 				case 'variable':   request = this.getTemplateVariable(this.moduleId,this.inputs.formId,this.inputs.name); break;
@@ -347,7 +355,7 @@ export default {
 						};
 						dependencyCheck = true;
 					} else {
-						request = this.getTemplateDoc(this.module.id,this.builderLanguage,this.inputs.name);
+						request = this.getTemplateDoc(this.module.id,this.builderLanguage,this.inputs.name,this.inputs.tagIds);
 					}
 				break;
 				case 'form':
@@ -360,7 +368,7 @@ export default {
 						};
 						dependencyCheck = true;
 					} else {
-						request = this.getTemplateForm(this.moduleId,this.inputs.name);
+						request = this.getTemplateForm(this.moduleId,this.inputs.name,this.inputs.tagIds);
 					}
 				break;
 				case 'tag': request = { moduleId:this.moduleId, tag:this.getTemplateTag(this.inputs.name) }; break;

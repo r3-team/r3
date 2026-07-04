@@ -122,13 +122,13 @@ export function getTemplateColumn(attributeId,index,content) {
 		}
 	};
 };
-export function getTemplateDoc(moduleId,language,name) {
+export function getTemplateDoc(moduleId,language,name,tagIds) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
+		moduleId,
 		author:'',
-		language:language,
-		name:name,
+		language,
+		name,
 		comment:null,
 		filename:'MyFile.pdf',
 		font:{
@@ -147,7 +147,8 @@ export function getTemplateDoc(moduleId,language,name) {
 		query:getTemplateQuery(),
 		pages:[getTemplateDocPage()],
 		states:[],
-		sets:[],
+		sets: [],
+		tagIds,
 		captions:{
 			docTitle:{}
 		}
@@ -575,14 +576,14 @@ export function getTemplateFieldVariable() {
 		}
 	};
 };
-export function getTemplateForm(moduleId,name) {
+export function getTemplateForm(moduleId,name,tagIds) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
+		moduleId,
 		fieldIdFocus:null,
 		presetIdOpen:null,
 		iconId:null,
-		name:name,
+		name,
 		noDataActions:false,
 		recordTitle:true,
 		query:getTemplateQuery(),
@@ -590,7 +591,8 @@ export function getTemplateForm(moduleId,name) {
 		functions:[],
 		states:[],
 		actions:[],
-		articleIdsHelp:[],
+		articleIdsHelp: [],
+		tagIds,
 		captions:{
 			formTitle:{}
 		}
@@ -618,16 +620,17 @@ export function getTemplateFormState() {
 		effects:[]
 	};
 };
-export function getTemplateJsFunction(moduleId,formId,name) {
+export function getTemplateJsFunction(moduleId,formId,name,tagIds) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
-		formId:formId,
-		name:name,
+		moduleId,
+		formId,
+		name,
 		codeArgs:'',
 		codeFunction:'',
 		codeReturns:'',
-		isClientEventExec:false,
+		isClientEventExec: false,
+		tagIds,
 		captions:{
 			jsFunctionTitle:{},
 			jsFunctionDesc:{}
@@ -714,19 +717,20 @@ export function getTemplateOpenForm(forcePopUp) {
 		maxWidth:1200
 	};
 };
-export function getTemplatePgFunction(moduleId,name,template,isTrigger) {
+export function getTemplatePgFunction(moduleId,name,tagIds,template,isTrigger) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
-		name:name,
+		moduleId,
+		name,
 		codeArgs:getTemplateArgs(template),
 		codeFunction:getTemplateFnc(template,isTrigger),
 		codeReturns:getTemplateReturn(isTrigger),
 		isFrontendExec:false,
 		isLoginSync:template === 'loginSync',
-		isTrigger:isTrigger,
+		isTrigger,
 		volatility:'VOLATILE',
-		schedules:[],
+		schedules: [],
+		tagIds,
 		captions:{
 			pgFunctionTitle:{},
 			pgFunctionDesc:{}
@@ -852,18 +856,19 @@ export function getTemplateQueryFilter() {
 		}
 	};
 };
-export function getTemplateRelation(moduleId,name,encryption) {
+export function getTemplateRelation(moduleId,name,tagIds,encryption) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
-		name:name,
+		moduleId,
+		name,
 		comment:null,
 		attributes:[],
-		attributeIdsTitle:[],
-		encryption:encryption,
+		attributeIdsTitle: [],
+		encryption,
 		retentionCount:null,
 		retentionDays:null,
-		policies:[],
+		policies: [],
+		tagIds,
 		captions:{
 			relationTitle:{}
 		}

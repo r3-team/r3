@@ -611,7 +611,7 @@ export default {
 				}
 			}
 			ws.sendMultiple([
-				ws.prepare('pgFunction','set',this.getTemplatePgFunction(this.id,fncName,'loginSync',false)),
+				ws.prepare('pgFunction','set',this.getTemplatePgFunction(this.id,fncName,[],'loginSync',false)),
 				ws.prepare('schema','check',{moduleId:this.id})
 			],true).then(
 				() => this.$root.schemaReload(this.id),
