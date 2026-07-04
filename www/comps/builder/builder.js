@@ -81,7 +81,7 @@ export default {
 						<span>{{ capGen.relations }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" :to="'/builder/forms/'+module.id">
+					<router-link class="entry clickable" :to="'/builder/overview/forms/'+module.id+'/0'" :class="{ 'router-link-active':$route.meta.nav === 'forms' }">
 						<img src="images/fileText.png" />
 						<span>{{ capGen.forms }}</span>
 					</router-link>
@@ -176,7 +176,7 @@ export default {
 			<div class="navigation-entities-header" v-if="subMenu">
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'forms'"
-					:to="'/builder/forms/'+module.id"
+					:to="'/builder/overview/forms/'+module.id+'/0'"
 				>
 					<img src="images/fileText.png" />
 					<span>{{ capGen.forms }}</span>

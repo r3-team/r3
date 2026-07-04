@@ -184,8 +184,8 @@ export default {
 
 		// inputs
 		filterTagsAnd: {
-			get()  { return this.builderOptionGet('relationsFilterTagsAnd', true); },
-			set(v) { this.builderOptionSet('relationsFilterTagsAnd', v); }
+			get()  { return this.builderOptionGet('overviewFilterTagsAnd', true); },
+			set(v) { this.builderOptionSet('overviewFilterTagsAnd', v); }
 		},
 
 		// simple

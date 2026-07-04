@@ -9,7 +9,7 @@ export default {
 	template:`<div class="contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
-				<img class="icon" src="images/database.png" />
+				<img class="icon" :src="'images/'+entityIcon" />
 				<h1 class="title">{{ title }}: {{ capGen.overview}}</h1>
 			</div>
 			<div class="area nowrap">
@@ -24,7 +24,7 @@ export default {
 						:to="'/builder/'+entity+'/'+id+'/all'"
 					>
 						<my-label :caption="capGen.button.showAll + ' (' + entityList.length + ')'" />
-						<img class="preview" src="images/checkbox1.png" />
+						<img class="preview" :src="'images/'+entityIcon" />
 					</router-link>
 
 					<div class="builder-startscreen-box clickable"
@@ -86,6 +86,16 @@ export default {
 		readonly:  { type:Boolean,       required:true }
 	},
 	computed: {
+		entityIcon: s => {
+			switch (s.entity) {
+				case 'docs': return 'document.png'; break;
+				case 'forms': return 'fileText.png'; break;
+				case 'js-functions': return 'codeScreen.png'; break;
+				case 'pg-functions': return 'codeDatabase.png'; break;
+				case 'relations': return 'database.png'; break;
+			}
+			return null;
+		},
 		entityList: s => {
 			if (s.isDocs) return s.module.docs;
 			if (s.isForms) return s.module.forms;
