@@ -59,11 +59,11 @@ import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
 import MyBuilderMenu        from './comps/builder/builderMenu.js';
 import MyBuilderModule      from './comps/builder/builderModule.js';
 import MyBuilderModules     from './comps/builder/builderModules.js';
+import MyBuilderOverview    from './comps/builder/builderOverview.js';
 import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
 import MyBuilderPgFunctions from './comps/builder/builderPgFunctions.js';
 import MyBuilderRelation    from './comps/builder/builderRelation.js';
 import MyBuilderRelations   from './comps/builder/builderRelations.js';
-import MyBuilderRelationsShow from './comps/builder/builderRelationsShow.js';
 import MyBuilderReleases    from './comps/builder/builderReleases.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
@@ -151,20 +151,10 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderModule,
 				props:true
 			},{
-				path:'relations/:id',
+				path:'relations/:id/:filter',
 				meta:{ nav:'relations', target:'module' },
 				component:MyBuilderRelations,
 				props: true
-			},{
-				path:'relations/:id/overview/:directOpen',
-				meta:{ nav:'relations', target:'module' },
-				component:MyBuilderRelations,
-				props: true
-			},{
-				path:'relations/:id/show/:filter',
-				meta:{ nav:'relations', target:'module' },
-				component:MyBuilderRelationsShow,
-				props:true
 			},{
 				path:'relation/:id',
 				meta:{ nav:'relations', target:'relation' },
@@ -295,6 +285,11 @@ const MyRouter = VueRouter.createRouter({
 				meta:{ nav:'caption-map', target:'module' },
 				component:MyBuilderCaptionMap,
 				props:true
+			},{
+				path:'overview/relations/:id/:directOpen',
+				meta:{ nav:'relations', target:'module' },
+				component:MyBuilderOverview,
+				props: true
 			}
 		]
 	},{

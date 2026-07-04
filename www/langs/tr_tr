@@ -1832,8 +1832,7 @@
 			"title": "İlişkiler",
 			"titleHint": "Başlık mevcut uygulama dillerine çevrilebilir. Değişiklik günlüklerini gösterirken olduğu gibi, kullanıcı arayüzünde bir ilişkiye başvurulduğunda görüntülenir.",
 			"titleOne": "İlişki '{NAME}'",
-			"triggers": "Tetikleyiciler ({CNT})",
-			"useOverview": "Open overview by default"
+			"triggers": "Tetikleyiciler ({CNT})"
 		},
 		"releases": {
 			"button": {
@@ -2693,6 +2692,7 @@
 		"update": "Güncelleme",
 		"updated": "Güncellendi",
 		"url": "URL",
+		"useOverview": "Open overview by default",
 		"userSync": "User sync",
 		"username": "Kullanıcı adı",
 		"value": "Değer",

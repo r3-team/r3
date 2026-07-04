@@ -1832,8 +1832,7 @@
 			"title": "Relationen",
 			"titleHint": "Der Titel kann in die verfügbaren Anwendungssprachen übersetzt werden. Er wird angezeigt, wenn eine Relation in einer Benutzeroberfläche angezeigt wird - wie z. B. in der Änderungshistorie.",
 			"titleOne": "Relation \"{NAME}\"",
-			"triggers": "Trigger ({CNT})",
-			"useOverview": "Übersicht zuerst öffnen"
+			"triggers": "Trigger ({CNT})"
 		},
 		"releases": {
 			"button": {
@@ -2693,6 +2692,7 @@
 		"update": "Aktualisieren",
 		"updated": "Aktualisiert",
 		"url": "URL",
+		"useOverview": "Übersicht zuerst öffnen",
 		"userSync": "User sync",
 		"username": "Benutzername",
 		"value": "Wert",

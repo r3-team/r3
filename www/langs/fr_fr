@@ -1832,8 +1832,7 @@
 			"title": "Relations",
 			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "Relation '{NAME}'",
-			"triggers": "Déclencheurs ({CNT})",
-			"useOverview": "Open overview by default"
+			"triggers": "Déclencheurs ({CNT})"
 		},
 		"releases": {
 			"button": {
@@ -2693,6 +2692,7 @@
 		"update": "Update",
 		"updated": "Updated",
 		"url": "URL",
+		"useOverview": "Open overview by default",
 		"userSync": "User sync",
 		"username": "Nom d'utilisateur",
 		"value": "Value",

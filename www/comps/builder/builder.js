@@ -76,7 +76,7 @@ export default {
 						<span>{{ capGen.module }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" :to="'/builder/relations/'+module.id" :class="{ 'router-link-active':$route.meta.nav === 'relations' }">
+					<router-link class="entry clickable" :to="'/builder/overview/relations/'+module.id+'/0'" :class="{ 'router-link-active':$route.meta.nav === 'relations' }">
 						<img src="images/database.png" />
 						<span>{{ capGen.relations }}</span>
 					</router-link>
@@ -190,7 +190,7 @@ export default {
 				</router-link>
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'relations'"
-					:to="'/builder/relations/'+module.id"
+					:to="'/builder/overview/relations/'+module.id+'/0'"
 				>
 					<img src="images/database.png" />
 					<span>{{ capGen.relations }}</span>
