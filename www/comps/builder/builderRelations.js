@@ -14,7 +14,7 @@ export default {
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/database.png" />
-					<h1 class="title">{{ capApp.title }}</h1>
+					<h1 class="title">{{ capApp.title }} ({{ idsShow.length + '/' + module.relations.length }})</h1>
 				</div>
 				<div class="area">
 					<my-button image="open.png"
@@ -42,7 +42,7 @@ export default {
 					</div>
 
 					<router-link class="entry clickable"
-						v-for="r in module.relations.filter(v => relationIdsShow === null || relationIdsShow.includes(v.id))"
+						v-for="r in module.relations.filter(v => idsShow === null || idsShow.includes(v.id))"
 						:key="r.id"
 						:title="r.comment"
 						:to="'/builder/relation/'+r.id"
@@ -157,7 +157,7 @@ export default {
 		};
 	},
 	computed:{
-		relationIdsShow: s => {
+		idsShow: s => {
 			const filterName = s.filterText.toLowerCase();
 			let out = [];
 			for (const r of s.module.relations) {
