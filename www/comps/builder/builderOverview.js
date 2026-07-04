@@ -10,7 +10,7 @@ export default {
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" :src="'images/'+entityIcon" />
-				<h1 class="title">{{ title }}: {{ capGen.overview}}</h1>
+				<h1 class="title">{{ entityTitle }}: {{ capGen.overview}}</h1>
 			</div>
 			<div class="area nowrap">
 				<my-button-check v-model="useOverview" :caption="capGen.useOverview" />
@@ -114,6 +114,16 @@ export default {
 			}
 			return null;
 		},
+		entityTitle: s => {
+			switch (s.entity) {
+				case 'docs': return s.capGen.pdfs; break;
+				case 'forms': return s.capGen.forms; break;
+				case 'js-functions': return s.capGen.jsFunctions; break;
+				case 'pg-functions': return s.capGen.pgFunctions; break;
+				case 'relations': return s.capGen.relations; break;
+			}
+			return '';
+		},
 		tagIdMapCount: s => {
 			let out = {};
 			for (const t of s.module.tags) {
@@ -130,16 +140,6 @@ export default {
 					out.push(t);
 			}
 			return out.toSorted((a,b) => s.tagIdMapCount[b.id] - s.tagIdMapCount[a.id]);
-		},
-		title: s => {
-			switch (s.entity) {
-				case 'docs': return s.capGen.pdfs; break;
-				case 'forms': return s.capGen.forms; break;
-				case 'js-functions': return s.capGen.jsFunctions; break;
-				case 'pg-functions': return s.capGen.pgFunctions; break;
-				case 'relations': return s.capGen.relations; break;
-			}
-			return '';
 		},
 
 		// inputs

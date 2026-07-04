@@ -42,7 +42,7 @@ export default {
 					</div>
 
 					<router-link class="entry clickable"
-						v-for="f in module.forms.filter(v => idsShow === null || idsShow.includes(v.id))"
+						v-for="f in module.forms.filter(v => idsShow.includes(v.id))"
 						:key="f.id"
 						:to="'/builder/form/'+f.id"
 					>

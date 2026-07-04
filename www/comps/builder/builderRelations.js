@@ -42,7 +42,7 @@ export default {
 					</div>
 
 					<router-link class="entry clickable"
-						v-for="r in module.relations.filter(v => idsShow === null || idsShow.includes(v.id))"
+						v-for="r in module.relations.filter(v => idsShow.includes(v.id))"
 						:key="r.id"
 						:title="r.comment"
 						:to="'/builder/relation/'+r.id"
