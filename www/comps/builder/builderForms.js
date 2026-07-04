@@ -13,7 +13,7 @@ export default {
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/fileText.png" />
-					<h1 class="title">{{ capApp.title }}</h1>
+					<h1 class="title">{{ capApp.title }} ({{ idsShow.length + '/' + module.forms.length }})</h1>
 				</div>
 				<div class="area">
 					<my-button image="open.png"
@@ -42,7 +42,7 @@ export default {
 					</div>
 
 					<router-link class="entry clickable"
-						v-for="f in module.forms.filter(v => formIdsShow === null || formIdsShow.includes(v.id))"
+						v-for="f in module.forms.filter(v => idsShow === null || idsShow.includes(v.id))"
 						:key="f.id"
 						:to="'/builder/form/'+f.id"
 					>
@@ -113,7 +113,7 @@ export default {
 		};
 	},
 	computed:{
-		formIdsShow: s => {
+		idsShow: s => {
 			const filterName = s.filterText.toLowerCase();
 			let out = [];
 			for (const f of s.module.forms) {
