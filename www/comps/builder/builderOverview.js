@@ -10,7 +10,7 @@ export default {
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" :src="'images/'+entityIcon" />
-				<h1 class="title">{{ entityTitle }}: {{ capGen.overview}}</h1>
+				<h1 class="title">{{ capGen.overview }}: {{ entityTitle }}</h1>
 			</div>
 			<div class="area nowrap">
 				<my-button-check v-model="useOverview" :caption="capGen.useOverview" />
@@ -57,6 +57,18 @@ export default {
 				<div class="column gap-large">
 					<my-label image="filter.png" :caption="capGen.filters" :large="true" />
 
+					<!-- forms -->
+					<div class="row wrap gap-large" v-if="isForms">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/forms/'+id+'/data1'">
+							<my-label :caption="capGen.recordLoad + ' (' + module.forms.filter(v => v.query !== null).length + ')'" />
+							<img class="preview" src="images/databaseCircle.png" />
+						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/forms/'+id+'/list1'">
+							<my-label :caption="capGen.listFullpage + ' (' + module.forms.filter(v => v.fields.length === 1 && v.fields[0].content === 'list').length + ')'" />
+							<img class="preview" src="images/files_list2.png" />
+						</router-link>
+					</div>
+
 					<!-- relations -->
 					<div class="row wrap gap-large" v-if="isRelations">
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/changelog1'">
@@ -84,6 +96,15 @@ export default {
 		directOpen:{ type:[String,null], required:false, default:null }, // overview is opened directly, skips forward if overview is not used by default
 		id:        { type:String,        required:true },
 		readonly:  { type:Boolean,       required:true }
+	},
+	watch: {
+		entity:{
+			handler(v) {
+				if (this.directOpen !== '1' && !this.useOverview)
+					this.$router.replace(`/builder/${v}/${this.id}/all`);
+			},
+			immediate:true
+		}
 	},
 	computed: {
 		entityIcon: s => {
@@ -161,10 +182,6 @@ export default {
 		capGen:     s => s.$store.getters.captions.generic,
 		iconIdMap:  s => s.$store.getters['schema/iconIdMap'],
 		moduleIdMap:s => s.$store.getters['schema/moduleIdMap']
-	},
-	mounted() {
-		if (this.directOpen !== '1' && !this.useOverview)
-			this.$router.replace(`/builder/${this.entity}/${this.id}/all`);
 	},
 	methods: {
 		// externals

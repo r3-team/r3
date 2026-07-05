@@ -1242,6 +1242,7 @@
     box-shadow:var(--shadow-input);
     background-color:var(--color-bright);
     text-align:center;
+    text-decoration:none;
 }
 .builder-startscreen-box:focus,
 .builder-startscreen-box:hover{

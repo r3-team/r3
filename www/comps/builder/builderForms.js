@@ -1,4 +1,5 @@
 import MyBuilderTagInput from './builderTagInput.js';
+import MyBuilderFilterPairInput from './builderFilterPairInput.js';
 import { srcBase64 } from '../shared/image.js';
 import {
 	builderOptionGet,
@@ -7,7 +8,7 @@ import {
 
 export default {
 	name: 'my-builder-forms',
-	components: {MyBuilderTagInput},
+	components: { MyBuilderFilterPairInput, MyBuilderTagInput },
 	template:`<div class="row grow nowrap builder-relations" v-if="module">
 		<div class="contentBox grow">
 			<div class="top lower">
@@ -95,6 +96,19 @@ export default {
 							:readonly="false"
 						/>
 					</div>
+
+					<my-builder-filter-pair-input image="databaseCircle.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterData0"
+						v-model:value1="filterData1"
+						:caption="capGen.recordLoad"
+					/>
+					<my-builder-filter-pair-input image="files_list2.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterList0"
+						v-model:value1="filterList1"
+						:caption="capGen.listFullpage"
+					/>
 				</div>
 			</div>
 		</div>
@@ -107,6 +121,10 @@ export default {
 	},
 	data() {
 		return {
+			filterData0: false,
+			filterData1: false,
+			filterList0: false,
+			filterList1: false,
 			filterText: '',
 			filterTagIds: [],
 			showSidebar: true
@@ -117,8 +135,14 @@ export default {
 			const filterName = s.filterText.toLowerCase();
 			let out = [];
 			for (const f of s.module.forms) {
+				const listFullpage = f.fields.length === 1 && f.fields[0].content === 'list';
+
 				if (
 					(filterName === '' || f.name.toLowerCase().includes(filterName))
+					&& (!s.filterData0 || f.query === null)
+					&& (!s.filterData1 || f.query !== null)
+					&& (!s.filterList0 || !listFullpage)
+					&& (!s.filterList1 || listFullpage)
 					&& (s.filterTagIds.length === 0 || (
 						(s.filterTagsAnd && s.filterTagIds.every(v => f.tagIds.includes(v)))
 						|| (!s.filterTagsAnd && s.filterTagIds.some(v => f.tagIds.includes(v)))
@@ -152,6 +176,10 @@ export default {
 	mounted() {
 		if (this.filter !== null) {
 			const f = decodeURIComponent(this.filter);
+			if (f.includes('data0')) this.filterData0 = true;
+			if (f.includes('data1')) this.filterData1 = true;
+			if (f.includes('list0')) this.filterList0 = true;
+			if (f.includes('list1')) this.filterList1 = true;
 
 			let tagIds = [];
 			for (const m of f.matchAll(/t\-([0-9a-f\-]{36})/g)) {
@@ -170,6 +198,10 @@ export default {
 		// actions
 		updateFilterArgs() {
 			let parts = [];
+			if (this.filterData0) parts.push('data0');
+			if (this.filterData1) parts.push('data1');
+			if (this.filterList0) parts.push('list0');
+			if (this.filterList1) parts.push('list1');
 			for (const tagId of this.filterTagIds) {
 				parts.push(`t-${tagId}`);
 			}
