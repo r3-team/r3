@@ -101,14 +101,14 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		directOpen:{ type:[String,null], required:false, default:null }, // overview is opened directly, skips forward if overview is not used by default
-		id:        { type:String,        required:true },
-		readonly:  { type:Boolean,       required:true }
+		directOpen:{ type:String,  required:true }, // overview is opened directly, skips forward if overview is not used by default
+		id:        { type:String,  required:true },
+		readonly:  { type:Boolean, required:true }
 	},
 	watch: {
 		entity:{
 			handler(v) {
-				if (this.directOpen !== '1' && !this.useOverview)
+				if (this.directOpen === '' && !this.useOverview)
 					this.$router.replace(`/builder/${v}/${this.id}/all`);
 			},
 			immediate:true

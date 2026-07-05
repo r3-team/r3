@@ -151,7 +151,7 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderModule,
 				props:true
 			},{
-				path:'relations/:id/:filter',
+				path:'relations/:id/:filter?',
 				meta:{ nav:'relations', target:'module' },
 				component:MyBuilderRelations,
 				props: true
@@ -171,7 +171,7 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderMenu,
 				props:true
 			},{
-				path:'forms/:id/:filter',
+				path:'forms/:id/:filter?',
 				meta:{ nav:'forms', target:'module' },
 				component:MyBuilderForms,
 				props:true
@@ -286,13 +286,13 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderCaptionMap,
 				props:true
 			},{
-				path:'overview/forms/:id/:directOpen',
-				meta:{ nav:'forms', target:'module' },
+				path:'overview/forms/:id/:directOpen?',
+				meta:{ nav:'forms', target:'module', isOverview:true },
 				component:MyBuilderOverview,
 				props: true
 			},{
-				path:'overview/relations/:id/:directOpen',
-				meta:{ nav:'relations', target:'module' },
+				path:'overview/relations/:id/:directOpen?',
+				meta:{ nav:'relations', target:'module', isOverview:true },
 				component:MyBuilderOverview,
 				props: true
 			}

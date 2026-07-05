@@ -76,12 +76,12 @@ export default {
 						<span>{{ capGen.module }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" :to="'/builder/overview/relations/'+module.id+'/0'" :class="{ 'router-link-active':$route.meta.nav === 'relations' }">
+					<router-link class="entry clickable" :to="'/builder/overview/relations/'+module.id" :class="{ 'router-link-active':$route.meta.nav === 'relations' }">
 						<img src="images/database.png" />
 						<span>{{ capGen.relations }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" :to="'/builder/overview/forms/'+module.id+'/0'" :class="{ 'router-link-active':$route.meta.nav === 'forms' }">
+					<router-link class="entry clickable" :to="'/builder/overview/forms/'+module.id" :class="{ 'router-link-active':$route.meta.nav === 'forms' }">
 						<img src="images/fileText.png" />
 						<span>{{ capGen.forms }}</span>
 					</router-link>
@@ -176,7 +176,7 @@ export default {
 			<div class="navigation-entities-header" v-if="subMenu">
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'forms'"
-					:to="'/builder/overview/forms/'+module.id+'/0'"
+					:to="'/builder/overview/forms/'+module.id"
 				>
 					<img src="images/fileText.png" />
 					<span>{{ capGen.forms }}</span>
@@ -190,7 +190,7 @@ export default {
 				</router-link>
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'relations'"
-					:to="'/builder/overview/relations/'+module.id+'/0'"
+					:to="'/builder/overview/relations/'+module.id"
 				>
 					<img src="images/database.png" />
 					<span>{{ capGen.relations }}</span>
@@ -485,8 +485,13 @@ export default {
 		moduleIdInput:{
 			get()  { return !this.module ? null : this.module.id; },
 			set(v) {
-				if(v === '') this.$router.push(`/builder/modules`);
-				else         this.$router.push(`/builder/${this.navigation}/${v}`);
+				if (v === '')
+					return this.$router.push(`/builder/modules`);
+
+				if (this.$route.meta.isOverview === true)
+					return this.$router.push(`/builder/overview/${this.navigation}/${v}`);
+
+				this.$router.push(`/builder/${this.navigation}/${v}`);
 			}
 		},
 
