@@ -114,17 +114,29 @@ export default {
 						v-model:value1="filterRetention1"
 						:caption="capGen.changeLogs"
 					/>
-					<my-builder-filter-pair-input image="personTemplate.png"
+					<my-builder-filter-pair-input image="databaseText.png"
 						@update="updateFilterArgs"
-						v-model:value0="filterPolicies0"
-						v-model:value1="filterPolicies1"
-						:caption="capGen.policies"
+						v-model:value0="filterRecordTitle0"
+						v-model:value1="filterRecordTitle1"
+						:caption="capGen.recordTitle"
+					/>
+					<my-builder-filter-pair-input image="databaseCircle.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterPresets0"
+						v-model:value1="filterPresets1"
+						:caption="capGen.presets"
 					/>
 					<my-builder-filter-pair-input image="databasePlay.png"
 						@update="updateFilterArgs"
 						v-model:value0="filterTriggers0"
 						v-model:value1="filterTriggers1"
 						:caption="capGen.triggers"
+					/>
+					<my-builder-filter-pair-input image="personTemplate.png"
+						@update="updateFilterArgs"
+						v-model:value0="filterPolicies0"
+						v-model:value1="filterPolicies1"
+						:caption="capGen.policies"
 					/>
 					<my-builder-filter-pair-input image="lock.png"
 						@update="updateFilterArgs"
@@ -147,6 +159,10 @@ export default {
 			filterEncryption1: false,
 			filterPolicies0: false,
 			filterPolicies1: false,
+			filterPresets0: false,
+			filterPresets1: false,
+			filterRecordTitle0: false,
+			filterRecordTitle1: false,
 			filterRetention0: false,
 			filterRetention1: false,
 			filterTriggers0: false,
@@ -167,10 +183,14 @@ export default {
 					&& (!s.filterEncryption1 || r.encryption)
 					&& (!s.filterPolicies0 || r.policies.length === 0)
 					&& (!s.filterPolicies1 || r.policies.length !== 0)
-					&& (!s.filterTriggers0 || !s.module.pgTriggers.some(t => t.relationId === r.id))
-					&& (!s.filterTriggers1 || s.module.pgTriggers.some(t => t.relationId === r.id))
+					&& (!s.filterPresets0 || r.presets.length === 0)
+					&& (!s.filterPresets1 || r.presets.length !== 0)
+					&& (!s.filterRecordTitle0 || r.attributeIdsTitle.length === 0)
+					&& (!s.filterRecordTitle1 || r.attributeIdsTitle.length !== 0)
 					&& (!s.filterRetention0 || (r.retentionCount === null && r.retentionDays === null))
 					&& (!s.filterRetention1 || r.retentionCount !== null || r.retentionDays !== null)
+					&& (!s.filterTriggers0 || !s.module.pgTriggers.some(t => t.relationId === r.id))
+					&& (!s.filterTriggers1 || s.module.pgTriggers.some(t => t.relationId === r.id))
 					&& (s.filterTagIds.length === 0 || (
 						(s.filterTagsAnd && s.filterTagIds.every(v => r.tagIds.includes(v)))
 						|| (!s.filterTagsAnd && s.filterTagIds.some(v => r.tagIds.includes(v)))
@@ -202,14 +222,18 @@ export default {
 	mounted() {
 		if (this.filter !== null) {
 			const f = decodeURIComponent(this.filter);
-			if (f.includes('changelog1')) this.filterRetention1 = true;
-			if (f.includes('changelog0')) this.filterRetention0 = true;
-			if (f.includes('encryption1')) this.filterEncryption1 = true;
 			if (f.includes('encryption0')) this.filterEncryption0 = true;
-			if (f.includes('policies1')) this.filterPolicies1 = true;
+			if (f.includes('encryption1')) this.filterEncryption1 = true;
 			if (f.includes('policies0')) this.filterPolicies0 = true;
-			if (f.includes('triggers1')) this.filterTriggers1 = true;
+			if (f.includes('policies1')) this.filterPolicies1 = true;
+			if (f.includes('presets0')) this.filterPresets0 = true;
+			if (f.includes('presets1')) this.filterPresets1 = true;
+			if (f.includes('recordtitle0')) this.filterRecordTitle0 = true;
+			if (f.includes('recordtitle1')) this.filterRecordTitle1 = true;
+			if (f.includes('retention0')) this.filterRetention0 = true;
+			if (f.includes('retention1')) this.filterRetention1 = true;
 			if (f.includes('triggers0')) this.filterTriggers0 = true;
+			if (f.includes('triggers1')) this.filterTriggers1 = true;
 
 			let tagIds = [];
 			for (const m of f.matchAll(/t\-([0-9a-f\-]{36})/g)) {
@@ -227,14 +251,18 @@ export default {
 		// actions
 		updateFilterArgs() {
 			let parts = [];
-			if (this.filterRetention1) parts.push('changelog1');
-			if (this.filterRetention0) parts.push('changelog0');
-			if (this.filterEncryption1) parts.push('encryption1');
 			if (this.filterEncryption0) parts.push('encryption0');
-			if (this.filterPolicies1) parts.push('policies1');
+			if (this.filterEncryption1) parts.push('encryption1');
 			if (this.filterPolicies0) parts.push('policies0');
-			if (this.filterTriggers1) parts.push('triggers1');
+			if (this.filterPolicies1) parts.push('policies1');
+			if (this.filterPresets0) parts.push('presets0');
+			if (this.filterPresets1) parts.push('presets1');
+			if (this.filterRecordTitle0) parts.push('recordtitle0');
+			if (this.filterRecordTitle1) parts.push('recordtitle1');
+			if (this.filterRetention0) parts.push('retention0');
+			if (this.filterRetention1) parts.push('retention1');
 			if (this.filterTriggers0) parts.push('triggers0');
+			if (this.filterTriggers1) parts.push('triggers1');
 			for (const tagId of this.filterTagIds) {
 				parts.push(`t-${tagId}`);
 			}

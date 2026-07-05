@@ -71,17 +71,25 @@ export default {
 
 					<!-- relations -->
 					<div class="row wrap gap-large" v-if="isRelations">
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/changelog1'">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/retention1'">
 							<my-label :caption="capGen.changeLogs + ' (' + module.relations.filter(v => v.retentionCount !== null || v.retentionDays !== null).length + ')'" />
 							<img class="preview" src="images/time.png" />
 						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/policies1'">
-							<my-label :caption="capGen.policies + ' (' + module.relations.filter(v => v.policies.length !== 0).length + ')'" />
-							<img class="preview" src="images/personTemplate.png" />
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/recordtitle1'">
+							<my-label :caption="capGen.recordTitle + ' (' + module.relations.filter(v => v.attributeIdsTitle.length !== 0).length + ')'" />
+							<img class="preview" src="images/databaseText.png" />
+						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/presets1'">
+							<my-label :caption="capGen.presets + ' (' + module.relations.filter(v => v.presets.length !== 0).length + ')'" />
+							<img class="preview" src="images/databaseCircle.png" />
 						</router-link>
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/triggers1'">
 							<my-label :caption="capGen.triggers + ' (' + module.relations.filter(v => module.pgTriggers.some(t => t.relationId === v.id)).length + ')'" />
 							<img class="preview" src="images/databasePlay.png" />
+						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/policies1'">
+							<my-label :caption="capGen.policies + ' (' + module.relations.filter(v => v.policies.length !== 0).length + ')'" />
+							<img class="preview" src="images/personTemplate.png" />
 						</router-link>
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/encryption1'">
 							<my-label :caption="capGen.encryption + ' (' + module.relations.filter(v => v.encryption).length + ')'" />
