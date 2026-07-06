@@ -188,7 +188,7 @@
 	display:flex;
 	color:inherit;
 	border:1px solid var(--color-border);
-	border-radius:12px;
+	border-radius:var(--border-input-radius-large);
 	box-shadow:var(--shadow-input);
 	background-color:var(--color-bright);
 }
@@ -1226,7 +1226,7 @@
 	gap:var(--spacing);
 	color:inherit;
     border:1px solid var(--color-border);
-    border-radius:8px;
+	border-radius:var(--border-input-radius-large);
     box-shadow:var(--shadow-input);
     background-color:var(--color-bright);
     text-align:center;

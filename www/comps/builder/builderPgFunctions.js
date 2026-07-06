@@ -76,7 +76,7 @@ export default {
 								:captionTitle="capApp.isColumnExec"
 								:naked="true"
 							/>
-							<my-button image="time.png"
+							<my-button image="clock.png"
 								v-if="f.schedules.length !== 0"
 								:active="false"
 								:captionTitle="capApp.schedules"
@@ -120,6 +120,18 @@ export default {
 						/>
 					</div>
 
+					<my-builder-filter-pair-input image="databasePlay.png"
+						@update="updateFilterArgs"
+						v-model:value0="filters.trigger0"
+						v-model:value1="filters.trigger1"
+						:caption="capApp.isTrigger"
+					/>
+					<my-builder-filter-pair-input image="clock.png"
+						@update="updateFilterArgs"
+						v-model:value0="filters.schedules0"
+						v-model:value1="filters.schedules1"
+						:caption="capApp.schedules"
+					/>
 					<my-builder-filter-pair-input image="screen.png"
 						@update="updateFilterArgs"
 						v-model:value0="filters.frontend0"
@@ -159,7 +171,11 @@ export default {
 				frontend0: false,
 				frontend1: false,
 				loginsync0: false,
-				loginsync1: false
+				loginsync1: false,
+				schedules0: false,
+				schedules1: false,
+				trigger0: false,
+				trigger1: false
 			},
 			showSidebar: true,
 		};
@@ -177,6 +193,10 @@ export default {
 					&& (!s.filters.frontend1 || f.isFrontendExec)
 					&& (!s.filters.loginsync0 || !f.isLoginSync)
 					&& (!s.filters.loginsync1 || f.isLoginSync)
+					&& (!s.filters.schedules0 || f.schedules.length === 0)
+					&& (!s.filters.schedules1 || f.schedules.length !== 0)
+					&& (!s.filters.trigger0 || !f.isTrigger)
+					&& (!s.filters.trigger1 || f.isTrigger)
 					&& (s.filterTagIds.length === 0 || (
 						(s.filterTagsAnd && s.filterTagIds.every(v => f.tagIds.includes(v)))
 						|| (!s.filterTagsAnd && s.filterTagIds.some(v => f.tagIds.includes(v)))
@@ -238,6 +258,6 @@ export default {
 				? `/builder/pg-functions/${this.module.id}/all`
 				: `/builder/pg-functions/${this.module.id}/${encodeURIComponent(parts.join('+'))}`
 			);
-		},
+		}
 	}
 };

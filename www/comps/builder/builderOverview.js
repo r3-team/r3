@@ -83,6 +83,14 @@ export default {
 
 					<!-- PG functions -->
 					<div class="row wrap gap-large" v-if="isPgFunctions">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/trigger1'">
+							<my-label :caption="capAppFnc.isTrigger + ' (' + module.pgFunctions.filter(v => v.isTrigger).length + ')'" />
+							<img class="preview" src="images/databasePlay.png" />
+						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/schedules1'">
+							<my-label :caption="capAppFnc.schedules + ' (' + module.pgFunctions.filter(v => v.schedules.length !== 0).length + ')'" />
+							<img class="preview" src="images/clock.png" />
+						</router-link>
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/frontend1'">
 							<my-label :caption="capAppFnc.isFrontendExec + ' (' + module.pgFunctions.filter(v => v.isFrontendExec).length + ')'" />
 							<img class="preview" src="images/screen.png" />
