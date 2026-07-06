@@ -76,7 +76,7 @@ export default {
 				<div class="column gap-large">
 					<div class="column gap">
 						<my-label image="editBox.png" :bold="filterText !== ''" :caption="capGen.name" />
-						<input class="dynamic" v-model="filterText" :placeholder="capGen.threeDots" />
+						<input class="dynamic" v-focus v-model="filterText" :placeholder="capGen.threeDots" />
 					</div>
 
 					<div class="column gap">

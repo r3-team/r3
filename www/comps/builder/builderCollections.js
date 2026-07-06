@@ -9,13 +9,13 @@ export default {
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 			<div class="area default-inputs">
-				<input v-model="filter" placeholder="..." />
+				<input v-focus v-model="filter" placeholder="..." />
 			</div>
 		</div>
-		
+
 		<div class="content default-inputs" v-if="module">
 			<div class="generic-entry-list">
-				
+
 				<div class="entry"
 					v-if="!readonly"
 					@click="$emit('createNew','collection')"
@@ -26,11 +26,11 @@ export default {
 						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
-				
+
 				<router-link class="entry clickable"
 					v-for="c in module.collections.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					:key="c.id"
-					:to="'/builder/collection/'+c.id" 
+					:to="'/builder/collection/'+c.id"
 				>
 					<div class="lines">
 						<span>{{ c.name }}</span>
@@ -66,7 +66,7 @@ export default {
 	},
 	computed:{
 		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		
+
 		// stores
 		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
 		iconIdMap:  s => s.$store.getters['schema/iconIdMap'],

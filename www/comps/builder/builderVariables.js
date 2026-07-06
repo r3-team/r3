@@ -13,7 +13,7 @@ export default {
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 			<div class="area default-inputs">
-				<input v-model="filter" placeholder="..." />
+				<input v-focus v-model="filter" placeholder="..." />
 			</div>
 		</div>
 

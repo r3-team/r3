@@ -11,7 +11,7 @@ export default {
 				<h1 class="title">{{ capGen.tags }}</h1>
 			</div>
 			<div class="area default-inputs">
-				<input v-model="filter" placeholder="..." />
+				<input v-focus v-model="filter" placeholder="..." />
 			</div>
 		</div>
 
