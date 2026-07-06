@@ -80,7 +80,7 @@
 	/* colors */
 	--color-bg:                     #f7f7f7;
 	--color-bg-bright:              #fcfcfc;
-	--color-bg-dark:                #474747;
+	--color-bg-dark:                #e7e7e7;
 	--color-bg-module:              #555555;
 	--color-bright:                 #ffffff;
 	--color-border:                 #9b9b9b;
@@ -1465,7 +1465,7 @@ table td.maximum{
 	/* color overwites */
 	--color-bg:            #252525;
 	--color-bg-bright:     #313131;
-	--color-bg-dark:       #181818;
+	--color-bg-dark:       #1f1f1f;
 	--color-bg-module:     #191919;
 	--color-bright:        #323232;
 	--color-border:        #111111;

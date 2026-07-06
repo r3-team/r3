@@ -912,6 +912,8 @@
 				"serieTypeScatter": "Dağılım",
 				"series": "Seri"
 			},
+			"collapseAllow": "Can be collapsed",
+			"collapseDefault": "Collapsed by default",
 			"collectionHint": "*Koleksiyon yalnızca veri sorgulamada filtre kriteri olarak seçilirse etkilenir.",
 			"collectionIdDef": "Koleksiyondaki varsayılan değer(ler)",
 			"collectionTitle": "Koleksiyonu filtrele",

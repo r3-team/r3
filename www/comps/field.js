@@ -20,6 +20,7 @@ import {getFieldHasQuery}     from './shared/builder.js';
 import {getTemplateQuery}     from './shared/builderTemplate.js';
 import {srcBase64}            from './shared/image.js';
 import {getCaption}           from './shared/language.js';
+import {layoutSettleSpace}    from './shared/layout.js';
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -275,26 +276,36 @@ export default {
 							<img :src="srcBase64(iconIdMap[iconId].file)" />
 						</div>
 						<div class="tabs-entry clickable"
-							v-if="!isMobile"
+							v-if="tabLayoutElements.length !== 0"
 							v-for="(t,i) in field.tabs"
 							v-show="!tabIndexesHidden.includes(i)"
 							@click="setTab(i)"
 							:class="getTabClasses(i)"
 						>
-							{{ tabIndexesTitle[i] }}
+							<my-label
+								:caption="tabLayoutElements.includes('label') || t.iconId === null ? tabIndexesTitle[i] : ''"
+								:imageBase64="tabLayoutElements.includes('icon') && t.iconId !== null ? srcBase64(iconIdMap[t.iconId].file) : ''"
+							/>
 						</div>
-						<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
+						<select v-if="tabLayoutElements.length === 0" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
 							<template v-for="(t,i) in field.tabs">
 								<option v-if="!tabIndexesHidden.includes(i)" :value="i">
 									{{ tabIndexesTitle[i] }}
 								</option>
 							</template>
 						</select>
+						<div class="tabs-entry-empty" ref="tabsEmpty"></div>
+						<div class="tabs-entry" v-if="field.collapseAllow">
+							<my-button
+								@trigger="tabsCollabsed = !tabsCollabsed"
+								:image="tabsCollabsed ? 'pageDown.png' : 'pageUp.png'"
+								:naked="true"
+							/>
+						</div>
 					</div>
 					<div class="fields"
-						v-if="!tabCollapsed"
 						v-for="(t,i) in field.tabs"
-						v-show="i === tabIndexShow"
+						v-show="!tabsCollabsed && i === tabIndexShow"
 						:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
 					>
 						<!-- tab children -->
@@ -726,7 +737,14 @@ export default {
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
 			showPassword: false,           // for password fields
-			tabCollapsed: false,
+
+			// tabs field
+			tabLayoutCheckTimer:null,
+			tabLayoutElements:[],                // elements that are shown, based on available space
+			tabLayoutElementsAvailableInOrder: [ // elements that can be shown, in order of priority
+				'count','label','icon'
+			],
+			tabsCollabsed: false,
 			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
 			tabIndexShow:0                // tabs only: which tab is shown
 		};
@@ -822,10 +840,10 @@ export default {
 		captionHelp:s => s.getCaption('fieldHelp',s.moduleId,s.field.id,s.field.captions),
 		domClass:s => {
 			let out = [];
-			if(s.isHidden)   out.push('hidden');
-			if(s.isIframe)   out.push('iframe');
-			if(s.isReadonly) out.push('readonly');
-			if(s.isRichtext) out.push('richtext');
+			if(s.isHidden)     out.push('hidden');
+			if(s.isIframe)     out.push('iframe');
+			if(s.isReadonly)   out.push('readonly');
+			if(s.isRichtext)   out.push('richtext');
 
 			for(const flag of s.field.flags)   out.push(`flag-${flag}`);
 			if(s.isHeader && s.field.richtext) out.push('headerRichtext');
@@ -970,12 +988,14 @@ export default {
 		},
 		tabIndexesTitle:s => {
 			let out = [];
-			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
+			for (let i = 0, j = s.field.tabs.length; i < j; i++) {
 				const tab = s.field.tabs[i];
 				out.push(s.getCaption('tabTitle',s.moduleId,tab.id,tab.captions,'-'));
 
-				if(typeof s.tabIndexFieldIdMapCounter[String(i)] === 'undefined')
+				if (typeof s.tabIndexFieldIdMapCounter[String(i)] === 'undefined'
+					|| (s.tabLayoutElements.length !== 0 && !s.tabLayoutElements.includes('count'))) {
 					continue;
+				}
 
 				// aggregate tab counters
 				let ctr = 0;
@@ -1053,9 +1073,11 @@ export default {
 			&& !s.isRelationship && !s.isRichtext
 			&& !s.isUuid         && !s.isBarcode
 			&& !s.isRating       && !s.isDecimal,
-		isLineSingle:s => s.isData && (
-			s.isLineInput || s.isBoolean || s.isDecimal || s.isColor || s.isDateInput || s.isSlider ||
-			s.isRating || s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
+		isLineSingle: s => (s.isTabs && s.tabsCollabsed) || (
+			s.isData && (
+				s.isLineInput || s.isBoolean || s.isDecimal || s.isColor || s.isDateInput || s.isSlider ||
+				s.isRating || s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
+			)
 		),
 		isValid:s => {
 			if(!s.isData || s.isReadonly) return true;
@@ -1105,6 +1127,7 @@ export default {
 		},
 
 		// simple
+		appResized:  s => s.$store.getters.appResized,
 		attribute:   s => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false,
 		collectionIdMapIndexes:s => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),
 		content:     s => s.isVariable ? 'data' : s.field.content,
@@ -1192,8 +1215,10 @@ export default {
 	},
 	mounted() {
 		if(this.isTabs) {
+			this.tabsCollabsed = this.field.collapseDefault;
 			this.setTabToValid();
-			this.tabCollapsed = this.field.collapseDefault;
+			this.resized();
+			this.$watch('appResized', this.resized);
 		}
 	},
 	beforeUnmount() {
@@ -1218,6 +1243,7 @@ export default {
 		isAttributeRegconfig,
 		isAttributeString,
 		isAttributeUuid,
+		layoutSettleSpace,
 		openLink,
 		setGetterArgs,
 		srcBase64,
@@ -1249,8 +1275,20 @@ export default {
 				active:  tabIndex === this.tabIndexShow,
 				error:   this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
 				inputBg: active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
+				grow:    this.isMobile,
 				readonly:active && oneField && readonly
 			};
+		},
+		resized() {
+			if (this.isTabs) {
+				if (this.tabLayoutCheckTimer !== null)
+					clearTimeout(this.tabLayoutCheckTimer);
+
+				this.tabLayoutCheckTimer = setTimeout(() => {
+					this.tabLayoutElements = JSON.parse(JSON.stringify(this.tabLayoutElementsAvailableInOrder));
+					this.$nextTick(() => this.layoutSettleSpace(this.tabLayoutElements, this.$refs.tabsEmpty));
+				}, 200);
+			}
 		},
 
 		// actions
@@ -1356,6 +1394,7 @@ export default {
 				this.setLoginOption('tabIndex',tabIndex);
 
 			this.tabIndexShow = tabIndex;
+			this.tabsCollabsed = false;
 		},
 		setTabCounter(tabIndex,fieldId,value) {
 			if(!this.field.tabs[tabIndex].contentCounter)

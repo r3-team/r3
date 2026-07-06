@@ -191,7 +191,7 @@
 	width:100%; /* otherwise does not shrink properly */
 	flex:1 2 auto;
 	margin:12px 12px 12px 0px;
-	
+
 	-webkit-appearance:none;
 	appearance:none;
 	height:8px;
@@ -256,17 +256,23 @@
 }
 .field .tabs-entries{
 	display:flex;
-	flex-flow:row wrap;
-	background-color:var(--color-bg);
+	flex-flow:row nowrap;
+	align-items:center;
+	background-color:var(--color-input-disabled);
 }
 .field .tabs-entries select{
-	flex:1 1 auto;
-	padding:8px;
+	flex:1 1 100%;
+	padding:4px 6px;
+	margin:2px 6px 2px 3px;
 	font-size:110%;
 	color:var(--color-font);
-	background-color:transparent;
 	border:none;
 	outline:none;
+	overflow:none;
+	background-color:var(--color-input);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 }
 .field .tabs-entries option{
 	color:var(--color-font);
@@ -284,20 +290,29 @@
 	filter:var(--image-filter);
 }
 .field .tabs-entry{
-	line-height:36px;
+	height:var(--row-height);
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	justify-content:center;
 	padding:0px 9px;
 	margin-left:-1px;
 	border:1px solid var(--color-border);
 	border-top:none;
 	border-bottom:none;
 	box-sizing:border-box;
-	background-color:var(--color-bg);
 	font-size:85%;
+}
+.field .tabs-entry.grow{
+	flex:1 1 auto;
 }
 .field .tabs-entry.active{
 	margin-bottom:-1px;
-	font-size:110%;
 	z-index:var(--z-index-tab-active);
+	text-decoration:underline;
+	text-decoration-color:var(--color-accent1);
+	text-decoration-thickness:1.5px;
+	background-color:var(--color-bg);
 }
 .field .tabs-entry.error{
 	color:var(--color-error);
@@ -307,6 +322,12 @@
 }
 .field .tabs-entry.active.inputBg.readonly{
 	background-color:var(--color-input-disabled);
+}
+.field .tabs-entry:last-child{
+	border-right:none;
+}
+.field .tabs-entry-empty{
+	flex:1 1 auto;
 }
 .field .tabs>.fields{
 	flex:1 1 auto;

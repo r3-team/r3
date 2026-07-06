@@ -912,6 +912,8 @@
 				"serieTypeScatter": "Szórási diagram",
 				"series": "Sorozatok"
 			},
+			"collapseAllow": "Can be collapsed",
+			"collapseDefault": "Collapsed by default",
 			"collectionHint": "*A gyűjtemény csak akkor érintkezik, ha szűrőként van használva az adatlekérdezésben.",
 			"collectionIdDef": "Alapértelmezett Érték(ek) a Gyűjteményből",
 			"collectionTitle": "Gyűjtemény Szűrése",

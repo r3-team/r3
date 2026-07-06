@@ -912,6 +912,8 @@
 				"serieTypeScatter": "Scatter",
 				"series": "Serie"
 			},
+			"collapseAllow": "Can be collapsed",
+			"collapseDefault": "Collapsed by default",
 			"collectionHint": "*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
 			"collectionIdDef": "Default value(s) from collection",
 			"collectionTitle": "Filter collection",

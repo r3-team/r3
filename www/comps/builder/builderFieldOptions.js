@@ -1016,6 +1016,20 @@ export default {
 
 				<template v-if="isTabs">
 					<tr>
+						<td>{{ capApp.collapseAllow }}</td>
+						<td>
+							<div class="row gap">
+								<my-bool @update:modelValue="set('collapseAllow',$event)" :modelValue="field.collapseAllow" :readonly />
+								<my-button-check
+									@update:modelValue="set('collapseDefault',$event)"
+									:caption="capApp.collapseDefault"
+									:modelValue="field.collapseDefault"
+									:readonly="readonly || !field.collapseAllow"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
 						<td>
 							<div class="column">
 								<span>{{ capApp.tabs }}</span>
@@ -1052,6 +1066,15 @@ export default {
 														:language="builderLanguage"
 														:modelValue="element.captions.tabTitle"
 														:readonly
+													/>
+												</td>
+												<td>
+													<my-builder-icon-input
+														@update:modelValue="element.iconId = $event;set('tabs',field.tabs)"
+														:module
+														:modelValue="element.iconId"
+														:readonly
+														:title="capGen.icon"
 													/>
 												</td>
 												<td>

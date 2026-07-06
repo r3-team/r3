@@ -912,6 +912,8 @@
 				"serieTypeScatter": "مبعثر",
 				"series": "مسلسل"
 			},
+			"collapseAllow": "Can be collapsed",
+			"collapseDefault": "Collapsed by default",
 			"collectionHint": "*تتأثر المجموعة فقط إذا تم تحديدها كمعايير تصفية في استعلام البيانات.",
 			"collectionIdDef": "القيمة (القيم) الافتراضية من المجموعة",
 			"collectionTitle": "جمع التصفية",

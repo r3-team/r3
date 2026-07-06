@@ -912,6 +912,8 @@
 				"serieTypeScatter": "散点图",
 				"series": "系列"
 			},
+			"collapseAllow": "Can be collapsed",
+			"collapseDefault": "Collapsed by default",
 			"collectionHint": "*仅当在数据查询中选定为筛选条件时，才会影响集合。",
 			"collectionIdDef": "来自集合的默认值",
 			"collectionTitle": "筛选集合",

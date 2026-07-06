@@ -912,6 +912,8 @@
 				"serieTypeScatter": "Dispersion",
 				"series": "Séries"
 			},
+			"collapseAllow": "Can be collapsed",
+			"collapseDefault": "Collapsed by default",
 			"collectionHint": "* La collection n'est affectée que si elle est sélectionnée comme critère de filtre dans la requête de données.",
 			"collectionIdDef": "Valeur(s) par défaut de la collection",
 			"collectionTitle": "Collection de filtres",
