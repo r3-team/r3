@@ -175,6 +175,7 @@ var (
 		DbRelation,
 		DbRole,
 		DbSearchBar,
+		DbTag,
 		DbVariable,
 		DbWidget,
 	}

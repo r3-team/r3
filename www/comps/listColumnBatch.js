@@ -253,7 +253,7 @@ export default {
 		canOrder:         s => s.columnBatch.columnIndexesSortBy.length !== 0,
 		dropdownShow:     s => s.dropdownElm === s.$refs.content,
 		filtersColumnThis:s => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
-		isDateOrTime:     s => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
+		isDateOrTime:     s => s.isValidFilter && s.columnUsedFilter.attributeId !== null && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:       s => s.columnFilterIndexes.length !== 0,
 		isOrdered:        s => s.columnBatch.orderIndexesUsed.length !== 0 && !s.isOrderedOrginal,
 		isOrderedAsc:     s => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
@@ -285,6 +285,9 @@ export default {
 			if(v === null)
 				return '[' + this.capGen.button.empty + ']';
 
+			if (this.columnUsedFilter.attributeId === null)
+				return String(v);
+
 			const atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
 
 			if(atr.content === 'boolean')
@@ -294,8 +297,8 @@ export default {
 				case 'date':     return this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
 				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
 				case 'time':     return this.getUtcTimeStringFromUnix(v);                                break;
-				default: return String(v); break;
 			}
+			return String(v);
 		},
 
 		// helper

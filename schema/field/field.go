@@ -89,7 +89,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 		LEFT JOIN app.field_header            AS fh ON fh.field_id = f.id
 		LEFT JOIN app.field_kanban            AS fk ON fk.field_id = f.id
 		LEFT JOIN app.field_list              AS fl ON fl.field_id = f.id
-		LEFT JOIN app.field_tab               AS ft ON ft.field_id = f.id
+		LEFT JOIN app.field_tabs              AS ft ON ft.field_id = f.id
 		LEFT JOIN app.field_variable          AS fv ON fv.field_id = f.id
 		LEFT JOIN app.attribute               AS a  ON a.id        = fd.attribute_id
 		WHERE f.form_id = $1
