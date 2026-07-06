@@ -170,7 +170,7 @@ export default {
 			</div>
 		</div>
 
-		<div class="contentBox sidebar scroll" v-show="showSidebar">
+		<div class="contentBox builder-sidebar" v-show="showSidebar">
 
 			<!-- form builder sidebar -->
 			<div class="top lower" :class="{ clickable:sideFieldShow }" @click="fieldIdShow = null">
@@ -385,9 +385,11 @@ export default {
 								</td>
 							</tr>
 							<tr>
-								<td>{{ capGen.tags }}</td>
 								<td colspan="2">
-									<my-builder-tag-input v-model="form.tagIds" :module :readonly />
+									<div class="column gap">
+										<my-label :caption="capGen.tags" />
+										<my-builder-tag-input v-model="form.tagIds" class="long" :module :readonly />
+									</div>
 								</td>
 							</tr>
 						</tbody>

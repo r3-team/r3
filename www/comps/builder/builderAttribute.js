@@ -524,10 +524,14 @@ export default {
 	},
 	mounted() {
 		this.reset();
-		window.addEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerSleep');
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerWake');
 	},
 	methods:{
 		// external
@@ -558,15 +562,8 @@ export default {
 			if(!this.isRelationship && this.values.relationshipId !== null)
 				this.values.relationshipId = null;
 		},
-		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's' && this.canSave) {
-				this.set();
-				e.preventDefault();
-			}
-			if(e.key === 'Escape') {
-				this.$emit('close');
-				e.preventDefault();
-			}
+		close() {
+			this.$emit('close');
 		},
 		reset() {
 			this.values = this.attributeId !== null
@@ -635,6 +632,9 @@ export default {
 			);
 		},
 		set(saveAndNew) {
+			if (!this.canSave)
+				return;
+
 			if(this.values.encrypted && !this.canEncrypt)
 				this.values.encrypted = false;
 
