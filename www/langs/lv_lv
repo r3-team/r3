@@ -1511,7 +1511,7 @@
 			"intervalAtDayForYears": "at day",
 			"intervalAtTime": "at time",
 			"intervalEvery": "Every",
-			"isColumnExec": "Available in columns",
+			"isColumnExec": "Column call",
 			"isFrontendExec": "Frontend call",
 			"isLoginSync": "User sync",
 			"isTrigger": "Trigger",

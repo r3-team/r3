@@ -99,14 +99,14 @@ export default {
 
 					<my-builder-filter-pair-input image="databaseCircle.png"
 						@update="updateFilterArgs"
-						v-model:value0="filterData0"
-						v-model:value1="filterData1"
+						v-model:value0="filters.data0"
+						v-model:value1="filters.data1"
 						:caption="capGen.recordLoad"
 					/>
 					<my-builder-filter-pair-input image="files_list2.png"
 						@update="updateFilterArgs"
-						v-model:value0="filterList0"
-						v-model:value1="filterList1"
+						v-model:value0="filters.list0"
+						v-model:value1="filters.list1"
 						:caption="capGen.listFullpage"
 					/>
 				</div>
@@ -121,12 +121,14 @@ export default {
 	},
 	data() {
 		return {
-			filterData0: false,
-			filterData1: false,
-			filterList0: false,
-			filterList1: false,
 			filterText: '',
 			filterTagIds: [],
+			filters: {
+				data0: false,
+				data1: false,
+				list0: false,
+				list1: false
+			},
 			showSidebar: true
 		};
 	},
@@ -139,10 +141,10 @@ export default {
 
 				if (
 					(filterName === '' || f.name.toLowerCase().includes(filterName))
-					&& (!s.filterData0 || f.query === null)
-					&& (!s.filterData1 || f.query !== null)
-					&& (!s.filterList0 || !listFullpage)
-					&& (!s.filterList1 || listFullpage)
+					&& (!s.filters.data0 || f.query === null)
+					&& (!s.filters.data1 || f.query !== null)
+					&& (!s.filters.list0 || !listFullpage)
+					&& (!s.filters.list1 || listFullpage)
 					&& (s.filterTagIds.length === 0 || (
 						(s.filterTagsAnd && s.filterTagIds.every(v => f.tagIds.includes(v)))
 						|| (!s.filterTagsAnd && s.filterTagIds.some(v => f.tagIds.includes(v)))
@@ -175,14 +177,13 @@ export default {
 	},
 	mounted() {
 		if (this.filter !== '') {
-			const f = decodeURIComponent(this.filter);
-			if (f.includes('data0')) this.filterData0 = true;
-			if (f.includes('data1')) this.filterData1 = true;
-			if (f.includes('list0')) this.filterList0 = true;
-			if (f.includes('list1')) this.filterList1 = true;
+			const filterLine = decodeURIComponent(this.filter);
+			for (const a of Object.keys(this.filters)) {
+				if (filterLine.includes(a)) this.filters[a] = true;
+			}
 
 			let tagIds = [];
-			for (const m of f.matchAll(/t\-([0-9a-f\-]{36})/g)) {
+			for (const m of filterLine.matchAll(/t\-([0-9a-f\-]{36})/g)) {
 				if (this.tagIdMap[m[1]] !== undefined)
 					tagIds.push(m[1]);
 			}
@@ -198,10 +199,10 @@ export default {
 		// actions
 		updateFilterArgs() {
 			let parts = [];
-			if (this.filterData0) parts.push('data0');
-			if (this.filterData1) parts.push('data1');
-			if (this.filterList0) parts.push('list0');
-			if (this.filterList1) parts.push('list1');
+			for (const a of Object.keys(this.filters)) {
+				if(this.filters[a])
+					parts.push(a);
+			}
 			for (const tagId of this.filterTagIds) {
 				parts.push(`t-${tagId}`);
 			}

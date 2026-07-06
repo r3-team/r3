@@ -1511,7 +1511,7 @@
 			"intervalAtDayForYears": "在日期",
 			"intervalAtTime": "在时间",
 			"intervalEvery": "每",
-			"isColumnExec": "Available in columns",
+			"isColumnExec": "Column call",
 			"isFrontendExec": "前端调用",
 			"isLoginSync": "User sync",
 			"isTrigger": "触发器",

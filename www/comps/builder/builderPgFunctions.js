@@ -51,7 +51,7 @@ export default {
 								[{{ f.captions.pgFunctionTitle[builderLanguage] }}]
 							</span>
 						</div>
-						<div class="row">
+						<div class="row gap">
 							<my-button image="personArrow.png"
 								v-if="f.isLoginSync"
 								:active="false"
@@ -68,6 +68,12 @@ export default {
 								v-if="f.isFrontendExec"
 								:active="false"
 								:captionTitle="capApp.isFrontendExec"
+								:naked="true"
+							/>
+							<my-button image="files_list2.png"
+								v-if="f.isColumnExec"
+								:active="false"
+								:captionTitle="capApp.isColumnExec"
 								:naked="true"
 							/>
 							<my-button image="time.png"
@@ -199,8 +205,6 @@ export default {
 		capGen:      s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		console.log('filters avail', Object.keys(this.filters));
-
 		if (this.filter !== '') {
 			const filterLine = decodeURIComponent(this.filter);
 			for (const a of Object.keys(this.filters)) {
