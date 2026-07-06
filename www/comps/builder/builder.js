@@ -86,6 +86,11 @@ export default {
 						<span>{{ capGen.forms }}</span>
 					</router-link>
 
+					<router-link class="entry clickable" :to="'/builder/docs/'+module.id">
+						<img src="images/document.png" />
+						<span>{{ capGen.pdfs }}</span>
+					</router-link>
+
 					<router-link class="entry clickable" :to="'/builder/menu/'+module.id">
 						<img src="images/menu.png" />
 						<span>{{ capGen.menus }}</span>
@@ -99,11 +104,6 @@ export default {
 					<router-link class="entry clickable" :to="'/builder/icons/'+module.id">
 						<img src="images/fileImage.png" />
 						<span>{{ capGen.icons }}</span>
-					</router-link>
-
-					<router-link class="entry clickable" :to="'/builder/docs/'+module.id">
-						<img src="images/document.png" />
-						<span>{{ capGen.pdfs }}</span>
 					</router-link>
 
 					<router-link class="entry clickable" :to="'/builder/articles/'+module.id">
@@ -122,7 +122,7 @@ export default {
 						<span>{{ capGen.pgFunctions }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" :to="'/builder/js-functions/'+module.id">
+					<router-link class="entry clickable" :to="'/builder/overview/js-functions/'+module.id" :class="{ 'router-link-active':$route.meta.nav === 'js-functions' }">
 						<img src="images/codeScreen.png" />
 						<span>{{ capGen.jsFunctions }}</span>
 					</router-link>
@@ -225,14 +225,14 @@ export default {
 				</router-link>
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'pg-functions'"
-					:to="'/builder/pg-functions/'+module.id"
+					:to="'/builder/overview/pg-functions/'+module.id"
 				>
 					<img src="images/codeDatabase.png" />
 					<span>{{ capGen.pgFunctions }}</span>
 				</router-link>
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'js-functions'"
-					:to="'/builder/js-functions/'+module.id"
+					:to="'/builder/overview/js-functions/'+module.id"
 				>
 					<img src="images/codeScreen.png" />
 					<span>{{ capGen.jsFunctions }}</span>
