@@ -129,7 +129,7 @@ export default {
 			</div>
 		</div>
 
-		<div class="contentBox sidebar scroll" v-if="showSidebar">
+		<div class="contentBox builder-sidebar scroll" v-if="showSidebar">
 			<div class="top lower" @click="sideFieldIdShow = null" :class="{ clickable:sideFieldShow }">
 				<div class="area">
 					<img class="icon" src="images/document.png" />

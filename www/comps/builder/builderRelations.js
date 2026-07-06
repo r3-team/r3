@@ -6,7 +6,7 @@ import {
 } from '../shared/builder.js';
 
 export default {
-	name:'my-builder-relations-show',
+	name:'my-builder-relations',
 	components:{ MyBuilderFilterPairInput, MyBuilderTagInput },
 	template:`<div class="row grow nowrap builder-relations" v-if="module">
 
@@ -75,7 +75,7 @@ export default {
 				</div>
 			</div>
 		</div>
-		<div class="contentBox sidebar" v-if="showSidebar">
+		<div class="contentBox builder-sidebar narrow" v-if="showSidebar">
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/filter.png" />
@@ -149,9 +149,9 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		filter:  { type:[String,null], required:false, default:null },
-		id:      { type:String,        required:true },
-		readonly:{ type:Boolean,       required:true }
+		filter:  { type:String,  required:true },
+		id:      { type:String,  required:true },
+		readonly:{ type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -220,7 +220,7 @@ export default {
 		capGen:      s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		if (this.filter !== null) {
+		if (this.filter !== '') {
 			const f = decodeURIComponent(this.filter);
 			if (f.includes('encryption0')) this.filterEncryption0 = true;
 			if (f.includes('encryption1')) this.filterEncryption1 = true;

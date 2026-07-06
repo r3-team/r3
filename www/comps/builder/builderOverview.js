@@ -69,6 +69,22 @@ export default {
 						</router-link>
 					</div>
 
+					<!-- PG functions -->
+					<div class="row wrap gap-large" v-if="isPgFunctions">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/frontend1'">
+							<my-label :caption="capAppFnc.isFrontendExec + ' (' + module.pgFunctions.filter(v => v.isFrontendExec).length + ')'" />
+							<img class="preview" src="images/screen.png" />
+						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/column1'">
+							<my-label :caption="capAppFnc.isColumnExec + ' (' + module.pgFunctions.filter(v => v.isColumnExec).length + ')'" />
+							<img class="preview" src="images/files_list2.png" />
+						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/loginsync1'">
+							<my-label :caption="capAppFnc.isLoginSync + ' (' + module.pgFunctions.filter(v => v.isLoginSync).length + ')'" />
+							<img class="preview" src="images/personArrow.png" />
+						</router-link>
+					</div>
+
 					<!-- relations -->
 					<div class="row wrap gap-large" v-if="isRelations">
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/relations/'+id+'/retention1'">
@@ -129,7 +145,7 @@ export default {
 			if (s.isDocs) return s.module.docs;
 			if (s.isForms) return s.module.forms;
 			if (s.isJsFunctions) return s.module.jsFunctions;
-			if (s.isPgFunctions) return s.module.PgFunctions;
+			if (s.isPgFunctions) return s.module.pgFunctions;
 			if (s.isRelations) return s.module.relations;
 			return [];
 		},
@@ -187,6 +203,7 @@ export default {
 		module:       s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
+		capAppFnc:  s => s.$store.getters.captions.builder.function,
 		capGen:     s => s.$store.getters.captions.generic,
 		iconIdMap:  s => s.$store.getters['schema/iconIdMap'],
 		moduleIdMap:s => s.$store.getters['schema/moduleIdMap']

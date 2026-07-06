@@ -178,7 +178,7 @@ const MyBuilderApiPreview = {
 		method:s => s.isAuth ? 'POST' : s.call,
 		paramsUrl:s => {
 			if(s.isAuth) return '';
-			
+
 			let out = [];
 			if(s.verboseChanged)       out.push(`verbose=${s.params.verbose ? '1' : '0'}`);
 			if(s.isGet && s.limitSet)  out.push(`limit=${s.params.limit}`);
@@ -193,7 +193,7 @@ const MyBuilderApiPreview = {
 		response:s => {
 			if(s.isAuth) return `{\n\t"token": "ACCESS_TOKEN"\n}`;
 			if(s.isGet)  return s.getBodyPreview(false);
-			
+
 			if(s.isPost) {
 				let out = {};
 				for(let join of s.joins) {
@@ -209,12 +209,12 @@ const MyBuilderApiPreview = {
 				case 'AUTH': base += 'auth'; break;
 				default: base += `${s.module.name}/${s.name}/v${s.version}`; break;
 			}
-			
+
 			if(s.isDelete)             base += `/${s.recordSet ? s.recordId : 1}`;
 			if(s.isGet && s.recordSet) base += `/${s.recordId}`;
 			return base + s.paramsUrl;
 		},
-		
+
 		// simple
 		isAuth:   s => s.call === 'AUTH',
 		isDelete: s => s.call === 'DELETE',
@@ -223,7 +223,7 @@ const MyBuilderApiPreview = {
 		limitSet: s => s.params.limit  !== '' && s.params.limit  !== 0 && s.limitChanged,
 		offsetSet:s => s.params.offset !== '' && s.params.offset !== 0,
 		recordSet:s => s.recordId      !== '' && s.recordId      !== 0,
-		
+
 		// stores
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
@@ -247,7 +247,7 @@ const MyBuilderApiPreview = {
 		isAttributeRelationship,
 		isAttributeString,
 		isAttributeUuid,
-		
+
 		// display
 		getColumnExampleValue(column) {
 			let contentDisplay = 'text';
@@ -273,7 +273,7 @@ const MyBuilderApiPreview = {
 					contentDisplay = this.attributeIdMap[column.attributeId].content;
 				break;
 			}
-			
+
 			if(this.isAttributeInteger(contentDisplay))      value = 123;
 			if(this.isAttributeDecimal(contentDisplay))      value = 123.45;
 			if(this.isAttributeString(contentDisplay))       value = 'ABC';
@@ -314,7 +314,7 @@ const MyBuilderApiPreview = {
 					}];
 				}
 			}
-			
+
 			if(column.aggregator !== null) {
 				switch(column.aggregator) {
 					case 'array': return [value,value];        break;
@@ -326,7 +326,7 @@ const MyBuilderApiPreview = {
 		getBodyPreview(singleRecord) {
 			let rows     = [];
 			let rowCount = this.recordSet || this.params.limit === 1 || singleRecord ? 1 : 2;
-			
+
 			for(;rowCount > 0;rowCount--) {
 				if(!this.params.verbose) {
 					let row = [];
@@ -341,7 +341,7 @@ const MyBuilderApiPreview = {
 						// relation reference (relation index + name): '0(person)' or '1(department)'
 						let relRef  = `${join.index}(${this.relationIdMap[join.relationId].name})`;
 						row[relRef] = {};
-						
+
 						for(const column of this.columns) {
 							if(column.index !== join.index)
 								continue;
@@ -355,7 +355,7 @@ const MyBuilderApiPreview = {
 			}
 			return JSON.stringify(singleRecord ? rows[0] : rows,null,'\t');
 		},
-		
+
 		// actions
 		copyToClipboard(value) {
 			navigator.clipboard.writeText(value);
@@ -421,11 +421,11 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding">
-				
+
 				<div class="builder-api-columns">
-				
+
 					<!-- columns -->
 					<div class="builder-api-columns-active">
 						<h2>{{ capGen.columnsActive }}</h2>
@@ -442,7 +442,7 @@ export default {
 							:readonly
 						/>
 					</div>
-					
+
 					<div class="builder-api-columns-available">
 						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-api-column-templates">
@@ -458,22 +458,22 @@ export default {
 				</div>
 			</div>
 		</div>
-		
-		<div class="contentBox sidebar scroll" v-if="showSidebar">
+
+		<div class="contentBox builder-sidebar" v-if="showSidebar">
 			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
 					<img class="icon" src="images/api.png" />
 					<h1>{{ capGen.api }}</h1>
 				</div>
 			</div>
-			
+
 			<template v-if="columnShow === false">
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','calls','properties']"
 					:entriesText="[capGen.content,capApp.calls,capGen.properties]"
 				/>
-			
+
 				<!-- API content -->
 				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
@@ -489,7 +489,7 @@ export default {
 						:readonly
 					/>
 				</div>
-				
+
 				<!-- calls -->
 				<div class="content no-padding" v-if="tabTarget === 'calls'">
 					<my-builder-api-preview
@@ -508,7 +508,7 @@ export default {
 						:warnings
 					/>
 				</div>
-				
+
 				<!-- properties -->
 				<div class="content no-padding" v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical default-inputs">
@@ -587,7 +587,7 @@ export default {
 					</table>
 				</div>
 			</template>
-				
+
 			<!-- column options -->
 			<my-builder-column-options
 				v-if="columnShow !== false"
@@ -620,7 +620,7 @@ export default {
 			// inputs
 			api:false,  // API being edited in this component
 			apiCopy:{}, // copy of API from schema when component last reset
-			
+
 			// state
 			columnIdShow:null,
 			filtersDisable:[
@@ -637,7 +637,7 @@ export default {
 		// states
 		columnShow:s => {
 			if(s.columnIdShow === null) return false;
-			
+
 			for(let i = 0, j = s.api.columns.length; i < j; i++) {
 				if(s.api.columns[i].id === s.columnIdShow)
 					return s.api.columns[i];
@@ -655,14 +655,14 @@ export default {
 				// check sub queries in POST API
 				if(s.api.columns.some(v => v.content === 'query'))
 					out.push(s.capApp.warning.postSubQuery);
-				
+
 				if(s.api.columns.some(v => v.content === 'fnc_pg' || v.content === 'fnc_scalar'))
 					out.push(s.capApp.warning.postFunction);
 
 				// check missing record lookups
 				for(let j of s.query.joins) {
 					if(!j.applyUpdate) continue;
-					
+
 					if(s.query.lookups.filter(l => l.index === j.index).length === 0) {
 						out.push(s.capApp.warning.postNoUpdate);
 						break;
@@ -671,13 +671,13 @@ export default {
 			}
 			return out;
 		},
-		
+
 		// simple
 		apiSchema: s => s.apiIdMap[s.id] === undefined ? false : s.apiIdMap[s.id],
 		hasChanges:s => !s.deepIsEqual(s.api,s.apiSchema),
 		module:    s => s.moduleIdMap[s.api.moduleId],
 		query:     s => s.api.query !== null ? s.api.query : s.getTemplateQuery(),
-		
+
 		// stores
 		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
 		apiIdMap:   s => s.$store.getters['schema/apiIdMap'],
@@ -696,7 +696,7 @@ export default {
 		deepIsEqual,
 		dialogDeleteAsk,
 		getTemplateQuery,
-		
+
 		// actions
 		columnSet(name,value) {
 			this.columnShow[name] = value;
@@ -718,11 +718,11 @@ export default {
 		},
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
-			
+
 			if(this.columnIdShow !== null)
 				this.tabTarget = 'content';
 		},
-		
+
 		// backend calls
 		copy() {
 			ws.send('api','copy',{id:this.id},true).then(

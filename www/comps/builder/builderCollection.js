@@ -132,7 +132,7 @@ export default {
 			</div>
 		</div>
 
-		<div class="contentBox sidebar scroll" v-if="showSidebar">
+		<div class="contentBox builder-sidebar scroll" v-if="showSidebar">
 			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
 					<img class="icon" src="images/tray.png" />

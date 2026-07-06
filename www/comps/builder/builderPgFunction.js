@@ -207,7 +207,7 @@ export default {
 		</div>
 
 		<!-- sidebar -->
-		<div class="contentBox sidebar right" v-if="showSidebar">
+		<div class="contentBox builder-sidebar right" v-if="showSidebar">
 			<div class="top lower">
 				<div class="area nowrap">
 					<h1 class="title">{{ capGen.settings }}</h1>

@@ -117,7 +117,7 @@ export default {
 					</router-link>
 				</div>
 				<div class="navigation-column">
-					<router-link class="entry clickable" :to="'/builder/pg-functions/'+module.id">
+					<router-link class="entry clickable" :to="'/builder/overview/pg-functions/'+module.id" :class="{ 'router-link-active':$route.meta.nav === 'pg-functions' }">
 						<img src="images/codeDatabase.png" />
 						<span>{{ capGen.pgFunctions }}</span>
 					</router-link>

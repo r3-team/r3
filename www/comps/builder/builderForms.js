@@ -9,7 +9,7 @@ import {
 export default {
 	name: 'my-builder-forms',
 	components: { MyBuilderFilterPairInput, MyBuilderTagInput },
-	template:`<div class="row grow nowrap builder-relations" v-if="module">
+	template:`<div class="row grow nowrap builder-forms" v-if="module">
 		<div class="contentBox grow">
 			<div class="top lower">
 				<div class="area nowrap">
@@ -64,7 +64,7 @@ export default {
 				</div>
 			</div>
 		</div>
-		<div class="contentBox sidebar" v-if="showSidebar">
+		<div class="contentBox builder-sidebar narrow" v-if="showSidebar">
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/filter.png" />
@@ -114,10 +114,10 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		filter:         { type:[String,null], required:false, default:null },
-		builderLanguage:{ type:String,        required:true },
-		id:             { type:String,        required:true },
-		readonly:       { type:Boolean,       required:true }
+		builderLanguage:{ type:String,  required:true },
+		filter:         { type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -174,7 +174,7 @@ export default {
 		capGen:      s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		if (this.filter !== null) {
+		if (this.filter !== '') {
 			const f = decodeURIComponent(this.filter);
 			if (f.includes('data0')) this.filterData0 = true;
 			if (f.includes('data1')) this.filterData1 = true;

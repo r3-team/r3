@@ -28,7 +28,7 @@ const MyBuilderRoleAccessMenu = {
 		</td>
 		<td class="maximum"></td>
 	</tr>
-	
+
 	<my-builder-role-access-menu
 		v-if="subsExist && subsShow"
 		v-for="m in menu.menus"
@@ -65,17 +65,17 @@ const MyBuilderRoleAccessMenu = {
 			// 1st preference: proper menu title
 			if(typeof s.menu.captions.menuTitle[s.builderLanguage] !== 'undefined')
 				return s.menu.captions.menuTitle[s.builderLanguage];
-			
+
 			// 2nd preference (if form is referenced): form title
 			if(s.menu.formId !== null) {
 				let form = s.formIdMap[s.menu.formId];
-				
+
 				if(typeof form.captions.formTitle[s.builderLanguage] !== 'undefined')
 					return form.captions.formTitle[s.builderLanguage];
 			}
 			return s.capGen.missingCaption;
 		},
-		
+
 		// stores
 		formIdMap:s => s.$store.getters['schema/formIdMap'],
 		capGen:   s => s.$store.getters.captions.generic
@@ -185,7 +185,7 @@ const MyBuilderRoleAccessRelation = {
 			}
 			return false;
 		},
-		
+
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -243,7 +243,7 @@ export default {
 		MyBuilderRoleAccessSimple
 	},
 	template:`<div class="builder-role contentBox grow" v-if="ready">
-			
+
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/personMultiple.png" />
@@ -287,7 +287,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content no-padding row grow">
 			<div class="column grow">
 				<my-tabs
@@ -296,7 +296,7 @@ export default {
 					:entriesIcon="['images/database.png','images/menu.png','images/tray.png','images/search.png','images/tiles.png','images/api.png','images/screen.png']"
 					:entriesText="tabCaptions"
 				/>
-				
+
 				<div class="builder-role-content">
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'data'">
 						<thead>
@@ -347,7 +347,7 @@ export default {
 							/>
 						</tbody>
 					</table>
-					
+
 					<template v-if="tabTarget === 'menus'">
 						<div v-if="module.menuTabs.length > 1">
 							<div class="builder-role-menu-tab-select"></div>
@@ -398,7 +398,7 @@ export default {
 							</tbody>
 						</table>
 					</template>
-					
+
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'clientEvents'">
 						<thead>
 							<tr>
@@ -421,7 +421,7 @@ export default {
 							/>
 						</tbody>
 					</table>
-					
+
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'collections'">
 						<thead>
 							<tr>
@@ -443,7 +443,7 @@ export default {
 							/>
 						</tbody>
 					</table>
-					
+
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'apis'">
 						<thead>
 							<tr>
@@ -465,7 +465,7 @@ export default {
 							/>
 						</tbody>
 					</table>
-					
+
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'searchBars'">
 						<thead>
 							<tr>
@@ -489,7 +489,7 @@ export default {
 							/>
 						</tbody>
 					</table>
-					
+
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'widgets'">
 						<thead>
 							<tr>
@@ -515,9 +515,9 @@ export default {
 					</table>
 				</div>
 			</div>
-			
+
 			<!-- sidebar -->
-			<div class="contentBox sidebar" v-if="!isEveryone">
+			<div class="contentBox builder-sidebar narrow" v-if="!isEveryone">
 				<div class="content no-padding default-inputs">
 					<table class="generic-table-vertical default-inputs">
 						<tbody>
@@ -575,7 +575,7 @@ export default {
 										:caption="moduleIdMap[roleIdMap[c].moduleId].name + '->' + roleIdMap[c].name"
 										:naked="true"
 									/>
-									
+
 									<select
 										@change="childAdd($event.target.value)"
 										:disabled="readonly"
@@ -635,7 +635,7 @@ export default {
 			childrenIds:[],
 			content:'user',
 			name:'',
-			
+
 			// states
 			menuIdsShow:[],
 			menuTabsIndexShown:0,
@@ -665,7 +665,7 @@ export default {
 				for(const m of menus) {
 					if(m.menus.length === 0)
 						continue;
-					
+
 					out.push(m.id);
 					getChildren(m.menus);
 				}
@@ -686,13 +686,13 @@ export default {
 				`${s.capGen.clientEvents} (${s.module.clientEvents.length})`
 			];
 		},
-		
+
 		// simple
 		canSave:   s => s.hasChanges && !s.readonly,
 		isEveryone:s => s.role.name === 'everyone',
 		module:    s => s.role === false ? false : s.moduleIdMap[s.role.moduleId],
 		role:      s => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
-		
+
 		// stores
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 		roleIdMap:   s => s.$store.getters['schema/roleIdMap'],
@@ -705,7 +705,7 @@ export default {
 		copyValueDialog,
 		dialogDeleteAsk,
 		getDependentModules,
-		
+
 		// actions
 		apply(type,id,access) {
 			switch(type) {
@@ -744,7 +744,7 @@ export default {
 
 			if(this.menuTabsIndexShown > this.module.menuTabs.length - 1)
 				this.menuTabsIndexShown = 0;
-			
+
 			this.ready = true;
 		},
 		toggleMenu(id) {
@@ -755,26 +755,26 @@ export default {
 		toggleMenusAll() {
 			if(this.menuIdsShow.length === this.menuIdsAll.length)
 				return this.menuIdsShow = [];
-			
+
 			this.menuIdsShow = JSON.parse(JSON.stringify(this.menuIdsAll));
 		},
 		toggleRelation(id) {
 			let pos = this.relationIdsShown.indexOf(id);
-			
+
 			if(pos === -1) this.relationIdsShown.push(id);
 			else           this.relationIdsShown.splice(pos,1);
 		},
 		toggleRelationsAll() {
 			if(this.relationIdsShown.length === this.module.relations.length)
 				return this.relationIdsShown = [];
-			
+
 			let out = [];
 			for(const rel of this.module.relations) {
 				out.push(rel.id);
 			}
 			this.relationIdsShown = out;
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('role','del',this.role.id,true).then(
@@ -788,7 +788,7 @@ export default {
 		},
 		set() {
 			if(!this.canSave) return;
-			
+
 			ws.send('role','set',{
 				id:this.role.id,
 				name:this.name,

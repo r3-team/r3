@@ -181,7 +181,7 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderForm,
 				props:true
 			},{
-				path:'pg-functions/:id',
+				path:'pg-functions/:id/:filter?',
 				meta:{ nav:'pg-functions', target:'module' },
 				component:MyBuilderPgFunctions,
 				props:true
@@ -288,6 +288,11 @@ const MyRouter = VueRouter.createRouter({
 			},{
 				path:'overview/forms/:id/:directOpen?',
 				meta:{ nav:'forms', target:'module', isOverview:true },
+				component:MyBuilderOverview,
+				props: true
+			},{
+				path:'overview/pg-functions/:id/:directOpen?',
+				meta:{ nav:'pg-functions', target:'module', isOverview:true },
 				component:MyBuilderOverview,
 				props: true
 			},{
