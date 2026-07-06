@@ -241,7 +241,7 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderArticles,
 				props:true
 			},{
-				path:'docs/:id',
+				path:'docs/:id/:filter?',
 				meta:{ nav:'docs', target:'module' },
 				component:MyBuilderDocs,
 				props:true
@@ -285,6 +285,11 @@ const MyRouter = VueRouter.createRouter({
 				meta:{ nav:'caption-map', target:'module' },
 				component:MyBuilderCaptionMap,
 				props:true
+			},{
+				path:'overview/docs/:id/:directOpen?',
+				meta:{ nav:'docs', target:'module', isOverview:true },
+				component:MyBuilderOverview,
+				props: true
 			},{
 				path:'overview/forms/:id/:directOpen?',
 				meta:{ nav:'forms', target:'module', isOverview:true },

@@ -177,7 +177,7 @@ export default {
 				trigger0: false,
 				trigger1: false
 			},
-			showSidebar: true,
+			showSidebar: true
 		};
 	},
 	computed:{

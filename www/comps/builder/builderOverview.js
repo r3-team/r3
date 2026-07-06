@@ -57,6 +57,14 @@ export default {
 				<div class="column gap-large">
 					<my-label image="filter.png" :caption="capGen.filters" :large="true" />
 
+					<!-- docs -->
+					<div class="row wrap gap-large" v-if="isDocs">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/docs/'+id+'/data1'">
+							<my-label :caption="capGen.recordLoad + ' (' + module.docs.filter(v => v.query !== null).length + ')'" />
+							<img class="preview" src="images/databaseCircle.png" />
+						</router-link>
+					</div>
+
 					<!-- forms -->
 					<div class="row wrap gap-large" v-if="isForms">
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/forms/'+id+'/data1'">

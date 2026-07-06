@@ -86,7 +86,7 @@ export default {
 						<span>{{ capGen.forms }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" :to="'/builder/docs/'+module.id">
+					<router-link class="entry clickable" :to="'/builder/overview/docs/'+module.id" :class="{ 'router-link-active':$route.meta.nav === 'docs' }">
 						<img src="images/document.png" />
 						<span>{{ capGen.pdfs }}</span>
 					</router-link>
@@ -211,7 +211,7 @@ export default {
 				</router-link>
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'docs'"
-					:to="'/builder/docs/'+module.id"
+					:to="'/builder/overview/docs/'+module.id"
 				>
 					<img src="images/document.png" />
 					<span>{{ capGen.pdfs }}</span>
