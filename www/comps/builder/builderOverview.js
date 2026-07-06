@@ -19,8 +19,9 @@ export default {
 		<div class="content default-inputs" v-if="module">
 			<div class="builder-startscreen">
 
-				<div class="row wrap gap-large">
+				<div class="row wrap gap-large" v-if="entityList.length !== 0 || !readonly">
 					<router-link class="builder-startscreen-box clickable" tag="div"
+						v-if="entityList.length !== 0"
 						:to="'/builder/'+entity+'/'+id+'/all'"
 					>
 						<my-label :caption="capGen.button.showAll + ' (' + entityList.length + ')'" />
@@ -29,7 +30,7 @@ export default {
 
 					<div class="builder-startscreen-box clickable"
 						@click="$emit('createNew',entityNew)"
-						:class="{ clickable:!readonly }"
+						v-if="!readonly"
 					>
 						<my-label :caption="capGen.button.new" />
 						<img class="preview" src="images/add.png" />
