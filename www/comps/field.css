@@ -337,10 +337,5 @@
 	flex:1 1 auto;
 }
 .field .tabs.isSingleField .tabs-entry{
-	margin-top:4px;
 	border-top:1px solid var(--color-border);
-}
-.field .tabs.isSingleField .tabs-entry.active{
-	margin-top:2px;
-	border-top:2px solid var(--color-border);
 }

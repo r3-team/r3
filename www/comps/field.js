@@ -295,12 +295,8 @@ export default {
 							</template>
 						</select>
 						<div class="tabs-entry empty grow" ref="tabsEmpty" v-show="!isTabsSingle"></div>
-						<div class="tabs-entry" v-if="field.collapseAllow">
-							<my-button
-								@trigger="tabsCollabsed = !tabsCollabsed"
-								:image="tabsCollabsed ? 'pageDown.png' : 'pageUp.png'"
-								:naked="true"
-							/>
+						<div class="tabs-entry clickable" v-if="field.collapseAllow" @click="tabsCollabsed = !tabsCollabsed">
+							<img class="tabs-icon" :src="tabsCollabsed ? 'images/pageDown.png' : 'images/pageUp.png'" />
 						</div>
 					</div>
 					<div class="fields"
