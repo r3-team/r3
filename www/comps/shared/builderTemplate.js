@@ -551,7 +551,9 @@ export function getTemplateFieldTabs() {
 		content:'tabs',
 		state:'default',
 		flags:[],
-		onMobile:true,
+		onMobile: true,
+		collapseAllow: false,
+		collapseDefault: false,
 		captions:{
 			fieldTitle:{}
 		},
@@ -924,6 +926,7 @@ export function getTemplateSearchBar(moduleId,name) {
 export function getTemplateTab() {
 	return {
 		id:getUuidV4(),
+		iconId:null,
 		contentCounter:false,
 		state:'default',
 		fields:[],

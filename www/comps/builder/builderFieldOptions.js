@@ -1048,6 +1048,7 @@ export default {
 										<tr>
 											<th colspan="2"></th>
 											<th>{{ capGen.title }}</th>
+											<th>{{ capGen.icon }}</th>
 											<th :title="capApp.tabContentCounterHint">{{ capApp.tabContentCounter }}</th>
 											<th colspan="2">{{ capGen.status }}</th>
 										</tr>

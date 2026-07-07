@@ -271,12 +271,12 @@ export default {
 
 				<!-- tabs -->
 				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">
-					<div class="tabs-entries">
-						<div class="tabs-icon" v-if="iconId">
-							<img :src="srcBase64(iconIdMap[iconId].file)" />
+					<div class="tabs-entries" :class="{ collapsed:tabsCollabsed }">
+						<div class="tabs-entry" v-if="iconId">
+							<img class="tabs-icon" :src="srcBase64(iconIdMap[iconId].file)" />
 						</div>
 						<div class="tabs-entry clickable"
-							v-if="tabLayoutElements.length !== 0"
+							v-if="tabLayoutElements.length !== 0 || isTabsSingle"
 							v-for="(t,i) in field.tabs"
 							v-show="!tabIndexesHidden.includes(i)"
 							@click="setTab(i)"
@@ -287,14 +287,14 @@ export default {
 								:imageBase64="tabLayoutElements.includes('icon') && t.iconId !== null ? srcBase64(iconIdMap[t.iconId].file) : ''"
 							/>
 						</div>
-						<select v-if="tabLayoutElements.length === 0" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
+						<select v-if="tabLayoutElements.length === 0 && !isTabsSingle" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
 							<template v-for="(t,i) in field.tabs">
 								<option v-if="!tabIndexesHidden.includes(i)" :value="i">
 									{{ tabIndexesTitle[i] }}
 								</option>
 							</template>
 						</select>
-						<div class="tabs-entry-empty" ref="tabsEmpty"></div>
+						<div class="tabs-entry empty grow" ref="tabsEmpty" v-show="!isTabsSingle"></div>
 						<div class="tabs-entry" v-if="field.collapseAllow">
 							<my-button
 								@trigger="tabsCollabsed = !tabsCollabsed"
@@ -1190,6 +1190,7 @@ export default {
 		isSlider:        s => s.isData && s.field.display === 'slider',
 		isString:        s => s.isData && s.isAttributeString(s.contentData),
 		isTabs:          s => s.content === 'tabs',
+		isTabsSingle:    s => s.isTabs && s.field.tabs.length - 1 === s.tabIndexesHidden.length,
 		isTextarea:      s => s.isData && s.contentUse === 'textarea',
 		isTime:          s => s.isData && s.contentUse === 'time',
 		isTouched:       s => s.fieldIdsTouched.includes(s.field.id),
@@ -1272,11 +1273,13 @@ export default {
 			}
 
 			return {
-				active:  tabIndex === this.tabIndexShow,
-				error:   this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				inputBg: active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
-				grow:    this.isMobile,
-				readonly:active && oneField && readonly
+				active:   tabIndex === this.tabIndexShow && !this.tabsCollabsed,
+				collapsed:this.tabsCollabsed,
+				error:    this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
+				inputBg:  active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
+				grow:     this.isMobile,
+				readonly: active && oneField && readonly,
+				single:   this.isTabsSingle
 			};
 		},
 		resized() {
@@ -1286,7 +1289,9 @@ export default {
 
 				this.tabLayoutCheckTimer = setTimeout(() => {
 					this.tabLayoutElements = JSON.parse(JSON.stringify(this.tabLayoutElementsAvailableInOrder));
-					this.$nextTick(() => this.layoutSettleSpace(this.tabLayoutElements, this.$refs.tabsEmpty));
+
+					if (!this.isTabsSingle)
+						this.$nextTick(() => this.layoutSettleSpace(this.tabLayoutElements, this.$refs.tabsEmpty));
 				}, 200);
 			}
 		},
@@ -1391,7 +1396,10 @@ export default {
 		},
 		setTab(tabIndex) {
 			if(this.settings.tabRemember)
-				this.setLoginOption('tabIndex',tabIndex);
+				this.setLoginOption('tabIndex', tabIndex);
+
+			if (this.tabIndexShow === tabIndex && this.field.collapseAllow && this.tabsCollabsed === false)
+				return this.tabsCollabsed = true;
 
 			this.tabIndexShow = tabIndex;
 			this.tabsCollabsed = false;
