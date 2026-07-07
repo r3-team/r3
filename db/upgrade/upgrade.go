@@ -326,6 +326,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_setting ADD   COLUMN collapse_remember BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN collapse_remember DROP DEFAULT;
 
+			-- single type qr/barcode attribute use
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_codabar';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_code39';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_code128';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_ean8';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_ean13';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_itf';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_qrcode';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_upc_a';
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_upc_e';
+
 			-- mail (re)send options
 			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER;
 			ALTER TABLE instance.mail_account ADD   COLUMN send_seconds   INTEGER NOT NULL DEFAULT 60;

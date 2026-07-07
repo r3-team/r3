@@ -372,7 +372,7 @@ export default {
 		},
 
 		// simple
-		isBarcode:  s => s.isString  && s.attribute.contentUse === 'barcode',
+		isBarcode:  s => s.isString  && s.attribute.contentUse.includes('barcode'),
 		isBoolean:  s => s.isAttributeBoolean(s.attribute.content),
 		isColor:    s => s.isString  && s.attribute.contentUse === 'color',
 		isDrawing:  s => s.isString  && s.attribute.contentUse === 'drawing',

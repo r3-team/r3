@@ -22,8 +22,9 @@ var contentTypes = []string{"integer", "bigint", "numeric", "real",
 	"double precision", "varchar", "text", "boolean", "regconfig", "uuid",
 	"1:1", "n:1", "files"}
 
-var contentUseTypes = []string{"default", "textarea", "richtext",
-	"date", "datetime", "time", "color", "iframe", "drawing", "barcode"}
+var contentUseTypes = []string{"default", "textarea", "richtext", "date", "datetime", "time",
+	"color", "iframe", "drawing", "barcode", "barcode_codabar", "barcode_code39", "barcode_code128",
+	"barcode_ean8", "barcode_ean13", "barcode_itf", "barcode_qrcode", "barcode_upc_a", "barcode_upc_e"}
 
 var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL",
 	"SET DEFAULT"}
@@ -437,7 +438,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 					);
 					CREATE INDEX "fki_%s_record_id_fkey"
 						ON instance_e2ee."%s" USING btree (record_id ASC NULLS LAST);
-					
+
 					CREATE INDEX "fki_%s_login_id_fkey"
 						ON instance_e2ee."%s" USING btree (login_id ASC NULLS LAST);
 				`, tName, tName, tName, moduleName, relationName, schema.PkName,

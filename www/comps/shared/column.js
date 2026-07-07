@@ -30,7 +30,7 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,global
 		// skip if columns are defined by user and its not included
 		if(columnIdsByUser.length !== 0 && !columnIdsByUser.includes(c.id))
 			continue;
-		
+
 		// not defined by user, apply defaults
 		if(columnIdsByUser.length === 0 && (c.hidden || (!c.onMobile && MyStore.getters.isMobile)))
 			continue;
@@ -64,36 +64,36 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,global
 
 export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sortByIndex,showCaptions) {
 	let batches = [];
-	
+
 	let addColumn = (column,index) => {
 		// first non-encrypted/non-file attribute in batch can be sorted by
 		const isAtr   = column.content === 'attribute';
 		const atr     = isAtr ? MyStore.getters['schema/attributeIdMap'][column.attributeId] : null;
 		const isColor = isAtr ? atr.contentUse === 'color' : false;
 		const isSort  = isAtr ? !atr.encrypted && !isAttributeFiles(atr.content) : true;
-		
+
 		if(column.batch !== null) {
 			// assign column to existing batch if available
 			for(let i = 0, j = batches.length; i < j; i++) {
 				if(batches[i].batch !== column.batch)
 					continue;
-				
+
 				// add its own column index + sort setting + width to batch
 				batches[i].columnIndexes.push(index);
-				
+
 				if(isSort)  batches[i].columnIndexesSortBy.push(index);
 				if(isColor) batches[i].columnIndexColor = index;
-				
+
 				if(!batches[i].vertical)
 					batches[i].basis += column.basis;
-				
+
 				if(batches[i].vertical && column.basis > batches[i].basis)
 					batches[i].basis = column.basis;
-				
+
 				return;
 			}
 		}
-		
+
 		// create new column batch with itself as first column
 		batches.push({
 			basis:column.basis,
@@ -111,7 +111,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 			vertical:column.flags?.vertical !== undefined ? column.flags.vertical : false
 		});
 	};
-	
+
 	for(let i = 0, j = columns.length; i < j; i++) {
 		if(!columnIndexesIgnore.includes(i))
 			addColumn(columns[i],i);
@@ -121,15 +121,15 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	for(let i = 0, j = batches.length; i < j; i++) {
 		if(batches[i].basis !== 0)
 			batches[i].style = `width:${batches[i].basis}px`;
-		
+
 		batches[i].orderIndexesUsed     = getOrderIndexesFromColumnBatch(batches[i],columns,orders);
 		batches[i].orderIndexesSmallest = batches[i].orderIndexesUsed.length !== 0 ? Math.min(...batches[i].orderIndexesUsed) : 999;
 	}
-	
+
 	// calculate which batch is sorted by in order (to show sort order indicators)
 	const batchesSortedBySmallestOrderIndex =
 		[...batches].sort((a,b) => a.orderIndexesSmallest > b.orderIndexesSmallest ? 1 : -1);
-	
+
 	for(let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
 		batches[batchesSortedBySmallestOrderIndex[i].batchOrderIndex].orderPosition = i;
 	}
@@ -137,7 +137,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	// apply sort order
 	if(sortByIndex.length !== 0)
 		batches.sort((a,b) => sortByIndex.indexOf(a.batchOrderIndex) - sortByIndex.indexOf(b.batchOrderIndex));
-	
+
 	// return all batches that have at least 1 column
 	return batches.filter(v => v.columnIndexes.length !== 0);
 };
@@ -194,7 +194,7 @@ export function getColumnTitleFallback(c,moduleId,languageForce) {
 
 	if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
 		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-		
+
 		if(languageForce !== undefined)
 			return getCaptionForLang('attributeTitle',languageForce,atr.id,atr.captions,atr.name);
 		else
@@ -217,7 +217,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 	for(let ind of batch.columnIndexes) {
 		const c = columns[ind];
 		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-		
+
 		// anything that can be counted can serve as aggregation
 		// sub queries and already aggregated columns are not supported
 		if(c.content === 'attribute'
@@ -225,7 +225,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 			&& !a.encrypted
 			&& a.contentUse !== 'color'
 			&& a.contentUse !== 'drawing'
-			&& a.contentUse !== 'barcode'
+			&& !a.contentUse.includes('barcode')
 			&& !isAttributeFiles(a.content)
 			&& !isAttributeBoolean(a.content)
 			&& !isAttributeString(a.content)
@@ -237,11 +237,11 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
 	if(columnBatch.columnIndexesSortBy.length === 0)
 		return [];
-	
+
 	let orderIndexesUsed = [];
 	for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
 		const col = columns[columnIndexSort];
-		
+
 		for(let i = 0, j = orders.length; i < j; i++) {
 			const order = orders[i];
 

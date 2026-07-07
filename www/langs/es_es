@@ -707,7 +707,7 @@
 			"onDelete": "Acción al eliminar",
 			"onUpdate": "Acción al cambiar",
 			"option": {
-				"barcode": "Código de barras/código QR",
+				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "Sí/no",
 				"color": "Color",
 				"date": "Fecha",

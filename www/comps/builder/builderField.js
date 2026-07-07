@@ -50,14 +50,14 @@ export default {
 				<img :src="'images/' + getFieldIcon(field)" />
 				<span>{{ reference }}</span>
 			</div>
-			
+
 			<!-- warnings -->
 			<img class="action warning clickable" src="images/warning.png"
 				v-if="!isTemplate && !moveActive && warnings.length !== 0"
 				@click="showWarnings"
 				:title="capGen.warnings"
 			/>
-			
+
 			<!-- container actions 1 -->
 			<template v-if="!isTemplate && !moveActive && isContainer">
 				<img class="action clickable"
@@ -67,7 +67,7 @@ export default {
 					:src="field.direction === 'row' ? 'images/flexRow.png' : 'images/flexColumn.png'"
 					:title="capGen.direction+': '+field.direction"
 				/>
-				
+
 				<img class="action clickable"
 					v-if="field.fields.length > 1 && !readonly"
 					@click="$emit('field-property-set','wrap',!field.wrap)"
@@ -76,7 +76,7 @@ export default {
 					:title="capApp.flexWrap+': '+field.wrap"
 				/>
 			</template>
-			
+
 			<!-- action: edit field content -->
 			<img class="action clickable" src="images/database.png"
 				v-if="!isTemplate && !moveActive && hasQuery"
@@ -84,14 +84,14 @@ export default {
 				:class="{ selected:isOptionsShow && tabTarget === 'content' }"
 				:title="capApp.contentField"
 			/>
-			
+
 			<!-- display: field is hidden -->
 			<img class="action clickable" src="images/visible0.png"
 				v-if="!isTemplate && !moveActive && field.state === 'hidden' && !readonly"
 				@click="$emit('field-property-set','state','default')"
 				:title="capApp.hidden"
 			/>
-			
+
 			<!-- action: move this field -->
 			<img class="action mover"
 				v-if="!noMovement && (!moveActive || fieldMoveList[fieldMoveIndex].id === field.id || !isTemplate) && !readonly"
@@ -100,18 +100,18 @@ export default {
 				:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
 				:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
 			/>
-			
+
 			<!-- action: move target inside container -->
 			<img class="action clickable" src="images/arrowInside.png"
 				v-if="!isTemplate && ['container','tabs'].includes(field.content) && moveActive && fieldMoveList[fieldMoveIndex].id !== field.id && !readonly"
 				@click="$emit('field-move',parentChildren,true)"
 				:title="capApp.fieldMoveInside"
 			/>
-			
+
 			<!-- mouse over break out actions -->
 			<div v-if="!isTemplate && !moveActive" class="break-out-wrap on-hover">
 				<div class="break-out shade">
-					
+
 					<!-- toggle: show on mobile -->
 					<img class="action clickable"
 						v-if="!moveActive && !readonly"
@@ -119,7 +119,7 @@ export default {
 						:src="field.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile+': '+field.onMobile"
 					/>
-					
+
 					<!-- container actions 2 -->
 					<template v-if="!moveActive && isContainer">
 						<div class="clickable"
@@ -130,7 +130,7 @@ export default {
 						>
 							<span>{{ getFlexBasis(field.basis) }}</span>
 						</div>
-						
+
 						<div class="clickable"
 							v-if="!readonly"
 							@click="$emit('field-property-set','grow',toggleSize(field.grow,1,1))"
@@ -139,7 +139,7 @@ export default {
 						>
 							<span>G{{ field.grow }}</span>
 						</div>
-						
+
 						<div class="clickable"
 							v-if="!readonly"
 							@click="$emit('field-property-set','shrink',toggleSize(field.shrink,1,1))"
@@ -149,7 +149,7 @@ export default {
 							<span>S{{ field.shrink }}</span>
 						</div>
 					</template>
-					
+
 					<!-- field title -->
 					<my-builder-caption
 						v-if="isButton || isChart || isData || isList || isTabs || isVariable || (isHeader && !field.richtext)"
@@ -159,7 +159,7 @@ export default {
 						:language="builderLanguage"
 						:readonly
 					/>
-					
+
 					<!-- action: remove field -->
 					<img class="action on-hover end clickable" src="images/delete.png"
 						v-if="!readonly"
@@ -167,13 +167,13 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<span class="title"
 				v-if="isTemplate || !isContainer" :title="title"
 				:class="{ 'no-hover':!isTemplate }"
 			>{{ title }}</span>
 		</div>
-		
+
 		<!-- tabs -->
 		<div class="builder-tabs" v-if="!isTemplate && isTabs">
 			<div class="entries">
@@ -209,7 +209,7 @@ export default {
 				:uiScale
 			/>
 		</div>
-		
+
 		<!-- columns -->
 		<my-builder-columns
 			v-if="showColumns"
@@ -224,7 +224,7 @@ export default {
 			:moduleId
 			:readonly
 		/>
-		
+
 		<!-- nested fields in container -->
 		<my-builder-fields class="fields-nested"
 			v-if="!isTemplate && isContainer"
@@ -278,7 +278,7 @@ export default {
 					:entriesText="[capGen.properties,capGen.content]"
 				/>
 				<div class="content flex column grow" :class="{ 'no-padding':tabTarget === 'properties' }">
-					
+
 					<!-- field options -->
 					<my-builder-field-options
 						v-if="tabTarget === 'properties'"
@@ -293,7 +293,7 @@ export default {
 						:moduleId
 						:readonly
 					/>
-					
+
 					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
 					<template v-if="hasQuery && tabTarget === 'content'">
 						<h2 v-if="!queryActive">{{ capGen.dataAccess }}</h2>
@@ -364,7 +364,7 @@ export default {
 		field:          { type:Object,        required:true },
 		fieldIdMap:     { type:Object,        required:true },
 		fieldIdShow:    { type:[String,null], required:true },
-		fieldMoveList:  { type:[Array,null],  required:true },              
+		fieldMoveList:  { type:[Array,null],  required:true },
 		fieldMoveIndex: { type:Number,        required:true },
 		filterData:     { type:Boolean,       required:true },
 		filterData1n:   { type:Boolean,       required:true },
@@ -397,13 +397,13 @@ export default {
 					const j = joinsIndexMap[relationIndex];
 					return `${relationIndex} ${s.relationIdMap[j.relationId].name}`;
 				};
-				
+
 				let out = [];
 				if(s.field.relationIndexAxisX !== null)
 					out.push(s.capApp.kanban.columnBatchX.replace('{REL}',getCaption(s.field.relationIndexAxisX)));
 				if(s.field.relationIndexAxisY !== null)
 					out.push(s.capApp.kanban.columnBatchY.replace('{REL}',getCaption(s.field.relationIndexAxisY)));
-				
+
 				return out;
 			}
 			return [];
@@ -432,16 +432,16 @@ export default {
 		cssClassChildren:s => {
 			if(s.isTemplate || !s.isContainer)
 				return [];
-			
+
 			// default classed
 			let out = [];
 			if(s.field.fields.length === 0) out.push('empty');
-			
+
 			// draggable does not support styling the main element
 			// use custom classes as fallback
 			if(s.field.direction === 'column') out.push('column');
 			if(s.field.wrap)                   out.push('wrap');
-			
+
 			out.push(`style-justify-content-${s.field.justifyContent}`);
 			out.push(`style-align-content-${s.field.alignContent}`);
 			out.push(`style-align-items-${s.field.alignItems}`);
@@ -450,11 +450,11 @@ export default {
 		cssStyleParent:s => {
 			if(typeof s.field.basis === 'undefined')
 				return;
-			
+
 			let basis = s.field.basis;
 			if(basis !== 0)
 				basis = Math.floor(basis * s.uiScale / 100);
-			
+
 			let out = [`flex:${s.field.grow} ${s.field.shrink} ${s.getFlexBasis(basis)}`];
 			if(basis !== 0) {
 				let dirMax = s.flexDirParent === 'row' ? 'max-width' : 'max-height';
@@ -466,30 +466,30 @@ export default {
 		},
 		relationIdStart:s => {
 			if(!s.isData) return null;
-			
+
 			if(!s.isAttributeRelationship(s.attribute.content))
 				return null;
-			
+
 			if(s.field.attributeIdNm !== null)
 				return s.attributeIdMap[s.field.attributeIdNm].relationshipId;
-			
+
 			if(s.joinsIndexMap[s.field.index].relationId === s.attribute.relationId)
 				return s.attribute.relationshipId;
-			
+
 			return s.attribute.relationId;
 		},
 		show:s => {
 			// filter only data fields
-			if(!s.filterData || !s.isData) 
+			if(!s.filterData || !s.isData)
 				return true;
-			
+
 			// filter by selected index (if set)
 			if(s.filterDataIndex !== -1 && s.field.index !== s.filterDataIndex)
 				return false;
-			
+
 			// filter by relationship type (show non-rel fields)
 			if(!s.isRelationship)  return true;
-			if(!s.field.outsideIn) return s.filterDataN1; 
+			if(!s.field.outsideIn) return s.filterDataN1;
 			if(s.filterData1n && s.field.attributeIdNm === null) return true;
 			if(s.filterDataNm && s.field.attributeIdNm !== null) return true;
 			return false;
@@ -499,7 +499,7 @@ export default {
 			if(s.hasQuery) {
 				if(s.query.relationId === null) out.push(s.capApp.warning.queryRelationNotSet);
 				if(s.field.columns.length   === 0)    out.push(s.capApp.warning.queryColumnsNotSet);
-				
+
 				for(let c of s.field.columns) {
 					if(c.content === 'query' && c.attributeId === null) {
 						out.push(s.capApp.warning.columnNoSubQueryAttribute);
@@ -513,10 +513,10 @@ export default {
 			}
 			return out;
 		},
-		
+
 		// simple
 		hasQuery:        s => s.getFieldHasQuery(s.field),
-		isBarcode:       s => s.isData && s.attribute.contentUse === 'barcode',
+		isBarcode:       s => s.isData && s.attribute.contentUse.includes('barcode'),
 		isButton:        s => s.field.content === 'button',
 		isCalendar:      s => s.field.content === 'calendar',
 		isChart:         s => s.field.content === 'chart',
@@ -544,7 +544,7 @@ export default {
 		showColumns:     s => !s.isTemplate && s.hasQuery && s.fieldIdShow === s.field.id && s.tabTarget === 'content',
 		tabIndexShown:   s => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
 		title:           s => s.getFieldTitle(s.field),
-		
+
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -568,7 +568,7 @@ export default {
 		getTemplateQuery,
 		isAttributeFiles,
 		isAttributeRelationship,
-		
+
 		// actions
 		columnAdd(column) {
 			let colsCloned = JSON.parse(JSON.stringify(this.field.columns));
@@ -615,7 +615,7 @@ export default {
 		toggleSize(oldVal,change,startSize) {
 			if(oldVal+change < 0) return 0;
 			if(oldVal === 0)      return startSize;
-			
+
 			return oldVal+change;
 		}
 	}

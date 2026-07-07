@@ -707,7 +707,7 @@
 			"onDelete": "删除时的操作",
 			"onUpdate": "更改时的操作",
 			"option": {
-				"barcode": "Barcode/QR code",
+				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "是/否",
 				"color": "颜色",
 				"date": "日期",

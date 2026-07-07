@@ -92,7 +92,9 @@ func getAttributeString(font types.DocFont, content string, contentUse string, d
 				return true, s, nil
 			}
 			return false, "", nil
-		case "barcode", "drawing":
+		case "barcode", "barcode_codabar", "barcode_code39", "barcode_code128", "barcode_ean8",
+			"barcode_ean13", "barcode_itf", "barcode_qrcode", "barcode_upc_a", "barcode_upc_e", "drawing":
+
 			return false, "", nil
 		}
 	case "boolean":

@@ -1,4 +1,3 @@
-
 import { openDataImageAsNewTag } from './shared/generic.js';
 
 export default {
@@ -15,7 +14,7 @@ export default {
 				/>
 			</div>
 			<my-button image="barcode.png"
-				v-if="inputFormat !== null && !readonly"
+				v-if="isMixedCode && inputFormat !== null && !readonly"
 				@trigger="update('format',null)"
 				:captionTitle="capApp.formatResetHint"
 				:naked="true"
@@ -36,29 +35,31 @@ export default {
 		</div>
 
 		<!-- preview image -->
-		<div class="input-barcode-preview" v-show="inputFormat !== null && !valueInvalid">
+		<div class="input-barcode-preview" v-show="inputFormat !== null && modelValue !== null && !valueInvalid">
 			<img class="input-barcode-preview clickable" ref="barcodePreview"
 				@click.left="openImage"
 				:class="{ 'max-size':inputFormat === 'QR_CODE' }"
 				:title="inputFormat"
 			/>
 		</div>
-		
+
 		<!-- messages / options -->
 		<div class="input-barcode-format default-inputs" v-if="(inputFormat === null && inputText !== '') || valueInvalid">
 			<h2 v-if="valueInvalid">{{ capApp.formatInvalidValue }}</h2>
-			<h2>{{ capApp.formatMissing }}</h2>
-			<select v-model="inputFormat">
-				<option value="QR_CODE">QR Code</option>
-				<option value="CODABAR">CODABAR</option>
-				<option value="CODE_39">CODE 39</option>
-				<option value="CODE_128">CODE 128</option>
-				<option value="EAN_8">EAN 8</option>
-				<option value="EAN_13">EAN 13</option>
-				<option value="ITF">ITF</option>
-				<option value="UPC_A">UPC A</option>
-				<option value="UPC_E">UPC E</option>
-			</select>
+			<template v-if="isMixedCode">
+				<h2>{{ capApp.formatMissing }}</h2>
+				<select v-model="inputFormat">
+					<option value="QR_CODE">QR Code</option>
+					<option value="CODABAR">CODABAR</option>
+					<option value="CODE_39">CODE 39</option>
+					<option value="CODE_128">CODE 128</option>
+					<option value="EAN_8">EAN 8</option>
+					<option value="EAN_13">EAN 13</option>
+					<option value="ITF">ITF</option>
+					<option value="UPC_A">UPC A</option>
+					<option value="UPC_E">UPC E</option>
+				</select>
+			</template>
 		</div>
 
 		<!-- camera dialog -->
@@ -76,7 +77,7 @@ export default {
 						/>
 					</div>
 				</div>
-				
+
 				<div class="content gap" :class="{ 'no-padding':deviceIdSelected !== null }">
 					<div id="input-barcode-target" class="input-barcode-target"
 						v-if="deviceIdSelected !== null"
@@ -100,33 +101,18 @@ export default {
 	</div>`,
 	emits:['copyToClipboard','update:modelValue'],
 	props:{
-		clipboard: { type:Boolean, required:true },
-		hideInputs:{ type:Boolean, required:true },
-		modelValue:{ required:true },
-		monospace: { type:Boolean, required:true },
-		readonly:  { type:Boolean, required:true }
+		clipboard: { type:Boolean,       required:true },
+		contentUse:{ type:String,        required:true },
+		hideInputs:{ type:Boolean,       required:true },
+		modelValue:{ type:[String,null], required:true },
+		monospace: { type:Boolean,       required:true },
+		readonly:  { type:Boolean,       required:true }
 	},
 	data() {
 		return {
 			devices:[],
 			deviceIdSelected:null,
 			scanner:null,
-			scannerConfig:{
-				fps:20,
-				formatsToSupport:[
-					Html5QrcodeSupportedFormats.QR_CODE,
-					Html5QrcodeSupportedFormats.CODABAR,
-					Html5QrcodeSupportedFormats.CODE_39,
-					Html5QrcodeSupportedFormats.CODE_128,
-					Html5QrcodeSupportedFormats.EAN_8,
-					Html5QrcodeSupportedFormats.EAN_13,
-					Html5QrcodeSupportedFormats.ITF,
-					Html5QrcodeSupportedFormats.UPC_A,
-					Html5QrcodeSupportedFormats.UPC_E,
-					Html5QrcodeSupportedFormats.UPC_EAN_EXTENSION
-				],
-				qrbox:{ width:300, height:300 }
-			},
 			showDialog:false,
 			valueInvalid:false
 		};
@@ -139,20 +125,55 @@ export default {
 	},
 	computed:{
 		inputFormat:{
-			get()  { return this.modelValue === null ? null : JSON.parse(this.modelValue).format; },
+			get() {
+				if (this.modelValue !== null)
+					return JSON.parse(this.modelValue).format;
+
+				switch (this.contentUse) {
+					case 'barcode_codabar': return 'CODABAR'; break;
+					case 'barcode_code39': return 'CODE_39'; break;
+					case 'barcode_code128': return 'CODE_128'; break;
+					case 'barcode_ean8': return 'EAN_8'; break;
+					case 'barcode_ean13': return 'EAN_13'; break;
+					case 'barcode_itf': return 'ITF'; break;
+					case 'barcode_qrcode': return 'QR_CODE'; break;
+					case 'barcode_upc_a': return 'UPC_A'; break;
+					case 'barcode_upc_e': return 'UPC_E'; break;
+				}
+				return null;
+			},
 			set(v) { this.update('format',v); }
 		},
 		inputText:{
 			get()  { return this.modelValue === null ? '' : JSON.parse(this.modelValue).text; },
 			set(v) { this.update('text',v); }
 		},
+		scannerConfig: s => {
+			let formats = [];
+			if (s.isMixedCode || s.contentUse === 'barcode_codabar') formats.push(Html5QrcodeSupportedFormats.CODABAR);
+			if (s.isMixedCode || s.contentUse === 'barcode_code39') formats.push(Html5QrcodeSupportedFormats.CODE_39);
+			if (s.isMixedCode || s.contentUse === 'barcode_code128') formats.push(Html5QrcodeSupportedFormats.CODE_128);
+			if (s.isMixedCode || s.contentUse === 'barcode_ean8') formats.push(Html5QrcodeSupportedFormats.EAN_8);
+			if (s.isMixedCode || s.contentUse === 'barcode_ean13') formats.push(Html5QrcodeSupportedFormats.EAN_13);
+			if (s.isMixedCode || s.contentUse === 'barcode_itf') formats.push(Html5QrcodeSupportedFormats.ITF);
+			if (s.isMixedCode || s.contentUse === 'barcode_qrcode') formats.push(Html5QrcodeSupportedFormats.QR_CODE);
+			if (s.isMixedCode || s.contentUse === 'barcode_upc_a') formats.push(Html5QrcodeSupportedFormats.UPC_A);
+			if (s.isMixedCode || s.contentUse === 'barcode_upc_e') formats.push(Html5QrcodeSupportedFormats.UPC_E);
+
+			return {
+				fps: 20,
+				formatsToSupport: formats,
+				qrbox: { width: 300, height: 300 }
+			};
+		},
 
 		// simple
-		isActive:(s) => s.inputText !== '',
+		isActive:    s => s.inputText !== '',
+		isMixedCode: s => s.contentUse === 'barcode', // legacy option, allows all codes
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.input.barcode,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.input.barcode,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
@@ -185,7 +206,7 @@ export default {
 
 			if(format === null || this.inputText === '' || this.$refs.barcodePreview === undefined)
 				return;
-			
+
 			if(format !== 'QRCODE') {
 				JsBarcode(this.$refs.barcodePreview, this.inputText, {
 					format:format,
@@ -193,10 +214,10 @@ export default {
 					width:2,
 					valid:(v) => {
 						this.valueInvalid = !v;
-						
+
 						if(v === false)
 							return this.$refs.barcodePreview.src = '';
-						
+
 						this.$nextTick(() => {
 							this.update('image',this.$refs.barcodePreview.src);
 						});
@@ -218,7 +239,7 @@ export default {
 		close() {
 			if(this.scanner !== null)
 				this.scanner.stop();
-			
+
 			this.showDialog = false;
 		},
 		deviceInit(id) {
@@ -226,7 +247,7 @@ export default {
 			this.$nextTick(() => {
 				this.scanner = new Html5Qrcode('input-barcode-target');
 				this.scanner.start(
-					this.deviceIdSelected, 
+					this.deviceIdSelected,
 					this.scannerConfig,
 					this.scanned,
 					() => {} // constant scan errors while running

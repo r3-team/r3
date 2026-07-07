@@ -134,7 +134,10 @@ export function getGetterFromAttributeValues(attributeIdMap) {
 };
 
 export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
-	if(isAttributeString(content)) {
+	if (isAttributeString(content)) {
+		if (contentUse.includes('barcode'))
+			return 'barcode.png';
+
 		switch(contentUse) {
 			case 'default':  return 'text.png';       break;
 			case 'richtext': return 'text_rich.png';  break;
@@ -142,7 +145,6 @@ export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
 			case 'color':    return 'colors.png';     break;
 			case 'drawing':  return 'drawing.png';    break;
 			case 'iframe':   return 'iframe.png';     break;
-			case 'barcode':  return 'barcode.png';    break;
 		}
 	}
 	if(isAttributeInteger(content)) {
@@ -171,27 +173,11 @@ export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
 };
 
 export function getAttributeContentUse(content,use) {
+	if (isAttributeString(content))
+		return use === 'default' ? 'text' : use;
 
-	if(isAttributeString(content)) {
-		switch(use) {
-			case 'barcode':  return 'barcode';  break;
-			case 'color':    return 'color';    break;
-			case 'drawing':  return 'drawing';  break;
-			case 'iframe':   return 'iframe';   break;
-			case 'richtext': return 'richtext'; break;
-			case 'textarea': return 'textarea'; break;
-			case 'default':  return 'text';     break;
-		}
-	}
-
-	if(isAttributeInteger(content)) {
-		switch(use) {
-			case 'date':     return 'date';     break;
-			case 'datetime': return 'datetime'; break;
-			case 'default':  return 'number';   break;
-			case 'time':     return 'time';     break;
-		}
-	}
+	if (isAttributeInteger(content))
+		return use;
 
 	if(isAttributeBoolean(content))        return 'boolean';
 	if(isAttributeNumeric(content))        return 'decimal';
@@ -205,7 +191,10 @@ export function getAttributeContentUse(content,use) {
 
 	return 'text';
 }
-export function getAttributeContentsByUse(usedFor,length,largeNumbers) {
+export function getAttributeContentsByUse(usedFor, length, largeNumbers) {
+	if (usedFor.includes('barcode'))
+		return { content:'text', contentUse:usedFor };
+
 	switch(usedFor) {
 		// default uses
 		case 'text':           return { content:length === 0 ? 'text'   : 'varchar',       contentUse:'default' }; break;
@@ -221,7 +210,6 @@ export function getAttributeContentsByUse(usedFor,length,largeNumbers) {
 		case 'relationship1N': return { content:'1:n',                                     contentUse:'default' }; break;
 
 		// special uses: strings
-		case 'barcode':  return { content:'text',                            contentUse:'barcode' };  break;
 		case 'color':    return { content:'varchar',                         contentUse:'color' };    break;
 		case 'drawing':  return { content:'text',                            contentUse:'drawing' };  break;
 		case 'iframe':   return { content:'text',                            contentUse:'iframe' };   break;

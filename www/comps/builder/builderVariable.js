@@ -55,7 +55,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -130,7 +130,6 @@ export default {
 											<option value="iframe"  >{{ capAppAtr.option.iframe }}</option>
 											<option value="drawing" >{{ capAppAtr.option.drawing }}</option>
 											<option value="boolean" >{{ capAppAtr.option.boolean }}</option>
-											<option value="barcode" >{{ capAppAtr.option.barcode }}</option>
 										</optgroup>
 										<optgroup :label="capAppAtr.datetimes">
 											<option value="datetime">{{ capAppAtr.option.datetime }}</option>
@@ -140,6 +139,18 @@ export default {
 										<optgroup :label="capGen.relationships">
 											<option value="relationshipN1">{{ capAppAtr.option.relationship1 }}</option>
 											<option value="relationship1N">{{ capAppAtr.option.relationshipN }}</option>
+										</optgroup>
+										<optgroup :label="capAppAtr.barcodes">
+											<option value="barcode">{{ capAppAtr.option.barcode }}</option>
+											<option value="barcode_qrcode">{{ capGen.codeQr }}</option>
+											<option value="barcode_codabar">CODABAR</option>
+											<option value="barcode_code39">CODE 39</option>
+											<option value="barcode_code128">CODE 128</option>
+											<option value="barcode_ean8">EAN 8</option>
+											<option value="barcode_ean13">EAN 13</option>
+											<option value="barcode_itf">ITF</option>
+											<option value="barcode_upc_a">UPC A</option>
+											<option value="barcode_upc_e">UPC E</option>
 										</optgroup>
 										<optgroup :label="capAppAtr.expert">
 											<option value="float"    >{{ capAppAtr.option.float }}</option>
@@ -189,13 +200,13 @@ export default {
 				this.values.contentUse = p.contentUse;
 			}
 		},
-		
+
 		// simple
 		canSave:   (s) => !s.readonly && s.hasChanges && !s.nameTaken,
 		hasChanges:(s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
 		preview:   (s) => s.variableValueGet(s.variableId),
 		title:     (s) => s.capApp.edit.replace('{NAME}',s.values.name),
-		
+
 		// stores
 		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
@@ -219,7 +230,7 @@ export default {
 		getAttributeContentsByUse,
 		getAttributeIcon,
 		variableValueGet,
-		
+
 		// actions
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's' && this.canSave) {
@@ -235,7 +246,7 @@ export default {
 			this.values    = JSON.parse(JSON.stringify(this.variableIdMap[this.variableId]));
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('variable','del',this.variableId,true).then(

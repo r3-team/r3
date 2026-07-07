@@ -397,6 +397,7 @@ export default {
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
 					:clipboard="isClipboard"
+					:contentUse
 					:hideInputs="field.flags.includes('hideInputs')"
 					:monospace="isMonospace"
 					:readonly="isReadonly"
@@ -1149,7 +1150,7 @@ export default {
 		// bool states
 		isActive:        s => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
 		isAlone:         s => s.isAloneInForm || s.isAloneInTab,
-		isBarcode:       s => s.isData && s.contentUse === 'barcode',
+		isBarcode:       s => s.isData && s.contentUse.includes('barcode'),
 		isButton:        s => s.content === 'button',
 		isCalendar:      s => s.content === 'calendar',
 		isChart:         s => s.content === 'chart',

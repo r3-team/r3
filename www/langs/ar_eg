@@ -707,7 +707,7 @@
 			"onDelete": "الإجراء عند الحذف",
 			"onUpdate": "الإجراء عند التغيير",
 			"option": {
-				"barcode": "Barcode/QR code",
+				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "نعم/لا",
 				"color": "لون",
 				"date": "تاريخ",

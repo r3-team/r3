@@ -133,7 +133,6 @@ export default {
 											<option value="color"    :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.color }}</option>
 											<option value="iframe"   :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.iframe }}</option>
 											<option value="drawing"  :disabled="!isNew && !isDrawing">{{ capApp.option.drawing }}</option>
-											<option value="barcode"  :disabled="!isNew && !isBarcode">{{ capApp.option.barcode }}</option>
 											<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
 											<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
 										</optgroup>
@@ -145,6 +144,18 @@ export default {
 										<optgroup :label="capGen.relationships" :disabled="!isNew && !isRelationship">
 											<option value="relationshipN1">{{ capApp.option.relationshipN1 }}</option>
 											<option value="relationship11">{{ capApp.option.relationship11 }}</option>
+										</optgroup>
+										<optgroup :label="capApp.barcodes" :disabled="!isNew && !isBarcode">
+											<option value="barcode" :disabled="!isNew && !isBarcode">{{ capApp.option.barcode }}</option>
+											<option value="barcode_qrcode" :disabled="!isNew && !isBarcode">{{ capGen.codeQr }}</option>
+											<option value="barcode_codabar" :disabled="!isNew && !isBarcode">CODABAR</option>
+											<option value="barcode_code39" :disabled="!isNew && !isBarcode">CODE 39</option>
+											<option value="barcode_code128" :disabled="!isNew && !isBarcode">CODE 128</option>
+											<option value="barcode_ean8" :disabled="!isNew && !isBarcode">EAN 8</option>
+											<option value="barcode_ean13" :disabled="!isNew && !isBarcode">EAN 13</option>
+											<option value="barcode_itf" :disabled="!isNew && !isBarcode">ITF</option>
+											<option value="barcode_upc_a" :disabled="!isNew && !isBarcode">UPC A</option>
+											<option value="barcode_upc_e" :disabled="!isNew && !isBarcode">UPC E</option>
 										</optgroup>
 										<optgroup :label="capApp.expert" :disabled="!isNew && !isFloat && !isUuid">
 											<option value="float"     :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
@@ -391,11 +402,6 @@ export default {
 						this.values.contentUse = 'iframe';
 						this.values.length     = 0;
 					break;
-					case 'barcode':
-						this.values.content    = 'text';
-						this.values.contentUse = 'barcode';
-						this.values.length     = 0;
-					break;
 
 					// boolean uses
 					case 'boolean':
@@ -435,6 +441,22 @@ export default {
 						this.values.contentUse = 'default';
 					break;
 
+					// code uses
+					case 'barcode': // fallthrough
+					case 'barcode_codabar': // fallthrough
+					case 'barcode_code39': // fallthrough
+					case 'barcode_code128': // fallthrough
+					case 'barcode_ean8': // fallthrough
+					case 'barcode_ean13': // fallthrough
+					case 'barcode_itf': // fallthrough
+					case 'barcode_qrcode': // fallthrough
+					case 'barcode_upc_a': // fallthrough
+					case 'barcode_upc_e':
+						this.values.content    = 'text';
+						this.values.contentUse = v;
+						this.values.length     = 0;
+					break;
+
 					// relationship uses
 					case 'relationship11': // fallthrough
 					case 'relationshipN1':
@@ -461,12 +483,12 @@ export default {
 			}
 		},
 
-		lengthTitle:(s) => {
+		lengthTitle:s => {
 			if(s.isString)  return s.capApp.lengthText;
 			if(s.isNumeric) return s.capApp.lengthNumeric;
 			return s.capApp.lengthFiles;
 		},
-		nameTaken:(s) => {
+		nameTaken:s => {
 			for(let a of s.relation.attributes) {
 				if(a.id !== s.attributeId && a.name === s.values.name)
 					return true;
@@ -475,52 +497,52 @@ export default {
 		},
 
 		// simple
-		canEncrypt:    (s) => s.relation.encryption && s.values.content === 'text',
-		canSave:       (s) => !s.readonly && s.hasChanges && !s.nameTaken,
-		hasChanges:    (s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		hasLength:     (s) => ['decimal','files','richtext','text','textarea'].includes(s.usedFor),
-		hasLengthFract:(s) => ['decimal'].includes(s.usedFor),
-		isId:          (s) => !s.isNew && s.values.name === 'id',
-		isNew:         (s) => s.attributeId === null,
-		title:         (s) => s.isNew ? s.capApp.new : s.capApp.edit.replace('{NAME}',s.values.name),
+		canEncrypt:    s => s.relation.encryption && s.values.content === 'text',
+		canSave:       s => !s.readonly && s.hasChanges && !s.nameTaken,
+		hasChanges:    s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		hasLength:     s => ['decimal','files','richtext','text','textarea'].includes(s.usedFor),
+		hasLengthFract:s => ['decimal'].includes(s.usedFor),
+		isId:          s => !s.isNew && s.values.name === 'id',
+		isNew:         s => s.attributeId === null,
+		title:         s => s.isNew ? s.capApp.new : s.capApp.edit.replace('{NAME}',s.values.name),
 
 		// content
-		isBoolean:       (s) => s.isAttributeBoolean(s.values.content),
-		isFiles:         (s) => s.isAttributeFiles(s.values.content),
-		isFloat:         (s) => s.isAttributeFloat(s.values.content),
-		isInteger:       (s) => s.isAttributeInteger(s.values.content),
-		isNumeric:       (s) => s.isAttributeNumeric(s.values.content),
-		isRegconfig:     (s) => s.isAttributeRegconfig(s.values.content),
-		isRelationship:  (s) => s.isAttributeRelationship(s.values.content),
-		isRelationship11:(s) => s.isAttributeRelationship11(s.values.content),
-		isRelationshipN1:(s) => s.isAttributeRelationshipN1(s.values.content),
-		isString:        (s) => s.isAttributeString(s.values.content),
-		isUuid:          (s) => s.isAttributeUuid(s.values.content),
+		isBoolean:       s => s.isAttributeBoolean(s.values.content),
+		isFiles:         s => s.isAttributeFiles(s.values.content),
+		isFloat:         s => s.isAttributeFloat(s.values.content),
+		isInteger:       s => s.isAttributeInteger(s.values.content),
+		isNumeric:       s => s.isAttributeNumeric(s.values.content),
+		isRegconfig:     s => s.isAttributeRegconfig(s.values.content),
+		isRelationship:  s => s.isAttributeRelationship(s.values.content),
+		isRelationship11:s => s.isAttributeRelationship11(s.values.content),
+		isRelationshipN1:s => s.isAttributeRelationshipN1(s.values.content),
+		isString:        s => s.isAttributeString(s.values.content),
+		isUuid:          s => s.isAttributeUuid(s.values.content),
 
 		// content use
-		isBarcode: (s) => s.isString  && s.values.contentUse === 'barcode',
-		isColor:   (s) => s.isString  && s.values.contentUse === 'color',
-		isDate:    (s) => s.isInteger && s.values.contentUse === 'date',
-		isDatetime:(s) => s.isInteger && s.values.contentUse === 'datetime',
-		isDrawing: (s) => s.isString  && s.values.contentUse === 'drawing',
-		isIframe:  (s) => s.isString  && s.values.contentUse === 'iframe',
-		isNumber:  (s) => s.isInteger && s.values.contentUse === 'default',
-		isRichtext:(s) => s.isString  && s.values.contentUse === 'richtext',
-		isText:    (s) => s.isString  && s.values.contentUse === 'default',
-		isTextarea:(s) => s.isString  && s.values.contentUse === 'textarea',
-		isTime:    (s) => s.isInteger && s.values.contentUse === 'time',
+		isBarcode: s => s.isString  && s.values.contentUse.includes('barcode'),
+		isColor:   s => s.isString  && s.values.contentUse === 'color',
+		isDate:    s => s.isInteger && s.values.contentUse === 'date',
+		isDatetime:s => s.isInteger && s.values.contentUse === 'datetime',
+		isDrawing: s => s.isString  && s.values.contentUse === 'drawing',
+		isIframe:  s => s.isString  && s.values.contentUse === 'iframe',
+		isNumber:  s => s.isInteger && s.values.contentUse === 'default',
+		isRichtext:s => s.isString  && s.values.contentUse === 'richtext',
+		isText:    s => s.isString  && s.values.contentUse === 'default',
+		isTextarea:s => s.isString  && s.values.contentUse === 'textarea',
+		isTime:    s => s.isInteger && s.values.contentUse === 'time',
 
 		// stores
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		apiIdMap:       (s) => s.$store.getters['schema/apiIdMap'],
-		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		indexIdMap:     (s) => s.$store.getters['schema/indexIdMap'],
-		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.attribute,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		module:         (s) => s.moduleIdMap[s.relation.moduleId]
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		apiIdMap:       s => s.$store.getters['schema/apiIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:      s => s.$store.getters['schema/formIdMap'],
+		indexIdMap:     s => s.$store.getters['schema/indexIdMap'],
+		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
+		capApp:         s => s.$store.getters.captions.builder.attribute,
+		capGen:         s => s.$store.getters.captions.generic,
+		module:         s => s.moduleIdMap[s.relation.moduleId]
 	},
 	mounted() {
 		this.reset();

@@ -35,7 +35,7 @@ export default {
 			:captionTitle="capGen.button.copyClipboard"
 			:naked="true"
 		/>
-		
+
 		<!-- link open action -->
 		<my-button
 			v-if="isLink"
@@ -51,12 +51,12 @@ export default {
 			v-if="isRating"
 			:src="srcBase64Icon(attribute.iconId,'images/star1.png')"
 		/>
-		
+
 		<!-- string value -->
 		<span v-if="isString" :title="stringValueFull">
 			{{ stringValue }}
 		</span>
-		
+
 		<!-- boolean value -->
 		<template v-if="isBoolean">
 			<img class="boolean"
@@ -74,7 +74,7 @@ export default {
 			:class="{ previewLarge:previewLarge }"
 			:src="JSON.parse(value).image"
 		/>
-		
+
 		<!-- drawing -->
 		<img class="drawing clickable"
 			v-if="isDrawing"
@@ -82,7 +82,7 @@ export default {
 			:class="{ previewLarge:previewLarge }"
 			:src="JSON.parse(value).image"
 		/>
-		
+
 		<!-- files -->
 		<template v-if="isFiles">
 			<a target="_blank"
@@ -158,26 +158,26 @@ export default {
 		attribute:s => s.attributeId !== null ? s.attributeIdMap[s.attributeId] : false,
 		files:    s => !s.isFiles || s.value === null ? []    : s.value,
 		link:     s => !s.isLink  || s.value === null ? false : s.getLinkMeta(s.display, s.isBarcode ? JSON.parse(s.value).text : s.value),
-		
+
 		// styles
 		iconBoolean:s => {
 			if(!s.boolAtrIcon)
 				return s.value ? 'images/ok.png' : 'images/cancel.png';
-			
+
 			return s.value && s.attribute !== false && s.attribute.iconId !== null
 				? s.srcBase64Icon(s.attribute.iconId,'') : null;
 		},
 		style:s => {
 			let out = [];
 			if(s.basis !== 0) out.push(`max-width:${s.basis}px`);
-			
+
 			if(s.isColor)
 				out.push(`background-color:${s.colorAdjustBg(s.value)}`);
-			
+
 			return out.join(';');
 		},
 		styleImage:s => `width:${100 / (s.length === 0 || s.files.length < s.length ? s.files.length : s.length)}%`,
-		
+
 		// store
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
@@ -199,7 +199,7 @@ export default {
 		openDataImageAsNewTag,
 		openLink,
 		srcBase64Icon,
-		
+
 		copyToClipboard() {
 			let value = !this.isPassword ? this.stringValueFull : this.value;
 
@@ -221,14 +221,23 @@ export default {
 						this.isGallery = this.display === 'gallery';
 						return this.isFiles = true;
 					break;
-					
+
 					// text
 					case 'text': // fallthrough
 					case 'varchar':
-						
+
 						// handle different uses and display options
 						switch(this.attribute.contentUse) {
-							case 'barcode':
+							case 'barcode': // fallthrough
+							case 'barcode_codabar': // fallthrough
+							case 'barcode_code39': // fallthrough
+							case 'barcode_code128': // fallthrough
+							case 'barcode_ean8': // fallthrough
+							case 'barcode_ean13': // fallthrough
+							case 'barcode_itf': // fallthrough
+							case 'barcode_qrcode': // fallthrough
+							case 'barcode_upc_a': // fallthrough
+							case 'barcode_upc_e':
 								this.isBarcode = true;
 
 								if(this.value !== null)
@@ -254,7 +263,7 @@ export default {
 							case 'url': this.isLink = true; break;
 						}
 					break;
-					
+
 					// integers
 					case 'integer': // fallthrough
 					case 'bigint':
@@ -272,25 +281,25 @@ export default {
 						if(this.display === 'rating')
 							this.isRating = true;
 					break;
-					
+
 					// decimals
 					case 'numeric': // fallthrough
 					case 'double precision':
 					case 'real':
 						this.stringValueFull = this.getNumberFormatted(this.value,this.attribute.length,this.attribute.lengthFract);
 					break;
-					
+
 					// others (UUID)
 					default: directValue = true; break;
 				}
 			}
-			
+
 			// only string values left
 			this.isString = true;
-			
+
 			if(directValue && this.value !== null)
 				this.stringValueFull = this.value;
-			
+
 			// set final string value with applied text length limit
 			if(this.length !== 0 && this.stringValueFull.length > this.length)
 				this.stringValue = `${this.stringValueFull.substring(0,this.length-3)}...`;

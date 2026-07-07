@@ -707,7 +707,7 @@
 			"onDelete": "Silindiğinde yapılacak işlem",
 			"onUpdate": "Değiştirildiğinde yapılacak işlem",
 			"option": {
-				"barcode": "Barkod/QR kodu",
+				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "Evet/hayır",
 				"color": "Renk",
 				"date": "Tarih",

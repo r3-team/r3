@@ -707,7 +707,7 @@
 			"onDelete": "Action when deleted",
 			"onUpdate": "Action when changed",
 			"option": {
-				"barcode": "Barcode/QR code",
+				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "Yes/no",
 				"color": "Color",
 				"date": "Date",

@@ -1532,7 +1532,7 @@ export default {
 		hasCaption:       s => s.isData || s.isHeader,
 		hasOpenDoc:       s => !s.isVariable && s.isButton,
 		hasOpenForm:      s => !s.isVariable && (s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.query.relationId !== null)),
-		isBarcode:        s => s.isData && s.contentUse === 'barcode',
+		isBarcode:        s => s.isData && s.contentUse !== undefined && s.contentUse.includes('barcode'),
 		isBoolean:        s => s.isData && s.isAttributeBoolean(s.contentData),
 		isButton:         s => s.content === 'button',
 		isCalendar:       s => s.content === 'calendar',

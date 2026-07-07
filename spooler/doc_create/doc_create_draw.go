@@ -43,7 +43,9 @@ func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY flo
 		}
 
 		switch contentUse {
-		case "barcode":
+		case "barcode", "barcode_codabar", "barcode_code39", "barcode_code128", "barcode_ean8",
+			"barcode_ean13", "barcode_itf", "barcode_qrcode", "barcode_upc_a", "barcode_upc_e":
+
 			var b textBarcode
 			if err := json.Unmarshal([]byte(v), &b); err != nil {
 				return err
