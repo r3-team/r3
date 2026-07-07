@@ -8,7 +8,7 @@ export default {
 	name:'my-admin-login-template',
 	components:{ MyInputColorWrap },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
-		
+
 		<div class="contentBox admin-login-template float" v-if="inputsReady">
 			<div class="top">
 				<div class="area nowrap">
@@ -50,7 +50,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical fullWidth">
 					<tbody>
@@ -65,7 +65,7 @@ export default {
 							<td>{{ capGen.comments }}</td>
 							<td><textarea v-model="comment" /></td>
 						</tr>
-						
+
 						<!-- general settings -->
 						<tr>
 							<td class="grouping" colspan="2">
@@ -134,10 +134,11 @@ export default {
 						</tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.sundayFirstDow"   :caption="capAppSet.sundayFirstDow"   /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.tabRemember"      :caption="capAppSet.tabRemember"      /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.collapseRemember" :caption="capAppSet.collapseRemember" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.mobileScrollForm" :caption="capAppSet.mobileScrollForm" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.boolAsIcon"       :caption="capAppSet.boolAsIcon"       /></td></tr>
-						
+
 						<!-- theming -->
 						<tr>
 							<td class="grouping" colspan="2">
@@ -179,7 +180,7 @@ export default {
 											<option value="lucida_console">Lucida Console</option>
 										</optgroup>
 									</select>
-										
+
 									<select class="short" v-model="settings.fontSize" :title="capAppSet.fontSize">
 										<option v-for="i in 11"
 											:value="70 + (i*5)"
@@ -295,7 +296,7 @@ export default {
 			name:'',
 			comment:'',
 			settings:{},
-			
+
 			// states
 			inputKeys:['name','comment','settings'],
 			inputsOrg:{},     // map of original input values, key = input key
@@ -303,17 +304,17 @@ export default {
 		};
 	},
 	computed:{
-		hasChanges:(s) => {
+		hasChanges:s => {
 			if(!s.inputsReady)
 				return false;
-			
+
 			for(let k of s.inputKeys) {
 				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s[k]))
 					return true;
 			}
 			return false;
 		},
-		languageCodesModulesAndCustom:(s) => {
+		languageCodesModulesAndCustom:s => {
 			let langs = s.languageCodesModules;
 			for(const k in s.moduleIdMapMeta) {
 				for(const l of s.moduleIdMapMeta[k].languagesCustom) {
@@ -323,32 +324,33 @@ export default {
 			}
 			return langs
 		},
-		
+
 		// simple states
-		canSave: (s) => s.hasChanges && s.name !== '',
-		isGlobal:(s) => s.name === 'GLOBAL',
-		isNew:   (s) => s.id === 0,
-		
+		canSave: s => s.hasChanges && s.name !== '',
+		isGlobal:s => s.name === 'GLOBAL',
+		isNew:   s => s.id === 0,
+
 		// stores
-		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
-		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
-		capApp:               (s) => s.$store.getters.captions.admin.loginTemplate,
-		capAppSet:            (s) => s.$store.getters.captions.settings,
-		capGen:               (s) => s.$store.getters.captions.generic,
-		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
-		moduleIdMapMeta:      (s) => s.$store.getters.moduleIdMapMeta,
+		languageCodes:        s => s.$store.getters['schema/languageCodes'],
+		languageCodesModules: s => s.$store.getters['schema/languageCodesModules'],
+		capApp:               s => s.$store.getters.captions.admin.loginTemplate,
+		capAppSet:            s => s.$store.getters.captions.settings,
+		capGen:               s => s.$store.getters.captions.generic,
+		languageCodesOfficial:s => s.$store.getters.constants.languageCodesOfficial,
+		moduleIdMapMeta:      s => s.$store.getters.moduleIdMapMeta,
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
 		this.id = this.templateId;
-		
+
 		if(this.id !== 0)
 			return this.get();
-		
+
 		// new template, apply defaults
 		this.settings = {
 			boolAsIcon:true,
-			bordersSquared:false,
+			bordersSquared: false,
+			collapseRemember: true,
 			colorClassicMode:false,
 			colorHeader:null,
 			colorHeaderSingle:false,
@@ -388,7 +390,7 @@ export default {
 			if(e.ctrlKey && e.key === 's') {
 				if(this.canSave)
 					this.set();
-				
+
 				e.preventDefault();
 			}
 			if(e.key === 'Escape') {
@@ -402,7 +404,7 @@ export default {
 			}
 			this.inputsReady = true;
 		},
-		
+
 		// actions
 		closeAsk() {
 			this.dialogCloseAsk(this.close,this.hasChanges);
@@ -410,7 +412,7 @@ export default {
 		close() {
 			this.$emit('close');
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('loginTemplate','del',{id:this.id},true).then(
@@ -421,7 +423,7 @@ export default {
 			ws.send('loginTemplate','get',{byId:this.id},true).then(
 				res => {
 					if(res.payload.length !== 1) return;
-					
+
 					let template = res.payload[0];
 					this.name     = template.name;
 					this.comment  = template.comment;
@@ -441,7 +443,7 @@ export default {
 				res => {
 					if(this.isNew)
 						this.id = res.payload;
-					
+
 					this.get();
 				},
 				this.$root.genericError

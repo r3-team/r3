@@ -2909,6 +2909,7 @@
 			"intro": "إذا تم تثبيت تطبيق عميل REI3 (راجع \"الأجهزة\")، فيمكنك تعيين مفاتيح الاختصار العامة. ",
 			"noEvents": "لا يوجد حاليًا أي تطبيقات REI3 يمكن الوصول إليها والتي توفر مفاتيح التشغيل السريع."
 		},
+		"collapseRemember": "Collapsed fields: Recover last state",
 		"colorClassicMode": "نظام الألوان",
 		"colorClassicMode0": "حديث",
 		"colorClassicMode1": "كلاسيكي",

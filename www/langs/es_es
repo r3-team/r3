@@ -2909,6 +2909,7 @@
 			"intro": "Si la aplicación cliente de REI3 (ver 'Dispositivos') está instalada, puedes configurar teclas de acceso rápido globales. Estas se utilizan para interactuar con REI3 mientras se ejecuta en segundo plano.",
 			"noEvents": "Actualmente no hay aplicaciones REI3 accesibles que ofrezcan teclas de acceso rápido."
 		},
+		"collapseRemember": "Collapsed fields: Recover last state",
 		"colorClassicMode": "Esquema de color",
 		"colorClassicMode0": "Moderno",
 		"colorClassicMode1": "Clásico",

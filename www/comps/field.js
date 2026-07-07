@@ -295,7 +295,7 @@ export default {
 							</template>
 						</select>
 						<div class="tabs-entry empty grow" ref="tabsEmpty" v-show="!isTabsSingle"></div>
-						<div class="tabs-entry clickable" v-if="field.collapseAllow" @click="tabsCollabsed = !tabsCollabsed">
+						<div class="tabs-entry clickable" v-if="field.collapseAllow" @click="setTagsCollapsed(!tabsCollabsed)">
 							<img class="tabs-icon" :src="tabsCollabsed ? 'images/pageDown.png' : 'images/pageUp.png'" />
 						</div>
 					</div>
@@ -740,9 +740,9 @@ export default {
 			tabLayoutElementsAvailableInOrder: [ // elements that can be shown, in order of priority
 				'count','label','icon'
 			],
-			tabsCollabsed: false,
 			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
-			tabIndexShow:0                // tabs only: which tab is shown
+			tabIndexShow: 0,              // tabs only: which tab is shown
+			tabsCollabsed: false
 		};
 	},
 	watch:{
@@ -1123,22 +1123,22 @@ export default {
 		},
 
 		// simple
-		appResized:  s => s.$store.getters.appResized,
-		attribute:   s => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false,
+		appResized:   s => s.$store.getters.appResized,
+		attribute:    s => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false,
 		collectionIdMapIndexes:s => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),
-		content:     s => s.isVariable ? 'data' : s.field.content,
-		contentData: s => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
-		contentUse:  s => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
-		customErr:   s => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
+		content:      s => s.isVariable ? 'data' : s.field.content,
+		contentData:  s => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
+		contentUse:   s => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
+		customErr:    s => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
-		dataOptions: s => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
-		dropdownShow:s => s.dropdownElm === s.$refs.content,
-		inputRegex:  s => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
-		link:        s => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
-		loginOptions:s => s.fieldIdMapOptions[s.field.id] === undefined ? {} : s.fieldIdMapOptions[s.field.id],
-		query:       s => s.getFieldHasQuery(s.field) && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
-		showInvalid: s => !s.isValid && (s.formBadSave || s.isTouched),
-		variable:    s => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
+		dataOptions:  s => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
+		dropdownShow: s => s.dropdownElm === s.$refs.content,
+		inputRegex:   s => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
+		link:         s => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
+		loginOptions: s => s.fieldIdMapOptions[s.field.id] === undefined ? {} : s.fieldIdMapOptions[s.field.id],
+		query:        s => s.getFieldHasQuery(s.field) && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
+		showInvalid:  s => !s.isValid && (s.formBadSave || s.isTouched),
+		variable:     s => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
 
 		// processed states
 		choices:     s => s.fieldIdMapProcessed.choices[s.field.id]      ?? [],
@@ -1211,8 +1211,11 @@ export default {
 		settings:           s => s.$store.getters.settings
 	},
 	mounted() {
-		if(this.isTabs) {
-			this.tabsCollabsed = this.field.collapseDefault;
+		if (this.isTabs) {
+			this.tabsCollabsed = this.settings.collapseRemember
+				? this.$root.getOrFallback(this.loginOptions, 'tabsCollabsed', this.field.collapseDefault)
+				: this.field.collapseDefault;
+
 			this.setTabToValid();
 			this.resized();
 			this.$watch('appResized', this.resized);
@@ -1395,10 +1398,10 @@ export default {
 				this.setLoginOption('tabIndex', tabIndex);
 
 			if (this.tabIndexShow === tabIndex && this.field.collapseAllow && this.tabsCollabsed === false)
-				return this.tabsCollabsed = true;
+				return this.setTagsCollapsed(true);
 
 			this.tabIndexShow = tabIndex;
-			this.tabsCollabsed = false;
+			this.setTagsCollapsed(false);
 		},
 		setTabCounter(tabIndex,fieldId,value) {
 			if(!this.field.tabs[tabIndex].contentCounter)
@@ -1420,6 +1423,12 @@ export default {
 				if(!this.tabIndexesHidden.includes(i))
 					return this.tabIndexShow = i;
 			}
+		},
+		setTagsCollapsed(state) {
+			if (this.settings.collapseRemember)
+				this.setLoginOption('tabsCollabsed', state);
+
+			this.tabsCollabsed = state;
 		},
 		setValue(val,valOld,indexAttributeId,isOriginal) {
 			// clean inputs

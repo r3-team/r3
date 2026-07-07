@@ -23,7 +23,7 @@ import {
 const MySettingsEncryption = {
 	name:'my-settings-encryption',
 	template:`<div class="encryption">
-	
+
 		<p v-if="!loginEncEnabled">{{ capApp.description }}</p>
 		<table>
 			<tbody>
@@ -34,7 +34,7 @@ const MySettingsEncryption = {
 			</tbody>
 		</table>
 		<br />
-		
+
 		<!-- list of modules with encryption enabled -->
 		<template v-if="modulesEnc.length !== 0 && loginEncEnabled && !loginEncLocked">
 			<h2>{{ capApp.modulesEnc }}</h2>
@@ -45,7 +45,7 @@ const MySettingsEncryption = {
 				</div>
 			</div>
 		</template>
-		
+
 		<div class="message-error" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
 
 		<!-- login without credentials -->
@@ -69,7 +69,7 @@ const MySettingsEncryption = {
 				<br />
 			</template>
 		</template>
-		
+
 		<!-- create new key pair -->
 		<template v-if="!loginEncEnabled && loginKeyAes !== null">
 			<my-button
@@ -79,16 +79,16 @@ const MySettingsEncryption = {
 				:caption="capApp.button.createKeys"
 				:image="!running ? 'add.png' : 'load.gif'"
 			/>
-			
+
 			<!-- newly created keys ready for storage -->
 			<template v-if="newKeys">
 				<h2>{{ capApp.newKeys }}</h2>
 				<p>{{ capApp.newKeysDesc }}</p>
-				
+
 				<h2>{{ capApp.backupCode }}</h2>
 				<div class="backup-code shade">{{ newBackupCode }}</div>
 				<p v-html="capApp.backupCodeDesc"></p>
-				
+
 				<table>
 					<tbody>
 						<tr>
@@ -103,7 +103,7 @@ const MySettingsEncryption = {
 				</table>
 				<br />
 				<br />
-				
+
 				<my-button image="key.png"
 					@trigger="set"
 					:active="!running && confirmBackupCode && confirmEncryption"
@@ -111,12 +111,12 @@ const MySettingsEncryption = {
 				/>
 			</template>
 		</template>
-		
+
 		<!-- recover access -->
 		<template v-if="loginEncLocked && (!loginNoCred || noCredMasterKeyBadInput)">
 			<h2>{{ capApp.regainAccess }}</h2>
 			<p>{{ capApp.regainAccessDesc }}</p>
-			
+
 			<table class="default-inputs">
 				<tbody>
 					<tr v-if="!loginNoCred">
@@ -148,12 +148,12 @@ const MySettingsEncryption = {
 					</tr>
 				</tbody>
 			</table>
-		
+
 			<!-- reset access -->
 			<br />
 			<h2>{{ capApp.resetAccess }}</h2>
 			<p v-html="capApp.resetAccessDesc"></p>
-			
+
 			<my-button image="warning.png"
 				@trigger="resetAsk"
 				:cancel="true"
@@ -164,11 +164,11 @@ const MySettingsEncryption = {
 	data() {
 		return {
 			running:false,
-			
+
 			// user confirmations for enabling encryption
 			confirmBackupCode:false,
 			confirmEncryption:false,
-			
+
 			// newly created keys to be stored
 			newBackupCode:null,
 			newKeyPair:null,
@@ -180,7 +180,7 @@ const MySettingsEncryption = {
 			noCredMasterKeyLast:'',        // last submitted version of master key input
 			noCredMasterKeyBadInput:false, // input for master key has failed at least once
 			noCredMasterKeyNew:'',         // input for new master key, in case of recovery via backup codes
-			
+
 			// regain access
 			regainBackupCode:'',
 			regainPassword:''
@@ -188,7 +188,7 @@ const MySettingsEncryption = {
 	},
 	computed:{
 		// indexes of module entries with any relation with enabled encryption
-		modulesEnc:(s) => {
+		modulesEnc:s => {
 			let out = [];
 			for(const k in s.moduleIdMap) {
 				for(const r of s.moduleIdMap[k].relations) {
@@ -200,35 +200,35 @@ const MySettingsEncryption = {
 			}
 			return out;
 		},
-		
+
 		// e2e encryption status
-		statusCaption:(s) => {
+		statusCaption:s => {
 			if(!s.loginEncEnabled) return s.capApp.status.inactive;
 			if(s.loginEncLocked)   return s.capApp.status.locked;
 			return s.capApp.status.unlocked;
 		},
-		
+
 		// simple
-		newKeys:               (s) => s.newKeyPrivateEnc !== null,
-		noCredMasterKeyChanged:(s) => s.noCredMasterKey !== s.noCredMasterKeyLast,
-		
+		newKeys:               s => s.newKeyPrivateEnc !== null,
+		noCredMasterKeyChanged:s => s.noCredMasterKey !== s.noCredMasterKeyLast,
+
 		// stores
-		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
-		loginKeyAes:         (s) => s.$store.getters['local/loginKeyAes'],
-		loginKeySalt:        (s) => s.$store.getters['local/loginKeySalt'],
-		loginNoCred:         (s) => s.$store.getters['local/loginNoCred'],
-		cryptoApiAvailable:  (s) => s.$store.getters.cryptoApiAvailable,
-		loginEncEnabled:     (s) => s.$store.getters.loginEncEnabled,
-		loginEncLocked:      (s) => s.$store.getters.loginEncLocked,
-		loginPrivateKey:     (s) => s.$store.getters.loginPrivateKey,
-		loginPrivateKeyEnc:  (s) => s.$store.getters.loginPrivateKeyEnc,
-		loginPrivateKeyEncBackup:(s) => s.$store.getters.loginPrivateKeyEncBackup,
-		loginPublicKey:      (s) => s.$store.getters.loginPublicKey,
-		moduleEntries:       (s) => s.$store.getters.moduleEntries,
-		kdfIterations:       (s) => s.$store.getters.constants.kdfIterations,
-		capApp:              (s) => s.$store.getters.captions.settings.encryption,
-		capErr:              (s) => s.$store.getters.captions.error,
-		capGen:              (s) => s.$store.getters.captions.generic
+		moduleIdMap:         s => s.$store.getters['schema/moduleIdMap'],
+		loginKeyAes:         s => s.$store.getters['local/loginKeyAes'],
+		loginKeySalt:        s => s.$store.getters['local/loginKeySalt'],
+		loginNoCred:         s => s.$store.getters['local/loginNoCred'],
+		cryptoApiAvailable:  s => s.$store.getters.cryptoApiAvailable,
+		loginEncEnabled:     s => s.$store.getters.loginEncEnabled,
+		loginEncLocked:      s => s.$store.getters.loginEncLocked,
+		loginPrivateKey:     s => s.$store.getters.loginPrivateKey,
+		loginPrivateKeyEnc:  s => s.$store.getters.loginPrivateKeyEnc,
+		loginPrivateKeyEncBackup:s => s.$store.getters.loginPrivateKeyEncBackup,
+		loginPublicKey:      s => s.$store.getters.loginPublicKey,
+		moduleEntries:       s => s.$store.getters.moduleEntries,
+		kdfIterations:       s => s.$store.getters.constants.kdfIterations,
+		capApp:              s => s.$store.getters.captions.settings.encryption,
+		capErr:              s => s.$store.getters.captions.error,
+		capGen:              s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -245,12 +245,12 @@ const MySettingsEncryption = {
 		pemImportPrivateEnc,
 		rsaGenerateKeys,
 		srcBase64Icon,
-		
+
 		createKeys() {
 			this.running = true;
 			const backupCode     = this.generateBackupCode();
 			const backupCodeShow = backupCode.replace(/.{4}/g, '$& '); // add spaces every 4 chars
-			
+
 			// generate RSA key pair for user
 			// import login AES key for encryption of private key
 			Promise.all([
@@ -260,7 +260,7 @@ const MySettingsEncryption = {
 				res => {
 					const keyPair  = res[0];
 					const keyLogin = res[1];
-					
+
 					// export both keys as PEM
 					Promise.all([
 						this.pemExport(keyPair.privateKey),
@@ -269,7 +269,7 @@ const MySettingsEncryption = {
 						keysPem => {
 							const pemPrivate = keysPem[0];
 							const pemPublic  = keysPem[1];
-							
+
 							// encrypt private key twice (once with login key, once with backup code)
 							Promise.all([
 								this.aesGcmEncryptBase64(pemPrivate,keyLogin),
@@ -361,7 +361,7 @@ const MySettingsEncryption = {
 		},
 		unlockWithBackupCode() {
 			let promises = [];
-			
+
 			// if no-cred login, apply new master key to login AES key
 			if(this.loginNoCred)
 				promises.push(this.noCredMasterKeyApply(this.noCredMasterKeyNew,false));
@@ -386,7 +386,7 @@ const MySettingsEncryption = {
 				this.$root.genericError
 			);
 		},
-		
+
 		// backend calls
 		reencrypt(privateKeyPem) {
 			Promise.all([
@@ -396,7 +396,7 @@ const MySettingsEncryption = {
 				res => {
 					const privateKey = res[0];
 					const loginKey   = res[1];
-					
+
 					// encrypt private key with current login key
 					this.aesGcmEncryptBase64(privateKeyPem,loginKey).then(
 						res => {
@@ -480,7 +480,7 @@ const MySettingsAccount = {
 			</template>
 		</tbody>
 	</table>
-	
+
 	<div class="settings-account-pw-change-action">
 		<my-button image="save.png"
 			v-if="isAllowedPwChange"
@@ -501,7 +501,7 @@ const MySettingsAccount = {
 	</div>
 
 	<div class="message-error" v-if="message !== ''">{{ message }}</div>
-	
+
 	<div class="column grow"></div>
 	<span><i>{{ capApp.nodeName.replace('{NAME}',clusterNodeName) }}</i></span>`,
 	data() {
@@ -509,7 +509,7 @@ const MySettingsAccount = {
 			// states
 			newInput:false,  // new input was entered by user
 			pwSettings:null, // server side password settings (require digits, minimum length, etc.)
-			
+
 			// inputs
 			pwNew0:'',
 			pwNew1:'',
@@ -518,23 +518,23 @@ const MySettingsAccount = {
 		};
 	},
 	computed:{
-		canSave:(s) => s.pwOldValid
+		canSave:s => s.pwOldValid
 			&& s.pwMatch
 			&& s.pwMetDigits
 			&& s.pwMetLength
 			&& s.pwMetLower
 			&& s.pwMetUpper
 			&& s.pwMetSpecial,
-		message:(s) => {
+		message:s => {
 			if(!s.newInput || s.pwSettings === null)
 				return '';
-			
+
 			if(!s.pwOldValid)
 				return s.capApp.messagePwCurrentWrong;
-			
+
 			if(s.pwNew0 === '')
 				return '';
-			
+
 			if(!s.pwMatch)      return s.capApp.messagePwDiff;
 			if(!s.pwMetDigits)  return s.capApp.messagePwRequiresDigit;
 			if(!s.pwMetLength)  return s.capApp.messagePwShort;
@@ -543,30 +543,30 @@ const MySettingsAccount = {
 			if(!s.pwMetSpecial) return s.capApp.messagePwRequiresSpecial;
 			return '';
 		},
-		
+
 		// simple
-		e2eeInactive:(s) => !s.loginEncEnabled || s.loginEncLocked, // encryption not enabled or private key locked
-		pwMatch:     (s) => s.pwNew0.length !== 0 && s.pwNew0 === s.pwNew1,
-		pwMetLength: (s) => s.pwSettings.length <= s.pwNew0.length,
-		pwOldValid:  (s) => s.loginKeyAes === s.pwOldKey || s.e2eeInactive,   // without login key, we cannot check old PW (backend still checks)
-		pwMetDigits: (s) => !s.pwSettings.requireDigits  || /\p{Nd}/u.test(s.pwNew0),
-		pwMetLower:  (s) => !s.pwSettings.requireLower   || /\p{Ll}/u.test(s.pwNew0),
-		pwMetSpecial:(s) => !s.pwSettings.requireSpecial || /[\p{P}\p{M}\p{S}\p{Z}]+/u.test(s.pwNew0),
-		pwMetUpper:  (s) => !s.pwSettings.requireUpper   || /\p{Lu}/u.test(s.pwNew0),
-		
+		e2eeInactive:s => !s.loginEncEnabled || s.loginEncLocked, // encryption not enabled or private key locked
+		pwMatch:     s => s.pwNew0.length !== 0 && s.pwNew0 === s.pwNew1,
+		pwMetLength: s => s.pwSettings.length <= s.pwNew0.length,
+		pwOldValid:  s => s.loginKeyAes === s.pwOldKey || s.e2eeInactive,   // without login key, we cannot check old PW (backend still checks)
+		pwMetDigits: s => !s.pwSettings.requireDigits  || /\p{Nd}/u.test(s.pwNew0),
+		pwMetLower:  s => !s.pwSettings.requireLower   || /\p{Ll}/u.test(s.pwNew0),
+		pwMetSpecial:s => !s.pwSettings.requireSpecial || /[\p{P}\p{M}\p{S}\p{Z}]+/u.test(s.pwNew0),
+		pwMetUpper:  s => !s.pwSettings.requireUpper   || /\p{Lu}/u.test(s.pwNew0),
+
 		// stores
-		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
-		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
-		isAllowedPwChange: (s) => s.$store.getters.isAllowedPwChange,
-		loginEncEnabled:   (s) => s.$store.getters.loginEncEnabled,
-		loginEncLocked:    (s) => s.$store.getters.loginEncLocked,
-		loginName:         (s) => s.$store.getters.loginName,
-		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
-		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
-		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
-		capApp:            (s) => s.$store.getters.captions.settings.account,
-		capGen:            (s) => s.$store.getters.captions.generic,
-		clusterNodeName:   (s) => s.$store.getters.clusterNodeName
+		loginKeyAes:       s => s.$store.getters['local/loginKeyAes'],
+		loginKeySalt:      s => s.$store.getters['local/loginKeySalt'],
+		isAllowedPwChange: s => s.$store.getters.isAllowedPwChange,
+		loginEncEnabled:   s => s.$store.getters.loginEncEnabled,
+		loginEncLocked:    s => s.$store.getters.loginEncLocked,
+		loginName:         s => s.$store.getters.loginName,
+		loginPrivateKey:   s => s.$store.getters.loginPrivateKey,
+		loginPrivateKeyEnc:s => s.$store.getters.loginPrivateKeyEnc,
+		kdfIterations:     s => s.$store.getters.constants.kdfIterations,
+		capApp:            s => s.$store.getters.captions.settings.account,
+		capGen:            s => s.$store.getters.captions.generic,
+		clusterNodeName:   s => s.$store.getters.clusterNodeName
 	},
 	mounted() {
 		ws.send('lookup','get',{name:'passwordSettings'},true).then(
@@ -581,11 +581,11 @@ const MySettingsAccount = {
 		aesGcmExportBase64,
 		aesGcmImportBase64,
 		pbkdf2PassToAesGcmKey,
-		
+
 		generateOldPwKey() {
 			if(this.e2eeInactive)
 				return;
-			
+
 			this.pbkdf2PassToAesGcmKey(this.pwOld,this.loginKeySalt,this.kdfIterations,true).then(
 				key => {
 					this.aesGcmExportBase64(key).then(
@@ -596,12 +596,12 @@ const MySettingsAccount = {
 				this.$root.genericError
 			);
 		},
-		
+
 		// actions
 		setCheck() {
 			if(this.e2eeInactive)
 				return this.set(null,null);
-			
+
 			this.aesGcmImportBase64(this.loginKeyAes).then(
 				loginKey => {
 					// decrypt private key with current login key
@@ -613,7 +613,7 @@ const MySettingsAccount = {
 						res => {
 							const privateKeyPem = res[0]; // private key PEM to be encrypted
 							const newLoginKey   = res[1]; // login key based on new password
-							
+
 							// re-encrypt private key with new login key
 							this.aesGcmEncryptBase64(privateKeyPem,newLoginKey).then(
 								newPrivateKeyEnc => this.set(newPrivateKeyEnc,newLoginKey)
@@ -625,7 +625,7 @@ const MySettingsAccount = {
 				this.$root.genericError
 			);
 		},
-		
+
 		// backend calls
 		delOptionsAsk() {
 			this.$store.commit('dialog',{
@@ -658,13 +658,13 @@ const MySettingsAccount = {
 					pwOld:this.pwOld
 				})
 			];
-			
+
 			// update encrypted private key if given
 			if(newPrivateKeyEnc !== null)
 				requests.push(ws.prepare('loginKeys','storePrivate',{
 					privateKeyEnc:newPrivateKeyEnc
 				}));
-			
+
 			// use same request/transaction to update password & encrypted private key
 			// one must not change without the other
 			ws.sendMultiple(requests,true).then(
@@ -673,7 +673,7 @@ const MySettingsAccount = {
 					this.pwNew1   = '';
 					this.pwOld    = '';
 					this.newInput = false;
-					
+
 					if(res.length > 1)
 						this.aesGcmExportBase64(newLoginKey).then(keyBase64 => {
 							this.$store.commit('loginPrivateKeyEnc',newPrivateKeyEnc);
@@ -727,7 +727,7 @@ const MySettingsClientEvents = {
 		};
 	},
 	computed:{
-		modulesWithClientEvents:(s) => {
+		modulesWithClientEvents:s => {
 			let out = [];
 			for(const modId in s.moduleIdMap) {
 				const mod = s.moduleIdMap[modId];
@@ -737,7 +737,7 @@ const MySettingsClientEvents = {
 					// only include hotkey events and only if there is access
 					if(ce.event !== 'onHotkey' || s.access.clientEvent[ce.id] === undefined)
 						continue;
-					
+
 					// overwrite defaults with login options if there
 					if(s.clientEventIdMapLogin[ce.id] !== undefined) {
 						ce.hotkeyChar      = s.clientEventIdMapLogin[ce.id].hotkeyChar;
@@ -756,10 +756,10 @@ const MySettingsClientEvents = {
 		},
 
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		access:     (s) => s.$store.getters.access,
-		capApp:     (s) => s.$store.getters.captions.settings.clientEvents,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		access:     s => s.$store.getters.access,
+		capApp:     s => s.$store.getters.captions.settings.clientEvents,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.get();
@@ -772,7 +772,7 @@ const MySettingsClientEvents = {
 		// actions
 		reloadWithChangedEvents() {
 			this.get();
-			
+
 			// inform connected fat clients about updated client events
 			ws.send('event','clientEventsChanged',{},false);
 		},
@@ -855,7 +855,7 @@ const MySettingsFixedTokens = {
 				</tbody>
 			</table>
 		</div>
-		
+
 		<div class="settings-token-actions">
 			<my-button image="screen.png"
 				@trigger="showSubWindow('install')"
@@ -867,7 +867,7 @@ const MySettingsFixedTokens = {
 				:caption="capApp.titleMfa"
 			/>
 		</div>
-		
+
 		<!-- MFA sub window -->
 		<div class="app-sub-window" v-if="showMfa">
 			<div class="contentBox float settings-mfa">
@@ -883,17 +883,17 @@ const MySettingsFixedTokens = {
 						/>
 					</div>
 				</div>
-				
+
 				<div class="content">
 					<div class="column">
 						<span>{{ capApp.mfa.intro }}</span>
 						<br />
-						
+
 						<span>{{ capApp.mfa.appsExample }}</span>
 						<ul>
 							<li v-for="l in capApp.mfa.apps">{{ l }}</li>
 						</ul>
-						
+
 						<div class="row gap centered default-inputs">
 							<span>{{ capApp.mfa.name }}</span>
 							<div class="settings-mfa-input">
@@ -905,7 +905,7 @@ const MySettingsFixedTokens = {
 								/>
 							</div>
 						</div>
-						
+
 						<br />
 						<div>
 							<my-button image="ok.png"
@@ -915,24 +915,24 @@ const MySettingsFixedTokens = {
 								:caption="capGen.button.ok"
 							/>
 						</div>
-						
+
 						<!-- scannable code -->
 						<div class="settings-mfa-qrcode shade clickable" ref="qrcode"
 							v-show="tokenSet"
 							@click="showMfaText = !showMfaText"
 						></div>
-						
+
 						<template v-if="showMfaText">
 							<span class="settings-mfa-uri">{{ qrCodeUri }}</span>
 							<br />
 						</template>
-						
+
 						<span v-if="tokenSet">{{ capApp.mfa.outro }}</span>
 					</div>
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- device install sub window -->
 		<div class="app-sub-window" v-if="showInstall" @mousedown.self="showInstall = false">
 			<div class="contentBox float settings-devices">
@@ -969,7 +969,7 @@ const MySettingsFixedTokens = {
 						<span v-html="capApp.device.adminInfo"></span>
 					</template>
 				</div>
-				
+
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['install','update','uninstall']"
@@ -1054,7 +1054,7 @@ const MySettingsFixedTokens = {
 			showInstall:false,
 			showMfa:false,
 			showMfaText:false,
-			
+
 			// inputs
 			deviceOs:'amd64_windows',
 			tokenFixed:'',
@@ -1064,25 +1064,25 @@ const MySettingsFixedTokens = {
 		};
 	},
 	computed:{
-		qrCodeUri:(s) => {
+		qrCodeUri:s => {
 			let app = encodeURIComponent(s.appNameShort+' - '+s.tokenName);
 			let usr = encodeURIComponent(s.loginName);
 			let uri = `otpauth://totp/${app}:${usr}?issuer=${app}&secret=${s.tokenFixedB32}`;
 			return !s.tokenSet ? '' : uri;
 		},
-		tokenSet:(s) => s.tokenFixed !== '',
-		urlApp:(s) => `/client/download/?${[`os=${s.deviceOs}`,`token=${s.token}`].join('&')}`,
-		urlCnf:(s) => {
+		tokenSet:s => s.tokenFixed !== '',
+		urlApp:s => `/client/download/?${[`os=${s.deviceOs}`,`token=${s.token}`].join('&')}`,
+		urlCnf:s => {
 			const langCode = s.languageCodesOfficial.includes(s.languageCode)
 				? s.languageCode : 'en_us';
-			
+
 			const isSsl = location.protocol.includes('https');
 			let port  = location.port;
-			
+
 			// known issue, empty is returned if port is default HTTP(S)
 			if(port === null || port === '')
 				port = isSsl ? '443' : '80';
-			
+
 			const call = [
 				`deviceName=${s.tokenName}`,
 				`hostName=${location.hostname}`,
@@ -1094,17 +1094,17 @@ const MySettingsFixedTokens = {
 			];
 			return `/client/download/config/?${call.join('&')}`;
 		},
-		
+
 		// stores
-		appNameShort:         (s) => s.$store.getters['local/appNameShort'],
-		token:                (s) => s.$store.getters['local/token'],
-		capApp:               (s) => s.$store.getters.captions.settings.tokensFixed,
-		capGen:               (s) => s.$store.getters.captions.generic,
-		isAdmin:              (s) => s.$store.getters.isAdmin,
-		isAllowedMfa:         (s) => s.$store.getters.isAllowedMfa,
-		languageCode:         (s) => s.$store.getters.settings.languageCode,
-		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
-		loginName:            (s) => s.$store.getters.loginName
+		appNameShort:         s => s.$store.getters['local/appNameShort'],
+		token:                s => s.$store.getters['local/token'],
+		capApp:               s => s.$store.getters.captions.settings.tokensFixed,
+		capGen:               s => s.$store.getters.captions.generic,
+		isAdmin:              s => s.$store.getters.isAdmin,
+		isAllowedMfa:         s => s.$store.getters.isAllowedMfa,
+		languageCode:         s => s.$store.getters.settings.languageCode,
+		languageCodesOfficial:s => s.$store.getters.constants.languageCodesOfficial,
+		loginName:            s => s.$store.getters.loginName
 	},
 	watch:{
 		qrCodeUri(v) {
@@ -1118,7 +1118,7 @@ const MySettingsFixedTokens = {
 	},
 	mounted() {
 		this.get();
-		
+
 		// set default client
 		if     (navigator.userAgent.includes('Win64'))        this.deviceOs = 'amd64_windows';
 		else if(navigator.userAgent.includes('WOW64'))        this.deviceOs = 'amd64_windows';
@@ -1129,7 +1129,7 @@ const MySettingsFixedTokens = {
 	methods:{
 		// externals
 		getUnixFormat,
-		
+
 		// actions
 		showSubWindow(target) {
 			this.tokenFixed    = '';
@@ -1140,7 +1140,7 @@ const MySettingsFixedTokens = {
 				case 'mfa':     this.showMfa     = true; break;
 			}
 		},
-		
+
 		// presentation
 		displayContextIcon(v) {
 			switch(v) {
@@ -1158,7 +1158,7 @@ const MySettingsFixedTokens = {
 			}
 			return '-';
 		},
-		
+
 		// backend calls
 		delAsk(id) {
 			this.tokenIdDel = id;
@@ -1237,7 +1237,7 @@ export default {
 			</div>
 		</div>
 		<div class="content" :style="patternStyle" v-if="settingsLoaded">
-		
+
 			<!-- general -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -1280,13 +1280,14 @@ export default {
 						<tr><td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.sundayFirstDow"   :caption="capApp.sundayFirstDow"   /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.tabRemember"      :caption="capApp.tabRemember"      /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.collapseRemember" :caption="capApp.collapseRemember" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.warnUnsaved"      :caption="capApp.warnUnsaved"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.mobileScrollForm" :caption="capApp.mobileScrollForm" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.boolAsIcon"       :caption="capApp.boolAsIcon"       /></td></tr>
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- theme -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -1329,7 +1330,7 @@ export default {
 											<option value="lucida_console">Lucida Console</option>
 										</optgroup>
 									</select>
-									
+
 									<select v-model="settingsInput.fontSize" :title="capApp.fontSize">
 										<option v-for="i in 11"
 											:value="70 + (i*5)"
@@ -1421,7 +1422,7 @@ export default {
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- account -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -1430,7 +1431,7 @@ export default {
 				</div>
 				<my-settings-account />
 			</div>
-			
+
 			<!-- fixed tokens (device access) -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -1439,7 +1440,7 @@ export default {
 				</div>
 				<my-settings-fixed-tokens />
 			</div>
-			
+
 			<!-- client events (global hotkeys) -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -1448,7 +1449,7 @@ export default {
 				</div>
 				<my-settings-client-events />
 			</div>
-			
+
 			<!-- encryption -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -1476,7 +1477,7 @@ export default {
 		}
 	},
 	computed:{
-		languageCodesModulesAndCustom:(s) => {
+		languageCodesModulesAndCustom:s => {
 			let langs = s.languageCodesModules;
 			for(const k in s.moduleIdMapMeta) {
 				for(const l of s.moduleIdMapMeta[k].languagesCustom) {
@@ -1486,16 +1487,16 @@ export default {
 			}
 			return langs
 		},
-		
+
 		// stores
-		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
-		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
-		capGen:               (s) => s.$store.getters.captions.generic,
-		capApp:               (s) => s.$store.getters.captions.settings,
-		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
-		moduleIdMapMeta:      (s) => s.$store.getters.moduleIdMapMeta,
-		patternStyle:         (s) => s.$store.getters.patternStyle,
-		settings:             (s) => s.$store.getters.settings
+		languageCodes:        s => s.$store.getters['schema/languageCodes'],
+		languageCodesModules: s => s.$store.getters['schema/languageCodesModules'],
+		capGen:               s => s.$store.getters.captions.generic,
+		capApp:               s => s.$store.getters.captions.settings,
+		languageCodesOfficial:s => s.$store.getters.constants.languageCodesOfficial,
+		moduleIdMapMeta:      s => s.$store.getters.moduleIdMapMeta,
+		patternStyle:         s => s.$store.getters.patternStyle,
+		settings:             s => s.$store.getters.settings
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);

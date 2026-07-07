@@ -2909,6 +2909,7 @@
 			"intro": "Wenn die REI3-Client-Anwendung (s. \"Geräte\") installiert ist, können globale Hotkeys eingestellt werden. Diese werden verwendet, um mit REI3 zu interagieren, wenn es im Hintergrund läuft.",
 			"noEvents": "Aktuell sind keine REI3-Anwendungen verfügbar, die Hotkeys anbieten."
 		},
+		"collapseRemember": "Eingeklappte Felder: Zustand wiederherstellen",
 		"colorClassicMode": "Farbschema",
 		"colorClassicMode0": "Modern",
 		"colorClassicMode1": "Klassisch",

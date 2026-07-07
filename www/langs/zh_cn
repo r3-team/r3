@@ -2909,6 +2909,7 @@
 			"intro": "If the REI3 client application (see 'Devices') is installed, you can set global hotkeys. These are used to interact with REI3 as it runs in the background.",
 			"noEvents": "There are currently no REI3 applications accessible that offer hotkeys."
 		},
+		"collapseRemember": "Collapsed fields: Recover last state",
 		"colorClassicMode": "颜色方案",
 		"colorClassicMode0": "现代",
 		"colorClassicMode1": "经典",

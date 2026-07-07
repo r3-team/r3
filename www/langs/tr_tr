@@ -2909,6 +2909,7 @@
 			"intro": "REI3 istemci uygulaması (bkz. 'Cihazlar') yüklüyse genel kısayol tuşlarını ayarlayabilirsiniz. Bunlar arka planda çalışırken REI3 ile etkileşimde bulunmak için kullanılır.",
 			"noEvents": "Şu anda kısayol tuşları sunan hiçbir REI3 uygulaması mevcut değil."
 		},
+		"collapseRemember": "Collapsed fields: Recover last state",
 		"colorClassicMode": "Renk şeması",
 		"colorClassicMode0": "Modern",
 		"colorClassicMode1": "Klasik",

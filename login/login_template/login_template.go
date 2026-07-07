@@ -22,7 +22,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 func Get_tx(ctx context.Context, tx pgx.Tx, byId int64) ([]types.LoginTemplateAdmin, error) {
 	templates := make([]types.LoginTemplateAdmin, 0)
 
-	sqlParams := make([]interface{}, 0)
+	sqlParams := make([]any, 0)
 	sqlWhere := ""
 	if byId != 0 {
 		sqlParams = append(sqlParams, byId)

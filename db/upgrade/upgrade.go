@@ -323,6 +323,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			FROM app.field
 			WHERE content = 'tabs';
 
+			ALTER TABLE instance.login_setting ADD   COLUMN collapse_remember BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN collapse_remember DROP DEFAULT;
+
 			-- mail (re)send options
 			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER;
 			ALTER TABLE instance.mail_account ADD   COLUMN send_seconds   INTEGER NOT NULL DEFAULT 60;
