@@ -442,13 +442,13 @@ const MyGantt = {
 			return d;
 		},
 		date1:s => {
-			let d = new Date(s.dateStart.getTime());
-			switch(s.stepType) {
-				case 'hours': d.setHours(d.getHours() + s.steps - 3 + (s.page * s.steps)); break;
-				case 'days': d.setDate(d.getDate() + s.steps - 3 + (s.page * s.steps)); break;
-				case 'months': d.setMonth(d.getMonth() + s.steps - 3 + (s.page * s.steps)); break;
-				case 'quarters': d.setMonth(d.getMonth() + (s.steps * 3) - 3 + (s.page * s.steps)); break;
-				case 'half-years': d.setMonth(d.getMonth() + (s.steps * 6) - 3 + (s.page * s.steps)); break;
+			let d = new Date(s.date0.getTime());
+			switch (s.stepType) {
+				case 'hours': d.setHours(d.getHours() + s.steps); break;
+				case 'days': d.setDate(d.getDate() + s.steps); break;
+				case 'months': d.setMonth(d.getMonth() + s.steps); break;
+				case 'quarters': d.setMonth(d.getMonth() + (s.steps * 3)); break;
+				case 'half-years': d.setMonth(d.getMonth() + (s.steps * 6)); break;
 			}
 			return d;
 		},
@@ -483,8 +483,8 @@ const MyGantt = {
 						: `${s.getDateFormat(d0, 'Y-m')} - ${s.getDateFormat(d1, 'Y-m')}`
 					break;
 				case 'quarters':
-					const d0Quarter = parseInt((d0.getMonth() + 1) / 3) + 1;
-					const d1Quarter = parseInt((d1.getMonth() + 1) / 3) + 1;
+					const d0Quarter = s.getDateCurrentQuarter(d0);
+					const d1Quarter = s.getDateCurrentQuarter(d1);
 					if (s.isMobile)
 						return `${d0.getFullYear()}-Q${d0Quarter}`;
 
@@ -606,7 +606,7 @@ const MyGantt = {
 		if(this.usesHotkeys)
 			window.addEventListener('keydown',this.handleHotkeys);
 
-		this.dateStart = this.getDateNowRounded();
+		this.dateStart = this.getDateRounded(new Date());
 		this.ready     = true;
 		this.$nextTick(() => this.setSteps(false));
 	},
@@ -665,7 +665,7 @@ const MyGantt = {
 			// create one meta header item for each meta switch (new day/month/quarter/...)
 			let stepsTaken = 0;
 			let d = new Date(this.date0.getTime());
-			for(; d < this.date1;) {
+			while(d < this.date1) {
 				stepsTaken++;
 				add(d);
 
@@ -717,7 +717,7 @@ const MyGantt = {
 			// add last meta header item
 			if(stepsTaken !== 0) {
 				switch(this.stepType) {
-					case 'hours': addMeta(stepsTaken,d.getDate());  break;
+					case 'hours': addMeta(stepsTaken,d.getDate()); break;
 					case 'days': addMeta(stepsTaken,d.getMonth()); break;
 					case 'months': addMeta(stepsTaken,d.getFullYear()); break;
 					case 'quarters': addMeta(stepsTaken,d.getFullYear()); break;
@@ -739,8 +739,8 @@ const MyGantt = {
 
 			if(this.unixInput0 !== null && this.unixInput1 !== null) {
 				let attributes = [
-					`${this.attributeIdDate0}_${this.isDateBased ? this.getUnixShifted(this.unixInput0,false) : this.unixInput0}`,
-					`${this.attributeIdDate1}_${this.isDateBased ? this.getUnixShifted(this.unixInput1,false) : this.unixInput1}`
+					`${this.attributeIdDate0}_${this.unixInput0}`,
+					`${this.attributeIdDate1}_${this.unixInput1}`
 				];
 				this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],false);
 			}
@@ -833,19 +833,28 @@ const MyGantt = {
 		},
 
 		// helpers
-		getDateNowRounded() {
-			let d = new Date();
-			d.setMinutes(0);
-			d.setSeconds(0);
-			d.setMilliseconds(0);
+		getDateRounded(d) {
+			d.setUTCMinutes(0);
+			d.setUTCSeconds(0);
+			d.setUTCMilliseconds(0);
 
 			if(this.stepType !== 'hours')
-				d.setHours(0);
+				d.setUTCHours(0);
 
 			if(this.stepType !== 'hours' && this.stepType !== 'days')
-				d.setDate(1);
+				d.setUTCDate(1);
+
+			if(this.stepType === 'quarters')
+				d.setMonth((this.getDateCurrentQuarter(d)-1) * 3); // set date to start of current quarter
+
+			if(this.stepType === 'half-years')
+				d.setMonth(d.getMonth() < 6 ? 0 : 6); // set date to start of current half-year
 
 			return d;
+		},
+		getDateCurrentQuarter(d) {
+			// returns quarter number, as in 1,2,3,4
+			return parseInt(d.getMonth() / 3) + 1;
 		},
 		getFreeLineIndex(lines,date0,date1) {
 			let index;
