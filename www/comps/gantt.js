@@ -784,19 +784,6 @@ const MyGantt = {
 		scrollToNow() {
 			if(this.page !== 0)
 				return this.pageChange(this.page-(this.page*2));
-
-			/*let d = this.getDateNowRounded();
-			let secFromStart = (d-this.date0) / 1000;
-
-			// target a couple of steps before now for better overview
-			switch(this.stepType) {
-				case 'hours': secFromStart -= 3600 * 3; break;
-				case 'days': secFromStart -= 86400 * 3; break;
-				case 'months': secFromStart -= 2592000 * 3; break;
-				case 'quarters': secFromStart -= 7776000 * 3; break;
-				case 'half-years': secFromStart -= 15552000 * 3; break;
-			}
-			this.$refs.content.scrollLeft = this.pxPerSec * secFromStart;*/
 		},
 
 		// page routing

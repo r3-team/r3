@@ -2453,12 +2453,12 @@
 		"dateFormat3": "d/m/Y (30/12/2012)",
 		"dateFormat4": "m/d/Y (12/30/2012)",
 		"dateSteps": {
-			"days": "Days",
-			"halfYears": "Half-years",
-			"hours": "Hours",
-			"months": "Months",
-			"quarters": "Quarters",
-			"years": "Years"
+			"days": "Tage",
+			"halfYears": "Halbjahre",
+			"hours": "Stunden",
+			"months": "Monate",
+			"quarters": "Quartale",
+			"years": "Jahre"
 		},
 		"default": "Standard",
 		"defaultValue": "Standardwert",
