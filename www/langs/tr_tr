@@ -1069,8 +1069,6 @@
 					"slider": "değer kaydırıcısı",
 					"url": "URL"
 				},
-				"ganttStepsDays": "günler",
-				"ganttStepsHours": "saat",
 				"style": {
 					"bold": "Gözü pek",
 					"italic": "İtalik"
@@ -2454,6 +2452,14 @@
 		"dateFormat2": "d.m.Y (30.12.2012)",
 		"dateFormat3": "g/a/Y (30/12/2012)",
 		"dateFormat4": "a/g/Y (30/12/2012)",
+		"dateSteps": {
+			"days": "Days",
+			"halfYears": "Half-years",
+			"hours": "Hours",
+			"months": "Months",
+			"quarters": "Quarters",
+			"years": "Years"
+		},
 		"default": "Varsayılan",
 		"defaultValue": "Varsayılan değer",
 		"description": "Tanım",

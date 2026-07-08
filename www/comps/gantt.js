@@ -69,8 +69,8 @@ const MyGanttLineRecord = {
 		date1Range:   { type:Date,   required:true }, // end date of gantt range
 		hasUpdate:    { type:Boolean,required:true },
 		indexesHidden:{ type:Array,  required:true }, // hidden column indexes (either it is hidden or used as Gantt group)
-		isDays:       { type:Boolean,required:true },
-		pxPerSec:     { type:Number, required:true }, // pixel per second on gantt
+		isDateBased:  { type:Boolean,required:true },
+		pxLine:       { type:Number, required:true }, // total length in pixels of 1 Gantt line
 		row:          { type:Object, required:true },
 		values:       { type:Array,  required:true }
 	},
@@ -85,26 +85,28 @@ const MyGanttLineRecord = {
 			if(this.date1Range < d1) d1 = this.date1Range;
 
 			// calculate width and offset to gantt start
+			const secLine = (this.date1Range - this.date0Range) / 1000;
 			let secOffset = (d0 - this.date0Range) / 1000;
 			let secWidth  = (d1 - d0) / 1000;
 
 			// correction for DST change in day mode
-			if(this.isDays) {
+			if(this.isDateBased) {
 				let secDst0 = this.date0Range.getTimezoneOffset()*60;
 				let secDst1 = d0.getTimezoneOffset()*60;
 				secOffset += secDst0 - secDst1;
 			}
 
-			const offset = secOffset * this.pxPerSec;
-			const width  = secWidth  * this.pxPerSec;
+			// width in px = factor of width (seconds of record / seconds of line) * total pixels of line
+			const pxOffset = secOffset / secLine * this.pxLine;
+			const pxWidth = secWidth / secLine * this.pxLine;
 
-			if(width < 1)
+			if(pxWidth < 1)
 				return 'display:none';
 
 			// max-width is overwritten by CSS if hovered over (show full entry)
-			return [`min-width:${width}px`,`max-width:${width}px`,`left:${offset}px`].join(';');
+			return [`min-width:${pxWidth}px`,`max-width:${pxWidth}px`,`left:${pxOffset}px`].join(';');
 		},
-		styleBg(r) {
+		styleBg() {
 			if(this.color === null) return '';
 			const colorBg   = this.colorAdjustBg(this.color);
 			const colorFont = this.colorMakeContrastFont(colorBg);
@@ -139,8 +141,8 @@ const MyGanttLine = {
 			:date1Range
 			:hasUpdate
 			:indexesHidden
-			:isDays
-			:pxPerSec
+			:isDateBased
+			:pxLine
 			:key="i+'_'+r.row.indexRecordIds['0']"
 			:row="r.row"
 			:values="r.values"
@@ -152,8 +154,8 @@ const MyGanttLine = {
 		date0Range:   { type:Date,   required:true },
 		date1Range:   { type:Date,   required:true },
 		hasUpdate:    { type:Boolean,required:true },
-		isDays:       { type:Boolean,required:true },
-		pxPerSec:     { type:Number, required:true },
+		isDateBased:  { type:Boolean,required:true },
+		pxLine:       { type:Number, required:true },
 		records:      { type:Array,  required:true }
 	},
 	emits:['record-selected']
@@ -215,10 +217,10 @@ const MyGantt = {
 				/>
 
 				<my-button
-					v-if="!isMobile && stepTypeToggle"
-					@trigger="$emit('set-login-option','ganttStepType', stepType === 'days' ? 'hours' : 'days')"
+					v-if="stepTypeToggle"
+					@trigger="toggleStepType"
+					:caption="stepType.toUpperCase()"
 					:captionTitle="capApp.button.ganttToggleHint"
-					:image="isDays ? 'clock.png' : 'clock24.png'"
 					:naked="true"
 				/>
 
@@ -277,7 +279,7 @@ const MyGantt = {
 					</div>
 					<div class="gantt-header-dates">
 
-						<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
+						<!-- header meta line: shows groupings of step entities (hours->days, days->months, months->years, quarters->years, half-years->years) -->
 						<div class="gantt-header-dates-upper">
 							<div class="gantt-header-item"
 								v-for="i in headerItemsMeta"
@@ -339,8 +341,8 @@ const MyGantt = {
 								:date1Range="date1"
 								:hasUpdate
 								:indexesHidden="group0LabelExpressionIndexes"
-								:isDays="isDays"
-								:pxPerSec="pxPerSec"
+								:isDateBased
+								:pxLine="stepPixels * steps"
 								:key="i+'_'+li"
 								:style="styleLine"
 								:records="l"
@@ -431,37 +433,75 @@ const MyGantt = {
 			let d = new Date(s.dateStart.getTime());
 			// start 3 steps before page start point
 			switch(s.stepType) {
-				case 'days':  d.setDate(d.getDate()   - 3 + (s.page*s.steps)); break;
-				case 'hours': d.setHours(d.getHours() - 3 + (s.page*s.steps)); break;
+				case 'hours': d.setHours(d.getHours() - 3 + (s.page * s.steps)); break;
+				case 'days': d.setDate(d.getDate() - 3 + (s.page * s.steps)); break;
+				case 'months': d.setMonth(d.getMonth() - 3 + (s.page * s.steps)); break;
+				case 'quarters': d.setMonth(d.getMonth() - 9 + (s.page * s.steps)); break;
+				case 'half-years': d.setMonth(d.getMonth() - 18 + (s.page * s.steps)); break;
 			}
 			return d;
 		},
 		date1:s => {
 			let d = new Date(s.dateStart.getTime());
 			switch(s.stepType) {
-				case 'days':  d.setDate(d.getDate()   + s.steps - 3 + (s.page*s.steps)); break;
-				case 'hours': d.setHours(d.getHours() + s.steps - 3 + (s.page*s.steps)); break;
+				case 'hours': d.setHours(d.getHours() + s.steps - 3 + (s.page * s.steps)); break;
+				case 'days': d.setDate(d.getDate() + s.steps - 3 + (s.page * s.steps)); break;
+				case 'months': d.setMonth(d.getMonth() + s.steps - 3 + (s.page * s.steps)); break;
+				case 'quarters': d.setMonth(d.getMonth() + (s.steps * 3) - 3 + (s.page * s.steps)); break;
+				case 'half-years': d.setMonth(d.getMonth() + (s.steps * 6) - 3 + (s.page * s.steps)); break;
 			}
 			return d;
 		},
 
-		dateRangeLabel:s => {
+		dateRangeLabel: s => {
+			let format = s.settings.dateFormat;
 			let d0 = new Date(s.date0.getTime());
 			let d1 = new Date(s.date1.getTime());
-			let format = s.isDays ? s.settings.dateFormat : s.settings.dateFormat+' H:i';
-			if(s.isDays) {
-				d1.setDate(d1.getDate()-1);
-				return s.isMobile ? s.getDateFormat(d0,format)
-					: s.getDateFormat(d0,format) + ' - ' +s.getDateFormat(d1,format);
-			}
-			if(s.isHours) {
-				if(s.isMobile)
-					return s.getDateFormat(d0,format);
+			switch (s.stepType) {
+				case 'hours':
+					format = s.settings.dateFormat + ' H:i';
+					if (s.isMobile)
+						return s.getDateFormat(d0, format);
 
-				if(d0.getDate() === d1.getDate())
-					return s.getDateFormat(d0,format) + '-' +s.getDateFormat(d1,'H:i');
+					return d0.getDate() === d1.getDate()
+						? s.getDateFormat(d0, format) + '-' + s.getDateFormat(d1, 'H:i')
+						: s.getDateFormat(d0, format) + ' - ' + s.getDateFormat(d1, format);
+					break;
+				case 'days':
+					d1.setDate(d1.getDate() - 1);
+					return s.isMobile
+						? s.getDateFormat(d0, format)
+						: s.getDateFormat(d0, format) + ' - ' + s.getDateFormat(d1, format);
+					break;
+				case 'months':
+					format = 'Y-m';
+					if (s.isMobile)
+						return s.getDateFormat(d0, format);
 
-				return s.getDateFormat(d0,format) + ' - ' +s.getDateFormat(d1,format);
+					return d0.getMonth() === d1.getMonth() && d0.getFullYear() === d1.getFullYear()
+						? s.getDateFormat(d0, 'Y-m')
+						: `${s.getDateFormat(d0, 'Y-m')} - ${s.getDateFormat(d1, 'Y-m')}`
+					break;
+				case 'quarters':
+					const d0Quarter = parseInt((d0.getMonth() + 1) / 3) + 1;
+					const d1Quarter = parseInt((d1.getMonth() + 1) / 3) + 1;
+					if (s.isMobile)
+						return `${d0.getFullYear()}-Q${d0Quarter}`;
+
+					return d0Quarter === d1Quarter && d0.getFullYear() === d1.getFullYear()
+						? `${d0.getFullYear()}-Q${d0Quarter}`
+						: `${d0.getFullYear()}-Q${d0Quarter} - ${d1.getFullYear()}-Q${d1Quarter}`;
+				break;
+				case 'half-years':
+					const d0HalfYear = d0.getMonth() < 6 ? '1' : '2';
+					const d1HalfYear = d1.getMonth() < 6 ? '1' : '2';
+					if (s.isMobile)
+						return `${d0.getFullYear()}-H${d0HalfYear}`;
+
+					return d0HalfYear === d1HalfYear && d0.getFullYear() === d1.getFullYear()
+						? `${d0.getFullYear()}-H${d0HalfYear}`
+						: `${d0.getFullYear()}-H${d0HalfYear} - ${d1.getFullYear()}-H${d1HalfYear}`;
+				break;
 			}
 			return '';
 		},
@@ -489,11 +529,6 @@ const MyGantt = {
 		},
 
 		// presentation
-		pxPerSec:s => {
-			if     (s.isHours) return s.stepPixels / 3600;
-			else if(s.isDays)  return s.stepPixels / 86400;
-			return 0.0;
-		},
 		styleLine:s => {
 			return [
 				`max-width:${s.stepPixels * s.steps}px`,
@@ -507,9 +542,8 @@ const MyGantt = {
 		hasColor:         s => s.attributeIdColor !== null,
 		hasCreate:        s => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
 		hasUpdate:        s => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		isDays:           s => s.stepType === 'days',
 		isEmpty:          s => s.groups.length === 0,
-		isHours:          s => s.stepType === 'hours',
+		isDateBased:      s => s.stepType !== 'hours',
 		joins:            s => s.fillRelationRecordIds(s.query.joins),
 		stepPixels:       s => s.stepBase * s.stepZoom,
 		styleHeaderItem:  s => `width:${s.stepPixels}px;`,
@@ -600,59 +634,83 @@ const MyGantt = {
 		srcBase64Icon,
 
 		createHeaderItems() {
-			let that = this;
 			this.headerItems     = [];
 			this.headerItemsMeta = [];
 
-			let addMeta = function(steps,value) {
-				that.headerItemsMeta.push({
+			const addMeta = (steps,value) => {
+				this.headerItemsMeta.push({
 					steps:steps,
 					value:value
 				});
 			};
-			let add = function(d) {
-				let caption;
-				if(that.isHours) caption = d.getHours();
-				if(that.isDays)  caption = `${d.getDate()}.`;
+			const add = d => {
+				let caption = '';
+				let showWeekend = false;
+				switch (this.stepType) {
+					case 'hours': caption = d.getHours(); showWeekend = true; break;
+					case 'days': caption = `${d.getDate()}.`; showWeekend = true; break;
+					case 'months': caption = `${d.getMonth() + 1}`; break;
+					case 'quarters': caption = `Q${parseInt((d.getMonth() + 1) / 3) + 1}`; break;
+					case 'half-years': caption = d.getMonth() < 6 ? 'H1' : 'H2'; break;
+				}
 
-				that.headerItems.push({
-					caption:caption,
-					isWeekend:d.getDay() === 0 || d.getDay() === 6,
-					unixTime:that.getUnixFromDate(d)
+				this.headerItems.push({
+					caption,
+					isWeekend:showWeekend && (d.getDay() === 0 || d.getDay() === 6),
+					unixTime:this.getUnixFromDate(d)
 				});
 			};
 
 			// create one header item for each date step
-			// create one meta header item for each meta switch (new day/new month)
+			// create one meta header item for each meta switch (new day/month/quarter/...)
 			let stepsTaken = 0;
 			let d = new Date(this.date0.getTime());
 			for(; d < this.date1;) {
 				stepsTaken++;
 				add(d);
 
-				if(this.isDays) {
-					d.setDate(d.getDate()+1);
+				switch (this.stepType) {
+					case 'hours':
+						d.setHours(d.getHours()+1);
 
-					// next month meta item
-					if(d.getDate() === 1) {
-						let dCopy = new Date(d.getTime());
-						dCopy.setDate(dCopy.getDate() - 1);
+						// next day meta item
+						if(d.getHours() === 0) {
+							let dCopy = new Date(d.getTime());
+							dCopy.setHours(dCopy.getHours() - 1);
 
-						addMeta(stepsTaken,dCopy.getMonth());
-						stepsTaken = 0;
-					}
-				}
-				else if(this.isHours) {
-					d.setHours(d.getHours()+1);
+							addMeta(stepsTaken,dCopy.getDate());
+							stepsTaken = 0;
+						}
+					break;
+					case 'days':
+						d.setDate(d.getDate()+1);
 
-					// next day meta item
-					if(d.getHours() === 0) {
-						let dCopy = new Date(d.getTime());
-						dCopy.setHours(dCopy.getHours() - 1);
+						// next month meta item
+						if(d.getDate() === 1) {
+							let dCopy = new Date(d.getTime());
+							dCopy.setDate(dCopy.getDate() - 1);
 
-						addMeta(stepsTaken,dCopy.getDate());
-						stepsTaken = 0;
-					}
+							addMeta(stepsTaken,dCopy.getMonth());
+							stepsTaken = 0;
+						}
+					break;
+					case 'months': // fallthrough
+					case 'quarters': // fallthrough
+					case 'half-years':
+						const yearCurr = d.getFullYear();
+
+						switch (this.stepType) {
+							case 'months': d.setMonth(d.getMonth() + 1); break;
+							case 'quarters': d.setMonth(d.getMonth() + 3); break;
+							case 'half-years': d.setMonth(d.getMonth() + 6); break;
+						}
+
+						// next year meta item
+						if(yearCurr !== d.getFullYear()) {
+							addMeta(stepsTaken,yearCurr);
+							stepsTaken = 0;
+						}
+					break;
 				}
 			}
 
@@ -660,7 +718,10 @@ const MyGantt = {
 			if(stepsTaken !== 0) {
 				switch(this.stepType) {
 					case 'hours': addMeta(stepsTaken,d.getDate());  break;
-					case 'days':  addMeta(stepsTaken,d.getMonth()); break;
+					case 'days': addMeta(stepsTaken,d.getMonth()); break;
+					case 'months': addMeta(stepsTaken,d.getFullYear()); break;
+					case 'quarters': addMeta(stepsTaken,d.getFullYear()); break;
+					case 'half-years': addMeta(stepsTaken,d.getFullYear()); break;
 				}
 			}
 		},
@@ -678,8 +739,8 @@ const MyGantt = {
 
 			if(this.unixInput0 !== null && this.unixInput1 !== null) {
 				let attributes = [
-					`${this.attributeIdDate0}_${this.isDays ? this.getUnixShifted(this.unixInput0,false) : this.unixInput0}`,
-					`${this.attributeIdDate1}_${this.isDays ? this.getUnixShifted(this.unixInput1,false) : this.unixInput1}`
+					`${this.attributeIdDate0}_${this.isDateBased ? this.getUnixShifted(this.unixInput0,false) : this.unixInput0}`,
+					`${this.attributeIdDate1}_${this.isDateBased ? this.getUnixShifted(this.unixInput1,false) : this.unixInput1}`
 				];
 				this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],false);
 			}
@@ -711,18 +772,31 @@ const MyGantt = {
 			clearTimeout(this.resizeTimer);
 			this.resizeTimer = setTimeout(() => this.setSteps(false),150);
 		},
+		toggleStepType() {
+			let stepType;
+			if      (this.stepType === 'hours') stepType = 'days';
+			else if (this.stepType === 'days') stepType = 'months';
+			else if (this.stepType === 'months') stepType = 'quarters';
+			else if (this.stepType === 'quarters') stepType = 'half-years';
+			else if (this.stepType === 'half-years') stepType = 'hours';
+			this.$emit('set-login-option', 'ganttStepType', stepType);
+		},
 		scrollToNow() {
 			if(this.page !== 0)
 				return this.pageChange(this.page-(this.page*2));
 
-			let d = this.getDateNowRounded();
+			/*let d = this.getDateNowRounded();
 			let secFromStart = (d-this.date0) / 1000;
 
 			// target a couple of steps before now for better overview
-			if(this.isHours) secFromStart -= 3600  * 3; // 3 hours
-			if(this.isDays)  secFromStart -= 86400 * 3; // 3 days
-
-			this.$refs.content.scrollLeft = this.pxPerSec * secFromStart;
+			switch(this.stepType) {
+				case 'hours': secFromStart -= 3600 * 3; break;
+				case 'days': secFromStart -= 86400 * 3; break;
+				case 'months': secFromStart -= 2592000 * 3; break;
+				case 'quarters': secFromStart -= 7776000 * 3; break;
+				case 'half-years': secFromStart -= 15552000 * 3; break;
+			}
+			this.$refs.content.scrollLeft = this.pxPerSec * secFromStart;*/
 		},
 
 		// page routing
@@ -743,11 +817,16 @@ const MyGantt = {
 
 		// presentation
 		displayHeaderMetaItem(value) {
-			if(this.isHours) // add days as: 12., 13., ...
-				return `${value}.`;
-
-			if(this.isDays) // add month as: January, ...
-				return this.capApp['month'+value];
+			switch(this.stepType) {
+				case 'hours': return `${value}.`; break; // days shown as: 12., 13., ...
+				case 'days': return this.capApp['month' + value]; break; // months shown as: January, ...
+				case 'months': // fallthrough
+				case 'quarters':
+				case 'half-years':
+					return value;
+				break;
+			}
+			return '';
 		},
 		setSteps(forceReload) {
 			// get count of steps that fit within Gantt content
@@ -769,16 +848,15 @@ const MyGantt = {
 		// helpers
 		getDateNowRounded() {
 			let d = new Date();
+			d.setMinutes(0);
+			d.setSeconds(0);
+			d.setMilliseconds(0);
 
-			// round point in times depending on the gantt step type
-			if(this.isHours || this.isDays) {
-				d.setMinutes(0);
-				d.setSeconds(0);
-				d.setMilliseconds(0);
-			}
-
-			if(this.isDays)
+			if(this.stepType !== 'hours')
 				d.setHours(0);
+
+			if(this.stepType !== 'hours' && this.stepType !== 'days')
+				d.setDate(1);
 
 			return d;
 		},

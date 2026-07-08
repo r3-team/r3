@@ -1069,8 +1069,6 @@
 					"slider": "Értékcsúszka",
 					"url": "URL"
 				},
-				"ganttStepsDays": "Napok",
-				"ganttStepsHours": "Órák",
 				"style": {
 					"bold": "Félkövér",
 					"italic": "Dőlt"
@@ -2454,6 +2452,14 @@
 		"dateFormat2": "n.h.É (30.12.2012)",
 		"dateFormat3": "n/h/É (30/12/2012)",
 		"dateFormat4": "h/n/É (12/30/2012)",
+		"dateSteps": {
+			"days": "Days",
+			"halfYears": "Half-years",
+			"hours": "Hours",
+			"months": "Months",
+			"quarters": "Quarters",
+			"years": "Years"
+		},
 		"default": "Default",
 		"defaultValue": "Default value",
 		"description": "Leírás",

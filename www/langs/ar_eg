@@ -1069,8 +1069,6 @@
 					"slider": "شريط تمرير القيمة",
 					"url": "عنوان URL"
 				},
-				"ganttStepsDays": "أيام",
-				"ganttStepsHours": "ساعات",
 				"style": {
 					"bold": "عريض",
 					"italic": "مائل"
@@ -2454,6 +2452,14 @@
 		"dateFormat2": "دي إم واي (30.12.2012)",
 		"dateFormat3": "يوم/شهر/سنة (30/12/2012)",
 		"dateFormat4": "ش/ي/س (12/30/2012)",
+		"dateSteps": {
+			"days": "Days",
+			"halfYears": "Half-years",
+			"hours": "Hours",
+			"months": "Months",
+			"quarters": "Quarters",
+			"years": "Years"
+		},
 		"default": "Default",
 		"defaultValue": "Default value",
 		"description": "وصف",

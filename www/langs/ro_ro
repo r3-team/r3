@@ -1069,8 +1069,6 @@
 					"slider": "valoarea cursorului",
 					"url": "URL"
 				},
-				"ganttStepsDays": "zile",
-				"ganttStepsHours": "ore",
 				"style": {
 					"bold": "Bold",
 					"italic": "Italic"
@@ -2454,6 +2452,14 @@
 		"dateFormat2": "zz.ll.aaaa (30.12.2012)",
 		"dateFormat3": "aaaa/ll/zz (30/12/2012)",
 		"dateFormat4": "ll/zz/aa (12/30/2012)",
+		"dateSteps": {
+			"days": "Days",
+			"halfYears": "Half-years",
+			"hours": "Hours",
+			"months": "Months",
+			"quarters": "Quarters",
+			"years": "Years"
+		},
 		"default": "Default",
 		"defaultValue": "Default value",
 		"description": "Descriere",

@@ -755,8 +755,11 @@ export default {
 									:disabled="readonly"
 									:value="field.ganttSteps"
 								>
-									<option value="days" >{{ capApp.option.ganttStepsDays }}</option>
-									<option value="hours">{{ capApp.option.ganttStepsHours }}</option>
+									<option value="hours">{{ capGen.dateSteps.hours }}</option>
+									<option value="days" >{{ capGen.dateSteps.days }}</option>
+									<option value="months">{{ capGen.dateSteps.months }}</option>
+									<option value="quarters">{{ capGen.dateSteps.quarters }}</option>
+									<option value="half-years">{{ capGen.dateSteps.halfYears }}</option>
 								</select>
 							</td>
 						</tr>

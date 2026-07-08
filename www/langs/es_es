@@ -1069,8 +1069,6 @@
 					"slider": "deslizador de valor",
 					"url": "URL"
 				},
-				"ganttStepsDays": "días",
-				"ganttStepsHours": "horas",
 				"style": {
 					"bold": "Negrita",
 					"italic": "Cursiva"
@@ -2454,6 +2452,14 @@
 		"dateFormat2": "d.m.Y (30.12.2012)",
 		"dateFormat3": "d/m/Y (30/12/2012)",
 		"dateFormat4": "m/d/Y (12/30/2012)",
+		"dateSteps": {
+			"days": "Days",
+			"halfYears": "Half-years",
+			"hours": "Hours",
+			"months": "Months",
+			"quarters": "Quarters",
+			"years": "Years"
+		},
 		"default": "Predeterminado",
 		"defaultValue": "Valor predeterminado",
 		"description": "Descripción",

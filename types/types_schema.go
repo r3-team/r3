@@ -162,7 +162,7 @@ type FieldCalendar struct {
 	IndexDate1       int                  `json:"indexDate1"`
 	IndexColor       pgtype.Int4          `json:"indexColor"`
 	Gantt            bool                 `json:"gantt"`            // gantt presentation
-	GanttSteps       pgtype.Text          `json:"ganttSteps"`       // gantt step type (hours, days)
+	GanttSteps       pgtype.Text          `json:"ganttSteps"`       // gantt step type (hours, days, months, quarters, half-years)
 	GanttStepsToggle bool                 `json:"ganttStepsToggle"` // user can toggle between gantt step types
 	Ics              bool                 `json:"ics"`              // calendar available as ICS download
 	DateRange0       int64                `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)

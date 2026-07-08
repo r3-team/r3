@@ -337,6 +337,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_upc_a';
 			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_upc_e';
 
+			-- more gantt interval types
+			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'months';
+			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'quarters';
+			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'half-years';
+
 			-- mail (re)send options
 			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER;
 			ALTER TABLE instance.mail_account ADD   COLUMN send_seconds   INTEGER NOT NULL DEFAULT 60;
