@@ -674,6 +674,7 @@
 			"titleAssigned": "Assigned"
 		},
 		"attribute": {
+			"barcodes": "Barcodes/QR codes",
 			"bigint": "Large values",
 			"bigintDates": "Support dates after 2038",
 			"bigintDatesHint": "Needs more storage space, but allows for date values after January of 2038.",
@@ -2424,6 +2425,8 @@
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",
 		"clipboard": "Clipboard",
+		"codeBar": "Barcode",
+		"codeQr": "QR code",
 		"collection": "Colecție",
 		"collections": "Colecții",
 		"color": "Color",

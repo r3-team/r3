@@ -674,6 +674,7 @@
 			"titleAssigned": "مُكَلَّف"
 		},
 		"attribute": {
+			"barcodes": "Barcodes/QR codes",
 			"bigint": "قيم كبيرة",
 			"bigintDates": "مواعيد الدعم بعد عام 2038",
 			"bigintDatesHint": "يحتاج إلى مساحة تخزين أكبر، ولكنه يسمح بقيم التاريخ بعد يناير 2038.",
@@ -2424,6 +2425,8 @@
 		"clientEvent": "حدث العميل",
 		"clientEvents": "أحداث العميل",
 		"clipboard": "الحافظة",
+		"codeBar": "Barcode",
+		"codeQr": "QR code",
 		"collection": "مجموعة",
 		"collections": "المجموعات",
 		"color": "لون",

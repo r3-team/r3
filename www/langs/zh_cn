@@ -674,6 +674,7 @@
 			"titleAssigned": "已分配"
 		},
 		"attribute": {
+			"barcodes": "Barcodes/QR codes",
 			"bigint": "大数值",
 			"bigintDates": "支持2038年后的日期",
 			"bigintDatesHint": "需要更多存储空间，但允许在2038年1月后的日期数值。",
@@ -2424,6 +2425,8 @@
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",
 		"clipboard": "剪贴板",
+		"codeBar": "Barcode",
+		"codeQr": "QR code",
 		"collection": "收藏",
 		"collections": "收藏",
 		"color": "颜色",

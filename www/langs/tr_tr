@@ -674,6 +674,7 @@
 			"titleAssigned": "Atandı"
 		},
 		"attribute": {
+			"barcodes": "Barcodes/QR codes",
 			"bigint": "Büyük değerler",
 			"bigintDates": "2038'den sonraki destek tarihleri",
 			"bigintDatesHint": "Daha fazla depolama alanı gerektirir ancak Ocak 2038'den sonraki tarih değerlerine izin verir.",
@@ -2424,6 +2425,8 @@
 		"clientEvent": "Müşteri etkinliği",
 		"clientEvents": "Müşteri etkinlikleri",
 		"clipboard": "Pano",
+		"codeBar": "Barcode",
+		"codeQr": "QR code",
 		"collection": "Koleksiyon",
 		"collections": "Koleksiyonlar",
 		"color": "Renk",

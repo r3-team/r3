@@ -674,6 +674,7 @@
 			"titleAssigned": "Zugewiesen"
 		},
 		"attribute": {
+			"barcodes": "Barcodes/QR-Codes",
 			"bigint": "Große Werte",
 			"bigintDates": "Datumswerte nach 2038",
 			"bigintDatesHint": "Benötigt mehr Speicherplatz, ermöglicht aber Datumswerte nach Januar 2038.",
@@ -2424,6 +2425,8 @@
 		"clientEvent": "Client-Ereignis",
 		"clientEvents": "Client-Ereignisse",
 		"clipboard": "Zwischenablage",
+		"codeBar": "Barcode",
+		"codeQr": "QR-Code",
 		"collection": "Sammlung",
 		"collections": "Sammlungen",
 		"color": "Farbe",

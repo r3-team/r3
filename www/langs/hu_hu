@@ -674,6 +674,7 @@
 			"titleAssigned": "Hozzárendelt"
 		},
 		"attribute": {
+			"barcodes": "Barcodes/QR codes",
 			"bigint": "Nagy Értékek",
 			"bigintDates": "Dátumok 2038 után",
 			"bigintDatesHint": "Több tárhelyet igényel, de támogatja a 2038. január utáni dátumokat.",
@@ -2424,6 +2425,8 @@
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",
 		"clipboard": "Vágólap",
+		"codeBar": "Barcode",
+		"codeQr": "QR code",
 		"collection": "Gyűjtemény",
 		"collections": "Gyűjtemények",
 		"color": "Color",
