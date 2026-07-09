@@ -35,7 +35,7 @@ export function getJoinsIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,ind
 		j.recordUpdate = j.applyUpdate && j.recordId !== 0 && checkDataOptions(2,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2) && !indexesNoSet.includes(j.index);
 		j.recordDelete = j.applyDelete && j.recordId !== 0 && checkDataOptions(1,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,3) && !indexesNoDel.includes(j.index) &&
 			MyStore.getters['schema/relationIdMap'][j.relationId].presets.filter(p => p.protected && MyStore.getters['schema/presetIdMapRecordId'][p.id] === j.recordId).length === 0;
-		
+
 		map[j.index] = j;
 	}
 	return map;
@@ -55,7 +55,7 @@ export function getRelationsJoined(joins) {
 	for(const j of joins) {
 		if(j.index === 0) // ignore source relation
 			continue;
-		
+
 		out.push({
 			attributeId:j.attributeId,
 			index:j.index,
@@ -105,7 +105,7 @@ export function getQueryExpressions(columns) {
 				// move expression aggregator to query (allows ORDER BY in aggregation)
 				let expr = getForAttribute(c);
 				expr.aggregator = null;
-				
+
 				out.push({
 					aggregator:c.aggregator,
 					query:{
@@ -129,7 +129,7 @@ export function getQueryExpressionsDateRange(attributeId0,index0,attributeId1,in
 		{ attributeId:attributeId0,index:index0,groupBy:false,aggregator:null },
 		{ attributeId:attributeId1,index:index1,groupBy:false,aggregator:null }
 	];
-	
+
 	// attribute color expression
 	if(attributeIdColor !== null)
 		expr.push({
@@ -138,7 +138,7 @@ export function getQueryExpressionsDateRange(attributeId0,index0,attributeId1,in
 			groupBy:false,
 			aggregator:null
 		});
-	
+
 	// add expressions from selected columns
 	return expr;
 };
@@ -147,7 +147,7 @@ export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypt
 	let out = [];
 	for(const join of joins) {
 		const r = MyStore.getters['schema/relationIdMap'][join.relationId];
-		
+
 		for(const atr of r.attributes) {
 			if(!atr.encrypted || inclEncrypted)
 				out.push(`${nestingLevel}_${join.index}_${atr.id}`);
@@ -172,7 +172,7 @@ export function getSubQueryFilterExpressions(subQuery) {
 export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,globalSearchDict,
 	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
 	recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal) {
-	
+
 	if(globalSearch               === undefined) globalSearch               = null;
 	if(globalSearchDict           === undefined) globalSearchDict           = null;
 	if(dataFieldIdMap             === undefined) dataFieldIdMap             = {};
@@ -184,7 +184,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,glob
 	if(recordMayUpdate            === undefined) recordMayUpdate            = false;
 	if(collectionIdMapIndexFilter === undefined) collectionIdMapIndexFilter = {};
 	if(variableIdMapLocal         === undefined) variableIdMapLocal         = {};
-	
+
 	const getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
 			// data
@@ -214,14 +214,14 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,glob
 				s.ftsDict = globalSearchDict;
 				s.value   = globalSearch;
 			break;
-			
+
 			// form
 			case 'field':
 				const fld = dataFieldIdMap[s.fieldId];
 				if(fld !== undefined) {
 					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
 						? fld.attributeIdNm : null;
-					
+
 					s.value = JSON.parse(JSON.stringify(fieldValues[getIndexAttributeId(
 						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
 					)]));
@@ -237,18 +237,18 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,glob
 			case 'recordMayDelete': s.value = recordMayDelete;                                                        break;
 			case 'recordMayUpdate': s.value = recordMayUpdate;                                                        break;
 			case 'recordNew':       if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId === 0; break;
-			
+
 			// login
 			case 'languageCode': s.value = MyStore.getters.settings.languageCode;             break;
 			case 'login':        s.value = MyStore.getters.loginId;                           break;
 			case 'role':         s.value = MyStore.getters.access.roleIds.includes(s.roleId); break;
-			
+
 			// date & time
 			case 'nowDate':     s.value = getUnixNowDate()     + s.nowOffset; break;
 			case 'nowDatetime': s.value = getUnixNowDatetime() + s.nowOffset; break;
 			case 'nowTime':     s.value = getUnixNowTime()     + s.nowOffset; break;
 		}
-		
+
 		// remove unnecessary data
 		if(s.content !== 'subQuery') {
 			delete(s.query);
@@ -270,7 +270,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,glob
 		delete(s.variableId);
 		return s;
 	};
-	
+
 	let out = [];
 	filters = JSON.parse(JSON.stringify(filters));
 	for(let f of filters) {
@@ -315,7 +315,17 @@ export function getQueryAttributesPkFilter(relationId,recordIds,index,not) {
 	};
 };
 
-export function getQueryFiltersDateRange(subJoinFilter,attributeId0,index0,date0,attributeId1,index1,date1) {
+export function getQueryFiltersDateRange(subJoinFilter, adjustOffset, attributeId0, index0, date0, attributeId1, index1, date1) {
+	if (adjustOffset) {
+		// expand date ranges by timezone offset
+		// reason: dates are stored as UTC 00:00:00
+		// January  1. 00:00:00 GMT-3 would be January  1. UTC 03:00:00 (looses dates on same day, dates are stored at UTC 00:00:00)
+		// January 31. 00:00:00 GMT+2 would be January 30. UTC 22:00:00 (prev. day)
+		let sec = new Date().getTimezoneOffset()*60;
+		if(sec < 0) date1 -= sec;
+		else        date0 -= sec;
+	}
+
 	// set query filters for attribute date values (attribute 0 to 1) occuring in date range (date 0 to 1)
 	// if sub join filter is used, we apply filter to relation joins, allowing for other relation data to be retrieved
 	//  useful for queries where grouping data is to be received even if date dependent records are not there (like in Gantts)

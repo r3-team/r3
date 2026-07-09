@@ -97,10 +97,10 @@ const MyCalendarDateSelect = {
 			get()  { return this.modelValue.getMonth(); },
 			set(v) {
 				let d = new Date(this.modelValue.valueOf());
-				
+
 				if(this.isMonth)
 					d.setDate(1); // set to 1st to add month correctly
-				
+
 				d.setMonth(v);
 				this.$emit('update:modelValue',d);
 			}
@@ -117,19 +117,19 @@ const MyCalendarDateSelect = {
 			get()  { return this.modelValue.getFullYear(); },
 			set(v) {
 				if(v.length !== 4) return;
-				
+
 				let d = new Date(this.modelValue.valueOf());
 				d.setFullYear(v);
 				this.$emit('update:modelValue',d);
 			}
 		},
-		
+
 		// simple
 		isDays:     s => s.daysShow === 1 || s.daysShow === 3,
 		isMonth:    s => s.daysShow === 42,
 		isWeek:     s => s.daysShow === 5 || s.daysShow === 7,
 		weeksInYear:s => s.isWeek ? s.getWeeksInYear(s.modelValue.getFullYear()) : 0,
-		
+
 		// stores
 		capApp:  s => s.$store.getters.captions.calendar,
 		settings:s => s.$store.getters.settings
@@ -160,7 +160,7 @@ const MyCalendarDateSelect = {
 			d1.setDate(d1.getDate()+6);
 			return `${this.getDateFormatNoYear(d0,this.settings.dateFormat)} - ${this.getDateFormatNoYear(d1,this.settings.dateFormat)}`;
 		},
-		
+
 		// actions
 		handleHotkeys(e) {
 			switch(e.key) {
@@ -171,12 +171,12 @@ const MyCalendarDateSelect = {
 		pageMove(forward) {
 			if(this.isMonth)
 				return this.monthInput = forward ? this.monthInput + 1 : this.monthInput - 1;
-			
+
 			let d = new Date(this.modelValue.valueOf());
-			
+
 			// 5-days view (Mo-Fr) moves full week
 			let dOffset = this.daysShow !== 5 ? this.daysShow : 7;
-			
+
 			d.setDate(d.getDate() + (forward ? dOffset : dOffset - (dOffset * 2)));
 			this.$emit('update:modelValue',d);
 		}
@@ -192,7 +192,7 @@ const MyCalendar = {
 		MyInputCollection
 	},
 	template:`<div class="calendar" :class="{ isSingleField:isSingleField, overflow:!isMonth }" v-if="ready">
-		
+
 		<div class="app-sub-window under-header"
 			v-if="showIcs"
 			@mousedown.self="showIcs = false"
@@ -223,7 +223,7 @@ const MyCalendar = {
 							:caption="capApp.button.icsPublish"
 						/>
 					</div>
-					
+
 					<template v-if="icsToken !== ''">
 						<div class="row gap">
 							<input readonly :value="icsUrl" />
@@ -237,7 +237,7 @@ const MyCalendar = {
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- header -->
 		<div class="top lower">
 			<div class="area nowrap">
@@ -249,7 +249,7 @@ const MyCalendar = {
 					:captionTitle="capGen.button.newHint"
 				/>
 			</div>
-			
+
 			<div class="area nowrap default-inputs">
 				<img class="icon"
 					v-if="iconId !== null"
@@ -262,9 +262,9 @@ const MyCalendar = {
 					@update:modelValue="dateSet"
 				/>
 			</div>
-			
+
 			<div class="area nowrap default-inputs">
-				
+
 				<template v-if="!isMobile && !isMonth">
 					<my-button image="search.png"
 						@trigger="$emit('set-login-option','zoom',zoomDefault)"
@@ -277,14 +277,14 @@ const MyCalendar = {
 						:value="zoom"
 					/>
 				</template>
-				
+
 				<my-button image="refresh.png"
 					v-if="!isMobile"
 					@trigger="get"
 					:captionTitle="capGen.button.refresh"
 					:naked="true"
 				/>
-				
+
 				<my-input-collection class="selector"
 					v-for="c in collections"
 					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
@@ -295,13 +295,13 @@ const MyCalendar = {
 					:multiValue="c.flags.includes('multiValue')"
 					:previewCount="isMobile ? 0 : 2"
 				/>
-				
+
 				<select class="selector" v-if="hasChoices" :value="choiceId" @change="$emit('set-login-option','choiceId',$event.target.value)">
 					<option v-for="c in choices" :value="c.id">
 						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
 				</select>
-				
+
 				<select
 					v-if="daysShowToggle"
 					@change="$emit('set-login-option','daysShow',parseInt($event.target.value))"
@@ -327,7 +327,7 @@ const MyCalendar = {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="calendar-content">
 			<my-calendar-days
 				v-if="!isMonth"
@@ -362,7 +362,7 @@ const MyCalendar = {
 				:isRange="true"
 				:rows
 			/>
-			
+
 			<!-- inline form -->
 			<my-form class="inline"
 				v-if="popUpFormInline !== null"
@@ -421,50 +421,50 @@ const MyCalendar = {
 			ready:false,
 			showIcs:false,
 			zoomDefault:5,
-			
+
 			// ICS access
 			icsToken:'',
 			icsTokenName:'',
-			
+
 			// calendar data
 			rows:[]
 		};
 	},
 	computed:{
 		// special date range expressions + regular column expressions
-		expressions:(s) => s.getQueryExpressionsDateRange(
+		expressions:s => s.getQueryExpressionsDateRange(
 			s.attributeIdDate0,s.indexDate0,
 			s.attributeIdDate1,s.indexDate1,
 			s.attributeIdColor,s.indexColor
 		).concat(s.getQueryExpressions(s.columns)),
-		
+
 		// simple
-		hasChoices:(s) => s.choices.length > 1,
-		hasCreate: (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
-		hasUpdate: (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		isDays:    (s) => s.daysShow === 1 || s.daysShow === 3,
-		isMonth:   (s) => s.daysShow === 42,
-		isWeek:    (s) => s.daysShow === 5 || s.daysShow === 7,
-		icsUrl:    (s) => `${location.protocol}//${location.host}/ics/download/cal.ics?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
-		
+		hasChoices:s => s.choices.length > 1,
+		hasCreate: s => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate: s => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		isDays:    s => s.daysShow === 1 || s.daysShow === 3,
+		isMonth:   s => s.daysShow === 42,
+		isWeek:    s => s.daysShow === 5 || s.daysShow === 7,
+		icsUrl:    s => `${location.protocol}//${location.host}/ics/download/cal.ics?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
+
 		// start/end date of calendar
-		date0:(s) => s.getCalendarCutOff0(s.daysShow,new Date(s.date.valueOf())),
-		date1:(s) => s.getCalendarCutOff1(s.daysShow,new Date(s.date.valueOf()),s.date0),
+		date0:s => s.getCalendarCutOff0(s.daysShow,new Date(s.date.valueOf())),
+		date1:s => s.getCalendarCutOff1(s.daysShow,new Date(s.date.valueOf()),s.date0),
 
 		// login options
-		choiceId:(s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		daysShow:(s) => !s.daysShowToggle ? s.daysShowDef : s.$root.getOrFallback(s.loginOptions,'daysShow',s.daysShowDef),
-		zoom:    (s) => s.$root.getOrFallback(s.loginOptions,'zoom',s.zoomDefault),
-		
+		choiceId:s => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		daysShow:s => !s.daysShowToggle ? s.daysShowDef : s.$root.getOrFallback(s.loginOptions,'daysShow',s.daysShowDef),
+		zoom:    s => s.$root.getOrFallback(s.loginOptions,'zoom',s.zoomDefault),
+
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
-		capApp:        (s) => s.$store.getters.captions.calendar,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		isMobile:      (s) => s.$store.getters.isMobile,
-		loginId:       (s) => s.$store.getters.loginId,
-		settings:      (s) => s.$store.getters.settings
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
+		capApp:        s => s.$store.getters.captions.calendar,
+		capGen:        s => s.$store.getters.captions.generic,
+		isMobile:      s => s.$store.getters.isMobile,
+		loginId:       s => s.$store.getters.loginId,
+		settings:      s => s.$store.getters.settings
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
@@ -518,7 +518,7 @@ const MyCalendar = {
 		routeChangeFieldReload,
 		routeParseParams,
 		srcBase64,
-		
+
 		// actions
 		dateSet(d) {
 			if(d !== this.date) {
@@ -540,15 +540,15 @@ const MyCalendar = {
 			if(!this.isMonth) {
 				if(now < this.date0 || now > this.date1)
 					return this.dateSet(now);
-				
+
 			} else {
 				if(now.getMonth() !== this.date.getMonth()
 					|| now.getFullYear() !== this.date.getFullYear()) {
-					
+
 					return this.dateSet(now);
 				}
 			}
-			
+
 			// if today is already visible, open 'today'
 			if(this.hasCreate) {
 				const u = this.getUnixFromDate(this.getDateAtUtcZero(now));
@@ -558,17 +558,17 @@ const MyCalendar = {
 		icsCopyToClipboard() {
 			navigator.clipboard.writeText(this.icsUrl);
 		},
-		
+
 		// page routing
 		paramsUpdate(pushHistory) {
 			if(!this.usesPageHistory) return;
 
 			let args = [ `daysShow=${this.daysShow}`, `year=${this.date.getFullYear()}` ];
-			
+
 			if(this.isMonth || this.isDays) args.push(`month=${this.date.getMonth()}`);
 			if(this.isWeek)                 args.push(`week=${this.getWeek(this.date)}`);
 			if(this.isDays)                 args.push(`day=${this.date.getDate()}`);
-			
+
 			this.$emit('set-args',args,pushHistory);
 		},
 		paramsUpdated(reloadIfChanged) {
@@ -579,62 +579,49 @@ const MyCalendar = {
 				year: { parse:'int', value:this.date.getFullYear() }
 			};
 			this.routeParseParams(params);
-			
+
 			let d = new Date(this.date.getTime());
 			d.setFullYear(params.year.value);
-			
+
 			if(this.isDays || this.isMonth) d.setMonth(params.month.value);
 			if(this.isDays)                 d.setDate(params.day.value);
 			if(this.isWeek)                 d = this.getDateFromWeek(params.week.value,d.getFullYear());
 
 			if(d.getTime() !== this.date.getTime()) {
 				this.date = d;
-				
+
 				if(reloadIfChanged)
 					this.get();
 			}
 		},
-		
+
 		// backend calls
 		get() {
 			if(this.query.relationId === null || (this.isHidden && !this.loadWhileHidden))
 				return;
-			
-			let dateStart = this.getUnixFromDate(this.date0);
-			let dateEnd   = this.getUnixFromDate(this.date1);
-			
+
 			// when switching date, empty rows
 			// otherwise data from wrong month is shown on calendar
 			this.rows = [];
-			
-			// expand date ranges by timezone offset
-			// reason: dates are stored as UTC 00:00:00 (timezone removed when stored)
-			// January 1.  00:00:00 GMT-3 would start UTC 03:00:00
-			// January 31. 00:00:00 GMT+2 would end   UTC 22:00:00 (prev. day)
-			let sec = new Date().getTimezoneOffset()*60;
-			if(sec < 0) dateEnd   -= sec;
-			else        dateStart -= sec;
-			
-			// sort by start date
+
+			// sort by start date then defined query sorting
 			let orders = [{
 				attributeId:this.attributeIdDate0,
 				index:this.indexDate0,
 				ascending:true
 			}];
-			
-			// additional query sorting
 			for(let i = 0, j = this.query.orders.length; i < j; i++) {
 				orders.push(this.query.orders[i]);
 			}
-			
+
 			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.expressions,
 				filters:this.filters.concat(this.getQueryFiltersDateRange(
-					false,
-					this.attributeIdDate0,this.indexDate0,dateStart,
-					this.attributeIdDate1,this.indexDate1,dateEnd
+					false, true,
+					this.attributeIdDate0, this.indexDate0, this.getUnixFromDate(this.date0),
+					this.attributeIdDate1, this.indexDate1, this.getUnixFromDate(this.date1)
 				)),
 				orders:orders,
 				getIds:true

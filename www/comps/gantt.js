@@ -8,6 +8,7 @@ import {
 	colorMakeContrastFont
 } from './shared/generic.js';
 import {
+	getDateAtUtcZero,
 	getDateFormat,
 	getDateFromUnix,
 	getDateShifted,
@@ -76,29 +77,29 @@ const MyGanttLineRecord = {
 	},
 	emits:['record-selected'],
 	computed:{
-		style() {
-			let d0 = new Date(this.date0.getTime());
-			let d1 = new Date(this.date1.getTime());
+		style:s => {
+			let d0 = new Date(s.date0.getTime());
+			let d1 = new Date(s.date1.getTime());
 
 			// limit record date to gantt presentation range
-			if(this.date0Range > d0) d0 = this.date0Range;
-			if(this.date1Range < d1) d1 = this.date1Range;
+			if(s.date0Range > d0) d0 = s.date0Range;
+			if(s.date1Range < d1) d1 = s.date1Range;
 
 			// calculate width and offset to gantt start
-			const secLine = (this.date1Range - this.date0Range) / 1000;
-			let secOffset = (d0 - this.date0Range) / 1000;
+			const secLine = (s.date1Range - s.date0Range) / 1000;
+			let secOffset = (d0 - s.date0Range) / 1000;
 			let secWidth  = (d1 - d0) / 1000;
 
 			// correction for DST change in day mode
-			if(this.isDateBased) {
-				let secDst0 = this.date0Range.getTimezoneOffset()*60;
-				let secDst1 = d0.getTimezoneOffset()*60;
+			if(s.isDateBased) {
+				let secDst0 = s.date0Range.getTimezoneOffset() * 60;
+				let secDst1 = d0.getTimezoneOffset() * 60;
 				secOffset += secDst0 - secDst1;
 			}
 
 			// width in px = factor of width (seconds of record / seconds of line) * total pixels of line
-			const pxOffset = secOffset / secLine * this.pxLine;
-			const pxWidth = secWidth / secLine * this.pxLine;
+			const pxOffset = secOffset / secLine * s.pxLine;
+			const pxWidth = secWidth / secLine * s.pxLine;
 
 			if(pxWidth < 1)
 				return 'display:none';
@@ -106,10 +107,10 @@ const MyGanttLineRecord = {
 			// max-width is overwritten by CSS if hovered over (show full entry)
 			return [`min-width:${pxWidth}px`,`max-width:${pxWidth}px`,`left:${pxOffset}px`].join(';');
 		},
-		styleBg() {
-			if(this.color === null) return '';
-			const colorBg   = this.colorAdjustBg(this.color);
-			const colorFont = this.colorMakeContrastFont(colorBg);
+		styleBg: s => {
+			if(s.color === null) return '';
+			const colorBg   = s.colorAdjustBg(s.color);
+			const colorFont = s.colorMakeContrastFont(colorBg);
 			return `background-color:${colorBg};color:${colorFont};`
 		}
 	},
@@ -430,14 +431,14 @@ const MyGantt = {
 	computed:{
 		// unix date range points, 0=gantt start, 1=gantt end
 		date0:s => {
-			let d = new Date(s.dateStart.getTime());
 			// start 3 steps before page start point
+			let d = new Date(s.dateStart.getTime());
 			switch(s.stepType) {
 				case 'hours': d.setHours(d.getHours() - 3 + (s.page * s.steps)); break;
 				case 'days': d.setDate(d.getDate() - 3 + (s.page * s.steps)); break;
 				case 'months': d.setMonth(d.getMonth() - 3 + (s.page * s.steps)); break;
-				case 'quarters': d.setMonth(d.getMonth() - 9 + (s.page * s.steps)); break;
-				case 'half-years': d.setMonth(d.getMonth() - 18 + (s.page * s.steps)); break;
+				case 'quarters': d.setMonth(d.getMonth() - 9 + (s.page * s.steps * 3)); break;
+				case 'half-years': d.setMonth(d.getMonth() - 18 + (s.page * s.steps * 6)); break;
 			}
 			return d;
 		},
@@ -478,29 +479,26 @@ const MyGantt = {
 					if (s.isMobile)
 						return s.getDateFormat(d0, format);
 
-					return d0.getMonth() === d1.getMonth() && d0.getFullYear() === d1.getFullYear()
-						? s.getDateFormat(d0, 'Y-m')
-						: `${s.getDateFormat(d0, 'Y-m')} - ${s.getDateFormat(d1, 'Y-m')}`
+					d1.setMonth(d1.getMonth() - 1);
+					return `${s.getDateFormat(d0, 'Y-m')} - ${s.getDateFormat(d1, 'Y-m')}`;
 					break;
 				case 'quarters':
 					const d0Quarter = s.getDateCurrentQuarter(d0);
-					const d1Quarter = s.getDateCurrentQuarter(d1);
 					if (s.isMobile)
 						return `${d0.getFullYear()}-Q${d0Quarter}`;
 
-					return d0Quarter === d1Quarter && d0.getFullYear() === d1.getFullYear()
-						? `${d0.getFullYear()}-Q${d0Quarter}`
-						: `${d0.getFullYear()}-Q${d0Quarter} - ${d1.getFullYear()}-Q${d1Quarter}`;
+					d1.setMonth(d1.getMonth() - 3);
+					const d1Quarter = s.getDateCurrentQuarter(d1);
+					return `${d0.getFullYear()}-Q${d0Quarter} - ${d1.getFullYear()}-Q${d1Quarter}`;
 				break;
 				case 'half-years':
 					const d0HalfYear = d0.getMonth() < 6 ? '1' : '2';
-					const d1HalfYear = d1.getMonth() < 6 ? '1' : '2';
 					if (s.isMobile)
 						return `${d0.getFullYear()}-H${d0HalfYear}`;
 
-					return d0HalfYear === d1HalfYear && d0.getFullYear() === d1.getFullYear()
-						? `${d0.getFullYear()}-H${d0HalfYear}`
-						: `${d0.getFullYear()}-H${d0HalfYear} - ${d1.getFullYear()}-H${d1HalfYear}`;
+					d1.setMonth(d1.getMonth() - 6);
+					const d1HalfYear = d1.getMonth() < 6 ? '1' : '2';
+					return `${d0.getFullYear()}-H${d0HalfYear} - ${d1.getFullYear()}-H${d1HalfYear}`;
 				break;
 			}
 			return '';
@@ -619,6 +617,7 @@ const MyGantt = {
 		checkDataOptions,
 		fillRelationRecordIds,
 		getCaption,
+		getDateAtUtcZero,
 		getDateFormat,
 		getDateFromUnix,
 		getDateShifted,
@@ -737,12 +736,33 @@ const MyGantt = {
 				return;
 			}
 
-			if(this.unixInput0 !== null && this.unixInput1 !== null) {
-				let attributes = [
+			if (this.unixInput0 !== null && this.unixInput1 !== null) {
+				let d0 = new Date(this.unixInput0 * 1000);
+				let d1 = new Date(this.unixInput1 * 1000);
+				switch(this.stepType) {
+					case 'hours': this.unixInput1 += 3600; break; // add 1 hour
+					case 'days': break; // dates autom. include the following day, nothing to change
+					case 'months': // set to last day of month
+						d1.setUTCMonth(d1.getUTCMonth() + 1);
+						d1.setUTCDate(0);
+					break;
+					case 'quarters': // set to last day of last month in quarter
+						d1.setUTCMonth(d1.getUTCMonth() + 3);
+						d1.setUTCDate(0);
+					break;
+					case 'half-years': // set to last day of last month in half year
+						d1.setUTCMonth(d1.getUTCMonth() + 6);
+						d1.setUTCDate(0);
+					break;
+				}
+				if (this.isDateBased) {
+					this.unixInput0 = Math.floor(this.getDateAtUtcZero(d0).getTime() / 1000);
+					this.unixInput1 = Math.floor(this.getDateAtUtcZero(d1).getTime() / 1000);
+				}
+				this.$emit('open-form',[],[`attributes=${[
 					`${this.attributeIdDate0}_${this.unixInput0}`,
 					`${this.attributeIdDate1}_${this.unixInput1}`
-				];
-				this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],false);
+				].join(',')}`],false);
 			}
 			this.unixInput0 = null;
 			this.unixInput1 = null;
@@ -879,6 +899,12 @@ const MyGantt = {
 				return;
 
 			this.createHeaderItems();
+			let d0 = new Date(this.date0.getTime());
+			let d1 = new Date(this.date1.getTime());
+
+			// expand range start to include prev. day to include dates that range into today
+			if (this.stepType === 'hours')
+				d0.setDate(d0.getDate() - 1);
 
 			ws.send('data','get',{
 				relationId:this.query.relationId,
@@ -889,9 +915,9 @@ const MyGantt = {
 					this.attributeIdColor,this.indexColor
 				).concat(this.expressions),
 				filters:this.filters.concat(this.getQueryFiltersDateRange(
-					true,
-					this.attributeIdDate0,this.indexDate0,this.getUnixFromDate(this.date0),
-					this.attributeIdDate1,this.indexDate1,this.getUnixFromDate(this.date1)
+					true, true,
+					this.attributeIdDate0,this.indexDate0,this.getUnixFromDate(d0),
+					this.attributeIdDate1,this.indexDate1,this.getUnixFromDate(d1)
 				)),
 				orders:this.query.orders,
 				getIds:true
@@ -952,10 +978,18 @@ const MyGantt = {
 							});
 						}
 
-						// apply shift to local time for fullday records
-						if(isFullDay) {
+						if (!isFullDay && this.stepType !== 'hours') {
+							// datetime shown in non-hour gantts, shift to UTC time
+							date0 = this.getDateShifted(date0,false);
+							date1 = this.getDateShifted(date1,false);
+						}
+						if (isFullDay && this.stepType === 'hours') {
+							// dates shown in hour-gantt, shift to local time
 							date0 = this.getDateShifted(date0,true);
 							date1 = this.getDateShifted(date1,true);
+						}
+						if (isFullDay) {
+							// dates shown, expand date range by one
 							date1.setDate(date1.getDate()+1);
 						}
 
