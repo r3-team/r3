@@ -1025,7 +1025,7 @@
 			"ganttBatch": "Gantt grubu",
 			"ganttNotes": "İlk sütun toplu grup sonuçlarını gruplandırır.",
 			"ganttSteps": "Gantt aralığı",
-			"ganttStepsToggle": "Gantt aralığı geçişi",
+			"ganttStepsShown": "Gantt interval choices",
 			"headerRichtext": "Zengin metin",
 			"headerSize": "Boyut",
 			"helpText": "Yardım metni",
@@ -1972,7 +1972,6 @@
 		"button": {
 			"ganttShowLabels": "Gruplar",
 			"ganttShowLabelsHint": "Grupları göster/gizle",
-			"ganttToggleHint": "Gün ve saat modu arasında geçiş yapın",
 			"ics": "Erişim",
 			"icsHint": "Takvime harici uygulamadan erişme",
 			"icsPublish": "Kişisel kullanım için yayınlayın"
@@ -2454,7 +2453,7 @@
 		"dateFormat4": "a/g/Y (30/12/2012)",
 		"dateSteps": {
 			"days": "Days",
-			"halfYears": "Half-years",
+			"half-years": "Half-years",
 			"hours": "Hours",
 			"months": "Months",
 			"quarters": "Quarters",

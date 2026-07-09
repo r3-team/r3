@@ -217,13 +217,13 @@ const MyGantt = {
 					:naked="true"
 				/>
 
-				<my-button
-					v-if="stepTypeToggle"
-					@trigger="toggleStepType"
-					:caption="stepType.toUpperCase()"
-					:captionTitle="capApp.button.ganttToggleHint"
-					:naked="true"
-				/>
+				<select class="auto"
+					v-if="stepTypesShown !== null && stepTypesShown.length > 1"
+					@input="$emit('set-login-option', 'ganttStepType', $event.target.value)"
+					:value="stepType"
+				>
+					<option v-for="t in stepTypesShown" :value="t">{{ capGen.dateSteps[t] }}</option>
+				</select>
 
 				<my-button image="search.png"
 					v-if="!isMobile"
@@ -376,7 +376,7 @@ const MyGantt = {
 		</div>
 	</div>`,
 	props:{
-		attributeIdColor:{ required:true },
+		attributeIdColor:{ type:[String,null], required:true },
 		attributeIdDate0:{ type:String,  required:true },
 		attributeIdDate1:{ type:String,  required:true },
 		choices:         { type:Array,   required:false, default:() => [] },
@@ -388,8 +388,8 @@ const MyGantt = {
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
 		hasOpenForm:     { type:Boolean, required:true },
-		iconId:          { required:true },
-		indexColor:      { required:true },               // index of attribute that provides record color
+		iconId:          { type:[String,null], required:true },
+		indexColor:      { type:[Number,null], required:true }, // index of attribute that provides record color
 		indexDate0:      { type:Number,  required:true }, // index of attribute that provides record date from
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
 		isHidden:        { type:Boolean, required:false, default:false },
@@ -399,7 +399,7 @@ const MyGantt = {
 		popUpFormInline: { required:false, default:null },
 		query:           { type:Object,  required:true },
 		stepTypeDefault: { type:String,  required:true },
-		stepTypeToggle:  { type:Boolean, required:true },
+		stepTypesShown:  { type:[Array,null], required:true },
 		usesHotkeys:     { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
@@ -604,6 +604,9 @@ const MyGantt = {
 		if(this.usesHotkeys)
 			window.addEventListener('keydown',this.handleHotkeys);
 
+		if (this.stepTypesShown !== null && this.stepTypesShown.length > 0 && !this.stepTypesShown.includes(this.stepType))
+			this.$emit('set-login-option', 'ganttStepType', this.stepTypesShown[0])
+
 		this.dateStart = this.getDateRounded(new Date());
 		this.ready     = true;
 		this.$nextTick(() => this.setSteps(false));
@@ -791,15 +794,6 @@ const MyGantt = {
 		resized() {
 			clearTimeout(this.resizeTimer);
 			this.resizeTimer = setTimeout(() => this.setSteps(false),150);
-		},
-		toggleStepType() {
-			let stepType;
-			if      (this.stepType === 'hours') stepType = 'days';
-			else if (this.stepType === 'days') stepType = 'months';
-			else if (this.stepType === 'months') stepType = 'quarters';
-			else if (this.stepType === 'quarters') stepType = 'half-years';
-			else if (this.stepType === 'half-years') stepType = 'hours';
-			this.$emit('set-login-option', 'ganttStepType', stepType);
 		},
 		scrollToNow() {
 			if(this.page !== 0)

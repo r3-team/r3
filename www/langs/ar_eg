@@ -1025,7 +1025,7 @@
 			"ganttBatch": "مجموعة جانت",
 			"ganttNotes": "نتائج مجموعات الدفعات في العمود الأول.",
 			"ganttSteps": "فاصل جانت",
-			"ganttStepsToggle": "تبديل الفاصل الزمني جانت",
+			"ganttStepsShown": "Gantt interval choices",
 			"headerRichtext": "نص منسق",
 			"headerSize": "مقاس",
 			"helpText": "نص المساعدة",
@@ -1972,7 +1972,6 @@
 		"button": {
 			"ganttShowLabels": "المجموعات",
 			"ganttShowLabelsHint": "إظهار/إخفاء المجموعات",
-			"ganttToggleHint": "التبديل بين وضع اليوم والساعة",
 			"ics": "وصول",
 			"icsHint": "الوصول إلى التقويم من تطبيق خارجي",
 			"icsPublish": "نشر للاستخدام الشخصي"
@@ -2454,7 +2453,7 @@
 		"dateFormat4": "ش/ي/س (12/30/2012)",
 		"dateSteps": {
 			"days": "Days",
-			"halfYears": "Half-years",
+			"half-years": "Half-years",
 			"hours": "Hours",
 			"months": "Months",
 			"quarters": "Quarters",

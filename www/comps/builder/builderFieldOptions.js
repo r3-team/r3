@@ -755,22 +755,22 @@ export default {
 									:disabled="readonly"
 									:value="field.ganttSteps"
 								>
-									<option value="hours">{{ capGen.dateSteps.hours }}</option>
-									<option value="days" >{{ capGen.dateSteps.days }}</option>
-									<option value="months">{{ capGen.dateSteps.months }}</option>
-									<option value="quarters">{{ capGen.dateSteps.quarters }}</option>
-									<option value="half-years">{{ capGen.dateSteps.halfYears }}</option>
+									<option v-for="t in dateSteps" :value="t">{{ capGen.dateSteps[t] }}</option>
 								</select>
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.ganttStepsToggle }}</td>
+							<td>{{ capApp.ganttStepsShown }}</td>
 							<td>
-								<my-bool
-									@update:modelValue="set('ganttStepsToggle',$event)"
-									:modelValue="field.ganttStepsToggle"
-									:readonly
-								/>
+								<div class="row gap">
+									<my-button-check
+										v-for="t in dateSteps"
+										@update:modelValue="setGanttStepShow(t)"
+										:active="!readonly"
+										:caption="capGen.dateSteps[t]"
+										:modelValue="field.ganttStepsShown !== null && field.ganttStepsShown.includes(t)"
+									/>
+								</div>
 							</td>
 						</tr>
 					</template>
@@ -1468,6 +1468,11 @@ export default {
 		moduleId:       { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
+	data() {
+		return {
+			dateSteps:['hours', 'days', 'months', 'quarters', 'half-years']
+		};
+	},
 	emits:['createNew','set'],
 	computed:{
 		displayOptions:s => {
@@ -1684,6 +1689,17 @@ export default {
 		},
 		setNull(name,val) {
 			this.set(name,val === '' ? null : val);
+		},
+		setGanttStepShow(val) {
+			let v = JSON.parse(JSON.stringify(this.field.ganttStepsShown));
+			if (v === null)
+				v = [];
+
+			const pos = v.indexOf(val);
+			if (pos === -1) v.push(val);
+			else v.splice(pos, 1);
+
+			this.set('ganttStepsShown',v.length === 0 ? null : v);
 		},
 		showHelp(help) {
 			this.$store.commit('dialog',{

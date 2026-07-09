@@ -338,6 +338,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_upc_e';
 
 			-- more gantt interval types
+			ALTER TABLE app.field_calendar ADD COLUMN gantt_steps_shown app.field_calendar_gantt_steps[];
+
+			UPDATE app.field_calendar
+			SET gantt_steps_shown = '{"hours","days"}'::app.field_calendar_gantt_steps[]
+			WHERE gantt_steps_toggle = TRUE
+			AND   gantt_steps IS NOT NULL;
+
+			ALTER TABLE app.field_calendar DROP COLUMN gantt_steps_toggle;
+
 			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'months';
 			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'quarters';
 			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'half-years';

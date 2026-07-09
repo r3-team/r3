@@ -1025,7 +1025,7 @@
 			"ganttBatch": "Gantt group",
 			"ganttNotes": "First column batch groups results.",
 			"ganttSteps": "Gantt interval",
-			"ganttStepsToggle": "Comutare interval Gantt",
+			"ganttStepsShown": "Gantt interval choices",
 			"headerRichtext": "Richtext",
 			"headerSize": "Mărime",
 			"helpText": "Text de ajutor",
@@ -1972,7 +1972,6 @@
 		"button": {
 			"ganttShowLabels": "Grupuri",
 			"ganttShowLabelsHint": "Afișați/ascundeți grupurile",
-			"ganttToggleHint": "Comutați între modul zi și oră",
 			"ics": "Acces",
 			"icsHint": "Accesați calendarul de la o aplicație externă",
 			"icsPublish": "Publică pentru uz personal"
@@ -2454,7 +2453,7 @@
 		"dateFormat4": "ll/zz/aa (12/30/2012)",
 		"dateSteps": {
 			"days": "Days",
-			"halfYears": "Half-years",
+			"half-years": "Half-years",
 			"hours": "Hours",
 			"months": "Months",
 			"quarters": "Quarters",

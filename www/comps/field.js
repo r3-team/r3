@@ -165,7 +165,7 @@ export default {
 					:moduleId
 					:popUpFormInline="popUpFormInline"
 					:stepTypeDefault="field.ganttSteps"
-					:stepTypeToggle="field.ganttStepsToggle"
+					:stepTypesShown="field.ganttStepsShown"
 					:query
 					:usesHotkeys="isAlone"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"

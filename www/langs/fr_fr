@@ -1025,7 +1025,7 @@
 			"ganttBatch": "Groupe de Gantt",
 			"ganttNotes": "Le premier lot de colonnes regroupe les résultats.",
 			"ganttSteps": "Intervalle du diagramme de Gantt",
-			"ganttStepsToggle": "Basculement de l'intervalle du diagramme de Gantt",
+			"ganttStepsShown": "Gantt interval choices",
 			"headerRichtext": "Texte enrichi de l'en-tête",
 			"headerSize": "Taille de l'en-tête",
 			"helpText": "Texte d'aide",
@@ -1972,7 +1972,6 @@
 		"button": {
 			"ganttShowLabels": "Groupes",
 			"ganttShowLabelsHint": "Afficher/masquer les groupes",
-			"ganttToggleHint": "Basculer entre le mode jour et heure",
 			"ics": "Accès",
 			"icsHint": "Accédez au calendrier depuis une application externe",
 			"icsPublish": "Publier pour un usage personnel"
@@ -2454,7 +2453,7 @@
 		"dateFormat4": "m/d/Y (12/30/2012)",
 		"dateSteps": {
 			"days": "Days",
-			"halfYears": "Half-years",
+			"half-years": "Half-years",
 			"hours": "Hours",
 			"months": "Months",
 			"quarters": "Quarters",

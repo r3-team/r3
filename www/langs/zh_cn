@@ -1025,7 +1025,7 @@
 			"ganttBatch": "甘特批处理组",
 			"ganttNotes": "首列批处理分组结果。",
 			"ganttSteps": "甘特间隔",
-			"ganttStepsToggle": "切换甘特间隔",
+			"ganttStepsShown": "Gantt interval choices",
 			"headerRichtext": "富文本",
 			"headerSize": "大小",
 			"helpText": "帮助文本",
@@ -1972,7 +1972,6 @@
 		"button": {
 			"ganttShowLabels": "分组",
 			"ganttShowLabelsHint": "显示/隐藏分组",
-			"ganttToggleHint": "在日和小时模式之间切换",
 			"ics": "访问",
 			"icsHint": "从外部应用程序访问日历",
 			"icsPublish": "发布供个人使用"
@@ -2454,7 +2453,7 @@
 		"dateFormat4": "m/d/Y (12/30/2012)",
 		"dateSteps": {
 			"days": "Days",
-			"halfYears": "Half-years",
+			"half-years": "Half-years",
 			"hours": "Hours",
 			"months": "Months",
 			"quarters": "Quarters",

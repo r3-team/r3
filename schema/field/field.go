@@ -41,7 +41,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 		-- calendar field
 		fn.attribute_id_date0, fn.attribute_id_date1, fn.attribute_id_color,
 		fn.index_date0, fn.index_date1, fn.index_color, fn.ics, fn.gantt,
-		fn.gantt_steps, fn.gantt_steps_toggle, fn.date_range0, fn.date_range1,
+		fn.gantt_steps, fn.gantt_steps_shown, fn.date_range0, fn.date_range1,
 		fn.days, fn.days_toggle,
 
 		-- chart field
@@ -137,15 +137,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 			fieldParentId, iconId, jsFunctionIdButton, jsFunctionIdData,
 			jsFunctionIdVariable, tabId, variableId pgtype.UUID
 		var collapseAllow, collapseDefault, csvExport, csvImport, daysToggle,
-			filterQuick, filterQuickList, gantt, ganttStepsToggle, ics, outsideIn,
-			richtext, wrap pgtype.Bool
+			filterQuick, filterQuickList, gantt, ics, outsideIn, richtext, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
+		var ganttStepsShown []string
 		var flags []string
 
 		if err := rows.Scan(&fieldId, &fieldParentId, &tabId, &iconId, &content,
 			&state, &flags, &onMobile, &atrContent, &jsFunctionIdButton,
 			&attributeIdDate0, &attributeIdDate1, &attributeIdColor, &indexDate0,
-			&indexDate1, &indexColor, &ics, &gantt, &ganttSteps, &ganttStepsToggle,
+			&indexDate1, &indexColor, &ics, &gantt, &ganttSteps, &ganttStepsShown,
 			&dateRange0, &dateRange1, &days, &daysToggle, &chartOption,
 			&direction, &justifyContent, &alignItems, &alignContent, &wrap,
 			&grow, &shrink, &basis, &perMin, &perMax, &richtext, &size,
@@ -196,7 +196,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 				Ics:              ics.Bool,
 				Gantt:            gantt.Bool,
 				GanttSteps:       ganttSteps,
-				GanttStepsToggle: ganttStepsToggle.Bool,
+				GanttStepsShown:  ganttStepsShown,
 				DateRange0:       int64(dateRange0.Int32),
 				DateRange1:       int64(dateRange1.Int32),
 				Days:             int(days.Int16),
@@ -916,23 +916,23 @@ func setCalendar_tx(ctx context.Context, tx pgx.Tx, f types.FieldCalendar) error
 	// fix imports < 3.5: Default view
 	f.Days = compatible.FixCalendarDefaultView(f.Days)
 
+	// fix imports < 3.13: Migrate Gantt steps toggle
+	f = compatible.FixGanttStepsToggle(f)
+
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.field_calendar (
-			field_id, attribute_id_date0, attribute_id_date1,
-			attribute_id_color, index_date0, index_date1, index_color,
-			gantt, gantt_steps, gantt_steps_toggle, ics, date_range0,
-			date_range1, days, days_toggle
+			field_id, attribute_id_date0, attribute_id_date1, attribute_id_color,
+			index_date0, index_date1, index_color, gantt, gantt_steps,
+			gantt_steps_shown, ics, date_range0, date_range1, days, days_toggle
 		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 		ON CONFLICT (field_id)
 		DO UPDATE SET attribute_id_date0 = $2, attribute_id_date1 = $3,
 			attribute_id_color = $4, index_date0 = $5, index_date1 = $6,
-			index_color = $7, gantt = $8, gantt_steps = $9,
-			gantt_steps_toggle = $10, ics = $11, date_range0 = $12,
-			date_range1 = $13, days = $14, days_toggle = $15
-	`, f.Id, f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor,
-		f.IndexDate0, f.IndexDate1, f.IndexColor, f.Gantt, f.GanttSteps,
-		f.GanttStepsToggle, f.Ics, f.DateRange0, f.DateRange1, f.Days,
-		f.DaysToggle); err != nil {
+			index_color = $7, gantt = $8, gantt_steps = $9, gantt_steps_shown = $10,
+			ics = $11, date_range0 = $12, date_range1 = $13, days = $14, days_toggle = $15
+	`, f.Id, f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor, f.IndexDate0,
+		f.IndexDate1, f.IndexColor, f.Gantt, f.GanttSteps, f.GanttStepsShown,
+		f.Ics, f.DateRange0, f.DateRange1, f.Days, f.DaysToggle); err != nil {
 
 		return err
 	}

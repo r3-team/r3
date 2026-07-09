@@ -161,18 +161,21 @@ type FieldCalendar struct {
 	IndexDate0       int                  `json:"indexDate0"`
 	IndexDate1       int                  `json:"indexDate1"`
 	IndexColor       pgtype.Int4          `json:"indexColor"`
-	Gantt            bool                 `json:"gantt"`            // gantt presentation
-	GanttSteps       pgtype.Text          `json:"ganttSteps"`       // gantt step type (hours, days, months, quarters, half-years)
-	GanttStepsToggle bool                 `json:"ganttStepsToggle"` // user can toggle between gantt step types
-	Ics              bool                 `json:"ics"`              // calendar available as ICS download
-	DateRange0       int64                `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
-	DateRange1       int64                `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
-	Days             int                  `json:"days"`             // how many days to show on calendar by default (1,3,5,7,42)
-	DaysToggle       bool                 `json:"daysToggle"`       // if enabled, user can choose how many days to show
+	Gantt            bool                 `json:"gantt"`           // gantt presentation
+	GanttSteps       pgtype.Text          `json:"ganttSteps"`      // gantt step type (hours, days, months, quarters, half-years)
+	GanttStepsShown  []string             `json:"ganttStepsShown"` // user can select from gantt step types
+	Ics              bool                 `json:"ics"`             // calendar available as ICS download
+	DateRange0       int64                `json:"dateRange0"`      // ICS/gantt time range before NOW (seconds)
+	DateRange1       int64                `json:"dateRange1"`      // ICS/gantt time range after NOW (seconds)
+	Days             int                  `json:"days"`            // how many days to show on calendar by default (1,3,5,7,42)
+	DaysToggle       bool                 `json:"daysToggle"`      // if enabled, user can choose how many days to show
 	OpenForm         OpenForm             `json:"openForm"`
 	Columns          []Column             `json:"columns"`
 	Collections      []CollectionConsumer `json:"collections"` // collections to select values for query filters
 	Query            Query                `json:"query"`
+
+	// legacy
+	GanttStepsToggle bool `json:"ganttStepsToggle"` // user can change between gantt step types
 }
 type FieldChart struct {
 	Id          uuid.UUID   `json:"id"`

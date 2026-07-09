@@ -36,6 +36,13 @@ func FixMissingDocColumnContent(column types.DocColumn) types.DocColumn {
 	}
 	return column
 }
+func FixGanttStepsToggle(field types.FieldCalendar) types.FieldCalendar {
+	if field.GanttStepsToggle {
+		// before 3.13, only hours & days existed to toggle between
+		field.GanttStepsShown = []string{"hours", "days"}
+	}
+	return field
+}
 
 // < 3.12
 func FixMissingZeroRelease(releases []types.Release) []types.Release {

@@ -1025,7 +1025,7 @@
 			"ganttBatch": "Gantt-csoport",
 			"ganttNotes": "Az első oszlopcsoport csoportosítja az eredményeket.",
 			"ganttSteps": "Gantt-intervallum",
-			"ganttStepsToggle": "Gantt-intervallum választás",
+			"ganttStepsShown": "Gantt interval choices",
 			"headerRichtext": "Richtext",
 			"headerSize": "Fej méret",
 			"helpText": "Segítség szöveg",
@@ -1972,7 +1972,6 @@
 		"button": {
 			"ganttShowLabels": "Csoportok",
 			"ganttShowLabelsHint": "Csoportok megjelenítése/elrejtése",
-			"ganttToggleHint": "Váltás Óra- és Napnézet között",
 			"ics": "Hozzáférés",
 			"icsHint": "Külső naptárhoz való hozzáférés iCalendar (ICS) formátumban.",
 			"icsPublish": "Személyes használatra közzétesz"
@@ -2454,7 +2453,7 @@
 		"dateFormat4": "h/n/É (12/30/2012)",
 		"dateSteps": {
 			"days": "Days",
-			"halfYears": "Half-years",
+			"half-years": "Half-years",
 			"hours": "Hours",
 			"months": "Months",
 			"quarters": "Quarters",

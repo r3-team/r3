@@ -1025,7 +1025,7 @@
 			"ganttBatch": "Gantt-Gruppe",
 			"ganttNotes": "Erster Spaltenstapel gruppiert Ergebnisse.",
 			"ganttSteps": "Gantt-Intervall",
-			"ganttStepsToggle": "Gantt-Intervall-Auswahl",
+			"ganttStepsShown": "Gantt-Intervall-Auswahl",
 			"headerRichtext": "Rich-Text",
 			"headerSize": "Größe",
 			"helpText": "Hilfetext",
@@ -1972,7 +1972,6 @@
 		"button": {
 			"ganttShowLabels": "Gruppen",
 			"ganttShowLabelsHint": "Gruppen anzeigen/verstecken",
-			"ganttToggleHint": "Zwischen Stunden- & Tagmodus wechseln",
 			"ics": "Zugriff",
 			"icsHint": "Auf Kalender von Extern zugreifen",
 			"icsPublish": "Für persönliche Nutzung veröffentlichen"
@@ -2454,7 +2453,7 @@
 		"dateFormat4": "m/d/Y (12/30/2012)",
 		"dateSteps": {
 			"days": "Tage",
-			"halfYears": "Halbjahre",
+			"half-years": "Halbjahre",
 			"hours": "Stunden",
 			"months": "Monate",
 			"quarters": "Quartale",
