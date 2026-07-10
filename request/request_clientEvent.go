@@ -9,8 +9,8 @@ import (
 	"r3/handler"
 	"r3/login/login_clientEvent"
 	"r3/schema/clientEvent"
+	"r3/spooler"
 	"r3/types"
-	"strings"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -92,32 +92,7 @@ func clientEventExecFatClient_tx(ctx context.Context, tx pgx.Tx, reqJson json.Ra
 		return nil, cluster.JsFunctionCalled_tx(ctx, tx, true, address, loginId, ce.ModuleId, ce.JsFunctionId.Bytes, req.Arguments)
 	}
 	if ce.Action == "callPgFunction" && ce.PgFunctionId.Valid {
-
-		cache.Schema_mx.RLock()
-		fnc, exists := cache.PgFunctionIdMap[ce.PgFunctionId.Bytes]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
-			return nil, handler.ErrSchemaUnknownPgFunction(ce.PgFunctionId.Bytes)
-		}
-		if fnc.IsTrigger {
-			return nil, handler.ErrSchemaTriggerPgFunctionCall(ce.PgFunctionId.Bytes)
-		}
-
-		cache.Schema_mx.RLock()
-		mod := cache.ModuleIdMap[fnc.ModuleId]
-		cache.Schema_mx.RUnlock()
-
-		placeholders := make([]string, 0)
-		for i := range req.Arguments {
-			placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
-		}
-
-		var returnIf any
-		err := tx.QueryRow(ctx, fmt.Sprintf(`SELECT "%s"."%s"(%s)`, mod.Name, fnc.Name, strings.Join(placeholders, ",")),
-			req.Arguments...).Scan(&returnIf)
-
-		return nil, err
+		return spooler.ExecutePgFunction_tx(ctx, tx, ce.PgFunctionId.Bytes, req.Arguments, false)
 	}
 	return nil, fmt.Errorf("invalid client event action")
 }

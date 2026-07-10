@@ -7,11 +7,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/png"
+	"os"
 	"r3/cache"
+	"r3/config"
+	"r3/data"
 	"r3/db"
 	"r3/handler"
 	"r3/log"
 	"r3/schema"
+	"r3/spooler"
+	"r3/tools"
+	"r3/types"
 	"strings"
 
 	"github.com/boombuler/barcode"
@@ -41,6 +47,10 @@ type codeJob struct {
 	// attach code to files/barcode attribute
 	AttributeIdAttach uuid.UUID
 	RecordIdAttach    int64
+
+	// callback after generation
+	PgFunctionIdCallback pgtype.UUID
+	CallbackValue        pgtype.Text
 }
 
 const codeFormatCodabar codeFormat = "CODABAR"
@@ -56,7 +66,8 @@ const codeFormatQr codeFormat = "QR_CODE"
 func DoAll() error {
 
 	rows, err := db.Pool.Query(context.Background(), `
-		SELECT id, format, text_value, size_x, size_y, qr_err_corr, attribute_id_attach, record_id_attach
+		SELECT id, attribute_id_attach, pg_function_id_callback, callback_value,
+			record_id_attach, format, text_value, size_x, size_y, qr_err_corr
 		FROM instance.code_spool
 	`)
 	if err != nil {
@@ -67,8 +78,8 @@ func DoAll() error {
 	codes := make([]codeJob, 0)
 	for rows.Next() {
 		var c codeJob
-		if err := rows.Scan(&c.Id, &c.Format, &c.TextValue, &c.SizeX, &c.SizeY,
-			&c.QrErrCorr, &c.AttributeIdAttach, &c.RecordIdAttach); err != nil {
+		if err := rows.Scan(&c.Id, &c.AttributeIdAttach, &c.PgFunctionIdCallback, &c.CallbackValue,
+			&c.RecordIdAttach, &c.Format, &c.TextValue, &c.SizeX, &c.SizeY, &c.QrErrCorr); err != nil {
 
 			return err
 		}
@@ -114,33 +125,82 @@ func do(c codeJob) error {
 	}
 
 	if schema.IsContentFiles(atr.Content) {
-		// attach file
-		return nil
-	}
-
-	if strings.Contains(atr.Content, "barcode") {
-
-		// update barcode attribute with base64 image
-		var buf bytes.Buffer
-		if err := png.Encode(&buf, code); err != nil {
+		if err := storeAsFilesAttribute(ctx, c.AttributeIdAttach, c.RecordIdAttach, code); err != nil {
 			return err
 		}
-		return storeAsTextAttributeValue(ctx, c.AttributeIdAttach, c.RecordIdAttach, codeJson{
-			Format: c.Format,
-			Image: pgtype.Text{
-				String: base64.StdEncoding.EncodeToString(buf.Bytes()),
-				Valid:  true,
-			},
-			Text: c.TextValue,
-		})
-
+	} else if strings.Contains(atr.Content, "barcode") {
+		if err := storeAsTextAttributeValue(ctx, c.AttributeIdAttach, c.RecordIdAttach, code, c.Format, c.TextValue); err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("QR-/barcodes can only be stored in files or QR-/barcode attributes")
 	}
-	return fmt.Errorf("QR-/barcodes can only be stored in files or QR-/barcode attributes")
+
+	if c.PgFunctionIdCallback.Valid {
+		_, err := spooler.ExecutePgFunction(ctx, c.PgFunctionIdCallback.Bytes, []any{c.CallbackValue}, false)
+		return err
+	}
+	return nil
 }
 
-func storeAsTextAttributeValue(ctx context.Context, attributeId uuid.UUID, recordId int64, value codeJson) error {
+func storeAsFilesAttribute(ctx context.Context, attributeId uuid.UUID, recordId int64, code barcode.Barcode) error {
 
-	valueJson, err := json.Marshal(value)
+	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
+	if err != nil {
+		return err
+	}
+	fileId, err := uuid.NewV4()
+	if err != nil {
+		return err
+	}
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if err := png.Encode(file, code); err != nil {
+		return err
+	}
+	if err := data.SetFile(ctx, -1, attributeId, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, true); err != nil {
+		return err
+	}
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := data.FilesApplyAttributChanges_tx(ctx, tx, recordId, attributeId,
+		map[uuid.UUID]types.DataSetFileChange{
+			fileId: {
+				Action:  "create",
+				Name:    "code.png",
+				Version: -1,
+			},
+		}); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func storeAsTextAttributeValue(ctx context.Context, attributeId uuid.UUID, recordId int64,
+	code barcode.Barcode, format codeFormat, textValue string) error {
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, code); err != nil {
+		return err
+	}
+
+	valueJson, err := json.Marshal(codeJson{
+		Format: format,
+		Image: pgtype.Text{
+			String: base64.StdEncoding.EncodeToString(buf.Bytes()),
+			Valid:  true,
+		},
+		Text: textValue,
+	})
 	if err != nil {
 		return err
 	}

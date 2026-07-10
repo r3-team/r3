@@ -16,6 +16,7 @@ import (
 	"r3/log"
 	"r3/repo"
 	"r3/schema"
+	"r3/spooler"
 	"r3/spooler/doc_create"
 	"r3/spooler/file_process"
 	"r3/spooler/mail_attach"
@@ -470,21 +471,8 @@ func runPgFunction(pgFunctionId uuid.UUID) error {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutPgFunc)
 	defer ctxCanc()
 
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	modName, fncName, _, _, err := schema.GetPgFunctionDetailsById_tx(ctx, tx, pgFunctionId)
-	if err != nil {
-		return err
-	}
-
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"()`, modName, fncName)); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
+	_, err := spooler.ExecutePgFunction(ctx, pgFunctionId, []any{}, false)
+	return err
 }
 
 // get unix time and index of task schedule to run next

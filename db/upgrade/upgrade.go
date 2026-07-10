@@ -358,6 +358,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TABLE IF NOT EXISTS instance.code_spool (
 				id uuid NOT NULL,
 				attribute_id_attach UUID NOT NULL,
+				pg_function_id_callback uuid,
+				callback_value text COLLATE pg_catalog."default",
 				record_id_attach BIGINT NOT NULL,
 				format instance.barcode_format NOT NULL,
 				qr_err_corr instance.qr_err_corr,
@@ -369,9 +371,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					REFERENCES app.attribute (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT code_spool_pg_function_id_callback_fkey FOREIGN KEY (pg_function_id_callback)
+					REFERENCES app.pg_function (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_code_spool_attribute_id_attach_id_fkey ON instance.code_spool USING btree (attribute_id_attach ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_code_spool_attribute_id_attach_id_fkey  ON instance.code_spool USING btree (attribute_id_attach     ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_code_spool_pg_function_id_callback_fkey ON instance.code_spool USING btree (pg_function_id_callback ASC NULLS LAST);
 
 			-- new log context
 			INSERT INTO instance.config (name,value) VALUES ('logCode',2);

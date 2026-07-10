@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"r3/cache"
 	"r3/data"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
+	"r3/spooler"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -28,29 +27,10 @@ func doTextRead(fileId uuid.UUID, fileVersion pgtype.Int8, pgFunctionId uuid.UUI
 		}
 	}
 
-	// access schema cache
-	cache.Schema_mx.RLock()
-	fnc, exists := cache.PgFunctionIdMap[pgFunctionId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownPgFunction(pgFunctionId)
-	}
-
-	cache.Schema_mx.RLock()
-	mod, exists := cache.ModuleIdMap[fnc.ModuleId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownModule(fnc.ModuleId)
-	}
-
-	// define paths
-	filePathSource := data.GetFilePathVersion(fileId, fileVersion.Int64)
-
 	log.Info(log.ContextFile, fmt.Sprintf("reading text from file '%s'", fileId))
 
-	fileContent, err := os.ReadFile(filePathSource)
+	// read file
+	fileContent, err := os.ReadFile(data.GetFilePathVersion(fileId, fileVersion.Int64))
 	if err != nil {
 		return err
 	}
@@ -59,20 +39,10 @@ func doTextRead(fileId uuid.UUID, fileVersion pgtype.Int8, pgFunctionId uuid.UUI
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
+	if hasCallbackValue {
+		_, err := spooler.ExecutePgFunction(ctx, pgFunctionId, []any{string(fileContent), callbackValue}, false)
 		return err
 	}
-	defer tx.Rollback(ctx)
-
-	if hasCallbackValue {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2)`, mod.Name, fnc.Name), string(fileContent), callbackValue); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1)`, mod.Name, fnc.Name), string(fileContent)); err != nil {
-			return err
-		}
-	}
-	return tx.Commit(ctx)
+	_, err = spooler.ExecutePgFunction(ctx, pgFunctionId, []any{string(fileContent)}, false)
+	return err
 }

@@ -13,6 +13,7 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/schema"
+	"r3/spooler"
 	"r3/tools"
 	"r3/types"
 
@@ -210,37 +211,9 @@ func do(j docJob) error {
 		}
 	}
 
-	// execute callback if used
 	if j.PgFunctionIdCallback.Valid {
-
-		cache.Schema_mx.RLock()
-		fnc, exists := cache.PgFunctionIdMap[j.PgFunctionIdCallback.Bytes]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
-			return handler.ErrSchemaUnknownPgFunction(j.PgFunctionIdCallback.Bytes)
-		}
-
-		cache.Schema_mx.RLock()
-		mod, exists := cache.ModuleIdMap[fnc.ModuleId]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
-			return handler.ErrSchemaUnknownModule(fnc.ModuleId)
-		}
-
-		tx, err := db.Pool.Begin(ctx)
-		if err != nil {
-			return err
-		}
-		defer tx.Rollback(ctx)
-
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1)`, mod.Name, fnc.Name), j.CallbackValue); err != nil {
-			return err
-		}
-		if err := tx.Commit(ctx); err != nil {
-			return err
-		}
+		_, err := spooler.ExecutePgFunction(ctx, j.PgFunctionIdCallback.Bytes, []any{j.CallbackValue}, false)
+		return err
 	}
 	return nil
 }

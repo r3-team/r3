@@ -9,12 +9,11 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"r3/cache"
 	"r3/config"
 	"r3/data"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
+	"r3/spooler"
 	"regexp"
 	"strconv"
 	"strings"
@@ -141,24 +140,7 @@ func callExecute(c restCall) error {
 		if err != nil {
 			return fmt.Errorf("could not read response body, %s", err)
 		}
-
-		cache.Schema_mx.RLock()
-		fnc, exists := cache.PgFunctionIdMap[c.pgFunctionIdCallback.Bytes]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
-			return handler.ErrSchemaUnknownPgFunction(c.pgFunctionIdCallback.Bytes)
-		}
-
-		cache.Schema_mx.RLock()
-		mod, exists := cache.ModuleIdMap[fnc.ModuleId]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
-			return handler.ErrSchemaUnknownModule(fnc.ModuleId)
-		}
-
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`, mod.Name, fnc.Name), httpRes.StatusCode, bodyRaw, c.callbackValue); err != nil {
+		if _, err := spooler.ExecutePgFunction_tx(ctx, tx, c.pgFunctionIdCallback.Bytes, []any{httpRes.StatusCode, bodyRaw, c.callbackValue}, false); err != nil {
 			return err
 		}
 	}

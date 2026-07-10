@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"r3/cache"
 	"r3/config"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
+	"r3/spooler"
 
 	"github.com/gofrs/uuid/v5"
 )
@@ -26,27 +25,9 @@ func doImportText(filePath string, pgFunctionId uuid.UUID) error {
 	if filePath == "" {
 		return errPathEmpty
 	}
-
 	filePathSource := filepath.Join(config.File.Paths.FileImport, filePath)
 
 	log.Info(log.ContextFile, fmt.Sprintf("importing text from file '%s'", filePathSource))
-
-	// access schema cache
-	cache.Schema_mx.RLock()
-	fnc, exists := cache.PgFunctionIdMap[pgFunctionId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownPgFunction(pgFunctionId)
-	}
-
-	cache.Schema_mx.RLock()
-	mod, exists := cache.ModuleIdMap[fnc.ModuleId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownModule(fnc.ModuleId)
-	}
 
 	if err := checkImportPath(filePathSource, 0); err != nil {
 		return err
@@ -62,16 +43,7 @@ func doImportText(filePath string, pgFunctionId uuid.UUID) error {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2)`, mod.Name, fnc.Name), fileName, string(fileContent)); err != nil {
-		return err
-	}
-	if err := tx.Commit(ctx); err != nil {
+	if _, err := spooler.ExecutePgFunction(ctx, pgFunctionId, []any{fileName, string(fileContent)}, false); err != nil {
 		return err
 	}
 	return os.Remove(filePathSource)

@@ -78,6 +78,28 @@ func GetAttributeDbNames(attributeId uuid.UUID) (string, string, string, error) 
 		atr.Name,
 		nil
 }
+
+// returns names of entities to fully reference PG function in DB (module, PG function)
+// can enforce frontend call PG functions if desired
+// returns error if requested function is a trigger function
+func GetPgFunctionDbNames(pgFunctionId uuid.UUID, frontendCall bool) (string, string, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+
+	fnc, exists := PgFunctionIdMap[pgFunctionId]
+	if !exists {
+		return "", "", handler.ErrSchemaUnknownPgFunction(pgFunctionId)
+	}
+	if fnc.IsTrigger {
+		return "", "", handler.ErrSchemaTriggerPgFunctionCall(pgFunctionId)
+	}
+	if frontendCall && !fnc.IsFrontendExec {
+		return "", "", handler.ErrSchemaBadFrontendExecPgFunctionCall(pgFunctionId)
+	}
+	return ModuleIdMap[fnc.ModuleId].Name,
+		fnc.Name,
+		nil
+}
 func GetClientEventIdMap() map[uuid.UUID]types.ClientEvent {
 	Schema_mx.RLock()
 	defer Schema_mx.RUnlock()
