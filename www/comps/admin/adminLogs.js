@@ -68,16 +68,16 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content admin-logs-content no-padding">
-		
+
 			<!-- options -->
 			<my-admin-log-options
 				v-if="showOptions"
 				@close="showOptions = false"
 				:contextsValid
 			/>
-			
+
 			<!-- logs -->
 			<div class="admin-logs-table">
 				<table class="generic-table bright sticky-top">
@@ -96,7 +96,7 @@ export default {
 						<tr v-if="logs.length === 0">
 							<td colspan="999">{{ capGen.nothingThere }}</td>
 						</tr>
-						
+
 						<tr v-for="(l,i) in logs">
 							<td>
 								<my-button image="open.png"
@@ -129,11 +129,11 @@ export default {
 	data() {
 		return {
 			contextsValid:[
-				'module','api','backup','cache','cluster','csv','doc','file','imager',
+				'module','api','backup','cache','cluster','code','csv','doc','file','imager',
 				'ldap','oauth','mail','scheduler','server','transfer','websocket'
 			],
 			messageLengthShow:200,
-			
+
 			// inputs
 			byString:'',
 			context:'',
@@ -143,17 +143,17 @@ export default {
 			total:0,
 			unixFrom:null,
 			unixTo:null,
-			
+
 			// states
 			showOptions:false,
-			
+
 			// data
 			logs:[]
 		};
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
-		
+
 		// set date range for log retrieval (7 days ago to now)
 		let d = new Date();
 		d.setDate(d.getDate()-7);
@@ -162,14 +162,14 @@ export default {
 	},
 	computed:{
 		// stores
-		settings:(s) => s.$store.getters.settings,
-		capApp:  (s) => s.$store.getters.captions.admin.logs,
-		capGen:  (s) => s.$store.getters.captions.generic
+		settings:s => s.$store.getters.settings,
+		capApp:  s => s.$store.getters.captions.admin.logs,
+		capGen:  s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getUnixFormat,
-		
+
 		// presentation
 		displayDate(date) {
 			let format = [this.settings.dateFormat,'H:i:S'];
@@ -197,7 +197,7 @@ export default {
 			}
 			else {
 				this.unixTo = unix;
-				
+
 				// add 23:59:59 to to date, if from and to date are equal
 				let d = new Date(this.unixTo * 1000);
 				if(d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0)
@@ -213,7 +213,7 @@ export default {
 				width:800
 			});
 		},
-		
+
 		// backend calls
 		get() {
 			ws.send('log','get',{

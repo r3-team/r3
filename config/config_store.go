@@ -34,7 +34,7 @@ var (
 		"dbTimeoutDataWs", "dbTimeoutIcs", "filesKeepDaysDeleted",
 		"fileVersionsKeepCount", "fileVersionsKeepDays", "icsDaysPost",
 		"icsDaysPre", "icsDownload", "imagerThumbWidth", "logApi", "logBackup",
-		"logCache", "logCluster", "logCsv", "logDoc", "logFile", "logImager",
+		"logCache", "logCluster", "logCode", "logCsv", "logDoc", "logFile", "logImager",
 		"logLdap", "logMail", "logModule", "logOauth", "logServer", "logScheduler",
 		"logTransfer", "logWebsocket", "logsKeepDays", "mailTrafficKeepDays",
 		"productionMode", "pwForceDigit", "pwForceLower", "pwForceSpecial",

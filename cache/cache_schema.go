@@ -62,6 +62,22 @@ var (
 	ClientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
 )
 
+// returns names of entities to fully reference attribute in DB (module, relation, attribute)
+func GetAttributeDbNames(attributeId uuid.UUID) (string, string, string, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+
+	atr, exists := AttributeIdMap[attributeId]
+	if !exists {
+		return "", "", "", handler.ErrSchemaUnknownAttribute(attributeId)
+	}
+	rel := RelationIdMap[atr.RelationId]
+
+	return ModuleIdMap[rel.ModuleId].Name,
+		RelationIdMap[atr.RelationId].Name,
+		atr.Name,
+		nil
+}
 func GetClientEventIdMap() map[uuid.UUID]types.ClientEvent {
 	Schema_mx.RLock()
 	defer Schema_mx.RUnlock()

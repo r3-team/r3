@@ -351,6 +351,32 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'quarters';
 			ALTER TYPE app.field_calendar_gantt_steps ADD VALUE 'half-years';
 
+			-- backend QR-/barcode generation
+			CREATE TYPE instance.barcode_format AS ENUM('CODABAR', 'CODE_39', 'CODE_128', 'EAN_8', 'EAN_13', 'UPC_A', 'UPC_E', 'ITF', 'QR_CODE');
+			CREATE TYPE instance.qr_err_corr AS ENUM('L', 'M', 'H', 'Q');
+
+			CREATE TABLE IF NOT EXISTS instance.code_spool (
+				id uuid NOT NULL,
+				attribute_id_attach UUID NOT NULL,
+				record_id_attach BIGINT NOT NULL,
+				format instance.barcode_format NOT NULL,
+				qr_err_corr instance.qr_err_corr,
+				text_value text COLLATE pg_catalog."default" NOT NULL,
+				size_x INTEGER NOT NULL,
+				size_y INTEGER NOT NULL,
+				CONSTRAINT code_spool_pk PRIMARY KEY (id),
+				CONSTRAINT code_spool_attribute_id_attach_id_fkey FOREIGN KEY (attribute_id_attach)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_code_spool_attribute_id_attach_id_fkey ON instance.code_spool USING btree (attribute_id_attach ASC NULLS LAST);
+
+			-- new log context
+			INSERT INTO instance.config (name,value) VALUES ('logCode',2);
+			ALTER TYPE instance.log_context ADD VALUE 'code';
+
 			-- mail (re)send options
 			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER;
 			ALTER TABLE instance.mail_account ADD   COLUMN send_seconds   INTEGER NOT NULL DEFAULT 60;
