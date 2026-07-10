@@ -36,6 +36,7 @@ const MyStore = Vuex.createStore({
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
 			dragFieldContent:'dragDropPrevField', // content name for drag&drop preview fields
+			ganttSteps:['hours', 'days', 'months', 'quarters', 'half-years'], // Gantt steps in order
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
 			keyLength:64,              // length of new symmetric keys for data encryption
 			languageCodesOfficial:[    // officially supported language codes
@@ -77,7 +78,7 @@ const MyStore = Vuex.createStore({
 		isCollapsedMenuApp:false,      // app menu is collapsed
 		isMobile:false,                // app runs on small screen (probably mobile)
 		isSecureContext:false,         // app runs in secure context (HTTPS or local access)
-		isWithoutMenuApp:false,        // session does not have an app menu, set via getter param (menu-app=0), 
+		isWithoutMenuApp:false,        // session does not have an app menu, set via getter param (menu-app=0),
 		isWithoutMenuHeader:false,     // session does not have a header menu, set via getter param (menu-header=0)
 		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
 		license:{},                    // license info (admin only)
@@ -139,21 +140,21 @@ const MyStore = Vuex.createStore({
 		dialog:(state,payload) => {
 			state.dialogCaptionTop = typeof payload.captionTop !== 'undefined' ?
 				payload.captionTop : '';
-			
+
 			state.dialogCaptionBody = typeof payload.captionBody !== 'undefined' ?
 				payload.captionBody : '';
-			
+
 			state.dialogImage = typeof payload.image !== 'undefined' ?
 				payload.image : null;
-			
+
 			state.dialogTextDisplay = typeof payload.textDisplay !== 'undefined' ?
 				payload.textDisplay : 'html';
-			
+
 			let styles = '';
-			
+
 			if(typeof payload.width !== 'undefined')
 				styles += `max-width:${payload.width}px;`;
-			
+
 			if(typeof payload.buttons === 'undefined')
 				payload.buttons = [{
 					caption:state.captions.generic.button.close,
@@ -161,7 +162,7 @@ const MyStore = Vuex.createStore({
 					image:'cancel.png',
 					keyEscape:true
 				}];
-			
+
 			state.dialogStyles  = styles;
 			state.dialogButtons = payload.buttons;
 			state.isAtDialog    = true;
@@ -200,10 +201,10 @@ const MyStore = Vuex.createStore({
 		},
 		license:(state,payload) => {
 			state.license = payload;
-			
+
 			if(payload.validUntil === undefined)
 				return state.licenseValid = false;
-			
+
 			state.licenseValid = payload.validUntil > Math.floor(new Date().getTime() / 1000);
 		},
 		loginType:(state,payload) => {
@@ -215,12 +216,12 @@ const MyStore = Vuex.createStore({
 		pageTitle:(state,payload) => {
 			state.pageTitle = payload;
 			let names = [payload];
-			
+
 			if(MyStoreLocal.state.appNameShort !== '')
 				names.push(MyStoreLocal.state.appNameShort);
-			
+
 			state.pageTitleFull = names.join(' - ');
-			
+
 			// update document title whenever page title changes
 			document.title = state.pageTitleFull;
 		},
@@ -255,7 +256,7 @@ const MyStore = Vuex.createStore({
 					clearInterval(state.sessionTimerStore[payload.moduleId][payload.name].id);
 				else
 					clearTimeout(state.sessionTimerStore[payload.moduleId][payload.name].id);
-				
+
 				delete(state.sessionTimerStore[payload.moduleId][payload.name]);
 			}
 		},
@@ -267,16 +268,16 @@ const MyStore = Vuex.createStore({
 		variableStoreValueById:(state,payload) => {
 			state.variableIdMapGlobal[payload.id] = payload.value;
 		},
-		
+
 		// collections
 		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.rows,
 		collectionsClear:(state,payload) => state.collectionIdMap = {},
-		
+
 		// counters
 		busyAdd:   (state,payload) => state.busyCounter++,
 		busyRemove:(state,payload) => state.busyCounter--,
 		busyReset: (state,payload) => state.busyCounter=0,
-		
+
 		// simple
 		access:                  (state,payload) => state.access                   = payload,
 		captions:                (state,payload) => state.captions                 = payload,
@@ -331,7 +332,7 @@ const MyStore = Vuex.createStore({
 		sessionValueStore:(state,payload) => {
 			if(state.sessionValueStore[payload.moduleId] === undefined)
 				state.sessionValueStore[payload.moduleId] = {};
-			
+
 			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
 		},
 		sessionValueStoreReset:(state,payload) => {
@@ -343,10 +344,10 @@ const MyStore = Vuex.createStore({
 			let colorRgb = state.colorHeaderDefault;
 			let brighten = 0;
 			let desature = 0;
-			
+
 			// accent color is used (it was enabled or classic color mode is active)
 			if(state.settings.colorClassicMode || !state.settings.colorHeaderSingle) {
-				
+
 				// get accent color either from customizing or currently shown module
 				if(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorHeader !== '') {
 					colorRgb = MyStoreLocal.state.companyColorHeader;
@@ -354,7 +355,7 @@ const MyStore = Vuex.createStore({
 				else if(state.isAtModule && state.moduleIdLast !== null && MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1 !== null) {
 					colorRgb = MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
 				}
-				
+
 				if(colorRgb !== state.colorHeaderDefault) {
 					if(state.settings.colorClassicMode) {
 						brighten = state.settings.dark ? -18: -8;
@@ -388,7 +389,7 @@ const MyStore = Vuex.createStore({
 		licenseDays:(state) => {
 			if(!state.licenseValid)
 				return 0;
-			
+
 			let seconds = state.license.validUntil - (new Date().getTime() / 1000);
 			return Math.round(seconds / 60 / 60 / 24);
 		},
@@ -425,7 +426,7 @@ const MyStore = Vuex.createStore({
 		pwaModuleId:(state) => {
 			if(!MyStoreLocal.state.activated)
 				return null;
-			
+
 			const subDomain = window.location.host.split('.')[0];
 			return typeof state.pwaDomainMap[subDomain] !== 'undefined'
 				? state.pwaDomainMap[subDomain] : null;
@@ -442,7 +443,7 @@ const MyStore = Vuex.createStore({
 			}
 			return out;
 		},
-		
+
 		// simple
 		access:                  (state) => state.access,
 		appFunctions:            (state) => state.appFunctions,

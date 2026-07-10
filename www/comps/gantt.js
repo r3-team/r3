@@ -1,7 +1,7 @@
 import MyInputCollection from './inputCollection.js';
 import MyForm            from './form.js';
 import srcBase64Icon     from './shared/image.js';
-import {getCaption}      from './shared/language.js';
+import { getCaption }    from './shared/language.js';
 import {
 	checkDataOptions,
 	colorAdjustBg,
@@ -222,7 +222,9 @@ const MyGantt = {
 					@input="$emit('set-login-option', 'ganttStepType', $event.target.value)"
 					:value="stepType"
 				>
-					<option v-for="t in stepTypesShown" :value="t">{{ capGen.dateSteps[t] }}</option>
+					<option v-for="t in dateSteps.filter(v => stepTypesShown.includes(v))" :value="t">
+						{{ capGen.dateSteps[t] }}
+					</option>
 				</select>
 
 				<my-button image="search.png"
@@ -560,6 +562,7 @@ const MyGantt = {
 		appResized:    s => s.$store.getters.appResized,
 		capApp:        s => s.$store.getters.captions.calendar,
 		capGen:        s => s.$store.getters.captions.generic,
+		dateSteps:     s => s.$store.getters.constants.ganttSteps,
 		isMobile:      s => s.$store.getters.isMobile,
 		settings:      s => s.$store.getters.settings
 	},

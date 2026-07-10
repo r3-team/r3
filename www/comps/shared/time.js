@@ -1,4 +1,4 @@
-import {getStringFilled} from './generic.js';
+import { getStringFilled } from './generic.js';
 
 // set both dates to UTC zero to remove issues with DST
 export function getDaysBetween(d0,d1) {
@@ -34,7 +34,7 @@ export function getDateFormatNoYear(d,format) {
 	format = format.replace('y','');
 	format = format.replace(/[\-\/]+$/,'');
 	format = format.replace(/^[\-\/]+/,'');
-	
+
 	format = format.replace('m',getStringFilled(d.getMonth()+1,2,'0'));
 	format = format.replace('d',getStringFilled(d.getDate(),2,'0'));
 	format = format.replace('H',getStringFilled(d.getHours(),2,'0'));
@@ -45,15 +45,15 @@ export function getDateFormatNoYear(d,format) {
 
 export function getDateNoUtcZero(dInput) {
 	let d = new Date(dInput.getTime());
-	
+
 	// dates are stored as UTC zero
 	// to convert to datetime, switch to 12:00:00 local time
 	d.setHours(12,0,0);
-	
+
 	// if this happens to be UTC zero, set to 13:00
 	if(isUnixUtcZero(d.getTime() / 1000))
 		d.setHours(13,0,0);
-	
+
 	return d;
 };
 
@@ -66,7 +66,7 @@ export function getDateAtUtcZero(dInput) {
 
 export function getUtcTimeStringFromUnix(unixTime) {
 	if(unixTime === null) return '';
-	
+
 	let d = new Date(unixTime * 1000);
 	d.setMinutes(d.getMinutes()+d.getTimezoneOffset());
 	return `${getStringFilled(d.getHours(),2,'0')}:` +
@@ -118,7 +118,7 @@ export function getUnixNowTime() {
 export function applyUnixDateToDatetime(unixDatetime,unixAtUtcMidnight) {
 	let dateOld = getDateFromUnix(unixDatetime);
 	let dateNew = getDateFromUnix(unixAtUtcMidnight);
-	
+
 	// only apply date component to datetime unix
 	dateOld.setFullYear(dateNew.getUTCFullYear());
 	dateOld.setMonth(dateNew.getUTCMonth());
@@ -129,13 +129,13 @@ export function applyUnixDateToDatetime(unixDatetime,unixAtUtcMidnight) {
 export function getWeek(dInput) {
 	let d = new Date(dInput.valueOf());
 	d.setHours(0,0,0,0);
-	
+
 	// Thursday in current week decides the year
 	d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
-	
+
 	// January 4 is always in first week
 	let w1 = new Date(d.getFullYear(), 0, 4);
-	
+
 	// adjust to Thursday in week 1 and count number of weeks from date to week1
 	return 1 + Math.round(
 		((d.getTime() - w1.getTime()) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7
@@ -146,12 +146,12 @@ export function getDateFromWeek(week,year) {
 	const d        = new Date(year, 0, 1 + (week - 1) * 7);
 	const dow      = d.getDay();
 	const dIsoWeek = d;
-	
+
 	// get the Monday past, and add a week if the day was Friday, Saturday or Sunday
 	dIsoWeek.setDate(d.getDate() - dow + 1);
 	if(dow > 4)
 		dIsoWeek.setDate(dIsoWeek.getDate() + 7);
-	
+
 	return dIsoWeek;
 };
 

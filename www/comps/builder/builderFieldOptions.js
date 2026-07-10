@@ -1,11 +1,11 @@
-import MyBuilderCaption                from './builderCaption.js';
-import MyBuilderCollectionInput        from './builderCollectionInput.js';
-import MyBuilderIconInput              from './builderIconInput.js';
-import MyBuilderOpenDoc                from './builderOpenDoc.js';
-import MyBuilderOpenForm               from './builderOpenForm.js';
-import MyCodeEditor                    from '../codeEditor.js';
-import {openLink}                      from '../shared/generic.js';
-import {getJoinsIndexMap}              from '../shared/query.js';
+import MyBuilderCaption         from './builderCaption.js';
+import MyBuilderCollectionInput from './builderCollectionInput.js';
+import MyBuilderIconInput       from './builderIconInput.js';
+import MyBuilderOpenDoc         from './builderOpenDoc.js';
+import MyBuilderOpenForm        from './builderOpenForm.js';
+import MyCodeEditor             from '../codeEditor.js';
+import {openLink}               from '../shared/generic.js';
+import { getJoinsIndexMap }     from '../shared/query.js';
 import {
 	getTemplateCollectionConsumer,
 	getTemplateQuery,
@@ -1468,11 +1468,6 @@ export default {
 		moduleId:       { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data() {
-		return {
-			dateSteps:['hours', 'days', 'months', 'quarters', 'half-years']
-		};
-	},
 	emits:['createNew','set'],
 	computed:{
 		displayOptions:s => {
@@ -1580,7 +1575,8 @@ export default {
 		variableIdMap: s => s.$store.getters['schema/variableIdMap'],
 		capApp:        s => s.$store.getters.captions.builder.form,
 		capCal:        s => s.$store.getters.captions.calendar,
-		capGen:        s => s.$store.getters.captions.generic
+		capGen:        s => s.$store.getters.captions.generic,
+		dateSteps:     s => s.$store.getters.constants.ganttSteps
 	},
 	methods:{
 		// externals
