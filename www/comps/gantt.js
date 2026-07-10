@@ -575,6 +575,7 @@ const MyGantt = {
 		this.$watch('popUpFormInline',this.resized);
 		this.$watch('stepType',() => {
 			this.page = 0;
+			this.dateStart = this.getDateRounded(new Date());
 			this.paramsUpdate(true);
 			this.$nextTick(() => this.setSteps(true));
 		});
