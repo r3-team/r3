@@ -17,6 +17,7 @@ import (
 	"r3/repo"
 	"r3/schema"
 	"r3/spooler"
+	"r3/spooler/code_create"
 	"r3/spooler/doc_create"
 	"r3/spooler/file_process"
 	"r3/spooler/mail_attach"
@@ -368,6 +369,9 @@ func load() error {
 		case "clusterProcessEvents":
 			t.nameLog = "Cluster event processing"
 			t.fn = clusterProcessEvents
+		case "codesGenerate":
+			t.nameLog = "QR-/barcode generation"
+			t.fn = code_create.DoAll
 		case "dbOptimize":
 			t.nameLog = "Database optimization"
 			t.fn = dbOptimize

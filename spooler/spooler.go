@@ -37,7 +37,7 @@ func ExecutePgFunction_tx(ctx context.Context, tx pgx.Tx, pgFunctionId uuid.UUID
 
 	placeholders := make([]string, len(args))
 	for i := range args {
-		placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
 	}
 
 	var returnIf any

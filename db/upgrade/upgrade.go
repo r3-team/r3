@@ -356,7 +356,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE instance.qr_err_corr AS ENUM('L', 'M', 'H', 'Q');
 
 			CREATE TABLE IF NOT EXISTS instance.code_spool (
-				id uuid NOT NULL,
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
 				attribute_id_attach UUID NOT NULL,
 				pg_function_id_callback uuid,
 				callback_value text COLLATE pg_catalog."default",
@@ -380,6 +380,82 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE INDEX IF NOT EXISTS fki_code_spool_attribute_id_attach_id_fkey  ON instance.code_spool USING btree (attribute_id_attach     ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_code_spool_pg_function_id_callback_fkey ON instance.code_spool USING btree (pg_function_id_callback ASC NULLS LAST);
+
+			CREATE OR REPLACE FUNCTION instance.barcode_generate(
+				text_value TEXT, format TEXT, size_x INTEGER, size_y INTEGER, attribute_id UUID, record_id BIGINT,
+				callback_function_id UUID DEFAULT NULL::UUID, callback_value TEXT DEFAULT NULL::TEXT
+			)
+				RETURNS INTEGER
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				INSERT INTO code_spool(
+					attribute_id_attach,
+					pg_function_id_callback,
+					callback_value,
+					record_id_attach,
+					format,
+					text_value,
+					size_x,
+					size_y
+				)
+				VALUES (
+					attribute_id,
+					callback_function_id,
+					callback_value,
+					record_id,
+					format,
+					text_value,
+					size_x,
+					size_y
+				);
+				RETURN 0;
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.qrcode_generate(text_value TEXT, error_correction CHAR(1), size_x INTEGER, size_y INTEGER, attribute_id UUID, record_id BIGINT,
+				callback_function_id UUID DEFAULT NULL::UUID, callback_value TEXT DEFAULT NULL::TEXT)
+				RETURNS INTEGER
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				INSERT INTO instance.code_spool(
+					attribute_id_attach,
+					pg_function_id_callback,
+					callback_value,
+					record_id_attach,
+					format,
+					qr_err_corr,
+					text_value,
+					size_x,
+					size_y
+				)
+				VALUES (
+					attribute_id,
+					callback_function_id,
+					callback_value,
+					record_id,
+					'QR_CODE',
+					error_correction::instance.qr_err_corr,
+					text_value,
+					size_x,
+					size_y
+				);
+				RETURN 0;
+			END;
+			$BODY$;
+
+			INSERT INTO instance.task (name,interval_seconds,cluster_master_only,embedded_only,active_only,active)
+			VALUES ('codesGenerate',15,true,false,false,true);
+
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('codesGenerate',0,0);
 
 			-- new log context
 			INSERT INTO instance.config (name,value) VALUES ('logCode',2);

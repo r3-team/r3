@@ -31,11 +31,6 @@ import (
 )
 
 type codeFormat string
-type codeJson struct {
-	Format codeFormat  `json:"format"`
-	Image  pgtype.Text `json:"image"`
-	Text   string      `json:"text"`
-}
 type codeJob struct {
 	Id        uuid.UUID // ID from code_spool
 	Format    codeFormat
@@ -51,6 +46,11 @@ type codeJob struct {
 	// callback after generation
 	PgFunctionIdCallback pgtype.UUID
 	CallbackValue        pgtype.Text
+}
+type codeJson struct {
+	Format codeFormat  `json:"format"`
+	Image  pgtype.Text `json:"image"`
+	Text   string      `json:"text"`
 }
 
 const codeFormatCodabar codeFormat = "CODABAR"
@@ -78,10 +78,23 @@ func DoAll() error {
 	codes := make([]codeJob, 0)
 	for rows.Next() {
 		var c codeJob
+		var errCorr pgtype.Text
 		if err := rows.Scan(&c.Id, &c.AttributeIdAttach, &c.PgFunctionIdCallback, &c.CallbackValue,
-			&c.RecordIdAttach, &c.Format, &c.TextValue, &c.SizeX, &c.SizeY, &c.QrErrCorr); err != nil {
+			&c.RecordIdAttach, &c.Format, &c.TextValue, &c.SizeX, &c.SizeY, &errCorr); err != nil {
 
 			return err
+		}
+		switch errCorr.String {
+		case "M":
+			c.QrErrCorr = qr.M
+		case "L":
+			c.QrErrCorr = qr.L
+		case "Q":
+			c.QrErrCorr = qr.Q
+		case "H":
+			c.QrErrCorr = qr.H
+		default:
+			c.QrErrCorr = qr.M
 		}
 		codes = append(codes, c)
 	}
@@ -128,7 +141,7 @@ func do(c codeJob) error {
 		if err := storeAsFilesAttribute(ctx, c.AttributeIdAttach, c.RecordIdAttach, code); err != nil {
 			return err
 		}
-	} else if strings.Contains(atr.Content, "barcode") {
+	} else if schema.IsContentText(atr.Content) && strings.Contains(atr.ContentUse, "barcode") {
 		if err := storeAsTextAttributeValue(ctx, c.AttributeIdAttach, c.RecordIdAttach, code, c.Format, c.TextValue); err != nil {
 			return err
 		}
@@ -162,6 +175,10 @@ func storeAsFilesAttribute(ctx context.Context, attributeId uuid.UUID, recordId 
 	if err := png.Encode(file, code); err != nil {
 		return err
 	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+
 	if err := data.SetFile(ctx, -1, attributeId, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, true); err != nil {
 		return err
 	}
@@ -196,7 +213,7 @@ func storeAsTextAttributeValue(ctx context.Context, attributeId uuid.UUID, recor
 	valueJson, err := json.Marshal(codeJson{
 		Format: format,
 		Image: pgtype.Text{
-			String: base64.StdEncoding.EncodeToString(buf.Bytes()),
+			String: fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(buf.Bytes())),
 			Valid:  true,
 		},
 		Text: textValue,
