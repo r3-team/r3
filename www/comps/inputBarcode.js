@@ -168,6 +168,7 @@ export default {
 		},
 
 		// simple
+		imageSrc:    s => s.modelValue === null ? null : JSON.parse(s.modelValue).image,
 		isActive:    s => s.inputText !== '',
 		isMixedCode: s => s.contentUse === 'barcode', // legacy option, allows all codes
 
@@ -206,6 +207,10 @@ export default {
 
 			if(format === null || this.inputText === '' || this.$refs.barcodePreview === undefined)
 				return;
+
+			// display image if exists
+			if (this.imageSrc !== null)
+				return this.$refs.barcodePreview.src = this.imageSrc;
 
 			if(format !== 'QRCODE') {
 				JsBarcode(this.$refs.barcodePreview, this.inputText, {
@@ -274,8 +279,9 @@ export default {
 		},
 		scanned(text,res) {
 			this.$emit('update:modelValue',JSON.stringify({
-				format:res.result.format.formatName,
-				text:text
+				format: res.result.format.formatName,
+				image: null,
+				text: text
 			}));
 			this.close();
 		},

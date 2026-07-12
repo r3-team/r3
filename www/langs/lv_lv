@@ -308,7 +308,7 @@
 				"backup": "Dublējums",
 				"cache": "Kešatmiņa",
 				"cluster": "Klasters",
-				"codes": "QR-/barcode generation",
+				"code": "QR-/barcode generation",
 				"csv": "CSV importēšana/eksportēšana",
 				"doc": "PDF creator",
 				"file": "File processing",
@@ -1293,6 +1293,7 @@
 			},
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
+				"barcode_generate": "instance.barcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a barcode image with a given value. The created barcode image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the barcode.</li><li>format: 'CODABAR', 'CODE_39', 'CODE_128', 'EAN_8', 'EAN_13' or 'UPC_A'</li><li>size_x/y: Size of barcode in pixels.</li><li>attribute_id: ID of the attribute that the barcode is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the barcode has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the barcode has been processed.</li></ul>",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"data_log_comment_create": "instance.data_log_comment_create({ARGS}) => VOID<br /><br />Creates a comment in the change log history for the given record in the chosen relation. A comment can be any text value, including simple HTML.<br /><br />Comments, as all change logs, are removed when log retention settings are satisfied.<br /><br />To define that a comment came from a specific user, a user ID can be provided; if the user ID is NULL, the comment is defined to have come from the system.",
 				"data_log_delete": "instance.data_log_delete({ARGS}) => VOID<br /><br />Deletes the change log history for the given record in the chosen relation.",
@@ -1322,6 +1323,7 @@
 				"mail_delete_after_attach": "instance.mail_delete_after_attach({ARGS}) => INTEGER<br /><br />Flag email attachments to be added to a file attribute of the specified record; the email and its attachments are deleted afterwards.",
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail<br /><br />Returns the next incoming email from the mail spooler; returns NULL if no email is available. When an account name is specified, returns only mails received with the given account.<br /><br />The returned type 'instance.mail' consists of:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>After processing an email it should be deleted; either directly (mail_delete) or after storing its attachments (mail_delete_after_attach).",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>File attribute and record from which to attach files from</li></ul>",
+				"qrcode_generate": "instance.qrcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a QR code image with a given value. The created QR code image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the QR code.</li><li>error_correction: Error correction level, such as 'L' (low), 'M' (medium), 'Q' (quartile) or 'H' (high)</li><li>size_x/y: Size of QR code in pixels.</li><li>attribute_id: ID of the attribute that the QR code is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the QR code has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the QR code has been processed.</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER<br /><br />Adds a HTTP REST call to the internal spooler for immediate execution. Supported methods are: DELETE, GET, PATCH, POST, PUT.<br /><br />URL can include query paramenters if needed.<br /><br />Headers must be provided as JSONB - each key value pair will result in one header.<br /><br />Validity check for TLS/SSL can be disabled if needed.<br /><br />If the REST response needs to be processed, another backend function can be set for callback. This callback function must have three arguments: INTEGER (for HTTP status code), TEXT (HTTP response body), TEXT (callback value).<br /><br />If a 'callback value' is set in instance.rest_call(...), it will be passed to the callback function - this is useful when multiple calls must be executed in order (like authentication before a data call).",
 				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the content of the specified file (encoded as BASE64), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
 				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the raw content of the specified file (for requests like formData), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
@@ -1332,6 +1334,16 @@
 			"helpPgArgs": {
 				"abort_show_message": [
 					"message TEXT"
+				],
+				"barcode_generate": [
+					"text_value TEXT",
+					"format TEXT",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
 				],
 				"clean_up_e2ee_keys": [
 					"user_id INTEGER",
@@ -1467,6 +1479,16 @@
 					"load_record_id BIGINT",
 					"file_path TEXT",
 					"overwrite BOOLEAN DEFAULT FALSE",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"qrcode_generate": [
+					"text_value TEXT",
+					"error_correction CHARACTER(1)",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
 				],

@@ -308,7 +308,7 @@
 				"backup": "Yedekleme",
 				"cache": "Önbellek",
 				"cluster": "Küme",
-				"codes": "QR-/barcode generation",
+				"code": "QR-/barcode generation",
 				"csv": "CSV içe/dışa aktarma",
 				"doc": "PDF yaratıcısı",
 				"file": "Dosya işleme",
@@ -1293,6 +1293,7 @@
 			},
 			"helpPg": {
 				"abort_show_message": "example.abort_show_message({ARGS}) => VOID<br /><br />Aİşlemi iptal eder ve yürütücü kullanıcıya kullanıcı arayüzünde görüntülenen bir mesaj gönderir.",
+				"barcode_generate": "instance.barcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a barcode image with a given value. The created barcode image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the barcode.</li><li>format: 'CODABAR', 'CODE_39', 'CODE_128', 'EAN_8', 'EAN_13' or 'UPC_A'</li><li>size_x/y: Size of barcode in pixels.</li><li>attribute_id: ID of the attribute that the barcode is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the barcode has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the barcode has been processed.</li></ul>",
 				"clean_up_e2ee_keys": "example.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Kullanıcının artık erişemediği kayıtlar için uçtan uca şifreleme veri anahtarlarını siler. Bu, kullanıcı için şifre çözmeyi imkansız hale getirir.",
 				"data_log_comment_create": "example.data_log_comment_create({ARGS}) => VOID<br /><br />Seçilen ilişkide verilen kayıt için değişiklik günlüğü geçmişinde bir yorum oluşturur. Bir yorum, basit HTML dahil herhangi bir metin değeri olabilir.<br /><br />Yorumlar, tüm değişiklik günlükleri günlük tutma ayarları karşılandığında kaldırıldığından.<br /><br />Bir yorumun belirli bir kullanıcıdan geldiğini tanımlamak için bir kullanıcı kimliği sağlanabilir; Kullanıcı ID'si NULL ise yorumun sistemden geldiği tanımlanır.",
 				"data_log_delete": "example.data_log_delete({ARGS}) => VOID<br /><br />Seçilen ilişkide verilen kayıt için değişiklik günlüğü geçmişini siler.",
@@ -1322,6 +1323,7 @@
 				"mail_delete_after_attach": "example.mail_delete_after_attach({ARGS}) => INTEGER<br /><br />Belirtilen kaydın dosya niteliğine eklenecek e-posta eklerini işaretleyin; e-posta ve ekleri daha sonra silinir.",
 				"mail_get_next": "example.mail_get_next({ARGS}) => example.mail<br /><br />Posta biriktiricisinden bir sonraki gelen e-postayı döndürür; E-posta yoksa NULL değerini döndürür. Bir hesap adı belirtildiğinde, yalnızca verilen hesapla alınan postaları döndürür.<br /><br />Döndürülen 'instance.mail' türü aşağıdakilerden oluşur:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>ABir e-posta işlendikten sonra silinmelidir; ya doğrudan (mail_delete) ya da eklerini kaydettikten sonra (mail_delete_after_attach).",
 				"mail_send": "example.mail_send({ARGS}) => INTEGER<br /><br />Posta biriktiricisi için giden bir e-posta oluşturur. İsteğe bağlı parametreler:<ul><li>Kime/CC/BCC alıcılarının virgülle ayrılmış listesi (bunlardan biri ayarlanmalıdır)</li><li>Gönderilecek posta hesabı adı (belirtilmemişse rastgele hesap kullanılır)</li><li>Dosya özelliği ve içinden dosyaların ekleneceği kayıt</li></ul>",
+				"qrcode_generate": "instance.qrcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a QR code image with a given value. The created QR code image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the QR code.</li><li>error_correction: Error correction level, such as 'L' (low), 'M' (medium), 'Q' (quartile) or 'H' (high)</li><li>size_x/y: Size of QR code in pixels.</li><li>attribute_id: ID of the attribute that the QR code is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the QR code has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the QR code has been processed.</li></ul>",
 				"rest_call": "example.rest_call({ARGS}) => INTEGER<br /><br />A Anında yürütülmek üzere dahili biriktiriciye bir HTTP REST çağrısı ekler. Desteklenen yöntemler şunlardır: DELETE, GET, PATCH, POST, PUT.<br /><br />URL gerekirse sorgu parametrelerini içerebilir.<br /><br />Başlıklar JSONB olarak sağlanmalıdır - her anahtar değer çifti bir başlıkla sonuçlanacaktır.<br /><br />TLS/SSL için geçerlilik kontrolü aşağıdaki durumlarda devre dışı bırakılabilir: gerekli.<br /><br />REST yanıtının işlenmesi gerekiyorsa, geri arama için başka bir arka uç işlevi ayarlanabilir. Bu geri çağırma fonksiyonunun üç argümanı olmalıdır: INTEGER (HTTP durum kodu için), TEXT (HTTP yanıt gövdesi), TEXT (geri arama değeri).<br /><br />Instance.rest_call(...) içinde bir 'geri arama değeri' ayarlanmışsa, geri arama işlevine aktarılacaktır - bu, birden fazla aramanın sırayla yürütülmesi gerektiğinde kullanışlıdır (veri aramasından önce kimlik doğrulama gibi).",
 				"rest_get_placeholder_file_base64": "example.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Örnek.rest_call(...) içindeki istek gövdesinde kullanıldığında REST çağrı yürütme sırasında belirtilen dosyanın içeriğiyle (BASE64 olarak kodlanmış) değiştirilen bir yer tutucu metni döndürür.<br /><br />Dosya kimliği ve sürümü alınabilir Mevcut bir kayıt ve dosya özniteliğine eklenen dosyalar arasında döngü yapan example.files_get(...) aracılığıyla.",
 				"rest_get_placeholder_file_raw": "example.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Örnek.rest_call(...) içindeki istek gövdesinde kullanıldığında, REST çağrısı yürütme sırasında belirtilen dosyanın ham içeriğiyle (formData gibi istekler için) değiştirilen bir yer tutucu metni döndürür.<br /><br />Dosya kimliği ve sürümü şu yolla alınabilir: example.files_get(...), mevcut bir kayıt ve dosya özniteliğine eklenen dosyalar arasında döngü yapar.",
@@ -1332,6 +1334,16 @@
 			"helpPgArgs": {
 				"abort_show_message": [
 					"mesaj METİN"
+				],
+				"barcode_generate": [
+					"text_value TEXT",
+					"format TEXT",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
 				],
 				"clean_up_e2ee_keys": [
 					"user_id INTEGER",
@@ -1469,6 +1481,16 @@
 					"BOOLE VARSAYILAN YANLIŞ üzerine yaz",
 					"callback_function_id UUID VARSAYILAN BOŞ",
 					"callback_value METİN VARSAYILAN BOŞ"
+				],
+				"qrcode_generate": [
+					"text_value TEXT",
+					"error_correction CHARACTER(1)",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
 				],
 				"rest_call": [
 					"yöntem METİN",

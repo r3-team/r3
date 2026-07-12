@@ -308,7 +308,7 @@
 				"backup": "Sicherung",
 				"cache": "Cache",
 				"cluster": "Cluster",
-				"codes": "QR-/Barcode-Erzeugung",
+				"code": "QR-/barcode generation",
 				"csv": "CSV-Import/Export",
 				"doc": "PDF-Generator",
 				"file": "Dateiverarbeitung",
@@ -1293,6 +1293,7 @@
 			},
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
+				"barcode_generate": "instance.barcode_generate({ARGS}) => INTEGER<br /><br />Erstellt einen Job zur Erzeugung eines Barcodes in Form eines Bildes, mit einem definierten Wert. Das erzeugte Barcode-Bild wird dann entweder als Daten in einem QR-/Barcode-Attribut gespeichert, oder an ein Dateien-Attribut angehängt. Relevante Parameter:<ul><li>text_value: Der Wert vom Barcode.</li><li>format: 'CODABAR', 'CODE_39', 'CODE_128', 'EAN_8', 'EAN_13' oder 'UPC_A'</li><li>size_x/y: Größe des Barcodes in Pixel.</li><li>attribute_id: ID des Attributs, worin der Barcode gespeichert (wenn QR-/Barcode-Attribut) oder angehängt wird (wenn Dateien-Attribut).</li><li>record_id: ID des Datensatzes, dessen Attributwert aktualisiert wird.</li></ul>Optionale Parameter:<ul><li>callback_function_id: ID der Backendfunktion, die nach Verarbeitung des Barcodes aufgerufen wird - sie muss einen Parameter haben: callback TEXT</li><li>callback_value: Textwert, der zur Callback-Funktion gesendet wird.</li></ul>",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Löscht Ende-Zu-Ende-Datenschlüssel für Datensätze, auf die ein Benutzer keinen Zugriff mehr hat. Dies macht Entschlüsselung für den Benutzer unmöglich.",
 				"data_log_comment_create": "instance.data_log_comment_create({ARGS}) => VOID<br /><br />Erzeugt einen Kommentar in der Änderungshistorie des definierten Datensatzes in der gewählten Relation. Ein Kommentar kann ein beliebiger Textwert sein - simples HTML wird ebenfalls unterstützt.<br /><br />Kommentare, so wie die Änderungshistorie allgemein, werden gelöscht, wenn die Aufbewahrungsrichtlinien erfüllt worden sind.<br /><br />Um festzulegen, dass ein Kommentar von einem bestimmten Benutzer gekommen ist, kann die Benutzer-ID angegeben werden; wenn die Benutzer-ID als NULL gesetzt ist, wird das System als Sender festgelegt.",
 				"data_log_delete": "instance.data_log_delete({ARGS}) => VOID<br /><br />Löscht die Änderungshistorie des definierten Datensatzes in der gewählten Relation.",
@@ -1322,6 +1323,7 @@
 				"mail_delete_after_attach": "instance.mail_delete_after_attach({ARGS}) => INTEGER<br /><br />Markiert die E-Mail-Anhänge, zum Hinzufügen an das Dateiattribut eines spezifizierten Datensatzes; die E-Mail und Anhänge werden danach gelöscht.",
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail<br /><br />Liefert die nächste eingegangene E-Mail von der Mail-Warteschlange; liefert NULL wenn keine E-Mail verfügbar ist. Falls ein Account-Name angegeben wird, werden nur E-Mails geliefert, die von diesem Account abgeholt worden sind.<br /><br />Der gelieferte Typ \"instance.mail\" besteht aus:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Nachdem eine E-Mail verarbeitet worden ist, sollte diese gelöscht werden; entweder direkt (mail_delete) oder nachdem Anhänge gespeichert worden sind (mail_delete_after_attach).",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER<br /><br />Erzeugt eine ausgehende E-Mail in der Mail-Warteschlange. Optionale Parameter:<ul><li>Komma-getrennte Liste für TO/CC/BCC-Empfänger (einer davon muss gesetzt sein)</li><li>Name des sendenen Mail-Accounts (zufälliger Account wird verwendet, wenn nicht spezifiziert)</li><li>Dateiattribut und ID des Datensatzes, dessen Dateien an die E-Mail angehängt werden sollen</li></ul>",
+				"qrcode_generate": "instance.qrcode_generate({ARGS}) => INTEGER<br /><br />Erstellt einen Job zur Erzeugung eines QR-Codes in Form eines Bildes, mit einem definierten Wert. Das erzeugte QR-Code-Bild wird dann entweder als Daten in einem QR-/Barcode-Attribut gespeichert, oder an ein Dateien-Attribut angehängt. Relevante Parameter:<ul><li>text_value: Der Wert vom QR-Code.</li><li>error_correction: Level der Fehlerkorrektur, diese sind 'L' (low), 'M' (medium), 'Q' (quartile) oder 'H' (high)</li><li>size_x/y: Größe des QR-Codes in Pixel.</li><li>attribute_id: ID des Attributs, worin der QR-Code gespeichert (wenn QR-/Barcode-Attribut) oder angehängt wird (wenn Dateien-Attribut).</li><li>record_id: ID des Datensatzes, dessen Attributwert aktualisiert wird.</li></ul>Optionale Parameter:<ul><li>callback_function_id: ID der Backendfunktion, die nach Verarbeitung des QR-Codes aufgerufen wird - sie muss einen Parameter haben: callback TEXT</li><li>callback_value: Textwert, der zur Callback-Funktion gesendet wird.</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER<br /><br />Fügt einen HTTP-REST-Aufruf der internen Warteschlange zur sofortigen Ausführung hinzu. Unterstützte Methoden sind: DELETE, GET, PATCH, POST, PUT.<br /><br />URL kann Query-Parameter beinhalten, falls erforderlich.<br /><br />Headers müssen als JSONB definiert sein - jedes Schlüssel/Wert-Paar führt zu einem Header-Eintrag.<br /><br />Validitätsprüfung für TLS/SSL lässt sich deaktivieren, falls erforderlich.<br /><br />Falls die REST-Antwort verarbeitet werden muss, kann eine weitere Backend-Funktion als Callback definiert werden. Diese Callback-Funktion muss diese drei Argumente haben: INTEGER (für HTTP-Status-Code), TEXT (HTTP-Antwortkörper), TEXT (Callback-Wert).<br /><br />Falls ein 'Callback-Wert' in instance.rest_call(...) gesetzt ist, wird dieser der Callback-Funktion übergeben - dies ist nützlich, falls mehrere Aufrufe in einer bestimmten Reihenfolge ausgeführt werden müssen (wie bspw. eine Authentifizierung vor einem Datenaufruf).",
 				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Liefert einen Platzhaltertext, welcher durch den Inhalt der angegebenen Datei (kodiert als BASE64) ausgetauscht wird, wenn dieser im Request-Körper in instance.rest_call(...) ausgeführt wird.<br /><br />Datei-ID & -Version können mit instance.files_get(...) geholt werden, womit durch angehängte Dateien eines Datensatzes und Dateien-Attributes iteriert wird.",
 				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Liefert einen Platzhaltertext, welcher durch den Inhalt der angegebenen Datei (RAW) ausgetauscht wird, wenn dieser im Request-Körper in instance.rest_call(...) ausgeführt wird.<br /><br />Datei-ID & -Version können mit instance.files_get(...) geholt werden, womit durch angehängte Dateien eines Datensatzes und Dateien-Attributes iteriert wird.",
@@ -1332,6 +1334,16 @@
 			"helpPgArgs": {
 				"abort_show_message": [
 					"message TEXT"
+				],
+				"barcode_generate": [
+					"text_value TEXT",
+					"format TEXT",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
 				],
 				"clean_up_e2ee_keys": [
 					"user_id INTEGER",
@@ -1467,6 +1479,16 @@
 					"load_record_id BIGINT",
 					"file_path TEXT",
 					"overwrite BOOLEAN DEFAULT FALSE",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"qrcode_generate": [
+					"text_value TEXT",
+					"error_correction CHARACTER(1)",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
 				],

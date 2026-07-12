@@ -392,7 +392,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			AS $BODY$
 			DECLARE
 			BEGIN
-				INSERT INTO code_spool(
+				INSERT INTO instance.code_spool(
 					attribute_id_attach,
 					pg_function_id_callback,
 					callback_value,
@@ -407,7 +407,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					callback_function_id,
 					callback_value,
 					record_id,
-					format,
+					format::instance.barcode_format,
 					text_value,
 					size_x,
 					size_y

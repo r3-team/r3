@@ -308,7 +308,7 @@
 				"backup": "备份",
 				"cache": "缓存",
 				"cluster": "集群",
-				"codes": "QR-/barcode generation",
+				"code": "QR-/barcode generation",
 				"csv": "CSV 导入/导出",
 				"doc": "PDF creator",
 				"file": "File processing",
@@ -1293,6 +1293,7 @@
 			},
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />中止操作并向执行用户发送消息，该消息将显示在用户界面上。",
+				"barcode_generate": "instance.barcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a barcode image with a given value. The created barcode image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the barcode.</li><li>format: 'CODABAR', 'CODE_39', 'CODE_128', 'EAN_8', 'EAN_13' or 'UPC_A'</li><li>size_x/y: Size of barcode in pixels.</li><li>attribute_id: ID of the attribute that the barcode is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the barcode has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the barcode has been processed.</li></ul>",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />删除登录用户不再访问的记录的端到端加密数据密钥。这将使登录用户无法解密。",
 				"data_log_comment_create": "instance.data_log_comment_create({ARGS}) => VOID<br /><br />Creates a comment in the change log history for the given record in the chosen relation. A comment can be any text value, including simple HTML.<br /><br />Comments, as all change logs, are removed when log retention settings are satisfied.<br /><br />To define that a comment came from a specific user, a user ID can be provided; if the user ID is NULL, the comment is defined to have come from the system.",
 				"data_log_delete": "instance.data_log_delete({ARGS}) => VOID<br /><br />Deletes the change log history for the given record in the chosen relation.",
@@ -1322,6 +1323,7 @@
 				"mail_delete_after_attach": "instance.mail_delete_after_attach({ARGS}) => INTEGER<br /><br />标记电子邮件附件以添加到指定记录的文件属性；之后删除电子邮件及其附件。",
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail\n\n从邮件队列获取下一个接收到的电子邮件；如果没有可用的电子邮件则返回NULL。当指定账户名时，仅返回使用给定账户接收的电子邮件。\n\n返回的类型 'instance.mail' 包括：<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>处理完邮件后应将其删除；可以直接删除（mail_delete）或在存储附件后删除(mail_delete_after_attach)。",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER\n\n为邮件队列生成一封出站邮件。可选参数：<ul><li>逗号分隔的收件人/抄送/密送（必须设置其中之一）</li><li>要发送的邮件帐户名称（如果未指定，则使用随机帐户）</li><li>要附加文件的文件属性和记录</li></ul>",
+				"qrcode_generate": "instance.qrcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a QR code image with a given value. The created QR code image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the QR code.</li><li>error_correction: Error correction level, such as 'L' (low), 'M' (medium), 'Q' (quartile) or 'H' (high)</li><li>size_x/y: Size of QR code in pixels.</li><li>attribute_id: ID of the attribute that the QR code is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the QR code has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the QR code has been processed.</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER\n\n向内部队列添加一个HTTP REST调用以进行立即执行。支持的方法有：DELETE、GET、PATCH、POST、PUT。\n\nURL 可以包含查询参数（如果需要）。\n\n必须以 JSONB 格式提供头信息 - 每个键值对都将生成一个头信息。\n\n如果需要，可以禁用 TLS/SSL 的有效性检查。\n\n如果需要处理 REST 响应，可以为回调设置另一个后端函数。此回调函数必须具有三个参数：INTEGER（表示 HTTP 状态码）、TEXT（HTTP 响应正文）、TEXT（回调值）。\n\n如果在 `instance.rest_call(...)` 中设置了“回调值”，它将被传递到回调函数中 - 当需要按顺序执行多个调用（比如在数据调用之前进行身份验证）时，这很有用。",
 				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the content of the specified file (encoded as BASE64), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
 				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the raw content of the specified file (for requests like formData), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
@@ -1332,6 +1334,16 @@
 			"helpPgArgs": {
 				"abort_show_message": [
 					"message TEXT"
+				],
+				"barcode_generate": [
+					"text_value TEXT",
+					"format TEXT",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
 				],
 				"clean_up_e2ee_keys": [
 					"user_id INTEGER",
@@ -1467,6 +1479,16 @@
 					"load_record_id BIGINT",
 					"file_path TEXT",
 					"overwrite BOOLEAN DEFAULT FALSE",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"qrcode_generate": [
+					"text_value TEXT",
+					"error_correction CHARACTER(1)",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
 				],
