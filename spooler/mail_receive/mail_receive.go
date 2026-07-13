@@ -31,18 +31,13 @@ var (
 )
 
 func DoAll() error {
-	if !cache.GetMailAccountsExist() {
+	mailAccounts := cache.GetMailAccountsByMode(accountMode)
+	if len(mailAccounts) == 0 {
 		log.Info(log.ContextMail, "cannot start retrieval, no accounts defined")
 		return nil
 	}
 
-	accountMap := cache.GetMailAccountMap()
-
-	for _, ma := range accountMap {
-		if ma.Mode != accountMode {
-			continue
-		}
-
+	for _, ma := range mailAccounts {
 		log.Info(log.ContextMail, fmt.Sprintf("is retrieving from '%s'", ma.Name))
 
 		if err := do(ma); err != nil {

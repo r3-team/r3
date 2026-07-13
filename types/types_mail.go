@@ -45,8 +45,8 @@ type MailAccount struct {
 	SmimeSign    bool        `json:"smimeSign"`
 
 	// send limits
-	SendCount   pgtype.Int4 `json:"sendCount"`   // how many mails to be sent with time limit
-	SendSeconds pgtype.Int4 `json:"sendSeconds"` // time limit (seconds before now) to count send mails in
+	SendCount   int32 `json:"sendCount"`   // how many mails to be sent within time limit
+	SendSeconds int32 `json:"sendSeconds"` // time limit (seconds before now) to count send mails in
 
 	// resend limits
 	ResendCount   int32 `json:"resendCount"`   // resend mail at most X times

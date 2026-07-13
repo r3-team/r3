@@ -462,7 +462,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE instance.log_context ADD VALUE 'code';
 
 			-- mail (re)send options
-			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER;
+			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER NOT NULL DEFAULT 999;
+			ALTER TABLE instance.mail_account ALTER COLUMN send_count     DROP DEFAULT;
 			ALTER TABLE instance.mail_account ADD   COLUMN send_seconds   INTEGER NOT NULL DEFAULT 60;
 			ALTER TABLE instance.mail_account ALTER COLUMN send_seconds   DROP DEFAULT;
 			ALTER TABLE instance.mail_account ADD   COLUMN resend_count   INTEGER NOT NULL DEFAULT 5;

@@ -17,56 +17,31 @@ import (
 	"r3/types"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/wneessen/go-mail"
 )
 
 var accountMode = "smtp"
 
 func DoAll() error {
-	if !cache.GetMailAccountsExist() {
+	mailAccounts := cache.GetMailAccountsByMode(accountMode)
+	if len(mailAccounts) == 0 {
 		log.Info(log.ContextMail, "cannot start sending, no accounts defined")
 		return nil
 	}
 
-	rows, err := db.Pool.Query(context.Background(), `
-		SELECT s.id, s.to_list, s.cc_list, s.bcc_list, s.subject, s.body,
-			s.attempt_count, s.mail_account_id, s.record_id_wofk, s.attribute_id
-		FROM      instance.mail_spool   AS s
-		LEFT JOIN instance.mail_account AS a ON a.id = s.mail_account_id
-		WHERE s.outgoing
-
-		-- send limits for mail account (if defined for mail)
-		AND (
-			s.mail_account_id IS NULL
-			OR a.send_count IS NULL
-			OR a.send_count > (
-				SELECT COUNT(*)
-				FROM instance.mail_traffic AS t
-				WHERE t.mail_account_id =  s.mail_account_id
-				AND   t.date            >= EXTRACT(EPOCH FROM NOW()) - a.send_seconds
-			)
-		)
-
-		-- resend limits for mail
-		AND s.attempt_count < COALESCE(a.resend_count, 5)
-		AND s.attempt_date  < EXTRACT(EPOCH FROM NOW()) - COALESCE(a.resend_seconds, 60)
-	`)
+	// fetch mails to be sent
+	mails, err := getMailsNoAccount()
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-
-	mails := make([]types.Mail, 0)
-	for rows.Next() {
-		var m types.Mail
-		if err := rows.Scan(&m.Id, &m.ToList, &m.CcList, &m.BccList, &m.Subject, &m.Body,
-			&m.AttemptCount, &m.AccountId, &m.RecordId, &m.AttributeId); err != nil {
-
+	for _, ma := range mailAccounts {
+		mailsMa, err := getMailsByAccount(ma)
+		if err != nil {
 			return err
 		}
-		mails = append(mails, m)
+		mails = append(mails, mailsMa...)
 	}
-	rows.Close()
 
 	log.Info(log.ContextMail, fmt.Sprintf("found %d messages to be sent", len(mails)))
 
@@ -308,4 +283,83 @@ func getAttachedFileWithName(n string) mail.FileOption {
 	return func(f *mail.File) {
 		f.Name = n
 	}
+}
+func getMailsByAccount(ma types.MailAccount) ([]types.Mail, error) {
+	mails := make([]types.Mail, 0)
+
+	rows, err := db.Pool.Query(context.Background(), `
+		SELECT id, to_list, cc_list, bcc_list, subject, body,
+			attempt_count, record_id_wofk, attribute_id
+		FROM instance.mail_spool
+		WHERE outgoing
+		AND   mail_account_id = $1
+
+		-- resend limits for individual mails
+		AND attempt_count < $2
+		AND attempt_date  < EXTRACT(EPOCH FROM NOW()) - $3
+
+		-- send limits for mail account
+		LIMIT (
+			GREATEST(
+				$4 - (
+					SELECT COUNT(*)
+					FROM instance.mail_traffic
+					WHERE date            >= EXTRACT(EPOCH FROM NOW()) - $5
+					AND   mail_account_id =  $1
+				),
+				0 -- LIMIT need not be negative
+			)
+		)
+	`, ma.Id, ma.ResendCount, ma.ResendSeconds, ma.SendCount, ma.SendSeconds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var m types.Mail
+		m.AccountId = pgtype.Int4{
+			Int32: ma.Id,
+			Valid: true,
+		}
+		if err := rows.Scan(&m.Id, &m.ToList, &m.CcList, &m.BccList, &m.Subject, &m.Body,
+			&m.AttemptCount, &m.RecordId, &m.AttributeId); err != nil {
+
+			return nil, err
+		}
+		mails = append(mails, m)
+	}
+	return mails, nil
+}
+
+func getMailsNoAccount() ([]types.Mail, error) {
+	mails := make([]types.Mail, 0)
+
+	rows, err := db.Pool.Query(context.Background(), `
+		SELECT id, to_list, cc_list, bcc_list, subject, body,
+			attempt_count, record_id_wofk, attribute_id
+		FROM instance.mail_spool
+		WHERE outgoing
+		AND   mail_account_id IS NULL
+
+		-- resend limits for individual mails
+		AND attempt_count < 5
+		AND attempt_date  < EXTRACT(EPOCH FROM NOW()) - 60
+		LIMIT 999
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var m types.Mail
+		if err := rows.Scan(&m.Id, &m.ToList, &m.CcList, &m.BccList, &m.Subject, &m.Body,
+			&m.AttemptCount, &m.RecordId, &m.AttributeId); err != nil {
+
+			return nil, err
+		}
+		mails = append(mails, m)
+	}
+	return mails, nil
 }

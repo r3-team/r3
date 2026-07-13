@@ -162,18 +162,10 @@ export default {
 							<td>{{ capApp.sendCount }}</td>
 							<td colspan="2">
 								<div class="row gap centered">
-									<my-button image="cancel.png"
-										v-if="inputs.sendCount === null"
-										@trigger="inputs.sendCount = 50"
-										:caption="capGen.noLimit"
-										:naked="true"
-									/>
-									<template v-if="inputs.sendCount !== null">
-										<my-input-decimal class="short" v-model="inputs.sendCount" :min="0" :allowNull="true" :lengthFract="0" />
-										<span>{{ capGen.every }}</span>
-										<my-input-decimal class="short" v-model="inputs.sendSeconds" :min="1" :allowNull="false" :lengthFract="0" />
-										<span>{{ capGen.seconds }}</span>
-									</template>
+									<my-input-decimal class="short" v-model="inputs.sendCount" :min="1" :allowNull="false" :lengthFract="0" />
+									<span>{{ capGen.every }}</span>
+									<my-input-decimal class="short" v-model="inputs.sendSeconds" :min="1" :allowNull="false" :lengthFract="0" />
+									<span>{{ capGen.seconds }}</span>
 								</div>
 							</td>
 						</tr>
@@ -232,7 +224,7 @@ export default {
 			smimeSign:false,
 			smimePathCrt:null,
 			smimePathKey: null,
-			sendCount: null,
+			sendCount: 999,
 			sendSeconds: 60,
 			resendCount: 5,
 			resendSeconds: 60

@@ -21,6 +21,19 @@ func GetMailAccountMap() map[int32]types.MailAccount {
 	return mailAccountIdMap
 }
 
+func GetMailAccountsByMode(mode string) []types.MailAccount {
+	mail_mx.RLock()
+	defer mail_mx.RUnlock()
+
+	mas := make([]types.MailAccount, 0)
+	for _, ma := range mailAccountIdMap {
+		if ma.Mode == mode {
+			mas = append(mas, ma)
+		}
+	}
+	return mas
+}
+
 func GetMailAccount(id int32, mode string) (types.MailAccount, error) {
 	mail_mx.RLock()
 	defer mail_mx.RUnlock()
@@ -42,13 +55,6 @@ func GetMailAccountAny(mode string) (types.MailAccount, error) {
 		}
 	}
 	return types.MailAccount{}, fmt.Errorf("no mail account is available for mode '%s'", mode)
-}
-
-func GetMailAccountsExist() bool {
-	mail_mx.RLock()
-	defer mail_mx.RUnlock()
-
-	return len(mailAccountIdMap) != 0
 }
 
 func LoadMailAccountMap_tx(ctx context.Context, tx pgx.Tx) error {
