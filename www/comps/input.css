@@ -23,18 +23,20 @@
 	box-shadow:var(--shadow-input);
 }
 .bool-button.left{
-	border-radius:6px 0px 0px 6px;
-	background-color:#cbcbcb;
-	outline:1px solid var(--color-border);
-	z-index:var(--z-index-field-toggle-first);
-}
-.bool-button.right{
-	margin-left:-12px;
 	border-radius:12px;
 	background-color:#838383;
-	z-index:var(--z-index-field-toggle-last);
+	outline:1px solid var(--color-border);
+	z-index:var(--z-index-field-toggle-fg);
 }
-.bool-button.small{
+.bool-button.right{
+	border-radius:0px 6px 6px 0px;
+	margin-left:-12px;
+	background-color:#cbcbcb;
+	z-index:var(--z-index-field-toggle-bg);
+}
+
+.bool.active .bool-button.left,
+.bool:not(.active) .bool-button.right{
 	height:20px;
 	line-height:20px;
 	margin-top:4px;
@@ -44,20 +46,20 @@
 	outline:1px solid var(--color-action-border);
 }
 .bool.active .bool-button.left{
-	border-radius:12px;
-	background-color:#6e8578;
-	z-index:var(--z-index-field-toggle-bool-first);
+	border-radius:6px 0px 0px 6px;
+	background-color:#b5cabf;
+	z-index:var(--z-index-field-toggle-bool-bg);
 }
 .bool.active .bool-button.right{
-	border-radius:0px 6px 6px 0px;
-	background-color:#b5cabf;
-	z-index:var(--z-index-field-toggle-bool-last);
+	border-radius:12px;
+	background-color:#6e8578;
+	z-index:var(--z-index-field-toggle-bool-fg);
 }
 .bool.clickable .bool-button.left{
-	background-color:#bbb;
+	background-color:#555;
 }
 .bool.clickable .bool-button.right{
-	background-color:#555;
+	background-color:#bbb;
 }
 .bool.clickable:focus .bool-button,
 .bool.clickable:hover .bool-button{
@@ -66,10 +68,10 @@
 	box-shadow:var(--shadow-input-focus);
 }
 .bool.active.clickable .bool-button.left{
-	background-color:var(--color-action);
+	background-color:var(--color-action-bright);
 }
 .bool.active.clickable .bool-button.right{
-	background-color:var(--color-action-bright);
+	background-color:var(--color-action);
 }
 .bool.active.clickable:focus .bool-button,
 .bool.active.clickable:hover .bool-button{

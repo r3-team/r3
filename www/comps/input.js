@@ -10,8 +10,8 @@ const MyBool = {
 		@keyup.enter.space="trigger"
 		:class="{ active:boolOn, clickable:!readonly, grow:grow }"
 	>
-		<div class="noHighlight bool-button left"  :class="{ small:!boolOn }">{{ displayLeft }}</div>
-		<div class="noHighlight bool-button right" :class="{ small:boolOn }" >{{ displayRight }}</div>
+		<div class="noHighlight bool-button left">{{ displayLeft }}</div>
+		<div class="noHighlight bool-button right" >{{ displayRight }}</div>
 	</div>`,
 	props:{
 		caption0:  { type:String,  required:false, default:'0' },
@@ -23,12 +23,9 @@ const MyBool = {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		boolOn:      (s) => s.modelValue === (!s.reversed ? true : false),
-		displayLeft: (s) => s.boolOn ? s.caption1 : '',
-		displayRight:(s) => {
-			if(s.modelValue === null) return '-';
-			return !s.boolOn ? s.caption0 : '';
-		},
+		boolOn:      s => s.modelValue === (!s.reversed ? true : false),
+		displayLeft: s => s.modelValue === null ? '-' : (!s.boolOn ? s.caption0 : ''),
+		displayRight:s => s.boolOn ? s.caption1 : '',
 	},
 	methods:{
 		trigger() {
@@ -82,7 +79,7 @@ const MyModuleSelect = {
 	mounted() {
 		if(this.modelValue !== null)
 			return;
-		
+
 		// select any valid module
 		if(this.preSelectOne) {
 			for(const m of this.modules) {
@@ -105,7 +102,7 @@ const MyModuleSelect = {
 		// externals
 		getCaption,
 		hasAnyAssignableRole,
-		
+
 		// presentation
 		getModuleIsValid(m) {
 			return !this.showOnlyIfAssignable || this.hasAnyAssignableRole(m.roles);

@@ -32,8 +32,8 @@
 	--z-index-field-file-list:2;
 	--z-index-field-toggle-bool-first:3;
 	--z-index-field-toggle-bool-last:2;
-	--z-index-field-toggle-first:2;
-	--z-index-field-toggle-last:3;
+	--z-index-field-toggle-bg:2;
+	--z-index-field-toggle-fg:3;
 	--z-index-builder-hover-input:2;
 
 	/* home */
