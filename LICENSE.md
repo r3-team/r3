@@ -27,7 +27,7 @@ This project also contains separate sub-components. These are located in the iso
 - *Vue ECharts*, 'www/externals/vue-echarts.js' (Copyright (c) 2016-present GU Yiling & ECOMFE)
 - *vue-router*, 'www/externals/vue-router.js' (Copyright (c) 2019-present Eduardo San Martin Morote)
 - *Vue TinyMCE*, 'www/externals/vue-tinymce.js' (Copyright (c) 2022 Ephox Corporation DBA Tiny Technologies, Inc.)
-- *Vuex*, 'www/externals/FILE.js' (Copyright (c) 2015-present Evan You)
+- *Vuex*, 'www/externals/vuex.js' (Copyright (c) 2015-present Evan You)
 
 ## Section 2: Components licensed under Apache License Version 2.0 (s. LICENSE.Apache-2.0)
 - *Apache ECharts*, 'www/externals/echarts.js' (Copyright (c) 2017-2026 The Apache Software Foundation)
