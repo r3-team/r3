@@ -8,7 +8,8 @@ The above copyright notice and this permission notice shall be included in all c
 ## Licenses for sub components
 This project also contains separate sub-components. These are located in the isolated directory 'www/externals'. Components outside section 1 are NOT covered by the MIT license.
 - Section 1: Components licensed under MIT
-- Section 2: Components licensed under APACHE License 2.0
+- Section 2: Components licensed under Apache License Version 2.0
+- Section 3: Components licensed under GNU General Public License Version 3
 
 ## Section 1: Components licensed under MIT (s. LICENSE.MIT)
 - *Ace*, 'www/externals/ace/' (Copyright (c) 2010, Ajax.org B.V.)
@@ -19,7 +20,6 @@ This project also contains separate sub-components. These are located in the iso
 - *QR Code Generator*, 'www/externals/qrcode.js' (Copyright (c) 2009 Kazuhiko Arase)
 - *Sortable*, 'www/externals/sortable.js' (Copyright (c) 2019 All contributors to Sortable)
 - *TinyColor*, 'www/externals/tinycolor2.js' (Copyright (c), Brian Grinstead, http://briangrinstead.com)
-- *TinyMCE*, 'www/externals/tinymce/' (Copyright (c) 2024, Ephox Corporation DBA Tiny Technologies, Inc.)
 - *Transliteration*, 'www/externals/transliteration.js' (Copyright (c) yf-hk)
 - *Vue.js*, 'www/externals/vue.js' (Copyright (c) 2018-present, Yuxi (Evan) You and Vue contributors)
 - *Vue Color*, 'www/externals/vue-color.js' (Copyright (c) 2021 chenkai0520)
@@ -33,3 +33,6 @@ This project also contains separate sub-components. These are located in the iso
 - *Apache ECharts*, 'www/externals/echarts.js' (Copyright (c) 2017-2026 The Apache Software Foundation)
 - *DOMPurify*, 'www/externals/dompurify.js' (Copyright (c) 2025 Dr.-Ing. Mario Heiderich, Cure53)
 - *Html5-QRCode*, 'www/externals/html5-qrcode.js' (Copyright (c) Minhaz / mebjas)
+
+# Section 3: Components licensed under GNU General Public License Version 3 (s. LICENSE.GPL-3.0)
+- *TinyMCE*, 'www/externals/tinymce/' (Copyright (c) 2024, Ephox Corporation DBA Tiny Technologies, Inc.)

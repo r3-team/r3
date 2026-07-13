@@ -31,12 +31,12 @@ export default {
 			</div>
 		</div>
 		<div class="input-richtext-content" :key="key">
-			<editor api-key="no-api-key"
+			<editor api-key="no-api-key" license-key="gpl"
 				v-if="active"
 				v-model="input"
 				@init="register"
 				:disabled="readonly"
-				:init="init"
+				:init
 			/>
 		</div>
 	</div>`,
@@ -59,7 +59,7 @@ export default {
 			key:0,             // forces recreation of the editor on init change, 0 = not yet initialized
 			toolbarBase:'bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify',
 			wasfocussed:false, // user focussed editor input
-			
+
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
 			// therefore we replace tokens with a placeholder
@@ -67,7 +67,7 @@ export default {
 		};
 	},
 	computed:{
-		init:(s) => {
+		init:s => {
 			return !s.isMounted ? {} : {
 				branding:true, // https://www.tiny.cloud/docs/general-configuration-guide/attribution-requirements/
 				cleanup_on_startup:false,
@@ -79,7 +79,7 @@ export default {
 				image_advtab:true,
 				image_list:s.images,
 				inline:true,
-				language:s.language,
+				language: s.language,
 				menubar:false,
 				paste_data_images:true,
 				plugins:'code emoticons image link lists searchreplace table',
@@ -98,13 +98,13 @@ export default {
 						items:'hr emoticons link image table'
 					}
 				},
-				toolbar_mode:'floating',
+				toolbar_mode:'wrap',
 				toolbar_persist:true,
 
 				// adds more elements that tiny does not convert (adds to default valid_elements)
 				// known issues: auto converts <b> to <strong>
 				extended_valid_elements:'b',
-				
+
 				setup:(e) => {
 					e.ui.registry.addButton('customPrint',{ icon:'print', onAction:s.print });
 					e.on('focus', () => s.wasfocussed = true);
@@ -116,21 +116,23 @@ export default {
 				}
 			};
 		},
-		language:(s) => {
+		language:s => {
 			switch(s.settings.languageCode.substring(0,2)) {
 				case 'ar': return 'ar';    break;
 				case 'en': return 'en';    break;
+				case 'es': return 'es';    break;
 				case 'de': return 'de';    break;
 				case 'fr': return 'fr_FR'; break;
 				case 'hu': return 'hu_HU'; break;
 				case 'it': return 'it';    break;
 				case 'lv': return 'lv';    break;
 				case 'ro': return 'ro';    break;
+				case 'tr': return 'tr';    break;
 				case 'zh': return 'zh_CN'; break;
 			}
 			return 'en';
 		},
-		
+
 		// inputs
 		input:{
 			get() {
@@ -141,7 +143,7 @@ export default {
 			set(v) {
 				if(this.readonly || !this.wasfocussed)
 					return;
-				
+
 				// remove authentication tokens from file download link
 				const n = v.replace(this.rxTokensDel,this.tokenPlaceholder);
 				if(n !== this.modelValue)
@@ -151,22 +153,22 @@ export default {
 
 		// component is expensive, do not load if hidden
 		// unless it was already loaded once, keep it to avoid expensive reload and keep editor state
-		active:(s) => s.isMounted && (!s.isHidden || s.editor !== null),
-		toolbar:(s) => {
+		active:s => s.isMounted && (!s.isHidden || s.editor !== null),
+		toolbar:s => {
 			if(s.readonly) return false;
 			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code customPrint searchreplace`;
 		},
 
 		// simple
-		editorId:   (s) => s.editor === null ? 'NOT REGISTERED' : s.editor.id,
-		rxTokensAdd:(s) => new RegExp(s.tokenPlaceholder,'g'),
-		rxTokensDel:(s) => new RegExp(s.token,'g'),
-		
+		editorId:   s => s.editor === null ? 'NOT REGISTERED' : s.editor.id,
+		rxTokensAdd:s => new RegExp(s.tokenPlaceholder,'g'),
+		rxTokensDel:s => new RegExp(s.token,'g'),
+
 		// stores
-		token:   (s) => s.$store.getters['local/token'],
-		capGen:  (s) => s.$store.getters.captions.generic,
-		isMobile:(s) => s.$store.getters.isMobile,
-		settings:(s) => s.$store.getters.settings
+		token:   s => s.$store.getters['local/token'],
+		capGen:  s => s.$store.getters.captions.generic,
+		isMobile:s => s.$store.getters.isMobile,
+		settings:s => s.$store.getters.settings
 	},
 	watch:{
 		init(v) {
@@ -187,7 +189,7 @@ export default {
 		deepIsEqual,
 		getAttributeFileHref,
 		getDateFormat,
-		
+
 		// editor
 		debugEvent(ev,err) {
 			if(this.debug) {
@@ -201,12 +203,12 @@ export default {
 			// keep known initial files if changes occurred (we only use stored files)
 			if(files === null || !Array.isArray(files))
 				return this.images = [];
-			
+
 			let out = [];
 			for(const f of files) {
 				if(!f.name.match(/\.(bmp|jpg|jpeg|png|gif|svg|webp)$/i))
 					continue;
-				
+
 				// token is added to file HREF so that tiny can download image aspect ratios (token is replaced in model value)
 				out.push({
 					title:f.name,

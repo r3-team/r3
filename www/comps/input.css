@@ -500,6 +500,10 @@
 .input-richtext .tox .tox-toolbar__group{
 	padding:0px;
 }
+.input-richtext .tox .tox-tbtn{
+	cursor:pointer;
+	background-color:transparent !important;
+}
 .input-decimal{
 	width:100%;
     color:inherit;
