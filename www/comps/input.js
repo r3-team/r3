@@ -1,62 +1,6 @@
 import {hasAnyAssignableRole} from './shared/access.js';
 import {getCaption}           from './shared/language.js';
-export {MyBool,MyBoolStringNumber,MyModuleSelect};
-
-// generic inputs
-const MyBool = {
-	name:'my-bool',
-	template:`<div class="bool" tabindex="0"
-		@click="trigger"
-		@keyup.enter.space="trigger"
-		:class="{ active:boolOn, clickable:!readonly, grow:grow }"
-	>
-		<div class="noHighlight bool-button left">{{ displayLeft }}</div>
-		<div class="noHighlight bool-button right" >{{ displayRight }}</div>
-	</div>`,
-	props:{
-		caption0:  { type:String,  required:false, default:'0' },
-		caption1:  { type:String,  required:false, default:'1' },
-		grow:      { type:Boolean, required:false, default:true },
-		modelValue:{ required:true },
-		readonly:  { type:Boolean, required:false, default:false },
-		reversed:  { type:Boolean, required:false, default:false }
-	},
-	emits:['update:modelValue'],
-	computed:{
-		boolOn:      s => s.modelValue === (!s.reversed ? true : false),
-		displayLeft: s => s.modelValue === null ? '-' : (!s.boolOn ? s.caption0 : ''),
-		displayRight:s => s.boolOn ? s.caption1 : '',
-	},
-	methods:{
-		trigger() {
-			if(this.readonly) return;
-			return this.$emit('update:modelValue',this.modelValue === true ? false : true);
-		}
-	}
-};
-
-const MyBoolStringNumber = {
-	name:'my-bool-string-number',
-	template:`<div>
-		<my-bool
-			v-model="value"
-			:readonly="readonly"
-			:reversed="reversed"
-		/>
-	</div>`,
-	props:{
-		modelValue:{ type:String,  required:true },
-		readonly:  { type:Boolean, required:false, default:false },
-		reversed:  { type:Boolean, required:false, default:false }
-	},
-	emits:['update:modelValue'],
-	computed:{
-		value:{
-			get()  { return this.modelValue === '1' ? true : false; },
-			set(v) { this.$emit('update:modelValue',v ? '1' : '0'); }
-		}
-	}
-};
+export {MyModuleSelect};
 
 const MyModuleSelect = {
 	name:'my-module-select',

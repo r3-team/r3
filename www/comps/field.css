@@ -79,8 +79,8 @@
 	margin:0px;
 	padding-left:var(--spacing-field-padding);
 }
-.field-content>.button,
-.field-content>.bool{
+.field-content>.my-button,
+.field-content>.my-bool{
 	align-self:center;
 }
 

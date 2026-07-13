@@ -3,7 +3,8 @@ package types
 import "github.com/jackc/pgx/v5/pgtype"
 
 type Settings struct {
-	BoolAsIcon        bool        `json:"boolAsIcon"`
+	BoolAsIcon        bool        `json:"boolAsIcon"`   // controls display in views
+	BoolAsToggle      bool        `json:"boolAsToggle"` // controls display in inputs
 	BordersSquared    bool        `json:"bordersSquared"`
 	CollapseRemember  bool        `json:"collapseRemember"`
 	ColorClassicMode  bool        `json:"colorClassicMode"`

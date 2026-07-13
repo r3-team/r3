@@ -323,8 +323,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			FROM app.field
 			WHERE content = 'tabs';
 
+			-- new login settings
 			ALTER TABLE instance.login_setting ADD   COLUMN collapse_remember BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN collapse_remember DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD   COLUMN bool_as_toggle BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login_setting ALTER COLUMN bool_as_toggle DROP DEFAULT;
 
 			-- single type qr/barcode attribute use
 			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_codabar';

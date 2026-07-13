@@ -2931,7 +2931,8 @@
 			"pwOld": "Mevcut Şifre",
 			"titlePwChange": "Şifre değiştir"
 		},
-		"boolAsIcon": "Simgeler olarak Boolean değerleri",
+		"boolAsIcon": "Boolean values as icons in views",
+		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Kenarlıklar",
 		"bordersSquared": "Kare",
 		"button": {

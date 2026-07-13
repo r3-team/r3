@@ -109,8 +109,12 @@
 	--color-action-border: hsl(196, 26%, 25%);
 	--color-action-bright: hsl(196,22%,72%);
 	--color-action-disable:hsl(0,   0%,77%);
+	--color-toggle:        hsl(146,21%,39%);
+	--color-toggle-bright: hsl(149,17%,75%);
+	--color-toggle-read:   hsl(0,0%,66%);
 	--color-cancel:        hsl(0,  57%,32%);
 	--color-cancel-border: hsl(0, 59%, 19%);
+	--color-cancel-bright: hsl(0, 22%, 62%);
 	--color-error:         hsl(0,  84%,61%);
 	--color-flow:          hsl(0, 0%, 97%);
 	--color-flow-active:   hsl(106, 18%, 51%);
@@ -1488,11 +1492,15 @@ table td.maximum{
 	--color-action-disable:hsl(0, 0%, 21%);
 	--color-cancel:        hsl(0, 42%, 27%);
 	--color-cancel-border: hsl(0, 33%, 11%);
+	--color-cancel-bright: hsl(0, 22%, 62%);
 	--color-error:         hsl(0, 44%, 51%);
 	--color-input:         #3b3b3b;
 	--color-success:       hsl(113, 53%, 27%);
 	--color-flow:          hsl(0, 1%, 37%);
 	--color-flow-active:   hsl(105, 13%, 32%);
+	--color-toggle:        hsl(146,15%,30%);
+	--color-toggle-bright: hsl(149,17%,55%);
+	--color-toggle-read:   hsl(0,0%,26%);
 
 	--color-hover-underlay:           rgba(0,0,0,0.50);
 	--color-form-builder-actions:     hsl(195,17%,29%,1.00);

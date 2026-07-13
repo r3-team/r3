@@ -1,0 +1,126 @@
+.my-bool{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:center;
+	flex:0 0 auto;
+	outline:none;
+	margin:0px 3px;
+}
+.my-bool.grow{
+	flex:1 1 auto;
+}
+@scope (.my-bool) {
+	.button{
+		min-width:30px;
+		height:26px;
+		line-height:26px;
+		box-sizing:border-box;
+		text-align:center;
+		color:var(--color-font-bright);
+		margin:1px 0px;
+		padding:0px 8px;
+		transition:box-shadow 0.1s, border-bottom 0.1s, line-height 0.1s;
+		background-color:var(--color-toggle-read);
+		box-shadow:var(--shadow-input);
+		outline:1px solid var(--color-action-border);
+		filter:contrast(75%) brightness(110%);
+	}
+}
+@scope (.my-bool.clickable) {
+	.button{
+		background-color:var(--color-toggle-read);
+		filter:none;
+	}
+}
+@scope (
+	.my-bool.clickable:focus,
+	.my-bool.clickable:hover
+) {
+	.button{
+		line-height:24px;
+		border-bottom:2px solid var(--color-border);
+		box-shadow:var(--shadow-input-focus);
+	}
+}
+@scope (.my-bool.isToggle.on) {
+	.button.left{
+		height:20px;
+		line-height:20px;
+		margin-top:4px;
+		margin-bottom:4px;
+		border-radius:6px 0px 0px 6px;
+		z-index:var(--z-index-field-toggle-bool-bg);
+		background-color:var(--color-toggle-bright);
+	}
+	.button.right{
+		border-radius:12px;
+		margin-left:-12px;
+		z-index:var(--z-index-field-toggle-bool-fg);
+		background-color:var(--color-toggle);
+	}
+}
+@scope (.my-bool.isToggle.off) {
+	.button.left{
+		border-radius:12px;
+		background-color:#838383;
+		z-index:var(--z-index-field-toggle-fg);
+	}
+	.button.right{
+		height:20px;
+		line-height:20px;
+		margin-top:4px;
+		margin-bottom:4px;
+		border-radius:0px 6px 6px 0px;
+		margin-left:-12px;
+		background-color:#cbcbcb;
+		z-index:var(--z-index-field-toggle-bg);
+	}
+}
+@scope (.my-bool.isToggle.clickable.off) {
+	.button.left{
+		background-color:#555;
+	}
+}
+@scope (
+	.my-bool.isToggle.clickable.on:focus,
+	.my-bool.isToggle.clickable.on:hover
+) {
+	.button{
+		border-bottom:2px solid var(--color-action-border);
+	}
+}
+
+@scope (.my-bool.isYesNo) {
+	.button.left{
+		border-radius:6px 0px 0px 6px;
+	}
+	.button.right{
+		border-radius:0px 6px 6px 0px;
+	}
+}
+@scope (.my-bool.isYesNo.on) {
+	.button.left{
+		font-size:90%;
+		background-color:var(--color-toggle-read);
+	}
+	.button.right{
+		font-size:110%;
+		background-color:var(--color-toggle);
+	}
+}
+@scope (.my-bool.isYesNo.off) {
+	.button.left{
+		font-size:110%;
+		background-color:var(--color-cancel);
+	}
+	.button.right{
+		font-size:90%;
+		background-color:var(--color-toggle-read);
+	}
+}
+@scope (.my-bool.isYesNo.empty) {
+	.button.left{
+		font-size:unset;
+		background-color:var(--color-toggle-read);
+	}
+}

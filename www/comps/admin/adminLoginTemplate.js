@@ -138,6 +138,7 @@ export default {
 						<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.mobileScrollForm" :caption="capAppSet.mobileScrollForm" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.boolAsIcon"       :caption="capAppSet.boolAsIcon"       /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.boolAsToggle"     :caption="capAppSet.boolAsToggle"   /></td></tr>
 
 						<!-- theming -->
 						<tr>
@@ -349,6 +350,7 @@ export default {
 		// new template, apply defaults
 		this.settings = {
 			boolAsIcon:true,
+			boolAsToggle:true,
 			bordersSquared: false,
 			collapseRemember: true,
 			colorClassicMode:false,

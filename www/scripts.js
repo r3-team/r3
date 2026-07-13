@@ -15,7 +15,7 @@ import {
 import {
 	MyBool,
 	MyBoolStringNumber
-} from './comps/input.js';
+} from './comps/inputBool.js';
 
 // admin
 import MyAdmin               from './comps/admin/admin.js';

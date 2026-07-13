@@ -2,7 +2,7 @@ export {MyButtonCheck};
 
 export default {
 	name:'my-button',
-	template:`<div class="button" data-is-input="1"
+	template:`<div class="my-button" data-is-input="1"
 		@click.ctrl.exact="triggerMiddle"
 		@click.left.exact="trigger"
 		@click.shift.exact="triggerShift"
@@ -37,7 +37,7 @@ export default {
 		image:       { type:String,  required:false, default:'' },
 		images:      { type:Array,   required:false, default:() => [] },
 		imageBase64: { type:String,  required:false, default:'' },
-		
+
 		// style props
 		adjusts:{ type:Boolean, required:false, default:false }, // adjusts its length to avail. space (text is ellipsed if too small)
 		cancel: { type:Boolean, required:false, default:false },
@@ -62,34 +62,34 @@ export default {
 	methods:{
 		trigger(ev) {
 			if(!this.active) return;
-			
+
 			if(this.blockBubble)
 				ev.stopPropagation();
-			
+
 			this.$emit('trigger');
 		},
 		triggerMiddle(ev) {
 			if(!this.active) return;
-			
+
 			if(this.blockBubble)
 				ev.stopPropagation();
-			
+
 			this.$emit('trigger-middle');
 		},
 		triggerRight(ev) {
 			if(!this.active) return;
-			
+
 			if(this.blockBubble)
 				ev.stopPropagation();
-			
+
 			this.$emit('trigger-right');
 		},
 		triggerShift(ev) {
 			if(!this.active) return;
-			
+
 			if(this.blockBubble)
 				ev.stopPropagation();
-			
+
 			this.$emit('trigger-shift');
 		}
 	}

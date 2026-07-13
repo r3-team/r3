@@ -1,4 +1,4 @@
-.button{
+.my-button{
 	height:30px;
 	margin:0px;
 	padding:4px calc(var(--spacing) / 1.5) 5px;
@@ -15,62 +15,62 @@
 	transition:box-shadow 0.1s, border-bottom 0.1s, filter 0.1s, padding 0.1s, height 0.1s, margin 0.1s;
 	user-select:none;
 }
-.button.adjusts{
+.my-button.adjusts{
 	flex:1 0 auto;
 }
-.button.background{
+.my-button.background{
 	box-shadow:var(--shadow-input);
 	color:var(--color-font-bright);
 	background-color:var(--color-action-disable);
 	border:1px solid var(--color-border);
 }
-.button.background.clickable{
+.my-button.background.clickable{
 	background-color:var(--color-action);
 	border:1px solid var(--color-action-border);
 }
-.button.background.clickable.cancel{
+.my-button.background.clickable.cancel{
 	background-color:var(--color-cancel);
 	border:1px solid var(--color-cancel-border);
 }
-.button.background.clickable:focus,
-.button.background.clickable:hover{
+.my-button.background.clickable:focus,
+.my-button.background.clickable:hover{
 	filter:brightness(120%);
 	box-shadow:var(--shadow-input-focus);
 	border-bottom:3px solid var(--color-action-border);
 }
-.button.background.clickable.cancel:focus,
-.button.background.clickable.cancel:hover{
+.my-button.background.clickable.cancel:focus,
+.my-button.background.clickable.cancel:hover{
 	border-bottom:3px solid var(--color-cancel-border);
 }
-.button.background.clickable:active{
+.my-button.background.clickable:active{
 	height:26px;
 	margin:2px;
 	padding:2px calc((var(--spacing) / 1.5) - 2px) 3px;
 }
-.button.large{
+.my-button.large{
 	height:40px;
 	font-size:120%;
 }
-.button.large.background.clickable:active{
+.my-button.large.background.clickable:active{
 	height:36px;
 }
-.button.naked{
+.my-button.naked{
 	color:var(--color-font-disabled);
 	padding:4px 0px;
 }
-.button.naked.clickable{
+.my-button.naked.clickable{
 	color:inherit;
 }
-.button.naked.clickable:focus,
-.button.naked.clickable:hover{
+.my-button.naked.clickable:focus,
+.my-button.naked.clickable:hover{
 	text-decoration:underline;
 }
 
 /* button content */
-.button span{
+.my-button span{
 	white-space:nowrap;
 }
-.button.adjusts span{
+.my-button.adjusts span{
 	flex:1 0 auto;
 	width:10px;
 	min-width:0px;
@@ -78,25 +78,25 @@
 	white-space:nowrap;
 	overflow:hidden;
 }
-.button img{
+.my-button img{
 	width:20px;
 	height:20px;
 	filter:var(--image-filter-bg);
 }
-.button.naked img{
+.my-button.naked img{
 	filter:var(--image-filter-alt);
 }
-.button.naked.clickable img{
+.my-button.naked.clickable img{
 	filter:var(--image-filter);
 }
-.button.naked.darkBg{
+.my-button.naked.darkBg{
 	color:var(--color-font-bright);
 }
-.button.naked.darkBg.clickable img{
+.my-button.naked.darkBg.clickable img{
 	filter:var(--image-filter-bg);
 }
-.button.naked.clickable:focus img,
-.button.naked.clickable:hover img{
+.my-button.naked.clickable:focus img,
+.my-button.naked.clickable:hover img{
 	width:24px;
 	height:24px;
 	margin-left:-2px;
@@ -105,6 +105,6 @@
 }
 
 /* user overwrites */
-.user-dark .button.background.inactive{
+.user-dark .my-button.background.inactive{
 	filter:grayscale(100%) brightness(85%);
 }

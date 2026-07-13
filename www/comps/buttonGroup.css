@@ -1,4 +1,4 @@
-.buttonGroup{
+.my-buttonGroup{
 	height:30px;
 	margin:0px;
 	font-size:inherit;
@@ -17,20 +17,20 @@
 	--buttonGroup-padding-cut:0px;
 }
 
-.buttonGroup.anyClickable{
+.my-buttonGroup.anyClickable{
 	border-color:var(--color-action-border);
 }
-.buttonGroup.anyClickable.cancel{
+.my-buttonGroup.anyClickable.cancel{
 	border-color:var(--color-cancel-border);
 }
-.buttonGroup.anyClickable:active{
+.my-buttonGroup.anyClickable:active{
 	height:26px;
 	margin:2px;
 	--buttonGroup-padding-cut:2px;
 }
 
 /* individual parts of button group */
-.buttonGroup-part{
+.my-buttonGroup-part{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
@@ -43,33 +43,33 @@
 	background-color:var(--color-action-disable);
 	--buttonGroup-padding:calc(var(--spacing) / 1.5);
 }
-.buttonGroup-part.clickable{
+.my-buttonGroup-part.clickable{
 	background-color:var(--color-action);
 }
-.buttonGroup-part.cancel.clickable{
+.my-buttonGroup-part.cancel.clickable{
 	background-color:var(--color-cancel);
 }
-.buttonGroup-part.clickable:focus,
-.buttonGroup-part.clickable:hover{
+.my-buttonGroup-part.clickable:focus,
+.my-buttonGroup-part.clickable:hover{
 	filter:brightness(120%);
 	box-shadow:var(--shadow-input-focus);
 	border-bottom:3px solid var(--color-action-border);
 }
-.buttonGroup-part.cancel.clickable:focus,
-.buttonGroup-part.cancel.clickable:hover{
+.my-buttonGroup-part.cancel.clickable:focus,
+.my-buttonGroup-part.cancel.clickable:hover{
 	border-bottom:3px solid var(--color-cancel-border);
 }
-.buttonGroup-part.justImage{
+.my-buttonGroup-part.justImage{
 	--buttonGroup-padding:calc(var(--spacing) / 3.5);
 }
-.buttonGroup-part:first-child{
+.my-buttonGroup-part:first-child{
 	padding-left:calc(var(--buttonGroup-padding) - var(--buttonGroup-padding-cut));
 }
-.buttonGroup-part:last-child{
+.my-buttonGroup-part:last-child{
 	padding-right:calc(var(--buttonGroup-padding) - var(--buttonGroup-padding-cut));
 }
 
-.buttonGroup-part-img{
+.my-buttonGroup-part-img{
 	width:20px;
 	height:20px;
 	filter:var(--image-filter-bg);

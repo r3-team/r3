@@ -176,6 +176,6 @@
 	align-self:flex-end;
 	font-style:italic;
 }
-.login .button.clickable img{
+.login .my-button.clickable img{
 	filter:var(--image-filter-bright-shade);
 }

@@ -1284,6 +1284,7 @@ export default {
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.warnUnsaved"      :caption="capApp.warnUnsaved"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.mobileScrollForm" :caption="capApp.mobileScrollForm" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.boolAsIcon"       :caption="capApp.boolAsIcon"       /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.boolAsToggle"     :caption="capApp.boolAsToggle"     /></td></tr>
 					</tbody>
 				</table>
 			</div>

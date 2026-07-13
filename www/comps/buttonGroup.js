@@ -1,5 +1,5 @@
 const MyButtonGroupPart = {
-	template: `<div class="buttonGroup-part"
+	template: `<div class="my-buttonGroup-part"
 		@click.ctrl.exact="onClick('middle')"
 		@click.left.exact="onClick('left')"
 		@click.shift.exact="onClick('shift')"
@@ -10,7 +10,7 @@ const MyButtonGroupPart = {
 		:tabindex="isFirst && !isReadonly ? 0 : -1"
 		:title="captionTitle !== '' ? captionTitle : caption"
 	>
-		<img v-if="image   !== ''" :src="'images/' + image" class="buttonGroup-part-img" />
+		<img v-if="image   !== ''" :src="'images/' + image" class="my-buttonGroup-part-img" />
 		<div v-if="caption !== ''">{{ caption }}</div>
 	</div>`,
 	props:{
@@ -42,7 +42,7 @@ const MyButtonGroupPart = {
 
 export default {
 	components:{ MyButtonGroupPart },
-	template: `<div class="buttonGroup" :class="{ anyClickable, cancel:allCancel }">
+	template: `<div class="my-buttonGroup" :class="{ anyClickable, cancel:allCancel }">
 		<my-button-group-part
 			v-for="(g,i) in group"
 			:caption="g.caption"
@@ -62,7 +62,7 @@ export default {
 	},
 	emits:[],
 	computed:{
-		allCancel:   (s) => s.group.filter(v => v.isCancel   === undefined || v.isCancel).length === s.group.length,
-		anyClickable:(s) => s.group.filter(v => v.isReadonly === undefined || !v.isReadonly).length > 0
+		allCancel:   s => s.group.filter(v => v.isCancel   === undefined || v.isCancel).length === s.group.length,
+		anyClickable:s => s.group.filter(v => v.isReadonly === undefined || !v.isReadonly).length > 0
 	}
 };
