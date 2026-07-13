@@ -367,10 +367,12 @@ export default {
 		// simple
 		docSchema:      s => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
 		entityIdMapRef: s => s.getDocEntityMapRef(s.doc),
-		hasChanges:     s => !s.deepIsEqual(s.doc,s.docSchema),
+		hasChanges:     s => !s.deepIsEqual(s.doc, s.docSchema),
+		hasQuery:       s => s.doc.query !== null,
 		module:         s => s.moduleIdMap[s.doc.moduleId],
 		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
-		previewUrl:     s => s.recordId !== null && !s.hasChanges ? `/doc/download/file.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
+		previewUrl: s => (s.recordId !== null || !s.hasQuery) && !s.hasChanges
+			? `/doc/download/file.pdf?doc_id=${s.id}&record_id=${s.recordId !== null ? s.recordId : 0}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
 		query:          s => s.doc.query !== null ? s.doc.query : s.getTemplateQuery(),
 		sideDocShow:    s => !s.sideFieldShow,
 		sideFieldShow:  s => s.sideFieldIdShow !== null,
