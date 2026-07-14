@@ -30,7 +30,9 @@ const MyBool = {
 	methods: {
 		getCaption(isLeft) {
 			if (!this.isToggle)
-				return isLeft ? this.capGen.option.no : this.capGen.option.yes;
+				return isLeft
+					? (this.caption0 === '0' ? this.capGen.option.no : (this.caption0 === this.caption1 ? '-' : this.caption0))
+					: (this.caption1 === '1' ? this.capGen.option.yes : this.caption1);
 
 			if (isLeft && this.modelValue === null)
 				return '-';
