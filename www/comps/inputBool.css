@@ -23,7 +23,7 @@
 		background-color:var(--color-toggle-read);
 		box-shadow:var(--shadow-input);
 		outline:1px solid var(--color-action-border);
-		filter:contrast(75%) brightness(110%);
+		filter:contrast(80%) saturate(20%);
 	}
 }
 @scope (.my-bool.clickable) {

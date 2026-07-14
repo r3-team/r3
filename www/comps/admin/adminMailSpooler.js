@@ -1,14 +1,12 @@
 import {getSizeReadable} from '../shared/generic.js';
 import {getUnixFormat}   from '../shared/time.js';
-export {MyAdminMailSpooler as default};
 
-let MyAdminMailSpooler = {
+export default {
 	name:'my-admin-mail-spooler',
 	template:`<div class="admin-mail-spooler contentBox grow">
-
 		<div class="top">
 			<div class="area">
-				<img class="icon" src="images/mail_spool.png" />
+				<img class="icon" src="images/mailSpool.png" />
 				<h1>{{ menuTitle + ' (' + total + ')' }}</h1>
 			</div>
 		</div>
@@ -218,6 +216,15 @@ let MyAdminMailSpooler = {
 					this.mailIdsSelected = [];
 					this.offset = 0;
 					this.get();
+
+					// update mail stuck counters
+					ws.send('mailSpooler', 'getCountStuck', null).then(
+						res => {
+							this.$store.commit('mailSpoolerStuckIn', res.payload.incoming);
+							this.$store.commit('mailSpoolerStuckOut', res.payload.outgoing);
+						},
+						this.$root.genericError
+					);
 				},
 				this.$root.genericError
 			);

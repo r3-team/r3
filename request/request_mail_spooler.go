@@ -51,6 +51,27 @@ func MailSpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return res, nil
 }
 
+func mailSpoolerGetCountStuck(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+	var res struct {
+		Incoming int `json:"incoming"`
+		Outgoing int `json:"outgoing"`
+	}
+	err := tx.QueryRow(ctx, `
+		SELECT
+			COUNT(*) FILTER (WHERE outgoing = FALSE),
+			COUNT(*) FILTER (WHERE outgoing = TRUE)
+		FROM instance.mail_spool
+		WHERE date < EXTRACT(EPOCH FROM NOW()) - COALESCE((
+			SELECT mail_spooler_stuck_sec
+			FROM instance.login_setting
+			WHERE login_id = $1
+			LIMIT 1
+		),3600)
+	`, loginId).Scan(&res.Incoming, &res.Outgoing)
+
+	return res, err
+}
+
 func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, search string) ([]types.Mail, int64, error) {
 
 	var searchFields = []string{"from_list", "to_list", "cc_list", "bcc_list", "subject", "body"}

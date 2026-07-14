@@ -2067,7 +2067,9 @@
 			"009": "السمة المشار إليها غير معروفة.",
 			"010": "A column does not include a valid attribute reference.",
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
-			"012": "A column does not include a valid backend function reference."
+			"012": "A column does not include a valid backend function reference.",
+			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
 		},
 		"CSV": {
 			"001": "رقم غير صالح '{VALUE}' (من المتوقع أن يكون عددًا صحيحًا).",
@@ -2749,6 +2751,7 @@
 		"versionPlatform": "نسخة المنصة",
 		"visibility": "Visibility",
 		"visible": "Visible",
+		"warning": "Warning",
 		"warnings": "تحذيرات",
 		"widget": "القطعة",
 		"widgets": "الحاجيات",
@@ -2992,6 +2995,7 @@
 		"listColored": "مقابلة",
 		"listRows": "صفوف القائمة",
 		"listSpaced": "أكبر",
+		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
 		"mobileScrollForm": "الهاتف المحمول: قم بتمرير النموذج بأكمله",
 		"pageTitle": "إعدادات",
 		"pattern": "نمط الخلفية",
@@ -3003,6 +3007,7 @@
 		"titleEncryption": "التشفير من النهاية إلى النهاية",
 		"titleFixedTokens": "الأجهزة",
 		"titleGeneral": "عام",
+		"titleSubAdmin": "Admin users",
 		"titleSubHeader": "القائمة الرئيسية",
 		"titleSubMenu": "قائمة التطبيق",
 		"titleSubMisc": "متنوع",

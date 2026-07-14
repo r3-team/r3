@@ -2067,7 +2067,9 @@
 			"009": "引用的属性未知。",
 			"010": "A column does not include a valid attribute reference.",
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
-			"012": "A column does not include a valid backend function reference."
+			"012": "A column does not include a valid backend function reference.",
+			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
 		},
 		"CSV": {
 			"001": "无效数字“{VALUE}”（应为整数）。",
@@ -2749,6 +2751,7 @@
 		"versionPlatform": "平台版本",
 		"visibility": "Visibility",
 		"visible": "Visible",
+		"warning": "Warning",
 		"warnings": "警告",
 		"widget": "新微件",
 		"widgets": "小部件",
@@ -2992,6 +2995,7 @@
 		"listColored": "对比",
 		"listRows": "列表行数",
 		"listSpaced": "较大",
+		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
 		"mobileScrollForm": "移动端：滚动整个表单",
 		"pageTitle": "设置",
 		"pattern": "背景图案",
@@ -3003,6 +3007,7 @@
 		"titleEncryption": "端到端加密",
 		"titleFixedTokens": "设备",
 		"titleGeneral": "常规",
+		"titleSubAdmin": "Admin users",
 		"titleSubHeader": "头部菜单",
 		"titleSubMenu": "应用程序菜单",
 		"titleSubMisc": "Miscellaneous",

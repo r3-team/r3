@@ -2067,7 +2067,9 @@
 			"009": "Başvurulan bir özellik bilinmiyor.",
 			"010": "A column does not include a valid attribute reference.",
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
-			"012": "A column does not include a valid backend function reference."
+			"012": "A column does not include a valid backend function reference.",
+			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
 		},
 		"CSV": {
 			"001": "Geçersiz sayı '{VALUE}' (tamsayı bekleniyordu).",
@@ -2749,6 +2751,7 @@
 		"versionPlatform": "Platform sürümü",
 		"visibility": "Görünürlük",
 		"visible": "Görünür",
+		"warning": "Warning",
 		"warnings": "Uyarılar",
 		"widget": "Widget",
 		"widgets": "Widget'lar",
@@ -2992,6 +2995,7 @@
 		"listColored": "Zıtlık",
 		"listRows": "Satırları listele",
 		"listSpaced": "Daha büyük",
+		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
 		"mobileScrollForm": "Mobil: Formun tamamını kaydır",
 		"pageTitle": "Ayarlar",
 		"pattern": "Arka plan deseni",
@@ -3003,6 +3007,7 @@
 		"titleEncryption": "Uçtan uca şifreleme",
 		"titleFixedTokens": "Cihazlar",
 		"titleGeneral": "Genel",
+		"titleSubAdmin": "Admin users",
 		"titleSubHeader": "Başlık menüsü",
 		"titleSubMenu": "Uygulama menüsü",
 		"titleSubMisc": "Çeşitli",

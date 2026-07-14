@@ -14,134 +14,134 @@ export default {
 					@trigger="showHelp = !showHelp"
 				/>
 			</div>
-			
+
 			<!-- system configuration -->
 			<router-link class="entry clickable" tag="div" to="/admin/config">
 				<img src="images/server.png" />
 				<span>{{ capApp.navigationConfig }}</span>
 			</router-link>
-			
+
 			<!-- logins -->
 			<router-link class="entry clickable" tag="div" to="/admin/logins">
 				<img src="images/person.png" />
 				<span>{{ capApp.navigationLogins }}</span>
 			</router-link>
-			
+
 			<!-- login sessions -->
 			<router-link class="entry clickable" tag="div" to="/admin/login-sessions">
 				<img src="images/personServer.png" />
 				<span>{{ capApp.navigationLoginSessions }}</span>
 			</router-link>
-			
+
 			<!-- login templates -->
 			<router-link class="entry clickable" tag="div" to="/admin/login-templates">
 				<img src="images/personTemplate.png" />
 				<span>{{ capApp.navigationLoginTemplates }}</span>
 			</router-link>
-			
+
 			<!-- roles -->
 			<router-link class="entry clickable" tag="div" to="/admin/roles">
 				<img src="images/admin.png" />
 				<span>{{ capApp.navigationRoles }}</span>
 			</router-link>
-			
+
 			<!-- modules -->
 			<router-link class="entry clickable" tag="div" to="/admin/modules">
 				<img src="images/builder.png" />
 				<span>{{ capApp.navigationModules }}</span>
 			</router-link>
-			
+
 			<!-- mail accounts -->
 			<router-link class="entry clickable" tag="div" to="/admin/mail-accounts">
 				<img src="images/mail2.png" />
 				<span>{{ capApp.navigationMailAccounts }}</span>
 			</router-link>
-			
+
 			<!-- mail spooler -->
 			<router-link class="entry clickable" tag="div" to="/admin/mail-spooler">
-				<img src="images/mail_spool.png" />
+				<img src="images/mailSpool.png" />
 				<span>{{ capApp.navigationMailSpooler }}</span>
 			</router-link>
-			
+
 			<!-- mail traffic -->
 			<router-link class="entry clickable" tag="div" to="/admin/mail-traffic">
-				<img src="images/mail_clock.png" />
+				<img src="images/mailClock.png" />
 				<span>{{ capApp.navigationMailTraffic }}</span>
 			</router-link>
-			
+
 			<!-- backups -->
 			<router-link class="entry clickable" tag="div" to="/admin/backups">
 				<img src="images/backup.png" />
 				<span>{{ capApp.navigationBackups }}</span>
 			</router-link>
-			
+
 			<!-- files -->
 			<router-link class="entry clickable" tag="div" to="/admin/files">
 				<img src="images/files.png" />
 				<span>{{ capApp.navigationFiles }}</span>
 			</router-link>
-			
+
 			<!-- logs -->
 			<router-link class="entry clickable" tag="div" to="/admin/logs">
 				<img src="images/fileText.png" />
 				<span>{{ capApp.navigationLogs }}</span>
 			</router-link>
-			
+
 			<!-- scheduler -->
 			<router-link class="entry clickable" tag="div" to="/admin/scheduler">
 				<img src="images/clock.png" />
 				<span>{{ capApp.navigationScheduler }}</span>
 			</router-link>
-			
+
 			<!-- caption map -->
 			<router-link class="entry clickable" tag="div" to="/admin/caption-map">
 				<img src="images/languages.png" />
 				<span>{{ capApp.navigationCaptionMap }}</span>
 			</router-link>
-			
+
 			<!-- REI3 Professional -->
 			<div class="entry isTitle separator" tag="div">
 				<img src="images/icon_naked.png" />
 				<span>{{ licenseTitle }}</span>
 			</div>
-			
+
 			<!-- activation -->
 			<router-link class="entry clickable" tag="div" to="/admin/license">
 				<img src="images/key.png" />
 				<span>{{ capApp.navigationActivation }}</span>
 			</router-link>
-			
+
 			<!-- system message -->
 			<router-link class="entry clickable" tag="div" to="/admin/system-msg" :class="{ inactive:!activated }">
 				<img src="images/warning.png" />
 				<span>{{ capApp.navigationSystemMsg }}</span>
 			</router-link>
-			
+
 			<!-- customizing -->
 			<router-link class="entry clickable" tag="div" to="/admin/custom" :class="{ inactive:!activated }">
 				<img src="images/colors.png" />
 				<span>{{ capApp.navigationCustom }}</span>
 			</router-link>
-			
+
 			<!-- LDAP -->
 			<router-link class="entry clickable" tag="div" to="/admin/ldaps" :class="{ inactive:!activated }">
 				<img src="images/hierarchy.png" />
 				<span>{{ capApp.navigationLdaps }}</span>
 			</router-link>
-			
+
 			<!-- OAuth clients -->
 			<router-link class="entry clickable" tag="div" to="/admin/oauth-clients" :class="{ inactive:!activated }">
 				<img src="images/lockCog.png" />
 				<span>{{ capApp.navigationOauthClients }}</span>
 			</router-link>
-			
+
 			<!-- cluster -->
 			<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
 				<img src="images/cluster.png" />
 				<span>{{ capApp.navigationCluster }}</span>
 			</router-link>
 		</div>
-		
+
 		<router-view
 			v-if="ready"
 			v-show="!showHelp"
@@ -149,7 +149,7 @@ export default {
 			:concurrentLoginsLimited="concurrentLoginsLimited"
 			:menuTitle="contentTitle"
 		/>
-		
+
 		<my-admin-help
 			v-if="showHelp"
 			@close="showHelp = false"
@@ -175,7 +175,7 @@ export default {
 	mounted() {
 		if(!this.isAdmin)
 			return this.$router.push('/');
-		
+
 		this.getConcurrentLogins();
 		this.ready = true;
 	},
@@ -206,7 +206,7 @@ export default {
 		licenseTitle:s => !s.activated
 			? s.capApp.navigationLicense
 			:`${s.capApp.navigationLicense} (${s.concurrentLogins}/${s.license.loginCount} - ${s.concurrentLoginsLimited}/${s.license.loginCount * s.limitedFactor})`,
-		
+
 		// stores
 		activated:    s => s.$store.getters['local/activated'],
 		bgStyle:      s => s.$store.getters.colorMenuStyle,

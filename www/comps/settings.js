@@ -4,6 +4,7 @@ import {set as setSetting} from './shared/settings.js';
 import {getUnixFormat}     from './shared/time.js';
 import MyInputColorWrap    from './inputColorWrap.js';
 import MyInputDateFormat   from './inputDateFormat.js';
+import MyInputDecimal      from './inputDecimal.js';
 import MyInputNumberSep    from './inputNumberSep.js';
 import MyInputHotkey       from './inputHotkey.js';
 import {
@@ -1211,6 +1212,7 @@ export default {
 	components:{
 		MyInputColorWrap,
 		MyInputDateFormat,
+		MyInputDecimal,
 		MyInputNumberSep,
 		MySettingsAccount,
 		MySettingsClientEvents,
@@ -1285,6 +1287,14 @@ export default {
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.mobileScrollForm" :caption="capApp.mobileScrollForm" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.boolAsIcon"       :caption="capApp.boolAsIcon"       /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.boolAsToggle"     :caption="capApp.boolAsToggle"     /></td></tr>
+						<template v-if="isAdmin">
+							<tr><td colspan="2"><hr /></td></tr>
+							<tr><td colspan="2"><b>{{ capApp.titleSubAdmin }}</b></td></tr>
+							<tr class="default-inputs">
+								<td>{{ capApp.mailSpoolerStuckSec }}</td>
+								<td><my-input-decimal v-model="settingsInput.mailSpoolerStuckSec" :min="0" :allowNull="false" :lengthFract="0" /></td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
@@ -1494,6 +1504,7 @@ export default {
 		languageCodesModules: s => s.$store.getters['schema/languageCodesModules'],
 		capGen:               s => s.$store.getters.captions.generic,
 		capApp:               s => s.$store.getters.captions.settings,
+		isAdmin:              s => s.$store.getters.isAdmin,
 		languageCodesOfficial:s => s.$store.getters.constants.languageCodesOfficial,
 		moduleIdMapMeta:      s => s.$store.getters.moduleIdMapMeta,
 		patternStyle:         s => s.$store.getters.patternStyle,

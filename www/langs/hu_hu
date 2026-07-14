@@ -2067,7 +2067,9 @@
 			"009": "Egy hivatkozott attribútum ismeretlen.",
 			"010": "A column does not include a valid attribute reference.",
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
-			"012": "A column does not include a valid backend function reference."
+			"012": "A column does not include a valid backend function reference.",
+			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
 		},
 		"CSV": {
 			"001": "Érvénytelen szám '{VALUE}' (egész számra számítás szükséges).",
@@ -2749,6 +2751,7 @@
 		"versionPlatform": "Platformverzió",
 		"visibility": "Visibility",
 		"visible": "Visible",
+		"warning": "Warning",
 		"warnings": "Figyelmeztetések",
 		"widget": "Widget",
 		"widgets": "Widgets",
@@ -2992,6 +2995,7 @@
 		"listColored": "Contrast",
 		"listRows": "List rows",
 		"listSpaced": "Larger",
+		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
 		"mobileScrollForm": "Mobil: Teljes űrlap görgetése",
 		"pageTitle": "Beállítások",
 		"pattern": "Háttérminta",
@@ -3003,6 +3007,7 @@
 		"titleEncryption": "Végponttól végpontig titkosítás",
 		"titleFixedTokens": "Eszközök",
 		"titleGeneral": "Általános",
+		"titleSubAdmin": "Admin users",
 		"titleSubHeader": "Header menu",
 		"titleSubMenu": "Application menu",
 		"titleSubMisc": "Miscellaneous",

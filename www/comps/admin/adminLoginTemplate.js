@@ -1,4 +1,5 @@
 import MyInputColorWrap from '../inputColorWrap.js';
+import MyInputDecimal   from '../inputDecimal.js';
 import {
 	dialogCloseAsk,
 	dialogDeleteAsk
@@ -6,7 +7,7 @@ import {
 
 export default {
 	name:'my-admin-login-template',
-	components:{ MyInputColorWrap },
+	components:{ MyInputColorWrap, MyInputDecimal },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-login-template float" v-if="inputsReady">
@@ -138,7 +139,14 @@ export default {
 						<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.mobileScrollForm" :caption="capAppSet.mobileScrollForm" /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settings.boolAsIcon"       :caption="capAppSet.boolAsIcon"       /></td></tr>
-						<tr><td colspan="2"><my-button-check v-model="settings.boolAsToggle"     :caption="capAppSet.boolAsToggle"   /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.boolAsToggle"     :caption="capAppSet.boolAsToggle"     /></td></tr>
+						<tr>
+							<td colspan="2"><b>{{ capAppSet.titleSubAdmin }}</b></td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.mailSpoolerStuckSec }}</td>
+							<td><my-input-decimal v-model="settings.mailSpoolerStuckSec" :min="0" :allowNull="false" :lengthFract="0" /></td>
+						</tr>
 
 						<!-- theming -->
 						<tr>
@@ -367,7 +375,8 @@ export default {
 			hintUpdateVersion:0,
 			languageCode:'en_us',
 			listColored:false,
-			listSpaced:true,
+			listSpaced: true,
+			mailSpoolerStuckSec: 3600,
 			mobileScrollForm:true,
 			numberSepDecimal:'.',
 			numberSepThousand:',',

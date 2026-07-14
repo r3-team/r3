@@ -37,7 +37,7 @@ export default {
 		MySettings
 	},
 	template:`<div :class="classes" id="app" :style="styles">
-		
+
 		<my-login ref="login" v-if="!appReady || loginSessionExpired"
 			@authenticated="initApp"
 			:backendReady="wsConnected"
@@ -46,7 +46,7 @@ export default {
 		/>
 
 		<my-dropdown />
-		
+
 		<template v-if="appReady">
 			<my-header
 				v-show="!loginSessionExpired"
@@ -59,11 +59,11 @@ export default {
 				:keysLocked="loginEncLocked"
 				:logoutInSec="logoutInSec"
 			/>
-			
+
 			<router-view class="app-content"
 				v-show="!loginSessionExpired"
 			/>
-			
+
 			<!-- global pop-up form window -->
 			<div class="app-sub-window under-header"
 				v-if="popUpFormGlobal !== null"
@@ -80,10 +80,10 @@ export default {
 					:style="popUpFormGlobal.style"
 				/>
 			</div>
-			
+
 			<!-- global search -->
 			<my-global-search v-if="globalSearchInput !== null" />
-			
+
 			<!-- login settings -->
 			<div class="app-sub-window"
 				v-if="showSettings"
@@ -96,7 +96,7 @@ export default {
 					@logout="showSettings = false;sessionInvalid(false,true)"
 				/>
 			</div>
-			
+
 			<!-- alternative module hover menu -->
 			<div class="app-sub-window at-left no-scroll"
 				v-if="showHoverNav"
@@ -135,7 +135,7 @@ export default {
 									<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
 									<span>{{ me.caption }}</span>
 								</router-link>
-								
+
 								<div class="module-hover-menu-entry-children">
 									<div class="module-hover-menu-entry" v-for="mec in me.children">
 										<router-link class="clickable"
@@ -153,7 +153,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			
+
 			<!-- mobile collection selection input -->
 			<div class="app-sub-window at-top no-scroll"
 				v-if="collectionEntries.length !== 0"
@@ -173,17 +173,17 @@ export default {
 					</div>
 				</div>
 			</div>
-			
+
 			<!-- feedback window -->
 			<transition name="fade">
 				<my-feedback v-if="isAtFeedback" v-show="!loginSessionExpired" />
 			</transition>
-			
+
 			<!-- dialog window -->
 			<transition name="fade">
 				<my-dialog v-if="isAtDialog" v-show="!loginSessionExpired" />
 			</transition>
-			
+
 			<!-- loading input blocker overlay -->
 			<div class="input-block-overlay-bg" :class="{show:blockInput}" v-show="!loginSessionExpired">
 				<div class="input-block-overlay">
@@ -217,7 +217,7 @@ export default {
 				let e = document.getElementById('app-custom-css');
 				if(typeof e !== 'undefined' && e !== null)
 					e.parentNode.removeChild(e);
-				
+
 				if(this.activated) {
 					e = document.createElement("style");
 					e.id        = 'app-custom-css';
@@ -239,7 +239,7 @@ export default {
 				let e = document.getElementById('app-pwa-manifest');
 				if(typeof e !== 'undefined' && e !== null)
 					e.parentNode.removeChild(e);
-				
+
 				e = document.createElement('link');
 				e.href = v;
 				e.id   = 'app-pwa-manifest';
@@ -258,88 +258,88 @@ export default {
 	},
 	computed:{
 		// presentation
-		classes:(s) => {
+		classes:s => {
 			if(!s.appReady || s.loginSessionExpired)
 				return 'login-visible';
-			
+
 			let classes = [
 				'user-spacing',`spacing-value${s.settings.spacing}`,
 				'user-font',s.settings.fontFamily
 			];
-			
+
 			if(s.settings.bordersSquared)   classes.push('user-bordersSquared');
 			if(s.settings.dark)             classes.push('user-dark');
 			if(s.settings.mobileScrollForm) classes.push('user-mobileScrollForm');
 			if(s.settings.listSpaced)       classes.push('user-listSpaced');
 			if(s.settings.shadowsInputs)    classes.push('user-shadowsInputs');
 			if(s.isMobile)                  classes.push('is-mobile');
-			
+
 			return classes.join(' ');
 		},
-		styles:(s) => {
+		styles:s => {
 			if(!s.appReady || s.loginSessionExpired)
 				return s.loginBackground;
-			
+
 			let styles = [`font-size:${s.settings.fontSize}%`];
-			
+
 			if(s.patternStyle !== '')
 				styles.push(s.patternStyle);
-			
+
 			return styles.join(';');
 		},
-		
+
 		// navigation
-		moduleEntries:(s) => {
+		moduleEntries:s => {
 			if(!s.appReady)
 				return [];
-			
+
 			let idMapChildren = {};
 			let entries       = [];
-			
+
 			// collect assigned modules
 			for(const mod of s.modules) {
 				if(mod.parentId === null)
 					continue;
-				
+
 				if(idMapChildren[mod.parentId] === undefined)
 					idMapChildren[mod.parentId] = [];
-				
+
 				idMapChildren[mod.parentId].push(mod);
 			}
-			
+
 			// parse module details for valid header entries
 			let parseModule = function(module,topLevel) {
-				
+
 				// ignore assigned modules on top level
 				if(module.parentId !== null && topLevel)
 					return false;
-				
+
 				// module is accessible if start form is set and user has access to any menu
 				let formIdStart = s.getStartFormId(module,s.access);
 				let accessible  = formIdStart !== null;
-				
+
 				// ignore hidden modules
 				if(s.moduleIdMapMeta[module.id].hidden)
 					return false;
-				
+
 				// ignore inaccessible and childless modules
 				if(!accessible && idMapChildren[module.id] === undefined)
 					return false;
-				
+
 				// assigned modules (children)
 				let children = [];
 				if(typeof idMapChildren[module.id] !== 'undefined') {
 					for(let i = 0, j = idMapChildren[module.id].length; i < j; i++) {
 						let m = parseModule(idMapChildren[module.id][i],false);
-						
+
 						if(m !== false)
 							children.push(m);
 					}
 				}
-				
+
 				// apply module order for children
 				children.sort((a, b) => (a.position > b.position) ? 1 : -1);
-				
+
 				return {
 					accessible:accessible,
 					caption:s.getCaption('moduleTitle',module.id,module.id,module.captions,module.name),
@@ -352,15 +352,15 @@ export default {
 					position:s.moduleIdMapMeta[module.id].position
 				};
 			};
-			
+
 			// parse module entries
 			for(const mod of s.modules) {
 				let m = parseModule(mod,true);
-				
+
 				if(m !== false)
 					entries.push(m);
 			}
-			
+
 			// remove modules that are inaccessible and have no accessible children
 			for(let i = 0, j = entries.length; i < j; i++) {
 				if(!entries[i].accessible && entries[i].children.length === 0) {
@@ -370,57 +370,57 @@ export default {
 			}
 			return entries.sort((a,b) => a.position - b.position);
 		},
-		
+
 		// simple
-		colorModuleMenu:(s) => s.settings.colorClassicMode ? s.colorHeaderAccent : s.colorHeaderMain,
-		httpMode:       (s) => location.protocol === 'http:',
-		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
-		
+		colorModuleMenu:s => s.settings.colorClassicMode ? s.colorHeaderAccent : s.colorHeaderMain,
+		httpMode:       s => location.protocol === 'http:',
+		pwaManifestHref:s => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
+
 		// stores
-		activated:          (s) => s.$store.getters['local/activated'],
-		appVersion:         (s) => s.$store.getters['local/appVersion'],
-		appVersionBuild:    (s) => s.$store.getters['local/appVersionBuild'],
-		css:                (s) => s.$store.getters['local/css'],
-		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
-		loginFavorites:     (s) => s.$store.getters['local/loginFavorites'],
-		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
-		loginOptions:       (s) => s.$store.getters['local/loginOptions'],
-		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
-		languageCodes:      (s) => s.$store.getters['schema/languageCodes'],
-		modules:            (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
-		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
-		access:             (s) => s.$store.getters.access,
-		blockInput:         (s) => s.$store.getters.blockInput,
-		capErr:             (s) => s.$store.getters.captions.error,
-		capGen:             (s) => s.$store.getters.captions.generic,
-		captionMapCustom:   (s) => s.$store.getters.captionMapCustom,
-		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
-		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
-		globalSearchInput:  (s) => s.$store.getters.globalSearchInput,
-		isAdmin:            (s) => s.$store.getters.isAdmin,
-		isAtDialog:         (s) => s.$store.getters.isAtDialog,
-		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
-		isAtModule:         (s) => s.$store.getters.isAtModule,
-		isMobile:           (s) => s.$store.getters.isMobile,
-		isSecureContext:    (s) => s.$store.getters.isSecureContext,
-		isWithoutMenuHeader:(s) => s.$store.getters.isWithoutMenuHeader,
-		keyDownHandlers:    (s) => s.$store.getters.keyDownHandlers,
-		loginEncLocked:     (s) => s.$store.getters.loginEncLocked,
-		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
-		loginSessionExpired:(s) => s.$store.getters.loginSessionExpired,
-		loginSessionExpires:(s) => s.$store.getters.loginSessionExpires,
-		moduleIdLast:       (s) => s.$store.getters.moduleIdLast,
-		moduleIdMapMeta:    (s) => s.$store.getters.moduleIdMapMeta,
-		patternStyle:       (s) => s.$store.getters.patternStyle,
-		popUpFormGlobal:    (s) => s.$store.getters.popUpFormGlobal,
-		settings:           (s) => s.$store.getters.settings,
-		systemMsgActive:    (s) => s.$store.getters.systemMsgActive,
-		systemMsgDate0:     (s) => s.$store.getters.systemMsgDate0,
-		systemMsgDate1:     (s) => s.$store.getters.systemMsgDate1,
-		systemMsgText:      (s) => s.$store.getters.systemMsgText,
-		systemMsgTextShown: (s) => s.$store.getters.systemMsgTextShown
+		activated:          s => s.$store.getters['local/activated'],
+		appVersion:         s => s.$store.getters['local/appVersion'],
+		appVersionBuild:    s => s.$store.getters['local/appVersionBuild'],
+		css:                s => s.$store.getters['local/css'],
+		loginBackground:    s => s.$store.getters['local/loginBackground'],
+		loginFavorites:     s => s.$store.getters['local/loginFavorites'],
+		loginKeyAes:        s => s.$store.getters['local/loginKeyAes'],
+		loginOptions:       s => s.$store.getters['local/loginOptions'],
+		loginOptionsMobile: s => s.$store.getters['local/loginOptionsMobile'],
+		languageCodes:      s => s.$store.getters['schema/languageCodes'],
+		modules:            s => s.$store.getters['schema/modules'],
+		moduleIdMap:        s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:          s => s.$store.getters['schema/formIdMap'],
+		presetIdMapRecordId:s => s.$store.getters['schema/presetIdMapRecordId'],
+		access:             s => s.$store.getters.access,
+		blockInput:         s => s.$store.getters.blockInput,
+		capErr:             s => s.$store.getters.captions.error,
+		capGen:             s => s.$store.getters.captions.generic,
+		captionMapCustom:   s => s.$store.getters.captionMapCustom,
+		colorHeaderAccent:  s => s.$store.getters.colorHeaderAccent,
+		colorHeaderMain:    s => s.$store.getters.colorHeaderMain,
+		globalSearchInput:  s => s.$store.getters.globalSearchInput,
+		isAdmin:            s => s.$store.getters.isAdmin,
+		isAtDialog:         s => s.$store.getters.isAtDialog,
+		isAtFeedback:       s => s.$store.getters.isAtFeedback,
+		isAtModule:         s => s.$store.getters.isAtModule,
+		isMobile:           s => s.$store.getters.isMobile,
+		isSecureContext:    s => s.$store.getters.isSecureContext,
+		isWithoutMenuHeader:s => s.$store.getters.isWithoutMenuHeader,
+		keyDownHandlers:    s => s.$store.getters.keyDownHandlers,
+		loginEncLocked:     s => s.$store.getters.loginEncLocked,
+		loginPrivateKey:    s => s.$store.getters.loginPrivateKey,
+		loginSessionExpired:s => s.$store.getters.loginSessionExpired,
+		loginSessionExpires:s => s.$store.getters.loginSessionExpires,
+		moduleIdLast:       s => s.$store.getters.moduleIdLast,
+		moduleIdMapMeta:    s => s.$store.getters.moduleIdMapMeta,
+		patternStyle:       s => s.$store.getters.patternStyle,
+		popUpFormGlobal:    s => s.$store.getters.popUpFormGlobal,
+		settings:           s => s.$store.getters.settings,
+		systemMsgActive:    s => s.$store.getters.systemMsgActive,
+		systemMsgDate0:     s => s.$store.getters.systemMsgDate0,
+		systemMsgDate1:     s => s.$store.getters.systemMsgDate1,
+		systemMsgText:      s => s.$store.getters.systemMsgText,
+		systemMsgTextShown: s => s.$store.getters.systemMsgTextShown
 	},
 	created() {
 		window.addEventListener('keydown',this.handleKeydown);
@@ -467,7 +467,7 @@ export default {
 		resolveErrCode,
 		srcBase64Icon,
 		updateCollections,
-		
+
 		// general app states
 		resized() {
 			this.$store.commit('appResized');
@@ -490,7 +490,7 @@ export default {
 			this.consoleError(err);
 			this.$refs.login.parentError();
 		},
-		
+
 		// web socket control
 		wsConnect() {
 			const protocol = this.httpMode ? 'ws:' : 'wss:';
@@ -519,7 +519,7 @@ export default {
 					this.$store.commit('schema/presetIdMapRecordId',res.payload.presetIdMapRecordId);
 					this.initSchema(res.payload.moduleIdMapData);
 				break;
-				
+
 				// affects current login only
 				case 'filesCopied':
 					this.$store.commit('filesCopy',res.payload);
@@ -527,7 +527,7 @@ export default {
 				case 'jsFunctionCalled':
 					this.jsFunctionRun(res.payload.jsFunctionId,res.payload.arguments,{});
 				break;
-				
+
 				// affects everyone logged in
 				case 'collectionChanged':
 					this.updateCollections(res.payload);
@@ -580,7 +580,7 @@ export default {
 				this.wsConnect();
 			}
 		},
-		
+
 		// session control
 		sessionExpireCheck() {
 			if(this.loginSessionExpires === null) return;
@@ -606,7 +606,7 @@ export default {
 			this.$store.commit('loginPrivateKeyEncBackup',null);
 			this.$store.commit('loginPublicKey',null);
 			this.$store.commit('loginSessionExpires',null);
-			
+
 			if(sessionExpired) {
 				this.$store.commit('loginSessionExpired',true);
 			} else {
@@ -618,7 +618,7 @@ export default {
 			if(returnToHome)
 				this.$router.push('/');
 		},
-		
+
 		// public info retrieval
 		initPublic() {
 			ws.send('public','get',{},false).then(
@@ -628,7 +628,7 @@ export default {
 						this.$store.commit('local/appVersion',res.payload.appVersion);
 						return location.reload();
 					}
-					
+
 					this.$store.commit('local/activated',res.payload.activated);
 					this.$store.commit('local/appName',res.payload.appName);
 					this.$store.commit('local/appNameShort',res.payload.appNameShort);
@@ -657,10 +657,10 @@ export default {
 					this.$store.commit('searchDictionaries',res.payload.searchDictionaries);
 					this.$store.commit('systemMsg',res.payload.systemMsg);
 					this.$store.commit('tokenKeepEnable',res.payload.tokenKeepEnable);
-					
+
 					if(!res.payload.tokenKeepEnable)
 						this.$store.commit('local/tokenKeep',false);
-					
+
 					this.publicLoaded = true;
 					this.systemMsgCheck();
 					this.stateChange();
@@ -668,38 +668,38 @@ export default {
 				this.setInitErr
 			);
 		},
-		
+
 		// schema retrieval
 		initSchema(moduleIdMapMetaNew) {
 			const fetchModuleJson = (url) => {
 				return fetch(url).then(res => {
 					if(res.status !== 200)
 						throw new Error(`Failed to load file, code ${res.status}`);
-					
+
 					return res.json();
 				});
 			};
-			
+
 			this.$store.commit('busyAdd');
-			
+
 			// compare new and known module meta data
 			let modulesFetch = [];
 			for(const k in moduleIdMapMetaNew) {
 				const metaNew = moduleIdMapMetaNew[k];
 				const metaOld = this.moduleIdMapMeta[k];
-				
+
 				// module not known or updated, fetch
 				if(this.moduleIdMap[k] === undefined || metaOld.dateChange !== metaNew.dateChange)
 					modulesFetch.push(`./cache/download/schema.json?module_id=${k}&date=${metaNew.dateChange}&build=${this.appVersionBuild}`);
 			}
-			
+
 			for(const k in this.moduleIdMapMeta) {
 				if(moduleIdMapMetaNew[k] !== undefined)
 					continue;
-				
+
 				// module not included, remove
 				this.$store.commit('schema/delModule',k);
-				
+
 				window.caches.open(String(this.appVersionBuild)).then(cache => {
 					cache.matchAll().then(res => {
 						res.forEach((element,index,array) => {
@@ -709,7 +709,7 @@ export default {
 					});
 				});
 			}
-			
+
 			const promises = modulesFetch.map(v => fetchModuleJson(v));
 			Promise.all(promises).then(
 				res => {
@@ -722,7 +722,7 @@ export default {
 			.catch(err => { this.setInitErr('Failed to load schema cache: '+err); })
 			.finally(() => this.$store.commit('busyRemove'));
 		},
-		
+
 		// final app meta retrieval, after authentication
 		initApp() {
 			let requests = [
@@ -737,13 +737,14 @@ export default {
 				ws.prepare('lookup','get',{name:'loginHasClient'}),
 				ws.prepare('lookup','get',{name:'loginKeys'})
 			];
-			
+
 			// system meta data, admins only
 			if(this.isAdmin) {
 				requests.push(ws.prepare('config','get',{}));
 				requests.push(ws.prepare('license','get',{}));
+				requests.push(ws.prepare('mailSpooler','getCountStuck',{}));
 			}
-			
+
 			ws.sendMultiple(requests,true).then(
 				async res => {
 					this.$store.commit('local/loginFavorites',res[0].payload);
@@ -752,29 +753,31 @@ export default {
 					this.$store.commit('loginWidgetGroups',res[3].payload);
 					this.$store.commit('access',res[4].payload);
 					this.$store.commit('loginHasClient',res[5].payload);
-					
+
 					if(this.isSecureContext && res[6].payload.privateEnc !== null && res[6].payload.privateEncBackup !== null) {
 						this.$store.commit('loginPrivateKey',null);
 						this.$store.commit('loginPrivateKeyEnc',res[6].payload.privateEnc);
 						this.$store.commit('loginPrivateKeyEncBackup',res[6].payload.privateEncBackup);
-						
+
 						await this.pemImport(res[6].payload.public,'RSA',true)
 							.then(res => this.$store.commit('loginPublicKey',res))
 							.catch(this.setInitErr);
-						
+
 						const keyPem = await this.pemImportPrivateEnc(res[6].payload.privateEnc,this.loginKeyAes)
 							.catch(this.setInitErr);
-						
+
 						// error is shown in header if private key cannot be decrypted
 						if(keyPem !== undefined)
 							this.$store.commit('loginPrivateKey',keyPem);
 					}
-					
+
 					if(this.isAdmin) {
 						this.$store.commit('config',res[7].payload);
-						this.$store.commit('license',res[8].payload);
+						this.$store.commit('license', res[8].payload);
+						this.$store.commit('mailSpoolerStuckIn', res[9].payload.incoming);
+						this.$store.commit('mailSpoolerStuckOut', res[9].payload.outgoing);
 					}
-					
+
 					// load captions, then collections
 					this.captionsReload().then(
 						() => this.updateCollections().then(
@@ -790,12 +793,12 @@ export default {
 							},
 							err => {
 								alert(this.capErr.initCollection.replace('{MSG}',this.resolveErrCode(err)));
-								
+
 								// if collection update error, admins can continue to fix the issue
 								// non-admins are blocked as the system might not run as expected
 								if(this.isAdmin)
 									return this.appReady = true;
-								
+
 								this.setInitErr(err);
 							}
 						),
@@ -805,13 +808,13 @@ export default {
 				this.setInitErr
 			)
 		},
-		
+
 		// hotkeys
 		handleKeydown(e) {
 			for(let k of this.keyDownHandlers) {
 				if(k.sleep || (k.keyCtrl && !e.ctrlKey) || (k.keyShift && !e.shiftKey))
 					continue;
-				
+
 				if(k.key === e.key) {
 					e.preventDefault();
 					k.fnc();
@@ -836,11 +839,11 @@ export default {
 				const msgActive =
 					(this.systemMsgDate0 === 0 || this.systemMsgDate0 < now) &&
 					(this.systemMsgDate1 === 0 || this.systemMsgDate1 > now);
-				
+
 				// wait for appReady as captions are not available before and authentication should occur first
 				if(!this.appReady || !this.activated)
 					return;
-				
+
 				if(msgActive !== this.systemMsgActive)
 					this.$store.commit('systemMsgActive',msgActive);
 
@@ -855,7 +858,7 @@ export default {
 				}
 			},2000);
 		},
-		
+
 		// backend reloads
 		captionsReload() {
 			return new Promise((resolve,reject) => {
@@ -878,7 +881,7 @@ export default {
 					res => {
 						if(res.status !== 200)
 							return reject('failed to load captions');
-						
+
 						res.json().then(v => {
 							this.$store.commit('captions',v);
 							resolve();

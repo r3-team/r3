@@ -18,7 +18,6 @@ type Settings struct {
 	FormActionsAlign  string      `json:"formActionsAlign"`
 	HeaderCaptions    bool        `json:"headerCaptions"`
 	HeaderModules     bool        `json:"headerModules"`
-	HintUpdateVersion int         `json:"hintUpdateVersion"`
 	LanguageCode      string      `json:"languageCode"`
 	ListColored       bool        `json:"listColored"`
 	ListSpaced        bool        `json:"listSpaced"`
@@ -32,4 +31,8 @@ type Settings struct {
 	SundayFirstDow    bool        `json:"sundayFirstDow"`
 	TabRemember       bool        `json:"tabRemember"`
 	WarnUnsaved       bool        `json:"warnUnsaved"`
+
+	// admin
+	HintUpdateVersion   int `json:"hintUpdateVersion"`
+	MailSpoolerStuckSec int `json:"mailSpoolerStuckSec"` // how many seconds mails (incoming/outgoing) should be stuck in spooler before warning
 }

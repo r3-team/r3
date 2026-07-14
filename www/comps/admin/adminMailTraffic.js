@@ -5,10 +5,10 @@ export {MyAdminMailTraffic as default};
 let MyAdminMailTraffic = {
 	name:'my-admin-mail-traffic',
 	template:`<div class="admin-mail-traffic contentBox grow">
-		
+
 		<div class="top">
 			<div class="area">
-				<img class="icon" src="images/mail_clock.png" />
+				<img class="icon" src="images/mailClock.png" />
 				<h1>{{ menuTitle + ' (' + total + ')' }}</h1>
 			</div>
 		</div>
@@ -26,9 +26,9 @@ let MyAdminMailTraffic = {
 					:active="offset-limit >= 0"
 					:naked="true"
 				/>
-				
+
 				<span>{{ String((offset / limit) + 1) + ' / ' + pages  }}</span>
-				
+
 				<my-button image="triangleRight.png"
 					@trigger="offsetSet(true)"
 					@trigger-shift="startAtPageLast"
@@ -58,9 +58,9 @@ let MyAdminMailTraffic = {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="content default-inputs" :class="{ 'no-padding':!noMails }">
-			
+
 			<!-- options -->
 			<div v-if="showOptions" class="admin-mail-traffic-settings">
 				<div class="row gap centered default-inputs">
@@ -73,9 +73,9 @@ let MyAdminMailTraffic = {
 					/>
 				</div>
 			</div>
-			
+
 			<span v-if="noMails"><i>{{ capApp.noMailsInTraffic }}</i></span>
-			
+
 			<table class="generic-table bright" v-if="!noMails">
 				<thead>
 					<tr>
@@ -116,11 +116,11 @@ let MyAdminMailTraffic = {
 			offset:0,
 			search:'',
 			showOptions:false,
-			
+
 			// mails
 			mails:[],
 			total:0,
-			
+
 			// mail accounts
 			accountIdMap:{}
 		};
@@ -128,7 +128,7 @@ let MyAdminMailTraffic = {
 	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.configInput = JSON.parse(JSON.stringify(this.config));
-		
+
 		this.get();
 		this.getAccounts();
 	},
@@ -136,7 +136,7 @@ let MyAdminMailTraffic = {
 		// simple
 		noMails:(s) => s.total === 0,
 		pages:  (s) => Math.ceil(s.total / s.limit),
-		
+
 		// stores
 		capApp:  (s) => s.$store.getters.captions.admin.mails,
 		capGen:  (s) => s.$store.getters.captions.generic,
@@ -147,7 +147,7 @@ let MyAdminMailTraffic = {
 		// externals
 		getSizeReadable,
 		getUnixFormat,
-		
+
 		// actions
 		offsetSet(add) {
 			if(add) this.offset += this.limit;
@@ -167,7 +167,7 @@ let MyAdminMailTraffic = {
 			this.offset = this.limit * (this.pages-1);
 			this.get();
 		},
-		
+
 		// backend calls
 		get() {
 			ws.send('mailTraffic','get',{

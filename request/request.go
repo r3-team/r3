@@ -490,6 +490,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return MailSpoolerDel_tx(ctx, tx, reqJson)
 		case "get":
 			return MailSpoolerGet_tx(ctx, tx, reqJson)
+		case "getCountStuck":
+			return mailSpoolerGetCountStuck(ctx, tx, loginId)
 		case "reset":
 			return MailSpoolerReset_tx(ctx, tx, reqJson)
 		}

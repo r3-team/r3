@@ -2067,7 +2067,9 @@
 			"009": "Un atributo referenciado no es conocido.",
 			"010": "A column does not include a valid attribute reference.",
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
-			"012": "A column does not include a valid backend function reference."
+			"012": "A column does not include a valid backend function reference.",
+			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
 		},
 		"CSV": {
 			"001": "Número inválido '{VALUE}' (se esperaba un entero).",
@@ -2749,6 +2751,7 @@
 		"versionPlatform": "Versión de la plataforma",
 		"visibility": "Visibilidad",
 		"visible": "Visible",
+		"warning": "Warning",
 		"warnings": "Advertencias",
 		"widget": "Widget",
 		"widgets": "Widgets",
@@ -2992,6 +2995,7 @@
 		"listColored": "Contraste",
 		"listRows": "Filas de la lista",
 		"listSpaced": "Más grande",
+		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
 		"mobileScrollForm": "Móvil: Desplazar todo el formulario",
 		"pageTitle": "Configuraciones",
 		"pattern": "Patrón de fondo",
@@ -3003,6 +3007,7 @@
 		"titleEncryption": "Cifrado de extremo a extremo",
 		"titleFixedTokens": "Dispositivos",
 		"titleGeneral": "General",
+		"titleSubAdmin": "Admin users",
 		"titleSubHeader": "Menú de encabezado",
 		"titleSubMenu": "Menú de la aplicación",
 		"titleSubMisc": "Varios",

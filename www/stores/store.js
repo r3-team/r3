@@ -94,6 +94,8 @@ const MyStore = Vuex.createStore({
 		loginSessionExpires:null,      // unix timestamp of session expiration date
 		loginType:null,                // user login type (local, oauth, ldap, noAuth, fixed)
 		loginWidgetGroups:[],          // user widgets, starting with widget groups
+		mailSpoolerStuckIn: 0,         // count of mails stuck in spooler (incoming), retrieved for admins
+		mailSpoolerStuckOut: 0,        // count of mails stuck in spooler (outgoing), retrieved for admins
 		mirrorMode:false,              // instance runs in mirror mode (eg. mirrors another, likely production instance)
 		moduleEntries:[],              // module entries for header/home page
 		moduleIdLast:null,             // module ID of last active module
@@ -312,6 +314,8 @@ const MyStore = Vuex.createStore({
 		loginSessionExpired:     (state,payload) => state.loginSessionExpired      = payload,
 		loginSessionExpires:     (state,payload) => state.loginSessionExpires      = payload,
 		loginWidgetGroups:       (state,payload) => state.loginWidgetGroups        = payload,
+		mailSpoolerStuckIn:      (state,payload) => state.mailSpoolerStuckIn       = payload,
+		mailSpoolerStuckOut:     (state,payload) => state.mailSpoolerStuckOut      = payload,
 		mirrorMode:              (state,payload) => state.mirrorMode               = payload,
 		moduleEntries:           (state,payload) => state.moduleEntries            = payload,
 		moduleIdLast:            (state,payload) => state.moduleIdLast             = payload,
@@ -500,6 +504,8 @@ const MyStore = Vuex.createStore({
 		loginSessionExpired:     (state) => state.loginSessionExpired,
 		loginSessionExpires:     (state) => state.loginSessionExpires,
 		loginWidgetGroups:       (state) => state.loginWidgetGroups,
+		mailSpoolerStuckIn:      (state) => state.mailSpoolerStuckIn,
+		mailSpoolerStuckOut:     (state) => state.mailSpoolerStuckOut,
 		mirrorMode:              (state) => state.mirrorMode,
 		moduleEntries:           (state) => state.moduleEntries,
 		moduleIdLast:            (state) => state.moduleIdLast,

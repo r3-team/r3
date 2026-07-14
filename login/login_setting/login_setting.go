@@ -32,7 +32,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 			warn_unsaved, pattern, font_family, tab_remember, list_colored,
 			list_spaced, color_classic_mode, color_header, color_header_single,
 			color_menu, number_sep_decimal, number_sep_thousand, bool_as_icon,
-			shadows_inputs, collapse_remember, bool_as_toggle
+			shadows_inputs, collapse_remember, bool_as_toggle, mail_spooler_stuck_sec
 		FROM instance.login_setting AS ls
 		WHERE %s = $1
 	`, entryName), entryId).Scan(&s.LanguageCode, &s.DateFormat, &s.SundayFirstDow,
@@ -41,7 +41,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 		&s.WarnUnsaved, &s.Pattern, &s.FontFamily, &s.TabRemember, &s.ListColored,
 		&s.ListSpaced, &s.ColorClassicMode, &s.ColorHeader, &s.ColorHeaderSingle,
 		&s.ColorMenu, &s.NumberSepDecimal, &s.NumberSepThousand, &s.BoolAsIcon,
-		&s.ShadowsInputs, &s.CollapseRemember, &s.BoolAsToggle)
+		&s.ShadowsInputs, &s.CollapseRemember, &s.BoolAsToggle, &s.MailSpoolerStuckSec)
 
 	return s, err
 }
@@ -67,15 +67,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 				dark, hint_update_version, mobile_scroll_form, form_actions_align, warn_unsaved,
 				pattern, font_family, tab_remember, list_colored, list_spaced, color_classic_mode,
 				color_header, color_header_single,color_menu, number_sep_decimal, number_sep_thousand,
-				bool_as_icon, shadows_inputs, collapse_remember, bool_as_toggle)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,
-				$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)
+				bool_as_icon, shadows_inputs, collapse_remember, bool_as_toggle, mail_spooler_stuck_sec)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,
+				$24,$25,$26,$27,$28,$29,$30)
 		`, entryName), entryId, s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize,
-			s.BordersSquared, s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark,
-			s.HintUpdateVersion, s.MobileScrollForm, s.FormActionsAlign, s.WarnUnsaved, s.Pattern,
-			s.FontFamily, s.TabRemember, s.ListColored, s.ListSpaced, s.ColorClassicMode,
-			s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, s.NumberSepDecimal, s.NumberSepThousand,
-			s.BoolAsIcon, s.ShadowsInputs, s.CollapseRemember, s.BoolAsToggle); err != nil {
+			s.BordersSquared, s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark, s.HintUpdateVersion,
+			s.MobileScrollForm, s.FormActionsAlign, s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember,
+			s.ListColored, s.ListSpaced, s.ColorClassicMode, s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu,
+			s.NumberSepDecimal, s.NumberSepThousand, s.BoolAsIcon, s.ShadowsInputs, s.CollapseRemember,
+			s.BoolAsToggle, s.MailSpoolerStuckSec); err != nil {
 
 			return err
 		}
@@ -88,14 +88,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 				warn_unsaved = $13, pattern = $14, font_family = $15, tab_remember = $16, list_colored = $17,
 				list_spaced = $18, color_classic_mode = $19, color_header = $20, color_header_single = $21,
 				color_menu = $22, number_sep_decimal = $23, number_sep_thousand = $24, bool_as_icon = $25,
-				shadows_inputs = $26, collapse_remember = $27, bool_as_toggle = $28
-			WHERE %s = $29
-		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize,
-			s.BordersSquared, s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark,
-			s.HintUpdateVersion, s.MobileScrollForm, s.FormActionsAlign, s.WarnUnsaved, s.Pattern,
-			s.FontFamily, s.TabRemember, s.ListColored, s.ListSpaced, s.ColorClassicMode,
-			s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, s.NumberSepDecimal, s.NumberSepThousand,
-			s.BoolAsIcon, s.ShadowsInputs, s.CollapseRemember, s.BoolAsToggle, entryId); err != nil {
+				shadows_inputs = $26, collapse_remember = $27, bool_as_toggle = $28, mail_spooler_stuck_sec = $29
+			WHERE %s = $30
+		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize, s.BordersSquared,
+			s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark, s.HintUpdateVersion, s.MobileScrollForm,
+			s.FormActionsAlign, s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember, s.ListColored, s.ListSpaced,
+			s.ColorClassicMode, s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, s.NumberSepDecimal, s.NumberSepThousand,
+			s.BoolAsIcon, s.ShadowsInputs, s.CollapseRemember, s.BoolAsToggle, s.MailSpoolerStuckSec, entryId); err != nil {
 
 			return err
 		}
