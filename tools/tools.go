@@ -2,7 +2,6 @@ package tools
 
 import (
 	"bytes"
-	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -29,10 +28,7 @@ func Substring(s string, start, end int) string {
 }
 
 func FormatFloatNumber(f float64, decCount int, charDec string, charThou string) string {
-	if decCount == -1 {
-		return FormatStringNumber(strconv.FormatFloat(f, 'f', -1, 64), charDec, charThou)
-	}
-	return FormatStringNumber(fmt.Sprintf("%.*f", decCount, f), charDec, charThou)
+	return FormatStringNumber(strconv.FormatFloat(f, 'f', decCount, 64), charDec, charThou)
 }
 
 // for decimals, expects default float formatting (ie. -42930.0033)
