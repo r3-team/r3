@@ -14,9 +14,9 @@ require (
 	github.com/h2non/filetype v1.1.3
 	github.com/kardianos/service v1.2.4
 	github.com/magefile/mage v1.17.2 // indirect
-	golang.org/x/crypto v0.51.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/crypto v0.54.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/text v0.40.0 // indirect
 )
 
 require (
@@ -29,7 +29,7 @@ require (
 	github.com/wneessen/go-mail v0.7.2
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
-	golang.org/x/net v0.55.0
+	golang.org/x/net v0.56.0
 	golang.org/x/oauth2 v0.36.0
 )
 
@@ -42,6 +42,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 )
