@@ -93,7 +93,7 @@ const MyBuilderFieldOptionsChartSerie = {
 			get()  { return this.get(['type'],'bar'); },
 			set(v) { this.set(['type'],v); }
 		},
-		
+
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -104,7 +104,7 @@ const MyBuilderFieldOptionsChartSerie = {
 		getItemTitle,
 		getValueFromJson,
 		setValueInJson,
-		
+
 		get(nameChain,valueFallback) {
 			return this.getValueFromJson(
 				JSON.stringify(this.serie),nameChain,valueFallback
@@ -112,16 +112,16 @@ const MyBuilderFieldOptionsChartSerie = {
 		},
 		set(nameChain,value) {
 			let s = JSON.parse(JSON.stringify(this.serie));
-			
+
 			// apply encoding fix (differences between serie types)
 			if(nameChain.length === 1 && nameChain[0] === 'type') {
-				
+
 				if(value === 'pie')
 					s.encode = { itemName:-1, tooltip:-1, value:-1 };
 				else
 					s.encode = { tooltip:-1, x:-1, y:-1 };
 			}
-			
+
 			this.$emit('update:modelValue',JSON.parse(
 				this.setValueInJson(JSON.stringify(s),nameChain,value)
 			));
@@ -158,7 +158,7 @@ const MyBuilderFieldOptionsChart = {
 				</select>
 			</td>
 		</tr>
-		
+
 		<!-- chart series -->
 		<tr>
 			<td>{{ capApp.series }}</td>
@@ -176,7 +176,7 @@ const MyBuilderFieldOptionsChart = {
 			@remove="serieSet(i,null)"
 			@update:modelValue="serieSet(i,$event)"
 		/>
-		
+
 		<!-- option input -->
 		<tr>
 			<td colspan="999">
@@ -219,7 +219,7 @@ const MyBuilderFieldOptionsChart = {
 			get()  { return this.modelValue; },
 			set(v) { this.$emit('update:modelValue',v); }
 		},
-		
+
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.form.chart,
 		capGen:(s) => s.$store.getters.captions.generic
@@ -241,12 +241,12 @@ const MyBuilderFieldOptionsChart = {
 		// externals
 		getValueFromJson,
 		setValueInJson,
-		
+
 		// actions
 		optionInput(v) {
 			try{
 				let o = JSON.parse(v);
-				
+
 				this.option  = v;
 				this.jsonBad = false;
 			}
@@ -268,10 +268,10 @@ const MyBuilderFieldOptionsChart = {
 		},
 		serieSet(i,value) {
 			let series = this.getValueFromJson(this.option,['series'],[]);
-			
+
 			if(value === null) series.splice(i,1);
 			else               series[i] = value;
-			
+
 			this.option = this.setValueInJson(this.option,['series'],series);
 		}
 	}
@@ -354,7 +354,7 @@ export default {
 						</div>
 					</td>
 				</tr>
-				
+
 				<template v-if="isHeader">
 					<tr>
 						<td>{{ capApp.headerRichtext }}</td>
@@ -394,7 +394,7 @@ export default {
 						</td>
 					</tr>
 				</template>
-				
+
 				<template v-if="isData && !isVariable">
 					<tr>
 						<td>{{ capGen.attribute }}</td>
@@ -449,7 +449,7 @@ export default {
 							</select>
 						</td>
 					</tr>
-					<tr v-if="!isDrawing && !isRelationship">
+					<tr v-if="!isDrawing && !isRelationship && !isFiles">
 						<td>{{ capApp.fieldRegexCheck }}</td>
 						<td>
 							<input
@@ -459,7 +459,7 @@ export default {
 							/>
 						</td>
 					</tr>
-					
+
 					<!-- default values -->
 					<tr v-if="!isFiles && !isDrawing && !isRelationship">
 						<td>{{ capApp.fieldDefault }}</td>
@@ -513,7 +513,7 @@ export default {
 										>{{ p.name }}</option>
 									</template>
 								</select>
-								
+
 								<div class="row gap wrap" v-if="field.defPresetIds.length !== 0">
 									<my-button image="cancel.png"
 										v-for="presetId in field.defPresetIds"
@@ -526,7 +526,7 @@ export default {
 							</div>
 						</td>
 					</tr>
-					
+
 					<!-- alternative field inputs -->
 					<tr v-if="isString && attribute.contentUse === 'richtext'">
 						<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
@@ -564,7 +564,7 @@ export default {
 							</select>
 						</td>
 					</tr>
-					
+
 					<!-- relationship inputs -->
 					<template v-if="isRelationship">
 						<tr>
@@ -643,7 +643,7 @@ export default {
 						</select>
 					</td>
 				</tr>
-				
+
 				<template v-if="isCalendar">
 					<tr>
 						<td>{{ capApp.date0 }}</td>
@@ -806,7 +806,7 @@ export default {
 						</tr>
 					</template>
 				</template>
-				
+
 				<template v-if="isContainer">
 					<tr>
 						<td>{{ capApp.fieldSize }}</td>
@@ -1013,7 +1013,7 @@ export default {
 						</td>
 					</tr>
 				</template>
-				
+
 				<template v-if="isTabs">
 					<tr>
 						<td>
@@ -1086,7 +1086,7 @@ export default {
 						</td>
 					</tr>
 				</template>
-				
+
 				<template v-if="isKanban">
 					<tr v-if="query.relationId !== null">
 						<td>{{ capApp.kanban.relationIndexData }}</td>
@@ -1179,7 +1179,7 @@ export default {
 						</td>
 					</tr>
 				</template>
-				
+
 				<template v-if="isList">
 					<tr>
 						<td>{{ capApp.display }}</td>
@@ -1254,7 +1254,7 @@ export default {
 						</td>
 					</tr>
 				</template>
-				
+
 				<!-- chart options -->
 				<my-builder-field-options-chart
 					v-if="isChart"
@@ -1301,7 +1301,7 @@ export default {
 						</div>
 					</td>
 				</tr>
-				
+
 				<!-- execute JS function -->
 				<tr v-if="isButton || isData">
 					<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
@@ -1343,7 +1343,7 @@ export default {
 						</div>
 					</td>
 				</tr>
-				
+
 				<!-- open form & open form bulk -->
 				<tr v-if="hasOpenForm">
 					<td>{{ capApp.openForm }}</td>
@@ -1393,7 +1393,7 @@ export default {
 						/>
 					</td>
 				</tr>
-				
+
 				<!-- consume collection -->
 				<template v-if="isList || isCalendar || isKanban">
 					<tr>
@@ -1463,14 +1463,14 @@ export default {
 		presetIdMap:s => {
 			if(!s.isRelationship)
 				return {};
-			
+
 			let nm = s.field.attributeIdNm !== null;
 			let trgAtrId = nm ? s.field.attributeIdNm : s.field.attributeId;
-			
+
 			let presets = !s.field.outsideIn || nm
 				? s.relationIdMap[s.attributeIdMap[trgAtrId].relationshipId].presets
 				: s.relationIdMap[s.attributeIdMap[trgAtrId].relationId].presets;
-			
+
 			let map = {};
 			for(let i = 0, j = presets.length; i < j; i++) {
 				map[presets[i].id] = presets[i];
@@ -1500,7 +1500,7 @@ export default {
 				this.field.flags = flags;
 			}
 		},
-		
+
 		// simple states
 		content:          s => s.isVariable ? 'data' : s.field.content,
 		contentData:      s => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
@@ -1536,7 +1536,7 @@ export default {
 		isVariable:       s => s.field.content === 'variable',
 		query:            s => s.isQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
 		systemDefaultUsed:s => s.systemDefaults.includes(s.field.def),
-		
+
 		// stores
 		attribute:     s => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined ? false : s.attributeIdMap[s.field.attributeId],
 		module:        s => s.moduleIdMap[s.moduleId],
@@ -1569,7 +1569,7 @@ export default {
 		isAttributeRelationship,
 		isAttributeString,
 		openLink,
-		
+
 		// actions
 		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
@@ -1587,20 +1587,20 @@ export default {
 		},
 		presetIdAdd(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
-			
+
 			if(ids.includes(value))
 				return;
-			
+
 			ids.push(value);
 			this.set('defPresetIds',ids);
 		},
 		presetIdRemove(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
-			
+
 			let pos = ids.indexOf(value);
 			if(pos === -1)
 				return;
-			
+
 			ids.splice(pos,1);
 			this.set('defPresetIds',ids);
 		},
@@ -1651,7 +1651,7 @@ export default {
 		setInt(name,val,allowNull) {
 			if(val !== '')
 				return this.set(name,parseInt(val));
-			
+
 			if(allowNull) return this.set(name,null);
 			else          return this.set(name,0);
 		},
