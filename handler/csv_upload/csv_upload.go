@@ -20,6 +20,7 @@ import (
 	"r3/tools"
 	"r3/types"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -44,16 +45,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// loop form reader until empty
 	// fixed order: token, columns, lookups, joins, boolTrue, dateFormat,
-	//  timezone, charComma, ignoreHeader, file
-	var token string
+	//  timezone, charComma, charDec, charThou, ignoreHeader, file
 	var columns []types.Column
-	var lookups []types.QueryLookup
 	var joins []types.QueryJoin
-	var boolTrue string
-	var dateFormat string
-	var timezone string
-	var charComma string
-	var ignoreHeader bool
+	var lookups []types.QueryLookup
+	var opt types.CsvOptions
+	var token string
 
 	res := struct {
 		Count int    `json:"count"`
@@ -85,15 +82,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case "boolTrue":
-			boolTrue = handler.GetStringFromPart(part)
+			opt.BoolTrue = handler.GetStringFromPart(part)
 		case "dateFormat":
-			dateFormat = handler.GetStringFromPart(part)
+			opt.DateFormat = handler.GetStringFromPart(part)
 		case "timezone":
-			timezone = handler.GetStringFromPart(part)
+			opt.Timezone = handler.GetStringFromPart(part)
 		case "charComma":
-			charComma = handler.GetStringFromPart(part)
+			opt.CharComma = handler.GetStringFromPart(part)
+		case "charDec":
+			opt.CharDec = handler.GetStringFromPart(part)
+		case "charThou":
+			opt.CharThou = handler.GetStringFromPart(part)
 		case "ignoreHeader":
-			ignoreHeader = handler.GetStringFromPart(part) == "true"
+			opt.IgnoreHeader = handler.GetStringFromPart(part) == "true"
 		}
 
 		if part.FormName() != "file" {
@@ -134,7 +135,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// read file
-		res.Count, err = importFromCsv(ctx, filePath, login.Id, boolTrue, dateFormat, timezone, charComma, ignoreHeader, columns, joins, lookups)
+		res.Count, err = importFromCsv(ctx, filePath, login.Id, opt, columns, joins, lookups)
 		if err != nil {
 			err, expectedErr := handler.ConvertToErrCode(err, !login.Admin)
 			res.Error = err.Error()
@@ -156,8 +157,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 // import all lines from CSV, optionally skipping a header line
 // returns to which line it got
-func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue string, dateFormat string, timezone string,
-	charComma string, ignoreHeader bool, columns []types.Column, joins []types.QueryJoin, lookups []types.QueryLookup) (int, error) {
+func importFromCsv(ctx context.Context, filePath string, loginId int64, opt types.CsvOptions,
+	columns []types.Column, joins []types.QueryJoin, lookups []types.QueryLookup) (int, error) {
 
 	log.Info(log.ContextCsv, fmt.Sprintf("starts import from file '%s' via upload", filePath))
 
@@ -179,7 +180,7 @@ func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue
 
 	// parse CSV file
 	reader := csv.NewReader(file)
-	reader.Comma, _ = utf8.DecodeRuneInString(charComma)
+	reader.Comma, _ = utf8.DecodeRuneInString(opt.CharComma)
 	reader.Comment = '#'
 	reader.FieldsPerRecord = len(columns)
 	reader.TrimLeadingSpace = true
@@ -187,7 +188,7 @@ func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue
 	importedCnt := 0
 
 	// load user location based on timezone for datetime values
-	locUser, err := time.LoadLocation(timezone)
+	locUser, err := time.LoadLocation(opt.Timezone)
 	if err != nil {
 		return 0, err
 	}
@@ -204,40 +205,36 @@ func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue
 			return 0, err
 		}
 
-		if ignoreHeader && !ignoreHeaderDone {
+		if opt.IgnoreHeader && !ignoreHeaderDone {
 			ignoreHeaderDone = true
 			continue
 		}
 
 		log.Info(log.ContextCsv, fmt.Sprintf("is importing line %d", importedCnt+1))
 
-		if err := importLine_tx(ctx, tx, loginId, boolTrue, dateFormat, locUser,
-			values, columns, joins, lookups, indexMapPgIndexAttributeIds); err != nil {
-
+		if err := importLine_tx(ctx, tx, loginId, opt, locUser, values, columns, joins, lookups, indexMapPgIndexAttributeIds); err != nil {
 			// still deliver number of imported lines, even though they were rolled back
 			// reason: client needs to know which line was affected
 			return importedCnt, err
 		}
 		importedCnt++
 	}
-
 	if err := tx.Commit(ctx); err != nil {
 		return 0, err
 	}
 	return importedCnt, nil
 }
 
-func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
-	boolTrue string, dateFormat string, locUser *time.Location,
-	valuesString []string, columns []types.Column, joins []types.QueryJoin,
-	lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID) error {
+func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvOptions, locUser *time.Location,
+	valuesString []string, columns []types.Column, joins []types.QueryJoin, lookups []types.QueryLookup,
+	indexMapPgIndexAttributeIds map[int][]uuid.UUID) error {
 
 	if len(valuesString) != len(columns) {
 		return errors.New("column and value count do not match")
 	}
 
 	var err error
-	valuesIn := make([]interface{}, len(valuesString))
+	valuesIn := make([]any, len(valuesString))
 
 	// apply column value overwrites
 	for i, column := range columns {
@@ -269,7 +266,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 				loc := time.UTC
 				format := "2006-01-02"
 
-				switch dateFormat {
+				switch opt.DateFormat {
 				case "Y-m-d":
 					format = "2006-01-02"
 				case "Y/m/d":
@@ -311,6 +308,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 				}
 				valuesIn[i] = t.Unix()
 			default:
+				valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharThou, "")
 				valuesIn[i], err = strconv.ParseInt(valuesString[i], 10, 64)
 				if err != nil {
 					return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvParseInt, struct {
@@ -320,6 +318,8 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			}
 
 		case "real", "double precision":
+			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharThou, "")
+			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharDec, ".")
 			valuesIn[i], err = strconv.ParseFloat(valuesString[i], 64)
 			if err != nil {
 				return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvParseFloat, struct {
@@ -329,10 +329,12 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 		// numeric must be handled as text as conversion to float is not 1:1
 		case "numeric", "text", "uuid", "varchar":
+			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharThou, "")
+			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharDec, ".")
 			valuesIn[i] = valuesString[i]
 
 		case "boolean":
-			valuesIn[i] = valuesString[i] == boolTrue
+			valuesIn[i] = valuesString[i] == opt.BoolTrue
 
 		case "default":
 			return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvBadAttributeType, struct {
@@ -341,8 +343,6 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		}
 	}
 
-	_, err = data_import.FromInterfaceValues_tx(ctx, tx, loginId,
-		valuesIn, columns, joins, lookups, indexMapPgIndexAttributeIds)
-
+	_, err = data_import.FromInterfaceValues_tx(ctx, tx, loginId, valuesIn, columns, joins, lookups, indexMapPgIndexAttributeIds)
 	return err
 }
