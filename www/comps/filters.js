@@ -704,7 +704,7 @@ const MyFilterSide = {
 			set(v) { this.set('value',v); }
 		},
 		valueFixTextDate:{
-			get() { return this.valueFixText === '' ? null : this.valueFixText; },
+			get() { return this.valueFixText === '' || isNaN(this.valueFixText) ? null : this.valueFixText; },
 			set(v) {
 				if(v === null) v = '';
 				this.valueFixText = String(v);
