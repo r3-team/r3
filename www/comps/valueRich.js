@@ -59,12 +59,10 @@ export default {
 
 		<!-- boolean value -->
 		<template v-if="isBoolean">
-			<img class="boolean"
-				v-if="settings.boolAsIcon && iconBoolean !== null"
-				:class="boolAtrIcon ? '' : (value ? 'true' : 'false')"
+			<img class="boolean" v-if="iconBoolean !== null" :class="boolAtrIcon ? '' : (value ? 'true' : 'false')"
 				:src="iconBoolean"
 			/>
-			<span v-if="!settings.boolAsIcon">{{ value ? capGen.option.yes : capGen.option.no }}</span>
+			<span v-else>{{ value ? capGen.option.yes : capGen.option.no }}</span>
 		</template>
 
 		<!-- barcode -->
@@ -161,11 +159,11 @@ export default {
 
 		// styles
 		iconBoolean:s => {
-			if(!s.boolAtrIcon)
-				return s.value ? 'images/ok.png' : 'images/cancel.png';
+			// if attribute icon is used for bool, it takes precedence, even if nothing is shown
+			if(s.boolAtrIcon)
+				return s.value && s.attribute.iconId !== null ? s.srcBase64Icon(s.attribute.iconId, '') : null;
 
-			return s.value && s.attribute !== false && s.attribute.iconId !== null
-				? s.srcBase64Icon(s.attribute.iconId,'') : null;
+			return s.settings.boolAsIcon ? (s.value ? 'images/ok.png' : 'images/cancel.png') : null;
 		},
 		style:s => {
 			let out = [];

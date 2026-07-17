@@ -38,27 +38,28 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 
 	// read getters from URL
+	var opt types.CsvOptions
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	dateFormat, err := handler.ReadGetterFromUrl(r, "date_format")
+	opt.DateFormat, err = handler.ReadGetterFromUrl(r, "date_format")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	timezone, err := handler.ReadGetterFromUrl(r, "timezone")
+	opt.Timezone, err = handler.ReadGetterFromUrl(r, "timezone")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	boolFalse, err := handler.ReadGetterFromUrl(r, "bool_false")
+	opt.BoolFalse, err = handler.ReadGetterFromUrl(r, "bool_false")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	boolTrue, err := handler.ReadGetterFromUrl(r, "bool_true")
+	opt.BoolTrue, err = handler.ReadGetterFromUrl(r, "bool_true")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
@@ -103,17 +104,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	charComma, err := handler.ReadGetterFromUrl(r, "char_comma")
+	opt.CharComma, err = handler.ReadGetterFromUrl(r, "char_comma")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	charDec, err := handler.ReadGetterFromUrlOptional(r, "char_dec")
+	opt.CharDec, err = handler.ReadGetterFromUrlOptional(r, "char_dec")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	charThou, err := handler.ReadGetterFromUrlOptional(r, "char_thou")
+	opt.CharThou, err = handler.ReadGetterFromUrlOptional(r, "char_thou")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
@@ -154,7 +155,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	ignoreHeader := ignoreHeaderString == "true"
+	opt.IgnoreHeader = ignoreHeaderString == "true"
 
 	// check invalid parameters
 	if len(get.Expressions) != len(columnCaptions) {
@@ -194,7 +195,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	writer := csv.NewWriter(file)
-	writer.Comma, _ = utf8.DecodeRuneInString(charComma)
+	writer.Comma, _ = utf8.DecodeRuneInString(opt.CharComma)
 
 	// place header line
 	if !ignoreHeader {
@@ -218,7 +219,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// load user location based on timezone for datetime values
-	locUser, err := time.LoadLocation(timezone)
+	locUser, err := time.LoadLocation(opt.Timezone)
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
@@ -265,9 +266,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for {
-		total, err := dataToCsv(ctx, writer, get, locUser, boolTrue, boolFalse,
-			dateFormat, charDec, charThou, expressionsContentUse, login.Id)
-
+		total, err := dataToCsv(ctx, writer, get, locUser, opt, expressionsContentUse, login.Id)
 		if err != nil {
 			handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 			return
@@ -295,8 +294,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	os.Remove(filePath)
 }
 
-func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location, boolTrue string,
-	boolFalse string, dateFormat string, charDec string, charThou string, expressionsContentUse []string, loginId int64) (int64, error) {
+func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location,
+	opt types.CsvOptions, expressionsContentUse []string, loginId int64) (int64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -323,7 +322,7 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 		case "date", "datetime":
 			// date values are always stored as UTC at midnight
 			loc := time.UTC
-			format := tools.GetDatetimeFormat(dateFormat, display == "datetime")
+			format := tools.GetDatetimeFormat(opt.DateFormat, display == "datetime")
 
 			// datetime values are in context of user timezone
 			if display == "datetime" {
@@ -333,7 +332,7 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 		case "time":
 			return time.Unix(value, 0).UTC().Format("15:04:05")
 		}
-		return tools.FormatStringNumber(fmt.Sprintf("%v", value), "", charThou)
+		return tools.FormatStringNumber(fmt.Sprintf("%v", value), "", opt.CharThou)
 	}
 
 	for i, j := 0, len(rows); i < j; i++ {
@@ -345,9 +344,9 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 				stringValues[pos] = ""
 			case bool:
 				if v {
-					stringValues[pos] = boolTrue
+					stringValues[pos] = opt.BoolTrue
 				} else {
-					stringValues[pos] = boolFalse
+					stringValues[pos] = opt.BoolFalse
 				}
 			case string:
 				stringValues[pos] = v
@@ -355,14 +354,16 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 				stringValues[pos] = parseIntegerValues(expressionsContentUse[pos], int64(v))
 			case int64:
 				stringValues[pos] = parseIntegerValues(expressionsContentUse[pos], v)
-			case float32, float64:
-				stringValues[pos] = tools.FormatStringNumber(fmt.Sprintf("%g", v), charDec, charThou)
+			case float32:
+				stringValues[pos] = tools.FormatStringNumber(strconv.FormatFloat(float64(v), 'f', -1, 32), opt.CharDec, opt.CharThou)
+			case float64:
+				stringValues[pos] = tools.FormatStringNumber(strconv.FormatFloat(v, 'f', -1, 64), opt.CharDec, opt.CharThou)
 			case pgtype.Numeric:
 				f, err := v.Float64Value()
 				if err != nil {
 					return 0, err
 				}
-				stringValues[pos] = tools.FormatFloatNumber(f.Float64, -1, charDec, charThou)
+				stringValues[pos] = tools.FormatFloatNumber(f.Float64, -1, opt.CharDec, opt.CharThou)
 			default:
 				stringValues[pos] = fmt.Sprintf("%v", value)
 			}

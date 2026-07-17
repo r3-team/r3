@@ -672,10 +672,16 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 		return "", errors.New("bad filter operator")
 	}
 
+	var opFtsDictAtrId pgtype.UUID
 	isOpFts := isFtsOperator(filter.Operator)
 	isOpLike := isLikeOperator(filter.Operator)
 	isOpNull := isNullOperator(filter.Operator)
-	var opFtsDictAtrId pgtype.UUID
+
+	// if both sides are fixed values (ie. 'any'), PG cannot assume types, in this case we must cast it
+	// some operators can assume type ('LIKE' assumes TEXT), others (like '=', '<>', '<') require casting
+	isTypeCastNeeded := !isOpNull &&
+		!filter.Side0.AttributeId.Valid && filter.Side0.Query.RelationId == uuid.Nil &&
+		!filter.Side1.AttributeId.Valid && filter.Side1.Query.RelationId == uuid.Nil
 
 	if isOpFts {
 		// handle fulltext search (FTS)
@@ -798,14 +804,14 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 			return getFtsExpression(exprRegconfig, fmt.Sprintf("$%d", (len(*queryArgs))), isSide0), nil
 		}
 
-		// cast args for certain data types, known issues:
-		// * uncast bool args cannot be compared to another uncast bool arg via equal operator (=)
-		// * uncast real/double args cannot be compared to another uncast real/double arg via equal operator (=)
-		switch s.Value.(type) {
-		case bool:
-			return fmt.Sprintf("$%d::BOOL", len(*queryArgs)), nil
-		case float64: // short alias to double precision, float64 is default coming from JSON decode of JS number values
-			return fmt.Sprintf("$%d::FLOAT8", len(*queryArgs)), nil
+		if isTypeCastNeeded {
+			switch s.Value.(type) {
+			case bool:
+				return fmt.Sprintf("$%d::BOOL", len(*queryArgs)), nil
+			case float64: // float64 is the type coming from to-interface decode of JSON numbers
+				// FLOAT8 is alias to double precision
+				return fmt.Sprintf("$%d::FLOAT8", len(*queryArgs)), nil
+			}
 		}
 		return fmt.Sprintf("$%d", len(*queryArgs)), nil
 	}

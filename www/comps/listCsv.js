@@ -11,7 +11,7 @@ export default {
 	template:`
 		<p v-if="action === 'export'">{{ capApp.message.csvExport }}</p>
 		<p v-if="action === 'import'">{{ capApp.message.csvImport.replace('{COUNT}',columns.length) }}</p>
-		
+
 		<table>
 			<tbody>
 				<tr v-if="isExport && isImport">
@@ -97,11 +97,11 @@ export default {
 				</tr>
 			</tbody>
 		</table>
-		
+
 		<transition name="fade">
 			<p v-if="message !== ''" :class="{ error:messageError }">{{ message }}</p>
 		</transition>
-		
+
 		<div class="row">
 			<my-button image="upload.png"
 				v-if="action === 'import'"
@@ -110,7 +110,7 @@ export default {
 				:caption="capGen.button.import"
 			/>
 		</div>
-		
+
 		<a download="export.csv" v-if="action === 'export'" :href="charComma !== '' ? exportHref : null">
 			<my-button image="download.png" :active="charComma !== ''" :caption="capGen.button.export" />
 		</a>`,
@@ -149,7 +149,7 @@ export default {
 	mounted() {
 		this.action    = this.isExport ? 'export' : 'import';
 		this.charComma = this.$root.getOrFallback(this.loginOptions,'csvCharComma',',');
-		
+
 		for(const c of this.columns) {
 			if(c.content !== 'attribute')
 				continue;
@@ -157,7 +157,7 @@ export default {
 			const atr = this.attributeIdMap[c.attributeId];
 			if(this.isAttributeDecimal(atr.content)) this.hasDecimal  = true;
 			if(atr.content    === 'boolean')         this.hasBool     = true;
-			if(atr.contentUse === 'date')            this.hasDate     = true; 
+			if(atr.contentUse === 'date')            this.hasDate     = true;
 			if(atr.contentUse === 'datetime')        this.hasDatetime = true;
 			if(atr.contentUse === 'time')            this.hasTime     = true;
 		}
@@ -216,7 +216,7 @@ export default {
 		// simple
 		expressions:s => s.getQueryExpressions(s.columnsSorted),
 		timezone:   s => Intl.DateTimeFormat().resolvedOptions().timeZone,
-		
+
 		// stores
 		token:         s => s.$store.getters['local/token'],
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -231,7 +231,7 @@ export default {
 		getQueryExpressions,
 		isAttributeDecimal,
 		resolveErrCode,
-		
+
 		// actions
 		setCacheDenialTimestamp() {
 			this.cacheDenialTimestamp = Math.floor(new Date().getTime() / 1000);
@@ -250,7 +250,7 @@ export default {
 		send() {
 			let formData    = new FormData();
 			let httpRequest = new XMLHttpRequest();
-			
+
 			httpRequest.upload.onprogress = event => {
 				if(event.lengthComputable) {}
 			};
@@ -261,13 +261,13 @@ export default {
 			httpRequest.onload = event => {
 				this.$store.commit('busyRemove');
 				const res = JSON.parse(httpRequest.response);
-				
+
 				if(res.error === '') {
 					this.setMessage(this.capApp.message.csvImportSuccess.replace('{COUNT}',res.count),false);
 					this.$emit('reload');
 					return;
 				}
-				
+
 				const errRow = this.hasHeader ? res.count+2 : res.count+1;
 				this.setMessage(this.capApp.csvLineError.replace('{COUNT}',errRow) + this.resolveErrCode(res.error),true);
 			};
@@ -279,11 +279,13 @@ export default {
 			formData.append('dateFormat',this.dateFormat);
 			formData.append('timezone',this.timezone);
 			formData.append('charComma',this.charComma);
+			formData.append('charDec',this.charDec);
+			formData.append('charThou',this.charThou);
 			formData.append('ignoreHeader',this.hasHeader ? 'true' : 'false');
 			formData.append('file',this.fileElm.files[0]);
 			httpRequest.open('POST','csv/upload',true);
 			httpRequest.send(formData);
-			
+
 			this.fileElm.value = null;
 			this.fileSet       = false;
 			this.setMessage('',false);

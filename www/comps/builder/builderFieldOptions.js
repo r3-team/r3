@@ -449,7 +449,7 @@ export default {
 							</select>
 						</td>
 					</tr>
-					<tr v-if="!isDrawing && !isRelationship">
+					<tr v-if="!isDrawing && !isRelationship && !isFiles">
 						<td>{{ capApp.fieldRegexCheck }}</td>
 						<td>
 							<input
