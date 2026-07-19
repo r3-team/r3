@@ -1052,9 +1052,10 @@
 .builder-function .entities{
 	display:flex;
 	flex-flow:column nowrap;
-	border:1px solid var(--color-border);
+	border:var(--border-input);
 	border-radius:var(--border-input-radius);
 	background-color:var(--color-input);
+	box-shadow:var(--shadow-input);
 	overflow:hidden;
 }
 .builder-function .entity{
