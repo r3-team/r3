@@ -1519,6 +1519,7 @@
 			"option": {
 				"fieldGetFileLinks": "Leer enlaces de archivos",
 				"fieldGetFileLinksHint": "Devuelve una matriz de URLs de descarga para archivos subidos, solo válido para la sesión de usuario actual.",
+				"fieldGetId": "Get ID",
 				"fieldGetValueChanged": "¿Valor cambiado?",
 				"fieldSetCaption": "Escribir título",
 				"fieldSetChart": "Escribir objeto de opciones de ECharts",

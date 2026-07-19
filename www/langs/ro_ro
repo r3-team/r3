@@ -1519,6 +1519,7 @@
 			"option": {
 				"fieldGetFileLinks": "Read file links",
 				"fieldGetFileLinksHint": "Returns array of download URLs for uploaded files, only valid for the current user session.",
+				"fieldGetId": "Get ID",
 				"fieldGetValueChanged": "Value changed?",
 				"fieldSetCaption": "Write caption",
 				"fieldSetChart": "Write ECharts option object",

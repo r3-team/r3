@@ -1519,6 +1519,7 @@
 			"option": {
 				"fieldGetFileLinks": "Dosya bağlantılarını oku",
 				"fieldGetFileLinksHint": "Yüklenen dosyalara ilişkin indirme URL'lerinin dizisini döndürür; yalnızca geçerli kullanıcı oturumu için geçerlidir.",
+				"fieldGetId": "Get ID",
 				"fieldGetValueChanged": "Değer değişti mi?",
 				"fieldSetCaption": "Başlık yaz",
 				"fieldSetChart": "ECharts seçenek nesnesini yaz",
