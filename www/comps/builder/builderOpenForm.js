@@ -29,7 +29,7 @@ export default {
 							v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.forms.length !== 0)"
 							:label="mod.name"
 						>
-							<option v-if="allowAllForms" v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
+							<option v-if="allowAllForms" v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
 							<template v-if="!allowAllForms" v-for="j in joinsIndexMapField">
 								<option
 									v-for="f in mod.forms.filter(v => v.query !== null && v.query.relationId === j.relationId)"
@@ -40,7 +40,7 @@ export default {
 					</select>
 				</td>
 			</tr>
-			
+
 			<template v-if="formIsSet">
 				<tr>
 					<td colspan="2">
@@ -189,11 +189,11 @@ export default {
 			get()  { return this.openForm.popUpType === null ? '' : this.openForm.popUpType; },
 			set(v) { this.openForm.popUpType = v === '' ? null : v; }
 		},
-		
+
 		// options
 		targetAttributes:s => {
 			if(!s.formIsSet) return [];
-			
+
 			// parse from which relation the record is applied, based on the chosen relation index
 			let relationIdRecord = null;
 			for(let k in s.joinsIndexMap) {
@@ -204,7 +204,7 @@ export default {
 			}
 			if(relationIdRecord === null)
 				return [];
-			
+
 			const form = s.formIdMap[s.openForm.formIdOpen];
 			if(form.query === null)
 				return [];
@@ -215,58 +215,58 @@ export default {
 				let cap = atrIdNm === null
 					? `${join} ${s.relationIdMap[atr.relationId].name}.${atr.name}`
 					: `${join} ${s.relationIdMap[atr.relationId].name}.${s.attributeIdMap[atrIdNm].name} -> ${atr.name}`;
-				
+
 				out.push({atrId:atrId,caption:cap});
 			};
-			
+
 			// collect fitting attributes
 			for(let join of form.query.joins) {
 				let rel = s.relationIdMap[join.relationId];
-				
+
 				// attributes on relation from target form, in relationship with record relation
 				for(let atr of rel.attributes) {
 					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === relationIdRecord)
 						atrAdd(join.index,atr.id,null)
 				}
-				
+
 				// attributes on record relation, in relationship with relation from target form
 				for(let atr of s.relationIdMap[relationIdRecord].attributes) {
 					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === rel.id)
 						atrAdd(join.index,atr.id,null)
 				}
-				
+
 				// attributes on n:m relations
 				for(const r of s.getDependentRelations(s.module)) {
-					
+
 					// skip if record relation itself is n:m candidate
 					if(r.id === relationIdRecord)
 						continue;
-					
+
 					let atrToSource = null; // attribute pointing to relation of record to be applied
 					let atrToTarget = null; // attribute pointing to form join relation
-					
+
 					for(let atr of r.attributes) {
 						if(!s.isAttributeRelationship(atr.content))
 							continue;
-						
+
 						if(atr.relationshipId === relationIdRecord)
 							atrToSource = atr;
-						
+
 						if(atr.relationshipId === rel.id)
 							atrToTarget = atr;
 					}
-					
+
 					if(atrToSource !== null && atrToTarget !== null)
 						atrAdd(join.index,atrToSource.id,atrToTarget.id)
 				}
 			}
 			return out;
 		},
-		
+
 		// simple
 		formIsData:s => s.joinsIndexMap['0'] !== undefined,
 		formIsSet: s => s.openForm.formIdOpen !== null,
-		
+
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
