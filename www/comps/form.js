@@ -622,9 +622,8 @@ export default {
 				},
 
 				// variables
-				get_variable:   (k) => s.variableValueGet(k,s.variableIdMapLocal),
-				get_variable_id:(k) => k,
-				set_variable:   (k,v) => s.variableValueSet(k,v,s.variableIdMapLocal),
+				get_variable:(k) => s.variableValueGet(k,s.variableIdMapLocal),
+				set_variable:(k,v) => s.variableValueSet(k,v,s.variableIdMapLocal),
 
 				// e2e encryption
 				set_e2ee_by_user_ids:ids => s.loginIdsEncryptFor = ids,
