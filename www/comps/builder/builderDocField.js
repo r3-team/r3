@@ -63,7 +63,7 @@ export default {
 			<div class="builder-doc-padding-margin-hor" v-if="field.padding.b > 0" :style="stylePaddingB"></div>
 			<div class="builder-doc-padding-margin-ver" v-if="field.padding.l > 0" :style="stylePaddingL"></div>
 		</template>
-		
+
 		<div class="builder-doc-field-title-bar" v-if="!isWithFields && !isDragPreview">
 			<img :src="'images/' + getDocFieldIcon(field)" @click="tabTargetField = 'properties'" />
 			<span>F{{ entityIdMapRef.field[field.id] }}</span>
@@ -141,7 +141,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<!-- column properties -->
 			<div ref="columnOptions" v-show="columnIdOptions !== null"></div>
 
@@ -192,7 +192,7 @@ export default {
 								<td>{{ capGen.showDefault1 }}</td>
 								<td><my-bool v-model="field.state" :readonly /></td>
 							</tr>
-							
+
 							<template v-if="!isRoot">
 								<tr v-if="isResizeInGrid">
 									<td>{{ capGen.sizeX }}</td>
@@ -494,8 +494,8 @@ export default {
 			draggedInSameParent:false,
 			filtersDisable:[
 				'collection','field','fieldChanged','fieldValid','formChanged','formState',
-				'getter','globalSearch','javascript','languageCode','login','recordMayCreate',
-				'recordMayDelete','recordMayUpdate','recordNew','role','variable'
+				'getter','globalSearch','javascript','recordMayCreate','recordMayDelete',
+				'recordMayUpdate','recordNew','variable'
 			],
 			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
@@ -685,7 +685,7 @@ export default {
 				this.columnIdOptions = null;
 				return this.$emit('setFieldIdOptions',this.field.id);
 			}
-			
+
 			if(this.isChildGrid) {
 				const sizeXClean = this.getSizeAfterSnap(this.isChildGrid,this.field.posX,sizeX,this.parentSizeX,this.gridFieldSizeMinX,this.gridParentSnap);
 				const sizeYClean = this.getSizeAfterSnap(this.isChildGrid,this.field.posY,sizeY,this.parentSizeY,this.gridFieldSizeMinY,this.gridParentSnap);
@@ -793,7 +793,7 @@ export default {
 			if(!this.isWithFields) {
 				if(!this.isDragPreview)
 					this.$emit('dragChildEnter');
-				
+
 				return;
 			}
 			e.stopPropagation();
@@ -810,10 +810,10 @@ export default {
 		drop(e) {
 			if(!this.isWithFields || !e.dataTransfer.types.includes(this.dragType))
 				return;
-			
+
 			e.stopPropagation();
 			this.dragFieldIdSet(null);
-			
+
 			const field         = JSON.parse(e.dataTransfer.getData('application/json'));
 			const fieldsElm     = this.$refs.fields;
 			const fieldsElmRect = fieldsElm.getBoundingClientRect();
@@ -824,7 +824,7 @@ export default {
 				// find position in grid
 				field.posX = (e.clientX - fieldsElmRect.left) * this.pixelToMm / this.zoom;
 				field.posY = (e.clientY - fieldsElmRect.top)  * this.pixelToMm / this.zoom;
-	
+
 				// snap position to grid
 				field.posX = Math.round(field.posX / this.field.sizeSnap) * this.field.sizeSnap;
 				field.posY = Math.round(field.posY / this.field.sizeSnap) * this.field.sizeSnap;

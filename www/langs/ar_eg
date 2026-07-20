@@ -1547,6 +1547,7 @@
 			"option": {
 				"fieldGetFileLinks": "قراءة روابط الملفات",
 				"fieldGetFileLinksHint": "إرجاع مجموعة من عناوين URL للتنزيل للملفات التي تم تحميلها، وهي صالحة فقط لجلسة المستخدم الحالية.",
+				"fieldGetId": "Get ID",
 				"fieldGetValueChanged": "تغيرت القيمة؟",
 				"fieldSetCaption": "اكتب التسمية التوضيحية",
 				"fieldSetChart": "كتابة كائن خيار ECharts",

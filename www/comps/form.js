@@ -92,7 +92,7 @@ export default {
 				:style="popUp.style"
 			/>
 		</div>
-		
+
 		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || !showHelp"
@@ -108,7 +108,7 @@ export default {
 						:captionTitle="capGen.button.goBack"
 					/>
 					<img class="icon" :src="iconSrc" />
-					
+
 					<!-- form title / message -->
 					<transition name="fade" mode="out-in">
 						<h1 v-if="title !== '' && message === null" class="title">{{ title }}</h1>
@@ -118,7 +118,7 @@ export default {
 
 				<!-- record title -->
 				<div class="form-record-title" v-if="recordTitle !== ''">{{ recordTitle }}</div>
-				
+
 				<my-form-actions
 					v-if="!hasBarLower && hasFormActions"
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
@@ -131,7 +131,7 @@ export default {
 					:moduleId
 					:noSpace="!layoutElements.includes('formActions')"
 				/>
-				
+
 				<div class="form-bar-layout-check" ref="formBarUpperCheck" />
 				<div class="area nowrap">
 					<template v-if="!isBulkUpdate">
@@ -149,7 +149,7 @@ export default {
 							:captionTitle="capApp.button.logHint"
 						/>
 					</template>
-					
+
 					<my-button image="star1.png"
 						v-if="!isBulkUpdate && !isNoAuth"
 						@trigger="makeFavorite"
@@ -188,7 +188,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<!-- title bar lower -->
 			<div class="top lower nowrap" v-if="hasBarLower">
 				<div class="area nowrap">
@@ -243,7 +243,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<!-- title bar widget -->
 			<div class="top lower" v-if="hasBarWidget">
 				<my-form-actions
@@ -258,7 +258,7 @@ export default {
 					:noSpace="false"
 				/>
 			</div>
-			
+
 			<!-- form fields -->
 			<div class="content grow fields" ref="fields"
 				:class="{ onlyOne:isSingleField }"
@@ -298,7 +298,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<!-- form change logs -->
 		<my-form-log
 			v-if="showLog"
@@ -313,7 +313,7 @@ export default {
 			:joinsIndexMap
 			:moduleId
 		/>
-		
+
 		<!-- form help articles -->
 		<my-articles class="form-help"
 			v-if="showHelp"
@@ -343,10 +343,10 @@ export default {
 		this.$watch(() => [this.favoriteId,this.formId,this.recordIds],this.reset,{
 			immediate:true
 		});
-		
+
 		if(!this.isWidget)
 			this.$store.commit('routingGuardAdd',this.routingGuard);
-		
+
 		window.addEventListener('keydown',this.handleHotkeys);
 		this.resized(null,0);
 		this.$store.commit('dropdownElm',null);
@@ -354,7 +354,7 @@ export default {
 	unmounted() {
 		if(!this.isWidget)
 			this.$store.commit('routingGuardDel',this.routingGuard);
-		
+
 		window.removeEventListener('keydown',this.handleHotkeys);
 		this.timerClearAll();
 	},
@@ -385,7 +385,7 @@ export default {
 			showHelp:false,         // show form context help
 			showLog:false,          // show data change log
 			titleOverwrite:null,    // custom form title, can be set via frontend function
-			
+
 			// form data
 			fieldIdsInvalid:[],           // field IDs with invalid values
 			fieldIdsTouched:[],           // field IDs that were touched (changed their value in some way)
@@ -424,10 +424,10 @@ export default {
 						}
 						continue;
 					}
-					
+
 					if(f.content !== 'data')
 						continue;
-					
+
 					// apply data field default value
 					let def              = null;
 					let attribute        = s.attributeIdMap[f.attributeId];
@@ -435,19 +435,19 @@ export default {
 					let isRelationship   = s.isAttributeRelationship(attribute.content);
 					let isRelationshipN1 = s.isAttributeRelationshipN1(attribute.content);
 					let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
-					
+
 					if(f.def !== '')
 						def = s.getAttributeValueFromString(
 							attribute.content,
 							s.getResolvedPlaceholders(f.def));
-					
+
 					if(f.defCollection !== null)
 						def = s.getCollectionValues(
 							f.defCollection.collectionId,
 							f.defCollection.columnIdDisplay,
 							!isRelMulti
 						);
-					
+
 					if(isRelationship && f.defPresetIds.length > 0) {
 						if(!isRelMulti) {
 							def = s.presetIdMapRecordId[f.defPresetIds[0]];
@@ -459,9 +459,9 @@ export default {
 							}
 						}
 					}
-					
+
 					out[indexAttributeId] = def;
-					
+
 					// set value and default for altern. field attribute
 					if(f.attributeIdAlt !== null)
 						out[s.getIndexAttributeId(f.index,f.attributeIdAlt,false,null)] = null;
@@ -479,18 +479,18 @@ export default {
 			// apply default values, set for attributes (usually via getters/arguments)
 			for(let k in out) {
 				const d = s.getDetailsFromIndexAttributeId(k);
-				
+
 				if(s.attributeIdMapDef[d.attributeId] !== undefined) {
 					out[k] = d.outsideIn && s.isAttributeRelationshipN1(s.attributeIdMap[d.attributeId].content)
 						? [s.attributeIdMapDef[d.attributeId]] : s.attributeIdMapDef[d.attributeId];
 				}
-				
+
 				if(s.attributeIdMapDef[d.attributeIdNm] !== undefined)
 					out[k] = [s.attributeIdMapDef[d.attributeIdNm]];
 			}
 			return out;
 		},
-		
+
 		// presentation
 		buttonGroupDelete:(s) => {
 			let group = [{
@@ -541,7 +541,7 @@ export default {
 		iconSrc:(s) => {
 			if(s.favoriteId  !== null) return 'images/star1.png';
 			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
-			
+
 			return s.menuActive !== null && s.menuActive.iconId !== null && s.menuActive.formId === s.form.id
 				? s.srcBase64(s.iconIdMap[s.menuActive.iconId].file)
 				: 'images/fileText.png';
@@ -566,17 +566,17 @@ export default {
 						return f.title;
 				}
 			}
-			
+
 			const formTitle = s.getCaption('formTitle',s.moduleId,s.formId,s.form.captions);
 			if(formTitle !== '')
 				return formTitle;
-			
+
 			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
 				return s.getCaption('menuTitle',s.moduleId,s.menuActive.id,s.menuActive.captions);
-			
+
 			return '';
 		},
-		
+
 		// function overwrites
 		exposedFunctions:(s) => {
 			return {
@@ -586,11 +586,11 @@ export default {
 					// bulk forms do not retrieve record values, only base record IDs are available
 					if(s.isBulkUpdate && relationIndex === 0)
 						return s.recordIds;
-					
+
 					return typeof s.indexMapRecordId[relationIndex] !== 'undefined'
 						? s.indexMapRecordId[relationIndex] : -1;
 				},
-				
+
 				// form functions
 				form_close:s.isPopUp ? s.closeAsk : s.openPrevAsk,
 				form_open:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
@@ -603,14 +603,14 @@ export default {
 				form_parent_refresh:() => s.$emit('refresh-parent'),
 				form_set_title:(v) => s.titleOverwrite = v,
 				form_show_message:s.messageSet,
-				
+
 				// record functions
 				record_delete:  () => { s.delAsk(false);    s.recordActionFree = false; },
 				record_new:     () => { s.openNewAsk();     s.recordActionFree = false; },
 				record_reload:  () => { s.get();            s.recordActionFree = false; },
 				record_save:    () => { s.set(false,false); s.recordActionFree = false; },
 				record_save_new:() => { s.set(true,false);  s.recordActionFree = false; },
-				
+
 				// timeout/interval function calls
 				timer_clear:s.timerClear,
 				timer_set:(name,isInterval,fnc,milliseconds) => {
@@ -622,9 +622,9 @@ export default {
 				},
 
 				// variables
-				get_variable:(k)   => s.variableValueGet(k,  s.variableIdMapLocal),
+				get_variable:(k) => s.variableValueGet(k,s.variableIdMapLocal),
 				set_variable:(k,v) => s.variableValueSet(k,v,s.variableIdMapLocal),
-				
+
 				// e2e encryption
 				set_e2ee_by_user_ids:ids => s.loginIdsEncryptFor = ids,
 				set_e2ee_by_user_ids_and_relation:(loginIds,relationId,recordIds) => {
@@ -634,21 +634,22 @@ export default {
 						recordIds:recordIds
 					});
 				},
-				
+
 				// field manipulation
+				get_field_id:(fieldId) => fieldId,
 				get_field_value:(fieldId) => s.fieldIdMapData[fieldId] === undefined
 					? undefined : JSON.parse(JSON.stringify(s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)])),
 				get_field_value_changed:(fieldId) => s.fieldIdsChanged.includes(fieldId),
 				get_field_file_links:(fieldId) => {
 					const fld = s.fieldIdMapData[fieldId];
 					const val = s.values[s.getIndexAttributeIdByField(fld,false)];
-					
+
 					if(fld !== undefined && val !== null && !Array.isArray(val))
 						console.warn('Failed to generate file links, file input has unsaved changes');
-					
+
 					if(fld === undefined || val === null || !Array.isArray(val))
 						return null;
-					
+
 					let out = [];
 					for(const f of val) {
 						out.push(s.getAttributeFileVersionHref(fld.attributeId, f.id, f.name, f.version, s.token));
@@ -664,10 +665,10 @@ export default {
 					// use common return codes: 0 = success, 1 = error
 					if(s.fieldIdMapData[fieldId] === undefined) return 1;
 					if(isChg                     === undefined) isChg = true;
-					
+
 					s.valueSetByField(s.getIndexAttributeIdByField(
 						s.fieldIdMapData[fieldId],false),value,!isChg,true,fieldId);
-					
+
 					return 0;
 				},
 
@@ -680,7 +681,7 @@ export default {
 						recordIds:recordIds
 					});
 				},
-				
+
 				// legacy calls (<3.5)
 				open_form:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
 					s.openForm((recordId === 0 ? [] : [recordId]),{
@@ -692,7 +693,7 @@ export default {
 				show_form_message:s.messageSet
 			};
 		},
-		
+
 		// applied form state effects, overwrites for different entities (form, fields, formActions, tabs)
 		entityIdMapEffect:(s) => {
 			const getValueFromConditionSide = (side,operator,recursionLevel) => {
@@ -738,35 +739,35 @@ export default {
 				// form state must have some condition to be evaluated, effects are optional as the state could be used as condition
 				if(state.conditions.length === 0)
 					return false;
-				
+
 				let line = 'return ';
 
 				// parse condition expressions
 				for(let i = 0, j = state.conditions.length; i < j; i++) {
 					const c = state.conditions[i];
-					
+
 					if(i !== 0)
 						line += c.connector === 'AND' ? '&&' : '||';
-					
+
 					// brackets open
 					line += '('.repeat(c.side0.brackets);
-					
+
 					// get boolean expression by checking filter condition
 					line += s.filterIsCorrect(c.operator,
 						getValueFromConditionSide(c.side0,c.operator,recursionLevel),
 						getValueFromConditionSide(c.side1,c.operator,recursionLevel)
 					) ? 'true' : 'false';
-					
+
 					// brackets close
 					line += ')'.repeat(c.side1.brackets);
 				}
 				return Function(line)();
 			};
-			
+
 			let out = { form:{ data:0, state:'default' }, field:{}, formAction:{}, tab:{} };
 			for(const state of s.form.states) {
 				if(!isFormStateActive(state,0)) continue;
-				
+
 				// apply effects if conditions are met
 				for(const e of state.effects) {
 					     if(e.fieldId      !== null) out.field[e.fieldId]           = { data:e.newData, state:e.newState };
@@ -782,15 +783,15 @@ export default {
 			for(const fieldId in s.fieldIdMapData) {
 				const f  = s.fieldIdMapData[fieldId];
 				let   ia = s.getIndexAttributeIdByField(f,false);
-				
+
 				if(!s.valueIsEqual(s.values[ia],s.valuesOrg[ia]))
 					out.push(fieldId);
-				
+
 				if(f.attributeIdAlt === null)
 					continue;
-				
+
 				ia = s.getIndexAttributeIdByField(f,true);
-			
+
 				if(!s.valueIsEqual(s.values[ia],s.valuesOrg[ia]))
 					out.push(fieldId);
 			}
@@ -825,7 +826,7 @@ export default {
 						}
 						continue;
 					}
-					
+
 					if(f.query !== undefined && f.query !== null) {
 						let choices           = JSON.parse(JSON.stringify(f.query.choices));
 						const choiceId        = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'choiceId',choices.length === 0 ? null : choices[0].id);
@@ -907,7 +908,7 @@ export default {
 		joinsIndexesDel:        (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
 		joinsIndexesNew:        (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordNew); },
 		joinsIndexesSet:        (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
-		
+
 		// stores
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
@@ -983,7 +984,7 @@ export default {
 		srcBase64,
 		variableValueGet,
 		variableValueSet,
-		
+
 		// form management
 		handleHotkeys(ev) {
 			// ignore hotkeys if pop-up form (child of this form) is open or if its a widget
@@ -1014,7 +1015,7 @@ export default {
 				case '[ENCRYPTING]': this.message = this.capApp.message.recordEncrypting;  break;
 				default: this.message = message; break;
 			}
-			
+
 			// reset message after timeout
 			clearTimeout(this.messageTimeout);
 			this.messageTimeout = setTimeout(() => this.message = null,
@@ -1024,7 +1025,7 @@ export default {
 			// set form to loading as data is being changed, will be released once form is ready
 			this.loading = true;
 			this.$store.commit('isAtMenu',false);
-			
+
 			// rebuild form if ID changed
 			if(this.lastFormId !== this.form.id) {
 				if(!this.isWidget)
@@ -1038,9 +1039,9 @@ export default {
 
 				// on first load, field valid states do not need to be reset
 				// addresses issue in which field valid states are set before reset() is executed
-				if(!this.firstLoad) 
+				if(!this.firstLoad)
 					this.fieldIdsInvalid = [];
-				
+
 				// set preset record to open, if defined
 				if(this.form.presetIdOpen !== null && this.relationId !== null) {
 					for(const p of this.relationIdMap[this.relationId].presets) {
@@ -1049,7 +1050,7 @@ export default {
 					}
 				}
 			}
-			
+
 			// reset form behaviour and load record
 			this.blockInputs = false;
 			this.firstLoad   = false;
@@ -1073,7 +1074,7 @@ export default {
 
 			// load record if relevant
 			this.get();
-			
+
 			if(!this.isWidget && !this.isMobile)
 				this.$nextTick(() => this.fieldSetFocus(this.form.fieldIdFocus,true));
 		},
@@ -1095,7 +1096,7 @@ export default {
 		resized(evt,initialWaitMs) {
 			if(this.layoutCheckTimer !== null)
 				clearTimeout(this.layoutCheckTimer);
-			
+
 			this.layoutCheckTimer = setTimeout(() => {
 				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailable));
 				this.$nextTick(() => this.layoutSettleSpace(this.layoutElements,
@@ -1116,7 +1117,7 @@ export default {
 
 			return false;
 		},
-		
+
 		// field value control
 		valueIsEqual(v1,v2) {
 			const clean = v => {
@@ -1136,12 +1137,12 @@ export default {
 
 			if(changed)    this.valuesNew[indexAttributeId] = value;
 			if(isOriginal) this.valuesOld[indexAttributeId] = JSON.parse(JSON.stringify(value));
-			
+
 			// update joined data, if relevant (relationship value changed or defaults were loaded)
 			if(updateJoins && (changed || isOriginal)) {
 				const d = this.getDetailsFromIndexAttributeId(indexAttributeId);
 				if(d.outsideIn) return;
-				
+
 				// get data from sub joins if relationship attribute value has changed
 				for(let k in this.joinsIndexMap) {
 					if(this.joinsIndexMap[k].attributeId === d.attributeId && this.joinsIndexMap[k].indexFrom === d.index)
@@ -1158,29 +1159,29 @@ export default {
 		valueSetByRows:async function(rows,expressions) {
 			if(rows.length !== 1)
 				throw new Error('expected 1 row, got: '+rows.length);
-			
+
 			const row = rows[0];
-			
+
 			// update record IDs & DEL/SET permission for each relation index
 			for(let index in row.indexRecordIds) {
 				this.indexMapRecordId[index] = row.indexRecordIds[index];
-				
+
 				const indexInt = parseInt(index);
 				let pos = this.indexesNoDel.indexOf(indexInt);
 				if(pos === -1 && row.indexesPermNoDel.includes(indexInt))
 					this.indexesNoDel.push(indexInt);
-				
+
 				if(pos !== -1 && !row.indexesPermNoDel.includes(indexInt))
 					this.indexesNoDel.splice(pos,1);
-				
+
 				pos = this.indexesNoSet.indexOf(indexInt);
 				if(pos === -1 && row.indexesPermNoSet.includes(indexInt))
 					this.indexesNoSet.push(indexInt);
-				
+
 				if(pos !== -1 && !row.indexesPermNoSet.includes(indexInt))
 					this.indexesNoSet.splice(pos,1);
 			}
-			
+
 			// update record data keys for each relation index
 			for(let index in row.indexRecordEncKeys) {
 				this.indexMapRecordKey[index] = await this.rsaDecrypt(
@@ -1190,7 +1191,7 @@ export default {
 					err => { throw new Error('failed to decrypt data key with private key, '+err); }
 				);
 			}
-			
+
 			// set row values (decrypt first if necessary)
 			return this.getRowsDecrypted(rows,expressions).then(
 				rows => {
@@ -1208,19 +1209,19 @@ export default {
 				}
 			);
 		},
-		
+
 		// field meta changes
 		fieldSetFocus(fieldId,fallbackToFirstInput) {
 			let searchEl = fieldId !== null
 				? this.$refs.fields.querySelector(`[data-field-id="${fieldId}"]`)
 				: this.$refs.fields;
-			
+
 			if(searchEl === null && fallbackToFirstInput)
 				searchEl = this.$refs.fields;
-			
+
 			if(searchEl === null)
 				return;
-			
+
 			const inputEl = searchEl.querySelector('[data-is-input="1"]');
 			if(inputEl !== null)
 				inputEl.focus();
@@ -1233,10 +1234,10 @@ export default {
 		},
 		fieldSetValid(state,fieldId) {
 			const pos = this.fieldIdsInvalid.indexOf(fieldId);
-			if(state  && pos !== -1) return this.fieldIdsInvalid.splice(pos,1); 
+			if(state  && pos !== -1) return this.fieldIdsInvalid.splice(pos,1);
 			if(!state && pos === -1) return this.fieldIdsInvalid.push(fieldId);
 		},
-		
+
 		// actions
 		closeAsk() {
 			this.dialogCloseAsk(this.close,this.hasChanges);
@@ -1253,7 +1254,7 @@ export default {
 		copyFormUrlToClipboard(middleClick) {
 			const path = this.getFormRoute(this.favoriteId,this.form.id,(this.isNew ? 0 : this.recordIds[0]),
 				true,this.getGetterFromAttributeValues(this.attributeIdMapDef));
-			
+
 			if(!middleClick) navigator.clipboard.writeText(`${location.protocol}//${location.host}/#${path}`);
 			else             this.openLink(`${location.protocol}//${location.host}/#${path}`,true);
 		},
@@ -1293,7 +1294,7 @@ export default {
 		openBuilder(middle) {
 			if(middle)
 				return this.openLink('#/builder/form/'+this.form.id,true);
-			
+
 			this.routingGuardSkip = true;
 			this.$router.push('/builder/form/'+this.form.id);
 			this.$store.commit('popUpFormGlobal',null);
@@ -1301,17 +1302,17 @@ export default {
 		openNewAsk(middleClick) {
 			if(middleClick || !this.warnUnsaved)
 				return this.openNew(middleClick);
-			
+
 			let caption = this.capGen.button.new;
 			let image   = 'new.png';
 			let msg     = this.capApp.dialog.new;
-			
+
 			if(this.isNew) {
 				caption = this.capGen.button.reset;
 				image   = 'refresh.png';
 				msg     = this.capApp.dialog.newReset;
 			}
-			
+
 			this.$store.commit('dialog',{
 				captionBody:msg,
 				buttons:[{
@@ -1336,7 +1337,7 @@ export default {
 		openPrevAsk() {
 			if(!this.warnUnsaved)
 				return this.openPrev();
-			
+
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.prev,
 				buttons:[{
@@ -1371,7 +1372,7 @@ export default {
 					let   valNew  = null;
 					const isMulti = field.attributeIdNm !== null ||
 						(field.outsideIn && this.isAttributeRelationshipN1(atr.content));
-					
+
 					if(!isMulti) {
 						valNew = isDeleted ? null : recordId;
 					}
@@ -1416,7 +1417,7 @@ export default {
 			this.showLog = !this.showLog;
 			this.resized();
 		},
-		
+
 		// timer
 		timerClear(name) {
 			if(this.timers[name] !== undefined) {
@@ -1424,7 +1425,7 @@ export default {
 					clearInterval(this.timers[name].id);
 				else
 					clearTimeout(this.timers[name].id);
-				
+
 				delete(this.timers[name]);
 			}
 		},
@@ -1433,7 +1434,7 @@ export default {
 				this.timerClear(k);
 			}
 		},
-		
+
 		// form function triggers
 		triggerEventAfter (e) { this.triggerEvent(e,false); },
 		triggerEventBefore(e) { this.triggerEvent(e,true); },
@@ -1443,13 +1444,13 @@ export default {
 					this.jsFunctionRun(f.jsFunctionId,[],this.exposedFunctions);
 			}
 		},
-		
+
 		// navigation
 		openDoc(openDoc) {
 			const recordId = this.indexMapRecordId[openDoc.relationIndexOpen] !== undefined ? this.indexMapRecordId[openDoc.relationIndexOpen] : 0;
 			if(openDoc.fieldIdAddTo === null || this.fieldIdMapData[openDoc.fieldIdAddTo] === undefined)
 				return this.openLinkNoCache(`/doc/download/file.pdf?doc_id=${openDoc.docIdOpen}&record_id=${recordId}&token=${this.token}`,true);
-			
+
 			const fieldId = openDoc.fieldIdAddTo;
 			const atr     = this.attributeIdMap[this.fieldIdMapData[fieldId].attributeId];
 			ws.send('doc','create',{
@@ -1463,7 +1464,7 @@ export default {
 
 					if(v === null || Array.isArray(v))
 						v = {fileCount:1,fileIdMapChange:{}};
-					
+
 					v.fileIdMapChange[res.payload.id] = {
 						action:"create",
 						name:res.payload.name,
@@ -1482,7 +1483,7 @@ export default {
 			if(newTab     === undefined)                        newTab     = false;
 			if(fieldIdSrc === undefined)                        fieldIdSrc = null;
 			if(replace    === undefined)                        replace    = false;
-			
+
 			const openSameForm = this.form.id === openForm.formIdOpen;
 
 			if(this.isPopUp && replace) {
@@ -1490,26 +1491,26 @@ export default {
 				openForm.popUpType === 'float';
 				return this.$emit('pop-up-replace',recordIds,openForm,getterArgs,newTab,null,false);
 			}
-			
+
 			// a pop-up/widget form can be reloaded by using itself as target (the same as regular forms)
 			// only valid if no pop-up option is used
 			if((this.isPopUp || this.isWidget) && openSameForm && openForm.popUpType === null)
 				return this.$emit('records-open',recordIds);
-				
+
 			// a pop-up form can only open other floating pop-ups, otherwise navigation becomes confusing
 			if(this.isPopUp)
 				openForm.popUpType = 'float';
-			
+
 			// open pop-up form unless new tab is requested
 			if(openForm.popUpType !== null && !newTab) {
 				this.popUp = this.getFormPopUpConfig(recordIds,openForm,getterArgs,'attributes');
 				this.popUpFieldIdSrc = fieldIdSrc;
 				return;
 			}
-			
+
 			// keep attribute default values from current getter if form does not change
 			if(openSameForm && typeof this.$route.query.attributes !== 'undefined') {
-				
+
 				// ignore current getter, if new one is supplied with same name
 				let newAttributesGetter = false;
 				for(let i = 0, j = getterArgs.length; i < j; i++) {
@@ -1518,31 +1519,31 @@ export default {
 						break;
 					}
 				}
-				
+
 				if(!newAttributesGetter)
 					getterArgs.push(`attributes=${this.$route.query.attributes}`);
 			}
-			
+
 			// full form navigation, only single record allowed as target
 			let recordIdOpen = recordIds.length === 1 ? recordIds[0] : 0;
 			const path = this.getFormRoute(null,openForm.formIdOpen,recordIdOpen,true,getterArgs);
-			
+
 			if(newTab)
 				return this.openLink('#'+path,true);
-			
+
 			// same path, reset form
 			if(this.$route.fullPath === path)
 				return this.reset();
-			
+
 			// different path, same form
 			if(openSameForm) {
 				// switch from existing to new one or between two existing records
 				if(!replace && !this.isNew && recordIdOpen !== this.recordIds[0])
 					return this.$router.push(path);
-				
+
 				return this.$router.replace(path);
 			}
-			
+
 			// new form
 			if(replace) this.$router.replace(path);
 			else        this.$router.push(path);
@@ -1550,14 +1551,14 @@ export default {
 		setFormArgs(args,push) {
 			const path = this.getFormRoute(this.favoriteId,this.form.id,
 				(this.isNew ? 0 : this.recordIds[0]),true,args);
-			
+
 			if(this.$route.fullPath === path || this.isPopUp || this.isWidget)
 				return; // nothing changed or pop-up/widget form, ignore
-			
+
 			if(push) this.$router.push(path);
 			else     this.$router.replace(path);
 		},
-		
+
 		// backend calls
 		delAsk(deleteAndNew) {
 			this.$store.commit('dialog',{
@@ -1577,7 +1578,7 @@ export default {
 		},
 		del(deleteAndNew) {
 			this.triggerEventBefore('delete');
-			
+
 			let requests = [];
 			for(const join of this.joinsIndexesDel) {
 				requests.push(ws.prepare('data','del',{
@@ -1585,23 +1586,23 @@ export default {
 					recordId:join.recordId
 				}));
 			}
-			
+
 			ws.sendMultiple(requests,true).then(
 				() => {
 					if(this.isPopUp)
 						this.$emit('record-deleted',this.recordIds[0]);
-					
+
 					this.recordActionFree = true;
-					
+
 					this.triggerEventAfter('delete');
-					
+
 					if(this.recordActionFree) {
 						if(this.isPopUp && deleteAndNew)  return this.$emit('records-open',[]);
 						if(this.isPopUp && !deleteAndNew) return this.closeAsk();
-						
+
 						if(deleteAndNew || this.isAtHistoryStart)
 							return this.openForm(null,null,[],false,null,true);
-						
+
 						return this.openPrevAsk();
 					}
 					this.messageSet('[DELETED]');
@@ -1614,7 +1615,7 @@ export default {
 		},
 		get() {
 			this.triggerEventBefore('open');
-			
+
 			// no or multiple records defined, no need to load record data
 			if(this.isNew || this.isBulkUpdate) {
 				this.resetRecordMeta();
@@ -1622,10 +1623,10 @@ export default {
 				this.releaseLoadingOnNextTick();
 				return;
 			}
-			
+
 			// set base record ID, necessary for form filter 'recordNew'
 			this.indexMapRecordId[0] = this.recordIds[0];
-			
+
 			// add index attributes to be retrieved
 			let expressions = [];
 			for(let ia in this.values) {
@@ -1637,10 +1638,10 @@ export default {
 					outsideIn:d.outsideIn
 				});
 			}
-			
+
 			const filters = this.getQueryFiltersProcessed(this.filters,this.joinsIndexMap).concat([
 				this.getQueryAttributePkFilter(this.relationId,this.recordIds[0],0,false)]);
-			
+
 			ws.send('data','get',{
 				relationId:this.relationId,
 				indexSource:0,
@@ -1654,7 +1655,7 @@ export default {
 					// reset states
 					this.resetRecordMeta();
 					this.loading = true;
-					
+
 					this.valueSetByRows(res.payload.rows,expressions).then(
 						() => this.triggerEventAfter('open'),
 						err => {
@@ -1672,32 +1673,32 @@ export default {
 			let joinIndexes = [join.index]; // all join indexes to collect (start with initial join)
 			let joins       = [];           // all collected joins
 			let joinAdded   = true;
-			
+
 			// loop until no more joins need to be added
 			while(joinAdded) {
 				joinAdded = false;
-				
+
 				for(let r of this.relationsJoined) {
-					
+
 					if(!joinIndexes.includes(r.indexFrom))
 						continue; // not dependent on existing joins
-					
+
 					if(joinIndexes.includes(r.index))
 						continue; // already added
-					
+
 					joins.push(r);
 					joinIndexes.push(r.index);
-					
+
 					// repeat if join was added (to collect dependent joins)
 					joinAdded = true;
 				}
 			}
-			
+
 			// collect which values from connected joins can be retrieved
 			let expressions = [];
 			for(let ia in this.values) {
 				const d = this.getDetailsFromIndexAttributeId(ia);
-				
+
 				if(joinIndexes.includes(d.index))
 					expressions.push({
 						attributeId:d.attributeId,
@@ -1706,7 +1707,7 @@ export default {
 						outsideIn:d.outsideIn
 					});
 			}
-			
+
 			// record is empty, clear attribute values from all joined relations
 			if(recordId === null) {
 				for(let e of expressions) {
@@ -1717,7 +1718,7 @@ export default {
 				}
 				return;
 			}
-			
+
 			// remove filters for non-available joins
 			// then process filters (to encapsule final filters correctly)
 			// lastly add filter for the record itself
@@ -1732,12 +1733,12 @@ export default {
 				}
 				return out;
 			};
-			
+
 			let filters = this.getQueryFiltersProcessed(
 				removeInvalid(JSON.parse(JSON.stringify(this.filters))),this.joinsIndexMap);
-			
+
 			filters.push(this.getQueryAttributePkFilter(this.relationId,recordId,join.index,false));
-			
+
 			this.triggerEventBefore('open');
 			ws.send('data','get',{
 				relationId:join.relationId,
@@ -1760,51 +1761,51 @@ export default {
 		set:async function(saveAndNew,saveAndClose) {
 			if(this.fieldIdsInvalid.length !== 0)
 				return this.badSave = true;
-			
+
 			this.triggerEventBefore('save');
 			this.changingRecord = true;
-			
+
 			const handleEncErr = err => {
 				this.changingRecord = false;
 				this.consoleError(err); // full error for troubleshooting
 				this.$root.genericErrorWithFallback(err,'SEC','003');
 			};
-			
+
 			let relations = {};
 			let addRelationByIndex = async index => {
 				if(typeof relations[index] !== 'undefined')
 					return;
-				
+
 				const j     = this.joinsIndexMap[index];
 				const isNew = j.recordId === 0;
 				let encLoginKeys = [];
-				
+
 				// ignore relation if record is new and creation is disallowed
 				if(!j.applyCreate && isNew)
 					return;
-				
+
 				// recursively add relation parent, if one exists
 				if(j.indexFrom !== -1)
 					await addRelationByIndex(j.indexFrom);
-				
+
 				// handle encryption key for record
 				if(this.relationIdMap[j.relationId].encryption) {
-					
+
 					// create if new or get known data key
 					if(isNew)
 						this.indexMapRecordKey[index] = this.getRandomString(this.keyLength);
-					
+
 					const dataKeyStr = this.indexMapRecordKey[index];
 					if(typeof dataKeyStr === 'undefined')
 						throw new Error('encryption key for existing record is not available');
-					
+
 					// new records need at least one encryption recipient
 					if(isNew && this.loginIdsEncryptFor.length === 0)
 						this.loginIdsEncryptFor.push(this.loginId);
-					
+
 					if(this.loginIdsEncryptFor.length !== 0) {
 						this.messageSet('[ENCRYPTING]');
-						
+
 						// get public keys for logins to encrypt data key for
 						// only returns keys if logins have not already encrypted all records
 						const res = await ws.send('loginKeys','getPublic',{
@@ -1812,14 +1813,14 @@ export default {
 							relationId:j.relationId,
 							recordIds:[j.recordId]
 						},true);
-						
+
 						// send encrypted data keys
 						const loginKeys = res.payload;
-						
+
 						for(const lk of loginKeys) {
 							const publicKey  = await this.pemImport(lk.publicKey,'RSA',true);
 							const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr);
-							
+
 							encLoginKeys.push({
 								loginId:lk.loginId,
 								keyEnc:dataKeyEnc
@@ -1827,7 +1828,7 @@ export default {
 						}
 					}
 				}
-				
+
 				relations[j.index] = {
 					relationId:j.relationId,
 					attributeId:j.attributeId,
@@ -1837,31 +1838,31 @@ export default {
 					encKeysSet:encLoginKeys
 				};
 			};
-			
+
 			// add values by index attribute ID
 			for(let k in this.values) {
 				let d     = this.getDetailsFromIndexAttributeId(k);
 				let j     = this.joinsIndexMap[d.index];
 				let isNew = j.recordId === 0;
-				
+
 				// ignore NULL values for new record
 				if(isNew && this.values[k] === null)
 					continue;
-				
+
 				// ignore unchanged values for existing record
 				if(!isNew && this.valueIsEqual(this.values[k],this.valuesOrg[k]))
 					continue;
-				
+
 				// ignore values if join settings disallow creation/update
 				if(!j.applyCreate && j.recordId === 0) continue;
 				if(!j.applyUpdate && j.recordId !== 0) continue;
-				
+
 				// add join to request to set attribute values and handle encryption keys
 				try        { await addRelationByIndex(d.index); }
 				catch(err) { return handleEncErr(err); }
-				
+
 				let value = this.values[k];
-				
+
 				// handle encryption
 				if(value !== null && this.attributeIdMap[d.attributeId].encrypted) {
 					try {
@@ -1870,7 +1871,7 @@ export default {
 					}
 					catch(err) { return handleEncErr(err); }
 				}
-				
+
 				relations[d.index].attributes.push({
 					attributeId:d.attributeId,
 					attributeIdNm:d.attributeIdNm,
@@ -1878,10 +1879,10 @@ export default {
 					value:value
 				});
 			}
-			
+
 			// prepare websocket requests
 			let requests = [ws.prepare('data','set',relations)];
-			
+
 			// encrypt for outside relations
 			// run in same transaction as data SET to keep data consistent
 			for(let i = 0, j = this.loginIdsEncryptForOutside.length; i < j; i++) {
@@ -1890,7 +1891,7 @@ export default {
 					const loginIds   = this.loginIdsEncryptForOutside[i].loginIds;
 					const relationId = this.loginIdsEncryptForOutside[i].relationId;
 					const recordIds  = this.loginIdsEncryptForOutside[i].recordIds;
-					
+
 					let [resDataKeys,resLoginKeys] = await Promise.all([
 						ws.send('data','getKeys',{
 							relationId:relationId,
@@ -1902,16 +1903,16 @@ export default {
 							recordIds:recordIds
 						},true)
 					]);
-					
+
 					const dataKeys  = resDataKeys.payload;
 					const loginKeys = resLoginKeys.payload;
-					
+
 					let recordIdMapKeyStr  = {}; // data key, by record ID, unencrypted
 					let recordIdMapKeysEnc = {}; // data keys, by record ID, encrypted with public keys
-					
+
 					if(dataKeys.length !== recordIds.length)
 						throw new Error(`current login has only access to ${dataKeys.length} of ${recordIds.length} records`);
-					
+
 					// decrypt data keys
 					for(let x = 0, y = dataKeys.length; x < y; x++) {
 						recordIdMapKeyStr[recordIds[x]] = await this.rsaDecrypt(
@@ -1919,27 +1920,27 @@ export default {
 							dataKeys[x]
 						);
 					}
-					
+
 					// encrypt data keys for all requested logins
 					for(const loginKey of loginKeys) {
 						const publicKey = await this.pemImport(loginKey.publicKey,'RSA',true);
-						
+
 						for(const recordId of loginKey.recordIds) {
 							const dataKeyEnc = await this.rsaEncrypt(
 								publicKey,
 								recordIdMapKeyStr[recordId]
 							);
-							
+
 							if(typeof recordIdMapKeysEnc[recordId] === 'undefined')
 								recordIdMapKeysEnc[recordId] = [];
-							
+
 							recordIdMapKeysEnc[recordId].push({
 								loginId:loginKey.loginId,
 								keyEnc:dataKeyEnc
 							});
 						}
 					}
-					
+
 					for(let recordId in recordIdMapKeysEnc) {
 						requests.push(ws.prepare('data','setKeys',{
 							relationId:relationId,
@@ -1950,24 +1951,24 @@ export default {
 				}
 				catch(err) { return handleEncErr(err); }
 			}
-			
+
 			ws.sendMultiple(requests,true).then(
 				res => {
 					const resSet = res[0];
-					
+
 					if(this.isNew) this.messageSet('[CREATED]');
 					else           this.messageSet('[UPDATED]');
-					
+
 					if(this.isPopUp)
 						this.$emit('record-updated',resSet.payload.indexRecordIds['0']);
-					
+
 					this.recordActionFree = true;
-					
+
 					// clear form changes, relevant for after-save functions that open a form
 					this.valuesOld = JSON.parse(JSON.stringify(this.valuesNew));
-					
+
 					this.triggerEventAfter('save');
-					
+
 					if(!this.recordActionFree)
 						return;
 
@@ -1975,7 +1976,7 @@ export default {
 					if(saveAndClose &&  this.isPopUp) return this.closeAsk();
 					if(saveAndNew)                    return this.openForm();
 					if(this.isNew)                    return this.openForm([resSet.payload.indexRecordIds['0']]);
-					
+
 					// reload same record
 					// unfortunately necessary as update trigger in backend can change values
 					// if we knew nothing triggered, we could update our values without reload
@@ -1991,24 +1992,24 @@ export default {
 			// only existing records, only pop-up, no encryption, no joins
 			if(this.fieldIdsInvalid.length !== 0)
 				return this.badSave = true;
-			
+
 			this.triggerEventBefore('save');
 			this.changingRecord = true;
-			
+
 			let attributes = [];
 			for(let fieldId of this.fieldIdsTouched) {
 				if(this.fieldIdMapData[fieldId] === undefined)
 					continue;
-				
+
 				let f   = this.fieldIdMapData[fieldId];
 				let err = null;
-				
+
 				if(f.index !== 0)
 					err = this.capApp.dialog.bulkMultiple;
-				
+
 				if(this.attributeIdMap[f.attributeId].encrypted)
 					err = this.capApp.dialog.bulkEncrypted;
-				
+
 				if(err !== null) {
 					this.changingRecord = false;
 					return this.$store.commit('dialog',{
@@ -2022,7 +2023,7 @@ export default {
 						}]
 					});
 				}
-				
+
 				attributes.push({
 					attributeId:f.attributeId,
 					attributeIdNm:f.attributeIdNm,
@@ -2034,7 +2035,7 @@ export default {
 					)]
 				});
 			}
-			
+
 			let requests = [];
 			for(let recordId of this.recordIds) {
 				requests.push(
@@ -2047,7 +2048,7 @@ export default {
 					}})
 				);
 			}
-			
+
 			ws.sendMultiple(requests,true).then(
 				res => {
 					this.$emit('record-updated');

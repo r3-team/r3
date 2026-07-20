@@ -1547,6 +1547,7 @@
 			"option": {
 				"fieldGetFileLinks": "Read file links",
 				"fieldGetFileLinksHint": "Returns array of download URLs for uploaded files, only valid for the current user session.",
+				"fieldGetId": "Get ID",
 				"fieldGetValueChanged": "Value changed?",
 				"fieldSetCaption": "填写标题",
 				"fieldSetChart": "填写ECharts选项对象",

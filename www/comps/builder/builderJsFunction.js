@@ -242,6 +242,12 @@ export default {
 										:image="radioIcon('field_order_set',field.id)"
 										:naked="true"
 									/>
+									<my-button
+										@trigger="selectEntity('field_id_get',field.id)"
+										:caption="capApp.option.fieldGetId"
+										:image="radioIcon('field_id_get',field.id)"
+										:naked="true"
+									/>
 								</div>
 							</div>
 						</div>
@@ -757,6 +763,7 @@ export default {
 						case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
 					}
 				break;
+				case 'field_id_get':               text = `${prefix}.get_field_id({${s.displayFieldName(s.entityId)}})`; break;
 				case 'field_value_get':            text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`; break;
 				case 'field_value_get_changed':    text = `${prefix}.get_field_value_changed({${s.displayFieldName(s.entityId)}})`; break;
 				case 'field_value_get_file_links': text = `${prefix}.get_field_file_links({${s.displayFieldName(s.entityId)}})`; break;
@@ -954,7 +961,7 @@ export default {
 			});
 
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\('(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links|id)\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,mode,part,id) => this.fieldIdMap[id] !== undefined
 				? `${prefix}.${mode}_field_${part}({${this.displayFieldName(id)}}` : match
 			);
@@ -1050,8 +1057,8 @@ export default {
 			});
 
 			// replace field get/set value/caption/error/focus/etc. placeholders
-			// stored as: app.get_field_value({F12::0 display_name... or app.get_field_value({F13: Container...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\(\{F(\\d+)\\:\\:.*?\}`,'g');
+			// stored as: app.get_field_value({F12::0 display_name... or app.get_field_value({F13::Container...
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links|id)\\(\{F(\\d+)\\:\\:.*?\}`,'g');
 			body = body.replace(pat,(match,mode,part,ref) => {
 				for(let fieldId in this.entityIdMapRef.field) {
 					if(this.entityIdMapRef.field[fieldId] === parseInt(ref))
