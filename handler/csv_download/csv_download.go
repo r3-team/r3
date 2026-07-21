@@ -198,7 +198,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	writer.Comma, _ = utf8.DecodeRuneInString(opt.CharComma)
 
 	// place header line
-	if !ignoreHeader {
+	if !opt.IgnoreHeader {
 		noTitleCtr := 0
 		for i, _ := range columnCaptions {
 			if columnCaptions[i] == "" {
