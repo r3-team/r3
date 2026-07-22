@@ -76,12 +76,12 @@ function getReferencesRelation(mod,relId,lookups) {
 		);
 	const isInColumns = columns => columns.some(v => v.content === 'query' && isInQuery(v.query));
 	const isInFilters = filters => filters.some(v => isInQuery(v.side0.query) || isInQuery(v.side1.query));
-	
+
 	const lookupInFields = (formId,fields) => {
 		const add = fieldId => {
 			if(lookups.formIdMapFieldIds[formId] === undefined)
 				lookups.formIdMapFieldIds[formId] = [];
-	
+
 			lookups.formIdMapFieldIds[formId].push(fieldId);
 			lookups.anyResults = true;
 		};
@@ -91,7 +91,7 @@ function getReferencesRelation(mod,relId,lookups) {
 				case 'calendar': // fallthrough
 				case 'chart':    // fallthrough
 				case 'kanban':   // fallthrough
-				case 'list':     // fallthrough 
+				case 'list':     // fallthrough
 				case 'variable':
 					if(isInQuery(f.query) || isInColumns(f.columns))
 						add(f.id);
@@ -111,7 +111,7 @@ function getReferencesRelation(mod,relId,lookups) {
 			}
 		}
 	};
-	
+
 	// triggers, indexes & presets cascade with relation deletion
 	// checking for these references is as easy as clicking on the trigger/index/preset tab
 
@@ -160,7 +160,7 @@ function getReferencesJsFunction(mod,fncId,lookups) {
 		const add = fieldId => {
 			if(lookups.formIdMapFieldIds[formId] === undefined)
 				lookups.formIdMapFieldIds[formId] = [];
-	
+
 			lookups.formIdMapFieldIds[formId].push(fieldId);
 			lookups.anyResults = true;
 		};
@@ -238,7 +238,7 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 		const add = fieldId => {
 			if(lookups.formIdMapFieldIds[formId] === undefined)
 				lookups.formIdMapFieldIds[formId] = [];
-	
+
 			lookups.formIdMapFieldIds[formId].push(fieldId);
 			lookups.anyResults = true;
 		};
@@ -260,7 +260,7 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 					if(f.columns !== undefined && isInColumns(f.columns))
 						add(f.id);
 				break;
-				case 'kanban': 
+				case 'kanban':
 					if(isInColumns(f.columns))
 						add(f.id);
 				break;
@@ -341,7 +341,7 @@ function getReferencesAttribut(mod,atrId,lookups) {
 			isInQuery(v.side0.query) ||
 			isInQuery(v.side1.query)
 		);
-	
+
 	const isInQuery = query =>
 		query !== null && (
 			isInFilters(query.filters) ||
@@ -349,12 +349,12 @@ function getReferencesAttribut(mod,atrId,lookups) {
 			query.joins.some(v => v.attributeId === atrId) ||
 			query.orders.some(v => v.attributeId === atrId)
 		);
-	
+
 	const lookupInFields = (formId,fields) => {
 		const add = fieldId => {
 			if(lookups.formIdMapFieldIds[formId] === undefined)
 				lookups.formIdMapFieldIds[formId] = [];
-	
+
 			lookups.formIdMapFieldIds[formId].push(fieldId);
 			lookups.anyResults = true;
 		};
@@ -379,7 +379,7 @@ function getReferencesAttribut(mod,atrId,lookups) {
 					if(f.outsideIn !== undefined && (f.attributeIdNm === atrId || isInQuery(f.query) || isInColumns(f.columns)))
 						add(f.id);
 				break;
-				case 'kanban': 
+				case 'kanban':
 					if(f.attributeIdSort === atrId || isInQuery(f.query) || isInColumns(f.columns))
 						add(f.id);
 				break;
@@ -404,7 +404,7 @@ function getReferencesAttribut(mod,atrId,lookups) {
 		|| v.setsFooter.some(s => s.attributeId === atrId)
 		|| v.setsHeader.some(s => s.attributeId === atrId)
 	);
-	
+
 	const isInDocField = field => {
 		if(field.sets.some(v => v.attributeId === atrId))
 			return true;
@@ -474,8 +474,8 @@ function getReferencesAttribut(mod,atrId,lookups) {
 			d.pages.some(v =>
 				v.sets.some(s => s.attributeId === atrId) ||
 				isInDocField(v.fieldFlow) ||
-				(v.header.active && isInDocField(v.header.fieldGrid)) ||
-				(v.footer.active && isInDocField(v.footer.fieldGrid))
+				(v.header.active && v.header.fieldGrid !== null && isInDocField(v.header.fieldGrid)) ||
+				(v.footer.active && v.footer.fieldGrid !== null && isInDocField(v.footer.fieldGrid))
 			)
 		) {
 			lookups.docIds.push(d.id);
