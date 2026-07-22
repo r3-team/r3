@@ -284,6 +284,9 @@ hr{
 .noHighlight{
 	user-select:none;
 }
+.textError{
+	color:var(--color-error);
+}
 @media print {
 	.noPrint{
 		display:none !important;

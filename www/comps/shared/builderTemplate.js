@@ -29,7 +29,7 @@ export function getTemplateApi(moduleId,name) {
 export function getTemplateArticle(moduleId) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
+		moduleId,
 		name:'',
 		captions:{
 			articleTitle:{},
@@ -37,18 +37,18 @@ export function getTemplateArticle(moduleId) {
 		}
 	};
 };
-export function getTemplateAttribute(moduleId,relationId) {
+export function getTemplateAttribute(moduleId,relationId,name) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
-		relationId:relationId,
+		moduleId,
+		relationId,
 		relationshipId:null,
 		iconId:null,
 		content:'text',
 		contentUse:'default',
 		length:0,
 		lengthFract:0,
-		name:'',
+		name,
 		nullable:true,
 		encrypted:false,
 		def:'',
@@ -62,7 +62,7 @@ export function getTemplateAttribute(moduleId,relationId) {
 export function getTemplateClientEvent(moduleId) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
+		moduleId,
 		action:'callJsFunction',
 		arguments:[],
 		event:'onHotkey',
@@ -79,7 +79,7 @@ export function getTemplateClientEvent(moduleId) {
 export function getTemplateCollection(moduleId,name) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
+		moduleId,
 		iconId:null,
 		name:name,
 		columns:[],
@@ -100,10 +100,10 @@ export function getTemplateCollectionConsumer() {
 export function getTemplateColumn(attributeId,index,content) {
 	return {
 		id:getUuidV4(),
-		content:content,
+		content,
 		pgFunctionId:null,
-		attributeId:attributeId,
-		index:index,
+		attributeId,
+		index,
 		arguments:[],
 		batch:null,
 		basis:0,
@@ -158,8 +158,8 @@ export function getTemplateDocColumn(attributeId,attributeIndex,content) {
 	return {
 		id:getUuidV4(),
 		pgFunctionId:null,
-		attributeId:attributeId,
-		attributeIndex:attributeIndex,
+		attributeId,
+		attributeIndex,
 		arguments:[],
 		aggregator:null,
 		aggregatorRow:null,
@@ -189,7 +189,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 
 	let f = {
 		id:getUuidV4(),
-		content:content,
+		content,
 		posX:0,
 		posY:0,
 		sizeX:0,
@@ -387,7 +387,7 @@ export function getTemplateFieldData(index,attribute,outsideIn,attributeIdNm) {
 		onMobile:true,
 		attributeId:attribute.id,
 		attributeIdAlt:null, // altern. attribute (used for date period)
-		index:index,
+		index,
 		presentation:'',
 		display:'default',
 		def:'',
@@ -755,7 +755,7 @@ export function getTemplatePgFunctionSchedule() {
 export function getTemplatePgIndex(relationId) {
 	return {
 		id:getUuidV4(),
-		relationId:relationId,
+		relationId,
 		attributeIdDict:null,
 		autoFki:false,
 		method:'BTREE',
@@ -764,12 +764,18 @@ export function getTemplatePgIndex(relationId) {
 		attributes:[]
 	};
 };
+export function getTemplatePgIndexAttribute(attributeId,orderAsc) {
+	return {
+		attributeId,
+		orderAsc
+	};
+};
 export function getTemplatePgTrigger(moduleId,relationId,pgFunctionId) {
 	return {
 		id:getUuidV4(),
-		moduleId:moduleId,
-		relationId:relationId,
-		pgFunctionId:pgFunctionId,
+		moduleId,
+		relationId,
+		pgFunctionId,
 		fires:'BEFORE',
 		onDelete:false,
 		onInsert:true,
@@ -781,22 +787,22 @@ export function getTemplatePgTrigger(moduleId,relationId,pgFunctionId) {
 		codeCondition:null
 	};
 };
-export function getTemplatePreset(relationId) {
+export function getTemplatePreset(relationId,name) {
 	return {
 		id:getUuidV4(),
-		name:'',
-		relationId:relationId,
+		name,
+		relationId,
 		protected:true,
 		values:[]
 	};
 };
-export function getTemplatePresetValue(atrId,presetIdRefer,protec,value) {
+export function getTemplatePresetValue(attributeId,presetIdRefer,protec,value) {
 	return {
 		id:getUuidV4(),
-		attributeId:atrId,
-		presetIdRefer:presetIdRefer,
+		attributeId,
+		presetIdRefer,
 		protected:protec,
-		value:value
+		value
 	};
 };
 export function getTemplateQuery() {
@@ -872,6 +878,7 @@ export function getTemplateRelation(moduleId,name,tagIds,encryption) {
 		retentionCount:null,
 		retentionDays:null,
 		policies: [],
+		presets: [],
 		tagIds,
 		captions:{
 			relationTitle:{}

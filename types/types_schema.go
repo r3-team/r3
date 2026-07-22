@@ -607,9 +607,7 @@ type PgIndex struct {
 	Attributes      []PgIndexAttribute `json:"attributes"`      // attributes the index is made of
 }
 type PgIndexAttribute struct {
-	PgIndexId   uuid.UUID `json:"pgIndexId"`
 	AttributeId uuid.UUID `json:"attributeId"`
-	Position    int       `json:"position"`
 	OrderAsc    bool      `json:"orderAsc"`
 }
 type Preset struct {

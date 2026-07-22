@@ -2,15 +2,11 @@ import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderSchemaLookup  from './builderSchemaLookup.js';
 import {getUuidV4}            from '../shared/crypto.js';
-import {getFieldMap}          from '../shared/form.js';
 import {copyValueDialog}      from '../shared/generic.js';
 import {getTemplateAttribute} from '../shared/builderTemplate.js';
 import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {getHasAnyReferences}  from '../shared/schemaLookup.js';
-import {
-	getDependentModules,
-	getItemTitle
-} from '../shared/builder.js';
+import {getDependentModules}  from '../shared/builder.js';
 import {
 	getAttributeContentUse,
 	getAttributeIcon,
@@ -93,7 +89,7 @@ export default {
 							<td>{{ capGen.name }}</td>
 							<td>
 								<input v-focus v-model="values.name" :disabled="readonly || isId" />
-								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
+								<p class="textError" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 							</td>
 							<td>{{ capApp.nameHint }}</td>
 						</tr>
@@ -104,7 +100,7 @@ export default {
 									<my-builder-caption
 										v-model="values.captions.attributeTitle"
 										:language="builderLanguage"
-										:readonly="readonly"
+										:readonly
 									/>
 									<my-button image="languages.png"
 										@trigger="$emit('next-language')"
@@ -229,7 +225,7 @@ export default {
 						<!-- bigint -->
 						<tr v-if="isInteger && !isTime">
 							<td>{{ isDate || isDatetime ? capApp.bigintDates : capApp.bigint }}</td>
-							<td><my-bool v-model="bigint" :readonly="readonly" /></td>
+							<td><my-bool v-model="bigint" :readonly /></td>
 							<td>{{ isDate || isDatetime ? capApp.bigintDatesHint : capApp.bigintHint }}</td>
 						</tr>
 
@@ -291,7 +287,7 @@ export default {
 						<!-- encrypted -->
 						<tr v-if="canEncrypt">
 							<td>{{ capApp.encrypted }}</td>
-							<td><my-bool v-model="values.encrypted" :readonly="readonly" /></td>
+							<td><my-bool v-model="values.encrypted" :readonly /></td>
 							<td>{{ capApp.encryptedHint }}</td>
 						</tr>
 
@@ -533,16 +529,11 @@ export default {
 		isTime:    s => s.isInteger && s.values.contentUse === 'time',
 
 		// stores
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
-		apiIdMap:       s => s.$store.getters['schema/apiIdMap'],
-		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:      s => s.$store.getters['schema/formIdMap'],
-		indexIdMap:     s => s.$store.getters['schema/indexIdMap'],
-		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
-		capApp:         s => s.$store.getters.captions.builder.attribute,
-		capGen:         s => s.$store.getters.captions.generic,
-		module:         s => s.moduleIdMap[s.relation.moduleId]
+		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.attribute,
+		capGen:        s => s.$store.getters.captions.generic,
+		module:        s => s.moduleIdMap[s.relation.moduleId]
 	},
 	mounted() {
 		this.reset();
@@ -562,9 +553,7 @@ export default {
 		getAttributeContentUse,
 		getAttributeIcon,
 		getDependentModules,
-		getFieldMap,
 		getHasAnyReferences,
-		getItemTitle,
 		getTemplateAttribute,
 		getUuidV4,
 		isAttributeBoolean,
@@ -590,7 +579,7 @@ export default {
 		reset() {
 			this.values = this.attributeId !== null
 				? JSON.parse(JSON.stringify(this.attributeIdMap[this.attributeId]))
-				: this.getTemplateAttribute(this.relation.moduleId,this.relation.id);
+				: this.getTemplateAttribute(this.relation.moduleId,this.relation.id,'');
 
 			this.resetOrg();
 

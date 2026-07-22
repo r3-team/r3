@@ -1,5 +1,8 @@
-import {getTemplatePgIndex} from '../shared/builderTemplate.js';
-import {dialogDeleteAsk}    from '../shared/dialog.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import {
+	getTemplatePgIndex,
+	getTemplatePgIndexAttribute
+} from '../shared/builderTemplate.js';
 
 export default {
 	name:'my-builder-pg-index',
@@ -39,7 +42,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content default-inputs no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -124,27 +127,27 @@ export default {
 		};
 	},
 	computed:{
-		attributeIdsUsed:(s) => {
+		attributeIdsUsed:s => {
 			let ids = [];
 			for(let indAtr of s.values.attributes) {
 				ids.push(indAtr.attributeId);
 			}
 			return ids;
 		},
-		
+
 		// simple
-		canSave:   (s) => s.values !== null && s.isNew && !s.isSystem && s.hasChanges && s.values.attributes.length !== 0,
-		hasChanges:(s) => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		isBtree:   (s) => s.values.method === 'BTREE',
-		isGin:     (s) => s.values.method === 'GIN',
-		isNew:     (s) => s.pgIndexId === null,
-		isSystem:  (s) => s.values.primaryKey || s.values.autoFki,
-		
+		canSave:   s => s.values !== null && s.isNew && !s.isSystem && s.hasChanges && s.values.attributes.length !== 0,
+		hasChanges:s => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		isBtree:   s => s.values.method === 'BTREE',
+		isGin:     s => s.values.method === 'GIN',
+		isNew:     s => s.pgIndexId === null,
+		isSystem:  s => s.values.primaryKey || s.values.autoFki,
+
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		indexIdMap:    (s) => s.$store.getters['schema/indexIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.pgIndex,
-		capGen:        (s) => s.$store.getters.captions.generic
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		indexIdMap:    s => s.$store.getters['schema/indexIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.pgIndex,
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();
@@ -157,22 +160,20 @@ export default {
 		// externals
 		dialogDeleteAsk,
 		getTemplatePgIndex,
+		getTemplatePgIndexAttribute,
 
 		// display
 		getAttributeCaption(attributeId,orderAsc) {
 			let order = this.isBtree ? ` (${orderAsc ? 'ASC' : 'DESC'})` : '';
 			return `${this.attributeIdMap[attributeId].name}${order}`;
 		},
-		
+
 		// actions
 		addAttribute() {
 			if(this.attributeInput === '') return;
-			
-			let s = this.attributeInput.split('_');
-			this.values.attributes.push({
-				attributeId:s[0],
-				orderAsc:s[1] === 'ASC'
-			});
+
+			const s = this.attributeInput.split('_');
+			this.values.attributes.push(this.getTemplatePgIndexAttribute(s[0],s[1] === 'ASC'));
 			this.attributeInput = '';
 		},
 		handleHotkeys(e) {
@@ -189,10 +190,10 @@ export default {
 			this.values = this.pgIndexId !== null
 				? JSON.parse(JSON.stringify(this.indexIdMap[this.pgIndexId]))
 				: this.getTemplatePgIndex(this.relation.id);
-			
+
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
-		
+
 		// backend calls
 		del() {
 			ws.send('pgIndex','del',this.pgIndexId,true).then(

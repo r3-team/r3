@@ -316,7 +316,7 @@ export default {
 		},
 		reset() {
 			if(this.id === null) {
-				this.values = this.getTemplatePreset(this.relation.id);
+				this.values = this.getTemplatePreset(this.relation.id,'');
 			}
 			else {
 				for(const p of this.relation.presets) {

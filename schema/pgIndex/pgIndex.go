@@ -114,7 +114,6 @@ func getAttributes_tx(ctx context.Context, tx pgx.Tx, pgIndexId uuid.UUID) ([]ty
 		if err := rows.Scan(&a.AttributeId, &a.OrderAsc); err != nil {
 			return nil, err
 		}
-		a.PgIndexId = pgIndexId
 		attributes = append(attributes, a)
 	}
 	return attributes, nil
@@ -132,13 +131,10 @@ func SetAutoFkiForAttribute_tx(ctx context.Context, tx pgx.Tx, relationId uuid.U
 		Method:       "BTREE",
 		NoDuplicates: noDuplicates,
 		PrimaryKey:   false,
-		Attributes: []types.PgIndexAttribute{
-			{
-				AttributeId: attributeId,
-				Position:    0,
-				OrderAsc:    true,
-			},
-		},
+		Attributes: []types.PgIndexAttribute{{
+			AttributeId: attributeId,
+			OrderAsc:    true,
+		}},
 	})
 }
 func SetPrimaryKeyForAttribute_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeId uuid.UUID) error {
@@ -153,13 +149,10 @@ func SetPrimaryKeyForAttribute_tx(ctx context.Context, tx pgx.Tx, relationId uui
 		Method:       "BTREE",
 		NoDuplicates: true,
 		PrimaryKey:   true,
-		Attributes: []types.PgIndexAttribute{
-			{
-				AttributeId: attributeId,
-				Position:    0,
-				OrderAsc:    true,
-			},
-		},
+		Attributes: []types.PgIndexAttribute{{
+			AttributeId: attributeId,
+			OrderAsc:    true,
+		}},
 	})
 }
 func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
@@ -200,8 +193,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 
 	// insert pg index references
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app.pg_index (id, relation_id, attribute_id_dict,
-			method, no_duplicates, auto_fki, primary_key)
+		INSERT INTO app.pg_index (id, relation_id, attribute_id_dict, method, no_duplicates, auto_fki, primary_key)
 		VALUES ($1,$2,$3,$4,$5,$6,$7)
 	`, pgi.Id, pgi.RelationId, pgi.AttributeIdDict, pgi.Method,
 		pgi.NoDuplicates, pgi.AutoFki, pgi.PrimaryKey); err != nil {
@@ -209,8 +201,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 	}
 	for position, atr := range pgi.Attributes {
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.pg_index_attribute (
-				pg_index_id, attribute_id, position, order_asc)
+			INSERT INTO app.pg_index_attribute (pg_index_id, attribute_id, position, order_asc)
 			VALUES ($1,$2,$3,$4)
 		`, pgi.Id, atr.AttributeId, position, atr.OrderAsc); err != nil {
 			return err
@@ -273,9 +264,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 		indexType = "UNIQUE INDEX"
 	}
 
-	_, err = tx.Exec(ctx, fmt.Sprintf(`
-		CREATE %s "%s" ON "%s"."%s" USING %s
-	`, indexType, schema.GetPgIndexName(pgi.Id), modName, relName, indexDef))
+	_, err = tx.Exec(ctx, fmt.Sprintf(`CREATE %s "%s" ON "%s"."%s" USING %s`,
+		indexType, schema.GetPgIndexName(pgi.Id), modName, relName, indexDef))
 
 	return err
 }

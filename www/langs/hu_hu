@@ -1858,7 +1858,16 @@
 			"title": "Relációk",
 			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "Reláció \"{NAME}\"",
-			"triggers": "Triggerek ({CNT})"
+			"triggers": "Triggerek ({CNT})",
+			"wizardEnum": {
+				"intro": "Dropdowns, and similar single value selections, are done in REI3 with relationships. This wizard lets you quickly create a new relation containing records to select from, and an attribute on this relation for the selection value.<br /><br />Make sure to grant read access to the new relation afterwards to desired roles.",
+				"nameAttributeHint": "Name of attribute on relation '{NAME}', which stores the selection value.",
+				"nameRelationHint": "Name of relation that contains selectable records.",
+				"protected": "Protect against deletion",
+				"protectedHint": "This setting controls, if the newly created records (ie. selectable values) are protected against deletion by users.",
+				"title": "Dropdown wizard",
+				"valuesHint": "One record is created for each value. At least one value is required."
+			}
 		},
 		"releases": {
 			"button": {
@@ -2743,6 +2752,7 @@
 		"valueFixedText": "Fixed text value",
 		"valueMulti": "Multi value",
 		"values": "Values",
+		"valuesSelectable": "Selectable values",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Verzió",

@@ -989,11 +989,6 @@
 	border-bottom:1px solid var(--color-border);
 }
 
-/* attributes */
-.builder-attribute .error{
-	color:var(--color-error);
-}
-
 /* functions */
 .builder-function{
 	flex:1 1 auto;

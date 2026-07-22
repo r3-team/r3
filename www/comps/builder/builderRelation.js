@@ -6,6 +6,7 @@ import MyBuilderPgTriggers         from './builderPgTriggers.js';
 import MyBuilderPresets            from './builderPresets.js';
 import MyBuilderTagInput           from './builderTagInput.js';
 import MyBuilderSchemaLookup       from './builderSchemaLookup.js';
+import MyBuilderWizardEnum         from './builderWizardEnum.js';
 import MyInputDecimal              from '../inputDecimal.js';
 import MyInputOffset               from '../inputOffset.js';
 import {getTemplateRelationPolicy} from '../shared/builderTemplate.js';
@@ -150,6 +151,7 @@ export default {
 		MyBuilderRelationsItemPolicy,
 		MyBuilderTagInput,
 		MyBuilderSchemaLookup,
+		MyBuilderWizardEnum,
 		MyInputDecimal,
 		MyInputOffset
 	},
@@ -191,6 +193,10 @@ export default {
 						@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
 						:caption="capGen.id"
 					/>
+					<my-button image="dropdown.png"
+						@trigger="showEnumWizard = true"
+						:caption="capApp.wizardEnum.title"
+					/>
 					<my-button image="builderLookup.png"
 						@trigger="showLookup = true"
 						:caption="capGen.references"
@@ -204,6 +210,15 @@ export default {
 					/>
 				</div>
 			</div>
+
+			<!-- enum wizard dialog -->
+			<my-builder-wizard-enum
+				v-if="showEnumWizard"
+				@close="showEnumWizard = false"
+				@nextLanguage="$emit('nextLanguage')"
+				:builderLanguage
+				:relation
+			/>
 
 			<div class="content no-padding builder-relation">
 				<my-tabs
@@ -620,7 +635,8 @@ export default {
 			previewRows:[],
 			previewRowCount:0,
 			previewValueLength:50,
-			recordTitleAttributeId:'',
+			recordTitleAttributeId: '',
+			showEnumWizard: false,
 			showLookup: false,
 			showSidebar: true,
 			tabTarget:'attributes'

@@ -1858,7 +1858,16 @@
 			"title": "Relationen",
 			"titleHint": "Der Titel kann in die verfügbaren Anwendungssprachen übersetzt werden. Er wird angezeigt, wenn eine Relation in einer Benutzeroberfläche angezeigt wird - wie z. B. in der Änderungshistorie.",
 			"titleOne": "Relation \"{NAME}\"",
-			"triggers": "Trigger ({CNT})"
+			"triggers": "Trigger ({CNT})",
+			"wizardEnum": {
+				"intro": "Dropdowns und andere Einzelwert-Eingaben werden in REI3 mit Beziehungen gebaut. Dieser Wizard unterstützt das schnelle Erstellen einer Relation mit Datensätzen zur Auswahl und einem Attribut auf dieser Relation zur Speicherung des ausgewählten Wertes.<br /><br />Bitte danach Leserechte auf der neuen Relation für gewünschte Rollen einrichten.",
+				"nameAttributeHint": "Name des Attributs auf der Relation \"{NAME}\", welches den ausgewählten Wert speichert.",
+				"nameRelationHint": "Name der Relation, die auswählbare Datensätze beinhaltet.",
+				"protected": "Gegen Löschung schützen",
+				"protectedHint": "Diese Einstellung definiert, ob die neu-erstellten Datensätze (die auswählbaren Werte) gegen Löschung durch Benutzer geschützt werden.",
+				"title": "Dropdown-Wizard",
+				"valuesHint": "Ein Datensatz wird je Wert angelegt. Mindestens ein Wert ist erforderlich."
+			}
 		},
 		"releases": {
 			"button": {
@@ -2743,6 +2752,7 @@
 		"valueFixedText": "Fester Textwert",
 		"valueMulti": "Mehrere Werte",
 		"values": "Werte",
+		"valuesSelectable": "Auswählbare Werte",
 		"variable": "Variable",
 		"variables": "Variabeln",
 		"version": "Version",
