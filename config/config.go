@@ -161,6 +161,7 @@ func SetLogLevels() {
 	log.SetLogLevel(log.ContextCluster, int(GetUint64("logCluster")))
 	log.SetLogLevel(log.ContextCode, int(GetUint64("logCode")))
 	log.SetLogLevel(log.ContextCsv, int(GetUint64("logCsv")))
+	log.SetLogLevel(log.ContextDbSync, int(GetUint64("logDbSync")))
 	log.SetLogLevel(log.ContextDoc, int(GetUint64("logDoc")))
 	log.SetLogLevel(log.ContextFile, int(GetUint64("logFile")))
 	log.SetLogLevel(log.ContextImager, int(GetUint64("logImager")))

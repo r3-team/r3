@@ -129,8 +129,8 @@ export default {
 	data() {
 		return {
 			contextsValid:[
-				'module','api','backup','cache','cluster','code','csv','doc','file','imager',
-				'ldap','oauth','mail','scheduler','server','transfer','websocket'
+				'module', 'api', 'backup', 'cache', 'cluster', 'code', 'csv', 'dbSync', 'doc', 'file',
+				'imager', 'ldap', 'oauth', 'mail', 'scheduler', 'server', 'transfer', 'websocket'
 			],
 			messageLengthShow:200,
 

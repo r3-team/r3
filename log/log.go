@@ -23,18 +23,19 @@ const (
 	ContextCache     logContext = 30
 	ContextCluster   logContext = 40
 	ContextCode      logContext = 50
+	ContextDbSync    logContext = 70
 	ContextCsv       logContext = 60
-	ContextDoc       logContext = 70
-	ContextFile      logContext = 80
-	ContextImager    logContext = 90
-	ContextLdap      logContext = 100
-	ContextMail      logContext = 110
-	ContextModule    logContext = 120 // only used via instance logging functions
-	ContextOauth     logContext = 130
-	ContextScheduler logContext = 140
-	ContextServer    logContext = 150
-	ContextTransfer  logContext = 160
-	ContextWebsocket logContext = 170
+	ContextDoc       logContext = 80
+	ContextFile      logContext = 90
+	ContextImager    logContext = 100
+	ContextLdap      logContext = 110
+	ContextMail      logContext = 120
+	ContextModule    logContext = 130 // only used via instance logging functions
+	ContextOauth     logContext = 140
+	ContextScheduler logContext = 150
+	ContextServer    logContext = 160
+	ContextTransfer  logContext = 170
+	ContextWebsocket logContext = 180
 )
 
 var (
@@ -52,6 +53,7 @@ var (
 		ContextCache:     1,
 		ContextCluster:   1,
 		ContextCode:      1,
+		ContextDbSync:    1,
 		ContextCsv:       1,
 		ContextDoc:       1,
 		ContextFile:      1,
@@ -72,6 +74,7 @@ var (
 		ContextCluster:   "cluster",
 		ContextCode:      "code",
 		ContextCsv:       "csv",
+		ContextDbSync:    "dbSync",
 		ContextDoc:       "doc",
 		ContextFile:      "file",
 		ContextImager:    "imager",

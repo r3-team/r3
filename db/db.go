@@ -19,6 +19,7 @@ var (
 	Pool *pgxpool.Pool
 
 	// default context timeouts
+	CtxDefTimeoutDbSync      = 60 * time.Second  // DB sync operations
 	CtxDefTimeoutDbTask      = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
 	CtxDefTimeoutDocGenerate = 20 * time.Second  // document generations
 	CtxDefTimeoutDocPreview  = 20 * time.Second  // document previews

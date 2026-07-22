@@ -464,7 +464,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- new log context
 			INSERT INTO instance.config (name,value) VALUES ('logCode',2);
+			INSERT INTO instance.config (name,value) VALUES ('logDbSync',2);
 			ALTER TYPE instance.log_context ADD VALUE 'code';
+			ALTER TYPE instance.log_context ADD VALUE 'dbSync';
 
 			-- mail (re)send options
 			ALTER TABLE instance.mail_account ADD   COLUMN send_count     INTEGER NOT NULL DEFAULT 999;

@@ -21,8 +21,10 @@ require (
 require (
 	codeberg.org/go-pdf/fpdf v0.12.1-0.20260527114131-49f5a634f68e
 	github.com/PaesslerAG/gval v1.2.4
+	github.com/boombuler/barcode v1.1.0
 	github.com/coreos/go-oidc/v3 v3.20.0
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
+	github.com/go-sql-driver/mysql v1.10.0
 	github.com/gofrs/uuid/v5 v5.4.0
 	github.com/jackc/pgx-gofrs-uuid v0.0.0-20230224015001-1d428863c2e2
 	github.com/jackc/pgx/v5 v5.10.0
@@ -34,8 +36,8 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ntlmssp v0.1.1 // indirect
-	github.com/boombuler/barcode v1.1.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
