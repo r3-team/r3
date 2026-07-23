@@ -310,6 +310,7 @@
 				"cluster": "Klaszter",
 				"code": "QR-/barcode generation",
 				"csv": "CSV import/export",
+				"dbSync": "Database sync",
 				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "Képkezelés",

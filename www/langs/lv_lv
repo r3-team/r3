@@ -310,6 +310,7 @@
 				"cluster": "Klasters",
 				"code": "QR-/barcode generation",
 				"csv": "CSV importēšana/eksportēšana",
+				"dbSync": "Database sync",
 				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "Attēlu apstrāde",

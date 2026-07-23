@@ -310,6 +310,7 @@
 				"cluster": "Küme",
 				"code": "QR-/barcode generation",
 				"csv": "CSV içe/dışa aktarma",
+				"dbSync": "Database sync",
 				"doc": "PDF yaratıcısı",
 				"file": "Dosya işleme",
 				"imager": "Görüntü işleme",

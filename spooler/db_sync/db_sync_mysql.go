@@ -13,6 +13,7 @@ func getDbConMysql(h types.DbSyncHost) (*sql.DB, error) {
 	conf.User = h.Username
 	conf.Passwd = h.Password
 	conf.Addr = fmt.Sprintf("%s:%d", h.Address, h.Port)
+	conf.DBName = h.DbName
 	conf.ParseTime = true
 
 	return sql.Open("mysql", conf.FormatDSN())

@@ -10,17 +10,28 @@ import (
 	"r3/types"
 )
 
-func do(j types.DbSyncJob) error {
+const (
+	sqlPlaceholderLimit  = "{SQL_LIMIT}"
+	sqlPlaceholderOffset = "{SQL_OFFSET}"
+)
 
+func do(j types.DbSyncJob) error {
 	host, err := cache_dbSync.GetHostById(j.HostId)
 	if err != nil {
 		return err
 	}
 
 	if !host.Active {
-		log.Info(log.ContextDbSync, fmt.Sprintf("skipping inactive host '%s'", host.Name))
+		log.Info(log.ContextDbSync, fmt.Sprintf("skipping job for inactive host '%s'", host.Name))
 		return nil
 	}
+
+	logMode := "RETRIEVE"
+	if j.Sending {
+		logMode = "SEND"
+	}
+
+	log.Info(log.ContextDbSync, fmt.Sprintf("starting %s job '%s' (host '%s')", logMode, j.Name, host.Name))
 
 	// connect to external DB host
 	var dbExt *sql.DB
@@ -34,7 +45,6 @@ func do(j types.DbSyncJob) error {
 	}
 	defer dbExt.Close()
 
-	// test connection to external host
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbSync)
 	defer ctxCanc()
 
@@ -42,42 +52,9 @@ func do(j types.DbSyncJob) error {
 		return err
 	}
 
+	// execute sync
 	if j.Sending {
-
-	} else {
-
+		return doSend(ctx, dbExt, j)
 	}
-	return nil
-}
-
-func doRetrieve(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
-
-	rows, err := dbExt.QueryContext(ctx, j.CodeSql)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	columnNames, err := rows.Columns()
-	if err != nil {
-		return err
-	}
-	if len(columnNames) != len(j.AttributeIds) {
-		return fmt.Errorf("expression count (%d) is unexpected (%d were expected)", len(columnNames), (j.AttributeIds))
-	}
-
-	for rows.Next() {
-		values := make([]any, len(columnNames))
-		scanArgs := make([]any, len(columnNames))
-		for i := range values {
-			scanArgs[i] = &values[i]
-		}
-
-		if err := rows.Scan(scanArgs...); err != nil {
-			return err
-		}
-	}
-	rows.Close()
-
-	return nil
+	return doRetrieve(ctx, dbExt, j)
 }

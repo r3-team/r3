@@ -311,6 +311,7 @@
 				"code": "QR-/barcode generation",
 				"csv": "CSV import/export",
 				"doc": "PDF creator",
+				"dbSync": "Database sync",
 				"file": "File processing",
 				"imager": "Image processing",
 				"ldap": "LDAP",

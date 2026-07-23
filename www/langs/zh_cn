@@ -310,6 +310,7 @@
 				"cluster": "集群",
 				"code": "QR-/barcode generation",
 				"csv": "CSV 导入/导出",
+				"dbSync": "Database sync",
 				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "图像处理",

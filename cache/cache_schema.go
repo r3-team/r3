@@ -62,6 +62,18 @@ var (
 	ClientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
 )
 
+// returns names of entities to fully reference relation in DB (module, relation)
+func GetRelationDbNames(relationId uuid.UUID) (string, string, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+
+	rel, exists := RelationIdMap[relationId]
+	if !exists {
+		return "", "", handler.ErrSchemaUnknownRelation(relationId)
+	}
+	return ModuleIdMap[rel.ModuleId].Name, rel.Name, nil
+}
+
 // returns names of entities to fully reference attribute in DB (module, relation, attribute)
 func GetAttributeDbNames(attributeId uuid.UUID) (string, string, string, error) {
 	Schema_mx.RLock()
@@ -99,6 +111,24 @@ func GetPgFunctionDbNames(pgFunctionId uuid.UUID, frontendCall bool) (string, st
 	return ModuleIdMap[fnc.ModuleId].Name,
 		fnc.Name,
 		nil
+}
+func GetAttributeById(id uuid.UUID) (types.Attribute, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+	atr, exists := AttributeIdMap[id]
+	if !exists {
+		return atr, handler.ErrSchemaUnknownAttribute(id)
+	}
+	return atr, nil
+}
+func GetRelationById(id uuid.UUID) (types.Relation, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+	rel, exists := RelationIdMap[id]
+	if !exists {
+		return rel, handler.ErrSchemaUnknownRelation(id)
+	}
+	return rel, nil
 }
 func GetClientEventIdMap() map[uuid.UUID]types.ClientEvent {
 	Schema_mx.RLock()

@@ -310,6 +310,7 @@
 				"cluster": "Cluster",
 				"code": "QR-/barcode generation",
 				"csv": "CSV-Import/Export",
+				"dbSync": "Datenbank-Sync",
 				"doc": "PDF-Generator",
 				"file": "Dateiverarbeitung",
 				"imager": "Bildverarbeitung",
