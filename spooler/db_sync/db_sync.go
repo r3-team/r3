@@ -11,6 +11,11 @@ import (
 )
 
 const (
+	jobTypeLoad       types.DbSyncJobType = "LOAD"
+	jobTypeSendDelete types.DbSyncJobType = "SEND_DELETE"
+	jobTypeSendInsert types.DbSyncJobType = "SEND_INSERT"
+	jobTypeSendUpdate types.DbSyncJobType = "SEND_UPDATE"
+
 	sqlPlaceholderLimit  = "{SQL_LIMIT}"
 	sqlPlaceholderOffset = "{SQL_OFFSET}"
 )
@@ -26,12 +31,7 @@ func do(j types.DbSyncJob) error {
 		return nil
 	}
 
-	logMode := "RETRIEVE"
-	if j.Sending {
-		logMode = "SEND"
-	}
-
-	log.Info(log.ContextDbSync, fmt.Sprintf("starting %s job '%s' (host '%s')", logMode, j.Name, host.Name))
+	log.Info(log.ContextDbSync, fmt.Sprintf("starting %s job '%s' (host '%s')", j.JobType, j.Name, host.Name))
 
 	// connect to external DB host
 	var dbExt *sql.DB
@@ -53,8 +53,11 @@ func do(j types.DbSyncJob) error {
 	}
 
 	// execute sync
-	if j.Sending {
+	switch j.JobType {
+	case jobTypeLoad:
+		return doLoad(ctx, dbExt, j)
+	case jobTypeSendInsert:
 		return doSend(ctx, dbExt, j)
 	}
-	return doRetrieve(ctx, dbExt, j)
+	return fmt.Errorf("invalid job type '%s'", j.JobType)
 }

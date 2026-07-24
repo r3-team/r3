@@ -28,7 +28,7 @@ type uniqueIndexAttributesT struct {
 	valueIndexes []int    // indexes of row values that contain values for unique index attribute, in order
 }
 
-func doRetrieve(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
+func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 
 	var err error
 	isUniqueIndex := j.PgIndexIdLookup.Valid
@@ -80,13 +80,13 @@ func doRetrieve(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 	}
 
 	// fetch and store records
-	if !j.Limit.Valid {
+	if !j.PageLimit.Valid {
 		// no limit defined, fetch all
-		rows, err := doRetrieveFetch(ctx, dbExt, j.CodeSql, len(j.AttributeIds))
+		rows, err := doLoadFetch(ctx, dbExt, j.CodeSql, len(j.AttributeIds))
 		if err != nil {
 			return err
 		}
-		if err := doRetrieveStore(ctx, j, modName, rel.Name, attributeIdMap, rows, j.DeleteMissing, &uniqueIndexAttributes); err != nil {
+		if err := doLoadStore(ctx, j, modName, rel.Name, attributeIdMap, rows, j.DeleteMissing, &uniqueIndexAttributes); err != nil {
 			return err
 		}
 	} else {
@@ -99,30 +99,30 @@ func doRetrieve(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 		var offset int32 = 0
 		for range maxFetchLoops {
 			codeSql := strings.ReplaceAll(
-				strings.ReplaceAll(j.CodeSql, sqlPlaceholderLimit, fmt.Sprintf("%d", j.Limit.Int32)),
+				strings.ReplaceAll(j.CodeSql, sqlPlaceholderLimit, fmt.Sprintf("%d", j.PageLimit.Int32)),
 				sqlPlaceholderOffset, fmt.Sprintf("%d", offset))
 
-			rows, err := doRetrieveFetch(ctx, dbExt, codeSql, len(j.AttributeIds))
+			rows, err := doLoadFetch(ctx, dbExt, codeSql, len(j.AttributeIds))
 			if err != nil {
 				return err
 			}
-			if err := doRetrieveStore(ctx, j, modName, rel.Name, attributeIdMap, rows, j.DeleteMissing, &uniqueIndexAttributes); err != nil {
+			if err := doLoadStore(ctx, j, modName, rel.Name, attributeIdMap, rows, j.DeleteMissing, &uniqueIndexAttributes); err != nil {
 				return err
 			}
-			if len(rows) < int(j.Limit.Int32) {
+			if len(rows) < int(j.PageLimit.Int32) {
 				break
 			}
-			offset += j.Limit.Int32
+			offset += j.PageLimit.Int32
 		}
 	}
 
 	if j.DeleteMissing && isUniqueIndex {
-		return doRetrieveDelete(ctx, modName, rel.Name, &uniqueIndexAttributes)
+		return doLoadDelete(ctx, modName, rel.Name, &uniqueIndexAttributes)
 	}
 	return nil
 }
 
-func doRetrieveFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCount int) ([][]any, error) {
+func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCount int) ([][]any, error) {
 
 	rows, err := dbExt.QueryContext(ctx, codeSql)
 	if err != nil {
@@ -155,7 +155,7 @@ func doRetrieveFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attribu
 	return resultRows, nil
 }
 
-func doRetrieveDelete(ctx context.Context, modName, relName string, uniqueIndexAttributes *uniqueIndexAttributesT) error {
+func doLoadDelete(ctx context.Context, modName, relName string, uniqueIndexAttributes *uniqueIndexAttributesT) error {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -187,7 +187,7 @@ func doRetrieveDelete(ctx context.Context, modName, relName string, uniqueIndexA
 	return nil
 }
 
-func doRetrieveStore(ctx context.Context, j types.DbSyncJob, modName, relName string, attributeIdMap map[uuid.UUID]types.Attribute,
+func doLoadStore(ctx context.Context, j types.DbSyncJob, modName, relName string, attributeIdMap map[uuid.UUID]types.Attribute,
 	rows [][]any, deleteMissing bool, uniqueIndexAttributes *uniqueIndexAttributesT) error {
 
 	if len(rows) == 0 {

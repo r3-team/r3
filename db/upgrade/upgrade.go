@@ -477,6 +477,67 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.mail_account ALTER COLUMN resend_count   DROP DEFAULT;
 			ALTER TABLE instance.mail_account ADD   COLUMN resend_seconds INTEGER NOT NULL DEFAULT 60;
 			ALTER TABLE instance.mail_account ALTER COLUMN resend_seconds DROP DEFAULT;
+
+			-- DB sync
+			CREATE SCHEMA instance_db_sync;
+			CREATE TYPE instance_db_sync.db_type AS ENUM('mssql', 'mysql', 'pgsql', 'clickhouse');
+			CREATE TYPE instance_db_sync.job_type AS ENUM('LOAD','SEND_INSERT','SEND_UPDATE','SEND_DELETE');
+
+			CREATE TABLE IF NOT EXISTS instance_db_sync.host (
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				name text NOT NULL,
+				comment text,
+				db_name text NOT NULL,
+				db_type instance_db_sync.db_type NOT NULL,
+				active BOOLEAN NOT NULL,
+				address text NOT NULL,
+				port integer NOT NULL,
+				username text NOT NULL,
+				password text NOT NULL,
+				CONSTRAINT host_name_key UNIQUE (name) DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE TABLE IF NOT EXISTS instance_db_sync.host_job (
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				host_id uuid NOT NULL,
+				relation_id uuid NOT NULL,
+				pg_index_id_lookup uuid,
+				name text NOT NULL,
+				comment text,
+				code_sql text NOT NULL,
+				job_type instance_db_sync.job_type NOT NULL,
+				delete_missing BOOLEAN NOT NULL,
+				page_limit integer,
+				CONSTRAINT host_job_pkey PRIMARY KEY (id),
+				CONSTRAINT host_job_name_key UNIQUE (host_id,name) DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT host_job_relation_id_fkey FOREIGN KEY (relation_id)
+					REFERENCES app.relation (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT host_job_pg_index_id_lookup_fkey FOREIGN KEY (pg_index_id_lookup)
+					REFERENCES app.pg_index (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_host_job_relation_id_fkey        ON instance_db_sync.host_job USING btree (relation_id        ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_host_job_pg_index_id_lookup_fkey ON instance_db_sync.host_job USING btree (pg_index_id_lookup ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS instance_db_sync.host_job_attribute (
+				host_job_id uuid NOT NULL,
+				attribute_id uuid NOT NULL,
+				CONSTRAINT host_job_attribute_pkey PRIMARY KEY (host_job_id,attribute_id),
+				CONSTRAINT host_job_attribute_host_job_id_fkey FOREIGN KEY (host_job_id)
+					REFERENCES instance_db_sync.host_job (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT host_job_attribute_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
 		`)
 		return "3.13", err
 	},
