@@ -62,6 +62,17 @@ var (
 	ClientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
 )
 
+// returns names of entities to fully reference module in DB (module)
+func GetModuleDbName(moduleId uuid.UUID) (string, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+
+	if _, exists := ModuleIdMap[moduleId]; !exists {
+		return "", handler.ErrSchemaUnknownModule(moduleId)
+	}
+	return ModuleIdMap[moduleId].Name, nil
+}
+
 // returns names of entities to fully reference relation in DB (module, relation)
 func GetRelationDbNames(relationId uuid.UUID) (string, string, error) {
 	Schema_mx.RLock()

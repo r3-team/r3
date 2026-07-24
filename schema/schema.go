@@ -209,6 +209,17 @@ func IsContentRelationship11(content string) bool {
 func IsContentText(content string) bool {
 	return content == "varchar" || content == "text"
 }
+func GetPgTypeByAttributeContent(content string) (string, error) {
+	switch content {
+	case "integer", "bigint", "numeric", "real", "double precision", "text", "varchar", "boolean", "regconfig", "uuid":
+		return content, nil
+	case "1:1":
+		return "bigint", nil
+	case "n:1":
+		return "bigint", nil
+	}
+	return "", fmt.Errorf("attribute content '%s' cannot be mapped to a native Postgres type", content)
+}
 
 // scheduler checks
 func GetValidAtDay(intervalType string, atDay int) int {

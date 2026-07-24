@@ -21,11 +21,12 @@ type DbSyncHost struct {
 
 // a job to send or receive data from external DB systems
 type DbSyncJob struct {
-	Comment string    `json:"comment"`
-	CodeSql string    `json:"codeSql"`
-	HostId  uuid.UUID `json:"hostId"`
-	Name    string    `json:"name"`
-	Sending bool      `json:"sending"` // is sending or receiving
+	Comment       string    `json:"comment"`
+	CodeSql       string    `json:"codeSql"`
+	HostId        uuid.UUID `json:"hostId"`
+	Name          string    `json:"name"`
+	Sending       bool      `json:"sending"`       // is sending or receiving
+	DeleteMissing bool      `json:"deleteMissing"` // delete non-existing records
 
 	// map to relation attributes
 	RelationId   uuid.UUID   `json:"relationId"`   // relation to read from (sending) or write to (receiving)
