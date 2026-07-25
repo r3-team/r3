@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"r3/bruteforce"
 	"r3/cache"
+	"r3/cache/cache_dbSync"
 	"r3/config"
 	"r3/db"
 	"r3/log"
@@ -144,6 +145,15 @@ func ConfigChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loadConf
 	config.SetLogLevels()
 	return nil
 }
+func DbSyncChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
+	if updateNodes {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "dbSyncChanged", nil, types.ClusterEventTarget{}); err != nil {
+			return err
+		}
+	}
+	return cache_dbSync.Load_tx(ctx, tx)
+}
+
 func FilesCopied_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64,
 	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
 

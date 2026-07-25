@@ -331,6 +331,19 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return DataSqlGet_tx(ctx, tx, reqJson, loginId)
 		}
+	case "dbSync":
+		switch action {
+		case "informChanged":
+			return nil, cluster.DbSyncChanged_tx(ctx, tx, true)
+		case "getHosts":
+			return DbSyncHostsGet_tx(ctx, tx)
+		case "getJobs":
+			return DbSyncJobsGet_tx(ctx, tx)
+		case "setHost":
+			return DbSyncHostSet_tx(ctx, tx, reqJson)
+		case "setJob":
+			return DbSyncJobSet_tx(ctx, tx, reqJson)
+		}
 	case "doc":
 		switch action {
 		case "copy":

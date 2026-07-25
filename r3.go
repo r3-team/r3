@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"r3/bruteforce"
 	"r3/cache"
+	"r3/cache/cache_dbSync"
 	"r3/cluster"
 	"r3/config"
 	"r3/data/data_image"
@@ -581,6 +582,12 @@ func initCaches(ctx context.Context) error {
 	}
 	if err := cache.LoadRepos_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize repository cache, %v", err)
+	}
+	if err := cache_dbSync.LoadHosts_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize DB sync host cache, %v", err)
+	}
+	if err := cache_dbSync.LoadJobs_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize DB sync job cache, %v", err)
 	}
 	if err := ldap.UpdateCache_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize LDAP cache, %v", err)

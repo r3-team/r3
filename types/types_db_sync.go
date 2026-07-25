@@ -20,9 +20,6 @@ type DbSyncHost struct {
 	Port     int    `json:"port"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-
-	// jobs
-	JobIdMap map[uuid.UUID]DbSyncJob `json:"jobIdMap"`
 }
 
 // a job to send or receive data from external DB systems

@@ -484,7 +484,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE instance_db_sync.job_type AS ENUM('LOAD','SEND_INSERT','SEND_UPDATE','SEND_DELETE');
 
 			CREATE TABLE IF NOT EXISTS instance_db_sync.host (
-				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				id uuid NOT NULL,
 				name text NOT NULL,
 				comment text,
 				db_name text NOT NULL,
@@ -496,8 +496,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				password text NOT NULL,
 				CONSTRAINT host_name_key UNIQUE (name) DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE TABLE IF NOT EXISTS instance_db_sync.host_job (
-				id uuid NOT NULL DEFAULT gen_random_uuid(),
+			CREATE TABLE IF NOT EXISTS instance_db_sync.job (
+				id uuid NOT NULL,
 				host_id uuid NOT NULL,
 				relation_id uuid NOT NULL,
 				pg_index_id_lookup uuid,
@@ -507,32 +507,32 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				job_type instance_db_sync.job_type NOT NULL,
 				delete_missing BOOLEAN NOT NULL,
 				page_limit integer,
-				CONSTRAINT host_job_pkey PRIMARY KEY (id),
-				CONSTRAINT host_job_name_key UNIQUE (host_id,name) DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT host_job_relation_id_fkey FOREIGN KEY (relation_id)
+				CONSTRAINT job_pkey PRIMARY KEY (id),
+				CONSTRAINT job_name_key UNIQUE (host_id,name) DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT job_relation_id_fkey FOREIGN KEY (relation_id)
 					REFERENCES app.relation (id) MATCH SIMPLE
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT host_job_pg_index_id_lookup_fkey FOREIGN KEY (pg_index_id_lookup)
+				CONSTRAINT job_pg_index_id_lookup_fkey FOREIGN KEY (pg_index_id_lookup)
 					REFERENCES app.pg_index (id) MATCH SIMPLE
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_host_job_relation_id_fkey        ON instance_db_sync.host_job USING btree (relation_id        ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_host_job_pg_index_id_lookup_fkey ON instance_db_sync.host_job USING btree (pg_index_id_lookup ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_job_relation_id_fkey        ON instance_db_sync.job USING btree (relation_id        ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_job_pg_index_id_lookup_fkey ON instance_db_sync.job USING btree (pg_index_id_lookup ASC NULLS LAST);
 
-			CREATE TABLE IF NOT EXISTS instance_db_sync.host_job_attribute (
-				host_job_id uuid NOT NULL,
+			CREATE TABLE IF NOT EXISTS instance_db_sync.job_attribute (
+				job_id uuid NOT NULL,
 				attribute_id uuid NOT NULL,
-				CONSTRAINT host_job_attribute_pkey PRIMARY KEY (host_job_id,attribute_id),
-				CONSTRAINT host_job_attribute_host_job_id_fkey FOREIGN KEY (host_job_id)
-					REFERENCES instance_db_sync.host_job (id) MATCH SIMPLE
+				CONSTRAINT job_attribute_pkey PRIMARY KEY (job_id,attribute_id),
+				CONSTRAINT job_attribute_job_id_fkey FOREIGN KEY (job_id)
+					REFERENCES instance_db_sync.job (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT host_job_attribute_attribute_id_fkey FOREIGN KEY (attribute_id)
+				CONSTRAINT job_attribute_attribute_id_fkey FOREIGN KEY (attribute_id)
 					REFERENCES app.attribute (id) MATCH SIMPLE
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION

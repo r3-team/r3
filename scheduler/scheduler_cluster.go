@@ -103,6 +103,8 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 			return err
 		}
 		err = cluster.ConfigChanged_tx(ctx, tx, false, true, switchToMaintenance)
+	case "dbSyncChanged":
+		err = cluster.DbSyncChanged_tx(ctx, tx, false)
 	case "filesCopied":
 		var p types.ClusterEventFilesCopied
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
