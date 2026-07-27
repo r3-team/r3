@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db/check"
+	"r3/db/db_check"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
@@ -107,7 +107,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 
 func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool) error {
 
-	if err := check.DbIdentifier(atr.Name); err != nil {
+	if err := db_check.DbIdentifier(atr.Name); err != nil {
 		return err
 	}
 
@@ -473,7 +473,7 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 
 	// name check can be ignored by internal tasks, never ignore for user input
 	if !ignoreNameCheck {
-		if err := check.DbIdentifier(name); err != nil {
+		if err := db_check.DbIdentifier(name); err != nil {
 			return err
 		}
 	}

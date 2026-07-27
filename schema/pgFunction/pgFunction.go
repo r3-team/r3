@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db/check"
+	"r3/db/db_check"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
@@ -105,7 +105,7 @@ func getSchedules_tx(ctx context.Context, tx pgx.Tx, pgFunctionId uuid.UUID) ([]
 
 func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
-	if err := check.DbIdentifier(fnc.Name); err != nil {
+	if err := db_check.DbIdentifier(fnc.Name); err != nil {
 		return err
 	}
 

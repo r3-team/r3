@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
-	"r3/config/module_meta"
+	"r3/config/config_moduleMeta"
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
@@ -75,7 +75,7 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 		return err
 	}
 
-	if err := module_meta.SetHash_tx(ctx, tx, moduleId, hashedStr); err != nil {
+	if err := config_moduleMeta.SetHash_tx(ctx, tx, moduleId, hashedStr); err != nil {
 		return err
 	}
 
@@ -305,7 +305,7 @@ func hasModuleChanged_tx(ctx context.Context, tx pgx.Tx, file types.TransferFile
 	if err != nil {
 		return false, err
 	}
-	hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, file.Content.Module.Id)
+	hashedStrEx, err := config_moduleMeta.GetHash_tx(ctx, tx, file.Content.Module.Id)
 	if err != nil {
 		return false, err
 	}

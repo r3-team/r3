@@ -7,7 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"r3/config/module_meta"
+	"r3/config/config_moduleMeta"
 	"r3/handler"
 	"r3/log"
 	"r3/schema/api"
@@ -193,7 +193,7 @@ func GetApiByNames(modName, apiName string, apiVersion int) (types.Api, error) {
 }
 
 func LoadModuleIdMapMeta_tx(ctx context.Context, tx pgx.Tx) error {
-	moduleIdMapMetaNew, err := module_meta.GetIdMap_tx(ctx, tx)
+	moduleIdMapMetaNew, err := config_moduleMeta.GetIdMap_tx(ctx, tx)
 	if err != nil {
 		return err
 	}
@@ -248,7 +248,7 @@ func UpdateSchema_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, init
 
 	// update change date for updated modules
 	now := tools.GetTimeUnix()
-	if err := module_meta.SetDateChange_tx(ctx, tx, moduleIds, now); err != nil {
+	if err := config_moduleMeta.SetDateChange_tx(ctx, tx, moduleIds, now); err != nil {
 		return err
 	}
 
@@ -259,7 +259,7 @@ func UpdateSchema_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, init
 		Schema_mx.RUnlock()
 
 		if !exists {
-			meta, err = module_meta.Get_tx(ctx, tx, id)
+			meta, err = config_moduleMeta.Get_tx(ctx, tx, id)
 			if err != nil {
 				return err
 			}

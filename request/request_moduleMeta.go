@@ -3,7 +3,7 @@ package request
 import (
 	"context"
 	"encoding/json"
-	"r3/config/module_meta"
+	"r3/config/config_moduleMeta"
 	"r3/types"
 
 	"github.com/gofrs/uuid/v5"
@@ -19,7 +19,7 @@ func ModuleMetaSetLanguagesCustom_tx(ctx context.Context, tx pgx.Tx, reqJson jso
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, module_meta.SetLanguagesCustom_tx(ctx, tx, req.Id, req.Languages)
+	return nil, config_moduleMeta.SetLanguagesCustom_tx(ctx, tx, req.Id, req.Languages)
 }
 
 func ModuleMetaSetOptions_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
@@ -27,5 +27,5 @@ func ModuleMetaSetOptions_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMes
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, module_meta.SetOptions_tx(ctx, tx, req.Id, req.Hidden, req.Owner, req.Position)
+	return nil, config_moduleMeta.SetOptions_tx(ctx, tx, req.Id, req.Hidden, req.Owner, req.Position)
 }

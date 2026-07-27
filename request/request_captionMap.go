@@ -3,7 +3,7 @@ package request
 import (
 	"context"
 	"encoding/json"
-	"r3/config/captionMap"
+	"r3/config/config_captionMap"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -16,11 +16,10 @@ func CaptionMapGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 		ModuleId pgtype.UUID `json:"moduleId"`
 		Target   string      `json:"target"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return captionMap.Get_tx(ctx, tx, req.ModuleId, req.Target)
+	return config_captionMap.Get_tx(ctx, tx, req.ModuleId, req.Target)
 }
 
 func CaptionMapSetOne_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
@@ -32,10 +31,8 @@ func CaptionMapSetOne_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage
 		Target       string    `json:"target"`
 		Value        string    `json:"value"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, captionMap.SetOne_tx(ctx, tx, req.Target,
-		req.EntityId, req.Content, req.LanguageCode, req.Value)
+	return nil, config_captionMap.SetOne_tx(ctx, tx, req.Target, req.EntityId, req.Content, req.LanguageCode, req.Value)
 }

@@ -4,5 +4,5 @@ import (
 	_ "embed"
 )
 
-//go:embed packages/core_company.rei3
+//go:embed cache_packages/core_company.rei3
 var Package_CoreCompany []byte

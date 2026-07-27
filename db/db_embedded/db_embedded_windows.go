@@ -1,6 +1,6 @@
 //go:build windows
 
-package embedded
+package db_embedded
 
 import (
 	"bufio"

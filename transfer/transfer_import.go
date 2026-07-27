@@ -11,7 +11,7 @@ import (
 	"r3/cache"
 	"r3/cluster"
 	"r3/config"
-	"r3/config/module_meta"
+	"r3/config/config_moduleMeta"
 	"r3/db"
 	"r3/log"
 	"r3/schema"
@@ -164,7 +164,7 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 	for _, m := range modules {
 
 		// set new module hash value in instance
-		if err := module_meta.SetHash_tx(ctx, tx, m.Id, moduleIdMapImportMeta[m.Id].hash); err != nil {
+		if err := config_moduleMeta.SetHash_tx(ctx, tx, m.Id, moduleIdMapImportMeta[m.Id].hash); err != nil {
 			return err
 		}
 
@@ -711,7 +711,7 @@ func parseModulesFromPaths_tx(ctx context.Context, tx pgx.Tx, filePaths []string
 			}
 
 			// check whether installed module hash changed at all
-			hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, moduleId)
+			hashedStrEx, err := config_moduleMeta.GetHash_tx(ctx, tx, moduleId)
 			if err != nil {
 				return modules, err
 			}

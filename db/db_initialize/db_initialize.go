@@ -1,4 +1,4 @@
-package initialize
+package db_initialize
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"r3/bruteforce"
 	"r3/config"
 	"r3/db"
-	"r3/db/upgrade"
+	"r3/db/db_upgrade"
 	"r3/login"
 	"r3/tools"
 
@@ -74,7 +74,7 @@ func PrepareDbIfNew() error {
 	config.SetLogLevels()
 
 	// before doing any more work, upgrade DB if necessary
-	if err := upgrade.RunIfRequired(); err != nil {
+	if err := db_upgrade.RunIfRequired(); err != nil {
 		return err
 	}
 
@@ -210,7 +210,7 @@ func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 			('tokenSecret',''),
 			('updateCheckUrl','https://rei3.de/version'),
 			('updateCheckVersion','');
-		
+
 		-- tasks
 		INSERT INTO instance.task
 			(name,interval_seconds,cluster_master_only,embedded_only,active,active_only)
@@ -235,7 +235,7 @@ func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 			('restExecute',15,true,false,true,false),
 			('systemMsgMaintenance',30,true,false,true,true),
 			('updateCheck',86400,true,false,true,false);
-		
+
 		INSERT INTO instance.schedule
 			(task_name,date_attempt,date_success)
 		VALUES
@@ -1118,13 +1118,13 @@ CREATE FUNCTION app.get_preset_ids_inside_queries(query_ids_in uuid[]) RETURNS u
 				IF array_length(query_ids_in,1) = 0 THEN
 					RETURN preset_ids;
 				END IF;
-			
+
 				-- collect preset directly
 				SELECT ARRAY_AGG(preset_id) INTO preset_ids
 				FROM app.query_filter_side
 				WHERE query_id = ANY(query_ids_in)
 				AND   content  = 'preset';
-			
+
 				-- collect presets from filters inside sub queries
 				SELECT ARRAY_AGG(q.id) INTO query_ids_sub
 				FROM app.query_filter_side AS s
@@ -1134,11 +1134,11 @@ CREATE FUNCTION app.get_preset_ids_inside_queries(query_ids_in uuid[]) RETURNS u
 					AND q.query_filter_side     = s.side
 				WHERE s.query_id = ANY(query_ids_in)
 				AND   s.content  = 'subQuery';
-			
+
 				IF array_length(query_ids_sub,1) <> 0 THEN
 					preset_ids := array_cat(preset_ids, app.get_preset_ids_inside_queries(query_ids_sub));
 				END IF;
-				
+
 				RETURN preset_ids;
 			END;
 			$$;
@@ -1256,10 +1256,10 @@ CREATE FUNCTION instance.files_get(attribute_id uuid, record_id bigint, include_
 						file.version          := rec.version;
 						file.date_change      := rec.date_change;
 						file.date_delete      := rec.date_delete;
-						
+
 						files := ARRAY_APPEND(files,file);
 					END LOOP;
-					
+
 					RETURN files;
 				END;
 			$_$;
@@ -1284,7 +1284,7 @@ CREATE FUNCTION instance.get_e2ee_data_key_enc(login_id integer, relation_id uui
 					'
 					USING login_id, record_id
 					INTO key_enc;
-					
+
 					RETURN key_enc;
 				END;
 			$_$;
@@ -1317,11 +1317,11 @@ CREATE FUNCTION instance.get_login_id() RETURNS integer
 		setting text;
 	BEGIN
 		SELECT CURRENT_SETTING('r3.login_id',TRUE) INTO setting;
-		
+
 		IF setting IS NULL OR setting = '' THEN
 			RETURN NULL;
 		END IF;
-		
+
 		RETURN setting::int;
 	END;
 	$$;
@@ -1340,15 +1340,15 @@ CREATE FUNCTION instance.get_login_language_code() RETURNS text
 		setting text;
 	BEGIN
 		SELECT CURRENT_SETTING('r3.login_id',TRUE) INTO setting;
-		
+
 		IF setting IS NULL OR setting = '' THEN
 			RETURN NULL;
 		END IF;
-		
+
 		SELECT language_code INTO code
 		FROM instance.login_setting
 		WHERE login_id = setting::int;
-		
+
 		RETURN code;
 	END;
 	$$;
@@ -1368,7 +1368,7 @@ CREATE FUNCTION instance.get_name() RETURNS text
 		SELECT value INTO output
 		FROM instance.config
 		WHERE name = 'appName';
-		
+
 		RETURN output;
 	END;
 	$$;
@@ -1407,7 +1407,7 @@ CREATE FUNCTION instance.get_public_hostname() RETURNS text
 		SELECT value INTO output
 		FROM instance.config
 		WHERE name = 'publicHostName';
-		
+
 		RETURN output;
 	END;
 	$$;
@@ -1447,7 +1447,7 @@ CREATE FUNCTION instance.get_role_ids(login_id integer, inherited boolean DEFAUL
 						FROM instance.login_role AS lr
 						WHERE lr.login_id = login
 					) INTO role_ids;
-					
+
 					RETURN role_ids;
 				ELSE
 					SELECT ARRAY(
@@ -1455,7 +1455,7 @@ CREATE FUNCTION instance.get_role_ids(login_id integer, inherited boolean DEFAUL
 						FROM instance.login_role AS lr
 						WHERE lr.login_id = login
 					) INTO role_ids;
-					
+
 					RETURN role_ids;
 				END IF;
 			END;
@@ -1490,14 +1490,14 @@ CREATE FUNCTION instance.has_role(login_id integer, role_id uuid, inherited bool
 				r UUID;
 			BEGIN
 				SELECT instance.get_role_ids(login_id, inherited) INTO roles_access;
-				
+
 				FOREACH r IN ARRAY roles_access
 				LOOP
 					IF r = role_id THEN
 						RETURN TRUE;
 					END IF;
 				END LOOP;
-				
+
 				RETURN FALSE;
 			END;
 			$$;
@@ -1517,7 +1517,7 @@ CREATE FUNCTION instance.has_role_any(login_id integer, role_ids uuid[], inherit
 				r2 UUID;
 			BEGIN
 				SELECT instance.get_role_ids(login_id, inherited) INTO roles_access;
-				
+
 				FOREACH r1 IN ARRAY roles_access
 				LOOP
 					FOREACH r2 IN ARRAY role_ids
@@ -1527,7 +1527,7 @@ CREATE FUNCTION instance.has_role_any(login_id integer, role_ids uuid[], inherit
 						END IF;
 					END LOOP;
 				END LOOP;
-				
+
 				RETURN FALSE;
 			END;
 			$$;
@@ -1549,11 +1549,11 @@ CREATE FUNCTION instance.log(level integer, message text, app_name text DEFAULT 
 					SELECT value::INT INTO level_show
 					FROM instance.config
 					WHERE name = 'logModule';
-					
+
 					IF level_show < level THEN
 						RETURN;
 					END IF;
-					
+
 					-- resolve module ID if possible
 					-- if not possible: log with module_id = NULL (better than not to log)
 					IF app_name IS NOT NULL THEN
@@ -1561,10 +1561,10 @@ CREATE FUNCTION instance.log(level integer, message text, app_name text DEFAULT 
 						FROM app.module
 						WHERE name = app_name;
 					END IF;
-					
+
 					INSERT INTO instance.log (level,context,module_id,message,date_milli)
 					VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
-				END;	
+				END;
 			$$;
 
 
@@ -1625,7 +1625,7 @@ CREATE FUNCTION instance.mail_delete(mail_id integer) RETURNS integer
 	BEGIN
 		DELETE FROM instance.mail_spool
 		WHERE id = mail_id;
-		
+
 		RETURN 0;
 	END;
 	$$;
@@ -1646,7 +1646,7 @@ CREATE FUNCTION instance.mail_delete_after_attach(mail_id integer, attach_record
 			attribute_id = attach_attribute_id
 		WHERE id = mail_id
 		AND outgoing = FALSE;
-		
+
 		RETURN 0;
 	END;
 	$$;
@@ -1679,7 +1679,7 @@ CREATE FUNCTION instance.mail_get_next(account_name text DEFAULT NULL::text) RET
 				)
 				ORDER BY id ASC
 				LIMIT 1;
-			
+
 				RETURN m;
 			END;
 			$$;
@@ -1701,16 +1701,16 @@ CREATE FUNCTION instance.mail_send(subject text, body text, to_list text DEFAULT
 					FROM instance.mail_account
 					WHERE name = account_name;
 				END IF;
-				
-				IF to_list  IS NULL THEN to_list  := ''; END IF; 
-				IF cc_list  IS NULL THEN cc_list  := ''; END IF; 
+
+				IF to_list  IS NULL THEN to_list  := ''; END IF;
+				IF cc_list  IS NULL THEN cc_list  := ''; END IF;
 				IF bcc_list IS NULL THEN bcc_list := ''; END IF;
-				
+
 				INSERT INTO instance.mail_spool (to_list,cc_list,bcc_list,
 					subject,body,outgoing,date,mail_account_id,record_id_wofk,attribute_id)
 				VALUES (to_list,cc_list,bcc_list,subject,body,TRUE,EXTRACT(epoch from now()),
 					account_id,attach_record_id,attach_attribute_id);
-			
+
 				RETURN 0;
 			END;
 			$$;
@@ -1728,7 +1728,7 @@ CREATE FUNCTION instance.rest_call(http_method text, url text, body text, header
 				BEGIN
 					INSERT INTO instance.rest_spool(pg_function_id_callback, method, headers, url, body, date_added, skip_verify, callback_value)
 					VALUES (callback_function_id, http_method::instance.rest_method, headers, url, body, EXTRACT(EPOCH FROM NOW()), tls_skip_verify, callback_value);
-					
+
 					RETURN 0;
 				END;
 			$$;
@@ -1750,7 +1750,7 @@ CREATE FUNCTION instance.trg_file_ref_counter_update() RETURNS trigger
 					WHERE id = NEW.file_id;
 					RETURN NEW;
 				END IF;
-				
+
 				UPDATE instance.file
 				SET ref_counter = ref_counter - 1
 				WHERE id = OLD.file_id;
@@ -1772,7 +1772,7 @@ CREATE FUNCTION instance.update_collection(collection_id uuid, login_ids integer
 				INSERT INTO instance_cluster.node_event (node_id,content,payload)
 					SELECT id, 'collectionUpdated', CONCAT('{"collectionId":"',collection_id,'","loginIds":',TO_JSON(login_ids),'}')
 					FROM instance_cluster.node;
-				
+
 				RETURN 0;
 			END;
 			$$;
@@ -1901,7 +1901,7 @@ CREATE FUNCTION instance.user_sync(_module_name text, _pg_function_name text, _l
 					_d.is_admin   := _rec.admin;
 					_d.is_limited := _rec.limited;
 					_d.is_public  := _rec.no_auth;
-					
+
 					-- meta
 					_d.department     := COALESCE(_rec.department, '');
 					_d.email          := COALESCE(_rec.email, '');
@@ -1913,8 +1913,8 @@ CREATE FUNCTION instance.user_sync(_module_name text, _pg_function_name text, _l
 					_d.organization   := COALESCE(_rec.organization, '');
 					_d.phone_fax      := COALESCE(_rec.phone_fax, '');
 					_d.phone_mobile   := COALESCE(_rec.phone_mobile, '');
-					_d.phone_landline := COALESCE(_rec.phone_landline, ''); 
-				
+					_d.phone_landline := COALESCE(_rec.phone_landline, '');
+
 					EXECUTE _sql USING _event, _d;
 				END LOOP;
 			END;
@@ -1946,7 +1946,7 @@ CREATE FUNCTION instance.user_sync_all(_module_id uuid) RETURNS integer
 					_pg_function_name
 				FROM app.module AS m
 				WHERE m.id = _module_id;
-				
+
 				IF _module_name IS NULL OR _pg_function_name IS NULL THEN
 					RETURN 1;
 				END IF;
@@ -1977,33 +1977,33 @@ CREATE FUNCTION instance_cluster.master_role_request(node_id_requested uuid) RET
 				SELECT value::INT INTO master_missing_after
 				FROM instance.config
 				WHERE name = 'clusterNodeMissingAfter';
-				
+
 				SELECT date_check_in INTO unix_master_check_in
 				FROM instance_cluster.node
 				WHERE cluster_master;
-				
+
 				IF EXTRACT(EPOCH FROM NOW()) < unix_master_check_in + master_missing_after THEN
 					-- current master is not missing
 					RETURN 0;
 				END IF;
-				
+
 				-- new master accepted, switch over
 				UPDATE instance_cluster.node
 				SET cluster_master = FALSE;
-				
+
 				UPDATE instance_cluster.node
 				SET cluster_master = TRUE
 				WHERE id = node_id_requested;
-				
+
 				-- assign master switch over tasks to all nodes
 				INSERT INTO instance_cluster.node_event (node_id,content,payload)
 					SELECT id, 'masterAssigned', '{"state":false}'
 					FROM instance_cluster.node
 					WHERE cluster_master = FALSE;
-				
+
 				INSERT INTO instance_cluster.node_event (node_id,content,payload)
 				VALUES (node_id_requested, 'masterAssigned', '{"state":true}');
-				
+
 				RETURN 0;
 			END;
 			$$;
@@ -2024,27 +2024,27 @@ CREATE FUNCTION instance_cluster.run_task(task_name text, pg_function_id uuid, p
 					SELECT cluster_master_only INTO needs_master
 					FROM instance.task
 					WHERE name = task_name;
-					
+
 					IF needs_master IS NULL THEN
 						RETURN 1;
 					END IF;
-				
+
 					-- run system task
 					INSERT INTO instance_cluster.node_event (node_id, content, payload)
 						SELECT id, 'taskTriggered', CONCAT('{"taskName":"',task_name,'"}')
 						FROM instance_cluster.node
 						WHERE needs_master = FALSE
 						OR cluster_master;
-					
+
 					RETURN 0;
 				END IF;
-				
+
 				-- run PG function by schedule (always run by cluster master)
 				INSERT INTO instance_cluster.node_event (node_id, content, payload)
 					SELECT id, 'taskTriggered', CONCAT('{"pgFunctionId":"',pg_function_id,'","pgFunctionScheduleId":"',pg_function_schedule_id,'"}')
 					FROM instance_cluster.node
 					WHERE cluster_master;
-				
+
 				RETURN 0;
 			END;
 			$$;

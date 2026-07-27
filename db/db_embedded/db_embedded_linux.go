@@ -1,6 +1,6 @@
 //go:build linux || darwin
 
-package embedded
+package db_embedded
 
 import "fmt"
 

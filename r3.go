@@ -20,9 +20,9 @@ import (
 	"r3/config"
 	"r3/data/data_image"
 	"r3/db"
-	"r3/db/embedded"
-	"r3/db/initialize"
-	"r3/db/upgrade"
+	"r3/db/db_embedded"
+	"r3/db/db_initialize"
+	"r3/db/db_upgrade"
 	"r3/handler"
 	"r3/handler/api"
 	"r3/handler/api_auth"
@@ -319,9 +319,9 @@ func (prg *program) execute(svc service.Service) {
 	// start embedded database
 	if config.File.Db.Embedded {
 		prg.logger.Infof("start embedded database at '%s'", config.File.Paths.EmbeddedDbData)
-		embedded.SetPaths()
+		db_embedded.SetPaths()
 
-		if err := embedded.Start(); err != nil {
+		if err := db_embedded.Start(); err != nil {
 			prg.executeAborted(svc, fmt.Errorf("failed to start embedded database, %v", err))
 			return
 		}
@@ -339,7 +339,7 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// check for first database start
-	if err := initialize.PrepareDbIfNew(); err != nil {
+	if err := db_initialize.PrepareDbIfNew(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize database on first start, %v", err))
 		return
 	}
@@ -354,7 +354,7 @@ func (prg *program) execute(svc service.Service) {
 	config.SetLogLevels()
 
 	// run automatic database upgrade if required
-	if err := upgrade.RunIfRequired(); err != nil {
+	if err := db_upgrade.RunIfRequired(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed automatic upgrade of database, %v", err))
 		return
 	}
@@ -674,7 +674,7 @@ func (prg *program) Stop(svc service.Service) error {
 
 	// stop embedded database if owned
 	if prg.embeddedDbOwned.Load() {
-		if err := embedded.Stop(); err != nil {
+		if err := db_embedded.Stop(); err != nil {
 			prg.logger.Error(err)
 		}
 		log.Info(log.ContextServer, "stopped embedded database")

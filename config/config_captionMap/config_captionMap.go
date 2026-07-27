@@ -1,4 +1,4 @@
-package captionMap
+package config_captionMap
 
 import (
 	"context"

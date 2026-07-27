@@ -2,7 +2,7 @@
 controls embedded postgres database via pg_ctl
 sets locale for messages (LC_MESSAGES) for parsing call outputs
 */
-package embedded
+package db_embedded
 
 import (
 	"path/filepath"

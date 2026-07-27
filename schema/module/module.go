@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/config/module_meta"
-	"r3/db/check"
+	"r3/config/config_moduleMeta"
+	"r3/db/db_check"
 	"r3/schema"
 	"r3/schema/article"
 	"r3/schema/caption"
@@ -57,7 +57,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2, js_function_id_on_login,
-			pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1, position, 
+			pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1, position,
 			language_main, release_build, release_build_app, release_date, release_log_categories,
 			ARRAY(
 				SELECT module_id_on
@@ -125,7 +125,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal bool) er
 }
 func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal bool) (uuid.UUID, error) {
 
-	if err := check.DbIdentifier(mod.Name); err != nil {
+	if err := db_check.DbIdentifier(mod.Name); err != nil {
 		return mod.Id, err
 	}
 
@@ -235,7 +235,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 		}
 
 		// create module meta data record for instance
-		if err := module_meta.Create_tx(ctx, tx, mod.Id, false, isNew, mod.Position); err != nil {
+		if err := config_moduleMeta.Create_tx(ctx, tx, mod.Id, false, isNew, mod.Position); err != nil {
 			return mod.Id, err
 		}
 	}

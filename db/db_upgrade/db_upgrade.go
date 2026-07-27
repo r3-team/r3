@@ -1,4 +1,4 @@
-package upgrade
+package db_upgrade
 
 import (
 	"context"

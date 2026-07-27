@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
-	"r3/config/module_meta"
+	"r3/config/config_moduleMeta"
 	"r3/db"
 	"r3/log"
 	"r3/types"
@@ -85,7 +85,7 @@ func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, exportKey str
 	}
 
 	// check for ownership
-	isOwner, err := module_meta.GetOwner_tx(ctx, tx, moduleId)
+	isOwner, err := config_moduleMeta.GetOwner_tx(ctx, tx, moduleId)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, exportKey str
 	}
 	hashed := sha256.Sum256(jsonContent)
 	hashedStr := base64.URLEncoding.EncodeToString(hashed[:])
-	hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, moduleId)
+	hashedStrEx, err := config_moduleMeta.GetHash_tx(ctx, tx, moduleId)
 	if err != nil {
 		return err
 	}

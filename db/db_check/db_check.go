@@ -1,4 +1,4 @@
-package check
+package db_check
 
 import (
 	"r3/handler"

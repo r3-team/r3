@@ -3,7 +3,7 @@ package relation
 import (
 	"context"
 	"fmt"
-	"r3/db/check"
+	"r3/db/db_check"
 	"r3/schema"
 	"r3/schema/attribute"
 	"r3/schema/caption"
@@ -129,7 +129,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relatio
 
 func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) error {
 
-	if err := check.DbIdentifier(rel.Name); err != nil {
+	if err := db_check.DbIdentifier(rel.Name); err != nil {
 		return err
 	}
 

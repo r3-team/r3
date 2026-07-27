@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db/check"
+	"r3/db/db_check"
 	"r3/schema"
 	"r3/schema/column"
 	"r3/schema/query"
@@ -116,7 +116,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([
 
 func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 
-	if err := check.DbIdentifier(api.Name); err != nil {
+	if err := db_check.DbIdentifier(api.Name); err != nil {
 		return err
 	}
 	if _, err := tx.Exec(ctx, `

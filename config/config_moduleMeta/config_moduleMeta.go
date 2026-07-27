@@ -1,4 +1,4 @@
-package module_meta
+package config_moduleMeta
 
 import (
 	"context"

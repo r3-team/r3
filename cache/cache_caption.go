@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"r3/config/captionMap"
+	"r3/config/config_captionMap"
 	"r3/types"
 	"sync"
 
@@ -26,7 +26,7 @@ func GetCaptionMapCustom() types.CaptionMapsAll {
 }
 
 func LoadCaptionMapCustom_tx(ctx context.Context, tx pgx.Tx) error {
-	cus, err := captionMap.Get_tx(ctx, tx, pgtype.UUID{}, "instance")
+	cus, err := config_captionMap.Get_tx(ctx, tx, pgtype.UUID{}, "instance")
 	if err != nil {
 		return err
 	}
