@@ -11,11 +11,6 @@ import (
 )
 
 const (
-	jobTypeLoad       types.DbSyncJobType = "LOAD"
-	jobTypeSendDelete types.DbSyncJobType = "SEND_DELETE"
-	jobTypeSendInsert types.DbSyncJobType = "SEND_INSERT"
-	jobTypeSendUpdate types.DbSyncJobType = "SEND_UPDATE"
-
 	sqlPlaceholderLimit  = "{SQL_LIMIT}"
 	sqlPlaceholderOffset = "{SQL_OFFSET}"
 )
@@ -54,9 +49,9 @@ func do(j types.DbSyncJob) error {
 
 	// execute sync
 	switch j.JobType {
-	case jobTypeLoad:
+	case types.DbSyncJobTypeLoad:
 		return doLoad(ctx, dbExt, j)
-	case jobTypeSendInsert:
+	case types.DbSyncJobTypeSendInsert:
 		return doSend(ctx, dbExt, j)
 	}
 	return fmt.Errorf("invalid job type '%s'", j.JobType)

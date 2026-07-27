@@ -7,6 +7,17 @@ import (
 
 type DbSyncJobType string
 
+const (
+	DbSyncJobTypeLoad       DbSyncJobType = "LOAD"
+	DbSyncJobTypeSendDelete DbSyncJobType = "SEND_DELETE"
+	DbSyncJobTypeSendInsert DbSyncJobType = "SEND_INSERT"
+	DbSyncJobTypeSendUpdate DbSyncJobType = "SEND_UPDATE"
+)
+
+var (
+	DbSyncJobTypesSend = []DbSyncJobType{DbSyncJobTypeSendDelete, DbSyncJobTypeSendInsert, DbSyncJobTypeSendUpdate}
+)
+
 type DbSyncHost struct {
 	Id      uuid.UUID `json:"id"`
 	Name    string    `json:"name"`

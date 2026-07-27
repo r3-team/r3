@@ -13,6 +13,7 @@ import (
 	"r3/ldap"
 	"r3/log"
 	"r3/repo"
+	"r3/request/request_dbSync"
 	"r3/request/request_login"
 	"r3/types"
 
@@ -333,16 +334,20 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "dbSync":
 		switch action {
+		case "delHost":
+			return request_dbSync.HostDel_tx(ctx, tx, reqJson)
+		case "delJob":
+			return request_dbSync.JobDel_tx(ctx, tx, reqJson)
+		case "getHosts":
+			return request_dbSync.HostsGet_tx(ctx, tx)
+		case "getJobs":
+			return request_dbSync.JobsGet_tx(ctx, tx)
+		case "setHost":
+			return request_dbSync.HostSet_tx(ctx, tx, reqJson)
+		case "setJob":
+			return request_dbSync.JobSet_tx(ctx, tx, reqJson)
 		case "informChanged":
 			return nil, cluster.DbSyncChanged_tx(ctx, tx, true)
-		case "getHosts":
-			return DbSyncHostsGet_tx(ctx, tx)
-		case "getJobs":
-			return DbSyncJobsGet_tx(ctx, tx)
-		case "setHost":
-			return DbSyncHostSet_tx(ctx, tx, reqJson)
-		case "setJob":
-			return DbSyncJobSet_tx(ctx, tx, reqJson)
 		}
 	case "doc":
 		switch action {

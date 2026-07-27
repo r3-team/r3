@@ -168,6 +168,8 @@ func doLoadDelete(ctx context.Context, modName, relName string, uniqueIndexAttri
 		parameterNames[i] = fmt.Sprintf("$%d::%s", i+1, (*uniqueIndexAttributes).types[i])
 	}
 
+	// WHERE condition checks list of attribute names against lists of values (one typed array per value)
+	//  such as: WHERE (name, age) NOT IN (SELECT * FROM UNNEST('{Fritz,Peter,Maria}'::TEXT[], '{23,18,32}'::INT[]))
 	ct, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM "%s"."%s"
 		WHERE (%s) NOT IN (

@@ -538,6 +538,71 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED
 			);
+
+			CREATE TABLE IF NOT EXISTS instance_db_sync.send_spool (
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				relation_id uuid NOT NULL,
+				record_id_wofk BIGINT NOT NULL,
+				job_type instance_db_sync.job_type NOT NULL,
+				CONSTRAINT send_spool_pkey PRIMARY KEY (id),
+				CONSTRAINT send_spool_relation_id_fkey FOREIGN KEY (relation_id)
+					REFERENCES app.relation (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_send_spool_relation_id_fkey ON instance_db_sync.send_spool USING btree (relation_id ASC NULLS LAST);
+
+			CREATE OR REPLACE FUNCTION instance_db_sync.trg_record_send_insert()
+				RETURNS trigger
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				IF ARRAY_LENGTH(TG_ARGV,1) IS NULL OR ARRAY_LENGTH(TG_ARGV,1) <> 1 THEN
+					RETURN NULL;
+				END IF;
+
+				INSERT INTO instance_db_sync.send_spool (relation_id, record_id_wofk, job_type)
+				VALUES (TG_ARGV[0], NEW.id, 'SEND_INSERT');
+
+				RETURN NULL;
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance_db_sync.trg_record_send_update()
+				RETURNS trigger
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				IF ARRAY_LENGTH(TG_ARGV,1) IS NULL OR ARRAY_LENGTH(TG_ARGV,1) <> 1 THEN
+					RETURN NULL;
+				END IF;
+
+				INSERT INTO instance_db_sync.send_spool (relation_id, record_id_wofk, job_type)
+				VALUES (TG_ARGV[0], NEW.id, 'SEND_UPDATE');
+
+				RETURN NULL;
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance_db_sync.trg_record_send_delete()
+				RETURNS trigger
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				IF ARRAY_LENGTH(TG_ARGV,1) IS NULL OR ARRAY_LENGTH(TG_ARGV,1) <> 1 THEN
+					RETURN NULL;
+				END IF;
+
+				INSERT INTO instance_db_sync.send_spool (relation_id, record_id_wofk, job_type)
+				VALUES (TG_ARGV[0], OLD.id, 'SEND_DELETE');
+
+				RETURN NULL;
+			END;
+			$BODY$;
 		`)
 		return "3.13", err
 	},
