@@ -142,6 +142,12 @@
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},
+			"jobType": {
+				"LOAD": "Load records",
+				"SEND_DELETE": "Send record deletion",
+				"SEND_INSERT": "Send record creation",
+				"SEND_UPDATE": "Send record update"
+			},
 			"title": "Database sync '{NAME}'",
 			"titleNew": "New database sync"
 		},
@@ -2594,6 +2600,8 @@
 		"install": "ثَبَّتَ",
 		"internalName": "يعمل الاسم كمرجع داخلي - ولا يظهر للمستخدمين.",
 		"interval": "فاصلة",
+		"job": "Job",
+		"jobs": "Jobs",
 		"jsFunction": "الوظيفة (الجبهة)",
 		"jsFunctions": "الوظائف (الأمامية)",
 		"keyPrivate": "Private key",

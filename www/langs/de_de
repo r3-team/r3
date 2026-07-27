@@ -142,6 +142,12 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Datenbank-Sync löschen möchtest?"
 			},
+			"jobType": {
+				"LOAD": "Datensätze laden",
+				"SEND_DELETE": "Datensatzlöschung senden",
+				"SEND_INSERT": "Datensatzerstellung senden",
+				"SEND_UPDATE": "Datensatzaktualisierung senden"
+			},
 			"title": "Datenbank-Sync '{NAME}'",
 			"titleNew": "Neuer Datenbank-Sync"
 		},
@@ -2594,6 +2600,8 @@
 		"install": "Installieren",
 		"internalName": "Der Name dient als interne Referenz - er wird den Benutzern nicht angezeigt.",
 		"interval": "Intervall",
+		"job": "Aufgabe",
+		"jobs": "Aufgaben",
 		"jsFunction": "Funktion (front)",
 		"jsFunctions": "Funktionen (front)",
 		"keyPrivate": "Privater Schlüssel",

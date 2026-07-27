@@ -1,9 +1,8 @@
 import {getAttributeFileHref} from '../shared/attribute.js';
 import {getSizeReadable}      from '../shared/generic.js';
 import {getUnixFormat}        from '../shared/time.js';
-export {MyAdminFiles as default};
 
-let MyAdminFiles = {
+export default {
 	name:'my-admin-files',
 	template:`<div class="admin-files contentBox grow">
 		<div class="top">
@@ -25,7 +24,7 @@ let MyAdminFiles = {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content">
 			<my-label image="settings.png" :caption="capApp.titleConfig" :large="true" />
 			<br />
@@ -45,9 +44,9 @@ let MyAdminFiles = {
 					</tr>
 				</tbody>
 			</table>
-			
+
 			<br />
-			
+
 			<!-- deleted files -->
 			<my-label image="delete.png" :caption="capApp.titleDeleted" :large="true" />
 			<br />
@@ -120,23 +119,23 @@ let MyAdminFiles = {
 	},
 	computed:{
 		// simple
-		hasChanged:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
-		
+		hasChanged:s => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
+
 		// stores
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.admin.files,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		config:        (s) => s.$store.getters.config,
-		token:         (s) => s.$store.getters['local/token']
+		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.admin.files,
+		capGen:        s => s.$store.getters.captions.generic,
+		config:        s => s.$store.getters.config,
+		token:         s => s.$store.getters['local/token']
 	},
 	methods:{
 		// externals
 		getAttributeFileHref,
 		getSizeReadable,
 		getUnixFormat,
-		
+
 		// presentation
 		displayAttribute(atrId,cnt) {
 			let a = this.attributeIdMap[atrId];
@@ -147,7 +146,7 @@ let MyAdminFiles = {
 		displayTime(unixTime) {
 			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,'Y-m-d H:i:S');
 		},
-		
+
 		// actions
 		reset() {
 			this.configInput = JSON.parse(JSON.stringify(this.config));
@@ -159,7 +158,7 @@ let MyAdminFiles = {
 			if(pos === -1) v.push(atrId);
 			else           v.splice(pos,1);
 		},
-		
+
 		// backend calls
 		get() {
 			ws.send('file','get',{},true).then(
@@ -179,7 +178,7 @@ let MyAdminFiles = {
 		},
 		set() {
 			if(!this.hasChanged) return;
-			
+
 			ws.send('config','set',this.configInput,true).then(
 				() => {},
 				this.$root.genericError

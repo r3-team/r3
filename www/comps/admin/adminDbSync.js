@@ -53,6 +53,7 @@ export default {
 				@reload="get"
 				:hostId="hostIdOpen"
 				:hostOrg="hostOpen"
+				:jobIdMap
 				:readonly="!licenseValid"
 			/>
 		</div>
