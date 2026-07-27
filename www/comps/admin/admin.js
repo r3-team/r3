@@ -135,6 +135,12 @@ export default {
 				<span>{{ capApp.navigationOauthClients }}</span>
 			</router-link>
 
+			<!-- DB sync -->
+			<router-link class="entry clickable" tag="div" to="/admin/db-sync" :class="{ inactive:!activated }">
+				<img src="images/databaseSync.png" />
+				<span>{{ capApp.navigationDbSync }}</span>
+			</router-link>
+
 			<!-- cluster -->
 			<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
 				<img src="images/cluster.png" />
@@ -186,6 +192,7 @@ export default {
 			if(s.$route.path.includes('cluster'))         return s.capApp.navigationCluster;
 			if(s.$route.path.includes('config'))          return s.capApp.navigationConfig;
 			if(s.$route.path.includes('custom'))          return s.capApp.navigationCustom;
+			if(s.$route.path.includes('db-sync'))         return s.capApp.navigationDbSync;
 			if(s.$route.path.includes('files'))           return s.capApp.navigationFiles;
 			if(s.$route.path.includes('license'))         return s.capApp.navigationActivation;
 			if(s.$route.path.includes('logins'))          return s.capApp.navigationLogins;

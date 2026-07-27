@@ -135,6 +135,13 @@
 			"tokenKeepEnable": "Autoriser les utilisateurs à rester connectés",
 			"tokenKeepEnableHint": "Si désactivé, l'option 'rester connecté' sur la page de connexion est supprimée. Sans cette option, les utilisateurs sont obligés de s'authentifier à chaque fois qu'ils accèdent au système. Ce paramètre n'affecte pas l'accès via les appareils, comme les abonnements de calendrier ou les clients REI3."
 		},
+		"dbSync": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this database sync?"
+			},
+			"title": "Database sync '{NAME}'",
+			"titleNew": "New database sync"
+		},
 		"files": {
 			"deleteDate": "Fichier supprimé",
 			"fileVersionsKeepCount": "Conserver au moins X versions du fichier",
@@ -446,6 +453,7 @@
 		"navigationCluster": "Cluster",
 		"navigationConfig": "Système",
 		"navigationCustom": "Personnalisation",
+		"navigationDbSync": "Database sync",
 		"navigationFiles": "Fichiers",
 		"navigationLdaps": "Connexions LDAP",
 		"navigationLicense": "Professional",

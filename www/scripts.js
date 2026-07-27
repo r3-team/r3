@@ -24,6 +24,7 @@ import MyAdminCaptionMap     from './comps/admin/adminCaptionMap.js';
 import MyAdminCluster        from './comps/admin/adminCluster.js';
 import MyAdminConfig         from './comps/admin/adminConfig.js';
 import MyAdminCustom         from './comps/admin/adminCustom.js';
+import MyAdminDbSync         from './comps/admin/adminDbSync.js';
 import MyAdminFiles          from './comps/admin/adminFiles.js';
 import MyAdminLdaps          from './comps/admin/adminLdaps.js';
 import MyAdminLicense        from './comps/admin/adminLicense.js';
@@ -116,6 +117,7 @@ const MyRouter = VueRouter.createRouter({
 			{ path:'cluster',         component:MyAdminCluster },
 			{ path:'config',          component:MyAdminConfig },
 			{ path:'custom',          component:MyAdminCustom },
+			{ path:'db-sync',         component:MyAdminDbSync },
 			{ path:'files',           component:MyAdminFiles },
 			{ path:'ldaps',           component:MyAdminLdaps },
 			{ path:'license',         component:MyAdminLicense },

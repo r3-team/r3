@@ -135,6 +135,13 @@
 			"tokenKeepEnable": "Allow users to stay logged in",
 			"tokenKeepEnableHint": "If switched off, the 'stay logged in' option on the login page is removed. Without this option, users are forced to authenticate every time they access the system. This setting does not affect device access, like calendar subscriptions or REI3 clients."
 		},
+		"dbSync": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this database sync?"
+			},
+			"title": "Database sync '{NAME}'",
+			"titleNew": "New database sync"
+		},
 		"files": {
 			"deleteDate": "Fájl törlése",
 			"fileVersionsKeepCount": "Legalább X fájlverziót tart meg",
@@ -446,6 +453,7 @@
 		"navigationCluster": "Klaszter",
 		"navigationConfig": "Rendszer",
 		"navigationCustom": "Egyedi",
+		"navigationDbSync": "Database sync",
 		"navigationFiles": "Fájlok",
 		"navigationLdaps": "LDAP-Connectors",
 		"navigationLicense": "Professional",

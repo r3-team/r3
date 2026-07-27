@@ -135,6 +135,13 @@
 			"tokenKeepEnable": "Benutzern erlauben, angemeldet zu bleiben",
 			"tokenKeepEnableHint": "Wenn deaktiviert, wird die Option \"angemeldet bleiben\" von der Anmeldeseite entfernt. Ohne diese Option werden Benutzer gezwungen, sich neu anzumelden, wenn sie auf das System zugreifen. Diese Einstellung betrifft nicht Gerätezugriffe wie Kalendar-Abonnements oder REI3-Clients."
 		},
+		"dbSync": {
+			"dialog": {
+				"delete": "Bist du sicher, dass du diesen Datenbank-Sync löschen möchtest?"
+			},
+			"title": "Datenbank-Sync '{NAME}'",
+			"titleNew": "Neuer Datenbank-Sync"
+		},
 		"files": {
 			"deleteDate": "Datei gelöscht",
 			"fileVersionsKeepCount": "Mindestens X Dateiversionen aufheben",
@@ -446,6 +453,7 @@
 		"navigationCluster": "Cluster",
 		"navigationConfig": "System",
 		"navigationCustom": "Anpassungen",
+		"navigationDbSync": "Datenbank-Sync",
 		"navigationFiles": "Dateien",
 		"navigationLdaps": "LDAP-Konnektoren",
 		"navigationLicense": "Professional",
