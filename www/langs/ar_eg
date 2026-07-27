@@ -136,6 +136,9 @@
 			"tokenKeepEnableHint": "إذا تم إيقاف تشغيله، فسيتم إزالة خيار \"البقاء مسجلاً الدخول\" الموجود على صفحة تسجيل الدخول. "
 		},
 		"dbSync": {
+			"address": "Network address",
+			"dbName": "Database name",
+			"dbType": "Database type",
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},

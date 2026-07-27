@@ -136,6 +136,9 @@
 			"tokenKeepEnableHint": "Wenn deaktiviert, wird die Option \"angemeldet bleiben\" von der Anmeldeseite entfernt. Ohne diese Option werden Benutzer gezwungen, sich neu anzumelden, wenn sie auf das System zugreifen. Diese Einstellung betrifft nicht Gerätezugriffe wie Kalendar-Abonnements oder REI3-Clients."
 		},
 		"dbSync": {
+			"address": "Netzwerkadresse",
+			"dbName": "Datenbankname",
+			"dbType": "Datenbanktyp",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Datenbank-Sync löschen möchtest?"
 			},

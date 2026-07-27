@@ -136,6 +136,9 @@
 			"tokenKeepEnableHint": "Ja izslēgts, pieteikšanās lapā tiek noņemta opcija 'palikt pierakstītam'. Bez šīs opcijas lietotājiem ir jāautentificējas katru reizi, kad viņi piekļūst sistēmai. Šis iestatījums neietekmē ierīces piekļuvi, piemēram, kalendāra abonēšanu vai REI3 klientus."
 		},
 		"dbSync": {
+			"address": "Network address",
+			"dbName": "Database name",
+			"dbType": "Database type",
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},

@@ -136,6 +136,9 @@
 			"tokenKeepEnableHint": "Kapatılırsa, giriş sayfasındaki 'oturum açık kal' seçeneği kaldırılır. Bu seçenek olmadığında kullanıcılar sisteme her erişimde kimlik doğrulaması yapmak zorunda kalır. Bu ayar, takvim abonelikleri veya REI3 istemcileri gibi cihaz erişimini etkilemez."
 		},
 		"dbSync": {
+			"address": "Network address",
+			"dbName": "Database name",
+			"dbType": "Database type",
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},

@@ -136,6 +136,9 @@
 			"tokenKeepEnableHint": "Si désactivé, l'option 'rester connecté' sur la page de connexion est supprimée. Sans cette option, les utilisateurs sont obligés de s'authentifier à chaque fois qu'ils accèdent au système. Ce paramètre n'affecte pas l'accès via les appareils, comme les abonnements de calendrier ou les clients REI3."
 		},
 		"dbSync": {
+			"address": "Network address",
+			"dbName": "Database name",
+			"dbType": "Database type",
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},

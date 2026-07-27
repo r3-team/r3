@@ -31,7 +31,7 @@ func HostSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, e
 		return nil, err
 	}
 
-	err := tx.QueryRow(ctx, `
+	_, err := tx.Exec(ctx, `
 		INSERT INTO instance_db_sync.host (id, name, comment, db_name,
 			db_type, active, address, port, username, password)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -40,7 +40,7 @@ func HostSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, e
 			name = $2, comment = $3, db_name = $4, db_type = $5, active = $6,
 			address = $7, port = $8, username = $9, password = $10
 	`, h.Id, h.Name, h.Comment, h.DbName, h.DbType, h.Active,
-		h.Address, h.Port, h.Username, h.Password).Scan(&h.Id)
+		h.Address, h.Port, h.Username, h.Password)
 
 	return nil, err
 }

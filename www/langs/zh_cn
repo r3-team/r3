@@ -136,6 +136,9 @@
 			"tokenKeepEnableHint": "如果关闭，登录页面上的“保持登录”选项将被移除。没有这个选项，用户每次访问系统时都必须进行身份验证。此设置不影响设备访问，如日历订阅或 REI3 客户端。"
 		},
 		"dbSync": {
+			"address": "Network address",
+			"dbName": "Database name",
+			"dbType": "Database type",
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},

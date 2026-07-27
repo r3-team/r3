@@ -1,10 +1,14 @@
-import {dialogDeleteAsk}       from '../shared/dialog.js';
-import {deepIsEqual}           from '../shared/generic.js';
+import { deepIsEqual } from '../shared/generic.js';
+import MyInputDecimal from '../inputDecimal.js';
+import {
+	dialogCloseAsk,
+	dialogDeleteAsk
+} from '../shared/dialog.js';
 
 export default {
 	name:'my-admin-db-sync-host',
-	components:{},
-	template:`<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="close">
+	components:{ MyInputDecimal },
+	template:`<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-db-sync-host scroll float">
 			<div class="top">
@@ -14,7 +18,7 @@ export default {
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						@trigger="close"
+						@trigger="closeAsk"
 						:cancel="true"
 					/>
 				</div>
@@ -58,6 +62,52 @@ export default {
 							<td><input v-model="host.name" :disabled="readonly" v-focus /></td>
 							<td></td>
 						</tr>
+						<tr>
+							<td>{{ capGen.active }}*</td>
+							<td><my-bool v-model="host.active" :disabled="readonly" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.comments }}</td>
+							<td><textarea v-model="host.comment" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.address }}*</td>
+							<td>
+								<div class="row gap">
+									<input v-model="host.address" :disabled="readonly" />
+									<my-input-decimal class="short" v-model="host.port" :min="0" :max="65535" :allowNull="false" :lengthFract="0" :readonly />
+								</div>
+							</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.username }}*</td>
+							<td><input v-model="host.username" :disabled="readonly" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.password }}*</td>
+							<td><input type="password" v-model="host.password" :disabled="readonly" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dbName }}*</td>
+							<td><input v-model="host.dbName" :disabled="readonly" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dbType }}*</td>
+							<td>
+								<select v-model="host.dbType" :disabled="readonly">
+									<option value="mysql">MySQL</option>
+									<option value="mssql">MSSQL</option>
+									<option value="pgsql">PostgreSQL</option>
+									<option value="clickhouse">ClickHouse</option>
+								</select>
+							</td>
+							<td></td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
@@ -68,7 +118,7 @@ export default {
 		hostOrg: { type:Object,        required:true },
 		readonly:{ type:Boolean,       required:true }
 	},
-	emits:['close','makeNew'],
+	emits:['close','makeNew','reload'],
 	watch:{
 		hostId:{
 			handler(v) { this.reset(); },
@@ -82,7 +132,12 @@ export default {
 		};
 	},
 	computed:{
-		canSave:s => s.isReady && !s.readonly && s.isChanged && s.host.name !== '',
+		canSave: s => s.isReady && !s.readonly && s.isChanged
+			&& s.host.name !== ''
+			&& s.host.address !== ''
+			&& s.host.dbName !== ''
+			&& s.host.username !== ''
+			&& s.host.password !== '',
 
 		// simple
 		isChanged:s => !s.deepIsEqual(s.hostOrg,s.host),
@@ -95,24 +150,34 @@ export default {
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
 		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
-		this.$store.commit('keyDownHandlerAdd', { fnc: this.close, key: 'Escape' });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.closeAsk, key: 'Escape' });
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel',this.set);
-		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerDel',this.closeAsk);
 		this.$store.commit('keyDownHandlerWake');
 	},
 	methods:{
 		// external
 		deepIsEqual,
+		dialogCloseAsk,
 		dialogDeleteAsk,
 
 		// actions
+		closeAsk() {
+			this.dialogCloseAsk(this.close,this.isChanged);
+		},
 		close() {
 			this.$emit('close');
 		},
-		informAndClose() {
-			ws.send('dbSync', 'informChanged', {}, true).then(this.close, this.$root.genericError);
+		reloadAndClose() {
+			ws.send('dbSync', 'informChanged', {}, true).then(
+				() => {
+					this.$emit('reload');
+					this.close();
+				},
+				this.$root.genericError
+			);
 		},
 		reset() {
 			this.host = JSON.parse(JSON.stringify(this.hostOrg));
@@ -121,14 +186,14 @@ export default {
 
 		// backend calls
 		del() {
-			ws.send('dbSync','delHost',this.id,true).then(
-				this.informAndClose,
+			ws.send('dbSync','delHost',this.hostId,true).then(
+				this.reloadAndClose,
 				this.$root.genericError
 			);
 		},
 		set() {
-			ws.send('dbSync','setHost',this.inputs,true).then(
-				this.informAndClose,
+			ws.send('dbSync','setHost',this.host,true).then(
+				this.reloadAndClose,
 				this.$root.genericError
 			);
 		}

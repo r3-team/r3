@@ -479,6 +479,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.mail_account ALTER COLUMN resend_seconds DROP DEFAULT;
 
 			-- DB sync
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'dbSyncChanged';
 			CREATE SCHEMA instance_db_sync;
 			CREATE TYPE instance_db_sync.db_type AS ENUM('mssql', 'mysql', 'pgsql', 'clickhouse');
 			CREATE TYPE instance_db_sync.job_type AS ENUM('LOAD','SEND_INSERT','SEND_UPDATE','SEND_DELETE');
@@ -494,6 +495,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				port integer NOT NULL,
 				username text NOT NULL,
 				password text NOT NULL,
+				CONSTRAINT host_pkey PRIMARY KEY (id),
 				CONSTRAINT host_name_key UNIQUE (name) DEFERRABLE INITIALLY DEFERRED
 			);
 			CREATE TABLE IF NOT EXISTS instance_db_sync.job (

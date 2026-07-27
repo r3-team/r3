@@ -35,7 +35,14 @@ export default {
 				>
 					<div class="lines">
 						<span>{{ h.name }}</span>
+						<span class="subtitle">{{ h.dbType }} - {{ h.address }}:{{ h.port }}/{{ h.dbName }}</span>
 					</div>
+					<my-button image="remove.png"
+						v-if="!h.active"
+						:active="false"
+						:captionTitle="capGen.disabled"
+						:naked="true"
+					/>
 				</div>
 			</div>
 
@@ -43,8 +50,9 @@ export default {
 				v-if="hostOpen !== null"
 				@close="closeHost"
 				@makeNew="openHost(null)"
+				@reload="get"
+				:hostId="hostIdOpen"
 				:hostOrg="hostOpen"
-				:id="hostIdOpen"
 				:readonly="!licenseValid"
 			/>
 		</div>

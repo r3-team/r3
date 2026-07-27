@@ -136,6 +136,9 @@
 			"tokenKeepEnableHint": "If switched off, the 'stay logged in' option on the login page is removed. Without this option, users are forced to authenticate every time they access the system. This setting does not affect device access, like calendar subscriptions or REI3 clients."
 		},
 		"dbSync": {
+			"address": "Network address",
+			"dbName": "Database name",
+			"dbType": "Database type",
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},
