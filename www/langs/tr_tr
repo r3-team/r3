@@ -149,6 +149,8 @@
 				"SEND_UPDATE": "Send record update"
 			},
 			"title": "Database sync '{NAME}'",
+			"titleJob": "Sync job '{NAME}'",
+			"titleJobNew": "New sync job",
 			"titleNew": "New database sync"
 		},
 		"files": {
@@ -2420,6 +2422,7 @@
 			"createNew": "Oluştur+Yeni",
 			"delete": "Silmek",
 			"deleteHint": "Kaydı kalıcı olarak sil ve geri dön",
+			"deleteMissing": "Delete missing",
 			"deleteNewHint": "Kaydı sil ve yenisini aç",
 			"deleteSelected": "Seçileni sil",
 			"download": "İndirmek",

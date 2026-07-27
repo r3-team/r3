@@ -148,7 +148,9 @@
 				"SEND_INSERT": "Datensatzerstellung senden",
 				"SEND_UPDATE": "Datensatzaktualisierung senden"
 			},
-			"title": "Datenbank-Sync '{NAME}'",
+			"title": "Datenbank-Sync \"{NAME}\"",
+			"titleJob": "Sync-Aufgabe \"{NAME}\"",
+			"titleJobNew": "Neue Sync-Aufgabe",
 			"titleNew": "Neuer Datenbank-Sync"
 		},
 		"files": {
@@ -2420,7 +2422,8 @@
 			"createNew": "Erstellen+Neu",
 			"delete": "Löschen",
 			"deleteHint": "Datensatz dauerhaft löschen und zurück gehen",
-			"deleteNewHint": "Delete record and open a new one",
+			"deleteMissing": "Fehlende löschen",
+			"deleteNewHint": "Datensatz löschen und einen neuen öffnen",
 			"deleteSelected": "Ausgewählte löschen",
 			"download": "Herunterladen",
 			"edit": "Bearbeiten",

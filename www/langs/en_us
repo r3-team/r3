@@ -149,6 +149,8 @@
 			"dbName": "Database name",
 			"dbType": "Database type",
 			"title": "Database sync '{NAME}'",
+			"titleJob": "Sync job '{NAME}'",
+			"titleJobNew": "New sync job",
 			"titleNew": "New database sync"
 		},
 		"files": {
@@ -2420,6 +2422,7 @@
 			"createNew": "Create+New",
 			"delete": "Delete",
 			"deleteHint": "Permanently delete record and go back",
+			"deleteMissing": "Delete missing",
 			"deleteNewHint": "Delete record and open a new one",
 			"deleteSelected": "Delete selected",
 			"download": "Download",

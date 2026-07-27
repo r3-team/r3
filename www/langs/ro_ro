@@ -149,6 +149,8 @@
 				"SEND_UPDATE": "Send record update"
 			},
 			"title": "Database sync '{NAME}'",
+			"titleJob": "Sync job '{NAME}'",
+			"titleJobNew": "New sync job",
 			"titleNew": "New database sync"
 		},
 		"files": {
@@ -2420,6 +2422,7 @@
 			"createNew": "Crează+Nou",
 			"delete": "Șterge",
 			"deleteHint": "Șterge definitiv înregistrarea selectată",
+			"deleteMissing": "Delete missing",
 			"deleteNewHint": "Delete record and open a new one",
 			"deleteSelected": "Șterge selecția",
 			"download": "Download",

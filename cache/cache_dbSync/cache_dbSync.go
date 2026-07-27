@@ -59,7 +59,7 @@ func LoadJobs_tx(ctx context.Context, tx pgx.Tx) error {
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, host_id, relation_id, pg_index_id_lookup, name, comment,
-			code_sql, page_limit, job_type, delete_missing, ARRAY(
+			code_sql, page_limit, job_type, delete_missing, active, ARRAY(
 				SELECT attribute_id
 				FROM instance_db_sync.job_attribute
 				WHERE job_id = j.id
@@ -80,7 +80,7 @@ func LoadJobs_tx(ctx context.Context, tx pgx.Tx) error {
 	for rows.Next() {
 		var j types.DbSyncJob
 		if err := rows.Scan(&j.Id, &j.HostId, &j.RelationId, &j.PgIndexIdLookup, &j.Name, &j.Comment,
-			&j.CodeSql, &j.PageLimit, &j.JobType, &j.DeleteMissing, &j.AttributeIds); err != nil {
+			&j.CodeSql, &j.PageLimit, &j.JobType, &j.DeleteMissing, &j.Active, &j.AttributeIds); err != nil {
 
 			return err
 		}

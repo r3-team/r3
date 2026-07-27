@@ -32,14 +32,14 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	// cannot update host, relation, or job type
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance_db_sync.job (id, host_id, relation_id, pg_index_id_lookup,
-			job_type, name, comment, code_sql, page_limit, delete_missing)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+			job_type, name, comment, code_sql, page_limit, delete_missing, active)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 		ON CONFLICT (id)
 		DO UPDATE SET
 			pg_index_id_lookup = $4, name = $6, comment = $7, code_sql = $8,
-			page_limit = $9, delete_missing = $10
+			page_limit = $9, delete_missing = $10, active = $11
 	`, j.Id, j.HostId, j.RelationId, j.PgIndexIdLookup, j.JobType, j.Name,
-		j.Comment, j.CodeSql, j.PageLimit, j.DeleteMissing); err != nil {
+		j.Comment, j.CodeSql, j.PageLimit, j.DeleteMissing, j.Active); err != nil {
 
 		return nil, err
 	}

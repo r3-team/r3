@@ -31,16 +31,43 @@
 
 /* DB sync */
 .admin-db-sync-host{}
-@scope (.admin-db-sync-host) {
-	.jobs{
-		border-left:1px solid var(--color-border);
-	}
-	.jobsTable{
-		border:var(--border-input);
-		border-radius:var(--border-input-radius);
-		box-shadow:var(--shadow-input);
-		min-width:400px;
-	}
+.admin-db-sync-host-table{
+	width:100%;
+	max-width:700px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+	min-width:400px;
+}
+.admin-db-sync-job{
+	width:95%;
+	max-width:2200px;
+	height:95%;
+}
+.admin-db-sync-job-content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row wrap;
+	gap:var(--spacing);
+}
+.admin-db-sync-job-content-editor{
+	flex:3 2 600px;
+	display:flex;
+	flex-flow:row wrap;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+}
+.admin-db-sync-job-content-arrow{
+	flex:0 0 60px;
+	display:flex;
+	flex-flow:column nowrap;
+	justify-content:center;
+}
+.admin-db-sync-job-content-options{
+	flex:1 0 300px;
+	display:flex;
+	flex-flow:column nowrap;
 }
 
 

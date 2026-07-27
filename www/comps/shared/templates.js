@@ -22,6 +22,22 @@ export function getTemplateDbSyncHost() {
 		password: ''
 	};
 };
+export function getTemplateDbSyncJob(hostId) {
+	return {
+		id: getUuidV4(),
+		hostId,
+		relationId: null,
+		attributeIds: [],
+		pgIndexIdLookup: null,
+		name: '',
+		comment: '',
+		codeSql: '',
+		jobType: 'LOAD',
+		active: true,
+		deleteMissing: false,
+		pageLimit: null
+	};
+};
 export function getTemplateFnc(name,isTrigger) {
 	switch(name) {
 		case 'loginSync':                return loginSync;                break;

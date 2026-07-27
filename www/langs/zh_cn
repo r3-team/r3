@@ -149,6 +149,8 @@
 				"SEND_UPDATE": "Send record update"
 			},
 			"title": "Database sync '{NAME}'",
+			"titleJob": "Sync job '{NAME}'",
+			"titleJobNew": "New sync job",
 			"titleNew": "New database sync"
 		},
 		"files": {
@@ -2420,6 +2422,7 @@
 			"createNew": "创建 + 新建",
 			"delete": "删除",
 			"deleteHint": "永久删除记录",
+			"deleteMissing": "Delete missing",
 			"deleteNewHint": "Delete record and open a new one",
 			"deleteSelected": "删除所选",
 			"download": "下载",

@@ -1,5 +1,7 @@
-import { deepIsEqual } from '../shared/generic.js';
+import MyAdminDbSyncJob from './adminDbSyncJob.js';
 import MyInputDecimal from '../inputDecimal.js';
+import { deepIsEqual } from '../shared/generic.js';
+import { getTemplateDbSyncJob } from '../shared/templates.js';
 import {
 	dialogCloseAsk,
 	dialogDeleteAsk
@@ -7,7 +9,7 @@ import {
 
 export default {
 	name:'my-admin-db-sync-host',
-	components:{ MyInputDecimal },
+	components:{ MyAdminDbSyncJob, MyInputDecimal },
 	template:`<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-db-sync-host scroll float">
@@ -54,7 +56,7 @@ export default {
 				</div>
 			</div>
 
-			<div class="row nowrap">
+			<div class="row wrap">
 				<!-- host details -->
 				<div class="content no-padding default-inputs">
 					<table class="generic-table-vertical">
@@ -76,7 +78,14 @@ export default {
 								<td>
 									<div class="row gap">
 										<input v-model="host.address" :disabled="readonly" />
-										<my-input-decimal class="short" v-model="host.port" :min="0" :max="65535" :allowNull="false" :lengthFract="0" :readonly />
+										<my-input-decimal class="short"
+											v-model="host.port"
+											:min="0"
+											:max="65535"
+											:allowNull="false"
+											:lengthFract="0"
+											:readonly
+										/>
 									</div>
 								</td>
 							</tr>
@@ -108,15 +117,16 @@ export default {
 				</div>
 
 				<!-- host jobs -->
-				<div class="content flex column gap jobs" v-if="!isNew">
+				<div class="content flex grow column gap" v-if="!isNew">
 					<div class="row gap centered space-between">
 						<my-label image="cogMultiple.png" :caption="capGen.jobs" />
 						<my-button image="add.png"
 							v-if="!readonly"
+							@trigger="openJob(null)"
 							:caption="capGen.button.add"
 						/>
 					</div>
-					<table class="generic-table bright jobsTable">
+					<table class="generic-table bright admin-db-sync-host-table">
 						<thead>
 							<tr>
 								<th>{{ capGen.name }}</th>
@@ -138,6 +148,17 @@ export default {
 				</div>
 			</div>
 		</div>
+
+		<my-admin-db-sync-job
+			v-if="jobOpen !== null"
+			@close="closeJob"
+			@makeNew="openJob(null)"
+			@reload="$emit('reload')"
+			:dbType="host.dbType"
+			:jobId="jobIdOpen"
+			:jobOrg="jobOpen"
+			:readonly
+		/>
 	</div>`,
 	props: {
 		hostId:  { type: [String,null], required: true },
@@ -154,8 +175,13 @@ export default {
 	},
 	data() {
 		return {
-			isReady:false,
-			host:{}
+			// inputs
+			host: {},
+
+			// states
+			jobIdOpen: null, // ID of job to be edited (null = new job)
+			jobOpen: null,   // contains job as object (null = no job open)
+			isReady: false,
 		};
 	},
 	computed:{
@@ -198,6 +224,7 @@ export default {
 		deepIsEqual,
 		dialogCloseAsk,
 		dialogDeleteAsk,
+		getTemplateDbSyncJob,
 
 		// actions
 		closeAsk() {
@@ -205,6 +232,18 @@ export default {
 		},
 		close() {
 			this.$emit('close');
+		},
+		closeJob() {
+			this.jobOpen = null;
+		},
+		openJob(id) {
+			if (id === null) {
+				this.jobIdOpen = null;
+				this.jobOpen = this.getTemplateDbSyncJob(this.hostId);
+			} else if(this.jobIdMap[id] !== undefined) {
+				this.jobIdOpen = id;
+				this.jobOpen = this.jobIdMap[id];
+			}
 		},
 		reloadAndClose() {
 			ws.send('dbSync', 'informChanged', {}, true).then(

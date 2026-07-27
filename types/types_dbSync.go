@@ -33,7 +33,7 @@ type DbSyncHost struct {
 	Password string `json:"password"`
 }
 
-// a job to send or receive data from external DB systems
+// a job to LOAD from or SEND to external DB systems
 type DbSyncJob struct {
 	Id      uuid.UUID     `json:"id"`
 	HostId  uuid.UUID     `json:"hostId"`
@@ -41,12 +41,13 @@ type DbSyncJob struct {
 	Comment string        `json:"comment"`
 	CodeSql string        `json:"codeSql"`
 	JobType DbSyncJobType `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
+	Active  bool          `json:"active"`
 
 	// map to relation attributes
 	RelationId   uuid.UUID   `json:"relationId"`   // relation to read from (sending) or write to (receiving)
 	AttributeIds []uuid.UUID `json:"attributeIds"` // attributes (in order) to map to parameters (SEND) or expressions (LOAD)
 
-	// receiving only
+	// LOAD only
 	DeleteMissing   bool        `json:"deleteMissing"`   // delete non-existing records
 	PageLimit       pgtype.Int4 `json:"pageLimit"`       // limit rows fetched in one go
 	PgIndexIdLookup pgtype.UUID `json:"pgIndexIdLookup"` // if used, records are identified via attributes assigned to the chosen unique index

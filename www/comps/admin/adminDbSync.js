@@ -45,18 +45,18 @@ export default {
 					/>
 				</div>
 			</div>
-
-			<my-admin-db-sync-host
-				v-if="hostOpen !== null"
-				@close="closeHost"
-				@makeNew="openHost(null)"
-				@reload="get"
-				:hostId="hostIdOpen"
-				:hostOrg="hostOpen"
-				:jobIdMap
-				:readonly="!licenseValid"
-			/>
 		</div>
+
+		<my-admin-db-sync-host
+			v-if="hostOpen !== null"
+			@close="closeHost"
+			@makeNew="openHost(null)"
+			@reload="get"
+			:hostId="hostIdOpen"
+			:hostOrg="hostOpen"
+			:jobIdMap
+			:readonly="!licenseValid"
+		/>
 	</div>`,
 	props:{
 		menuTitle:{ type:String, required:true }
