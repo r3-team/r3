@@ -15,7 +15,7 @@ export default {
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/codeScreen.png" />
-					<h1 class="title">{{ capGen.functionsFrontend }}</h1>
+					<h1 class="title">{{ capGen.functionsFrontend }} ({{ idsShow.length + '/' + module.jsFunctions.length }})</h1>
 				</div>
 				<div class="area">
 					<my-button image="open.png"
