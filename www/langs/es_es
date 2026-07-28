@@ -590,6 +590,7 @@
 				"clusterProcessEvents": "Procesamiento de eventos del clúster",
 				"codesGenerate": "Generate QR-/barcodes",
 				"dbOptimize": "Optimización de la base de datos",
+				"dbSync": "Database sync",
 				"docsGenerate": "Generate PDF documents",
 				"filesProcess": "File job processing",
 				"httpCertRenew": "Recargar certificado SSL si se actualiza",

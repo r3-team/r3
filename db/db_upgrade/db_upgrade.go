@@ -506,6 +506,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				name text NOT NULL,
 				comment text,
 				code_sql text NOT NULL,
+				date_attempt BIGINT,
+				date_success BIGINT,
+				interval_seconds INTEGER NOT NULL,
 				job_type instance_db_sync.job_type NOT NULL,
 				active BOOLEAN NOT NULL,
 				delete_missing BOOLEAN NOT NULL,
@@ -541,6 +544,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED
 			);
+
+			INSERT INTO instance.task (name,interval_seconds,cluster_master_only,embedded_only,active_only,active)
+			VALUES ('dbSync',15,true,false,false,true);
+
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('dbSync',0,0);
 
 			CREATE TABLE IF NOT EXISTS instance_db_sync.send_spool (
 				id uuid NOT NULL DEFAULT gen_random_uuid(),

@@ -18,6 +18,7 @@ import (
 	"r3/schema"
 	"r3/spooler"
 	"r3/spooler/code_create"
+	"r3/spooler/db_sync"
 	"r3/spooler/doc_create"
 	"r3/spooler/file_process"
 	"r3/spooler/mail_attach"
@@ -375,6 +376,9 @@ func load() error {
 		case "dbOptimize":
 			t.nameLog = "Database optimization"
 			t.fn = dbOptimize
+		case "dbSync":
+			t.nameLog = "Database sync"
+			t.fn = db_sync.DoAllLoad
 		case "docsGenerate":
 			t.nameLog = "Document generation"
 			t.fn = doc_create.DoAll

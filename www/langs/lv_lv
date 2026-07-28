@@ -590,6 +590,7 @@
 				"clusterProcessEvents": "Apstrādāt klastra notikumus",
 				"codesGenerate": "Generate QR-/barcodes",
 				"dbOptimize": "Optimizēt datubāzi",
+				"dbSync": "Database sync",
 				"docsGenerate": "Generate PDF documents",
 				"filesProcess": "File job processing",
 				"httpCertRenew": "Pārlādēt SSL sertifikātu, ja tas ir atjaunināts",

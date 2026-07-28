@@ -590,6 +590,7 @@
 				"clusterProcessEvents": "معالجة الأحداث الجماعية",
 				"codesGenerate": "Generate QR-/barcodes",
 				"dbOptimize": "تحسين قاعدة البيانات",
+				"dbSync": "Database sync",
 				"docsGenerate": "Generate PDF documents",
 				"filesProcess": "File job processing",
 				"httpCertRenew": "أعد تحميل شهادة SSL إذا تم تحديثها",

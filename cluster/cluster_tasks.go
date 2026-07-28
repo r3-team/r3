@@ -283,7 +283,14 @@ func MasterAssigned(state bool) error {
 	log.Info(log.ContextCluster, fmt.Sprintf("node has changed its master state to '%v'", state))
 	cache.SetIsClusterMaster(state)
 
-	// reload scheduler as most events should only be executed by the cluster master
+	if state {
+		// reload DB sync cache to update job run dates
+		if err := cache_dbSync.Load(); err != nil {
+			log.Error(log.ContextCluster, "node failed to reload DB sync cache during cluster master assignment", err)
+		}
+	}
+
+	// reload scheduler, most events are only executed by the cluster master
 	SchedulerRestart <- true
 	return nil
 }

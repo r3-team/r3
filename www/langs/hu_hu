@@ -590,6 +590,7 @@
 				"clusterProcessEvents": "Klaszter események feldolgozása",
 				"codesGenerate": "Generate QR-/barcodes",
 				"dbOptimize": "Database optimization",
+				"dbSync": "Database sync",
 				"docsGenerate": "Generate PDF documents",
 				"filesProcess": "File job processing",
 				"httpCertRenew": "SSL tanúsítvány újratöltése, ha megújították",

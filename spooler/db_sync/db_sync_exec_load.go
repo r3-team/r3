@@ -185,7 +185,7 @@ func doLoadDelete(ctx context.Context, modName, relName string, uniqueIndexAttri
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
-	log.Info(log.ContextDbSync, fmt.Sprintf("deleted %d missing records from local DB", ct.RowsAffected()))
+	log.Info(log.ContextDbSync, fmt.Sprintf("deleted %d records from local DB, not existing in source", ct.RowsAffected()))
 	return nil
 }
 

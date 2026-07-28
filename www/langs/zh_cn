@@ -590,6 +590,7 @@
 				"clusterProcessEvents": "集群事件处理",
 				"codesGenerate": "Generate QR-/barcodes",
 				"dbOptimize": "数据库优化",
+				"dbSync": "Database sync",
 				"docsGenerate": "Generate PDF documents",
 				"filesProcess": "File job processing",
 				"httpCertRenew": "如果已更新，则重新加载 SSL 证书",

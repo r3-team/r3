@@ -1,8 +1,8 @@
-import {getUuidV4} from './crypto.js';
+import { getUuidV4 } from './crypto.js';
 
 export function getTemplateArgs(name) {
-	switch(name) {
-		case 'loginSync':        return '_event TEXT, _user instance.user_data'; break;
+	switch (name) {
+		case 'loginSync': return '_event TEXT, _user instance.user_data'; break;
 		case 'restAuthResponse': // fallthrough
 		case 'restDataResponse': return 'http_status INTEGER, response TEXT, callback TEXT'; break;
 		default: return ''; break;
@@ -32,26 +32,29 @@ export function getTemplateDbSyncJob(hostId) {
 		name: '',
 		comment: '',
 		codeSql: '',
+		dateAttempt: null,
+		dateSuccess: null,
+		intervalSeconds: 86400,
 		jobType: 'LOAD',
 		active: true,
 		deleteMissing: false,
 		pageLimit: null
 	};
 };
-export function getTemplateFnc(name,isTrigger) {
-	switch(name) {
-		case 'loginSync':                return loginSync;                break;
-		case 'mailsFromSpooler':         return mailsFromSpooler;         break;
-		case 'restAuthRequest':          return restAuthRequest;          break;
-		case 'restAuthResponse':         return restAuthResponse;         break;
-		case 'restDataResponse':         return restDataResponse;         break;
+export function getTemplateFnc(name, isTrigger) {
+	switch (name) {
+		case 'loginSync': return loginSync; break;
+		case 'mailsFromSpooler': return mailsFromSpooler; break;
+		case 'restAuthRequest': return restAuthRequest; break;
+		case 'restAuthResponse': return restAuthResponse; break;
+		case 'restDataResponse': return restDataResponse; break;
 		case 'restFileAttachViaREI3API': return restFileAttachViaREI3API; break;
-		case 'restFileUploadToREI3':     return restFileUploadToREI3;     break;
+		case 'restFileUploadToREI3': return restFileUploadToREI3; break;
 		default:
 			return isTrigger
 				? '$BODY$\nDECLARE\nBEGIN\n\tRETURN NEW;\nEND;\n$BODY$'
 				: '$BODY$\nDECLARE\nBEGIN\n\tRETURN 0;\nEND;\n$BODY$';
-		break;
+			break;
 	}
 };
 export function getTemplateReturn(isTrigger) {
@@ -61,14 +64,14 @@ export function getTemplateReturn(isTrigger) {
 export function getTemplateRepo(id) {
 	return {
 		id,
-		active:true,
-		name:'',
-		dateChecked:0,
-		feedbackEnable:false,
-		fetchUserName:'',
-		fetchUserPass:'',
-		skipVerify:false,
-		url:''
+		active: true,
+		name: '',
+		dateChecked: 0,
+		feedbackEnable: false,
+		fetchUserName: '',
+		fetchUserPass: '',
+		skipVerify: false,
+		url: ''
 	};
 };
 

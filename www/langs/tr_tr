@@ -590,6 +590,7 @@
 				"clusterProcessEvents": "Küme olayı işleme",
 				"codesGenerate": "Generate QR-/barcodes",
 				"dbOptimize": "Veritabanı optimizasyonu",
+				"dbSync": "Database sync",
 				"docsGenerate": "PDF belgeleri oluştur",
 				"filesProcess": "Dosya işi işleme",
 				"httpCertRenew": "Güncellendiyse SSL sertifikasını yeniden yükleyin",
