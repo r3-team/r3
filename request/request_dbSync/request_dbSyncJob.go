@@ -12,6 +12,7 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // DB sync jobs
@@ -27,6 +28,13 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	var j types.DbSyncJob
 	if err := json.Unmarshal(reqJson, &j); err != nil {
 		return nil, err
+	}
+
+	// reset invalid inputs based on job type
+	if j.JobType != types.DbSyncJobTypeLoad {
+		j.DeleteMissing = false
+		j.PageLimit = pgtype.Int4{}
+		j.PgIndexIdLookup = pgtype.UUID{}
 	}
 
 	// cannot update host, relation, or job type
@@ -46,7 +54,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance_db_sync.job_attribute (job_id, attribute_id)
-		SELECT $1, UNNEST($2)
+		SELECT $1, UNNEST($2::UUID[])
 		ON CONFLICT (job_id, attribute_id) DO NOTHING
 	`, j.Id, j.AttributeIds); err != nil {
 		return nil, err
@@ -55,7 +63,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance_db_sync.job_attribute
 		WHERE job_id = $1
-		AND ($2 IS NULL OR attribute_id <> ALL($2))
+		AND ($2::UUID[] IS NULL OR attribute_id <> ALL($2::UUID[]))
 	`, j.Id, j.AttributeIds); err != nil {
 		return nil, err
 	}
@@ -75,9 +83,22 @@ func JobsGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 
 // helpers
 func jobDeleteById(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
-	if err := triggerSendRemoveIfNotNeeded(ctx, tx, id); err != nil {
+	var jobType types.DbSyncJobType
+	var relationId uuid.UUID
+	if err := tx.QueryRow(ctx, `
+		SELECT job_type, relation_id
+		FROM instance_db_sync.job
+		WHERE id = $1
+	`, id).Scan(&jobType, &relationId); err != nil {
 		return err
 	}
+
+	if slices.Contains(types.DbSyncJobTypesSend, jobType) {
+		if err := triggerSendRemoveIfNotNeeded(ctx, tx, id, relationId, jobType); err != nil {
+			return err
+		}
+	}
+
 	_, err := tx.Exec(ctx, `DELETE FROM instance_db_sync.job WHERE id = $1`, id)
 	return err
 }
@@ -160,7 +181,7 @@ func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.U
 	return err
 }
 
-func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId uuid.UUID) error {
+func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId uuid.UUID, relationId uuid.UUID, jobType types.DbSyncJobType) error {
 
 	// check if there is another job for the combination of relation/job type that needs this trigger
 	var exists bool
@@ -184,24 +205,12 @@ func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId uuid.UUI
 		return nil
 	}
 
-	// no job exists, remove trigger
-	var relationId uuid.UUID
-	var jobType types.DbSyncJobType
-	if err := tx.QueryRow(ctx, `
-		SELECT relation_id, job_type
-		FROM instance_db_sync.job
-		WHERE id = $1
-		LIMIT 1
-	`, jobId).Scan(&relationId, &jobType); err != nil {
-		return err
-	}
-
 	modName, relName, err := cache.GetRelationDbNames(relationId)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.Exec(ctx, fmt.Sprintf(`DROP TRIGGER "%s" ON "%s"."%s"`,
+	_, err = tx.Exec(ctx, fmt.Sprintf(`DROP TRIGGER IF EXISTS "%s" ON "%s"."%s"`,
 		schema.GetDbSyncTriggerName(relationId, jobType), modName, relName))
 
 	return err

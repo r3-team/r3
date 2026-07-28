@@ -38,6 +38,7 @@
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 	min-width:400px;
+	overflow:hidden;
 }
 .admin-db-sync-job{
 	width:95%;
@@ -53,16 +54,24 @@
 .admin-db-sync-job-content-editor{
 	flex:3 2 600px;
 	display:flex;
-	flex-flow:row wrap;
+	flex-flow:column nowrap;
+	gap:calc(var(--spacing) / 1.5);
+}
+.admin-db-sync-job-content-editor-input{
+	flex:1 1 auto;
+	min-height:500px;
+	display:flex;
 	border:var(--border-input);
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
+	overflow:hidden;
 }
 .admin-db-sync-job-content-arrow{
 	flex:0 0 60px;
 	display:flex;
 	flex-flow:column nowrap;
 	justify-content:center;
+	align-items:center;
 }
 .admin-db-sync-job-content-options{
 	flex:1 0 300px;

@@ -144,14 +144,22 @@
 			},
 			"jobType": {
 				"LOAD": "Load records",
-				"SEND_DELETE": "Send record deletion",
-				"SEND_INSERT": "Send record creation",
-				"SEND_UPDATE": "Send record update"
+				"SEND_DELETE": "Send deleted record",
+				"SEND_INSERT": "Send created record",
+				"SEND_UPDATE": "Send updated record"
 			},
+			"loadSource": "Load records via SQL query (SELECT)",
+			"loadSourceHint": "SQL query is executed on the database host '{HOST}' when the job runs. Each SELECT expression (column, sub query, ...) must be assigned to one attribute in REI3 in the given order, to create/update record values in the chosen relation.",
+			"loadTargetAttributes": "Assign SELECT expressions to attributes",
+			"loadTargetRelation": "Write loaded records to relation",
 			"title": "Database sync '{NAME}'",
 			"titleJob": "Sync job '{NAME}'",
 			"titleJobNew": "New sync job",
-			"titleNew": "New database sync"
+			"titleNew": "New database sync",
+			"warning": {
+				"missingLimit": "When a page limit is used, placeholders for LIMIT & OFFSET must be set in the SELECT SQL query. Example: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
+				"missingSelect": "To load records, SQL query should start with a SELECT statement."
+			}
 		},
 		"files": {
 			"deleteDate": "Archivo eliminado",
@@ -2615,6 +2623,7 @@
 		"less": "Menos",
 		"licenseRequired": "Requiere licencia",
 		"limit": "Límite",
+		"limitPage": "Page size",
 		"list": "List",
 		"listFullpage": "Fullpage list",
 		"loading": "Loading...",

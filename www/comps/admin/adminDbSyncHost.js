@@ -123,7 +123,7 @@ export default {
 						<my-button image="add.png"
 							v-if="!readonly"
 							@trigger="openJob(null)"
-							:caption="capGen.button.add"
+							:caption="capGen.button.create"
 						/>
 					</div>
 					<table class="generic-table bright admin-db-sync-host-table">
@@ -136,7 +136,13 @@ export default {
 						</thead>
 						<tbody>
 							<tr v-if="jobs.length !== 0" v-for="j in jobs">
-								<td>{{ j.name }}</td>
+								<td>
+									<div class="row gap centered">
+										<my-button image="open.png" @trigger="openJob(j.id)" />
+										<my-label image="remove.png" v-if="!j.active" />
+										<span>{{ j.name }}</span>
+									</div>
+								</td>
 								<td>{{ capApp.jobType[j.jobType] }}</td>
 								<td>{{ relationIdMap[j.relationId].name }}</td>
 							</tr>
@@ -155,6 +161,7 @@ export default {
 			@makeNew="openJob(null)"
 			@reload="$emit('reload')"
 			:dbType="host.dbType"
+			:hostName="host.name"
 			:jobId="jobIdOpen"
 			:jobOrg="jobOpen"
 			:readonly

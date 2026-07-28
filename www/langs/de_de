@@ -148,10 +148,18 @@
 				"SEND_INSERT": "Datensatzerstellung senden",
 				"SEND_UPDATE": "Datensatzaktualisierung senden"
 			},
+			"loadSource": "Datensätze via SQL-Abfrage laden (SELECT)",
+			"loadSourceHint": "SQL-Abfrage wird auf dem Datenbanksystem '{HOST}' ausgeführt, wenn Aufgabe läuft. Jeder SELECT-Ausdruck (Spalte, Unterabfrage, ...) muss einem Attribut in REI3 in der richtigen Reihenfolge zugeordnet werden, um Datensatzwerte in der gewählten Relation zu erstellen/aktualisieren.",
+			"loadTargetAttributes": "SELECT-Ausdrücke Attributen zuordnen",
+			"loadTargetRelation": "Geladene Datensätze in Relation schreiben",
 			"title": "Datenbank-Sync \"{NAME}\"",
 			"titleJob": "Sync-Aufgabe \"{NAME}\"",
 			"titleJobNew": "Neue Sync-Aufgabe",
-			"titleNew": "Neuer Datenbank-Sync"
+			"titleNew": "Neuer Datenbank-Sync",
+			"warning": {
+				"missingLimit": "Wenn eine Seitengröße definiert ist, müssen Platzhalter für LIMIT & OFFSET in der SQL-Abfrage gesetzt sein. Beispiel: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
+				"missingSelect": "Um Datensätze zu laden, sollte SQL-Abfrage mit einem SELECT beginnen."
+			}
 		},
 		"files": {
 			"deleteDate": "Datei gelöscht",
@@ -2615,6 +2623,7 @@
 		"less": "Weniger",
 		"licenseRequired": "Lizenz erforderlich",
 		"limit": "Anzahl",
+		"limitPage": "Seitengröße",
 		"list": "Liste",
 		"listFullpage": "Ganzseitige Liste",
 		"loading": "Loading...",
