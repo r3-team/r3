@@ -193,13 +193,14 @@ export default {
 						@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
 						:caption="capGen.id"
 					/>
-					<my-button image="dropdown.png"
-						@trigger="showEnumWizard = true"
-						:caption="capApp.wizardEnum.title"
-					/>
 					<my-button image="builderLookup.png"
 						@trigger="showLookup = true"
 						:caption="capGen.references"
+					/>
+					<my-button image="dropdown.png"
+						@trigger="showEnumWizard = true"
+						:active="!readonly"
+						:caption="capApp.wizardEnum.title"
 					/>
 					<my-button image="delete.png"
 						@trigger="delCheck"
