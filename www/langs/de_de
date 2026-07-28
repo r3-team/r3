@@ -139,6 +139,7 @@
 			"address": "Netzwerkadresse",
 			"dbName": "Datenbankname",
 			"dbType": "Datenbanktyp",
+			"deleteMissing": "Datensätze nicht in Quelle löschen",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Datenbank-Sync löschen möchtest?"
 			},
@@ -152,11 +153,13 @@
 			"loadSourceHint": "SQL-Abfrage wird auf dem Datenbanksystem '{HOST}' ausgeführt, wenn Aufgabe läuft. Jeder SELECT-Ausdruck (Spalte, Unterabfrage, ...) muss einem Attribut in REI3 in der richtigen Reihenfolge zugeordnet werden, um Datensatzwerte in der gewählten Relation zu erstellen/aktualisieren.",
 			"loadTargetAttributes": "SELECT-Ausdrücke Attributen zuordnen",
 			"loadTargetRelation": "Geladene Datensätze in Relation schreiben",
+			"loadUniqueIndex": "Eindeutiger Index zur Aktualisierung von Datensätzen",
 			"title": "Datenbank-Sync \"{NAME}\"",
 			"titleJob": "Sync-Aufgabe \"{NAME}\"",
 			"titleJobNew": "Neue Sync-Aufgabe",
 			"titleNew": "Neuer Datenbank-Sync",
 			"warning": {
+				"missingIndexAttribute": "Wenn ein eindeutiger Index zur Aktualisierung von Datensätzen genutzt wird, müssen alle Attribute dieses Indexes als Ausdrücke zugeordnet sein.",
 				"missingLimit": "Wenn eine Seitengröße definiert ist, müssen Platzhalter für LIMIT & OFFSET in der SQL-Abfrage gesetzt sein. Beispiel: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
 				"missingSelect": "Um Datensätze zu laden, sollte SQL-Abfrage mit einem SELECT beginnen."
 			}
@@ -2430,7 +2433,6 @@
 			"createNew": "Erstellen+Neu",
 			"delete": "Löschen",
 			"deleteHint": "Datensatz dauerhaft löschen und zurück gehen",
-			"deleteMissing": "Fehlende löschen",
 			"deleteNewHint": "Datensatz löschen und einen neuen öffnen",
 			"deleteSelected": "Ausgewählte löschen",
 			"download": "Herunterladen",

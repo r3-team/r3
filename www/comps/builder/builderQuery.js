@@ -1,5 +1,6 @@
-import MyBuilderCaption               from './builderCaption.js';
-import {getCaptionByIndexAttributeId} from '../shared/query.js';
+import MyBuilderCaption from './builderCaption.js';
+import { getCaptionByIndexAttributeId } from '../shared/query.js';
+import { getPgIndexTitle } from '../shared/schema.js';
 import {
 	getTemplateQueryChoice,
 	getTemplateQueryFilter
@@ -20,8 +21,8 @@ import {
 } from '../shared/builder.js';
 
 const MyBuilderQueryFilter = {
-	name:'my-builder-query-filter',
-	template:`<div class="query-title">
+	name: 'my-builder-query-filter',
+	template: `<div class="query-title">
 		<my-button
 			@trigger="show = !show"
 			:active="modelValue.length !== 0"
@@ -72,98 +73,98 @@ const MyBuilderQueryFilter = {
 			/>
 		</template>
 	</div>`,
-	props:{
-		entityIdMapRef: { type:Object,  required:true },
-		expertMode:     { type:Boolean, required:true },
-		fieldIdMap:     { type:Object,  required:true },
-		filtersDisable: { type:Array,   required:false, default:() => [] },
-		formId:         { type:String,  required:true },
-		joins:          { type:Array,   required:true },
-		joinsParents:   { type:Array,   required:true },
-		modelValue:     { type:Array,   required:true },
-		moduleId:       { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		entityIdMapRef: { type: Object, required: true },
+		expertMode: { type: Boolean, required: true },
+		fieldIdMap: { type: Object, required: true },
+		filtersDisable: { type: Array, required: false, default: () => [] },
+		formId: { type: String, required: true },
+		joins: { type: Array, required: true },
+		joinsParents: { type: Array, required: true },
+		modelValue: { type: Array, required: true },
+		moduleId: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			indexTarget:0,
-			show:false
+			indexTarget: 0,
+			show: false
 		};
 	},
-	emits:['update:modelValue'],
-	computed:{
-		filtersByIndexMap:s => {
-			let out = {};
-			for(const f of s.modelValue) {
-				if(out[f.index] === undefined)
+	emits: ['update:modelValue'],
+	computed: {
+		filtersByIndexMap: s => {
+			const out = {};
+			for (const f of s.modelValue) {
+				if (out[f.index] === undefined)
 					out[f.index] = []
 
 				out[f.index].push(f);
 			}
 			return out;
 		},
-		indexTargets:s => {
-			let out = [];
-			for(const j of s.joins.filter(v => v.index !== 0)) {
+		indexTargets: s => {
+			const out = [];
+			for (const j of s.joins.filter(v => v.index !== 0)) {
 				out.push(j.index);
 			}
 			return out;
 		},
 
 		// simple
-		visible:s => s.show && s.modelValue.length !== 0,
+		visible: s => s.show && s.modelValue.length !== 0,
 
 		// stores
-		capApp:s => s.$store.getters.captions.builder.query,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.builder.query,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getItemTitleRelation,
 		getTemplateQueryFilter,
 
 		// presentation
-		displayArrow(state,count) {
+		displayArrow(state, count) {
 			return state && count !== 0 ? 'triangleDown.png' : 'triangleRight.png';
 		},
 		relationLabel(index) {
-			for(const j of this.joins) {
-				if(j.index === index)
-					return this.getItemTitleRelation(j.relationId,index);
+			for (const j of this.joins) {
+				if (j.index === index)
+					return this.getItemTitleRelation(j.relationId, index);
 			}
 			return '';
 		},
 
 		// actions
 		add(indexTarget) {
-			let f = this.getTemplateQueryFilter();
+			const f = this.getTemplateQueryFilter();
 			f.index = indexTarget;
 
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v.push(f);
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 			this.show = true;
 		},
-		set(filters,index) {
+		set(filters, index) {
 			const filtersOtherIndexes = this.modelValue.filter(v => v.index !== index);
-			this.$emit('update:modelValue',filtersOtherIndexes.concat(filters));
+			this.$emit('update:modelValue', filtersOtherIndexes.concat(filters));
 		},
 		showHelp() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.filterJoinHelp,
-				captionTop:this.capGen.help
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.filterJoinHelp,
+				captionTop: this.capGen.help
 			});
 		},
 	}
 };
 
 const MyBuilderQueryChoice = {
-	name:'my-builder-query-choice',
-	components:{
+	name: 'my-builder-query-choice',
+	components: {
 		MyBuilderCaption,
 		MyBuilderQueryFilter
 	},
-	template:`<div class="query-choice">
+	template: `<div class="query-choice">
 		<div class="query-choice-details">
 
 			<my-button
@@ -213,102 +214,86 @@ const MyBuilderQueryChoice = {
 			:readonly
 		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		expertMode:     { type:Boolean, required:true },
-		choice:         { type:Object,  required:true },
-		entityIdMapRef: { type:Object,  required:true },
-		fieldIdMap:     { type:Object,  required:true },
-		filtersDisable: { type:Array,   required:true },
-		formId:         { type:String,  required:true },
-		joins:          { type:Array,   required:true },
-		joinsParents:   { type:Array,   required:true },
-		moduleId:       { type:String,  required:true },
-		moveDown:       { type:Boolean, required:true },
-		moveUp:         { type:Boolean, required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		expertMode: { type: Boolean, required: true },
+		choice: { type: Object, required: true },
+		entityIdMapRef: { type: Object, required: true },
+		fieldIdMap: { type: Object, required: true },
+		filtersDisable: { type: Array, required: true },
+		formId: { type: String, required: true },
+		joins: { type: Array, required: true },
+		joinsParents: { type: Array, required: true },
+		moduleId: { type: String, required: true },
+		moveDown: { type: Boolean, required: true },
+		moveUp: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['move-down','move-up','remove','update'],
-	computed:{
-		filtersInput:{
-			get()  { return JSON.parse(JSON.stringify(this.choice.filters)); },
-			set(v) { this.update('filters',v); }
+	emits: ['move-down', 'move-up', 'remove', 'update'],
+	computed: {
+		filtersInput: {
+			get() { return JSON.parse(JSON.stringify(this.choice.filters)); },
+			set(v) { this.update('filters', v); }
 		},
-		nameInput:{
-			get()  { return this.choice.name; },
-			set(v) { this.update('name',v); }
+		nameInput: {
+			get() { return this.choice.name; },
+			set(v) { this.update('name', v); }
 		},
 
 		// stores
-		capApp:s => s.$store.getters.captions.builder.query,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.builder.query,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
-		updateCaption(content,value) {
-			let captionsInput = JSON.parse(JSON.stringify(this.choice.captions));
+	methods: {
+		updateCaption(content, value) {
+			const captionsInput = JSON.parse(JSON.stringify(this.choice.captions));
 			captionsInput[content] = value;
-			this.update('captions',captionsInput);
+			this.update('captions', captionsInput);
 		},
-		update(content,value) {
-			let choice = JSON.parse(JSON.stringify(this.choice));
+		update(content, value) {
+			const choice = JSON.parse(JSON.stringify(this.choice));
 			choice[content] = value;
-			this.$emit('update',choice);
+			this.$emit('update', choice);
 		}
 	}
 };
 
 const MyBuilderQueryLookupItem = {
-	name:'my-builder-query-lookup-item',
-	template:`<div class="query-lookup-item">
-		<span>{{ join.index + ') ' + relationIdMap[join.relationId].name }}</span>
+	name: 'my-builder-query-lookup-item',
+	template: `<div class="query-lookup-item">
+		<span>{{ join.index + ') ' + relation.name }}</span>
 		<select v-model="value" :disabled="readonly">
 			<option :value="null">-</option>
-			<option v-for="pgIndex in pgIndexCandidates" :value="pgIndex.id">
-				{{ displayPgIndexDesc(pgIndex) }}
-			</option>
+			<option v-for="ind in pgIndexes" :value="ind.id">{{ getPgIndexTitle(ind.id) }}</option>
 		</select>
 	</div>`,
-	props:{
-		join:      { type:Object,  required:true },
-		modelValue:{ required:true },
-		readonly:  { type:Boolean, required:true }
+	props: {
+		join: { type: Object, required: true },
+		modelValue: { required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		value:{
-			get()  { return this.modelValue; },
-			set(v) { this.$emit('update:modelValue',v); }
+	emits: ['update:modelValue'],
+	computed: {
+		value: {
+			get() { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue', v); }
 		},
-		pgIndexCandidates:s => {
-			let out = [];
-			let rel = s.relationIdMap[s.join.relationId];
-			for(let index of rel.indexes) {
-				if(index.noDuplicates)
-					out.push(index);
-			}
-			return out;
-		},
+		pgIndexes: s => s.relation.indexes.filter(v => v.noDuplicates),
+		relation: s => s.relationIdMap[s.join.relationId],
 
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap']
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap']
 	},
-	methods:{
-		displayPgIndexDesc(pgIndex) {
-			let out = [];
-			for(let a of pgIndex.attributes) {
-				let atr = this.attributeIdMap[a.attributeId];
-				out.push(`${atr.name} (${atr.content})`);
-			}
-			return out.join(' + ');
-		}
+	methods: {
+		getPgIndexTitle
 	}
 };
 
 const MyBuilderQueryLookups = {
-	name:'my-builder-query-lookups',
-	components:{MyBuilderQueryLookupItem},
-	template:`<div class="query-lookups">
+	name: 'my-builder-query-lookups',
+	components: { MyBuilderQueryLookupItem },
+	template: `<div class="query-lookups">
 		<my-builder-query-lookup-item
 			@update:modelValue="setValueForJoin(j,$event)"
 			v-for="j in joins"
@@ -318,47 +303,47 @@ const MyBuilderQueryLookups = {
 			:readonly
 		/>
 	</div>`,
-	props:{
-		joins:   { type:Array,   required:true },
-		lookups: { type:Array,   required:true }, // [{pgIndexId:123,index:0},{...}]
-		readonly:{ type:Boolean, required:true }
+	props: {
+		joins: { type: Array, required: true },
+		lookups: { type: Array, required: true }, // [{pgIndexId:123,index:0},{...}]
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update'],
-	computed:{
+	emits: ['update'],
+	computed: {
 		// stores
-		capApp:s => s.$store.getters.captions.builder.query
+		capApp: s => s.$store.getters.captions.builder.query
 	},
-	methods:{
+	methods: {
 		getValueForJoin(join) {
-			for(let lookup of this.lookups) {
-				if(lookup.index === join.index)
+			for (let lookup of this.lookups) {
+				if (lookup.index === join.index)
 					return lookup.pgIndexId;
 			}
 			return null;
 		},
-		setValueForJoin(join,pgIndexId) {
+		setValueForJoin(join, pgIndexId) {
 			let lookups = JSON.parse(JSON.stringify(this.lookups));
-			for(let i = 0, j = lookups.length; i < j; i++) {
-				if(lookups[i].index === join.index) {
-					lookups.splice(i,1);
+			for (let i = 0, j = lookups.length; i < j; i++) {
+				if (lookups[i].index === join.index) {
+					lookups.splice(i, 1);
 					break;
 				}
 			}
 
-			if(pgIndexId !== null)
+			if (pgIndexId !== null)
 				lookups.push({
-					pgIndexId:pgIndexId,
-					index:join.index
+					pgIndexId: pgIndexId,
+					index: join.index
 				});
 
-			this.$emit('update',lookups);
+			this.$emit('update', lookups);
 		}
 	}
 };
 
 const MyBuilderQueryOrderItem = {
-	name:'my-builder-query-order-item',
-	template:`<div class="query-order-item">
+	name: 'my-builder-query-order-item',
+	template: `<div class="query-order-item">
 
 		<!-- index attribute -->
 		<select
@@ -385,62 +370,61 @@ const MyBuilderQueryOrderItem = {
 			:naked="true"
 		/>
 	</div>`,
-	props:{
-		ascending:  { type:Boolean, required:true },
-		attributeId:{ required:true },
-		index:      { type:Number,  required:true },
-		joins:      { type:Array,   required:true },
-		readonly:   { type:Boolean, required:true }
+	props: {
+		ascending: { type: Boolean, required: true },
+		attributeId: { required: true },
+		index: { type: Number, required: true },
+		joins: { type: Array, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['remove','set-ascending','set-attribute-id','set-index'],
-	computed:{
+	emits: ['remove', 'set-ascending', 'set-attribute-id', 'set-index'],
+	computed: {
 		// inputs
-		ascendingInput:{
-			get()  { return this.ascending; },
-			set(v) { this.$emit('set-ascending',v); }
+		ascendingInput: {
+			get() { return this.ascending; },
+			set(v) { this.$emit('set-ascending', v); }
 		},
-		attributeIdInput:{
-			get()  { return this.attributeId; },
-			set(v) { this.$emit('set-attribute-id',v); }
+		attributeIdInput: {
+			get() { return this.attributeId; },
+			set(v) { this.$emit('set-attribute-id', v); }
 		},
-		indexInput:{
-			get()  { return this.index; },
-			set(v) { this.$emit('set-index',v); }
+		indexInput: {
+			get() { return this.index; },
+			set(v) { this.$emit('set-index', v); }
 		},
 
 		// simple
-		indexAttributeIds:(s) => s.getIndexAttributeIdsByJoins(s.joins,[],[]),
+		indexAttributeIds: s => s.getIndexAttributeIdsByJoins(s.joins, [], []),
 
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capGen:        (s) => s.$store.getters.captions.generic
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaptionByIndexAttributeId,
 		getIndexAttributeIdsByJoins,
 
 		// actions
 		setIndexAttribute(indexAttributeId) {
-			let v = indexAttributeId.split('_');
-
-			if(v[1] === 'null') {
-				this.indexInput       = 0;
+			const v = indexAttributeId.split('_');
+			if (v[1] === 'null') {
+				this.indexInput = 0;
 				this.attributeIdInput = null;
 				return;
 			}
 
-			this.indexInput       = parseInt(v[0]);
+			this.indexInput = parseInt(v[0], 10);
 			this.attributeIdInput = v[1];
 		}
 	}
 };
 
 const MyBuilderQueryOrders = {
-	name:'my-builder-query-orders',
-	components:{MyBuilderQueryOrderItem},
-	template:`<div>
+	name: 'my-builder-query-orders',
+	components: { MyBuilderQueryOrderItem },
+	template: `<div>
 		<my-builder-query-order-item
 			v-for="(o,i) in ordersInput"
 			@remove="remove(i)"
@@ -455,24 +439,24 @@ const MyBuilderQueryOrders = {
 			:readonly
 		/>
 	</div>`,
-	props:{
-		joins:   { type:Array,   required:true },
-		orders:  { type:Array,   required:true },
-		readonly:{ type:Boolean, required:true }
+	props: {
+		joins: { type: Array, required: true },
+		orders: { type: Array, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update'],
-	computed:{
-		ordersInput:{
-			get()  { return JSON.parse(JSON.stringify(this.orders)); },
-			set(v) { this.$emit('update',v); }
+	emits: ['update'],
+	computed: {
+		ordersInput: {
+			get() { return JSON.parse(JSON.stringify(this.orders)); },
+			set(v) { this.$emit('update', v); }
 		}
 	},
-	methods:{
+	methods: {
 		remove(i) {
-			this.ordersInput.splice(i,1);
+			this.ordersInput.splice(i, 1);
 			this.ordersInput = this.ordersInput;
 		},
-		update(i,name,value) {
+		update(i, name, value) {
 			this.ordersInput[i][name] = value;
 			this.ordersInput = this.ordersInput;
 		}
@@ -480,8 +464,8 @@ const MyBuilderQueryOrders = {
 };
 
 const MyBuilderQueryNestedJoin = {
-	name:'my-builder-query-nested-join',
-	template:`<div class="nested-join" :class="{ nested:index !== 0 }">
+	name: 'my-builder-query-nested-join',
+	template: `<div class="nested-join" :class="{ nested:index !== 0 }">
 
 		<!-- descriptive summary line with relation options -->
 		<div class="summary">
@@ -559,81 +543,81 @@ const MyBuilderQueryNestedJoin = {
 	</div>`,
 	data() {
 		return {
-			relationAddId:null,
-			relationAddShow:false
+			relationAddId: null,
+			relationAddShow: false
 		};
 	},
-	props:{
-		applyCreate:     { type:Boolean,required:true },
-		applyUpdate:     { type:Boolean,required:true },
-		applyDelete:     { type:Boolean,required:true },
-		connector:       { type:String, required:true },
-		index:           { type:Number, required:true },
-		joins:           { type:Array,  required:true },
-		joinAttributeId: { required:true },
-		joinRelationId:  { type:String, required:true },
-		module:          { type:Object, required:true },
-		readonly:        { type:Boolean,required:true },
-		relationIdParent:{ type:String, required:false, default: null}
+	props: {
+		applyCreate: { type: Boolean, required: true },
+		applyUpdate: { type: Boolean, required: true },
+		applyDelete: { type: Boolean, required: true },
+		connector: { type: String, required: true },
+		index: { type: Number, required: true },
+		joins: { type: Array, required: true },
+		joinAttributeId: { required: true },
+		joinRelationId: { type: String, required: true },
+		module: { type: Object, required: true },
+		readonly: { type: Boolean, required: true },
+		relationIdParent: { type: String, required: false, default: null }
 	},
-	emits:['relation-add','relation-apply-toggle','relation-connector-set','relation-remove'],
-	computed:{
-		attributesUnused:(s) => {
+	emits: ['relation-add', 'relation-apply-toggle', 'relation-connector-set', 'relation-remove'],
+	computed: {
+		attributesUnused: s => {
 			let atrs = [];
-			for(const atr of s.getDependentAttributes(s.module)) {
-				if(!s.isAttributeRelationship(atr.content))
+			for (const atr of s.getDependentAttributes(s.module)) {
+				if (!s.isAttributeRelationship(atr.content))
 					continue;
 
 				// relationship attribute is from current relation or pointing to it
-				if(atr.relationId === s.joinRelationId || atr.relationshipId === s.joinRelationId)
+				if (atr.relationId === s.joinRelationId || atr.relationshipId === s.joinRelationId)
 					atrs.push(atr);
 			}
 			return atrs;
 		},
 
 		// simple
-		hasNoJoinOptions:(s) => s.attributesUnused.length === 0,
-		iconJoin:        (s) => {
-			switch(s.connector) {
+		hasNoJoinOptions: s => s.attributesUnused.length === 0,
+		iconJoin: s => {
+			switch (s.connector) {
 				case 'INNER': return 'images/joinInner.png'; break;
-				case 'LEFT':  return 'images/joinLeft.png';  break;
+				case 'LEFT': return 'images/joinLeft.png'; break;
 				case 'RIGHT': return 'images/joinRight.png'; break;
-				case 'FULL':  return 'images/joinOuter.png'; break;
+				case 'FULL': return 'images/joinOuter.png'; break;
 			}
 			return 'images/clear.png';
 		},
-		iconJoinTitle:   (s) => s.capApp.join.replace('{NAME}',s.connector),
-		iconRelationship:(s) => {
-			if(s.isBaseRelation) return 'link0.png';
-			if(s.isRelation11)   return 'link1.png';
-			if(s.isRelation1N)   return 'link2.png';
-			if(s.isRelationN1)   return 'link3.png';
+		iconJoinTitle: s => s.capApp.join.replace('{NAME}', s.connector),
+		iconRelationship: s => {
+			if (s.isBaseRelation) return 'link0.png';
+			if (s.isRelation11) return 'link1.png';
+			if (s.isRelation1N) return 'link2.png';
+			if (s.isRelationN1) return 'link3.png';
 			return 'noPic.png';
 		},
-		iconRelationshipTitle:(s) => {
-			if(s.isBaseRelation) return '';
-			if(s.isRelation11)   return '1:1';
-			if(s.isRelation1N)   return '1:n';
-			if(s.isRelationN1)   return 'n:1';
+		iconRelationshipTitle: s => {
+			if (s.isBaseRelation) return '';
+			if (s.isRelation11) return '1:1';
+			if (s.isRelation1N) return '1:n';
+			if (s.isRelationN1) return 'n:1';
 			return '';
 		},
-		isBaseRelation:   (s) => s.index === 0,
-		isOutsideIn:      (s) => !s.isBaseRelation && (s.joinRelationId !== s.joinAttribute.relationId || s.joinRelationId === s.relationIdParent),
-		isRelation11:     (s) => !s.isBaseRelation && s.isAttributeRelationship11(s.joinAttribute.content),
-		isRelationN1:     (s) => !s.isBaseRelation && !s.isRelation11 && s.isOutsideIn,
-		isRelation1N:     (s) => !s.isBaseRelation && !s.isRelation11 && !s.isOutsideIn,
-		joinAttribute:    (s) => !s.isBaseRelation ? s.attributeIdMap[s.joinAttributeId] : false,
-		joinReference:    (s) => !s.isOutsideIn ? s.joinAttribute.name : s.joinReferenceFull,
-		joinReferenceFull:(s) => `${s.relationIdMap[s.joinAttribute.relationId].name}.${s.joinAttribute.name}`,
-		joinRelation:     (s) => s.relationIdMap[s.joinRelationId],
+		isBaseRelation: s => s.index === 0,
+		isOutsideIn: s => !s.isBaseRelation && (s.joinRelationId !== s.joinAttribute.relationId || s.joinRelationId === s.relationIdParent),
+		isRelation11: s => !s.isBaseRelation && s.isAttributeRelationship11(s.joinAttribute.content),
+		isRelationN1: s => !s.isBaseRelation && !s.isRelation11 && s.isOutsideIn,
+		isRelation1N: s => !s.isBaseRelation && !s.isRelation11 && !s.isOutsideIn,
+		joinAttribute: s => !s.isBaseRelation ? s.attributeIdMap[s.joinAttributeId] : false,
+		joinReference: s => !s.isOutsideIn ? s.joinAttribute.name : s.joinReferenceFull,
+		joinReferenceFull: s => `${s.relationIdMap[s.joinAttribute.relationId].name}.${s.joinAttribute.name}`,
+		joinRelation: s => s.relationIdMap[s.joinRelationId],
 
 		// stores
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.query
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.builder.query
 	},
-	methods:{
+	methods: {
 		// externals
 		getDependentAttributes,
 		isAttributeRelationship,
@@ -641,25 +625,25 @@ const MyBuilderQueryNestedJoin = {
 
 		// actions
 		relationAdd(event) {
-			this.$emit('relation-add',this.index,this.joinRelationId,this.relationAddId,'LEFT');
-			this.relationAddId   = null;
+			this.$emit('relation-add', this.index, this.joinRelationId, this.relationAddId, 'LEFT');
+			this.relationAddId = null;
 			this.relationAddShow = false;
 		},
 		toggleApply(content) {
-			this.$emit('relation-apply-toggle',this.index,content);
+			this.$emit('relation-apply-toggle', this.index, content);
 		},
 		toggleConnector() {
-			switch(this.connector) {
-				case 'INNER': this.$emit('relation-connector-set',this.index,'LEFT');  break;
-				case 'LEFT':  this.$emit('relation-connector-set',this.index,'RIGHT'); break;
-				case 'RIGHT': this.$emit('relation-connector-set',this.index,'FULL'); break;
-				case 'FULL':  this.$emit('relation-connector-set',this.index,'INNER'); break;
+			switch (this.connector) {
+				case 'INNER': this.$emit('relation-connector-set', this.index, 'LEFT'); break;
+				case 'LEFT': this.$emit('relation-connector-set', this.index, 'RIGHT'); break;
+				case 'RIGHT': this.$emit('relation-connector-set', this.index, 'FULL'); break;
+				case 'FULL': this.$emit('relation-connector-set', this.index, 'INNER'); break;
 			}
 		},
 
 		// presentation
 		displayApply(content) {
-			switch(content) {
+			switch (content) {
 				case 'create': return this.applyCreate ? 'C' : 'c'; break;
 				case 'update': return this.applyUpdate ? 'U' : 'u'; break;
 				case 'delete': return this.applyDelete ? 'D' : 'd'; break;
@@ -667,12 +651,12 @@ const MyBuilderQueryNestedJoin = {
 			return '?';
 		},
 		displayJoinOption(atr) {
-			let outsideIn    = atr.relationId !== this.joinRelationId;
-			let relIdPartner = !outsideIn ? atr.relationshipId : atr.relationId;
-			let atrRel       = this.relationIdMap[atr.relationId];
-			let relType      = outsideIn ? '1:n' : 'n:1';
+			const outsideIn = atr.relationId !== this.joinRelationId;
+			const relIdPartner = !outsideIn ? atr.relationshipId : atr.relationId;
+			const atrRel = this.relationIdMap[atr.relationId];
+			let relType = outsideIn ? '1:n' : 'n:1';
 
-			if(this.isAttributeRelationship11(atr.content))
+			if (this.isAttributeRelationship11(atr.content))
 				relType = '1:1';
 
 			return `[${relType}] ${this.relationIdMap[relIdPartner].name} (${atrRel.name}.${atr.name})`;
@@ -684,15 +668,15 @@ const MyBuilderQueryNestedJoin = {
 };
 
 export default {
-	name:'my-builder-query',
-	components:{
+	name: 'my-builder-query',
+	components: {
 		MyBuilderQueryChoice,
 		MyBuilderQueryFilter,
 		MyBuilderQueryLookups,
 		MyBuilderQueryNestedJoin,
 		MyBuilderQueryOrders
 	},
-	template:`<div class="builder-query default-inputs">
+	template: `<div class="builder-query default-inputs">
 		<div class="query-component">
 
 			<!-- start relation -->
@@ -895,119 +879,119 @@ export default {
 			/>
 		</div>
 	</div>`,
-	props:{
-		allowChoices:   { type:Boolean, required:false, default:true },
-		allowFilters:   { type:Boolean, required:false, default:true },
-		allowFixedLimit:{ type:Boolean, required:false, default:true },
-		allowJoinEdit:  { type:Boolean, required:false, default:true },
-		allowLookups:   { type:Boolean, required:false, default:false },
-		allowOrders:    { type:Boolean, required:false, default:false },
-		builderLanguage:{ type:String,  required:false, default:'' },
-		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
-		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} }, // form field map, key: field ID
-		filtersDisable: { type:Array,   required:false, default:() => [] },          // filter content to disable (attribute, javascript, collection, preset, ...)
-		formId:         { type:String,  required:false, default:'' },                // ID of form in which context the query is used
-		joinsParents:   { type:Array,   required:false, default:() => [] },          // each item is an array of joins from a parent query
-		modelValue:     { type:Object,  required:true },                             // { choices:[], filters:[], fixedLimit:0, joins:[], lookups:[], orders:[], relationId:'' }
-		moduleId:       { type:String,  required:true },
-		readonly:       { type:Boolean, required:true },
-		relationIdStart:{ required:false, default:null }                             // when query starts with a defined relation
+	props: {
+		allowChoices: { type: Boolean, required: false, default: true },
+		allowFilters: { type: Boolean, required: false, default: true },
+		allowFixedLimit: { type: Boolean, required: false, default: true },
+		allowJoinEdit: { type: Boolean, required: false, default: true },
+		allowLookups: { type: Boolean, required: false, default: false },
+		allowOrders: { type: Boolean, required: false, default: false },
+		builderLanguage: { type: String, required: false, default: '' },
+		entityIdMapRef: { type: Object, required: false, default: () => { return {} } },
+		fieldIdMap: { type: Object, required: false, default: () => { return {} } }, // form field map, key: field ID
+		filtersDisable: { type: Array, required: false, default: () => [] },          // filter content to disable (attribute, javascript, collection, preset, ...)
+		formId: { type: String, required: false, default: '' },                // ID of form in which context the query is used
+		joinsParents: { type: Array, required: false, default: () => [] },          // each item is an array of joins from a parent query
+		modelValue: { type: Object, required: true },                             // { choices:[], filters:[], fixedLimit:0, joins:[], lookups:[], orders:[], relationId:'' }
+		moduleId: { type: String, required: true },
+		readonly: { type: Boolean, required: true },
+		relationIdStart: { required: false, default: null }                             // when query starts with a defined relation
 	},
-	emits:['index-removed','update:modelValue'],
+	emits: ['index-removed', 'update:modelValue'],
 	data() {
 		return {
-			expertMode:false,
-			showChoices:false,
-			showLookups:false,
-			showOrders:false,
-			showRelations:true
+			expertMode: false,
+			showChoices: false,
+			showLookups: false,
+			showOrders: false,
+			showRelations: true
 		};
 	},
-	watch:{
-		relationId:{
+	watch: {
+		relationId: {
 			handler(v) {
 				// if source relation not set, but default given: set
-				if(v === null && this.relationIdStart !== null)
-					return this.set('relationId',this.relationIdStart);
+				if (v === null && this.relationIdStart !== null)
+					return this.set('relationId', this.relationIdStart);
 
 				// if source relation set, but not added as join yet: add
-				if(v !== null && this.joins.length === 0)
-					return this.relationAdd(-1,v,null,'INNER');
+				if (v !== null && this.joins.length === 0)
+					return this.relationAdd(-1, v, null, 'INNER');
 			},
-			immediate:true
+			immediate: true
 		}
 	},
-	computed:{
-		relationNextIndex:(s) => {
+	computed: {
+		relationNextIndex: s => {
 			let indexCandidate = 0;
-			for(let join of s.joins) {
-				if(join.index >= indexCandidate)
+			for (const join of s.joins) {
+				if (join.index >= indexCandidate)
 					indexCandidate = join.index + 1;
 			}
 			return indexCandidate;
 		},
-		relationsNested:(s) => {
-			const getChildRelationsByIndex = function(indexFrom) {
-				let rels = [];
-				for(const j of s.joins) {
-					if(j.indexFrom !== indexFrom)
+		relationsNested: s => {
+			const getChildRelationsByIndex = (indexFrom) => {
+				const rels = [];
+				for (const j of s.joins) {
+					if (j.indexFrom !== indexFrom)
 						continue;
 
-					let join = JSON.parse(JSON.stringify(j));
+					const join = JSON.parse(JSON.stringify(j));
 					rels.push({
-						applyCreate:join.applyCreate,
-						applyUpdate:join.applyUpdate,
-						applyDelete:join.applyDelete,
-						connector:join.connector,
-						index:join.index,
-						joins:getChildRelationsByIndex(join.index),
-						joinAttributeId:join.attributeId,
-						joinRelationId:join.relationId
+						applyCreate: join.applyCreate,
+						applyUpdate: join.applyUpdate,
+						applyDelete: join.applyDelete,
+						connector: join.connector,
+						index: join.index,
+						joins: getChildRelationsByIndex(join.index),
+						joinAttributeId: join.attributeId,
+						joinRelationId: join.relationId
 					});
 				}
 				return rels;
 			};
 
-			if(!s.module || !s.relation || s.joins.length === 0)
+			if (!s.module || !s.relation || s.joins.length === 0)
 				return false;
 
 			// source relation with all relations deep-nested
 			return {
-				applyCreate:s.joins[0].applyCreate,
-				applyUpdate:s.joins[0].applyUpdate,
-				applyDelete:s.joins[0].applyDelete,
-				connector:'INNER',
-				index:0,
-				joins:getChildRelationsByIndex(0),
-				joinAttributeId:null,
-				joinRelationId:s.relation.id,
-				name:s.relation.name
+				applyCreate: s.joins[0].applyCreate,
+				applyUpdate: s.joins[0].applyUpdate,
+				applyDelete: s.joins[0].applyDelete,
+				connector: 'INNER',
+				index: 0,
+				joins: getChildRelationsByIndex(0),
+				joinAttributeId: null,
+				joinRelationId: s.relation.id,
+				name: s.relation.name
 			};
 		},
 
 		// simple
-		module:    (s) => s.moduleIdMap[s.moduleId]     === undefined ? false : s.moduleIdMap[s.moduleId],
-		relation:  (s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
-		choices:   (s) => s.modelValue.choices,
-		filters:   (s) => s.modelValue.filters,
-		fixedLimit:(s) => s.modelValue.fixedLimit,
-		id:        (s) => s.modelValue.id,
-		joins:     (s) => s.modelValue.joins,
-		lookups:   (s) => s.modelValue.lookups,
-		orders:    (s) => s.modelValue.orders,
-		relationId:(s) => s.modelValue.relationId,
+		module: s => s.moduleIdMap[s.moduleId] === undefined ? false : s.moduleIdMap[s.moduleId],
+		relation: s => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
+		choices: s => s.modelValue.choices,
+		filters: s => s.modelValue.filters,
+		fixedLimit: s => s.modelValue.fixedLimit,
+		id: s => s.modelValue.id,
+		joins: s => s.modelValue.joins,
+		lookups: s => s.modelValue.lookups,
+		orders: s => s.modelValue.orders,
+		relationId: s => s.modelValue.relationId,
 
 		// stores
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.query,
-		capGen:        (s) => s.$store.getters.captions.generic
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.builder.query,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		this.expertMode = this.builderOptionGet('queryExpertMode',false);
+		this.expertMode = this.builderOptionGet('queryExpertMode', false);
 	},
-	methods:{
+	methods: {
 		// externals
 		builderOptionGet,
 		builderOptionSet,
@@ -1015,150 +999,150 @@ export default {
 		getTemplateQueryChoice,
 
 		// presentation
-		displayArrow(state,count) {
+		displayArrow(state, count) {
 			return state && count !== 0 ? 'triangleDown.png' : 'triangleRight.png';
 		},
 
 		// actions
 		choiceAdd() {
-			let v = JSON.parse(JSON.stringify(this.choices));
+			const v = JSON.parse(JSON.stringify(this.choices));
 			v.push(this.getTemplateQueryChoice());
-			this.set('choices',v);
+			this.set('choices', v);
 
-			if(!this.showChoices)
+			if (!this.showChoices)
 				this.showChoices = true;
 		},
-		choiceApply(i,value) {
-			let v = JSON.parse(JSON.stringify(this.choices));
+		choiceApply(i, value) {
+			const v = JSON.parse(JSON.stringify(this.choices));
 			v[i] = value;
-			this.set('choices',v);
+			this.set('choices', v);
 		},
-		choiceMove(i,down) {
-			let v = JSON.parse(JSON.stringify(this.choices));
-			let c = v[i];
-			v.splice(i,1);
-			v.splice((down ? i + 1 : i - 1),0,c);
-			this.set('choices',v);
+		choiceMove(i, down) {
+			const v = JSON.parse(JSON.stringify(this.choices));
+			const c = v[i];
+			v.splice(i, 1);
+			v.splice((down ? i + 1 : i - 1), 0, c);
+			this.set('choices', v);
 		},
 		choiceRemove(i) {
-			let v = JSON.parse(JSON.stringify(this.choices));
-			v.splice(i,1);
-			this.set('choices',v);
+			const v = JSON.parse(JSON.stringify(this.choices));
+			v.splice(i, 1);
+			this.set('choices', v);
 		},
 		orderAdd() {
-			let v = JSON.parse(JSON.stringify(this.orders));
+			const v = JSON.parse(JSON.stringify(this.orders));
 			v.push({
-				ascending:true,
-				attributeId:null,
-				index:0
+				ascending: true,
+				attributeId: null,
+				index: 0
 			});
-			this.set('orders',v);
+			this.set('orders', v);
 
-			if(!this.showOrders)
+			if (!this.showOrders)
 				this.showOrders = true;
 		},
 		showChoicesHelp() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.filterChoicesHelp,
-				captionTop:this.capGen.help,
-				image:'question.png'
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.filterChoicesHelp,
+				captionTop: this.capGen.help,
+				image: 'question.png'
 			});
 		},
 		showLookupHelp() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.lookupsHelp,
-				captionTop:this.capGen.help,
-				image:'question.png'
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.lookupsHelp,
+				captionTop: this.capGen.help,
+				image: 'question.png'
 			});
 		},
 
 		// relation manipulation
-		relationAdd(indexFrom,relationIdFrom,attributeId,connector) {
-			let isSource = indexFrom === -1;
-			let relId    = '';
-			if(!isSource) {
-				let atr = this.attributeIdMap[attributeId];
+		relationAdd(indexFrom, relationIdFrom, attributeId, connector) {
+			const isSource = indexFrom === -1;
+			let relId = '';
+			if (!isSource) {
+				const atr = this.attributeIdMap[attributeId];
 				relId = relationIdFrom !== atr.relationId ? atr.relationId : atr.relationshipId;
 			} else {
 				relId = relationIdFrom;
 			}
-			let v = JSON.parse(JSON.stringify(this.joins));
+			const v = JSON.parse(JSON.stringify(this.joins));
 
 			v.push({
-				applyCreate:isSource ? true : false,
-				applyUpdate:isSource ? true : false,
-				applyDelete:isSource ? true : false,
-				connector:connector,
-				relationId:relId,
-				attributeId:attributeId,
-				index:this.relationNextIndex,
-				indexFrom:indexFrom
+				applyCreate: isSource ? true : false,
+				applyUpdate: isSource ? true : false,
+				applyDelete: isSource ? true : false,
+				connector: connector,
+				relationId: relId,
+				attributeId: attributeId,
+				index: this.relationNextIndex,
+				indexFrom: indexFrom
 			});
-			this.set('joins',v);
+			this.set('joins', v);
 		},
 		relationRemove(index) {
 			// remove relation & lookup
-			let changes = {
-				joins:this.joins.filter(v => v.index !== index),
-				lookups:this.lookups.filter(v => v.index !== index)
+			const changes = {
+				joins: this.joins.filter(v => v.index !== index),
+				lookups: this.lookups.filter(v => v.index !== index)
 			};
 
-			if(index === 0) {
+			if (index === 0) {
 				// source relation has changed
 				changes.relationId = null;
-				changes.filters    = [];
+				changes.filters = [];
 			}
 			this.setMultiple(changes);
 
 			// inform parent about removed index, to remove affected fields/columns/etc.
-			this.$emit('index-removed',index);
+			this.$emit('index-removed', index);
 		},
-		relationApplyToggle(index,content) {
-			let joins = JSON.parse(JSON.stringify(this.joins));
-			for(let j of joins) {
-				if(j.index === index) {
-					switch(content) {
+		relationApplyToggle(index, content) {
+			const joins = JSON.parse(JSON.stringify(this.joins));
+			for (const j of joins) {
+				if (j.index === index) {
+					switch (content) {
 						case 'create': j.applyCreate = !j.applyCreate; break;
 						case 'update': j.applyUpdate = !j.applyUpdate; break;
 						case 'delete': j.applyDelete = !j.applyDelete; break;
 					}
-					this.set('joins',joins);
+					this.set('joins', joins);
 					break;
 				}
 			}
 		},
-		relationConnectorSet(index,connector) {
-			let joins = JSON.parse(JSON.stringify(this.joins));
-			for(let j of joins) {
-				if(j.index === index) {
+		relationConnectorSet(index, connector) {
+			const joins = JSON.parse(JSON.stringify(this.joins));
+			for (const j of joins) {
+				if (j.index === index) {
 					j.connector = connector;
-					this.set('joins',joins);
+					this.set('joins', joins);
 					break;
 				}
 			}
 		},
 
 		// emitter
-		set(name,value) {
-			let changes = {};
+		set(name, value) {
+			const changes = {};
 			changes[name] = value;
 			this.setMultiple(changes);
 		},
 		setMultiple(changes) {
-			let query = {
-				id:this.id,
-				relationId:this.relationId,
-				fixedLimit:this.fixedLimit,
-				joins:this.joins,
-				filters:this.filters,
-				orders:this.orders,
-				lookups:this.lookups,
-				choices:this.choices
+			const query = {
+				id: this.id,
+				relationId: this.relationId,
+				fixedLimit: this.fixedLimit,
+				joins: this.joins,
+				filters: this.filters,
+				orders: this.orders,
+				lookups: this.lookups,
+				choices: this.choices
 			};
-			for(const k in changes) {
+			for (const k in changes) {
 				query[k] = changes[k];
 			}
-			this.$emit('update:modelValue',query);
+			this.$emit('update:modelValue', query);
 		}
 	}
 };

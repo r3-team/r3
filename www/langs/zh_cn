@@ -139,6 +139,7 @@
 			"address": "Network address",
 			"dbName": "Database name",
 			"dbType": "Database type",
+			"deleteMissing": "Delete records not in source",
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},
@@ -152,11 +153,13 @@
 			"loadSourceHint": "SQL query is executed on the database host '{HOST}' when the job runs. Each SELECT expression (column, sub query, ...) must be assigned to one attribute in REI3 in the given order, to create/update record values in the chosen relation.",
 			"loadTargetAttributes": "Assign SELECT expressions to attributes",
 			"loadTargetRelation": "Write loaded records to relation",
+			"loadUniqueIndex": "Unique index for updating records",
 			"title": "Database sync '{NAME}'",
 			"titleJob": "Sync job '{NAME}'",
 			"titleJobNew": "New sync job",
 			"titleNew": "New database sync",
 			"warning": {
+				"missingIndexAttribute": "When using a unqiue index for updating records, all attributes of the index must be assigned as expressions.",
 				"missingLimit": "When a page limit is used, placeholders for LIMIT & OFFSET must be set in the SELECT SQL query. Example: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
 				"missingSelect": "To load records, SQL query should start with a SELECT statement."
 			}
@@ -2430,7 +2433,6 @@
 			"createNew": "创建 + 新建",
 			"delete": "删除",
 			"deleteHint": "永久删除记录",
-			"deleteMissing": "Delete missing",
 			"deleteNewHint": "Delete record and open a new one",
 			"deleteSelected": "删除所选",
 			"download": "下载",
