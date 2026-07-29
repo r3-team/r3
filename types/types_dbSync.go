@@ -35,23 +35,26 @@ type DbSyncHost struct {
 
 // a job to LOAD from or SEND to external DB systems
 type DbSyncJob struct {
-	Id          uuid.UUID     `json:"id"`
-	HostId      uuid.UUID     `json:"hostId"`
-	Name        string        `json:"name"`
-	Comment     string        `json:"comment"`
-	CodeSql     string        `json:"codeSql"`
-	DateAttempt pgtype.Int8   `json:"dateAttempt"`
-	DateSuccess pgtype.Int8   `json:"dateSuccess"`
-	JobType     DbSyncJobType `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
-	Active      bool          `json:"active"`
-
-	// map to relation attributes
-	RelationId   uuid.UUID   `json:"relationId"`   // relation to read from (sending) or write to (receiving)
-	AttributeIds []uuid.UUID `json:"attributeIds"` // attributes (in order) to map to parameters (SEND) or expressions (LOAD)
+	Id          uuid.UUID         `json:"id"`
+	HostId      uuid.UUID         `json:"hostId"`
+	Name        string            `json:"name"`
+	Comment     string            `json:"comment"`
+	CodeSql     string            `json:"codeSql"`
+	DateAttempt pgtype.Int8       `json:"dateAttempt"`
+	DateSuccess pgtype.Int8       `json:"dateSuccess"`
+	JobType     DbSyncJobType     `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
+	Columns     []DbSyncJobColumn `json:"columns"`
+	Joins       []QueryJoin       `json:"joins"`
+	Lookups     []QueryLookup     `json:"lookups"`
+	Active      bool              `json:"active"`
 
 	// LOAD only
 	DeleteMissing   bool        `json:"deleteMissing"`   // delete non-existing records
 	IntervalSeconds int64       `json:"intervalSeconds"` // execute every X seconds
 	PageLimit       pgtype.Int4 `json:"pageLimit"`       // limit rows fetched in one go
-	PgIndexIdLookup pgtype.UUID `json:"pgIndexIdLookup"` // if used, records are identified via attributes assigned to the chosen unique index
+}
+
+type DbSyncJobColumn struct {
+	AttributeId uuid.UUID `json:"attributeId"`
+	Index       int       `json:"index"` // relation index
 }

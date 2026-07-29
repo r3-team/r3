@@ -39,7 +39,7 @@ type DocColumn struct {
 
 	// attribute expression
 	AttributeId    pgtype.UUID `json:"attributeId"`
-	AttributeIndex int         `json:"attributeIndex"` // attribute index
+	AttributeIndex int         `json:"attributeIndex"`
 
 	// PG function expression
 	PgFunctionId pgtype.UUID `json:"pgFunctionId"`

@@ -529,21 +529,68 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_job_relation_id_fkey        ON instance_db_sync.job USING btree (relation_id        ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_job_pg_index_id_lookup_fkey ON instance_db_sync.job USING btree (pg_index_id_lookup ASC NULLS LAST);
 
-			CREATE TABLE IF NOT EXISTS instance_db_sync.job_attribute (
+			CREATE TABLE IF NOT EXISTS instance_db_sync.job_column (
 				job_id uuid NOT NULL,
+				position smallint NOT NULL,
 				attribute_id uuid NOT NULL,
-				CONSTRAINT job_attribute_pkey PRIMARY KEY (job_id,attribute_id),
-				CONSTRAINT job_attribute_job_id_fkey FOREIGN KEY (job_id)
-					REFERENCES instance_db_sync.job (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT job_attribute_attribute_id_fkey FOREIGN KEY (attribute_id)
+				index smallint NOT NULL,
+				CONSTRAINT job_column_pkey PRIMARY KEY (job_id,position),
+				CONSTRAINT job_column_attribute_id_fkey FOREIGN KEY (attribute_id)
 					REFERENCES app.attribute (id) MATCH SIMPLE
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED
 			);
+			CREATE INDEX IF NOT EXISTS fki_job_column_attribute_id_fkey ON instance_db_sync.job_column USING btree (attribute_id ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS instance_db_sync.job_join (
+				job_id uuid NOT NULL,
+				"position" smallint NOT NULL,
+				relation_id uuid NOT NULL,
+				attribute_id uuid,
+				apply_create boolean NOT NULL,
+				apply_update boolean NOT NULL,
+				apply_delete boolean NOT NULL,
+				connector app.query_join_connector NOT NULL,
+				index_from smallint NOT NULL,
+				index smallint NOT NULL,
+				CONSTRAINT job_join_pkey PRIMARY KEY (job_id,position),
+				CONSTRAINT job_join_job_id_fkey FOREIGN KEY (job_id)
+					REFERENCES instance_db_sync.job (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT job_join_relation_id_fkey FOREIGN KEY (relation_id)
+					REFERENCES app.relation (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT job_join_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_job_join_attribute_id_fkey ON instance_db_sync.job_join USING btree (attribute_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_job_join_relation_id_fkey  ON instance_db_sync.job_join USING btree (relation_id  ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS instance_db_sync.job_lookup (
+				job_id uuid NOT NULL,
+				pg_index_id uuid NOT NULL,
+				index smallint NOT NULL,
+				CONSTRAINT job_lookup_job_id_fkey FOREIGN KEY (job_id)
+					REFERENCES instance_db_sync.job (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT job_lookup_pg_index_id_fkey FOREIGN KEY (pg_index_id)
+					REFERENCES app.pg_index (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_job_lookup_job_id_fkey      ON instance_db_sync.job_lookup USING btree (job_id      ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_job_lookup_pg_index_id_fkey ON instance_db_sync.job_lookup USING btree (pg_index_id ASC NULLS LAST);
 
 			INSERT INTO instance.task (name,interval_seconds,cluster_master_only,embedded_only,active_only,active)
 			VALUES ('dbSync',15,true,false,false,true);

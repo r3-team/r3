@@ -4,89 +4,38 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"r3/cache"
+	"r3/data/data_import"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
-	"r3/schema"
 	"r3/types"
-	"slices"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const (
-	maxFetchLoops            = 10000 // should not be necessary, fallback in case LOOP is not stopped
-	sqlPrepareRetrievalStore = "apply_to_local"
-)
-
-type uniqueIndexAttributesT struct {
-	names        []string // names of unique index attributes, in order
-	types        []string // types of unique index attribute values (text[], integer[], etc.), in order
-	values       []any    // values of unique index attributes, in order (each unique index attribute has a slice of values for each row)
-	valueIndexes []int    // indexes of row values that contain values for unique index attribute, in order
-}
+const maxFetchLoops = 10000 // should not be necessary, fallback in case LOOP is not stopped
 
 func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 
-	var err error
-	isUniqueIndex := j.PgIndexIdLookup.Valid
-
-	// resolve references from cache
-	rel, err := cache.GetRelationById(j.RelationId)
-	if err != nil {
-		return err
-	}
-	attributeIdMap := make(map[uuid.UUID]types.Attribute)
-	for _, id := range j.AttributeIds {
-		attributeIdMap[id], err = cache.GetAttributeById(id)
-		if err != nil {
-			return err
+	// convert to query types
+	columns := make([]types.Column, len(j.Columns))
+	for i, c := range j.Columns {
+		columns[i] = types.Column{
+			AttributeId: pgtype.UUID{Bytes: c.AttributeId, Valid: true},
+			Index:       c.Index,
 		}
 	}
-	modName, err := cache.GetModuleDbName(rel.ModuleId)
-	if err != nil {
-		return err
-	}
-
-	// process unique index attributes, to allow UPDATE & DELETE actions
-	var uniqueIndexAttributes uniqueIndexAttributesT
-	if isUniqueIndex {
-		for _, ind := range rel.Indexes {
-			if ind.Id == j.PgIndexIdLookup.Bytes && ind.NoDuplicates {
-				uniqueIndexAttributes.names = make([]string, len(ind.Attributes))
-				uniqueIndexAttributes.types = make([]string, len(ind.Attributes))
-				uniqueIndexAttributes.values = make([]any, len(ind.Attributes))
-				uniqueIndexAttributes.valueIndexes = make([]int, len(ind.Attributes))
-
-				for i, a := range ind.Attributes {
-					atr, exists := attributeIdMap[a.AttributeId]
-					if !exists {
-						return fmt.Errorf("unique index used to identify record has attributes that are not in expression list")
-					}
-					atrType, err := schema.GetPgTypeByAttributeContent(atr.Content)
-					if err != nil {
-						return err
-					}
-					uniqueIndexAttributes.names[i] = fmt.Sprintf(`"%s"`, atr.Name)
-					uniqueIndexAttributes.types[i] = fmt.Sprintf(`%s[]`, atrType)
-					uniqueIndexAttributes.values[i] = make([]any, 0)
-					uniqueIndexAttributes.valueIndexes[i] = slices.Index(j.AttributeIds, atr.Id)
-				}
-				break
-			}
-		}
-	}
+	indexMapPgIndexAttributeIds := data_import.ResolveQueryLookups(j.Joins, j.Lookups)
 
 	// fetch and store records
 	if !j.PageLimit.Valid {
 		// no limit defined, fetch all
-		rows, err := doLoadFetch(ctx, dbExt, j.CodeSql, len(j.AttributeIds))
+		rows, err := doLoadFetch(ctx, dbExt, j.CodeSql, len(j.Columns))
 		if err != nil {
 			return err
 		}
-		if err := doLoadStore(ctx, j, modName, rel.Name, attributeIdMap, rows, j.DeleteMissing, &uniqueIndexAttributes); err != nil {
+		if err := doLoadStore(ctx, -1, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
 			return err
 		}
 	} else {
@@ -102,11 +51,11 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 				strings.ReplaceAll(j.CodeSql, sqlPlaceholderLimit, fmt.Sprintf("%d", j.PageLimit.Int32)),
 				sqlPlaceholderOffset, fmt.Sprintf("%d", offset))
 
-			rows, err := doLoadFetch(ctx, dbExt, codeSql, len(j.AttributeIds))
+			rows, err := doLoadFetch(ctx, dbExt, codeSql, len(j.Columns))
 			if err != nil {
 				return err
 			}
-			if err := doLoadStore(ctx, j, modName, rel.Name, attributeIdMap, rows, j.DeleteMissing, &uniqueIndexAttributes); err != nil {
+			if err := doLoadStore(ctx, -1, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
 				return err
 			}
 			if len(rows) < int(j.PageLimit.Int32) {
@@ -116,9 +65,9 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 		}
 	}
 
-	if j.DeleteMissing && isUniqueIndex {
+	/*if j.DeleteMissing && isUniqueIndex {
 		return doLoadDelete(ctx, modName, rel.Name, &uniqueIndexAttributes)
-	}
+	}*/
 	return nil
 }
 
@@ -155,42 +104,8 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 	return resultRows, nil
 }
 
-func doLoadDelete(ctx context.Context, modName, relName string, uniqueIndexAttributes *uniqueIndexAttributesT) error {
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	parameterNames := make([]string, len((*uniqueIndexAttributes).names))
-	for i := range (*uniqueIndexAttributes).names {
-		parameterNames[i] = fmt.Sprintf("$%d::%s", i+1, (*uniqueIndexAttributes).types[i])
-	}
-
-	// WHERE condition checks list of attribute names against lists of values (one typed array per value)
-	//  such as: WHERE (name, age) NOT IN (SELECT * FROM UNNEST('{Fritz,Peter,Maria}'::TEXT[], '{23,18,32}'::INT[]))
-	ct, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM "%s"."%s"
-		WHERE (%s) NOT IN (
-			SELECT * FROM UNNEST(%s)
-		)
-	`, modName, relName,
-		strings.Join((*uniqueIndexAttributes).names, ","),
-		strings.Join(parameterNames, ",")), (*uniqueIndexAttributes).values...)
-
-	if err != nil {
-		return err
-	}
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
-	log.Info(log.ContextDbSync, fmt.Sprintf("deleted %d records from local DB, not existing in source", ct.RowsAffected()))
-	return nil
-}
-
-func doLoadStore(ctx context.Context, j types.DbSyncJob, modName, relName string, attributeIdMap map[uuid.UUID]types.Attribute,
-	rows [][]any, deleteMissing bool, uniqueIndexAttributes *uniqueIndexAttributesT) error {
+func doLoadStore(ctx context.Context, loginId int64, columns []types.Column, joins []types.QueryJoin,
+	lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
 
 	if len(rows) == 0 {
 		return nil
@@ -202,71 +117,8 @@ func doLoadStore(ctx context.Context, j types.DbSyncJob, modName, relName string
 	}
 	defer tx.Rollback(ctx)
 
-	isUniqueIndex := j.PgIndexIdLookup.Valid
-
-	// SQL parts
-	attributeNamesInsert := make([]string, 0)
-	attributeNamesUpdate := make([]string, 0)
-	parameterNamesInsert := make([]string, 0)
-	whereConditionsUpdate := make([]string, 0)
-
-	for i, id := range j.AttributeIds {
-		atr, exists := attributeIdMap[id]
-		if !exists {
-			return handler.ErrSchemaUnknownAttribute(id)
-		}
-		attributeNamesInsert = append(attributeNamesInsert, fmt.Sprintf(`"%s"`, atr.Name))
-		parameterNamesInsert = append(parameterNamesInsert, fmt.Sprintf(`$%d`, i+1))
-
-		if isUniqueIndex {
-			attributeNamesUpdate = append(attributeNamesUpdate, fmt.Sprintf(`"%s" = $%d`, atr.Name, i+1))
-			whereConditionsUpdate = append(whereConditionsUpdate, fmt.Sprintf(`"%s"."%s" IS DISTINCT FROM EXCLUDED."%s"`, relName, atr.Name, atr.Name))
-		}
-	}
-
-	// apply rows to local DB
-	if !isUniqueIndex {
-		if _, err := tx.Prepare(ctx, sqlPrepareRetrievalStore, fmt.Sprintf(`INSERT INTO "%s"."%s" (%s) VALUES (%s)`,
-			modName, relName,
-			strings.Join(attributeNamesInsert, ","),
-			strings.Join(parameterNamesInsert, ","))); err != nil {
-
-			return err
-		}
-	} else {
-		// UPSERTs are efficient for this use case
-		// they do have a downside as they increase serial counters for each CONFLICT
-		// large record sets could bloat PKs over time if they are run in very short intervals
-		if _, err := tx.Prepare(ctx, sqlPrepareRetrievalStore, fmt.Sprintf(`
-				INSERT INTO "%s"."%s" (%s)
-				VALUES (%s)
-				ON CONFLICT (%s)
-				DO UPDATE
-				SET %s
-				WHERE %s
-			`, modName, relName,
-			strings.Join(attributeNamesInsert, ","),
-			strings.Join(parameterNamesInsert, ","),
-			strings.Join((*uniqueIndexAttributes).names, ","),
-			strings.Join(attributeNamesUpdate, ","),
-			strings.Join(whereConditionsUpdate, " OR "))); err != nil {
-
-			return err
-		}
-	}
-
 	for _, values := range rows {
-		if deleteMissing && isUniqueIndex {
-			// store values for unique index for row, to enable DELETE action later
-			for i, index := range (*uniqueIndexAttributes).valueIndexes {
-				if v, ok := (*uniqueIndexAttributes).values[i].([]any); ok {
-					v = append(v, values[index])
-					(*uniqueIndexAttributes).values[i] = v
-				}
-			}
-		}
-
-		if _, err := tx.Exec(ctx, sqlPrepareRetrievalStore, values...); err != nil {
+		if _, err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, values, columns, joins, lookups, indexMapPgIndexAttributeIds); err != nil {
 			return err
 		}
 	}
@@ -274,5 +126,6 @@ func doLoadStore(ctx context.Context, j types.DbSyncJob, modName, relName string
 		return err
 	}
 	log.Info(log.ContextDbSync, fmt.Sprintf("applied %d retrieved rows to local DB", len(rows)))
+
 	return nil
 }

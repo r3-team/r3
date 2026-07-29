@@ -34,45 +34,80 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	if j.JobType != types.DbSyncJobTypeLoad {
 		j.DeleteMissing = false
 		j.PageLimit = pgtype.Int4{}
-		j.PgIndexIdLookup = pgtype.UUID{}
+		j.Lookups = make([]types.QueryLookup, 0)
 	}
 
-	// cannot update host, relation, or job type
+	// cannot update host or job type
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO instance_db_sync.job (id, host_id, relation_id, pg_index_id_lookup,
-			job_type, interval_seconds, name, comment, code_sql, page_limit, delete_missing, active)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		INSERT INTO instance_db_sync.job (id, host_id, job_type, interval_seconds,
+			name, comment, code_sql, page_limit, delete_missing, active)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
 		ON CONFLICT (id)
 		DO UPDATE SET
-			pg_index_id_lookup = $4, interval_seconds = $6, name = $7, comment = $8,
-			code_sql = $9, page_limit = $10, delete_missing = $11, active = $12
-	`, j.Id, j.HostId, j.RelationId, j.PgIndexIdLookup, j.JobType, j.IntervalSeconds, j.Name,
-		j.Comment, j.CodeSql, j.PageLimit, j.DeleteMissing, j.Active); err != nil {
+			interval_seconds = $4, name = $5, comment = $6, code_sql = $7,
+			page_limit = $8, delete_missing = $9, active = $10
+	`, j.Id, j.HostId, j.JobType, j.IntervalSeconds, j.Name, j.Comment, j.CodeSql,
+		j.PageLimit, j.DeleteMissing, j.Active); err != nil {
 
 		return nil, err
 	}
 
+	// columns
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO instance_db_sync.job_attribute (job_id, attribute_id)
-		SELECT $1, UNNEST($2::UUID[])
-		ON CONFLICT (job_id, attribute_id) DO NOTHING
-	`, j.Id, j.AttributeIds); err != nil {
-		return nil, err
-	}
-
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM instance_db_sync.job_attribute
+		DELETE FROM instance_db_sync.job_column
 		WHERE job_id = $1
-		AND ($2::UUID[] IS NULL OR attribute_id <> ALL($2::UUID[]))
-	`, j.Id, j.AttributeIds); err != nil {
+	`, j.Id); err != nil {
 		return nil, err
+	}
+	for i, c := range j.Columns {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO instance_db_sync.job_column (job_id, position, attribute_id, index)
+			VALUES ($1,$2,$3,$4)
+		`, j.Id, i, c.AttributeId, c.Index); err != nil {
+			return nil, err
+		}
+	}
+
+	// joins
+	if _, err := tx.Exec(ctx, `
+		DELETE FROM instance_db_sync.job_join
+		WHERE job_id = $1
+	`, j.Id); err != nil {
+		return nil, err
+	}
+	for _, e := range j.Joins {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO instance_db_sync.job_join (job_id, relation_id, attribute_id,
+				index_from, index, connector, apply_create, apply_update, apply_delete)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		`, j.Id, e.RelationId, e.AttributeId, e.IndexFrom, e.Index, e.Connector,
+			e.ApplyCreate, e.ApplyUpdate, e.ApplyDelete); err != nil {
+
+			return nil, err
+		}
+	}
+
+	// lookups
+	if _, err := tx.Exec(ctx, `
+		DELETE FROM instance_db_sync.job_lookup
+		WHERE job_id = $1
+	`, j.Id); err != nil {
+		return nil, err
+	}
+	for _, l := range j.Lookups {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO instance_db_sync.job_lookup (job_id, pg_index_id, index)
+			VALUES ($1,$2,$3)
+		`, j.Id, l.PgIndexId, l.Index); err != nil {
+			return nil, err
+		}
 	}
 
 	// register trigger for SEND jobs for relation/job type combination
 	if slices.Contains(types.DbSyncJobTypesSend, j.JobType) {
-		if err := triggerSendCreateIfNeeded(ctx, tx, j.RelationId, j.JobType); err != nil {
-			return nil, err
-		}
+		//if err := triggerSendCreateIfNeeded(ctx, tx, j.RelationId, j.JobType); err != nil {
+		//	return nil, err
+		//}
 	}
 	return nil, nil
 }

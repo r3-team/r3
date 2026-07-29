@@ -128,6 +128,14 @@ type DataGetValueFile struct {
 }
 
 // data SET request
+type DataSet struct {
+	RelationId  uuid.UUID          `json:"relationId"`  // relation ID to update
+	AttributeId uuid.UUID          `json:"attributeId"` // attribute ID of relationship to join with, UUID Nil if base relation
+	IndexFrom   int                `json:"indexFrom"`   // from relation index
+	RecordId    int64              `json:"recordId"`    // record ID to update (0 if new)
+	Attributes  []DataSetAttribute `json:"attributes"`  // attribute values to set
+	EncKeysSet  []DataSetEncKeys   `json:"encKeysSet"`  // data encryption keys to store, encrypted with login´s public key
+}
 type DataSetAttribute struct {
 	AttributeId   uuid.UUID   `json:"attributeId"`   // attribute ID
 	AttributeIdNm pgtype.UUID `json:"attributeIdNm"` // attribute ID for n:m relationship
@@ -145,14 +153,6 @@ type DataSetFileChange struct {
 }
 type DataSetFileChanges struct {
 	FileIdMapChange map[uuid.UUID]DataSetFileChange `json:"fileIdMapChange"`
-}
-type DataSet struct {
-	RelationId  uuid.UUID          `json:"relationId"`  // relation ID to update
-	AttributeId uuid.UUID          `json:"attributeId"` // attribute ID of relationship to join with, UUID Nil if base relation
-	IndexFrom   int                `json:"indexFrom"`   // from relation index
-	RecordId    int64              `json:"recordId"`    // record ID to update (0 if new)
-	Attributes  []DataSetAttribute `json:"attributes"`  // attribute values to set
-	EncKeysSet  []DataSetEncKeys   `json:"encKeysSet"`  // data encryption keys to store, encrypted with login´s public key
 }
 type DataSetResult struct {
 	IndexRecordIds map[int]int64 `json:"indexRecordIds"` // IDs of relation records, key: relation index
