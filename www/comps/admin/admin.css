@@ -85,7 +85,7 @@
 	padding-left:var(--spacing);
 	border-left:1px solid var(--color-border);
 }
-.admin-db-sync-job-content-options-attribute-list{
+.admin-db-sync-job-content-options-columns{
 	max-height:300px;
 	display:flex;
 	flex-flow:column nowrap;
@@ -96,6 +96,75 @@
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 	background-color:var(--color-bg-bright);
+}
+@scope (.admin-db-sync-job-query) {
+	.query-lookups{
+		display:flex;
+		flex-flow:column nowrap;
+		align-items:flex-start;
+		margin:0px 0px 12px 0px;
+	}
+	.query-lookup-item{
+		display:flex;
+		flex-flow:row nowrap;
+		align-items:center;
+		margin:0px 0px 6px 0px;
+	}
+	.query-lookup-item span{
+		width:200px;
+		flex:1 1 auto;
+	}
+	.query-lookup-item select{
+		width:300px;
+		flex:2 1 auto;
+	}
+	.nested-join{
+		max-width:500px;
+		margin:0px 0px 0px 8px;
+	}
+	.nested-join.nested{
+		padding:0px 0px 0px 9px;
+		margin:0px;
+		border-left:2px dotted var(--color-font);
+	}
+	.nested-join .children{
+		padding:0px 0px 0px 4px;
+	}
+	.nested-join .summary{
+		display:flex;
+		flex-flow:row wrap;
+		align-items:center;
+		gap:6px;
+	}
+	.nested-join .summary img.relationship{
+		width:24px;
+		height:24px;
+		filter:var(--image-filter);
+	}
+	.nested-join .summary .options{
+		margin:0px 0px 0px auto;
+		display:flex;
+		flex-direction:row;
+	}
+	.nested-join .summary .option{
+		width:24px;
+		margin:1px;
+		text-align:center;
+		font-weight:bold;
+		font-size:110%;
+		color:var(--color-font);
+		filter:var(--image-filter);
+	}
+	.nested-join .summary .option.toggle{
+		filter:var(--image-filter-success);
+	}
+	.nested-join .summary .option.toggle.off{
+		filter:var(--image-filter-error);
+	}
+	.nested-join .summary .option:hover{
+		width:26px;
+		margin:0px;
+	}
 }
 
 

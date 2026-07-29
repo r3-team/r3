@@ -26,9 +26,6 @@ export function getTemplateDbSyncJob(hostId) {
 	return {
 		id: getUuidV4(),
 		hostId,
-		relationId: null,
-		attributeIds: [],
-		pgIndexIdLookup: null,
 		name: '',
 		comment: '',
 		codeSql: '',
@@ -36,6 +33,9 @@ export function getTemplateDbSyncJob(hostId) {
 		dateSuccess: null,
 		intervalSeconds: 86400,
 		jobType: 'LOAD',
+		columns: [],
+		joins: [],
+		lookups: [],
 		active: true,
 		deleteMissing: false,
 		pageLimit: null

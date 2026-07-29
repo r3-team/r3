@@ -1,24 +1,10 @@
-import MyBuilderCaption from './builderCaption.js';
+
+import { getIndexAttributeIdsByJoins, isAttributeRelationship, isAttributeRelationship11 } from '../shared/attribute.js';
+import { builderOptionGet, builderOptionSet, getDependentAttributes, getDependentModules, getItemTitleRelation } from '../shared/builder.js';
+import { getTemplateQueryChoice, getTemplateQueryFilter } from '../shared/builderTemplate.js';
 import { getCaptionByIndexAttributeId } from '../shared/query.js';
 import { getPgIndexTitle } from '../shared/schema.js';
-import {
-	getTemplateQueryChoice,
-	getTemplateQueryFilter
-} from '../shared/builderTemplate.js';
-import {
-	builderOptionGet,
-	builderOptionSet,
-	getItemTitleRelation
-} from '../shared/builder.js';
-import {
-	getIndexAttributeIdsByJoins,
-	isAttributeRelationship,
-	isAttributeRelationship11
-} from '../shared/attribute.js';
-import {
-	getDependentAttributes,
-	getDependentModules
-} from '../shared/builder.js';
+import MyBuilderCaption from './builderCaption.js';
 
 const MyBuilderQueryFilter = {
 	name: 'my-builder-query-filter',
@@ -282,8 +268,7 @@ const MyBuilderQueryLookupItem = {
 		relation: s => s.relationIdMap[s.join.relationId],
 
 		// stores
-		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap: s => s.$store.getters['schema/attributeIdMap']
+		relationIdMap: s => s.$store.getters['schema/relationIdMap']
 	},
 	methods: {
 		getPgIndexTitle
@@ -660,9 +645,6 @@ const MyBuilderQueryNestedJoin = {
 				relType = '1:1';
 
 			return `[${relType}] ${this.relationIdMap[relIdPartner].name} (${atrRel.name}.${atr.name})`;
-		},
-		displayCheck(state) {
-			return `images/${state ? 'checkbox1' : 'checkbox0'}.png`;
 		}
 	}
 };
@@ -1069,9 +1051,9 @@ export default {
 			const v = JSON.parse(JSON.stringify(this.joins));
 
 			v.push({
-				applyCreate: isSource ? true : false,
-				applyUpdate: isSource ? true : false,
-				applyDelete: isSource ? true : false,
+				applyCreate: isSource,
+				applyUpdate: isSource,
+				applyDelete: isSource,
 				connector: connector,
 				relationId: relId,
 				attributeId: attributeId,

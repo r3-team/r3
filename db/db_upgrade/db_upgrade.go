@@ -501,8 +501,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TABLE IF NOT EXISTS instance_db_sync.job (
 				id uuid NOT NULL,
 				host_id uuid NOT NULL,
-				relation_id uuid NOT NULL,
-				pg_index_id_lookup uuid,
 				name text NOT NULL,
 				comment text,
 				code_sql text NOT NULL,
@@ -514,20 +512,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				delete_missing BOOLEAN NOT NULL,
 				page_limit integer,
 				CONSTRAINT job_pkey PRIMARY KEY (id),
-				CONSTRAINT job_name_key UNIQUE (host_id,name) DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT job_relation_id_fkey FOREIGN KEY (relation_id)
-					REFERENCES app.relation (id) MATCH SIMPLE
-					ON UPDATE NO ACTION
-					ON DELETE NO ACTION
-					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT job_pg_index_id_lookup_fkey FOREIGN KEY (pg_index_id_lookup)
-					REFERENCES app.pg_index (id) MATCH SIMPLE
-					ON UPDATE NO ACTION
-					ON DELETE NO ACTION
-					DEFERRABLE INITIALLY DEFERRED
+				CONSTRAINT job_name_key UNIQUE (host_id,name) DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_job_relation_id_fkey        ON instance_db_sync.job USING btree (relation_id        ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_job_pg_index_id_lookup_fkey ON instance_db_sync.job USING btree (pg_index_id_lookup ASC NULLS LAST);
 
 			CREATE TABLE IF NOT EXISTS instance_db_sync.job_column (
 				job_id uuid NOT NULL,
