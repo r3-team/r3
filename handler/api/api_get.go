@@ -39,11 +39,11 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 	relIndexMapRef := make(map[int]string)
 	for _, join := range api.Query.Joins {
 		if getters.verbose {
-			cache.Schema_mx.RLock()
-			rel := cache.RelationIdMap[join.RelationId]
-			cache.Schema_mx.RUnlock()
-
-			relIndexMapRef[join.Index] = fmt.Sprintf("%d(%s)", join.Index, rel.Name)
+			relName, err := cache.GetRelationDbName(join.RelationId)
+			if err != nil {
+				return http.StatusServiceUnavailable, err, fmt.Errorf(handler.ErrGeneral)
+			}
+			relIndexMapRef[join.Index] = fmt.Sprintf("%d(%s)", join.Index, relName)
 		}
 		if join.Index == 0 {
 			continue
@@ -71,10 +71,10 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 
 	// add record filter
 	if recordId != 0 {
-		cache.Schema_mx.RLock()
-		rel := cache.RelationIdMap[api.Query.RelationId.Bytes]
-		cache.Schema_mx.RUnlock()
-
+		rel, err := cache.GetRelationById(api.Query.RelationId.Bytes)
+		if err != nil {
+			return http.StatusServiceUnavailable, err, fmt.Errorf(handler.ErrGeneral)
+		}
 		dataGet.Filters = append(dataGet.Filters, types.DataGetFilter{
 			Connector: "AND",
 			Index:     0,

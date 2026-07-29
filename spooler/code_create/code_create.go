@@ -12,7 +12,6 @@ import (
 	"r3/config"
 	"r3/data"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
 	"r3/schema"
 	"r3/spooler"
@@ -120,18 +119,13 @@ func DoAll() error {
 }
 
 func do(c codeJob) error {
-
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDocGenerate)
 	defer ctxCanc()
 
-	cache.Schema_mx.RLock()
-	atr, exists := cache.AttributeIdMap[c.AttributeIdAttach]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownAttribute(c.AttributeIdAttach)
+	atr, err := cache.GetAttributeById(c.AttributeIdAttach)
+	if err != nil {
+		return err
 	}
-
 	code, err := generateCode(c.Format, c.TextValue, c.SizeX, c.SizeY, c.QrErrCorr)
 	if err != nil {
 		return err

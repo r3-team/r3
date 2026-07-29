@@ -86,8 +86,6 @@ func GetPublic_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 }
 
 func Reset_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
 
 	if _, err := tx.Exec(ctx, `
 		UPDATE instance.login
@@ -98,14 +96,12 @@ func Reset_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 	}
 
 	// delete unusable data keys
-	for _, rel := range cache.RelationIdMap {
-		if rel.Encryption {
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				DELETE FROM instance_e2ee."%s"
-				WHERE login_id = $1
-			`, schema.GetEncKeyTableName(rel.Id)), loginId); err != nil {
-				return err
-			}
+	for _, relId := range cache.GetRelationIdsEncryptedAllModules() {
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
+			DELETE FROM instance_e2ee."%s"
+			WHERE login_id = $1
+		`, schema.GetEncKeyTableName(relId)), loginId); err != nil {
+			return err
 		}
 	}
 	return nil

@@ -112,30 +112,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// module PWA
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	moduleId, err := uuid.FromString(elements[2])
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 		return
 	}
 
-	module, exists := cache.ModuleIdMap[moduleId]
-	if !exists {
-		handler.AbortRequest(w, handler.ContextManifestDownload, handler.ErrSchemaUnknownModule(moduleId), handler.ErrGeneral)
+	module, err := cache.GetModuleById(moduleId)
+	if err != nil {
+		handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	// check for module parent
 	parentName := module.Name
 	if module.ParentId.Valid {
-		parent, exists := cache.ModuleIdMap[module.ParentId.Bytes]
-		if !exists {
-			handler.AbortRequest(w, handler.ContextManifestDownload, handler.ErrSchemaUnknownModule(module.ParentId.Bytes), handler.ErrGeneral)
+		parentName, err = cache.GetModuleDbName(module.ParentId.Bytes)
+		if err != nil {
+			handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 			return
 		}
-		parentName = parent.Name
 	}
 
 	// overwrite module PWA settings

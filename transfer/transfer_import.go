@@ -694,9 +694,8 @@ func parseModulesFromPaths_tx(ctx context.Context, tx pgx.Tx, filePaths []string
 		}
 
 		// check whether module is imported anew or updated
-		cache.Schema_mx.RLock()
-		exModule, isModuleUpgrade := cache.ModuleIdMap[moduleId]
-		cache.Schema_mx.RUnlock()
+		exModule, err := cache.GetModuleById(moduleId)
+		isModuleUpgrade := err == nil
 
 		if isModuleUpgrade {
 

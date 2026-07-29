@@ -34,14 +34,14 @@ var (
 )
 
 func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
-	cache.Schema_mx.RLock()
-	atr, exists := cache.AttributeIdMap[attributeId]
-	cache.Schema_mx.RUnlock()
 
-	if !exists || !schema.IsContentFiles(atr.Content) {
-		return errors.New("not a file attribute")
+	isFiles, err := cache.GetAttributeIsFilesById(attributeId)
+	if err != nil {
+		return err
 	}
-
+	if !isFiles {
+		return errors.New("not a files attribute")
+	}
 	if !authorizedAttributes(loginId, []uuid.UUID{attributeId}, types.AccessRead) {
 		return errors.New(handler.ErrUnauthorized)
 	}
@@ -65,12 +65,12 @@ func GetFilePathVersion(fileId uuid.UUID, version int64) string {
 func SetFile(ctx context.Context, loginId int64, attributeId, fileId uuid.UUID, fileSourcePart *multipart.Part,
 	fileSourcePath, fileSourceString pgtype.Text, isNewFile bool) error {
 
-	cache.Schema_mx.RLock()
-	attribute, exists := cache.AttributeIdMap[attributeId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists || !schema.IsContentFiles(attribute.Content) {
-		return handler.ErrSchemaUnknownAttribute(attributeId)
+	attribute, err := cache.GetAttributeById(attributeId)
+	if err != nil {
+		return err
+	}
+	if !schema.IsContentFiles(attribute.Content) {
+		return fmt.Errorf("not a files attribute")
 	}
 
 	// check for access permissions, unless it´s a system task (login ID = -1)
@@ -224,14 +224,10 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 		return nil
 	}
 
-	cache.Schema_mx.RLock()
-	relation, exists := cache.RelationIdMap[relationId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownRelation(relationId)
+	relation, err := cache.GetRelationById(relationId)
+	if err != nil {
+		return err
 	}
-
 	if !relationUsesLogging(relation.RetentionCount, relation.RetentionDays) {
 		return nil
 	}

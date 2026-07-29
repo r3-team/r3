@@ -10,6 +10,7 @@ import (
 	"r3/schema"
 	"r3/types"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -35,25 +36,29 @@ func handleDelete_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api 
 		}
 
 		ids := make([]int64, 0)
-		joinAtr, exists := cache.AttributeIdMap[join.AttributeId.Bytes]
-		if !exists {
-			return http.StatusServiceUnavailable, nil, handler.ErrSchemaUnknownAttribute(join.AttributeId.Bytes)
+		joinAtr, err := cache.GetAttributeById(join.AttributeId.Bytes)
+		if err != nil {
+			return http.StatusServiceUnavailable, nil, err
 		}
 
 		var atrNameLookup, atrNameFilter string
-		var rel types.Relation
+		var relId uuid.UUID
 
 		if joinAtr.RelationId == join.RelationId {
 			atrNameLookup = schema.PkName
 			atrNameFilter = joinAtr.Name
-			rel = cache.RelationIdMap[join.RelationId]
+			relId = join.RelationId
 		} else {
 			// join from other relation
 			atrNameLookup = joinAtr.Name
 			atrNameFilter = schema.PkName
-			rel = cache.RelationIdMap[joinAtr.RelationId]
+			relId = joinAtr.RelationId
 		}
-		mod := cache.ModuleIdMap[rel.ModuleId]
+
+		modName, relName, err := cache.GetRelationDbNames(relId)
+		if err != nil {
+			return http.StatusServiceUnavailable, nil, err
+		}
 
 		if err := tx.QueryRow(ctx, fmt.Sprintf(`
 			SELECT ARRAY(
@@ -62,7 +67,7 @@ func handleDelete_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api 
 				WHERE "%s" = ANY($1)
 				AND   "%s" IS NOT NULL -- ignore empty references
 			)
-		`, atrNameLookup, mod.Name, rel.Name, atrNameFilter, atrNameLookup), relationIndexMapRecordIds[join.IndexFrom]).Scan(&ids); err != nil {
+		`, atrNameLookup, modName, relName, atrNameFilter, atrNameLookup), relationIndexMapRecordIds[join.IndexFrom]).Scan(&ids); err != nil {
 			return http.StatusServiceUnavailable, err, fmt.Errorf(handler.ErrGeneral)
 		}
 		relationIndexMapRecordIds[join.Index] = ids

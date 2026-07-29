@@ -249,11 +249,8 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 		}
 
 		// check column attribute
-		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[column.AttributeId.Bytes]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
+		atr, err := cache.GetAttributeById(column.AttributeId.Bytes)
+		if err != nil {
 			return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppUnknownAttribute)
 		}
 		if atr.Encrypted {

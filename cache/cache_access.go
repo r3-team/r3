@@ -87,8 +87,8 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 		return err
 	}
 
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
@@ -105,7 +105,7 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 	}
 
 	for _, roleId := range roleIds {
-		role := RoleIdMap[roleId]
+		role := roleIdMap[roleId]
 
 		// because access rights work cumulatively, apply highest right only
 		for id, access := range role.AccessApis {
@@ -169,10 +169,10 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 	// resolve inherited attribute access from parent relation
 	// all roles were parsed and applied their cumulative attribute access
 	for _, roleId := range roleIds {
-		role := RoleIdMap[roleId]
+		role := roleIdMap[roleId]
 
 		for id, accessRel := range role.AccessRelations {
-			for _, atr := range RelationIdMap[id].Attributes {
+			for _, atr := range relationIdMap[id].Attributes {
 				if _, exists := role.AccessAttributes[atr.Id]; exists {
 					// role sets access for this attribute, nothing to inherit from relation
 					continue
@@ -202,25 +202,25 @@ func loadRoleIds_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]uuid.UUID,
 				FROM instance.login_role
 				WHERE login_id = $1
 			)
-			
+
 			UNION
-			
+
 			SELECT c.role_id_child
 			FROM app.role_child AS c
 			INNER JOIN child_ids AS r ON c.role_id = r.role_id_child
 		)
 		SELECT *
 		FROM child_ids
-		
+
 		UNION
-		
+
 		-- get assigned roles
 		SELECT role_id
 		FROM instance.login_role
 		WHERE login_id = $2
-		
+
 		UNION
-		
+
 		-- get 'everyone' roles from all modules
 		SELECT id
 		FROM app.role

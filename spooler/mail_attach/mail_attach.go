@@ -53,18 +53,13 @@ func DoAll() error {
 func do(mail types.Mail) error {
 
 	// check validity of attribute to attach files to
-	cache.Schema_mx.RLock()
-	atr, exists := cache.AttributeIdMap[mail.AttributeId.Bytes]
-	var rel types.Relation
-	var mod types.Module
-	if exists {
-		rel = cache.RelationIdMap[atr.RelationId]
-		mod = cache.ModuleIdMap[rel.ModuleId]
+	atr, err := cache.GetAttributeById(mail.AttributeId.Bytes)
+	if err != nil {
+		return err
 	}
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return fmt.Errorf("cannot attach file(s) to unknown attribute '%s'", mail.AttributeId.String())
+	modName, relName, err := cache.GetRelationDbNames(atr.RelationId)
+	if err != nil {
+		return err
 	}
 
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
@@ -106,11 +101,12 @@ func do(mail types.Mail) error {
 		return deleteMail(ctx, mail.Id)
 	}
 
+	var exists bool
 	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 		SELECT TRUE
-		FROM %s.%s
-		WHERE %s = $1
-	`, mod.Name, rel.Name, schema.PkName), mail.RecordId.Int64).Scan(&exists); err != nil {
+		FROM "%s"."%s"
+		WHERE "%s" = $1
+	`, modName, relName, schema.PkName), mail.RecordId.Int64).Scan(&exists); err != nil {
 		if err == pgx.ErrNoRows {
 			// record does not exist, delete mail
 			log.Warning(log.ContextMail, fmt.Sprintf("cannot store attachments for record ID %d, record does not exist", mail.RecordId.Int64), fmt.Errorf("deleting mail"))
@@ -152,7 +148,7 @@ func do(mail types.Mail) error {
 
 	fileIdMapChange := make(map[uuid.UUID]types.DataSetFileChange)
 	for _, f := range filesMail {
-		if err := data.FileApplyVersion_tx(ctx, tx, true, atr.Id, rel.Id,
+		if err := data.FileApplyVersion_tx(ctx, tx, true, atr.Id, atr.RelationId,
 			f.Id, f.Hash, f.Name, f.Size, 0, []int64{mail.RecordId.Int64}, -1); err != nil {
 
 			return err

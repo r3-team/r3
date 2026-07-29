@@ -44,9 +44,6 @@ func ExportToFile(ctx context.Context, moduleId uuid.UUID, exportKey string, zip
 	}
 	defer tx.Rollback(ctx)
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	// export all modules as JSON files
 	var moduleJsonPaths []string
 	var moduleIdsExported []uuid.UUID
@@ -69,12 +66,12 @@ func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, exportKey str
 	}
 	*moduleIdsExported = append(*moduleIdsExported, moduleId)
 
-	var exists bool
+	var err error
 	var file types.TransferFile
 
-	file.Content.Module, exists = cache.ModuleIdMap[moduleId]
-	if !exists {
-		return errors.New("module does not exist")
+	file.Content.Module, err = cache.GetModuleById(moduleId)
+	if err != nil {
+		return err
 	}
 
 	// export all modules that this module is dependent on

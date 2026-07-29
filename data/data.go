@@ -28,7 +28,7 @@ func authorizedAttributes(loginId int64, attributeIds []uuid.UUID, accessRequest
 	for _, attributeId := range attributeIds {
 
 		// use attribute access first if specified (more specific access wins)
-		access, exists := m.Attribute[attributeId];
+		access, exists := m.Attribute[attributeId]
 		if exists && access < accessRequested {
 			return false
 		}
@@ -38,11 +38,10 @@ func authorizedAttributes(loginId int64, attributeIds []uuid.UUID, accessRequest
 		}
 
 		// use relation access otherwise (inherited access)
-		atr, exists := cache.AttributeIdMap[attributeId]
-		if !exists {
+		atr, err := cache.GetAttributeById(attributeId)
+		if err != nil {
 			return false
 		}
-
 		if access, exists := m.Relation[atr.RelationId]; exists && access >= accessRequested {
 			continue
 		}
@@ -135,14 +134,13 @@ func getPolicyFunctionNames(loginId int64, policies []types.RelationPolicy, acti
 func getPolicyValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	relationId uuid.UUID, action string) ([]int64, []int64, bool, error) {
 
-	idsBlacklist := make([]int64, 0)
-	idsWhitelist := make([]int64, 0)
-
-	rel, exists := cache.RelationIdMap[relationId]
-	if !exists {
-		return idsBlacklist, idsWhitelist, false, handler.ErrSchemaUnknownRelation(relationId)
+	rel, err := cache.GetRelationById(relationId)
+	if err != nil {
+		return nil, nil, false, err
 	}
 
+	idsBlacklist := make([]int64, 0)
+	idsWhitelist := make([]int64, 0)
 	if len(rel.Policies) == 0 {
 		return idsBlacklist, idsWhitelist, false, nil
 	}
@@ -197,15 +195,11 @@ func getPolicyFilter(loginId int64, action string, tableAlias string, policies [
 }
 
 func getFunctionName(pgFunctionId uuid.UUID) (string, error) {
-	fnc, exists := cache.PgFunctionIdMap[pgFunctionId]
-	if !exists {
-		return "", handler.ErrSchemaUnknownFunction(pgFunctionId)
+	modName, fncName, err := cache.GetPgFunctionDbNames(pgFunctionId, false)
+	if err != nil {
+		return "", err
 	}
-	mod, exists := cache.ModuleIdMap[fnc.ModuleId]
-	if !exists {
-		return "", handler.ErrSchemaUnknownModule(fnc.ModuleId)
-	}
-	return fmt.Sprintf(`"%s"."%s"`, mod.Name, fnc.Name), nil
+	return fmt.Sprintf(`"%s"."%s"`, modName, fncName), nil
 }
 
 func GetRecordTitles_tx(ctx context.Context, tx pgx.Tx, relationIdMapRecordIds map[uuid.UUID][]int64, loginId int64) (map[uuid.UUID]map[int64]string, error) {
@@ -214,45 +208,37 @@ func GetRecordTitles_tx(ctx context.Context, tx pgx.Tx, relationIdMapRecordIds m
 
 	for relId, recordIds := range relationIdMapRecordIds {
 
-		cache.Schema_mx.RLock()
-		rel, relExists := cache.RelationIdMap[relId]
-		mod, modExists := cache.ModuleIdMap[rel.ModuleId]
-		cache.Schema_mx.RUnlock()
-
-		if !relExists {
-			return nil, handler.ErrSchemaUnknownRelation(relId)
+		rel, err := cache.GetRelationById(relId)
+		if err != nil {
+			return nil, err
 		}
-		if !modExists {
-			return nil, handler.ErrSchemaUnknownModule(rel.ModuleId)
-		}
-
 		if len(rel.AttributeIdsTitle) == 0 {
 			return nil, fmt.Errorf("record title is not defined for relation '%s'", rel.Name)
 		}
-
 		if !authorizedAttributes(loginId, rel.AttributeIdsTitle, types.AccessRead) {
 			return nil, errors.New(handler.ErrUnauthorized)
 		}
 
 		attrNames := make([]string, 0)
 		for _, atrId := range rel.AttributeIdsTitle {
-			cache.Schema_mx.RLock()
-			atr, exists := cache.AttributeIdMap[atrId]
-			cache.Schema_mx.RUnlock()
-
-			// cast to TEXT in case mixed types are used (such as integer + text)
-			attrNames = append(attrNames, fmt.Sprintf("\"%s\"::TEXT", atr.Name))
-
-			if !exists {
-				return nil, handler.ErrSchemaUnknownAttribute(atrId)
+			atrName, err := cache.GetAttributeDbName(atrId)
+			if err != nil {
+				return nil, err
 			}
+			// cast to TEXT in case mixed types are used (such as integer + text)
+			attrNames = append(attrNames, fmt.Sprintf(`"%s"::TEXT`, atrName))
+		}
+
+		modName, err := cache.GetModuleDbName(rel.ModuleId)
+		if err != nil {
+			return nil, err
 		}
 
 		rows, err := tx.Query(ctx, fmt.Sprintf(`
-			SELECT %s, ARRAY_TO_STRING(ARRAY[%s], ', ')
-			FROM %s.%s
-			WHERE %s = ANY($1)
-		`, schema.PkName, strings.Join(attrNames, ", "), mod.Name, rel.Name, schema.PkName), recordIds)
+			SELECT "%s", ARRAY_TO_STRING(ARRAY[%s], ', ')
+			FROM "%s"."%s"
+			WHERE "%s" = ANY($1)
+		`, schema.PkName, strings.Join(attrNames, ", "), modName, rel.Name, schema.PkName), recordIds)
 		if err != nil {
 			return nil, err
 		}

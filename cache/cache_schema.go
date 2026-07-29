@@ -10,6 +10,7 @@ import (
 	"r3/config/config_moduleMeta"
 	"r3/handler"
 	"r3/log"
+	"r3/schema"
 	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
@@ -44,60 +45,82 @@ import (
 
 var (
 	// schema cache access and state
-	Schema_mx sync.RWMutex
+	schema_mx sync.RWMutex
 
 	// schema cache
 	moduleIdMapJson = make(map[uuid.UUID]json.RawMessage)  // ID map of module definition as JSON
 	moduleIdMapMeta = make(map[uuid.UUID]types.ModuleMeta) // ID map of module meta data
 
 	// cached entities for regular use during normal operation
-	ModuleIdMap        = make(map[uuid.UUID]types.Module)      // all modules by ID
-	ModuleApiNameMapId = make(map[string]map[string]uuid.UUID) // all API IDs by module+API name
-	RelationIdMap      = make(map[uuid.UUID]types.Relation)    // all relations by ID
-	AttributeIdMap     = make(map[uuid.UUID]types.Attribute)   // all attributes by ID
-	RoleIdMap          = make(map[uuid.UUID]types.Role)        // all roles by ID
-	PgFunctionIdMap    = make(map[uuid.UUID]types.PgFunction)  // all PG functions by ID
-	ApiIdMap           = make(map[uuid.UUID]types.Api)         // all APIs by ID
-	DocIdMap           = make(map[uuid.UUID]types.Doc)         // all documents by ID
-	ClientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
+	moduleIdMap        = make(map[uuid.UUID]types.Module)      // all modules by ID
+	moduleApiNameMapId = make(map[string]map[string]uuid.UUID) // all API IDs by module+API name
+	relationIdMap      = make(map[uuid.UUID]types.Relation)    // all relations by ID
+	attributeIdMap     = make(map[uuid.UUID]types.Attribute)   // all attributes by ID
+	roleIdMap          = make(map[uuid.UUID]types.Role)        // all roles by ID
+	pgFunctionIdMap    = make(map[uuid.UUID]types.PgFunction)  // all PG functions by ID
+	apiIdMap           = make(map[uuid.UUID]types.Api)         // all APIs by ID
+	docIdMap           = make(map[uuid.UUID]types.Doc)         // all documents by ID
+	clientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
 )
 
 // returns names of entities to fully reference module in DB (module)
 func GetModuleDbName(moduleId uuid.UUID) (string, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 
-	if _, exists := ModuleIdMap[moduleId]; !exists {
+	if _, exists := moduleIdMap[moduleId]; !exists {
 		return "", handler.ErrSchemaUnknownModule(moduleId)
 	}
-	return ModuleIdMap[moduleId].Name, nil
+	return moduleIdMap[moduleId].Name, nil
+}
+
+// returns name of entity to reference relation in DB (relation)
+func GetRelationDbName(relationId uuid.UUID) (string, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+
+	if _, exists := relationIdMap[relationId]; !exists {
+		return "", handler.ErrSchemaUnknownRelation(relationId)
+	}
+	return relationIdMap[relationId].Name, nil
 }
 
 // returns names of entities to fully reference relation in DB (module, relation)
 func GetRelationDbNames(relationId uuid.UUID) (string, string, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 
-	rel, exists := RelationIdMap[relationId]
+	rel, exists := relationIdMap[relationId]
 	if !exists {
 		return "", "", handler.ErrSchemaUnknownRelation(relationId)
 	}
-	return ModuleIdMap[rel.ModuleId].Name, rel.Name, nil
+	return moduleIdMap[rel.ModuleId].Name, rel.Name, nil
+}
+
+// returns name of entities to reference just attribute in DB (attribute)
+func GetAttributeDbName(attributeId uuid.UUID) (string, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+
+	if _, exists := attributeIdMap[attributeId]; !exists {
+		return "", handler.ErrSchemaUnknownAttribute(attributeId)
+	}
+	return attributeIdMap[attributeId].Name, nil
 }
 
 // returns names of entities to fully reference attribute in DB (module, relation, attribute)
 func GetAttributeDbNames(attributeId uuid.UUID) (string, string, string, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 
-	atr, exists := AttributeIdMap[attributeId]
+	atr, exists := attributeIdMap[attributeId]
 	if !exists {
 		return "", "", "", handler.ErrSchemaUnknownAttribute(attributeId)
 	}
-	rel := RelationIdMap[atr.RelationId]
+	rel := relationIdMap[atr.RelationId]
 
-	return ModuleIdMap[rel.ModuleId].Name,
-		RelationIdMap[atr.RelationId].Name,
+	return moduleIdMap[rel.ModuleId].Name,
+		relationIdMap[atr.RelationId].Name,
 		atr.Name,
 		nil
 }
@@ -106,10 +129,10 @@ func GetAttributeDbNames(attributeId uuid.UUID) (string, string, string, error) 
 // can enforce frontend call PG functions if desired
 // returns error if requested function is a trigger function
 func GetPgFunctionDbNames(pgFunctionId uuid.UUID, frontendCall bool) (string, string, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 
-	fnc, exists := PgFunctionIdMap[pgFunctionId]
+	fnc, exists := pgFunctionIdMap[pgFunctionId]
 	if !exists {
 		return "", "", handler.ErrSchemaUnknownPgFunction(pgFunctionId)
 	}
@@ -119,41 +142,109 @@ func GetPgFunctionDbNames(pgFunctionId uuid.UUID, frontendCall bool) (string, st
 	if frontendCall && !fnc.IsFrontendExec {
 		return "", "", handler.ErrSchemaBadFrontendExecPgFunctionCall(pgFunctionId)
 	}
-	return ModuleIdMap[fnc.ModuleId].Name,
-		fnc.Name,
-		nil
+	return moduleIdMap[fnc.ModuleId].Name, fnc.Name, nil
+}
+
+func GetAttributeIsEncryptedById(attributeId uuid.UUID) (bool, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+
+	if _, exists := attributeIdMap[attributeId]; !exists {
+		return false, handler.ErrSchemaUnknownAttribute(attributeId)
+	}
+	return attributeIdMap[attributeId].Encrypted, nil
+}
+func GetAttributeIsFilesById(attributeId uuid.UUID) (bool, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+
+	if _, exists := attributeIdMap[attributeId]; !exists {
+		return false, handler.ErrSchemaUnknownAttribute(attributeId)
+	}
+	return schema.IsContentFiles(attributeIdMap[attributeId].Content), nil
 }
 func GetAttributeById(id uuid.UUID) (types.Attribute, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
-	atr, exists := AttributeIdMap[id]
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	atr, exists := attributeIdMap[id]
 	if !exists {
 		return atr, handler.ErrSchemaUnknownAttribute(id)
 	}
 	return atr, nil
 }
+func GetClientEventById(id uuid.UUID) (types.ClientEvent, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	ce, exists := clientEventIdMap[id]
+	if !exists {
+		return ce, handler.ErrSchemaUnknownClientEvent(id)
+	}
+	return ce, nil
+}
+func GetDocById(id uuid.UUID) (types.Doc, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	doc, exists := docIdMap[id]
+	if !exists {
+		return doc, handler.ErrSchemaUnknownDoc(id)
+	}
+	return doc, nil
+}
+func GetPgFunctionById(id uuid.UUID) (types.PgFunction, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	fnc, exists := pgFunctionIdMap[id]
+	if !exists {
+		return fnc, handler.ErrSchemaUnknownPgFunction(id)
+	}
+	return fnc, nil
+}
+func GetModuleById(id uuid.UUID) (types.Module, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	mod, exists := moduleIdMap[id]
+	if !exists {
+		return mod, handler.ErrSchemaUnknownModule(id)
+	}
+	return mod, nil
+}
+func GetRelationAndAttributeByAttributeId(id uuid.UUID) (types.Relation, types.Attribute, error) {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+
+	atr, exists := attributeIdMap[id]
+	if !exists {
+		return types.Relation{}, atr, handler.ErrSchemaUnknownAttribute(id)
+	}
+	rel, exists := relationIdMap[atr.RelationId]
+	if !exists {
+		return rel, atr, handler.ErrSchemaUnknownRelation(atr.RelationId)
+	}
+	return rel, atr, nil
+}
 func GetRelationById(id uuid.UUID) (types.Relation, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
-	rel, exists := RelationIdMap[id]
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	rel, exists := relationIdMap[id]
 	if !exists {
 		return rel, handler.ErrSchemaUnknownRelation(id)
 	}
 	return rel, nil
 }
+
 func GetClientEventIdMap() map[uuid.UUID]types.ClientEvent {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
-	return ClientEventIdMap
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	return clientEventIdMap
 }
 func GetModuleIdMapMeta() map[uuid.UUID]types.ModuleMeta {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 	return moduleIdMapMeta
 }
 func GetModuleCacheJson(moduleId uuid.UUID) (json.RawMessage, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 
 	json, exists := moduleIdMapJson[moduleId]
 	if !exists {
@@ -161,31 +252,60 @@ func GetModuleCacheJson(moduleId uuid.UUID) (json.RawMessage, error) {
 	}
 	return json, nil
 }
+func GetPgFunctionIdsLoginSyncAllModules() []uuid.UUID {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+
+	ids := make([]uuid.UUID, 0)
+	for _, mod := range moduleIdMap {
+		if mod.PgFunctionIdLoginSync.Valid {
+			ids = append(ids, mod.PgFunctionIdLoginSync.Bytes)
+		}
+	}
+	return ids
+}
+func GetRelationIdsEncryptedAllModules() []uuid.UUID {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+
+	ids := make([]uuid.UUID, 0)
+	for _, rel := range relationIdMap {
+		if rel.Encryption {
+			ids = append(ids, rel.Id)
+		}
+	}
+	return ids
+}
+func GetRelationIdMap() map[uuid.UUID]types.Relation {
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
+	return relationIdMap
+}
 
 // overwrites language code with primary language of module if it´s not supported by module
 func GetModuleLanguageCodeValid(moduleId uuid.UUID, languageCode string) (string, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 
-	if _, exists := ModuleIdMap[moduleId]; !exists {
+	if _, exists := moduleIdMap[moduleId]; !exists {
 		return "", handler.ErrSchemaUnknownModule(moduleId)
 	}
 
-	if !slices.Contains(ModuleIdMap[moduleId].Languages, languageCode) {
-		languageCode = ModuleIdMap[moduleId].LanguageMain
+	if !slices.Contains(moduleIdMap[moduleId].Languages, languageCode) {
+		languageCode = moduleIdMap[moduleId].LanguageMain
 	}
 	return languageCode, nil
 }
 
 func GetApiByNames(modName, apiName string, apiVersion int) (types.Api, error) {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
+	schema_mx.RLock()
+	defer schema_mx.RUnlock()
 
-	apiId, exists := ModuleApiNameMapId[modName][fmt.Sprintf("%s.v%d", apiName, apiVersion)]
+	apiId, exists := moduleApiNameMapId[modName][fmt.Sprintf("%s.v%d", apiName, apiVersion)]
 	if !exists {
 		return types.Api{}, fmt.Errorf("API '%s.%s' (v%d) does not exist", modName, apiName, apiVersion)
 	}
-	api, exists := ApiIdMap[apiId]
+	api, exists := apiIdMap[apiId]
 	if !exists {
 		return types.Api{}, handler.ErrSchemaUnknownApi(apiId)
 	}
@@ -197,13 +317,13 @@ func LoadModuleIdMapMeta_tx(ctx context.Context, tx pgx.Tx) error {
 	if err != nil {
 		return err
 	}
-	Schema_mx.Lock()
-	defer Schema_mx.Unlock()
+	schema_mx.Lock()
+	defer schema_mx.Unlock()
 
 	// apply deletions if relevant
 	for id := range moduleIdMapMeta {
 		if _, exists := moduleIdMapMetaNew[id]; !exists {
-			delete(ModuleIdMap, id)
+			delete(moduleIdMap, id)
 			delete(moduleIdMapJson, id)
 		}
 	}
@@ -234,9 +354,9 @@ func UpdateSchema_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, init
 
 	// create JSON copy of schema cache for fast retrieval
 	for _, id := range moduleIds {
-		Schema_mx.Lock()
-		moduleIdMapJson[id], err = json.Marshal(ModuleIdMap[id])
-		Schema_mx.Unlock()
+		schema_mx.Lock()
+		moduleIdMapJson[id], err = json.Marshal(moduleIdMap[id])
+		schema_mx.Unlock()
 		if err != nil {
 			return err
 		}
@@ -254,9 +374,9 @@ func UpdateSchema_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, init
 
 	// update module meta cache
 	for _, id := range moduleIds {
-		Schema_mx.RLock()
+		schema_mx.RLock()
 		meta, exists := moduleIdMapMeta[id]
-		Schema_mx.RUnlock()
+		schema_mx.RUnlock()
 
 		if !exists {
 			meta, err = config_moduleMeta.Get_tx(ctx, tx, id)
@@ -266,16 +386,16 @@ func UpdateSchema_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, init
 		}
 		meta.DateChange = now
 
-		Schema_mx.Lock()
+		schema_mx.Lock()
 		moduleIdMapMeta[id] = meta
-		Schema_mx.Unlock()
+		schema_mx.Unlock()
 	}
 	return nil
 }
 
 func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID) error {
-	Schema_mx.Lock()
-	defer Schema_mx.Unlock()
+	schema_mx.Lock()
+	defer schema_mx.Unlock()
 
 	log.Info(log.ContextCache, fmt.Sprintf("starting schema processing for %d module(s)", len(moduleIds)))
 
@@ -302,7 +422,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		mod.Tags = make([]types.Tag, 0)
 		mod.Variables = make([]types.Variable, 0)
 		mod.Widgets = make([]types.Widget, 0)
-		ModuleApiNameMapId[mod.Name] = make(map[string]uuid.UUID)
+		moduleApiNameMapId[mod.Name] = make(map[string]uuid.UUID)
 
 		// get articles
 		log.Info(log.ContextCache, "load articles")
@@ -330,7 +450,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 
 			// store & backfill attribute to relation
 			for _, atr := range atrs {
-				AttributeIdMap[atr.Id] = atr
+				attributeIdMap[atr.Id] = atr
 				rel.Attributes = append(rel.Attributes, atr)
 			}
 
@@ -347,7 +467,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 			}
 
 			// store & backfill relation to module
-			RelationIdMap[rel.Id] = rel
+			relationIdMap[rel.Id] = rel
 			mod.Relations = append(mod.Relations, rel)
 		}
 
@@ -385,7 +505,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 
 		for _, rol := range mod.Roles {
 			// store role
-			RoleIdMap[rol.Id] = rol
+			roleIdMap[rol.Id] = rol
 		}
 
 		// get login forms
@@ -410,7 +530,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 			return err
 		}
 		for _, fnc := range mod.PgFunctions {
-			PgFunctionIdMap[fnc.Id] = fnc
+			pgFunctionIdMap[fnc.Id] = fnc
 		}
 
 		// get JS functions
@@ -437,8 +557,8 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 			return err
 		}
 		for _, a := range mod.Apis {
-			ApiIdMap[a.Id] = a
-			ModuleApiNameMapId[mod.Name][fmt.Sprintf("%s.v%d", a.Name, a.Version)] = a.Id
+			apiIdMap[a.Id] = a
+			moduleApiNameMapId[mod.Name][fmt.Sprintf("%s.v%d", a.Name, a.Version)] = a.Id
 		}
 
 		// get documents
@@ -449,7 +569,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 			return err
 		}
 		for _, d := range mod.Docs {
-			DocIdMap[d.Id] = d
+			docIdMap[d.Id] = d
 		}
 
 		// get client events
@@ -460,7 +580,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 			return err
 		}
 		for _, ce := range mod.ClientEvents {
-			ClientEventIdMap[ce.Id] = ce
+			clientEventIdMap[ce.Id] = ce
 		}
 
 		// get search bars
@@ -494,7 +614,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// update cache map with parsed module
-		ModuleIdMap[mod.Id] = mod
+		moduleIdMap[mod.Id] = mod
 	}
 	return nil
 }

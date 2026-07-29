@@ -144,16 +144,12 @@ func do(m types.Mail) error {
 	fileList := make([]string, 0)
 	if m.RecordId.Valid && m.AttributeId.Valid {
 
-		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[m.AttributeId.Bytes]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
-			return fmt.Errorf("cannot attach file(s) from unknown attribute %s", m.AttributeId.String())
+		isFiles, err := cache.GetAttributeIsFilesById(m.AttributeId.Bytes)
+		if err != nil {
+			return err
 		}
-
-		if !schema.IsContentFiles(atr.Content) {
-			return fmt.Errorf("cannot attach file(s) from non-file attribute %s", m.AttributeId.String())
+		if !isFiles {
+			return fmt.Errorf("cannot attach file(s) from non-files attribute %s", m.AttributeId.String())
 		}
 		files := make([]types.DataGetValueFile, 0)
 
@@ -166,7 +162,7 @@ func do(m types.Mail) error {
 			FROM instance_file."%s" AS r
 			WHERE r.record_id = $1
 			AND   r.date_delete IS NULL
-		`, schema.GetFilesTableName(atr.Id)), m.RecordId.Int64)
+		`, schema.GetFilesTableName(m.AttributeId.Bytes)), m.RecordId.Int64)
 
 		if err != nil {
 			return err

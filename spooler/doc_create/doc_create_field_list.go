@@ -7,7 +7,6 @@ import (
 	"r3/data"
 	"r3/data/data_query"
 	"r3/db"
-	"r3/handler"
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
@@ -164,12 +163,9 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			if !column.AttributeId.Valid {
 				return fmt.Errorf("no attribute defined in column")
 			}
-
-			cache.Schema_mx.RLock()
-			atr, exists := cache.AttributeIdMap[column.AttributeId.Bytes]
-			cache.Schema_mx.RUnlock()
-			if !exists {
-				return handler.ErrSchemaUnknownAttribute(column.AttributeId.Bytes)
+			atr, err := cache.GetAttributeById(column.AttributeId.Bytes)
+			if err != nil {
+				return err
 			}
 			meta.content = atr.Content
 			meta.contentUse = atr.ContentUse

@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"r3/cache"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
 	"r3/login/login_external"
 	"r3/login/login_meta"
@@ -73,11 +72,6 @@ func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, entity string, ent
 func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy string, orderAsc bool, limit int, offset int,
 	meta bool, roles bool, recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
-	logins := make([]types.LoginAdmin, 0)
-
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
 	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.oauth_client_id", "l.name",
@@ -90,21 +84,16 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	separator := "<|-|>"
 
 	for _, r := range recordRequests {
-		atrLogin, exists := cache.AttributeIdMap[r.AttributeIdLogin]
-		if !exists {
-			return logins, 0, fmt.Errorf("cannot find attribute for ID %s", r.AttributeIdLogin)
+		modName, relName, atrName, err := cache.GetAttributeDbNames(r.AttributeIdLogin)
+		if err != nil {
+			return nil, 0, err
 		}
-		atrLookup, exists := cache.AttributeIdMap[r.AttributeIdLookup]
-		if !exists {
-			return logins, 0, fmt.Errorf("cannot find attribute for ID %s", r.AttributeIdLookup)
+		atrLookupName, err := cache.GetAttributeDbName(r.AttributeIdLookup)
+		if err != nil {
+			return nil, 0, err
 		}
-
-		// if attribute exists, everything else does too
-		rel := cache.RelationIdMap[atrLogin.RelationId]
-		mod := cache.ModuleIdMap[rel.ModuleId]
-
 		parts = append(parts, fmt.Sprintf(`SELECT COALESCE((SELECT CONCAT("%s",'%s',"%s") FROM "%s"."%s" WHERE "%s" = l.id),'')`,
-			schema.PkName, separator, atrLookup.Name, mod.Name, rel.Name, atrLogin.Name))
+			schema.PkName, separator, atrLookupName, modName, relName, atrName))
 	}
 	if len(parts) != 0 {
 		qb.Add("SELECT", fmt.Sprintf("ARRAY(%s)", strings.Join(parts, "\nUNION ALL\n")))
@@ -150,14 +139,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 	query, err := qb.GetQuery()
 	if err != nil {
-		return logins, 0, err
+		return nil, 0, err
 	}
 
 	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
-		return logins, 0, err
+		return nil, 0, err
 	}
 
+	logins := make([]types.LoginAdmin, 0)
 	for rows.Next() {
 		var l types.LoginAdmin
 		var records []string
@@ -165,7 +155,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 		if err := rows.Scan(&l.Id, &l.LdapId, &l.OauthClientId, &l.Name, &l.Admin, &l.Limited,
 			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &records); err != nil {
 
-			return logins, 0, err
+			return nil, 0, err
 		}
 
 		// process looked up login records
@@ -178,12 +168,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 			parts = strings.Split(r, separator)
 			if len(parts) != 2 {
-				return logins, 0, errors.New("failed to separate login record ID from lookup attribute value")
+				return nil, 0, errors.New("failed to separate login record ID from lookup attribute value")
 			}
 
 			id, err := strconv.ParseInt(parts[0], 10, 64)
 			if err != nil {
-				return logins, 0, err
+				return nil, 0, err
 			}
 			l.Records = append(l.Records, types.LoginAdminRecord{
 				Id:    pgtype.Int8{Int64: id, Valid: true},
@@ -199,7 +189,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 		for i, l := range logins {
 			logins[i].Meta, err = login_meta.Get_tx(ctx, tx, l.Id)
 			if err != nil {
-				return logins, 0, err
+				return nil, 0, err
 			}
 		}
 	}
@@ -209,7 +199,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 		for i, l := range logins {
 			logins[i].RoleIds, err = login_role.Get_tx(ctx, tx, l.Id)
 			if err != nil {
-				return logins, 0, err
+				return nil, 0, err
 			}
 		}
 	}
@@ -232,12 +222,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 	query_cnt, err := qb_cnt.GetQuery()
 	if err != nil {
-		return logins, 0, err
+		return nil, 0, err
 	}
 
 	var total int
 	if err := tx.QueryRow(ctx, query_cnt, qb_cnt.GetParaValues()...).Scan(&total); err != nil {
-		return logins, 0, err
+		return nil, 0, err
 	}
 	return logins, total, nil
 }
@@ -328,19 +318,17 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	// set records
 	for _, record := range records {
 
-		atr, exists := cache.AttributeIdMap[record.AttributeId]
-		if !exists {
-			return 0, handler.ErrSchemaUnknownAttribute(record.AttributeId)
+		modName, relName, atrName, err := cache.GetAttributeDbNames(record.AttributeId)
+		if err != nil {
+			return 0, err
 		}
-		rel := cache.RelationIdMap[atr.RelationId]
-		mod := cache.ModuleIdMap[rel.ModuleId]
 		if !isNew {
 			// remove old record (first to free up unique index)
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s"
 				SET "%s" = null
 				WHERE "%s" = $1
-			`, mod.Name, rel.Name, atr.Name, atr.Name), id); err != nil {
+			`, modName, relName, atrName, atrName), id); err != nil {
 				return 0, err
 			}
 		}
@@ -350,7 +338,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 			UPDATE "%s"."%s"
 			SET "%s" = $1
 			WHERE "%s" = $2
-		`, mod.Name, rel.Name, atr.Name, schema.PkName), id, record.RecordId); err != nil {
+		`, modName, relName, atrName, schema.PkName), id, record.RecordId); err != nil {
 			return 0, err
 		}
 	}
@@ -563,20 +551,13 @@ func syncLogin_tx(ctx context.Context, tx pgx.Tx, action string, id int64) {
 		return
 	}
 
-	cache.Schema_mx.RLock()
-	for _, mod := range cache.ModuleIdMap {
-		if !mod.PgFunctionIdLoginSync.Valid {
+	for _, fncId := range cache.GetPgFunctionIdsLoginSyncAllModules() {
+		modName, fncName, err := cache.GetPgFunctionDbNames(fncId, false)
+		if err != nil {
 			continue
 		}
-
-		fnc, exists := cache.PgFunctionIdMap[mod.PgFunctionIdLoginSync.Bytes]
-		if !exists {
-			continue
-		}
-
-		if _, err := tx.Exec(ctx, `SELECT instance.user_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
+		if _, err := tx.Exec(ctx, `SELECT instance.user_sync($1,$2,$3,$4)`, modName, fncName, id, action); err != nil {
 			log.Error(log.ContextServer, logErr, err)
 		}
 	}
-	cache.Schema_mx.RUnlock()
 }

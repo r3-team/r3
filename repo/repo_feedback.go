@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/config"
-	"r3/handler"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -14,14 +13,11 @@ func SendFeedback(isAdmin bool, moduleRelated bool, repoId uuid.UUID, moduleId p
 
 	releaseBuild := 0
 	if moduleId.Valid {
-		cache.Schema_mx.RLock()
-		module, exists := cache.ModuleIdMap[moduleId.Bytes]
-		cache.Schema_mx.RUnlock()
-
-		if !exists {
-			return handler.ErrSchemaUnknownModule(moduleId.Bytes)
+		mod, err := cache.GetModuleById(moduleId.Bytes)
+		if err != nil {
+			return err
 		}
-		releaseBuild = module.ReleaseBuild
+		releaseBuild = mod.ReleaseBuild
 	}
 
 	repo, err := cache.GetRepoById(repoId)

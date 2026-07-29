@@ -10,7 +10,6 @@ import (
 	"r3/config"
 	"r3/data"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
 	"r3/schema"
 	"r3/spooler"
@@ -151,23 +150,19 @@ func do(j docJob) error {
 			return errors.New("no record ID for attachment given")
 		}
 
-		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[j.AttributeIdAttach.Bytes]
-		var rel types.Relation
-		var mod types.Module
-		if exists {
-			rel = cache.RelationIdMap[atr.RelationId]
-			mod = cache.ModuleIdMap[rel.ModuleId]
+		modName, relName, _, err := cache.GetAttributeDbNames(j.AttributeIdAttach.Bytes)
+		if err != nil {
+			return err
 		}
-		cache.Schema_mx.RUnlock()
 
+		var exists bool
 		if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 			SELECT TRUE
-			FROM %s.%s
-			WHERE %s = $1
-		`, mod.Name, rel.Name, schema.PkName), j.RecordIdAttach.Int64).Scan(&exists); err != nil {
+			FROM "%s"."%s"
+			WHERE "%s" = $1
+		`, modName, relName, schema.PkName), j.RecordIdAttach.Int64).Scan(&exists); err != nil {
 			if err == pgx.ErrNoRows {
-				return fmt.Errorf("record %d to attach to on relation '%s' does not exist", j.RecordIdAttach.Int64, rel.Name)
+				return fmt.Errorf("record %d to attach to on relation '%s' does not exist", j.RecordIdAttach.Int64, relName)
 			}
 		}
 
@@ -221,12 +216,9 @@ func do(j docJob) error {
 // returns filename of generated document
 func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pathOut string) (string, error) {
 
-	cache.Schema_mx.RLock()
-	docDef, exists := cache.DocIdMap[docId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return "", handler.ErrSchemaUnknownDoc(docId)
+	docDef, err := cache.GetDocById(docId)
+	if err != nil {
+		return "", err
 	}
 
 	if len(docDef.Pages) < 1 {
@@ -244,27 +236,15 @@ func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pa
 	if docHasData {
 		if recordId != 0 {
 			// apply record filter to base relation
-			cache.Schema_mx.RLock()
-			rel, exists := cache.RelationIdMap[docDef.Query.RelationId.Bytes]
-			cache.Schema_mx.RUnlock()
-
-			if !exists {
-				return "", handler.ErrSchemaUnknownRelation(docDef.Query.RelationId.Bytes)
+			rel, err := cache.GetRelationById(docDef.Query.RelationId.Bytes)
+			if err != nil {
+				return "", err
 			}
-
-			cache.Schema_mx.RLock()
-			atrPk, exists := cache.AttributeIdMap[rel.AttributeIdPk]
-			cache.Schema_mx.RUnlock()
-
-			if !exists {
-				return "", handler.ErrSchemaUnknownAttribute(rel.AttributeIdPk)
-			}
-
 			docDef.Query.Filters = append(docDef.Query.Filters, types.QueryFilter{
 				Connector: "AND",
 				Operator:  "=",
 				Side0: types.QueryFilterSide{
-					AttributeId: pgtype.UUID{Bytes: atrPk.Id, Valid: true},
+					AttributeId: pgtype.UUID{Bytes: rel.AttributeIdPk, Valid: true},
 				},
 				Side1: types.QueryFilterSide{
 					Value: pgtype.Text{String: fmt.Sprintf("%d", recordId), Valid: true},

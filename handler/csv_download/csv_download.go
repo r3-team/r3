@@ -243,11 +243,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			cache.Schema_mx.RLock()
-			atr, exists := cache.AttributeIdMap[atrId.Bytes]
-			cache.Schema_mx.RUnlock()
-			if !exists {
-				handler.AbortRequest(w, handler.ContextCsvDownload, nil, handler.ErrSchemaUnknownAttribute(atrId.Bytes).Error())
+			atr, err := cache.GetAttributeById(atrId.Bytes)
+			if err != nil {
+				handler.AbortRequest(w, handler.ContextCsvDownload, nil, err.Error())
 				return
 			}
 			expressionsContentUse[i] = atr.ContentUse

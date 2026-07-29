@@ -21,7 +21,6 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/config/config_moduleMeta"
-	"r3/handler"
 	"r3/tools"
 	"r3/types"
 	"sync"
@@ -35,15 +34,12 @@ var (
 )
 
 func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
-	var exists bool
+	var err error
 	var file types.TransferFile
 
-	cache.Schema_mx.RLock()
-	file.Content.Module, exists = cache.ModuleIdMap[moduleId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownModule(moduleId)
+	file.Content.Module, err = cache.GetModuleById(moduleId)
+	if err != nil {
+		return err
 	}
 
 	// update version info
@@ -109,9 +105,6 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 // start with 1 module and check whether it or its dependent upon modules had changed
 // returns map of module IDs, changed yes/no
 func GetModuleChangedWithDependencies_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (map[uuid.UUID]bool, error) {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	mapChecked := make(map[uuid.UUID]bool)
 
 	var checkRecursive func(id uuid.UUID, moduleIdMapChecked map[uuid.UUID]bool) error
@@ -122,12 +115,11 @@ func GetModuleChangedWithDependencies_tx(ctx context.Context, tx pgx.Tx, moduleI
 			return nil
 		}
 
-		module, exists := cache.ModuleIdMap[id]
-		if !exists {
-			return handler.ErrSchemaUnknownModule(id)
+		module, err := cache.GetModuleById(id)
+		if err != nil {
+			return err
 		}
 
-		var err error
 		var file types.TransferFile
 		file.Content.Module = module
 

@@ -17,24 +17,17 @@ import (
 func GetRecords_tx(ctx context.Context, tx pgx.Tx, attributeIdLookup uuid.UUID, idsExclude []int64,
 	byId int64, byString string) ([]types.LoginRecord, error) {
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
-	records := make([]types.LoginRecord, 0)
-
-	atr, exists := cache.AttributeIdMap[attributeIdLookup]
-	if !exists {
-		return records, fmt.Errorf("cannot find attribute for ID %s", attributeIdLookup)
+	modName, relName, atrName, err := cache.GetAttributeDbNames(attributeIdLookup)
+	if err != nil {
+		return nil, err
 	}
-	rel := cache.RelationIdMap[atr.RelationId]
-	mod := cache.ModuleIdMap[rel.ModuleId]
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
 	qb.AddList("SELECT", []string{fmt.Sprintf(`"%s"`, schema.PkName),
-		fmt.Sprintf(`"%s"`, atr.Name)})
+		fmt.Sprintf(`"%s"`, atrName)})
 
-	qb.SetFrom(fmt.Sprintf(`"%s"."%s"`, mod.Name, rel.Name))
+	qb.SetFrom(fmt.Sprintf(`"%s"."%s"`, modName, relName))
 
 	if len(idsExclude) != 0 {
 		qb.Add("WHERE", fmt.Sprintf(`"%s" <> ALL({IDS_EXCLUDE})`, schema.PkName))
@@ -42,31 +35,32 @@ func GetRecords_tx(ctx context.Context, tx pgx.Tx, attributeIdLookup uuid.UUID, 
 	}
 
 	if byString != "" {
-		qb.Add("WHERE", fmt.Sprintf(`"%s" ILIKE {FILTER}`, atr.Name))
+		qb.Add("WHERE", fmt.Sprintf(`"%s" ILIKE {FILTER}`, atrName))
 		qb.AddPara("{FILTER}", fmt.Sprintf("%%%s%%", byString))
 	} else if byId != 0 {
 		qb.Add("WHERE", fmt.Sprintf(`"%s" = {FILTER}`, schema.PkName))
 		qb.AddPara("{FILTER}", byId)
 	}
 
-	qb.Add("ORDER", fmt.Sprintf(`"%s" ASC`, atr.Name))
+	qb.Add("ORDER", fmt.Sprintf(`"%s" ASC`, atrName))
 	qb.SetLimit(10)
 
 	query, err := qb.GetQuery()
 	if err != nil {
-		return records, err
+		return nil, err
 	}
 
 	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
-		return records, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	records := make([]types.LoginRecord, 0)
 	for rows.Next() {
 		var r types.LoginRecord
 		if err := rows.Scan(&r.Id, &r.Name); err != nil {
-			return records, err
+			return nil, err
 		}
 		records = append(records, r)
 	}

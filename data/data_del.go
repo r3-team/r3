@@ -19,12 +19,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordId int64
 		return errors.New(handler.ErrUnauthorized)
 	}
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
-	rel, exists := cache.RelationIdMap[relationId]
-	if !exists {
-		return handler.ErrSchemaUnknownRelation(relationId)
+	rel, err := cache.GetRelationById(relationId)
+	if err != nil {
+		return err
 	}
 
 	// check for protected preset record
@@ -34,9 +31,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordId int64
 		}
 	}
 
-	mod, exists := cache.ModuleIdMap[rel.ModuleId]
-	if !exists {
-		return handler.ErrSchemaUnknownModule(rel.ModuleId)
+	modName, err := cache.GetModuleDbName(rel.ModuleId)
+	if err != nil {
+		return err
 	}
 
 	// get policy filter if applicable
@@ -50,7 +47,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordId int64
 		DELETE FROM "%s"."%s" AS "%s"
 		WHERE "%s"."%s" = $1
 		%s
-	`, mod.Name, rel.Name, tableAlias, tableAlias,
+	`, modName, rel.Name, tableAlias, tableAlias,
 		schema.PkName, policyFilter), recordId)
 
 	return err

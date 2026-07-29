@@ -28,10 +28,6 @@ import (
 // each index provides values for its relation attributes or partner relation attributes (relationship attributes from other relation)
 func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSet, loginId int64) (map[int]int64, error) {
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
-	var err error
 	var indexes = make([]int, 0)                 // all relation indexes
 	var indexRecordIds = make(map[int]int64)     // record IDs by index
 	var indexRecordsCreated = make(map[int]bool) // created record IDs by index
@@ -49,16 +45,16 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		dataSet := dataSetsByIndex[index]
 		isNewRecord := dataSet.RecordId == 0
 
-		rel, exists := cache.RelationIdMap[dataSet.RelationId]
-		if !exists {
-			return indexRecordIds, handler.ErrSchemaUnknownRelation(dataSet.RelationId)
+		rel, err := cache.GetRelationById(dataSet.RelationId)
+		if err != nil {
+			return nil, err
 		}
 
 		// check write access to relation
 		// if no attributes are to be SET for an existing record, WRITE permission is not required
 		//  case: joined record is to be created but existing base record is untouched, SET still includes base relation (to resolve relationship)
 		if (isNewRecord || len(dataSet.Attributes) != 0) && !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
-			return indexRecordIds, errors.New(handler.ErrUnauthorized)
+			return nil, errors.New(handler.ErrUnauthorized)
 		}
 
 		// check write access for updating attribute values & check for protected preset record values
@@ -73,69 +69,68 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 				for _, presetValue := range preset.Values {
 					if presetValue.AttributeId == attribute.AttributeId && presetValue.Protected {
-
-						atr, exists := cache.AttributeIdMap[attribute.AttributeId]
-						if !exists {
-							return indexRecordIds, handler.ErrSchemaUnknownAttribute(attribute.AttributeId)
+						atr, err := cache.GetAttributeById(attribute.AttributeId)
+						if err != nil {
+							return nil, err
 						}
-						return indexRecordIds, fmt.Errorf("cannot change attribute value '%s' of protected preset '%s'", atr.Name, preset.Name)
+						return nil, fmt.Errorf("cannot change attribute value '%s' of protected preset '%s'", atr.Name, preset.Name)
 					}
 				}
 			}
 		}
 		if !authorizedAttributes(loginId, attributeIdsWriteAccess, types.AccessWrite) {
-			return indexRecordIds, errors.New(handler.ErrUnauthorized)
+			return nil, errors.New(handler.ErrUnauthorized)
 		}
 
 		// set data for record of given relation index
 
 		// log data changes if retention is enabled
-		fileAttributeIndexes := make([]int, 0)
+		logAttributeIndexesFiles := make([]int, 0)
 		logRecordOld := types.DataGetResult{}
 		useLog := relationUsesLogging(rel.RetentionCount, rel.RetentionDays)
 
 		if useLog {
 			for i, a := range dataSet.Attributes {
-				atr, exists := cache.AttributeIdMap[a.AttributeId]
-				if !exists {
-					return indexRecordIds, handler.ErrSchemaUnknownAttribute(a.AttributeId)
+				isFiles, err := cache.GetAttributeIsFilesById(a.AttributeId)
+				if err != nil {
+					return nil, err
 				}
 
 				// store index of files attributes, they require special treatment
-				if schema.IsContentFiles(atr.Content) {
-					fileAttributeIndexes = append(fileAttributeIndexes, i)
+				if isFiles {
+					logAttributeIndexesFiles = append(logAttributeIndexesFiles, i)
 				}
 			}
-		}
 
-		// if existing record, get current values for log comparison after change
-		if useLog && !isNewRecord {
-			logRecordOld, err = collectCurrentValuesForLog_tx(ctx, tx, dataSet.RelationId, dataSet.Attributes,
-				fileAttributeIndexes, dataSet.RecordId, loginId)
+			// if existing record, get current values for log comparison after change
+			if !isNewRecord {
+				logRecordOld, err = collectCurrentValuesForLog_tx(ctx, tx, rel.Id, rel.AttributeIdPk,
+					dataSet.Attributes, logAttributeIndexesFiles, dataSet.RecordId, loginId)
 
-			if err != nil {
-				return indexRecordIds, err
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 
 		// set data for index
 		if err := setForIndex_tx(ctx, tx, index, dataSetsByIndex, indexRecordIds, indexRecordsCreated, loginId); err != nil {
-			return indexRecordIds, err
+			return nil, err
 		}
 
 		// set encrypted record keys
 		if rel.Encryption {
 			if err := data_enc.SetKeys_tx(ctx, tx, rel.Id, indexRecordIds[index], dataSet.EncKeysSet); err != nil {
-				return indexRecordIds, err
+				return nil, err
 			}
 		}
 
 		// set data log
 		if useLog {
-			if err := setLog_tx(ctx, tx, dataSet.RelationId, dataSet.Attributes, fileAttributeIndexes,
+			if err := setLog_tx(ctx, tx, dataSet.RelationId, dataSet.Attributes, logAttributeIndexesFiles,
 				isNewRecord, logRecordOld.Values, indexRecordIds[index], loginId); err != nil {
 
-				return indexRecordIds, fmt.Errorf("failed to set data log, %v", err)
+				return nil, fmt.Errorf("failed to set data log, %v", err)
 			}
 		}
 	}
@@ -160,19 +155,20 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 	// store index of files attributes in data set
 	attributeFilesIndexes := make([]int, 0)
 
-	rel, exists := cache.RelationIdMap[dataSet.RelationId]
-	if !exists {
-		return handler.ErrSchemaUnknownRelation(dataSet.RelationId)
+	rel, err := cache.GetRelationById(dataSet.RelationId)
+	if err != nil {
+		return err
 	}
-	mod, exists := cache.ModuleIdMap[rel.ModuleId]
-	if !exists {
-		return handler.ErrSchemaUnknownModule(rel.ModuleId)
+	modName, err := cache.GetModuleDbName(rel.ModuleId)
+	if err != nil {
+		return err
 	}
 
 	// process values
-	names := make([]string, 0)  // attribute names for insert statement
-	params := make([]string, 0) // value parameters for insert/update statement
-	values := make([]any, 0)    // values for insert/update statements
+	names := make([]string, 0)      // attribute names for INSERT statement
+	params := make([]string, 0)     // value parameters for INSERT/UPDATE statement
+	paramsExcl := make([]string, 0) // value parameters to block UPDATE if nothing changed
+	values := make([]any, 0)        // values for INSERT/UPDATE statements
 
 	// values for relationship tuple IDs are dealt with separately
 	type relationshipValue struct {
@@ -183,9 +179,9 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 	relationshipValues := make([]relationshipValue, 0)
 
 	for ai, attribute := range dataSet.Attributes {
-		atr, exists := cache.AttributeIdMap[attribute.AttributeId]
-		if !exists {
-			return handler.ErrSchemaUnknownAttribute(attribute.AttributeId)
+		atr, err := cache.GetAttributeById(attribute.AttributeId)
+		if err != nil {
+			return err
 		}
 
 		// process relationship values from other relation
@@ -229,13 +225,13 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 			params = append(params, fmt.Sprintf(`$%d`, len(values)))
 		} else {
 			params = append(params, fmt.Sprintf(`"%s" = $%d`, atr.Name, len(values)))
+			paramsExcl = append(paramsExcl, fmt.Sprintf(`"%s" IS DISTINCT FROM $%d`, atr.Name, len(values)))
 		}
 	}
 
 	if !isNewRecord && len(values) != 0 {
 
-		// update existing record
-
+		// UPDATE existing record
 		// get policy filter if applicable
 		tableAlias := "t"
 		policyFilter, err := getPolicyFilter(loginId, "update", tableAlias, rel.Policies)
@@ -245,16 +241,22 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 
 		values = append(values, dataSet.RecordId)
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			UPDATE "%s"."%s" AS "%s" SET %s
+			UPDATE "%s"."%s" AS "%s"
+			SET %s
 			WHERE "%s"."%s" = %s
+			AND (%s)
 			%s
-		`, mod.Name, rel.Name, tableAlias, strings.Join(params, `, `), tableAlias,
-			schema.PkName, fmt.Sprintf("$%d", len(values)), policyFilter), values...); err != nil {
+		`, modName, rel.Name, tableAlias,
+			strings.Join(params, ", "),                                 // SET
+			tableAlias, schema.PkName, fmt.Sprintf("$%d", len(values)), // CONDITION: PK = ID
+			strings.Join(paramsExcl, "\n\tOR "), // CONDITION: any value changed
+			policyFilter),                       // POLICIES
+			values...); err != nil {
 
 			return err
 		}
 	} else if isNewRecord {
-		// insert new record
+		// INSERT new record
 		// first check whether this relation is part of any joined relationship
 		for indexOther, dataSetOther := range dataSetsByIndex {
 
@@ -267,9 +269,9 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 			if dataSetOther.IndexFrom == index {
 
 				// check on which side the relationship attribute resides
-				relAtrOther, exists := cache.AttributeIdMap[dataSetOther.AttributeId]
-				if !exists {
-					return handler.ErrSchemaUnknownAttribute(dataSetOther.AttributeId)
+				relAtrOther, err := cache.GetAttributeById(dataSetOther.AttributeId)
+				if err != nil {
+					return err
 				}
 
 				// if attribute is on our side, we need to add its value to this tuple
@@ -308,16 +310,15 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 			if dataSet.IndexFrom == indexOther {
 
 				// check on which side the relationship attribute resides
-				relAtr, exists := cache.AttributeIdMap[dataSet.AttributeId]
-				if !exists {
-					return handler.ErrSchemaUnknownAttribute(dataSet.AttributeId)
+				relAtr, err := cache.GetAttributeById(dataSet.AttributeId)
+				if err != nil {
+					return err
 				}
 
 				// if attribute is on this side, add to this record
 				// other relation tuple exists already as its index is lower
 				// exclude if both relations are the same, in this case the lower index always wins
 				if relAtr.RelationId == dataSet.RelationId && dataSet.RelationId != dataSetOther.RelationId {
-
 					values = append(values, indexRecordIds[indexOther])
 					names = append(names, fmt.Sprintf(`"%s"`, relAtr.Name))
 					params = append(params, fmt.Sprintf(`$%d`, len(values)))
@@ -332,13 +333,13 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 			insertQuery = fmt.Sprintf(`
 				INSERT INTO "%s"."%s" DEFAULT VALUES
 				RETURNING "%s"
-			`, mod.Name, rel.Name, schema.PkName)
+			`, modName, rel.Name, schema.PkName)
 		} else {
 			insertQuery = fmt.Sprintf(`
 				INSERT INTO "%s"."%s" (%s)
 				VALUES (%s)
 				RETURNING "%s"
-			`, mod.Name, rel.Name, strings.Join(names, `, `), strings.Join(params, `, `), schema.PkName)
+			`, modName, rel.Name, strings.Join(names, `, `), strings.Join(params, `, `), schema.PkName)
 		}
 
 		if err := tx.QueryRow(ctx, insertQuery, values...).Scan(&newRecordId); err != nil {
@@ -369,17 +370,9 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 	// assign relationship references to this tuple via attributes from partner relations
 	for _, shipValues := range relationshipValues {
 
-		shipAtr, exists := cache.AttributeIdMap[shipValues.attributeId]
-		if !exists {
-			return handler.ErrSchemaUnknownAttribute(shipValues.attributeId)
-		}
-		shipRel, exists := cache.RelationIdMap[shipAtr.RelationId]
-		if !exists {
-			return handler.ErrSchemaUnknownRelation(shipAtr.RelationId)
-		}
-		shipMod, exists := cache.ModuleIdMap[shipRel.ModuleId]
-		if !exists {
-			return handler.ErrSchemaUnknownModule(shipRel.ModuleId)
+		shipModName, shipRelName, shipAtrName, err := cache.GetAttributeDbNames(shipValues.attributeId)
+		if err != nil {
+			return err
 		}
 
 		if len(shipValues.values) == 0 {
@@ -390,14 +383,14 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 				if _, err := tx.Exec(ctx, fmt.Sprintf(`
 					UPDATE "%s"."%s" SET "%s" = NULL
 					WHERE "%s" = $1
-				`, shipMod.Name, shipRel.Name, shipAtr.Name, shipAtr.Name), indexRecordIds[index]); err != nil {
+				`, shipModName, shipRelName, shipAtrName, shipAtrName), indexRecordIds[index]); err != nil {
 					return err
 				}
 			} else {
 				if _, err := tx.Exec(ctx, fmt.Sprintf(`
 					DELETE FROM "%s"."%s"
 					WHERE "%s" = $1
-				`, shipMod.Name, shipRel.Name, shipAtr.Name), indexRecordIds[index]); err != nil {
+				`, shipModName, shipRelName, shipAtrName), indexRecordIds[index]); err != nil {
 					return err
 				}
 			}
@@ -411,7 +404,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 				UPDATE "%s"."%s" SET "%s" = NULL
 				WHERE "%s" = $1
 				AND "%s" <> ALL($2)
-			`, shipMod.Name, shipRel.Name, shipAtr.Name, shipAtr.Name, schema.PkName), indexRecordIds[index], shipValues.values); err != nil {
+			`, shipModName, shipRelName, shipAtrName, shipAtrName, schema.PkName), indexRecordIds[index], shipValues.values); err != nil {
 				return err
 			}
 
@@ -419,13 +412,13 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s" SET "%s" = $1
 				WHERE "%s" = ANY($2)
-			`, shipMod.Name, shipRel.Name, shipAtr.Name, schema.PkName), indexRecordIds[index], shipValues.values); err != nil {
+			`, shipModName, shipRelName, shipAtrName, schema.PkName), indexRecordIds[index], shipValues.values); err != nil {
 				return err
 			}
 		} else {
-			shipAtrNm, exists := cache.AttributeIdMap[shipValues.attributeIdNm.Bytes]
-			if !exists {
-				return handler.ErrSchemaUnknownAttribute(shipValues.attributeIdNm.Bytes)
+			shipAtrNm, err := cache.GetAttributeById(shipValues.attributeIdNm.Bytes)
+			if err != nil {
+				return err
 			}
 
 			// get current references to this tuple
@@ -435,7 +428,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 					SELECT "%s" FROM "%s"."%s"
 					WHERE "%s" = $1
 				)
-			`, shipAtrNm.Name, shipMod.Name, shipRel.Name, shipAtr.Name), indexRecordIds[index]).Scan(&valuesCurr); err != nil {
+			`, shipAtrNm.Name, shipModName, shipRelName, shipAtrName), indexRecordIds[index]).Scan(&valuesCurr); err != nil {
 				return err
 			}
 
@@ -449,7 +442,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 					DELETE FROM "%s"."%s"
 					WHERE "%s" = $1
 					AND "%s" = $2
-				`, shipMod.Name, shipRel.Name, shipAtr.Name, shipAtrNm.Name), indexRecordIds[index], value); err != nil {
+				`, shipModName, shipRelName, shipAtrName, shipAtrNm.Name), indexRecordIds[index], value); err != nil {
 					return err
 				}
 			}
@@ -463,7 +456,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 				if _, err := tx.Exec(ctx, fmt.Sprintf(`
 					INSERT INTO "%s"."%s" ("%s","%s")
 					VALUES ($1,$2)
-				`, shipMod.Name, shipRel.Name, shipAtr.Name, shipAtrNm.Name), indexRecordIds[index], value); err != nil {
+				`, shipModName, shipRelName, shipAtrName, shipAtrNm.Name), indexRecordIds[index], value); err != nil {
 					return err
 				}
 			}
@@ -472,15 +465,10 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 	return nil
 }
 
-func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
-	relationId uuid.UUID, attributes []types.DataSetAttribute,
-	fileAttributeIndexes []int, recordId int64, loginId int64) (types.DataGetResult, error) {
+func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx, relationId, attributeIdPk uuid.UUID,
+	attributes []types.DataSetAttribute, logAttributeIndexesFiles []int, recordId int64, loginId int64) (types.DataGetResult, error) {
 
 	var result types.DataGetResult
-	rel, exists := cache.RelationIdMap[relationId]
-	if !exists {
-		return result, handler.ErrSchemaUnknownRelation(relationId)
-	}
 
 	// get old attribute values
 	// result values come in same order as requested attributes
@@ -493,7 +481,7 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 			Operator:  "=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
-					Bytes: rel.AttributeIdPk,
+					Bytes: attributeIdPk,
 					Valid: true,
 				},
 			},
@@ -516,7 +504,7 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 
 			// special case: file attribute
 			// no need to lookup current values as file attribute values already only include changes
-			ReturnNull: slices.Contains(fileAttributeIndexes, i),
+			ReturnNull: slices.Contains(logAttributeIndexesFiles, i),
 		})
 	}
 

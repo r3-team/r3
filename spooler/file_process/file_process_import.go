@@ -9,7 +9,6 @@ import (
 	"r3/config"
 	"r3/data"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
 	"r3/schema"
 
@@ -34,28 +33,17 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId pgtype.Int8)
 	log.Info(log.ContextFile, fmt.Sprintf("importing file '%s'", filePathSource))
 
 	// access schema cache
-	cache.Schema_mx.RLock()
-	atr, exists := cache.AttributeIdMap[attributeIdFiles]
-	cache.Schema_mx.RUnlock()
-
-	if !exists || !schema.IsContentFiles(atr.Content) {
-		return handler.ErrSchemaUnknownAttribute(attributeIdFiles)
+	atr, err := cache.GetAttributeById(attributeIdFiles)
+	if err != nil {
+		return err
+	}
+	if !schema.IsContentFiles(atr.Content) {
+		return fmt.Errorf("cannot import file to non-files attribute")
 	}
 
-	cache.Schema_mx.RLock()
-	rel, exists := cache.RelationIdMap[atr.RelationId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownRelation(atr.RelationId)
-	}
-
-	cache.Schema_mx.RLock()
-	mod, exists := cache.ModuleIdMap[rel.ModuleId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownModule(rel.ModuleId)
+	modName, relName, err := cache.GetRelationDbNames(atr.RelationId)
+	if err != nil {
+		return err
 	}
 
 	if err := checkImportPath(filePathSource, int64(atr.Length)); err != nil {
@@ -74,5 +62,5 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId pgtype.Int8)
 	if err := data.SetFile(ctx, -1, attributeIdFiles, fileId, nil, pgtype.Text{String: filePathSource, Valid: true}, pgtype.Text{}, true); err != nil {
 		return err
 	}
-	return applyFileToRecord(ctx, recordId, mod.Name, rel.Name, attributeIdFiles, fileId, filepath.Base(filePathSource))
+	return applyFileToRecord(ctx, recordId, modName, relName, attributeIdFiles, fileId, filepath.Base(filePathSource))
 }

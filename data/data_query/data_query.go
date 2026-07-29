@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
-	"r3/handler"
 	"r3/schema"
 	"r3/types"
 	"regexp"
@@ -295,13 +294,10 @@ func GetContentFromPgFunctionReturn(fncId pgtype.UUID) (string, int, error) {
 		return "", 0, fmt.Errorf("no backend function set in column")
 	}
 
-	cache.Schema_mx.RLock()
-	fnc, exists := cache.PgFunctionIdMap[fncId.Bytes]
-	cache.Schema_mx.RUnlock()
-	if !exists {
-		return "", 0, handler.ErrSchemaUnknownPgFunction(fncId.Bytes)
+	fnc, err := cache.GetPgFunctionById(fncId.Bytes)
+	if err != nil {
+		return "", 0, err
 	}
-
 	returnCode := strings.ReplaceAll(strings.TrimSpace(strings.ToLower(fnc.CodeReturns)), " ", "")
 
 	// simple types
@@ -353,12 +349,9 @@ func GetContentFromScalarArgs(scalar string, args []types.DataGetArg) (string, s
 			if !arg.AttributeId.Valid {
 				continue
 			}
-
-			cache.Schema_mx.RLock()
-			atr, exists := cache.AttributeIdMap[arg.AttributeId.Bytes]
-			cache.Schema_mx.RUnlock()
-			if !exists {
-				return "", "", 0, handler.ErrSchemaUnknownAttribute(arg.AttributeId.Bytes)
+			atr, err := cache.GetAttributeById(arg.AttributeId.Bytes)
+			if err != nil {
+				return "", "", 0, err
 			}
 
 			// return first usable attribute type - types in scalar functions should be compatible
@@ -379,10 +372,10 @@ func GetTitleFromExpression(expr types.DataGetExpression, languageCode string) (
 		parts := make([]string, 0)
 		for _, arg := range args {
 			if arg.AttributeId.Valid {
-				cache.Schema_mx.RLock()
-				atr := cache.AttributeIdMap[arg.AttributeId.Bytes]
-				cache.Schema_mx.RUnlock()
-
+				atr, err := cache.GetAttributeById(arg.AttributeId.Bytes)
+				if err != nil {
+					return "", err
+				}
 				if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
 					parts = append(parts, title)
 				} else {
@@ -420,14 +413,11 @@ func GetTitleFromExpression(expr types.DataGetExpression, languageCode string) (
 		if !atrId.Valid {
 			return "", errors.New("expression is missing an attribute")
 		}
-		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[atrId.Bytes]
-		cache.Schema_mx.RUnlock()
 
-		if !exists {
-			return "", handler.ErrSchemaUnknownAttribute(atrId.Bytes)
+		atr, err := cache.GetAttributeById(atrId.Bytes)
+		if err != nil {
+			return "", err
 		}
-
 		if title, exists := atr.Captions["attributeTitle"][languageCode]; exists {
 			return title, nil
 		} else {

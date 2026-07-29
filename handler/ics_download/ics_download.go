@@ -198,15 +198,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			cache.Schema_mx.RLock()
-			atr, exists := cache.AttributeIdMap[column.AttributeId.Bytes]
-			cache.Schema_mx.RUnlock()
-
-			if !exists {
-				handler.AbortRequest(w, handler.ContextIcsDownload, handler.ErrSchemaUnknownAttribute(column.AttributeId.Bytes), handler.ErrGeneral)
+			isFiles, err := cache.GetAttributeIsFilesById(column.AttributeId.Bytes)
+			if err != nil {
+				handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 				return
 			}
-			if schema.IsContentFiles(atr.Content) {
+			if isFiles {
 				continue
 			}
 		}

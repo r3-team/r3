@@ -54,14 +54,10 @@ func RepoCommit(ctx context.Context, loginId int64, repoId uuid.UUID, credUser, 
 	}
 
 	// build delta version log
-	cache.Schema_mx.RLock()
-	mod, exists := cache.ModuleIdMap[moduleId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownModule(moduleId)
+	mod, err := cache.GetModuleById(moduleId)
+	if err != nil {
+		return err
 	}
-
 	if repoModuleBuild >= int64(mod.ReleaseBuild) {
 		return handler.CreateErrCodeWithData(handler.ErrContextTrf, handler.ErrCodeTrfRepoCommitBuildOld, struct {
 			BuildLocal int64 `json:"buildLocal"`

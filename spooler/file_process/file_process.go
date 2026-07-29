@@ -164,7 +164,7 @@ func applyFileToRecord(ctx context.Context, recordId pgtype.Int8, moduleName str
 
 	if !recordId.Valid {
 		if err := tx.QueryRow(ctx, fmt.Sprintf(`
-			INSERT INTO %s.%s
+			INSERT INTO "%s"."%s"
 			DEFAULT VALUES
 			RETURNING %s
 		`, moduleName, relationName, schema.PkName)).Scan(&recordId.Int64); err != nil {

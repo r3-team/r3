@@ -27,10 +27,7 @@ func DelLogsBackground() error {
 	}
 	defer tx.Rollback(ctx)
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
-	for _, r := range cache.RelationIdMap {
+	for _, r := range cache.GetRelationIdMap() {
 
 		// delete logs for relations with no retention
 		if !r.RetentionCount.Valid && !r.RetentionDays.Valid {
@@ -58,7 +55,7 @@ func DelLogsBackground() error {
 		if _, err := tx.Exec(ctx, `
 			DELETE FROM instance.data_log AS p
 			WHERE p.relation_id = $1
-			
+
 			-- exclude retained change logs per record by count
 			AND p.id NOT IN (
 				SELECT id
@@ -68,7 +65,7 @@ func DelLogsBackground() error {
 				ORDER BY date_change DESC
 				LIMIT $2
 			)
-			
+
 			-- exclude retained change logs by age
 			AND date_change < $3
 		`, r.Id, r.RetentionCount.Int32, now-(int64(r.RetentionDays.Int32)*86400)); err != nil {
@@ -80,9 +77,6 @@ func DelLogsBackground() error {
 
 // get data change logs for specified record and attributes
 func GetLogs_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeIds []uuid.UUID, recordIds []int64, loginId int64) ([]types.DataLog, error) {
-
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
 
 	if !authorizedAttributes(loginId, attributeIds, types.AccessRead) {
 		return nil, errors.New(handler.ErrUnauthorized)

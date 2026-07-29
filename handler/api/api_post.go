@@ -59,14 +59,11 @@ func handlePost_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, r *htt
 				if ref, exists := c.Captions["columnTitle"][languageCode]; exists {
 					colRef = ref
 				} else if c.AttributeId.Valid {
-					cache.Schema_mx.RLock()
-					atr, exists := cache.AttributeIdMap[c.AttributeId.Bytes]
-					cache.Schema_mx.RUnlock()
-
-					if !exists {
-						return http.StatusInternalServerError, nil, handler.ErrSchemaUnknownAttribute(c.AttributeId.Bytes)
+					atrName, err := cache.GetAttributeDbName(c.AttributeId.Bytes)
+					if err != nil {
+						return http.StatusInternalServerError, nil, err
 					}
-					colRef = atr.Name
+					colRef = atrName
 				}
 
 				if value, exists := columnNameMapValues[colRef]; exists {

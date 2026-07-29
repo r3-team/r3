@@ -33,9 +33,6 @@ var (
 // updates SQL query pointer value (for error logging), returns data rows + total count
 func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, query *string) ([]types.DataGetResult, int64, error) {
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	var err error
 	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
 	isDoingRowCount := data.Limit != 0
@@ -154,9 +151,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 
 		for _, j := range data.Joins {
 
-			atr, exists := cache.AttributeIdMap[j.AttributeId]
-			if !exists {
-				return nil, 0, handler.ErrSchemaUnknownAttribute(j.AttributeId)
+			atr, err := cache.GetAttributeById(j.AttributeId)
+			if err != nil {
+				return nil, 0, err
 			}
 
 			// join attribute is from other relation, use relationship partner
@@ -211,19 +208,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 	for _, expr := range data.Expressions {
 
 		// ignore non-attribute and sub query expressions
-		if !expr.AttributeId.Valid {
-			continue
-		}
-		if expr.Query.RelationId != uuid.Nil {
+		if !expr.AttributeId.Valid || expr.Query.RelationId != uuid.Nil {
 			continue
 		}
 
-		atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
-		if !exists {
-			return nil, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
+		isEncrypted, err := cache.GetAttributeIsEncryptedById(expr.AttributeId.Bytes)
+		if err != nil {
+			return nil, 0, err
 		}
-
-		if !atr.Encrypted || slices.Contains(relationIndexesEnc, expr.Index) {
+		if !isEncrypted || slices.Contains(relationIndexesEnc, expr.Index) {
 			continue
 		}
 		relationIndexesEnc = append(relationIndexesEnc, expr.Index)
@@ -300,14 +293,13 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 	)
 
 	// check source relation and module
-	rel, exists := cache.RelationIdMap[data.RelationId]
-	if !exists {
-		return "", handler.ErrSchemaUnknownRelation(data.RelationId)
+	rel, err := cache.GetRelationById(data.RelationId)
+	if err != nil {
+		return "", err
 	}
-
-	mod, exists := cache.ModuleIdMap[rel.ModuleId]
-	if !exists {
-		return "", handler.ErrSchemaUnknownModule(rel.ModuleId)
+	modName, err := cache.GetModuleDbName(rel.ModuleId)
+	if err != nil {
+		return "", err
 	}
 
 	// add relations as joins via relationship attributes
@@ -378,12 +370,12 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 			if err != nil {
 				return "", err
 			}
-			fnc, exists := cache.PgFunctionIdMap[expr.PgFunctionId.Bytes]
-			if !exists {
-				return "", handler.ErrSchemaUnknownPgFunction(expr.PgFunctionId.Bytes)
+			fncModName, fncName, err := cache.GetPgFunctionDbNames(expr.PgFunctionId.Bytes, false)
+			if err != nil {
+				return "", err
 			}
 			inSelect = append(inSelect, data_sql.GetExpression(expr, fmt.Sprintf(`"%s"."%s"(%s)`,
-				cache.ModuleIdMap[fnc.ModuleId].Name, fnc.Name, code), data_sql.GetExpressionAlias(pos)))
+				fncModName, fncName, code), data_sql.GetExpressionAlias(pos)))
 
 			continue
 		}
@@ -488,7 +480,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 		`SELECT %s`+"\n"+
 			`FROM "%s"."%s" AS "%s" %s%s%s%s%s%s`,
 		strings.Join(inSelect, `, `), // SELECT
-		mod.Name, rel.Name, relCode,  // FROM
+		modName, rel.Name, relCode,   // FROM
 		strings.Join(inJoin, ""), // JOINS
 		queryWhere,               // WHERE
 		queryGroup,               // GROUP BY
@@ -511,11 +503,10 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 
 	relCode := data_sql.GetRelationCode(expr.Index, nestingLevel)
 
-	atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
-	if !exists {
-		return "", handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
+	atr, err := cache.GetAttributeById(expr.AttributeId.Bytes)
+	if err != nil {
+		return "", err
 	}
-
 	if schema.IsContentFiles(atr.Content) {
 		// attribute is files attribute
 		return fmt.Sprintf(`(
@@ -544,11 +535,10 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 	}
 
 	// attribute comes via relationship from other relation (or self reference from same relation)
-	shipRel, exists := cache.RelationIdMap[atr.RelationId]
-	if !exists {
-		return "", handler.ErrSchemaUnknownRelation(atr.RelationId)
+	shipModName, shipRelName, err := cache.GetRelationDbNames(atr.RelationId)
+	if err != nil {
+		return "", err
 	}
-	shipMod := cache.ModuleIdMap[shipRel.ModuleId]
 
 	// get tuple IDs from other relation
 	if !expr.AttributeIdNm.Valid {
@@ -568,15 +558,15 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 			WHERE "%s"."%s" = "%s"."%s"
 		) AS %s`,
 			selectExpr,
-			shipMod.Name, shipRel.Name,
-			shipRel.Name, atr.Name, relCode, schema.PkName,
+			shipModName, shipRelName,
+			shipRelName, atr.Name, relCode, schema.PkName,
 			alias), nil
 
 	}
 
-	shipAtrNm, exists := cache.AttributeIdMap[expr.AttributeIdNm.Bytes]
-	if !exists {
-		return "", errors.New("attribute does not exist")
+	shipAtrNmName, err := cache.GetAttributeDbName(expr.AttributeIdNm.Bytes)
+	if err != nil {
+		return "", err
 	}
 
 	// from other relation, collect tuple IDs from n:m relationship attribute
@@ -585,9 +575,9 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 		FROM "%s"."%s"
 		WHERE "%s"."%s" = "%s"."%s"
 	) AS %s`,
-		shipAtrNm.Name,
-		shipMod.Name, shipRel.Name,
-		shipRel.Name, atr.Name, relCode, schema.PkName,
+		shipAtrNmName,
+		shipModName, shipRelName,
+		shipRelName, atr.Name, relCode, schema.PkName,
 		alias), nil
 }
 
@@ -595,9 +585,9 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 	queryArgs *[]any, loginId int64, nestingLevel int) (string, error) {
 
 	// check join attribute
-	atr, exists := cache.AttributeIdMap[join.AttributeId]
-	if !exists {
-		return "", errors.New("join attribute does not exist")
+	atr, err := cache.GetAttributeById(join.AttributeId)
+	if err != nil {
+		return "", err
 	}
 	if !atr.RelationshipId.Valid {
 		return "", errors.New("relationship of attribute is invalid")
@@ -626,11 +616,14 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 	indexRelationIds[join.Index] = relIdTarget
 
 	// check other relation and corresponding module
-	relTarget, exists := cache.RelationIdMap[relIdTarget]
-	if !exists {
-		return "", handler.ErrSchemaUnknownRelation(relIdTarget)
+	relTarget, err := cache.GetRelationById(relIdTarget)
+	if err != nil {
+		return "", err
 	}
-	modTarget := cache.ModuleIdMap[relTarget.ModuleId]
+	modTargetName, err := cache.GetModuleDbName(relTarget.ModuleId)
+	if err != nil {
+		return "", err
+	}
 
 	// define JOIN type
 	if !slices.Contains(types.QueryJoinConnectors, join.Connector) {
@@ -656,7 +649,7 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 	}
 
 	return fmt.Sprintf("\n"+`%s JOIN "%s"."%s" AS "%s" ON "%s"."%s" = "%s"."%s" %s%s`,
-		join.Connector, modTarget.Name, relTarget.Name, relCodeTarget,
+		join.Connector, modTargetName, relTarget.Name, relCodeTarget,
 		relCodeFrom, atr.Name,
 		relCodeTo, schema.PkName,
 		policyFilter, strings.Join(inWhere, "")), nil
@@ -688,13 +681,12 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 		// in FTS comparisons, side0 is TSVECTOR (side0), side1 is TSQUERY
 		s := filter.Side0
 		if s.AttributeId.Valid {
-			atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
-			if !exists {
-				return "", handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
-			}
 
 			// we can apply a dictionary attribute (eg. regconfig) from an text index (GIN) if available
-			rel := cache.RelationIdMap[atr.RelationId]
+			rel, atr, err := cache.GetRelationAndAttributeByAttributeId(s.AttributeId.Bytes)
+			if err != nil {
+				return "", err
+			}
 			for _, ind := range rel.Indexes {
 				if ind.Method == "GIN" && len(ind.Attributes) == 1 && ind.Attributes[0].AttributeId == atr.Id && ind.AttributeIdDict.Valid {
 					opFtsDictAtrId = ind.AttributeIdDict
@@ -720,16 +712,20 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 
 		// attribute filter
 		if s.AttributeId.Valid {
-			atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
-			if !exists {
-				return "", handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
+			atr, err := cache.GetAttributeById(s.AttributeId.Bytes)
+			if err != nil {
+				return "", err
 			}
 			atrExpr := data_sql.GetAttributeCode(data_sql.GetRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
 
 			if isOpFts {
 				exprRegconfig := exprRegconfigSimple
 				if opFtsDictAtrId.Valid {
-					expr := data_sql.GetAttributeCode(data_sql.GetRelationCode(s.AttributeIndex, s.AttributeNested), cache.AttributeIdMap[opFtsDictAtrId.Bytes].Name)
+					atrDict, err := cache.GetAttributeById(opFtsDictAtrId.Bytes)
+					if err != nil {
+						return "", err
+					}
+					expr := data_sql.GetAttributeCode(data_sql.GetRelationCode(s.AttributeIndex, s.AttributeNested), atrDict.Name)
 					exprRegconfig = fmt.Sprintf("CASE WHEN %s IS NULL THEN %s ELSE %s END", expr, exprRegconfigSimple, expr)
 				}
 				return getFtsExpression(exprRegconfig, atrExpr, isSide0), nil
@@ -761,11 +757,11 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 			if err != nil {
 				return "", err
 			}
-			fnc, exists := cache.PgFunctionIdMap[s.PgFunctionId.Bytes]
-			if !exists {
-				return "", handler.ErrSchemaUnknownPgFunction(s.PgFunctionId.Bytes)
+			modName, fncName, err := cache.GetPgFunctionDbNames(s.PgFunctionId.Bytes, false)
+			if err != nil {
+				return "", err
 			}
-			return fmt.Sprintf(`"%s"."%s"(%s)`, cache.ModuleIdMap[fnc.ModuleId].Name, fnc.Name, code), nil
+			return fmt.Sprintf(`"%s"."%s"(%s)`, modName, fncName, code), nil
 		}
 
 		// fixed value filter
@@ -872,12 +868,11 @@ func getQueryLineOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 			if expressionPosAlias != -1 {
 				alias = data_sql.GetExpressionAlias(expressionPosAlias)
 			} else {
-				atr, exists := cache.AttributeIdMap[ord.AttributeId.Bytes]
-				if !exists {
-					return "", handler.ErrSchemaUnknownAttribute(ord.AttributeId.Bytes)
+				atrName, err := cache.GetAttributeDbName(ord.AttributeId.Bytes)
+				if err != nil {
+					return "", err
 				}
-
-				alias = data_sql.GetAttributeCode(data_sql.GetRelationCode(int(ord.Index.Int32), nestingLevel), atr.Name)
+				alias = data_sql.GetAttributeCode(data_sql.GetRelationCode(int(ord.Index.Int32), nestingLevel), atrName)
 			}
 
 		} else if ord.ExpressionPos.Valid {
@@ -899,12 +894,11 @@ func getArgumentCodes(args []types.DataGetArg, queryArgs *[]any, nestingLevel in
 	parts := make([]string, 0)
 	for _, arg := range args {
 		if arg.AttributeId.Valid {
-			atr, exists := cache.AttributeIdMap[arg.AttributeId.Bytes]
-			if !exists {
-				return "", handler.ErrSchemaUnknownAttribute(arg.AttributeId.Bytes)
+			atrName, err := cache.GetAttributeDbName(arg.AttributeId.Bytes)
+			if err != nil {
+				return "", err
 			}
-
-			parts = append(parts, data_sql.GetAttributeCode(data_sql.GetRelationCode(arg.AttributeIndex, nestingLevel), atr.Name))
+			parts = append(parts, data_sql.GetAttributeCode(data_sql.GetRelationCode(arg.AttributeIndex, nestingLevel), atrName))
 		} else {
 			*queryArgs = append(*queryArgs, arg.Value)
 			parts = append(parts, fmt.Sprintf("$%d::TEXT", len(*queryArgs)))

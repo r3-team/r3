@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/cluster"
-	"r3/handler"
 	"r3/login/login_clientEvent"
 	"r3/schema/clientEvent"
 	"r3/spooler"
@@ -79,12 +78,9 @@ func clientEventExecFatClient_tx(ctx context.Context, tx pgx.Tx, reqJson json.Ra
 		return nil, err
 	}
 
-	cache.Schema_mx.RLock()
-	ce, exists := cache.ClientEventIdMap[req.Id]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return nil, handler.ErrSchemaUnknownClientEvent(req.Id)
+	ce, err := cache.GetClientEventById(req.Id)
+	if err != nil {
+		return nil, err
 	}
 
 	// execute valid actions

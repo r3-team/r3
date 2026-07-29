@@ -8,7 +8,6 @@ import (
 	"r3/cache"
 	"r3/data"
 	"r3/db"
-	"r3/handler"
 	"r3/log"
 	"r3/schema"
 
@@ -17,36 +16,22 @@ import (
 )
 
 func doTextWrite(fileName string, fileTextContent string, attributeIdFiles uuid.UUID, recordId pgtype.Int8) error {
-
 	if attributeIdFiles.IsNil() {
 		return errors.New("attribute ID is nil")
 	}
 
 	log.Info(log.ContextFile, fmt.Sprintf("writing text file to attribute '%s'", attributeIdFiles))
 
-	// access schema cache
-	cache.Schema_mx.RLock()
-	atr, exists := cache.AttributeIdMap[attributeIdFiles]
-	cache.Schema_mx.RUnlock()
-
-	if !exists || !schema.IsContentFiles(atr.Content) {
-		return handler.ErrSchemaUnknownAttribute(attributeIdFiles)
+	atr, err := cache.GetAttributeById(attributeIdFiles)
+	if err != nil {
+		return err
 	}
-
-	cache.Schema_mx.RLock()
-	rel, exists := cache.RelationIdMap[atr.RelationId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownRelation(atr.RelationId)
+	if !schema.IsContentFiles(atr.Content) {
+		return fmt.Errorf("cannot write text file to non-files attribute")
 	}
-
-	cache.Schema_mx.RLock()
-	mod, exists := cache.ModuleIdMap[rel.ModuleId]
-	cache.Schema_mx.RUnlock()
-
-	if !exists {
-		return handler.ErrSchemaUnknownModule(rel.ModuleId)
+	modName, relName, err := cache.GetRelationDbNames(atr.RelationId)
+	if err != nil {
+		return err
 	}
 
 	// set file
@@ -61,5 +46,5 @@ func doTextWrite(fileName string, fileTextContent string, attributeIdFiles uuid.
 	if err := data.SetFile(ctx, -1, attributeIdFiles, fileId, nil, pgtype.Text{}, pgtype.Text{String: fileTextContent, Valid: true}, true); err != nil {
 		return err
 	}
-	return applyFileToRecord(ctx, recordId, mod.Name, rel.Name, attributeIdFiles, fileId, filepath.Base(fileName))
+	return applyFileToRecord(ctx, recordId, modName, relName, attributeIdFiles, fileId, filepath.Base(fileName))
 }
