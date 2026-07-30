@@ -234,10 +234,16 @@ func setLogRecord_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, login
 		return logId, err
 	}
 
+	// if system executes changes (login ID -1), set login ID to NULL
+	loginIdWofk := pgtype.Int8{
+		Int64: loginId,
+		Valid: loginId != -1,
+	}
+
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance.data_log (id, relation_id, login_id_wofk, record_id_wofk, date_change)
 		VALUES ($1,$2,$3,$4,$5)
-	`, logId, relationId, loginId, recordId, tools.GetTimeUnix()); err != nil {
+	`, logId, relationId, loginIdWofk, recordId, tools.GetTimeUnix()); err != nil {
 		return logId, err
 	}
 	return logId, nil

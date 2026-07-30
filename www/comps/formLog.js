@@ -1,47 +1,43 @@
-import MyInputRichtext                 from './inputRichtext.js';
-import {getColumnTitle}                from './shared/column.js';
-import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
-import {consoleError}                  from './shared/error.js';
-import {getHtmlStripped}               from './shared/generic.js';
-import {srcBase64}                     from './shared/image.js';
-import {getCaption}                    from './shared/language.js';
-import {getUnixFormat}                 from './shared/time.js';
+import MyInputRichtext from './inputRichtext.js';
 import {
-	getAttributeFileHref,
-	getAttributeFileVersionHref,
-	isAttributeFiles,
-	isAttributeRelationship,
-	isAttributeRelationship11,
-	isAttributeRelationshipN1
+	getAttributeFileHref, getAttributeFileVersionHref, isAttributeFiles,
+	isAttributeRelationship, isAttributeRelationship11, isAttributeRelationshipN1
 } from './shared/attribute.js';
+import { getColumnTitle } from './shared/column.js';
+import { aesGcmDecryptBase64WithPhrase } from './shared/crypto.js';
+import { consoleError } from './shared/error.js';
+import { getHtmlStripped } from './shared/generic.js';
+import { srcBase64 } from './shared/image.js';
+import { getCaption } from './shared/language.js';
+import { getUnixFormat } from './shared/time.js';
 
 const myFormLogLabel = {
-	name:'my-form-log-label',
-	template:`<my-label
+	name: 'my-form-log-label',
+	template: `<my-label
 		:caption
 		:image="iconId === null ? 'icon_missing.png' : ''"
 		:imageBase64="iconId === null ? '' : srcBase64(iconIdMap[iconId].file)"
 		:large
 		:wrap="isMobile"
 	/>`,
-	props:{
-		caption:{ type:String,        required:true },
-		iconId: { type:[String,null], required:true },
-		large:  { type:Boolean,       required:false, default:false }
+	props: {
+		caption: { type: String, required: true },
+		iconId: { type: [String, null], required: true },
+		large: { type: Boolean, required: false, default: false }
 	},
-	computed:{
-		iconIdMap:s => s.$store.getters['schema/iconIdMap'],
+	computed: {
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
 		isMobile: s => s.$store.getters.isMobile
 	},
-	methods:{
+	methods: {
 		srcBase64
 	}
 };
 
 const myFormLogValue = {
-	name:'my-form-log-value',
-	components:{ MyInputRichtext },
-	template:`<div class="form-log-value" :class="{ noGrow:showLarge && !isRichtext, large:showLarge, noPadding:isRichtext }">
+	name: 'my-form-log-value',
+	components: { MyInputRichtext },
+	template: `<div class="form-log-value" :class="{ noGrow:showLarge && !isRichtext, large:showLarge, noPadding:isRichtext }">
 		<span class="form-log-value-empty" v-if="isNull">[{{ capGen.button.empty }}]</span>
 
 		<template v-if="!isNull">
@@ -87,39 +83,39 @@ const myFormLogValue = {
 			</table>
 		</template>
 	</div>`,
-	props:{
-		attributeId:                  { type:String,        required:true },
-		isFiles:                      { type:Boolean,       required:true },
-		isFullscreen:                 { type:Boolean,       required:false, default:false },
-		relationId:                   { type:[String,null], required:true }, // set if attribute is relationship, relation of target records
-		relationIdMapRecordIdMapTitle:{ type:Object,        required:true },
-		showLarge:                    { type:Boolean,       required:false, default:false },
-		value:                        { required:true }
+	props: {
+		attributeId: { type: String, required: true },
+		isFiles: { type: Boolean, required: true },
+		isFullscreen: { type: Boolean, required: false, default: false },
+		relationId: { type: [String, null], required: true }, // set if attribute is relationship, relation of target records
+		relationIdMapRecordIdMapTitle: { type: Object, required: true },
+		showLarge: { type: Boolean, required: false, default: false },
+		value: { required: true }
 	},
-	emits:[],
-	computed:{
-		isLarge:       s => s.isRichtext,
-		isNull:        s => s.value === null,
-		isRelationship:s => s.relationId !== null,
-		isRichtext:    s => s.attribute.contentUse === 'richtext',
-		isValueRegular:s => !s.isFiles && !s.isRelationship && (!s.showLarge || !s.isLarge),
+	emits: [],
+	computed: {
+		isLarge: s => s.isRichtext,
+		isNull: s => s.value === null,
+		isRelationship: s => s.relationId !== null,
+		isRichtext: s => s.attribute.contentUse === 'richtext',
+		isValueRegular: s => !s.isFiles && !s.isRelationship && (!s.showLarge || !s.isLarge),
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		token:         s => s.$store.getters['local/token'],
-		attribute:     s => s.attributeIdMap[s.attributeId],
-		capApp:        s => s.$store.getters.captions.formLog,
-		capGen:        s => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		token: s => s.$store.getters['local/token'],
+		attribute: s => s.attributeIdMap[s.attributeId],
+		capApp: s => s.$store.getters.captions.formLog,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getAttributeFileHref,
 		getAttributeFileVersionHref,
 
 		// presentation
-		getFileName(name,version) {
-			if(name.length > 30)
-				name = name.substring(0,27) + '...';
+		getFileName(name, version) {
+			if (name.length > 30)
+				name = `${name.substring(0, 27)}...`
 
 			return version === null ? name : `${name} (v${version})`;
 		}
@@ -127,13 +123,13 @@ const myFormLogValue = {
 };
 
 const myFormLogValueSidebar = {
-	name:'my-form-log-value-sidebar',
-	components:{
+	name: 'my-form-log-value-sidebar',
+	components: {
 		myFormLogLabel,
 		myFormLogValue,
 		MyInputRichtext
 	},
-	template:`<div class="form-log-value-sidebar" v-if="isReady">
+	template: `<div class="form-log-value-sidebar" v-if="isReady">
 		<div class="row gap-large center space-between" v-if="recordTitle !== null">
 			<my-label :caption="recordTitle" :imageBase64="source.image" :large="true" />
 			<my-button image="cancel.png" v-if="recordTitle !== null" @trigger="$emit('close')" :captionTitle="capApp.button.closeSidebar" />
@@ -157,7 +153,7 @@ const myFormLogValueSidebar = {
 			<span v-if="log.loginName !== ''">{{ log.loginName }}</span>
 			<span>{{ getUnixFormat(log.dateChange,settings.dateFormat + ' H:i:S') }}</span>
 		</div>
-		
+
 		<div class="form-log-value-sidebar-comment" v-if="isValueComment">
 			<my-input-richtext :modelValue="log.comment" :readonly="true" />
 		</div>
@@ -172,47 +168,47 @@ const myFormLogValueSidebar = {
 			:value="attributeValue.value"
 		/>
 	</div>`,
-	emits:['close'],
-	props:{
-		attributeId:                  { type:[String,null], required:true },
-		isFullscreen:                 { type:Boolean,       required:true },
-		isSingleSource:               { type:Boolean,       required:true },
-		log:                          { type:Object,        required:true },
-		relationIdMapRecordIdMapTitle:{ type:Object,        required:true },
-		source:                       { type:Object,        required:true }
+	emits: ['close'],
+	props: {
+		attributeId: { type: [String, null], required: true },
+		isFullscreen: { type: Boolean, required: true },
+		isSingleSource: { type: Boolean, required: true },
+		log: { type: Object, required: true },
+		relationIdMapRecordIdMapTitle: { type: Object, required: true },
+		source: { type: Object, required: true }
 	},
-	computed:{
-		attributeValue:s => {
+	computed: {
+		attributeValue: s => {
 			const a = s.log.attributes.find(v => v.attributeId === s.attributeId);
 			return a === undefined ? null : a;
 		},
-		recordTitle:s => {
+		recordTitle: s => {
 			return !s.isSingleSource && s.relationIdMapRecordIdMapTitle[s.log.relationId]?.[s.log.recordId] !== undefined
-				? s.capGen.record + ': ' + s.relationIdMapRecordIdMapTitle[s.log.relationId]?.[s.log.recordId] : null;
+				? `${s.capGen.record}: ${s.relationIdMapRecordIdMapTitle[s.log.relationId]?.[s.log.recordId]}` : null;
 		},
-		isReady:         s => s.isValueComment || s.attributeValue !== null,
-		isValueAttribute:s => s.attributeId !== null,
-		isValueComment:  s => s.log.comment !== null,
+		isReady: s => s.isValueComment || s.attributeValue !== null,
+		isValueAttribute: s => s.attributeId !== null,
+		isValueComment: s => s.log.comment !== null,
 
 		// stores
-		settings:s => s.$store.getters.settings,
-		capApp:  s => s.$store.getters.captions.formLog,
-		capGen:  s => s.$store.getters.captions.generic
+		settings: s => s.$store.getters.settings,
+		capApp: s => s.$store.getters.captions.formLog,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getUnixFormat
 	}
 };
 
 export default {
-	name:'my-form-log',
-	components:{
+	name: 'my-form-log',
+	components: {
 		myFormLogLabel,
 		myFormLogValue,
 		myFormLogValueSidebar
 	},
-	template:`<div class="app-sub-window" @mousedown.left.self="$emit('close')" :class="{ 'under-header':!isMobile }">
+	template: `<div class="app-sub-window" @mousedown.left.self="$emit('close')" :class="{ 'under-header':!isMobile }">
 		<div class="contentBox scroll float form-log" :class="{ fullscreen:showFullscreen }">
 			<div class="top lower">
 				<div class="area nowrap">
@@ -297,8 +293,9 @@ export default {
 												{{ getDateFormatted(l.dateChange) }}
 											</td>
 											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isMobile">
-												<span v-if="l.loginName !== ''">{{ l.loginName }}</span>
-												<span v-if="l.loginName === ''"><i>[{{ capApp.deletedUser }}]</i></span>
+												<span v-if="!l.isSystem && l.loginName !== ''">{{ l.loginName }}</span>
+												<span v-if="!l.isSystem && l.loginName === ''"><i>[{{ capApp.deletedUser }}]</i></span>
+												<span v-if="l.isSystem"><i>[{{ capGen.system }}]</i></span>
 											</td>
 											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isSingleSourceActive">
 												<div class="form-log-source">
@@ -361,137 +358,137 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		entityIdMapEffect:          { type:Object, required:true },
-		fields:                     { type:Array,  required:true },
-		fieldIdMapIndexMapRecordIds:{ type:Object, required:true },
-		fieldIdMapOverwrite:        { type:Object, required:true },
-		formIconSrc:                { type:String, required:true },
-		formTitle:                  { type:String, required:true },
-		indexMapRecordKey:          { type:Object, required:true },
-		joinsIndexMap:              { type:Object, required:true },
-		moduleId:                   { type:String, required:true }
+	props: {
+		entityIdMapEffect: { type: Object, required: true },
+		fields: { type: Array, required: true },
+		fieldIdMapIndexMapRecordIds: { type: Object, required: true },
+		fieldIdMapOverwrite: { type: Object, required: true },
+		formIconSrc: { type: String, required: true },
+		formTitle: { type: String, required: true },
+		indexMapRecordKey: { type: Object, required: true },
+		joinsIndexMap: { type: Object, required: true },
+		moduleId: { type: String, required: true }
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
-			logs:[],
-			logShownAttributeId:null,
-			logShownComment:false,
-			logShownId:null,
-			logShownFilter:true, // only show logs if they match the log in the sidebar (by attribute ID or if they also show a comment)
-			showFullscreen:false,
-			sourceFieldIdsHide:[],
-			relationIdMapRecordIdMapTitle:{}
+			logs: [],
+			logShownAttributeId: null,
+			logShownComment: false,
+			logShownId: null,
+			logShownFilter: true, // only show logs if they match the log in the sidebar (by attribute ID or if they also show a comment)
+			showFullscreen: false,
+			sourceFieldIdsHide: [],
+			relationIdMapRecordIdMapTitle: {}
 		};
 	},
-	computed:{
+	computed: {
 		// a source requests data logs for a number of record IDs and defined attributes
 		// sources can either be the current form itself or a number of list fields on the form
 		// which attributes are requested depends on the requestor (form = visible data fields, list = available columns)
 		// a data log request runs for specific record IDs for a single relation, with shared attributes to retrieve
 		//  both form & list fields can have multiple sources if they join multiple relations
-		sources:s => {
-			let out = [];
-			const parseFields = (fields,isFirstField,tabTitle) => {
-				for(const f of fields) {
+		sources: s => {
+			const out = [];
+			const parseFields = (fields, isFirstField, tabTitle) => {
+				for (const f of fields) {
 					const state = s.entityIdMapEffect.field[f.id] !== undefined
 						? s.entityIdMapEffect.field[f.id] : f.state;
-					
-					if(state === 'hidden')
+
+					if (state === 'hidden')
 						continue;
 
-					switch(f.content) {
+					switch (f.content) {
 						case 'container':
-							parseFields(f.fields,false,'');
-						break;
+							parseFields(f.fields, false, '');
+							break;
 						case 'tabs':
-							for(const t of f.tabs) {
-								parseFields(t.fields,false,s.getCaption('tabTitle',s.moduleId,t.id,t.captions,''));
+							for (const t of f.tabs) {
+								parseFields(t.fields, false, s.getCaption('tabTitle', s.moduleId, t.id, t.captions, ''));
 							}
-						break;
+							break;
 						case 'data':
 							// if field join index is available
 							const src = out.find(v => v.fieldId === null && v.index === f.index);
-							if(src !== undefined && !src.attributeIds.includes(f.attributeId)) {
+							if (src !== undefined && !src.attributeIds.includes(f.attributeId)) {
 
 								const isNm = f.attributeIdNm !== undefined && f.attributeIdNm !== null;
-								const atr  = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
-								const rel  = s.relationIdMap[s.joinsIndexMap[f.index].relationId];
+								const atr = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
+								const rel = s.relationIdMap[s.joinsIndexMap[f.index].relationId];
 
-								if(!s.relationHasRetention(rel))
+								if (!s.relationHasRetention(rel))
 									continue;
 
-								if(isNm || s.isAttributeRelationship(atr.content)) {
+								if (isNm || s.isAttributeRelationship(atr.content)) {
 									// fetch only relationship attributes, if their relation has record titles
 									const relShip = s.relationIdMap[atr.relationshipId];
-									if(relShip.attributeIdsTitle.length === 0)
+									if (relShip.attributeIdsTitle.length === 0)
 										continue;
 								}
 
-								let title  = '';
+								let title = '';
 								let iconId = f.iconId !== null ? f.iconId : atr.iconId;
-								
-								if(s.fieldIdMapOverwrite.caption[f.id] !== undefined)
+
+								if (s.fieldIdMapOverwrite.caption[f.id] !== undefined)
 									title = s.fieldIdMapOverwrite.caption[f.id];
 
-								if(title === '') title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
-								if(title === '') title = tabTitle;
-								if(title === '') title = s.getCaption('attributeTitle',s.moduleId,f.attributeId,atr.captions,atr.name);
-								
+								if (title === '') title = s.getCaption('fieldTitle', s.moduleId, f.id, f.captions);
+								if (title === '') title = tabTitle;
+								if (title === '') title = s.getCaption('attributeTitle', s.moduleId, f.attributeId, atr.captions, atr.name);
+
 								src.attributeIds.push(f.attributeId);
-								src.attributeIdMapIcon[f.attributeId]  = iconId;
+								src.attributeIdMapIcon[f.attributeId] = iconId;
 								src.attributeIdMapTitle[f.attributeId] = title;
 
-								if(!isNm && atr.encrypted)
+								if (!isNm && atr.encrypted)
 									src.attributeIdsEnc.push(f.attributeId);
 
-								if(s.isAttributeFiles(atr.content))
+								if (s.isAttributeFiles(atr.content))
 									src.attributeIdsFiles.push(f.attributeId);
 							}
-						break;
+							break;
 						case 'list':
 							// lists are their own data log source if they have records loaded
-							if(f.query === null || s.fieldIdMapIndexMapRecordIds[f.id] === undefined)
+							if (f.query === null || s.fieldIdMapIndexMapRecordIds[f.id] === undefined)
 								continue;
 
-							for(const k in s.fieldIdMapIndexMapRecordIds[f.id]) {
+							for (const k in s.fieldIdMapIndexMapRecordIds[f.id]) {
 								const index = parseInt(k);
-								const join  = f.query.joins.find(v => v.index === index);
+								const join = f.query.joins.find(v => v.index === index);
 
-								if(join === undefined)
+								if (join === undefined)
 									continue;
 
 								// for list fields, we need both a title for the source as well as record titles
 								// otherwise it´s not possible to see what a change belongs to
 								const rel = s.relationIdMap[join.relationId];
-								if(rel.attributeIdsTitle.length === 0)
+								if (rel.attributeIdsTitle.length === 0)
 									continue;
 
 								let title = '';
-								if(title === '') title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
-								if(title === '') title = tabTitle;
-								if(title === '') title = s.getCaption('relationTitle',s.moduleId,rel.id,rel.captions);
-								if(title === '' && isFirstField) title = s.formTitle;
+								if (title === '') title = s.getCaption('fieldTitle', s.moduleId, f.id, f.captions);
+								if (title === '') title = tabTitle;
+								if (title === '') title = s.getCaption('relationTitle', s.moduleId, rel.id, rel.captions);
+								if (title === '' && isFirstField) title = s.formTitle;
 
-								if(title === '')
+								if (title === '')
 									continue;
 
-								let src = s.getSourceTemplate(f.id,index,join.relationId,s.fieldIdMapIndexMapRecordIds[f.id][index],'images/files_list2.png',title);
-								for(const c of f.columns) {
-									if(c.attribute && c.index === index) {
+								const src = s.getSourceTemplate(f.id, index, join.relationId, s.fieldIdMapIndexMapRecordIds[f.id][index], 'images/files_list2.png', title);
+								for (const c of f.columns) {
+									if (c.attribute && c.index === index) {
 										const atr = s.attributeIdMap[c.attributeId];
 
 										// encrypted change logs are not supported for sub lists, keys are not available
 										// it would require providing keys during data log GET call to implement this
-										if(atr.encrypted)
+										if (atr.encrypted)
 											continue;
 
 										src.attributeIds.push(c.attributeId);
-										src.attributeIdMapIcon[c.attributeId]  = atr.iconId;
-										src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c,s.moduleId);
+										src.attributeIdMapIcon[c.attributeId] = atr.iconId;
+										src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c, s.moduleId);
 
-										if(s.isAttributeFiles(atr.content))
+										if (s.isAttributeFiles(atr.content))
 											src.attributeIdsFiles.push(c.attributeId);
 									}
 								}
@@ -499,100 +496,100 @@ export default {
 							}
 
 							// add relationship attributes
-							for(const join of f.query.joins) {
-								if(join.attributeId === null)
+							for (const join of f.query.joins) {
+								if (join.attributeId === null)
 									continue;
 
 								const src = out.find(v => v.fieldId === f.id && v.index === join.index);
-								if(src === undefined)
+								if (src === undefined)
 									continue;
 
-								const atr   = s.attributeIdMap[join.attributeId];
-								const title = s.getCaption('attributeTitle',s.moduleId,atr.id,atr.captions,atr.name);
-								if(atr.relationId === join.relationId) {
+								const atr = s.attributeIdMap[join.attributeId];
+								const title = s.getCaption('attributeTitle', s.moduleId, atr.id, atr.captions, atr.name);
+								if (atr.relationId === join.relationId) {
 									src.attributeIds.push(atr.id);
-									src.attributeIdMapIcon[atr.id]  = atr.iconId;
+									src.attributeIdMapIcon[atr.id] = atr.iconId;
 									src.attributeIdMapTitle[atr.id] = title;
 									continue;
 								}
 
 								const srcFrom = out.find(v => v.fieldId === f.id && v.index === join.indexFrom);
-								if(srcFrom !== undefined) {
+								if (srcFrom !== undefined) {
 									srcFrom.attributeIds.push(atr.id);
-									srcFrom.attributeIdMapIcon[atr.id]  = atr.iconId;
+									srcFrom.attributeIdMapIcon[atr.id] = atr.iconId;
 									srcFrom.attributeIdMapTitle[atr.id] = title;
 								}
 							}
-						break;
+							break;
 					}
 				}
 			};
-			
-			for(const k in s.joinsIndexMap) {	
+
+			for (const k in s.joinsIndexMap) {
 				const j = s.joinsIndexMap[k];
-				if(j.recordId !== 0)
-					out.push(s.getSourceTemplate(null,j.index,j.relationId,[j.recordId],s.formIconSrc,s.formTitle));
+				if (j.recordId !== 0)
+					out.push(s.getSourceTemplate(null, j.index, j.relationId, [j.recordId], s.formIconSrc, s.formTitle));
 			}
-			parseFields(s.fields,true,'');
+			parseFields(s.fields, true, '');
 			return out;
 		},
-		sourcesFieldIds:s => {
+		sourcesFieldIds: s => {
 			let out = [];
-			for(const src of s.sources) {
-				if(!out.includes(src.fieldId))
+			for (const src of s.sources) {
+				if (!out.includes(src.fieldId))
 					out.push(src.fieldId);
 			}
 			return out;
 		},
-		isSingleSource:s => {
+		isSingleSource: s => {
 			let srcFieldIdLast;
-			for(const src of s.sources) {
-				if(srcFieldIdLast === undefined) {
+			for (const src of s.sources) {
+				if (srcFieldIdLast === undefined) {
 					srcFieldIdLast = src.fieldId;
 					continue;
 				}
 
-				if(srcFieldIdLast !== src.fieldId)
+				if (srcFieldIdLast !== src.fieldId)
 					return false;
 			}
 			return true;
 		},
-		logShownSidebar:s => {
+		logShownSidebar: s => {
 			const l = s.logsShown.find(v => v.id === s.logShownId);
 			return l === undefined ? null : l;
 		},
-		logsShown:s => {
+		logsShown: s => {
 			return s.logs.filter(v => !s.sourceFieldIdsHide.includes(s.sources[v.sourceIndex].fieldId)
 				&& !s.isSidebarLogFilter
 				|| (s.logShownAttributeId !== null && v.attributes.findIndex(w => w.attributeId === s.logShownAttributeId) !== -1)
-				|| (s.logShownComment     === true && v.comment !== null)
+				|| (s.logShownComment === true && v.comment !== null)
 			);
 		},
 
 		// simple
-		isLogTableVisible:    s => !s.isMobile || !s.isSidebarLogShown,
-		isSidebarLogFilter:   s => s.logShownFilter && (s.logShownAttributeId !== null || s.logShownComment !== false),
-		isSidebarLogShown:    s => s.logShownSidebar !== null,
-		isSidebarSourcesShown:s => !s.isSingleSource && !s.isSidebarLogShown,
+		isLogTableVisible: s => !s.isMobile || !s.isSidebarLogShown,
+		isSidebarLogFilter: s => s.logShownFilter && (s.logShownAttributeId !== null || s.logShownComment !== false),
+		isSidebarLogShown: s => s.logShownSidebar !== null,
+		isSidebarSourcesShown: s => !s.isSingleSource && !s.isSidebarLogShown,
 		isSingleSourceActive: s => s.isSingleSource || s.sourceFieldIdsHide.length === s.sourcesFieldIds.length - 1,
-		isSingleSourceForm:   s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
+		isSingleSourceForm: s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		capApp:        s => s.$store.getters.captions.formLog,
-		capGen:        s => s.$store.getters.captions.generic,
-		isMobile:      s => s.$store.getters.isMobile,
-		settings:      s => s.$store.getters.settings
+		capApp: s => s.$store.getters.captions.formLog,
+		capGen: s => s.$store.getters.captions.generic,
+		isMobile: s => s.$store.getters.isMobile,
+		settings: s => s.$store.getters.settings
 	},
 	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 		this.get(false);
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		consoleError,
@@ -607,23 +604,24 @@ export default {
 
 		getCommentPreview(comment) {
 			comment = this.getHtmlStripped(comment);
-			return comment.length > 120 ? `${comment.substring(0,117)}...` : comment;
+			return comment.length > 120 ? `${comment.substring(0, 117)}...` : comment;
 		},
 		getDateFormatted(unix) {
-			return this.getUnixFormat(unix,this.settings.dateFormat + (this.isMobile ? '' : ' H:i:S'));
+			return this.getUnixFormat(unix, this.settings.dateFormat + (this.isMobile ? '' : ' H:i:S'));
 		},
-		getSourceTemplate(fieldId,index,relationId,recordIds,image,title) {
-			return { fieldId, index, image, relationId, recordIds, title,
-				attributeIds:[],
-				attributeIdsEnc:[],
-				attributeIdsFiles:[],
-				attributeIdMapIcon:{},
-				attributeIdMapTitle:{}
+		getSourceTemplate(fieldId, index, relationId, recordIds, image, title) {
+			return {
+				fieldId, index, image, relationId, recordIds, title,
+				attributeIds: [],
+				attributeIdsEnc: [],
+				attributeIdsFiles: [],
+				attributeIdMapIcon: {},
+				attributeIdMapTitle: {}
 			};
 		},
 		getSourceTitleByFieldId(fieldId) {
-			for(const src of this.sources) {
-				if(fieldId === src.fieldId)
+			for (const src of this.sources) {
+				if (fieldId === src.fieldId)
 					return `${src.title} (${String(src.recordIds.length)})`;
 			}
 			return '';
@@ -634,24 +632,24 @@ export default {
 
 		// actions
 		handleHotkeys(e) {
-			if(e.key === 'Escape') {
+			if (e.key === 'Escape') {
 				e.preventDefault();
 
-				if(this.isSidebarLogShown)
-					return this.logShownSidebarSet(null,null,false);
-				
+				if (this.isSidebarLogShown)
+					return this.logShownSidebarSet(null, null, false);
+
 				this.$emit('close');
 			}
 		},
-		logShownSidebarSet(logId,attributeId,showComment) {
+		logShownSidebarSet(logId, attributeId, showComment) {
 			this.logShownAttributeId = attributeId;
-			this.logShownComment     = showComment;
-			this.logShownId          = logId;
+			this.logShownComment = showComment;
+			this.logShownId = logId;
 		},
 		sourceToggle(fieldId) {
 			const pos = this.sourceFieldIdsHide.indexOf(fieldId);
-			if(pos === -1) this.sourceFieldIdsHide.push(fieldId);
-			else           this.sourceFieldIdsHide.splice(pos,1);
+			if (pos === -1) this.sourceFieldIdsHide.push(fieldId);
+			else this.sourceFieldIdsHide.splice(pos, 1);
 		},
 
 		// backend calls
@@ -659,59 +657,59 @@ export default {
 			let requests = [];
 
 			// copy sources in cases it changes before responses come back (need to match request response to each source)
-			for(let i = 0, j = this.sources.length; i < j; i++) {
+			for (let i = 0, j = this.sources.length; i < j; i++) {
 				const src = this.sources[i];
-				if(src.recordIds.length === 0 || src.attributeIds.length === 0)
+				if (src.recordIds.length === 0 || src.attributeIds.length === 0)
 					continue;
 
 				// if multiple sources exist, we require a title to differentiate them
-				if(!this.isSingleSource && src.title === '')
+				if (!this.isSingleSource && src.title === '')
 					continue;
 
-				requests.push(ws.prepare('data','getLog',{
-					relationId:src.relationId,
-					attributeIds:src.attributeIds,
-					recordIds:src.recordIds,
-					sourceIndex:i
+				requests.push(ws.prepare('data', 'getLog', {
+					relationId: src.relationId,
+					attributeIds: src.attributeIds,
+					recordIds: src.recordIds,
+					sourceIndex: i
 				}));
 			}
-			
-			if(requests.length === 0)
+
+			if (requests.length === 0)
 				return;
 
-			ws.sendMultiple(requests,true).then(
+			ws.sendMultiple(requests, true).then(
 				async responses => {
 					let logsCombined = []; // logs from all data log requests combined
-					let logIdsParsed = []; // logs can be fetched twice, if multiple sources refer to the same records
-					let relationIdMapRecordIds = {};
-					const addRelationRecordIds = (relationId,recordIds) => {
+					const logIdsParsed = []; // logs can be fetched twice, if multiple sources refer to the same records
+					const relationIdMapRecordIds = {};
+					const addRelationRecordIds = (relationId, recordIds) => {
 
 						// skip if the record of the log relation does not have a title
-						if(this.relationIdMap[relationId].attributeIdsTitle.length === 0)
+						if (this.relationIdMap[relationId].attributeIdsTitle.length === 0)
 							return;
 
-						if(relationIdMapRecordIds[relationId] === undefined)
+						if (relationIdMapRecordIds[relationId] === undefined)
 							relationIdMapRecordIds[relationId] = [];
 
-						for(const id of recordIds) {
-							if(!relationIdMapRecordIds[relationId].includes(id))
+						for (const id of recordIds) {
+							if (!relationIdMapRecordIds[relationId].includes(id))
 								relationIdMapRecordIds[relationId].push(id);
 						}
 					};
-					const parseLogValues = async (attributeValues,src) => {
-						for(const a of attributeValues) {
+					const parseLogValues = async (attributeValues, src) => {
+						for (const a of attributeValues) {
 							a.relationId = null;
-							a.value      = JSON.parse(a.value);
+							a.value = JSON.parse(a.value);
 
 							const atr = this.attributeIdMap[a.attributeId];
-							if(!this.isAttributeRelationship(atr.content)) {
-								if(a.value !== null && src.attributeIdsEnc.includes(atr.id)) {
+							if (!this.isAttributeRelationship(atr.content)) {
+								if (a.value !== null && src.attributeIdsEnc.includes(atr.id)) {
 									// decrypt encrypted attribute value
 									const keyStr = this.indexMapRecordKey[src.index];
-									if(keyStr === undefined)
+									if (keyStr === undefined)
 										throw new Error('no data key for record');
 
-									a.value = await this.aesGcmDecryptBase64WithPhrase(a.value,keyStr);
+									a.value = await this.aesGcmDecryptBase64WithPhrase(a.value, keyStr);
 								}
 								continue;
 							}
@@ -719,39 +717,39 @@ export default {
 							// process relationship values
 							const isSingleValue = this.isAttributeRelationship11(atr.content)
 								|| (this.isAttributeRelationshipN1(atr.content) && a.outsideIn !== true);
-							
-							if(isSingleValue) {
+
+							if (isSingleValue) {
 								a.relationId = a.outsideIn ? atr.relationId : atr.relationshipId;
-								if(a.value !== null)
+								if (a.value !== null)
 									a.value = [a.value];
 							} else {
 								// multi values are always outside-in
 								a.relationId = a.attributeIdNm === null ? atr.relationId : this.attributeIdMap[a.attributeIdNm].relationshipId;
 							}
 
-							if(a.value !== null)
-								addRelationRecordIds(a.relationId,a.value);
+							if (a.value !== null)
+								addRelationRecordIds(a.relationId, a.value);
 						}
 					};
 
-					for(let i = 0, j = responses.length; i < j; i++) {
-						const res  = responses[i];
-						const req  = requests[i];
+					for (let i = 0, j = responses.length; i < j; i++) {
+						const res = responses[i];
+						const req = requests[i];
 						const logs = [];
 
-						for(const log of res.payload) {
-							if(logIdsParsed.includes(log.id))
+						for (const log of res.payload) {
+							if (logIdsParsed.includes(log.id))
 								continue;
 
 							logIdsParsed.push(log.id);
 							log.sourceIndex = req.payload.sourceIndex;
 							const src = this.sources[log.sourceIndex];
-							addRelationRecordIds(log.relationId,[log.recordId]);
-							
-							try      { await parseLogValues(log.attributes,src); }
-							catch(e) {
+							addRelationRecordIds(log.relationId, [log.recordId]);
+
+							try { await parseLogValues(log.attributes, src); }
+							catch (e) {
 								this.consoleError(e); // full error for troubleshooting
-								this.$root.genericErrorWithFallback(e.message,'SEC','003');
+								this.$root.genericErrorWithFallback(e.message, 'SEC', '003');
 								return;
 							}
 							logs.push(log);
@@ -760,16 +758,16 @@ export default {
 					}
 
 					// sort logs by date change (separate requests are sorted individually, but not together)
-					logsCombined.sort((a,b) => b.dateChange - a.dateChange);
+					logsCombined.sort((a, b) => b.dateChange - a.dateChange);
 
 					// fetch titles for loaded records and relationship values
-					ws.send('data','getRecordTitles',relationIdMapRecordIds,true).then(
+					ws.send('data', 'getRecordTitles', relationIdMapRecordIds, true).then(
 						res => {
 							this.relationIdMapRecordIdMapTitle = res.payload;
 
 							// apply processed logs once record titles are ready
-							if(!isNextPage) this.logs = logsCombined;
-							else            this.logs.concat(logsCombined);
+							if (!isNextPage) this.logs = logsCombined;
+							else this.logs.concat(logsCombined);
 						},
 						this.$root.genericError
 					);
