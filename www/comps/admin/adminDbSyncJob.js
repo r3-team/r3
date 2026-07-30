@@ -2,13 +2,15 @@ import MyCodeEditor from '../codeEditor.js';
 import MyInputDecimal from '../inputDecimal.js';
 import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
 import { deepIsEqual } from '../shared/generic.js';
+import srcBase64Icon from '../shared/image.js';
 import { getCaption } from '../shared/language.js';
 import { getPgIndexTitle } from '../shared/schema.js';
-import MyAdminDbSyncJobQuery from './adminDbSyncJobQuery.js';
+import MyAdminDbSyncJobJoins from './adminDbSyncJobJoins.js';
+import MyAdminDbSyncJobLookups from './adminDbSyncJobLookups.js';
 
 export default {
 	name: 'my-admin-db-sync-job',
-	components: { MyAdminDbSyncJobQuery, MyCodeEditor, MyInputDecimal },
+	components: { MyAdminDbSyncJobJoins, MyAdminDbSyncJobLookups, MyCodeEditor, MyInputDecimal },
 	template: `<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-db-sync-job scroll float">
@@ -107,24 +109,30 @@ export default {
 					</div>
 					<div class="admin-db-sync-job-content-options column gap-large default-inputs">
 						<div class="column gap">
-							<my-label image="database.png" :caption="capApp.loadTargetRelation" :large="true" />
-							<select
-								@input="changeModuleId($event.target.value)"
-								:disabled="readonly || !isNew"
-								:value="moduleIdActive !== null ? moduleIdActive : ''"
-							>
-								<option value=""> - {{ capGen.application }} - </option>
-								<option v-for="m in modulesUsable" :value="m.id">
-									{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}
-								</option>
-							</select>
+							<my-label image="edit.png" :caption="capApp.loadTargetRelation" :large="true" />
+							<div class="row gap centered">
+								<my-label
+									:image="module ? '' : 'icon_missing.png'"
+									:imageBase64="module ? srcBase64Icon(module.iconId,'images/module.png') : ''"
+								/>
+								<select
+									@input="changeModuleId($event.target.value)"
+									:disabled="readonly || !isNew"
+									:value="moduleIdActive !== null ? moduleIdActive : ''"
+								>
+									<option value=""> - {{ capGen.application }} - </option>
+									<option v-for="m in modulesUsable" :value="m.id">
+										{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}
+									</option>
+								</select>
+							</div>
 
-							<my-admin-db-sync-job-query
+							<my-admin-db-sync-job-joins
 								v-if="module !== false"
-								v-model:joins="job.joins"
-								v-model:lookups="job.lookups"
-								@indexRemoved=""
+								v-model="job.joins"
+								@indexRemoved="indexRemoved"
 								:module
+								:protectRelationBase="!isNew"
 								:readonly
 							/>
 						</div>
@@ -132,6 +140,12 @@ export default {
 							<div class="column gap">
 								<hr />
 								<my-label image="databaseAsterisk.png" :caption="capApp.loadUniqueIndex" />
+								<my-admin-db-sync-job-lookups
+									v-if="job.joins.length !== 0"
+									v-model="job.lookups"
+									:joins="job.joins"
+									:readonly
+								/>
 								<my-button-check
 									v-model="job.deleteMissing"
 									:active="isLookupOnBaseRelation"
@@ -144,7 +158,7 @@ export default {
 								<div class="row gap centered space-between">
 									<my-label image="files_list2.png" :caption="capApp.loadTargetAttributes" />
 									<my-button image="add.png"
-										@trigger="addColumn"
+										@trigger="columnAdd"
 										:active="!readonly"
 										:caption="capGen.button.add"
 									/>
@@ -152,12 +166,15 @@ export default {
 								<div class="admin-db-sync-job-content-options-columns" v-if="job.columns.length !== 0">
 									<div class="row gap centered" v-for="(c,i) in job.columns">
 										<span>#{{ i+1 }}</span>
-										<select v-model="job.columns[i]" :disabled="readonly">
-											<optgroup v-for="j in job.joins" :label="getJoinLabel(j)">
-												<option v-for="a in relationIdMap[j.relationId].attributes.filter(v => v.content !== 'files')" :value="a.id">
-													{{ getCaption('attributeTitle',relationIdMap[j.relationId].moduleId,a.id,a.captions,a.name) }}
+										<select @input="columnSetValue($event.target.value,i)" :disabled="readonly" :value="columnGetValue(c)">
+											<template v-for="j in job.joins">
+												<option
+													v-for="a in relationIdMap[j.relationId].attributes.filter(v => v.content !== 'files')"
+													:value="j.index + '_' + a.id"
+												>
+													{{ j.index }}) {{ getCaption('attributeTitle',relationIdMap[j.relationId].moduleId,a.id,a.captions,a.name) }}
 												</option>
-											</optgroup>
+											</template>
 										</select>
 										<my-button image="cancel.png"
 											@trigger="job.columns.splice(i,1)"
@@ -231,7 +248,7 @@ export default {
 
 				if (s.isWithLookups) {
 					for (const l of s.job.lookups) {
-						for (const a of s.indexIdMap[l.pgIndexId]) {
+						for (const a of s.indexIdMap[l.pgIndexId].attributes) {
 							if (!s.job.columns.some(v => v.attributeId === a.attributeId)) {
 								out.push(s.capApp.warning.missingIndexAttribute);
 								break;
@@ -286,20 +303,25 @@ export default {
 		dialogDeleteAsk,
 		getCaption,
 		getPgIndexTitle,
-
-		// presentation
-		getJoinLabel(j) {
-			const r = this.relationIdMap[j.relationId];
-			return `${j.index}) ${this.getCaption("relationTitle", this.module.id, r.id, r.captions, r.name)}`;
-		},
+		srcBase64Icon,
 
 		// actions
-		addColumn() {
+		columnAdd() {
 			if (this.job.joins.length === 0)
 				return;
 
 			const r = this.relationIdMap[this.job.joins[0].relationId];
 			this.job.columns.push({ attributeId: r.attributes[0], index: 0 });
+		},
+		columnGetValue(c) {
+			return `${c.index}_${c.attributeId}`;
+		},
+		columnSetValue(v, i) {
+			const p = v.split('_');
+			this.job.columns[i] = {
+				attributeId: p[1],
+				index: parseInt(p[0], 10),
+			};
 		},
 		changeModuleId(input) {
 			this.moduleIdActive = input === '' ? null : input;
@@ -312,6 +334,11 @@ export default {
 		},
 		close() {
 			this.$emit('close');
+		},
+		indexRemoved(index) {
+			this.job.columns = this.job.columns.filter(v => v.index !== index);
+			this.job.joins = this.job.joins.filter(v => v.index !== index);
+			this.job.lookups = this.job.lookups.filter(v => v.index !== index);
 		},
 		reloadAndClose() {
 			ws.send('dbSync', 'informChanged', {}, true).then(() => {

@@ -2713,6 +2713,7 @@
 		"recordTitle": "Datensatztitel",
 		"references": "Referenzen",
 		"relation": "Relation",
+		"relationBase": "Start-Relation",
 		"relations": "Relationen",
 		"relationship": "Beziehung",
 		"relationships": "Beziehungen",

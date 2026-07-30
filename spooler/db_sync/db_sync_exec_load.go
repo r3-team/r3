@@ -7,8 +7,10 @@ import (
 	"r3/data/data_import"
 	"r3/db"
 	"r3/log"
+	"r3/schema"
 	"r3/types"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -23,6 +25,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 	for i, c := range j.Columns {
 		columns[i] = types.Column{
 			AttributeId: pgtype.UUID{Bytes: c.AttributeId, Valid: true},
+			Content:     schema.ColumnContentAttribute,
 			Index:       c.Index,
 		}
 	}
@@ -35,7 +38,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 		if err != nil {
 			return err
 		}
-		if err := doLoadStore(ctx, -1, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
+		if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
 			return err
 		}
 	} else {
@@ -55,7 +58,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 			if err != nil {
 				return err
 			}
-			if err := doLoadStore(ctx, -1, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
+			if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
 				return err
 			}
 			if len(rows) < int(j.PageLimit.Int32) {
@@ -97,6 +100,18 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 		if err := rows.Scan(scanArgs...); err != nil {
 			return nil, err
 		}
+
+		// parse results
+		for i, vIf := range resultRow {
+			switch v := vIf.(type) {
+			case []byte:
+				if utf8.Valid(v) {
+					resultRow[i] = string(v)
+				} else {
+					resultRow[i] = string(strings.ToValidUTF8(string(v), ""))
+				}
+			}
+		}
 		resultRows = append(resultRows, resultRow)
 	}
 
@@ -104,7 +119,7 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 	return resultRows, nil
 }
 
-func doLoadStore(ctx context.Context, loginId int64, columns []types.Column, joins []types.QueryJoin,
+func doLoadStore(ctx context.Context, columns []types.Column, joins []types.QueryJoin,
 	lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
 
 	if len(rows) == 0 {
@@ -118,7 +133,8 @@ func doLoadStore(ctx context.Context, loginId int64, columns []types.Column, joi
 	defer tx.Rollback(ctx)
 
 	for _, values := range rows {
-		if _, err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, values, columns, joins, lookups, indexMapPgIndexAttributeIds); err != nil {
+		// DB sync values are submitted as system (login ID -1)
+		if _, err := data_import.FromInterfaceValues_tx(ctx, tx, -1, values, columns, joins, lookups, indexMapPgIndexAttributeIds); err != nil {
 			return err
 		}
 	}

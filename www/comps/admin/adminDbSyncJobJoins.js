@@ -1,91 +1,8 @@
 import { isAttributeRelationship, isAttributeRelationship11 } from '../shared/attribute.js';
 import { getDependentAttributes, getDependentModules } from '../shared/builder.js';
-import { getPgIndexTitle } from '../shared/schema.js';
 
-const MyAdminDbSyncJobQueryLookupItem = {
-	name: "my-admin-db-sync-job-query-lookup-item",
-	template: `<div class="query-lookup-item">
-		<span>{{ join.index + ') ' + relation.name }}</span>
-		<select v-model="value" :disabled="readonly">
-			<option value="">-</option>
-			<option v-for="ind in pgIndexes" :value="ind.id">{{ getPgIndexTitle(ind.id) }}</option>
-		</select>
-	</div>`,
-	props: {
-		join: { type: Object, required: true },
-		modelValue: { type: [String, null], required: true },
-		readonly: { type: Boolean, required: true },
-	},
-	emits: ["update:modelValue"],
-	computed: {
-		value: {
-			get() { return this.modelValue === null ? '' : this.modelValue; },
-			set(v) { this.$emit("update:modelValue", v === '' ? null : v); },
-		},
-		pgIndexes: s => s.relation.indexes.filter((v) => v.noDuplicates),
-		relation: s => s.relationIdMap[s.join.relationId],
-
-		// stores
-		relationIdMap: s => s.$store.getters["schema/relationIdMap"]
-	},
-	methods: {
-		getPgIndexTitle,
-	},
-};
-
-const MyAdminDbSyncJobQueryLookups = {
-	name: 'my-admin-db-sync-job-query-lookups',
-	components: { MyAdminDbSyncJobQueryLookupItem },
-	template: `<div class="query-lookups">
-		<my-admin-db-sync-job-query-lookup-item
-			@update:modelValue="setValueForJoin(j,$event)"
-			v-for="j in joins"
-			:join="j"
-			:key="j.index"
-			:modelValue="getValueForJoin(j)"
-			:readonly
-		/>
-	</div>`,
-	props: {
-		joins: { type: Array, required: true },
-		lookups: { type: Array, required: true }, // [{pgIndexId:123,index:0},{...}]
-		readonly: { type: Boolean, required: true }
-	},
-	emits: ['update'],
-	computed: {
-		// stores
-		capApp: s => s.$store.getters.captions.builder.query
-	},
-	methods: {
-		getValueForJoin(join) {
-			for (const lookup of this.lookups) {
-				if (lookup.index === join.index)
-					return lookup.pgIndexId;
-			}
-			return null;
-		},
-		setValueForJoin(join, pgIndexId) {
-			const lookups = JSON.parse(JSON.stringify(this.lookups));
-			for (let i = 0, j = lookups.length; i < j; i++) {
-				if (lookups[i].index === join.index) {
-					lookups.splice(i, 1);
-					break;
-				}
-			}
-
-			if (pgIndexId !== null)
-				lookups.push({
-					pgIndexId: pgIndexId,
-					index: join.index
-				});
-
-			this.$emit('update', lookups);
-		}
-	}
-};
-
-const MyAdminDbSyncJobQueryNestedJoin = {
-	name: 'my-admin-db-sync-job-query-nested-join',
+const MyAdminDbSyncJobJoinsNested = {
+	name: 'my-admin-db-sync-job-joins-nested',
 	template: `<div class="nested-join" :class="{ nested:index !== 0 }">
 
 		<!-- descriptive summary line with relation options -->
@@ -122,8 +39,11 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 				/>
 
 				<!-- delete only if last relation in chain -->
-				<img v-if="joins.length === 0" class="option clickable" src="images/cancel.png" @click="$emit('relationRemove',index)" />
-				<img v-else class="option" src="images/clear.png" />
+				<my-button image="cancel.png"
+					@trigger="$emit('relationRemove',index)"
+					:active="!readonly && joins.length === 0 && (!isBaseRelation || !protectRelationBase)"
+					:naked="true"
+				/>
 			</div>
 		</div>
 
@@ -141,7 +61,7 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 
 		<!-- child joins -->
 		<div class="children">
-			<my-admin-db-sync-job-query-nested-join
+			<my-admin-db-sync-job-joins-nested
 				v-for="j in joins"
 				@relationAdd="(...args) => $emit('relationAdd',...args)"
 				@relationRemove="(...args) => $emit('relationRemove',...args)"
@@ -158,6 +78,7 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 				:joinRelationId="j.joinRelationId"
 				:module
 				:readonly
+				:protectRelationBase
 				:relationIdParent="joinRelationId"
 			/>
 		</div>
@@ -178,6 +99,7 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 		joinAttributeId: { required: true },
 		joinRelationId: { type: String, required: true },
 		module: { type: Object, required: true },
+		protectRelationBase: { type: Boolean, required: true },
 		readonly: { type: Boolean, required: true },
 		relationIdParent: { type: String, required: false, default: null }
 	},
@@ -200,10 +122,10 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 		hasNoJoinOptions: s => s.attributesUnused.length === 0,
 		iconJoin: s => {
 			switch (s.connector) {
-				case 'INNER': return 'images/joinInner.png'; break;
-				case 'LEFT': return 'images/joinLeft.png'; break;
-				case 'RIGHT': return 'images/joinRight.png'; break;
-				case 'FULL': return 'images/joinOuter.png'; break;
+				case 'INNER': return 'images/joinInner.png';
+				case 'LEFT': return 'images/joinLeft.png';
+				case 'RIGHT': return 'images/joinRight.png';
+				case 'FULL': return 'images/joinOuter.png';
 			}
 			return 'images/clear.png';
 		},
@@ -245,7 +167,7 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 		isAttributeRelationship11,
 
 		// actions
-		relationAdd(event) {
+		relationAdd() {
 			this.$emit('relationAdd', this.index, this.joinRelationId, this.relationAddId, 'LEFT');
 			this.relationAddId = null;
 			this.relationAddShow = false;
@@ -263,14 +185,6 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 		},
 
 		// presentation
-		displayApply(content) {
-			switch (content) {
-				case 'create': return this.applyCreate ? 'C' : 'c'; break;
-				case 'update': return this.applyUpdate ? 'U' : 'u'; break;
-				case 'delete': return this.applyDelete ? 'D' : 'd'; break;
-			}
-			return '?';
-		},
 		displayJoinOption(atr) {
 			const outsideIn = atr.relationId !== this.joinRelationId;
 			const relIdPartner = !outsideIn ? atr.relationshipId : atr.relationId;
@@ -286,20 +200,14 @@ const MyAdminDbSyncJobQueryNestedJoin = {
 };
 
 export default {
-	name: 'my-admin-db-sync-job-query',
-	components: {
-		MyAdminDbSyncJobQueryLookups,
-		MyAdminDbSyncJobQueryNestedJoin
-	},
-	template: `<div class="admin-db-sync-job-query default-inputs">
+	name: 'my-admin-db-sync-job-joins',
+	components: { MyAdminDbSyncJobJoinsNested },
+	template: `<div class="admin-db-sync-job-joins default-inputs">
 		<!-- start relation -->
-		<div class="row gap centered" v-if="joins.length === 0 && !readonly">
-			<my-label :caption="capGen.query" image="database.png" />
-			<select
-				@input="relationSet($event.target.value)"
-				:value="relationId === null ? '' : relationId"
-			>
-				<option value="">[{{ capApp.relationStart }}]</option>
+		<div class="row gap centered" v-if="modelValue.length === 0 && !readonly">
+			<my-label image="database.png" />
+			<select @input="relationSet($event.target.value)" value="">
+				<option value="">- [{{ capGen.relation }}] -</option>
 				<option v-for="r in module.relations" :value="r.id">{{ r.name }}</option>
 				<optgroup
 					v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
@@ -310,7 +218,7 @@ export default {
 			</select>
 		</div>
 
-		<my-admin-db-sync-job-query-nested-join
+		<my-admin-db-sync-job-joins-nested
 			v-if="relationsNested !== false"
 			@relationAdd="relationAdd"
 			@relationRemove="relationRemove"
@@ -326,33 +234,21 @@ export default {
 			:joinRelationId="relationsNested.joinRelationId"
 			:key="relationsNested.index"
 			:module
-			:readonly
-		/>
-
-		<my-admin-db-sync-job-query-lookups
-			v-if="joins.length !== 0"
-			@update="$emit('update:lookups',$event)"
-			:joins
-			:lookups
+			:protectRelationBase
 			:readonly
 		/>
 	</div>`,
 	props: {
-		joins: { type: Array, required: true },
-		lookups: { type: Array, required: true },
 		module: { type: Object, required: true },
-		readonly: { type: Boolean, required: true }
+		modelValue: { type: Array, required: true },
+		protectRelationBase: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: true },
 	},
-	emits: ['indexRemoved', 'update:joins', 'update:lookups'],
-	data() {
-		return {
-			relationId: null
-		};
-	},
+	emits: ['indexRemoved', 'update:modelValue'],
 	computed: {
 		relationNextIndex: s => {
 			let indexCandidate = 0;
-			for (const join of s.joins) {
+			for (const join of s.modelValue) {
 				if (join.index >= indexCandidate)
 					indexCandidate = join.index + 1;
 			}
@@ -361,7 +257,7 @@ export default {
 		relationsNested: s => {
 			const getChildRelationsByIndex = (indexFrom) => {
 				const rels = [];
-				for (const j of s.joins) {
+				for (const j of s.modelValue) {
 					if (j.indexFrom !== indexFrom)
 						continue;
 
@@ -380,14 +276,14 @@ export default {
 				return rels;
 			};
 
-			if (!s.module || !s.relation || s.joins.length === 0)
+			if (!s.module || !s.relation || s.modelValue.length === 0)
 				return false;
 
 			// source relation with all relations deep-nested
 			return {
-				applyCreate: s.joins[0].applyCreate,
-				applyUpdate: s.joins[0].applyUpdate,
-				applyDelete: s.joins[0].applyDelete,
+				applyCreate: s.modelValue[0].applyCreate,
+				applyUpdate: s.modelValue[0].applyUpdate,
+				applyDelete: s.modelValue[0].applyDelete,
 				connector: 'INNER',
 				index: 0,
 				joins: getChildRelationsByIndex(0),
@@ -398,7 +294,7 @@ export default {
 		},
 
 		// stores
-		relation: s => s.relationId !== null ? s.relationIdMap[s.relationId] : false,
+		relation: s => s.modelValue.length !== 0 ? s.relationIdMap[s.modelValue[0].relationId] : false,
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
@@ -411,11 +307,11 @@ export default {
 
 		// actions
 		relationSet(v) {
-			this.relationId = v === '' ? null : v;
+			v = v === '' ? null : v;
 
 			// if source relation set, but not added as join yet: add
-			if (this.relationId !== null && this.joins.length === 0)
-				return this.relationAdd(-1, this.relationId, null, 'INNER');
+			if (v !== null && this.modelValue.length === 0)
+				this.relationAdd(-1, v, null, 'INNER');
 		},
 		relationAdd(indexFrom, relationIdFrom, attributeId, connector) {
 			const isSource = indexFrom === -1;
@@ -426,7 +322,7 @@ export default {
 			} else {
 				relId = relationIdFrom;
 			}
-			const v = JSON.parse(JSON.stringify(this.joins));
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v.push({
 				applyCreate: isSource,
 				applyUpdate: isSource,
@@ -437,16 +333,13 @@ export default {
 				index: this.relationNextIndex,
 				indexFrom: indexFrom
 			});
-			this.$emit('update:joins', v);
+			this.$emit('update:modelValue', v);
 		},
 		relationRemove(index) {
-			this.$emit('update:joins', this.joins.filter(v => v.index !== index));
-			this.$emit('update:lookups', this.lookups.filter(v => v.index !== index));
-
 			this.$emit('indexRemoved', index);
 		},
 		relationApplyToggle(index, content) {
-			const joins = JSON.parse(JSON.stringify(this.joins));
+			const joins = JSON.parse(JSON.stringify(this.modelValue));
 			for (const j of joins) {
 				if (j.index === index) {
 					switch (content) {
@@ -454,17 +347,17 @@ export default {
 						case 'update': j.applyUpdate = !j.applyUpdate; break;
 						case 'delete': j.applyDelete = !j.applyDelete; break;
 					}
-					this.$emit('update:joins', joins);
+					this.$emit('update:modelValue', joins);
 					break;
 				}
 			}
 		},
 		relationConnectorSet(index, connector) {
-			const joins = JSON.parse(JSON.stringify(this.joins));
+			const joins = JSON.parse(JSON.stringify(this.modelValue));
 			for (const j of joins) {
 				if (j.index === index) {
 					j.connector = connector;
-					this.$emit('update:joins', joins);
+					this.$emit('update:modelValue', joins);
 					break;
 				}
 			}

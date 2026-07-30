@@ -15,7 +15,8 @@ import (
 
 func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordId int64, loginId int64) error {
 
-	if !authorizedRelation(loginId, relationId, types.AccessDelete) {
+	// check for access permissions, unless it´s a system task (login ID = -1)
+	if loginId != -1 && !authorizedRelation(loginId, relationId, types.AccessDelete) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 

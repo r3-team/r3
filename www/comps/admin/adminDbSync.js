@@ -1,10 +1,10 @@
-import MyAdminDbSyncHost from './adminDbSyncHost.js';
 import { getTemplateDbSyncHost } from '../shared/templates.js';
+import MyAdminDbSyncHost from './adminDbSyncHost.js';
 
 export default {
-	name:'my-admin-db-sync',
-	components:{ MyAdminDbSyncHost },
-	template:`<div class="admin-db-sync contentBox grow">
+	name: 'my-admin-db-sync',
+	components: { MyAdminDbSyncHost },
+	template: `<div class="admin-db-sync contentBox grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/databaseSync.png" />
@@ -58,8 +58,8 @@ export default {
 			:readonly="!licenseValid"
 		/>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
 	data() {
 		return {
@@ -72,15 +72,15 @@ export default {
 			hostOpen: null    // contains host as object (null = no host open)
 		};
 	},
-	computed:{
+	computed: {
 		// stores
-		capApp:      s => s.$store.getters.captions.admin.dbSync,
-		capGen:      s => s.$store.getters.captions.generic,
-		licenseValid:s => s.$store.getters.licenseValid
+		capApp: s => s.$store.getters.captions.admin.dbSync,
+		capGen: s => s.$store.getters.captions.generic,
+		licenseValid: s => s.$store.getters.licenseValid
 	},
 	mounted() {
 		this.get();
-		this.$store.commit('pageTitle',this.menuTitle);
+		this.$store.commit('pageTitle', this.menuTitle);
 	},
 	methods: {
 		// externals
@@ -94,7 +94,7 @@ export default {
 			if (id === null) {
 				this.hostIdOpen = null;
 				this.hostOpen = this.getTemplateDbSyncHost();
-			} else if(this.hostIdMap[id] !== undefined) {
+			} else if (this.hostIdMap[id] !== undefined) {
 				this.hostIdOpen = id;
 				this.hostOpen = this.hostIdMap[id];
 			}
@@ -103,12 +103,12 @@ export default {
 		// backend calls
 		get() {
 			ws.sendMultiple([
-				ws.prepare('dbSync','getHosts',null),
-				ws.prepare('dbSync','getJobs',null)
-			],true).then(
+				ws.prepare('dbSync', 'getHosts', null),
+				ws.prepare('dbSync', 'getJobs', null)
+			], true).then(
 				res => {
 					this.hostIdMap = res[0].payload;
-					this.jobIdMap  = res[1].payload;
+					this.jobIdMap = res[1].payload;
 				},
 				this.$root.genericError
 			);

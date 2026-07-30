@@ -15,7 +15,7 @@ func GetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 
 	encKeys := make([]string, 0)
 
-	if len(recordIds) == 0 {
+	if loginId == -1 || len(recordIds) == 0 {
 		return encKeys, nil
 	}
 
@@ -34,8 +34,7 @@ func GetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	return encKeys, err
 }
 
-func SetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
-	recordId int64, keys []types.DataSetEncKeys) error {
+func SetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordId int64, keys []types.DataSetEncKeys) error {
 
 	if len(keys) == 0 {
 		return nil

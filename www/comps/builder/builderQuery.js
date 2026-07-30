@@ -627,14 +627,6 @@ const MyBuilderQueryNestedJoin = {
 		},
 
 		// presentation
-		displayApply(content) {
-			switch (content) {
-				case 'create': return this.applyCreate ? 'C' : 'c'; break;
-				case 'update': return this.applyUpdate ? 'U' : 'u'; break;
-				case 'delete': return this.applyDelete ? 'D' : 'd'; break;
-			}
-			return '?';
-		},
 		displayJoinOption(atr) {
 			const outsideIn = atr.relationId !== this.joinRelationId;
 			const relIdPartner = !outsideIn ? atr.relationshipId : atr.relationId;

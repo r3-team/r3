@@ -1,16 +1,13 @@
-import MyAdminDbSyncJob from './adminDbSyncJob.js';
 import MyInputDecimal from '../inputDecimal.js';
+import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
 import { deepIsEqual } from '../shared/generic.js';
 import { getTemplateDbSyncJob } from '../shared/templates.js';
-import {
-	dialogCloseAsk,
-	dialogDeleteAsk
-} from '../shared/dialog.js';
+import MyAdminDbSyncJob from './adminDbSyncJob.js';
 
 export default {
-	name:'my-admin-db-sync-host',
-	components:{ MyAdminDbSyncJob, MyInputDecimal },
-	template:`<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
+	name: 'my-admin-db-sync-host',
+	components: { MyAdminDbSyncJob, MyInputDecimal },
+	template: `<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-db-sync-host scroll float">
 			<div class="top">
@@ -131,7 +128,7 @@ export default {
 							<tr>
 								<th>{{ capGen.name }}</th>
 								<th>{{ capGen.job }}</th>
-								<th>{{ capGen.relation }}</th>
+								<th>{{ capGen.relationBase }}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -144,7 +141,7 @@ export default {
 									</div>
 								</td>
 								<td>{{ capApp.jobType[j.jobType] }}</td>
-								<td>{{ relationIdMap[j.relationId].name }}</td>
+								<td v-if="j.joins.length !== 0">{{ relationIdMap[j.joins[0].relationId].name }}</td>
 							</tr>
 							<tr v-if="jobs.length === 0">
 								<td colspan="999">{{ capGen.nothingThere }}</td>
@@ -168,16 +165,16 @@ export default {
 		/>
 	</div>`,
 	props: {
-		hostId:  { type: [String,null], required: true },
-		hostOrg: { type: Object,        required: true },
-		jobIdMap:{ type: Object,        required: true },
-		readonly:{ type: Boolean,       required: true }
+		hostId: { type: [String, null], required: true },
+		hostOrg: { type: Object, required: true },
+		jobIdMap: { type: Object, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['close','makeNew','reload'],
-	watch:{
-		hostId:{
-			handler(v) { this.reset(); },
-			immediate:true
+	emits: ['close', 'makeNew', 'reload'],
+	watch: {
+		hostId: {
+			handler() { this.reset(); },
+			immediate: true
 		},
 	},
 	data() {
@@ -191,7 +188,7 @@ export default {
 			isReady: false,
 		};
 	},
-	computed:{
+	computed: {
 		canSave: s => s.isReady && !s.readonly && s.isChanged
 			&& s.host.name !== ''
 			&& s.host.address !== ''
@@ -208,12 +205,12 @@ export default {
 		},
 
 		// simple
-		isChanged:s => !s.deepIsEqual(s.hostOrg,s.host),
-		isNew:    s => s.hostId === null,
+		isChanged: s => !s.deepIsEqual(s.hostOrg, s.host),
+		isNew: s => s.hostId === null,
 
 		// stores
-		capApp:        s => s.$store.getters.captions.admin.dbSync,
-		capGen:        s => s.$store.getters.captions.generic,
+		capApp: s => s.$store.getters.captions.admin.dbSync,
+		capGen: s => s.$store.getters.captions.generic,
 		relationIdMap: s => s.$store.getters['schema/relationIdMap']
 	},
 	mounted() {
@@ -222,11 +219,11 @@ export default {
 		this.$store.commit('keyDownHandlerAdd', { fnc: this.closeAsk, key: 'Escape' });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
-		this.$store.commit('keyDownHandlerDel',this.closeAsk);
+		this.$store.commit('keyDownHandlerDel', this.set);
+		this.$store.commit('keyDownHandlerDel', this.closeAsk);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	methods:{
+	methods: {
 		// external
 		deepIsEqual,
 		dialogCloseAsk,
@@ -235,7 +232,7 @@ export default {
 
 		// actions
 		closeAsk() {
-			this.dialogCloseAsk(this.close,this.isChanged);
+			this.dialogCloseAsk(this.close, this.isChanged);
 		},
 		close() {
 			this.$emit('close');
@@ -247,7 +244,7 @@ export default {
 			if (id === null) {
 				this.jobIdOpen = null;
 				this.jobOpen = this.getTemplateDbSyncJob(this.hostId);
-			} else if(this.jobIdMap[id] !== undefined) {
+			} else if (this.jobIdMap[id] !== undefined) {
 				this.jobIdOpen = id;
 				this.jobOpen = this.jobIdMap[id];
 			}
@@ -268,13 +265,13 @@ export default {
 
 		// backend calls
 		del() {
-			ws.send('dbSync','delHost',this.hostId,true).then(
+			ws.send('dbSync', 'delHost', this.hostId, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);
 		},
 		set() {
-			ws.send('dbSync','setHost',this.host,true).then(
+			ws.send('dbSync', 'setHost', this.host, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

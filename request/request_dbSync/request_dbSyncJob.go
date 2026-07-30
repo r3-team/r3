@@ -37,6 +37,10 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		j.Lookups = make([]types.QueryLookup, 0)
 	}
 
+	if len(j.Joins) < 1 {
+		return nil, fmt.Errorf("DB sync job requires at least one relation")
+	}
+
 	// cannot update host or job type
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance_db_sync.job (id, host_id, job_type, interval_seconds,
@@ -75,12 +79,12 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	`, j.Id); err != nil {
 		return nil, err
 	}
-	for _, e := range j.Joins {
+	for i, e := range j.Joins {
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO instance_db_sync.job_join (job_id, relation_id, attribute_id,
+			INSERT INTO instance_db_sync.job_join (job_id, position, relation_id, attribute_id,
 				index_from, index, connector, apply_create, apply_update, apply_delete)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		`, j.Id, e.RelationId, e.AttributeId, e.IndexFrom, e.Index, e.Connector,
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+		`, j.Id, i, e.RelationId, e.AttributeId, e.IndexFrom, e.Index, e.Connector,
 			e.ApplyCreate, e.ApplyUpdate, e.ApplyDelete); err != nil {
 
 			return nil, err
@@ -105,9 +109,9 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 
 	// register trigger for SEND jobs for relation/job type combination
 	if slices.Contains(types.DbSyncJobTypesSend, j.JobType) {
-		//if err := triggerSendCreateIfNeeded(ctx, tx, j.RelationId, j.JobType); err != nil {
-		//	return nil, err
-		//}
+		if err := triggerSendCreateIfNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
+			return nil, err
+		}
 	}
 	return nil, nil
 }
@@ -121,7 +125,13 @@ func jobDeleteById(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	var jobType types.DbSyncJobType
 	var relationId uuid.UUID
 	if err := tx.QueryRow(ctx, `
-		SELECT job_type, relation_id
+		SELECT job_type, (
+			SELECT relation_id
+			FROM instance_db_sync.job_join
+			WHERE job_id = $1
+			AND   index = 0
+			LIMIT 1
+		)
 		FROM instance_db_sync.job
 		WHERE id = $1
 	`, id).Scan(&jobType, &relationId); err != nil {
@@ -173,9 +183,11 @@ func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.U
 	if err := tx.QueryRow(ctx, `
 		SELECT EXISTS(
 			SELECT 1
-			FROM instance_db_sync.job
-			WHERE relation_id = $1
-			AND   job_type    = $2
+			FROM instance_db_sync.job_join AS jj
+			JOIN instance_db_sync.job      AS j ON j.id = jj.job_id
+			WHERE jj.relation_id = $1
+			AND   jj.index       = 0
+			AND   j.job_type     = $2
 			LIMIT 1
 		)
 	`, relationId, jobType).Scan(&exists); err != nil {
@@ -223,16 +235,15 @@ func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId uuid.UUI
 	if err := tx.QueryRow(ctx, `
 		SELECT EXISTS(
 			SELECT 1
-			FROM instance_db_sync.job
-			WHERE id <> $1
-			AND (relation_id, job_type) = (
-				SELECT relation_id, job_type
-				FROM instance_db_sync.job
-				WHERE id = $1
-			)
+			FROM instance_db_sync.job_join AS jj
+			JOIN instance_db_sync.job      AS j ON j.id = jj.job_id
+			WHERE j.id <> $1
+			AND   j.job_type = $2
+			AND   jj.relation_id = $3
+			AND   jj.index = 0
 			LIMIT 1
 		)
-	`, jobId).Scan(&exists); err != nil {
+	`, jobId, jobType, relationId).Scan(&exists); err != nil {
 		return err
 	}
 

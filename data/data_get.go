@@ -241,9 +241,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 			}
 		}
 
-		encKeys, err := data_enc.GetKeys_tx(ctx, tx,
-			indexRelationIds[relIndex], recordIds, loginId)
-
+		encKeys, err := data_enc.GetKeys_tx(ctx, tx, indexRelationIds[relIndex], recordIds, loginId)
 		if err != nil {
 			return nil, 0, err
 		}

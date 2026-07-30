@@ -50,36 +50,40 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			return nil, err
 		}
 
-		// check write access to relation
-		// if no attributes are to be SET for an existing record, WRITE permission is not required
-		//  case: joined record is to be created but existing base record is untouched, SET still includes base relation (to resolve relationship)
-		if (isNewRecord || len(dataSet.Attributes) != 0) && !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
-			return nil, errors.New(handler.ErrUnauthorized)
-		}
+		// check write access to relation/attributes, unless it´s a system task (login ID = -1)
+		if loginId != -1 {
 
-		// check write access for updating attribute values & check for protected preset record values
-		attributeIdsWriteAccess := make([]uuid.UUID, 0)
-		for _, attribute := range dataSet.Attributes {
-			attributeIdsWriteAccess = append(attributeIdsWriteAccess, attribute.AttributeId)
+			// if no attributes are to be SET for an existing record, WRITE permission is not required
+			//  case: joined record is to be created but existing base record is untouched, SET still includes base relation (to resolve relationship)
+			if (isNewRecord || len(dataSet.Attributes) != 0) && !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
 
-			for _, preset := range rel.Presets {
-				if cache.GetPresetRecordId(preset.Id) != dataSet.RecordId {
-					continue
-				}
+			// check write access for updating attribute values, unless it´s a system task (login ID = -1)
+			// check for protected preset record values
+			attributeIdsWriteAccess := make([]uuid.UUID, 0)
+			for _, attribute := range dataSet.Attributes {
+				attributeIdsWriteAccess = append(attributeIdsWriteAccess, attribute.AttributeId)
 
-				for _, presetValue := range preset.Values {
-					if presetValue.AttributeId == attribute.AttributeId && presetValue.Protected {
-						atr, err := cache.GetAttributeById(attribute.AttributeId)
-						if err != nil {
-							return nil, err
+				for _, preset := range rel.Presets {
+					if cache.GetPresetRecordId(preset.Id) != dataSet.RecordId {
+						continue
+					}
+
+					for _, presetValue := range preset.Values {
+						if presetValue.AttributeId == attribute.AttributeId && presetValue.Protected {
+							atr, err := cache.GetAttributeById(attribute.AttributeId)
+							if err != nil {
+								return nil, err
+							}
+							return nil, fmt.Errorf("cannot change attribute value '%s' of protected preset '%s'", atr.Name, preset.Name)
 						}
-						return nil, fmt.Errorf("cannot change attribute value '%s' of protected preset '%s'", atr.Name, preset.Name)
 					}
 				}
 			}
-		}
-		if !authorizedAttributes(loginId, attributeIdsWriteAccess, types.AccessWrite) {
-			return nil, errors.New(handler.ErrUnauthorized)
+			if !authorizedAttributes(loginId, attributeIdsWriteAccess, types.AccessWrite) {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
 		}
 
 		// set data for record of given relation index
@@ -279,9 +283,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 				if relAtrOther.RelationId == dataSet.RelationId {
 
 					// the other relation has a higher index, so its tuple might not exist yet
-					if err := setForIndex_tx(ctx, tx, indexOther, dataSetsByIndex,
-						indexRecordIds, indexRecordsCreated, loginId); err != nil {
-
+					if err := setForIndex_tx(ctx, tx, indexOther, dataSetsByIndex, indexRecordIds, indexRecordsCreated, loginId); err != nil {
 						return err
 					}
 					indexRecordsCreated[indexOther] = true
