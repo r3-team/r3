@@ -150,10 +150,10 @@
 				"SEND_UPDATE": "Datensatzaktualisierung senden"
 			},
 			"loadSource": "Datensätze via SQL-Abfrage laden (SELECT)",
-			"loadSourceHint": "SQL-Abfrage wird auf dem Datenbanksystem '{HOST}' ausgeführt, wenn Aufgabe läuft. Jeder SELECT-Ausdruck (Spalte, Unterabfrage, ...) muss einem Attribut in REI3 in der richtigen Reihenfolge zugeordnet werden, um Datensatzwerte in der gewählten Relation zu erstellen/aktualisieren.",
+			"loadSourceHint": "SQL wird auf dem Host \"{HOST}\" ausgeführt. Jeder SELECT-Ausdruck (Spalte 1, Spalte 2, Unterabfrage, ...) muss einem Attribut zugeordnet werden; die richtige Reihenfolge ist hierbei wichtig.",
 			"loadTargetAttributes": "SELECT-Ausdrücke Attributen zuordnen",
 			"loadTargetRelation": "Geladene Datensätze in Relation schreiben",
-			"loadUniqueIndex": "Eindeutiger Index zur Aktualisierung von Datensätzen",
+			"loadUniqueIndex": "Eindeutige Indexe zur Aktualisierung von Datensätzen",
 			"title": "Datenbank-Sync \"{NAME}\"",
 			"titleJob": "Sync-Aufgabe \"{NAME}\"",
 			"titleJobNew": "Neue Sync-Aufgabe",
@@ -161,6 +161,7 @@
 			"warning": {
 				"missingIndexAttribute": "Wenn ein eindeutiger Index zur Aktualisierung von Datensätzen genutzt wird, müssen alle Attribute dieses Indexes als Ausdrücke zugeordnet sein.",
 				"missingLimit": "Wenn eine Seitengröße definiert ist, müssen Platzhalter für LIMIT & OFFSET in der SQL-Abfrage gesetzt sein. Beispiel: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
+				"missingOrder": "Wenn eine Seitengröße definiert ist, sollte eine ORDER BY-Klausel inkludiert sein, um saubere Seitenabschnitte zu gewährleisten.",
 				"missingSelect": "Um Datensätze zu laden, sollte SQL-Abfrage mit einem SELECT beginnen."
 			}
 		},
@@ -1585,14 +1586,7 @@
 				"fieldSetChart": "ECharts-Optionen-Objekt setzen",
 				"fieldSetError": "Fehlermeldung setzen",
 				"fieldSetFocus": "Zur Feldeingabe springen",
-				"fieldSetOrder": "Feldreihenfolge im Element setzen",
-				"intervalDays": "Tage",
-				"intervalHours": "Stunden",
-				"intervalMinutes": "Minuten",
-				"intervalMonths": "Monate",
-				"intervalSeconds": "Sekunden",
-				"intervalWeeks": "Wochen",
-				"intervalYears": "Jahre"
+				"fieldSetOrder": "Feldreihenfolge im Element setzen"
 			},
 			"placeholderDoc": "PDFs",
 			"placeholderDocHelp": [
@@ -1618,7 +1612,6 @@
 			"runOnce": "Einmalig",
 			"runRegular": "Regelmäßig",
 			"runType": "Ausführung",
-			"schedules": "Zeitpläne",
 			"title": "Funktionen",
 			"titleJsOne": "Frontend-Funktion \"{NAME}\"",
 			"titlePgOne": "Backend-Funktion \"{NAME}\"",
@@ -2613,7 +2606,16 @@
 		"inputs": "Eingaben",
 		"install": "Installieren",
 		"internalName": "Der Name dient als interne Referenz - er wird den Benutzern nicht angezeigt.",
-		"interval": "Intervall",
+		"interval": {
+			"days": "Tage",
+			"hours": "Stunden",
+			"minutes": "Minuten",
+			"months": "Monate",
+			"seconds": "Sekunden",
+			"weeks": "Wochen",
+			"years": "Jahre"
+		},
+		"intervalTitle": "Intervall",
 		"job": "Aufgabe",
 		"jobs": "Aufgaben",
 		"jsFunction": "Funktion (front)",
@@ -2732,6 +2734,8 @@
 			"COALESCE": "Ersten nicht leeren Wert anzeigen",
 			"CONCAT": "Werte als Text zusammenfügen"
 		},
+		"schedule": "Zeitplan",
+		"schedules": "Zeitpläne",
 		"search": "Suche",
 		"searchBar": "Suchleiste",
 		"searchBars": "Suchleisten",

@@ -115,7 +115,7 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 		resultRows = append(resultRows, resultRow)
 	}
 
-	log.Info(log.ContextDbSync, fmt.Sprintf("retrieved %d rows from external DB system", len(resultRows)))
+	log.Info(log.ContextDbSync, fmt.Sprintf("loaded %d rows from external DB system", len(resultRows)))
 	return resultRows, nil
 }
 
@@ -141,7 +141,7 @@ func doLoadStore(ctx context.Context, columns []types.Column, joins []types.Quer
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
-	log.Info(log.ContextDbSync, fmt.Sprintf("applied %d retrieved rows to local DB", len(rows)))
+	log.Info(log.ContextDbSync, fmt.Sprintf("saved %d loaded rows to local DB", len(rows)))
 
 	return nil
 }

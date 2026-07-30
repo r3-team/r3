@@ -1,12 +1,9 @@
+import { builderOptionGet, builderOptionSet } from '../shared/builder.js';
 import { srcBase64 } from '../shared/image.js';
-import {
-	builderOptionGet,
-	builderOptionSet
-} from '../shared/builder.js';
 
 export default {
 	name: 'my-builder-overview',
-	template:`<div class="contentBox grow">
+	template: `<div class="contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" :src="'images/'+entityIcon" />
@@ -97,7 +94,7 @@ export default {
 							<img class="preview" src="images/databasePlay.png" />
 						</router-link>
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/schedules1'">
-							<my-label :caption="capAppFnc.schedules + ' (' + module.pgFunctions.filter(v => v.schedules.length !== 0).length + ')'" />
+							<my-label :caption="capGen.schedules + ' (' + module.pgFunctions.filter(v => v.schedules.length !== 0).length + ')'" />
 							<img class="preview" src="images/clock.png" />
 						</router-link>
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/pg-functions/'+id+'/frontend1'">
@@ -145,28 +142,28 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		directOpen:{ type:String,  required:true }, // overview is opened directly, skips forward if overview is not used by default
-		id:        { type:String,  required:true },
-		readonly:  { type:Boolean, required:true }
+	props: {
+		directOpen: { type: String, required: true }, // overview is opened directly, skips forward if overview is not used by default
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	watch: {
-		entity:{
+		entity: {
 			handler(v) {
 				if (this.directOpen === '' && !this.useOverview)
 					this.$router.replace(`/builder/${v}/${this.id}/all`);
 			},
-			immediate:true
+			immediate: true
 		}
 	},
 	computed: {
 		entityIcon: s => {
 			switch (s.entity) {
-				case 'docs': return 'document.png'; break;
-				case 'forms': return 'fileText.png'; break;
-				case 'js-functions': return 'codeScreen.png'; break;
-				case 'pg-functions': return 'codeDatabase.png'; break;
-				case 'relations': return 'database.png'; break;
+				case 'docs': return 'document.png';
+				case 'forms': return 'fileText.png';
+				case 'js-functions': return 'codeScreen.png';
+				case 'pg-functions': return 'codeDatabase.png';
+				case 'relations': return 'database.png';
 			}
 			return null;
 		},
@@ -180,26 +177,26 @@ export default {
 		},
 		entityNew: s => {
 			switch (s.entity) {
-				case 'docs': return 'doc'; break;
-				case 'forms': return 'form'; break;
-				case 'js-functions': return 'jsFunction'; break;
-				case 'pg-functions': return 'pgFunction'; break;
-				case 'relations': return 'relation'; break;
+				case 'docs': return 'doc';
+				case 'forms': return 'form';
+				case 'js-functions': return 'jsFunction';
+				case 'pg-functions': return 'pgFunction';
+				case 'relations': return 'relation';
 			}
 			return null;
 		},
 		entityTitle: s => {
 			switch (s.entity) {
-				case 'docs': return s.capGen.pdfs; break;
-				case 'forms': return s.capGen.forms; break;
-				case 'js-functions': return s.capGen.jsFunctions; break;
-				case 'pg-functions': return s.capGen.pgFunctions; break;
-				case 'relations': return s.capGen.relations; break;
+				case 'docs': return s.capGen.pdfs;
+				case 'forms': return s.capGen.forms;
+				case 'js-functions': return s.capGen.jsFunctions;
+				case 'pg-functions': return s.capGen.pgFunctions;
+				case 'relations': return s.capGen.relations;
 			}
 			return '';
 		},
 		tagIdMapCount: s => {
-			let out = {};
+			const out = {};
 			for (const t of s.module.tags) {
 				const len = s.entityList.filter(v => v.tagIds.includes(t.id)).length;
 				if (len !== 0)
@@ -208,34 +205,34 @@ export default {
 			return out;
 		},
 		tagsOrdered: s => {
-			let out = [];
+			const out = [];
 			for (const t of s.module.tags) {
 				if (s.tagIdMapCount[t.id] !== undefined)
 					out.push(t);
 			}
-			return out.toSorted((a,b) => s.tagIdMapCount[b.id] - s.tagIdMapCount[a.id]);
+			return out.toSorted((a, b) => s.tagIdMapCount[b.id] - s.tagIdMapCount[a.id]);
 		},
 
 		// inputs
 		useOverview: {
-			get()  { return this.builderOptionGet(this.entity + 'OverviewUse', true); },
-			set(v) { this.builderOptionSet(this.entity + 'OverviewUse', v); }
+			get() { return this.builderOptionGet(`${this.entity}OverviewUse`, true); },
+			set(v) { this.builderOptionSet(`${this.entity}OverviewUse`, v); }
 		},
 
 		// simple
-		entity:       s => s.$route.meta.nav,
-		isDocs:       s => s.entity === 'docs',
-		isForms:      s => s.entity === 'forms',
-		isJsFunctions:s => s.entity === 'js-functions',
-		isPgFunctions:s => s.entity === 'pg-functions',
-		isRelations:  s => s.entity === 'relations',
-		module:       s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		entity: s => s.$route.meta.nav,
+		isDocs: s => s.entity === 'docs',
+		isForms: s => s.entity === 'forms',
+		isJsFunctions: s => s.entity === 'js-functions',
+		isPgFunctions: s => s.entity === 'pg-functions',
+		isRelations: s => s.entity === 'relations',
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		capAppFnc:  s => s.$store.getters.captions.builder.function,
-		capGen:     s => s.$store.getters.captions.generic,
-		iconIdMap:  s => s.$store.getters['schema/iconIdMap'],
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap']
+		capAppFnc: s => s.$store.getters.captions.builder.function,
+		capGen: s => s.$store.getters.captions.generic,
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap']
 	},
 	methods: {
 		// externals

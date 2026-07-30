@@ -1,14 +1,11 @@
-import MyBuilderTagInput        from './builderTagInput.js';
+import { builderOptionGet, builderOptionSet } from '../shared/builder.js';
 import MyBuilderFilterPairInput from './builderFilterPairInput.js';
-import {
-	builderOptionGet,
-	builderOptionSet
-} from '../shared/builder.js';
+import MyBuilderTagInput from './builderTagInput.js';
 
 export default {
-	name:'my-builder-pg-functions',
-	components:{ MyBuilderFilterPairInput, MyBuilderTagInput },
-	template:`<div class="row grow nowrap builder-functions" v-if="module">
+	name: 'my-builder-pg-functions',
+	components: { MyBuilderFilterPairInput, MyBuilderTagInput },
+	template: `<div class="row grow nowrap builder-functions" v-if="module">
 
 		<div class="contentBox grow">
 			<div class="top lower">
@@ -79,7 +76,7 @@ export default {
 							<my-button image="clock.png"
 								v-if="f.schedules.length !== 0"
 								:active="false"
-								:captionTitle="capApp.schedules"
+								:captionTitle="capGen.schedules"
 								:naked="true"
 							/>
 						</div>
@@ -130,7 +127,7 @@ export default {
 						@update="updateFilterArgs"
 						v-model:value0="filters.schedules0"
 						v-model:value1="filters.schedules1"
-						:caption="capApp.schedules"
+						:caption="capGen.schedules"
 					/>
 					<my-builder-filter-pair-input image="screen.png"
 						@update="updateFilterArgs"
@@ -154,12 +151,12 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	emits:['createNew'],
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		filter:         { type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	emits: ['createNew'],
+	props: {
+		builderLanguage: { type: String, required: true },
+		filter: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
@@ -180,10 +177,10 @@ export default {
 			showSidebar: true
 		};
 	},
-	computed:{
+	computed: {
 		idsShow: s => {
 			const filterName = s.filterText.toLowerCase();
-			let out = [];
+			const out = [];
 			for (const f of s.module.pgFunctions) {
 				if (
 					(filterName === '' || f.name.toLowerCase().includes(filterName))
@@ -210,19 +207,19 @@ export default {
 
 		// inputs
 		filterTagsAnd: {
-			get()  { return this.builderOptionGet('overviewFilterTagsAnd', true); },
+			get() { return this.builderOptionGet('overviewFilterTagsAnd', true); },
 			set(v) { this.builderOptionSet('overviewFilterTagsAnd', v); }
 		},
 
 		// simple
-		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
-		tagIdMap:    s => s.$store.getters['schema/tagIdMap'],
-		capApp:      s => s.$store.getters.captions.builder.function,
-		capAppFilter:s => s.$store.getters.captions.filter,
-		capGen:      s => s.$store.getters.captions.generic
+		tagIdMap: s => s.$store.getters['schema/tagIdMap'],
+		capApp: s => s.$store.getters.captions.builder.function,
+		capAppFilter: s => s.$store.getters.captions.filter,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		if (this.filter !== '') {
@@ -231,7 +228,7 @@ export default {
 				if (filterLine.includes(a)) this.filters[a] = true;
 			}
 
-			let tagIds = [];
+			const tagIds = [];
 			for (const m of filterLine.matchAll(/t\-([0-9a-f\-]{36})/g)) {
 				if (this.tagIdMap[m[1]] !== undefined)
 					tagIds.push(m[1]);
@@ -246,9 +243,9 @@ export default {
 
 		// actions
 		updateFilterArgs() {
-			let parts = [];
+			const parts = [];
 			for (const a of Object.keys(this.filters)) {
-				if(this.filters[a])
+				if (this.filters[a])
 					parts.push(a);
 			}
 			for (const tagId of this.filterTagIds) {

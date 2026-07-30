@@ -70,20 +70,40 @@ export default {
 						</select>
 					</div>
 					<template v-if="isLoad">
-						<my-button-check
-							@update:modelValue="$event ? job.pageLimit = 50 : job.pageLimit = null"
-							:caption="capGen.limitPage"
-							:modelValue="job.pageLimit !== null"
-							:readonly
-						/>
-						<my-input-decimal class="short"
-							v-if="job.pageLimit !== null"
-							v-model="job.pageLimit"
-							:min="0"
-							:allowNull="false"
-							:lengthFract="0"
-							:readonly
-						/>
+						<div class="row gap centered">
+							<my-label image="clock.png" />
+							<span>{{ capGen.every }}</span>
+							<my-input-decimal class="short"
+								@update:modelValue="intervalValueSet($event)"
+								:lengthFract="0"
+								:min="1"
+								:modelValue="intervalValue"
+								:readonly
+							/>
+							<select class="auto" @input="intervalTypeSet($event.target.value)" :value="intervalType">
+								<option value="seconds">{{ capGen.interval.seconds }}</option>
+								<option value="minutes">{{ capGen.interval.minutes }}</option>
+								<option value="hours"  >{{ capGen.interval.hours   }}</option>
+								<option value="days"   >{{ capGen.interval.days    }}</option>
+								<option value="weeks"  >{{ capGen.interval.weeks   }}</option>
+							</select>
+						</div>
+						<div class="row gap centered">
+							<my-button-check
+								@update:modelValue="$event ? job.pageLimit = 50 : job.pageLimit = null"
+								:caption="capGen.limitPage"
+								:modelValue="job.pageLimit !== null"
+								:readonly
+							/>
+							<my-input-decimal class="short"
+								v-if="job.pageLimit !== null"
+								v-model="job.pageLimit"
+								:min="0"
+								:allowNull="false"
+								:lengthFract="0"
+								:readonly
+							/>
+						</div>
 					</template>
 					<my-button-check
 						v-model="job.active"
@@ -212,15 +232,12 @@ export default {
 	},
 	emits: ['close', 'makeNew', 'reload'],
 	watch: {
-		jobId: {
-			handler(v) {
-				this.reset();
-			},
-			immediate: true,
-		},
+		jobId() { this.reset(); },
 	},
 	data() {
 		return {
+			intervalType: 'seconds',
+			intervalValue: 0,
 			isReady: false,
 			job: {},
 			jobTypes: ['LOAD', 'SEND_INSERT', 'SEND_UPDATE', 'SEND_DELETE'],
@@ -243,9 +260,13 @@ export default {
 				if (!s.job.codeSql.includes('SELECT'))
 					out.push(s.capApp.warning.missingSelect);
 
-				if (s.isPageLimit && (!s.job.codeSql.includes(s.placeholdersLoad.LIMIT) || !s.job.codeSql.includes(s.placeholdersLoad.OFFSET)))
-					out.push(s.capApp.warning.missingLimit);
+				if (s.isPageLimit) {
+					if (!s.job.codeSql.includes(s.placeholdersLoad.LIMIT) || !s.job.codeSql.includes(s.placeholdersLoad.OFFSET))
+						out.push(s.capApp.warning.missingLimit);
 
+					if (!s.job.codeSql.includes('ORDER BY'))
+						out.push(s.capApp.warning.missingOrder);
+				}
 				if (s.isWithLookups) {
 					for (const l of s.job.lookups) {
 						for (const a of s.indexIdMap[l.pgIndexId].attributes) {
@@ -281,15 +302,10 @@ export default {
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd', {
-			fnc: this.set,
-			key: 's',
-			keyCtrl: true,
-		});
-		this.$store.commit('keyDownHandlerAdd', {
-			fnc: this.closeAsk,
-			key: 'Escape',
-		});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true, });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.closeAsk, key: 'Escape', });
+
+		this.reset();
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel', this.set);
@@ -340,6 +356,23 @@ export default {
 			this.job.joins = this.job.joins.filter(v => v.index !== index);
 			this.job.lookups = this.job.lookups.filter(v => v.index !== index);
 		},
+		intervalTypeSet(v) {
+			this.intervalType = v;
+			this.intervalValueSet(this.intervalValue);
+		},
+		intervalValueSet(v) {
+			if (Number.isNaN(v))
+				return;
+
+			v = parseInt(v, 10);
+			this.intervalValue = v;
+
+			if (this.intervalType === 'weeks') this.job.intervalSeconds = v * 604800;
+			else if (this.intervalType === 'days') this.job.intervalSeconds = v * 86400;
+			else if (this.intervalType === 'hours') this.job.intervalSeconds = v * 3600;
+			else if (this.intervalType === 'minutes') this.job.intervalSeconds = v * 60;
+			else this.job.intervalSeconds = v;
+		},
 		reloadAndClose() {
 			ws.send('dbSync', 'informChanged', {}, true).then(() => {
 				this.$emit('reload');
@@ -352,6 +385,23 @@ export default {
 			if (this.job.joins.length !== 0)
 				this.moduleIdActive = this.relationIdMap[this.job.joins[0].relationId].moduleId;
 
+			// apply interval
+			if (this.job.intervalSeconds % 604800 === 0) {
+				this.intervalType = 'weeks';
+				this.intervalValue = this.job.intervalSeconds / 604800;
+			} else if (this.job.intervalSeconds % 86400 === 0) {
+				this.intervalType = 'days';
+				this.intervalValue = this.job.intervalSeconds / 86400;
+			} else if (this.job.intervalSeconds % 3600 === 0) {
+				this.intervalType = 'hours';
+				this.intervalValue = this.job.intervalSeconds / 3600;
+			} else if (this.job.intervalSeconds % 60 === 0) {
+				this.intervalType = 'minutes';
+				this.intervalValue = this.job.intervalSeconds / 60;
+			} else {
+				this.intervalType = 'seconds';
+				this.intervalValue = this.job.intervalSeconds;
+			}
 			this.isReady = true;
 		},
 

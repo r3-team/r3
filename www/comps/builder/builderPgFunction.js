@@ -1,28 +1,18 @@
-import MyBuilderCaption                from './builderCaption.js';
-import MyBuilderPgTriggers             from './builderPgTriggers.js';
-import MyBuilderSchemaLookup           from './builderSchemaLookup.js';
-import MyBuilderTagInput               from './builderTagInput.js';
-import MyCodeEditor                    from '../codeEditor.js';
-import {getTemplatePgFunctionSchedule} from '../shared/builderTemplate.js';
-import {dialogDeleteAsk}               from '../shared/dialog.js';
-import {getHasAnyReferences}           from '../shared/schemaLookup.js';
-import {
-	getAttributeIcon,
-	isAttributeFiles
-}  from '../shared/attribute.js';
-import {
-	getDependentModules,
-	getFunctionHelp,
-	getValidDbCharsForRx
-} from '../shared/builder.js';
-import {
-	copyValueDialog,
-	deepIsEqual
-} from '../shared/generic.js';
+import MyCodeEditor from '../codeEditor.js';
+import { getAttributeIcon, isAttributeFiles } from '../shared/attribute.js';
+import { getDependentModules, getFunctionHelp, getValidDbCharsForRx } from '../shared/builder.js';
+import { getTemplatePgFunctionSchedule } from '../shared/builderTemplate.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderPgTriggers from './builderPgTriggers.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
+import MyBuilderTagInput from './builderTagInput.js';
 
 const MyBuilderPgFunctionItemSchedule = {
-	name:'my-builder-pg-function-item-schedule',
-	template:`<div class="schedule">
+	name: 'my-builder-pg-function-item-schedule',
+	template: `<div class="schedule">
 
 		<div class="line">
 			<!-- interval at which to run -->
@@ -38,13 +28,13 @@ const MyBuilderPgFunctionItemSchedule = {
 				<input class="dynamic" v-model.number="intervalValue" :disabled="readonly" />
 
 				<select class="dynamic" v-model="intervalType" :disabled="readonly">
-					<option value="seconds">{{ capApp.option.intervalSeconds }}</option>
-					<option value="minutes">{{ capApp.option.intervalMinutes }}</option>
-					<option value="hours"  >{{ capApp.option.intervalHours   }}</option>
-					<option value="days"   >{{ capApp.option.intervalDays    }}</option>
-					<option value="weeks"  >{{ capApp.option.intervalWeeks   }}</option>
-					<option value="months" >{{ capApp.option.intervalMonths  }}</option>
-					<option value="years"  >{{ capApp.option.intervalYears   }}</option>
+					<option value="seconds">{{ capGen.interval.seconds }}</option>
+					<option value="minutes">{{ capGen.interval.minutes }}</option>
+					<option value="hours"  >{{ capGen.interval.hours   }}</option>
+					<option value="days"   >{{ capGen.interval.days    }}</option>
+					<option value="weeks"  >{{ capGen.interval.weeks   }}</option>
+					<option value="months" >{{ capGen.interval.months  }}</option>
+					<option value="years"  >{{ capGen.interval.years   }}</option>
 				</select>
 			</template>
 		</div>
@@ -75,60 +65,61 @@ const MyBuilderPgFunctionItemSchedule = {
 			/>
 		</div>
 	</div>`,
-	props:{
-		modelValue:{ type:Object,  required:true },
-		readonly:  { type:Boolean, required:true }
+	props: {
+		modelValue: { type: Object, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['remove','update:modelValue'],
-	computed:{
+	emits: ['remove', 'update:modelValue'],
+	computed: {
 		// inputs
-		atDay:{
-			get()  { return this.modelValue.atDay; },
-			set(v) { this.update('atDay',v); }
+		atDay: {
+			get() { return this.modelValue.atDay; },
+			set(v) { this.update('atDay', v); }
 		},
-		atHour:{
-			get()  { return this.modelValue.atHour; },
-			set(v) { this.update('atHour',v); }
+		atHour: {
+			get() { return this.modelValue.atHour; },
+			set(v) { this.update('atHour', v); }
 		},
-		atMinute:{
-			get()  { return this.modelValue.atMinute; },
-			set(v) { this.update('atMinute',v); }
+		atMinute: {
+			get() { return this.modelValue.atMinute; },
+			set(v) { this.update('atMinute', v); }
 		},
-		atSecond:{
-			get()  { return this.modelValue.atSecond; },
-			set(v) { this.update('atSecond',v); }
+		atSecond: {
+			get() { return this.modelValue.atSecond; },
+			set(v) { this.update('atSecond', v); }
 		},
-		intervalType:{
-			get()  { return this.modelValue.intervalType; },
-			set(v) { this.update('intervalType',v); }
+		intervalType: {
+			get() { return this.modelValue.intervalType; },
+			set(v) { this.update('intervalType', v); }
 		},
-		intervalValue:{
-			get()  { return this.modelValue.intervalValue; },
-			set(v) { this.update('intervalValue',v); }
+		intervalValue: {
+			get() { return this.modelValue.intervalValue; },
+			set(v) { this.update('intervalValue', v); }
 		},
-		runOnce:{
-			get()  { return this.intervalType === 'once'; },
+		runOnce: {
+			get() { return this.intervalType === 'once'; },
 			set(v) {
-				if(v) this.update('intervalType','once');
-				else  this.update('intervalType','days');
+				if (v) this.update('intervalType', 'once');
+				else this.update('intervalType', 'days');
 			}
 		},
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.function
+		capApp: s => s.$store.getters.captions.builder.function,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
-		update(name,value) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+	methods: {
+		update(name, value) {
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		}
 	}
 };
 
 export default {
-	name:'my-builder-pg-function',
-	components:{
+	name: 'my-builder-pg-function',
+	components: {
 		MyBuilderCaption,
 		MyBuilderPgFunctionItemSchedule,
 		MyBuilderPgTriggers,
@@ -136,7 +127,7 @@ export default {
 		MyBuilderTagInput,
 		MyCodeEditor
 	},
-	template:`<div class="builder-function" v-if="fnc !== false">
+	template: `<div class="builder-function" v-if="fnc !== false">
 		<div class="contentBox left">
 			<div class="top">
 				<div class="area nowrap">
@@ -626,7 +617,7 @@ export default {
 						<tr v-if="!fnc.isTrigger && !fnc.isLoginSync">
 							<td>
 								<div class="column">
-									<span>{{ capApp.schedules }}</span>
+									<span>{{ capGen.schedules }}</span>
 									<my-button image="add.png"
 										@trigger="addSchedule"
 										:active="!readonly"
@@ -666,55 +657,55 @@ export default {
 			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
 		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	watch:{
-		fncSchema:{
+	watch: {
+		fncSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		}
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 
 		// set defaults
-		this.holderDocModuleId      = this.module.id;
+		this.holderDocModuleId = this.module.id;
 		this.holderFunctionModuleId = this.module.id;
-		this.holderPresetModuleId   = this.module.id;
+		this.holderPresetModuleId = this.module.id;
 		this.holderRelationModuleId = this.module.id;
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
 	data() {
 		return {
 			// inputs
-			fnc:false,  // function being edited in this component
-			fncCopy:{}, // copy of function from schema when component last reset
+			fnc: false,  // function being edited in this component
+			fncCopy: {}, // copy of function from schema when component last reset
 
 			// execution
-			execArgs:[],
-			execResponse:'',
+			execArgs: [],
+			execResponse: '',
 
 			// states
-			addNew:false,
-			addOld:false,
-			entity:'relation', // selected placeholder entity (relation, attribute, pgFunction, instanceFunction)
-			entityId:null,
-			hasReferences:false,
-			holderDocIdsOpen:[],         // opened document placeholders (shows methods 'attach', 'export')
-			holderDocText:'',            // text filter for documents
-			holderFunctionModuleId:null, // module filter for backend functions
-			holderFunctionText:'',       // text filter for backend functions
-			holderPresetModuleId:null,   // module filter for presets
-			holderPresetText:''      ,   // text filter for presets
-			holderRelationModuleId:null, // module filter for relations
-			holderRelationIdsOpen:[],    // opened relation placeholders (shows attributes)
-			holderRelationText:'',       // text filter for module relations
-			instanceFunctionIds:[
+			addNew: false,
+			addOld: false,
+			entity: 'relation', // selected placeholder entity (relation, attribute, pgFunction, instanceFunction)
+			entityId: null,
+			hasReferences: false,
+			holderDocIdsOpen: [],         // opened document placeholders (shows methods 'attach', 'export')
+			holderDocText: '',            // text filter for documents
+			holderFunctionModuleId: null, // module filter for backend functions
+			holderFunctionText: '',       // text filter for backend functions
+			holderPresetModuleId: null,   // module filter for presets
+			holderPresetText: '',   // text filter for presets
+			holderRelationModuleId: null, // module filter for relations
+			holderRelationIdsOpen: [],    // opened relation placeholders (shows attributes)
+			holderRelationText: '',       // text filter for module relations
+			instanceFunctionIds: [
 				'abort_show_message', 'barcode_generate', 'clean_up_e2ee_keys', 'data_log_comment_create', 'data_log_delete',
 				'file_export', 'file_export_text', 'file_import', 'file_import_text', 'file_link', 'file_text_read',
 				'file_text_read_cb', 'file_text_write', 'file_unlink', 'files_get', 'get_e2ee_data_key_enc',
@@ -723,117 +714,117 @@ export default {
 				'mail_get_next', 'mail_send', 'qrcode_generate', 'rest_call', 'rest_get_placeholder_file_base64',
 				'rest_get_placeholder_file_raw', 'update_collection', 'user_meta_set', 'user_sync_all'
 			],
-			showHolderDoc:false,
-			showHolderFncInstance:false,
-			showHolderFncModule:false,
-			showHolderPreset:false,
-			showHolderRelation:false,
-			showLookup:false,
-			showPreview:false,
-			showSidebar:true,
-			tabTarget:'content'
+			showHolderDoc: false,
+			showHolderFncInstance: false,
+			showHolderFncModule: false,
+			showHolderPreset: false,
+			showHolderRelation: false,
+			showLookup: false,
+			showPreview: false,
+			showSidebar: true,
+			tabTarget: 'content'
 		};
 	},
-	computed:{
-		insertEntity:s => {
-			if(s.entityId === null)
+	computed: {
+		insertEntity: s => {
+			if (s.entityId === null)
 				return null;
 
 			let text = null;
-			let mod, rel, prs, atr, fnc, args, pat;
+			let mod, rel, prs, atr, fnc, args, pat, doc, help, mode;
 
 			// build unique placeholder name
 			// relation:    {module_name}.[relation_name]
 			// pg function: {module_name}.[function_name]()
 			// attribute:   (module_name.relation_name.attribute_name)
 			// preset:      {PRESET::module_name.relation_name.preset_name}
-			switch(s.entity) {
+			switch (s.entity) {
 				case 'attribute':
-					atr  = s.attributeIdMap[s.entityId];
-					rel  = s.relationIdMap[atr.relationId];
-					mod  = s.moduleIdMap[rel.moduleId];
+					atr = s.attributeIdMap[s.entityId];
+					rel = s.relationIdMap[atr.relationId];
+					mod = s.moduleIdMap[rel.moduleId];
 					text = `(${mod.name}.${rel.name}.${atr.name})`;
 
-					if(s.addNew) text = 'NEW.'+text;
-					if(s.addOld) text = 'OLD.'+text;
-				break;
+					if (s.addNew) text = `NEW.${text}`;
+					if (s.addOld) text = `OLD.${text}`;
+					break;
 				case 'docAttach': // fallthrough
 				case 'docExport':
-					const doc = s.docIdMap[s.entityId];
+					doc = s.docIdMap[s.entityId];
 					mod = s.moduleIdMap[doc.moduleId];
-					const mode = s.entity === 'docAttach' ? 'ATTACH' : 'EXPORT';
-					const help = s.entity === 'docAttach' ? s.capApp.helpPgArgs.pdf_create_attach : s.capApp.helpPgArgs.pdf_create_export;
+					mode = s.entity === 'docAttach' ? 'ATTACH' : 'EXPORT';
+					help = s.entity === 'docAttach' ? s.capApp.helpPgArgs.pdf_create_attach : s.capApp.helpPgArgs.pdf_create_export;
 					text = `{PDF_CREATE_${mode}::${mod.name}.${doc.name}}(${help})`;
-				break;
+					break;
 				case 'instanceFunction':
 					args = s.capApp.helpPgArgs[s.entityId] !== undefined ? s.capApp.helpPgArgs[s.entityId].join(', ') : '';
 					text = `instance.${s.entityId}(${args})`;
-				break;
+					break;
 				case 'pgFunction':
-					fnc  = s.pgFunctionIdMap[s.entityId];
-					mod  = s.moduleIdMap[fnc.moduleId];
+					fnc = s.pgFunctionIdMap[s.entityId];
+					mod = s.moduleIdMap[fnc.moduleId];
 					text = `{${mod.name}}.[${fnc.name}](${fnc.codeArgs})`;
-				break;
+					break;
 				case 'preset':
-					prs  = s.presetIdMap[s.entityId];
-					rel  = s.relationIdMap[prs.relationId];
-					mod  = s.moduleIdMap[rel.moduleId];
-					pat = new RegExp(`[\{\}]`,'g');
+					prs = s.presetIdMap[s.entityId];
+					rel = s.relationIdMap[prs.relationId];
+					mod = s.moduleIdMap[rel.moduleId];
+					pat = new RegExp(`[\{\}]`, 'g');
 
 					text = !pat.test(prs.name)
 						? `{PRESET::${mod.name}.${rel.name}.${prs.name}}`
 						: `instance.get_preset_record_id('${s.entityId}')`;
-				break;
+					break;
 				case 'relation':
-					rel  = s.relationIdMap[s.entityId];
-					mod  = s.moduleIdMap[rel.moduleId];
+					rel = s.relationIdMap[s.entityId];
+					mod = s.moduleIdMap[rel.moduleId];
 					text = `{${mod.name}}.[${rel.name}]`;
-				break;
+					break;
 			}
 			return text;
 		},
-		tabs:s => {
-			let out = {
-				icons:['images/code.png','images/edit.png'],
-				keys:['content','properties'],
-				labels:[s.capGen.placeholders,s.capGen.properties]
+		tabs: s => {
+			const out = {
+				icons: ['images/code.png', 'images/edit.png'],
+				keys: ['content', 'properties'],
+				labels: [s.capGen.placeholders, s.capGen.properties]
 			};
-			if(!s.fnc.isTrigger) {
-				out.icons.splice(1,0,'images/settingsPlay.png');
-				out.keys.splice(1,0,'exec');
-				out.labels.splice(1,0,s.capApp.exec);
+			if (!s.fnc.isTrigger) {
+				out.icons.splice(1, 0, 'images/settingsPlay.png');
+				out.keys.splice(1, 0, 'exec');
+				out.labels.splice(1, 0, s.capApp.exec);
 			}
 			return out;
 		},
 
 		// inputs
-		fncBody:{
-			get()  { return this.placeholdersSet(this.fnc.codeFunction); },
-			set(v) { this.fnc.codeFunction = this.placeholdersUnset(v,false); }
+		fncBody: {
+			get() { return this.placeholdersSet(this.fnc.codeFunction); },
+			set(v) { this.fnc.codeFunction = this.placeholdersUnset(v, false); }
 		},
 
 		// simple
-		execArgInputs:s => s.fnc.codeArgs.trim() === '' ? [] : s.fnc.codeArgs.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/),
-		fncSchema:    s => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
-		isChanged:    s => !s.deepIsEqual(s.fnc,s.fncSchema),
-		module:       s => s.fnc === false ? false : s.moduleIdMap[s.fnc.moduleId],
-		modulesDoc:   s => s.getDependentModules(s.module).filter(v => v.docs.length        !== 0),
-		modulesData:  s => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
-		modulesFnc:   s => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
-		preview:      s => !s.showPreview ? '' : s.placeholdersUnset(s.fncBody,true),
+		execArgInputs: s => s.fnc.codeArgs.trim() === '' ? [] : s.fnc.codeArgs.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/),
+		fncSchema: s => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
+		isChanged: s => !s.deepIsEqual(s.fnc, s.fncSchema),
+		module: s => s.fnc === false ? false : s.moduleIdMap[s.fnc.moduleId],
+		modulesDoc: s => s.getDependentModules(s.module).filter(v => v.docs.length !== 0),
+		modulesData: s => s.getDependentModules(s.module).filter(v => v.relations.length !== 0),
+		modulesFnc: s => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
+		preview: s => !s.showPreview ? '' : s.placeholdersUnset(s.fncBody, true),
 
 		// stores
-		docIdMap:       s => s.$store.getters['schema/docIdMap'],
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
-		moduleNameMap:  s => s.$store.getters['schema/moduleNameMap'],
-		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
-		presetIdMap:    s => s.$store.getters['schema/presetIdMap'],
+		docIdMap: s => s.$store.getters['schema/docIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		moduleNameMap: s => s.$store.getters['schema/moduleNameMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		presetIdMap: s => s.$store.getters['schema/presetIdMap'],
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
-		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
-		capApp:         s => s.$store.getters.captions.builder.function,
-		capGen:         s => s.$store.getters.captions.generic
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		capApp: s => s.$store.getters.captions.builder.function,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
@@ -847,12 +838,12 @@ export default {
 		isAttributeFiles,
 
 		// presentation
-		radioIcon(entity,id) {
+		radioIcon(entity, id) {
 			return this.entity === entity && this.entityId === id
 				? 'radio1.png' : 'radio0.png';
 		},
 		titleAttribute(atr) {
-			return atr.nullable ? atr.name : this.capApp.attributeNotNull.replace('{ATR}',atr.name);
+			return atr.nullable ? atr.name : this.capApp.attributeNotNull.replace('{ATR}', atr.name);
 		},
 
 		// actions
@@ -860,62 +851,63 @@ export default {
 			this.fnc.schedules.push(this.getTemplatePgFunctionSchedule());
 		},
 		reset(manuelReset) {
-			if(this.fncSchema !== false && (manuelReset || !this.deepIsEqual(this.fncCopy,this.fncSchema))) {
-				this.fnc     = JSON.parse(JSON.stringify(this.fncSchema));
+			if (this.fncSchema !== false && (manuelReset || !this.deepIsEqual(this.fncCopy, this.fncSchema))) {
+				this.fnc = JSON.parse(JSON.stringify(this.fncSchema));
 				this.fncCopy = JSON.parse(JSON.stringify(this.fncSchema));
 
 				this.resetExec();
 				this.addNew = false;
 				this.addOld = false;
 
-				if(this.fnc.isTrigger && this.tabTarget === 'exec')
+				if (this.fnc.isTrigger && this.tabTarget === 'exec')
 					this.tabTarget = 'content';
 			}
 		},
 		resetExec() {
-			this.execArgs     = [];
+			this.execArgs = [];
 			this.execResponse = '';
 
-			for(let a of this.execArgInputs) {
+			for (let a of this.execArgInputs) {
 				this.execArgs.push(null);
 			}
 		},
-		selectEntity(entity,id) {
-			if(entity === this.entity && id === this.entityId)
-				return this.entityId = null;
-
-			this.entity   = entity;
+		selectEntity(entity, id) {
+			if (entity === this.entity && id === this.entityId) {
+				this.entityId = null;
+				return;
+			}
+			this.entity = entity;
 			this.entityId = id;
 		},
-		showHelp(top,text,args) {
-			if(args !== undefined)
-				text = text.replace('{ARGS}',`<blockquote>${args.join(',<br />')}</blockquote>`);
+		showHelp(top, text, args) {
+			if (args !== undefined)
+				text = text.replace('{ARGS}', `<blockquote>${args.join(',<br />')}</blockquote>`);
 
-			this.$store.commit('dialog',{
-				captionTop:top,
-				captionBody:Array.isArray(text) ? text.join('<br /><br />') : text,
-				image:'question.png'
+			this.$store.commit('dialog', {
+				captionTop: top,
+				captionBody: Array.isArray(text) ? text.join('<br /><br />') : text,
+				image: 'question.png'
 			});
 		},
-		showHelpVolatility(top,text,args) {
-			this.$store.commit('dialog',{
-				captionTop:this.capApp.volatility,
-				captionBody:this.capApp.volatilityHelp,
-				image:'question.png'
+		showHelpVolatility(top, text, args) {
+			this.$store.commit('dialog', {
+				captionTop: this.capApp.volatility,
+				captionBody: this.capApp.volatilityHelp,
+				image: 'question.png'
 			});
 		},
 		toggleDocShow(docId) {
-			let pos = this.holderDocIdsOpen.indexOf(docId);
-			if(pos === -1) this.holderDocIdsOpen.push(docId);
-			else           this.holderDocIdsOpen.splice(pos,1);
+			const pos = this.holderDocIdsOpen.indexOf(docId);
+			if (pos === -1) this.holderDocIdsOpen.push(docId);
+			else this.holderDocIdsOpen.splice(pos, 1);
 		},
 		toggleRelationShow(relationId) {
-			let pos = this.holderRelationIdsOpen.indexOf(relationId);
-			if(pos === -1) this.holderRelationIdsOpen.push(relationId);
-			else           this.holderRelationIdsOpen.splice(pos,1);
+			const pos = this.holderRelationIdsOpen.indexOf(relationId);
+			if (pos === -1) this.holderRelationIdsOpen.push(relationId);
+			else this.holderRelationIdsOpen.splice(pos, 1);
 		},
 		updateCost(value) {
-			this.fnc.cost = value === '' ? 0 : parseInt(value);
+			this.fnc.cost = value === '' ? 0 : parseInt(value, 10);
 		},
 
 		// placeholders are used for storing entities via ID instead of name (which can change)
@@ -927,14 +919,14 @@ export default {
 		//            {PDF_CREATE_EXPORT::MOD_NAME.DOC_NAME})() <-> instance.pdf_create_export('DOC_ID')
 		placeholdersSet(body) {
 			// functions, relations & modules
-			body = body.replace(/\[([a-z0-9\-]{36})\]\(/g,(m,id) => this.pgFunctionIdMap[id] === undefined ? m : `[${this.pgFunctionIdMap[id].name}](`);
-			body = body.replace(/\[([a-z0-9\-]{36})\]/g,(m,id)   => this.relationIdMap[id]   === undefined ? m : `[${this.relationIdMap[id].name}]`);
-			body = body.replace(/\{([a-z0-9\-]{36})\}/g,(m,id)   => this.moduleIdMap[id]     === undefined ? m : `{${this.moduleIdMap[id].name}}`);
+			body = body.replace(/\[([a-z0-9\-]{36})\]\(/g, (m, id) => this.pgFunctionIdMap[id] === undefined ? m : `[${this.pgFunctionIdMap[id].name}](`);
+			body = body.replace(/\[([a-z0-9\-]{36})\]/g, (m, id) => this.relationIdMap[id] === undefined ? m : `[${this.relationIdMap[id].name}]`);
+			body = body.replace(/\{([a-z0-9\-]{36})\}/g, (m, id) => this.moduleIdMap[id] === undefined ? m : `{${this.moduleIdMap[id].name}}`);
 
 			// attributes
-			body = body.replace(/\(([a-z0-9\-]{36})\)/g,(match,id) => {
+			body = body.replace(/\(([a-z0-9\-]{36})\)/g, (match, id) => {
 				const atr = this.attributeIdMap[id];
-				if(atr === undefined) return match;
+				if (atr === undefined) return match;
 
 				const rel = this.relationIdMap[atr.relationId];
 				const mod = this.moduleIdMap[rel.moduleId];
@@ -942,15 +934,15 @@ export default {
 			});
 
 			// presets, name may not include closed curly bracket '}'
-			body = body.replace(/instance\.get_preset_record_id\(\'([a-z0-9\-]{36})\'\)/g,(match,presetId) => {
+			body = body.replace(/instance\.get_preset_record_id\(\'([a-z0-9\-]{36})\'\)/g, (match, presetId) => {
 				const prs = this.presetIdMap[presetId];
-				if(prs === undefined) return match;
+				if (prs === undefined) return match;
 
 				const rel = this.relationIdMap[prs.relationId];
 				const mod = this.moduleIdMap[rel.moduleId];
-				const pat = new RegExp(`[\{\}]`,'g');
+				const pat = new RegExp(`[\{\}]`, 'g');
 
-				if(prs !== undefined && !pat.test(prs.name))
+				if (prs !== undefined && !pat.test(prs.name))
 					return `{PRESET::${mod.name}.${rel.name}.${prs.name}}`;
 
 				return match;
@@ -958,54 +950,54 @@ export default {
 
 			// documents instance.pdf_create_attach(... or instance.pdf_create_export(...
 			// stored in function text as: {PDF_CREATE_ATTACH::MOD_NAME.DOC_NAME})() or {PDF_CREATE_EXPORT::MOD_NAME.DOC_NAME})()
-			body = body.replace(/instance\.pdf_create_(attach|export)\(\'([a-z0-9\-]{36})\',/g,(match,mode,docId) => {
+			body = body.replace(/instance\.pdf_create_(attach|export)\(\'([a-z0-9\-]{36})\',/g, (match, mode, docId) => {
 				const doc = this.docIdMap[docId];
-				if(doc === undefined) return match;
+				if (doc === undefined) return match;
 
 				const mod = this.moduleIdMap[doc.moduleId];
 				return `{PDF_CREATE_${mode.toUpperCase()}::${mod.name}.${doc.name}}(`;
 			});
 			return body;
 		},
-		placeholdersUnset(body,previewMode) {
+		placeholdersUnset(body, previewMode) {
 			let dbChars = this.getValidDbCharsForRx();
 
 			// attributes
 			let pat = /\(([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\)/g;
-			body = body.replace(pat,(match,modName,relName,atrName) => {
+			body = body.replace(pat, (match, modName, relName, atrName) => {
 
 				// resolve module by name
-				if(this.moduleNameMap[modName] === undefined)
+				if (this.moduleNameMap[modName] === undefined)
 					return match;
 
 				const mod = this.moduleNameMap[modName];
 
 				// resolve relation by name
 				let rel = false;
-				for(let i = 0, j = mod.relations.length; i < j; i++) {
-					if(mod.relations[i].name !== relName)
+				for (let i = 0, j = mod.relations.length; i < j; i++) {
+					if (mod.relations[i].name !== relName)
 						continue;
 
 					rel = mod.relations[i];
 					break;
 				}
-				if(rel === false)
+				if (rel === false)
 					return match;
 
 				// resolve attribute by name
 				let atr = false;
-				for(let i = 0, j = rel.attributes.length; i < j; i++) {
-					if(rel.attributes[i].name !== atrName)
+				for (let i = 0, j = rel.attributes.length; i < j; i++) {
+					if (rel.attributes[i].name !== atrName)
 						continue;
 
 					atr = rel.attributes[i];
 					break;
 				}
-				if(atr === false)
+				if (atr === false)
 					return match;
 
 				// replace placeholder
-				if(previewMode)
+				if (previewMode)
 					return atr.name;
 
 				return `(${atr.id})`;
@@ -1013,28 +1005,28 @@ export default {
 
 			// functions
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]\(/g;
-			body = body.replace(pat,(match,modName,fncName) => {
+			body = body.replace(pat, (match, modName, fncName) => {
 
 				// resolve module by name
-				if(this.moduleNameMap[modName] === undefined)
+				if (this.moduleNameMap[modName] === undefined)
 					return match;
 
 				const mod = this.moduleNameMap[modName];
 
 				// resolve function by name
 				let fnc = false;
-				for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
-					if(mod.pgFunctions[i].name !== fncName)
+				for (let i = 0, j = mod.pgFunctions.length; i < j; i++) {
+					if (mod.pgFunctions[i].name !== fncName)
 						continue;
 
 					fnc = mod.pgFunctions[i];
 					break;
 				}
-				if(fnc === false)
+				if (fnc === false)
 					return match;
 
 				// replace placeholder
-				if(previewMode)
+				if (previewMode)
 					return `${mod.name}.${fnc.name}(`;
 
 				return `{${mod.id}}.[${fnc.id}](`;
@@ -1042,44 +1034,44 @@ export default {
 
 			// relations
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]/g;
-			body = body.replace(pat,(match,modName,relName) => {
+			body = body.replace(pat, (match, modName, relName) => {
 
 				// resolve module by name
-				if(this.moduleNameMap[modName] === undefined)
+				if (this.moduleNameMap[modName] === undefined)
 					return match;
 
 				const mod = this.moduleNameMap[modName];
 
 				// resolve relation by name
 				let rel = false;
-				for(let i = 0, j = mod.relations.length; i < j; i++) {
-					if(mod.relations[i].name !== relName)
+				for (let i = 0, j = mod.relations.length; i < j; i++) {
+					if (mod.relations[i].name !== relName)
 						continue;
 
 					rel = mod.relations[i];
 					break;
 				}
-				if(rel === false)
+				if (rel === false)
 					return match;
 
 				// replace placeholder
-				if(previewMode)
+				if (previewMode)
 					return `${mod.name}.${rel.name}`;
 
 				return `{${mod.id}}.[${rel.id}]`;
 			});
 
 			// presets
-			pat = new RegExp(`\\{PRESET\\:\\:(${dbChars})\\.(${dbChars})\\.([^\}]*)\\}`,'g');
-			body = body.replace(pat,(match,modName,relName,presetName) => {
+			pat = new RegExp(`\\{PRESET\\:\\:(${dbChars})\\.(${dbChars})\\.([^\}]*)\\}`, 'g');
+			body = body.replace(pat, (match, modName, relName, presetName) => {
 				const mod = this.moduleNameMap[modName];
-				if(mod !== undefined) {
-					for(let r of mod.relations) {
-						if(r.name !== relName)
+				if (mod !== undefined) {
+					for (let r of mod.relations) {
+						if (r.name !== relName)
 							continue;
 
-						for(let p of r.presets) {
-							if(p.name === presetName)
+						for (let p of r.presets) {
+							if (p.name === presetName)
 								return `instance\.get_preset_record_id('${p.id}')`;
 						}
 					}
@@ -1088,12 +1080,12 @@ export default {
 			});
 
 			// documents
-			pat = new RegExp(`\\{PDF_CREATE_(ATTACH|EXPORT)\\:\\:(${dbChars})\\.([^\}]*)\\}\\(`,'g');
-			body = body.replace(pat,(match,mode,modName,docName) => {
+			pat = new RegExp(`\\{PDF_CREATE_(ATTACH|EXPORT)\\:\\:(${dbChars})\\.([^\}]*)\\}\\(`, 'g');
+			body = body.replace(pat, (match, mode, modName, docName) => {
 				const mod = this.moduleNameMap[modName];
-				if(mod !== undefined) {
-					for(let d of mod.docs) {
-						if(d.name === docName)
+				if (mod !== undefined) {
+					for (let d of mod.docs) {
+						if (d.name === docName)
 							return `instance.pdf_create_${mode.toLowerCase()}('${d.id}',`;
 					}
 				}
@@ -1104,17 +1096,18 @@ export default {
 
 		// backend calls
 		delCheck() {
-			this.hasReferences = this.getHasAnyReferences(this.module,'pgFunction',this.id);
-			if(this.hasReferences)
-				return this.showLookup = true;
-
-			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
+			this.hasReferences = this.getHasAnyReferences(this.module, 'pgFunction', this.id);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
 		},
 		del() {
-			ws.send('pgFunction','del',this.fnc.id,true).then(
+			ws.send('pgFunction', 'del', this.fnc.id, true).then(
 				() => {
 					this.$root.schemaReload(this.fnc.moduleId);
-					this.$router.push('/builder/pg-functions/'+this.fnc.moduleId);
+					this.$router.push(`/builder/pg-functions/${this.fnc.moduleId}`);
 				},
 				this.$root.genericError
 			);
@@ -1122,21 +1115,21 @@ export default {
 		exec() {
 			// convert to NULL if inputs are empty
 			let args = JSON.parse(JSON.stringify(this.execArgs));
-			for(let i = 0, j = args.length; i < j; i++) {
-				if(args[i] === '')
+			for (let i = 0, j = args.length; i < j; i++) {
+				if (args[i] === '')
 					args[i] = null
 			}
 
-			ws.send('pgFunction','execAny',{id:this.fnc.id,args:args},true).then(
+			ws.send('pgFunction', 'execAny', { id: this.fnc.id, args: args }, true).then(
 				res => this.execResponse = res.payload === null ? '[NULL]' : res.payload,
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('pgFunction','set',this.fnc),
-				ws.prepare('schema','check',{moduleId:this.module.id})
-			],true).then(
+				ws.prepare('pgFunction', 'set', this.fnc),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

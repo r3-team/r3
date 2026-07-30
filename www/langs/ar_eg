@@ -150,10 +150,10 @@
 				"SEND_UPDATE": "Send updated record"
 			},
 			"loadSource": "Load records via SQL query (SELECT)",
-			"loadSourceHint": "SQL query is executed on the database host '{HOST}' when the job runs. Each SELECT expression (column, sub query, ...) must be assigned to one attribute in REI3 in the given order, to create/update record values in the chosen relation.",
+			"loadSourceHint": "SQL is executed on the host '{HOST}'. Each SELECT expression (column 1, column 2, sub query, ...) must be assigned to an attribute in the correct order.",
 			"loadTargetAttributes": "Assign SELECT expressions to attributes",
 			"loadTargetRelation": "Write loaded records to relation",
-			"loadUniqueIndex": "Unique index for updating records",
+			"loadUniqueIndex": "Unique indexes for updating records",
 			"title": "Database sync '{NAME}'",
 			"titleJob": "Sync job '{NAME}'",
 			"titleJobNew": "New sync job",
@@ -161,6 +161,7 @@
 			"warning": {
 				"missingIndexAttribute": "When using a unqiue index for updating records, all attributes of the index must be assigned as expressions.",
 				"missingLimit": "When a page limit is used, placeholders for LIMIT & OFFSET must be set in the SELECT SQL query. Example: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
+				"missingOrder": "When a page limit is used, an ORDER BY clause should be included to ensure clean page offsets.",
 				"missingSelect": "To load records, SQL query should start with a SELECT statement."
 			}
 		},
@@ -1585,14 +1586,7 @@
 				"fieldSetChart": "كتابة كائن خيار ECharts",
 				"fieldSetError": "كتابة رسالة خطأ",
 				"fieldSetFocus": "انتقل إلى حقل الإدخال",
-				"fieldSetOrder": "تعيين ترتيب الحقل في الأصل",
-				"intervalDays": "أيام",
-				"intervalHours": "ساعات",
-				"intervalMinutes": "دقائق",
-				"intervalMonths": "شهور",
-				"intervalSeconds": "ثواني",
-				"intervalWeeks": "أسابيع",
-				"intervalYears": "سنين"
+				"fieldSetOrder": "تعيين ترتيب الحقل في الأصل"
 			},
 			"placeholderDoc": "PDFs",
 			"placeholderDocHelp": [
@@ -1618,7 +1612,6 @@
 			"runOnce": "مرة واحدة",
 			"runRegular": "بانتظام",
 			"runType": "تنفيذ",
-			"schedules": "الجداول الزمنية",
 			"title": "وظائف",
 			"titleJsOne": "وظيفة الواجهة الأمامية '{NAME}'",
 			"titlePgOne": "وظيفة الواجهة الخلفية '{NAME}'",
@@ -2613,7 +2606,16 @@
 		"inputs": "Inputs",
 		"install": "ثَبَّتَ",
 		"internalName": "يعمل الاسم كمرجع داخلي - ولا يظهر للمستخدمين.",
-		"interval": "فاصلة",
+		"interval": {
+			"days": "أيام",
+			"hours": "ساعات",
+			"minutes": "دقائق",
+			"months": "شهور",
+			"seconds": "ثواني",
+			"weeks": "أسابيع",
+			"years": "سنين"
+		},
+		"intervalTitle": "فاصلة",
 		"job": "Job",
 		"jobs": "Jobs",
 		"jsFunction": "الوظيفة (الجبهة)",
@@ -2732,6 +2734,8 @@
 			"COALESCE": "Show first non-empty value",
 			"CONCAT": "Combine values as text"
 		},
+		"schedule": "Schedule",
+		"schedules": "الجداول الزمنية",
 		"search": "Search",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",

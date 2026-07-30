@@ -150,10 +150,10 @@
 				"SEND_UPDATE": "Send updated record"
 			},
 			"loadSource": "Load records via SQL query (SELECT)",
-			"loadSourceHint": "SQL query is executed on the database host '{HOST}' when the job runs. Each SELECT expression (column, sub query, ...) must be assigned to one attribute in REI3 in the given order, to create/update record values in the chosen relation.",
+			"loadSourceHint": "SQL is executed on the host '{HOST}'. Each SELECT expression (column 1, column 2, sub query, ...) must be assigned to an attribute in the correct order.",
 			"loadTargetAttributes": "Assign SELECT expressions to attributes",
 			"loadTargetRelation": "Write loaded records to relation",
-			"loadUniqueIndex": "Unique index for updating records",
+			"loadUniqueIndex": "Unique indexes for updating records",
 			"title": "Database sync '{NAME}'",
 			"titleJob": "Sync job '{NAME}'",
 			"titleJobNew": "New sync job",
@@ -161,6 +161,7 @@
 			"warning": {
 				"missingIndexAttribute": "When using a unqiue index for updating records, all attributes of the index must be assigned as expressions.",
 				"missingLimit": "When a page limit is used, placeholders for LIMIT & OFFSET must be set in the SELECT SQL query. Example: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
+				"missingOrder": "When a page limit is used, an ORDER BY clause should be included to ensure clean page offsets.",
 				"missingSelect": "To load records, SQL query should start with a SELECT statement."
 			}
 		},
@@ -1585,14 +1586,7 @@
 				"fieldSetChart": "填写ECharts选项对象",
 				"fieldSetError": "填写错误消息",
 				"fieldSetFocus": "跳转到字段输入",
-				"fieldSetOrder": "设置字段在父级中的顺序",
-				"intervalDays": "天",
-				"intervalHours": "小时",
-				"intervalMinutes": "分钟",
-				"intervalMonths": "月",
-				"intervalSeconds": "秒",
-				"intervalWeeks": "周",
-				"intervalYears": "年"
+				"fieldSetOrder": "设置字段在父级中的顺序"
 			},
 			"placeholderDoc": "PDFs",
 			"placeholderDocHelp": [
@@ -1618,7 +1612,6 @@
 			"runOnce": "一次",
 			"runRegular": "定期",
 			"runType": "执行类型",
-			"schedules": "计划",
 			"title": "函数",
 			"titleJsOne": "前端函数 '{NAME}'",
 			"titlePgOne": "后端函数 '{NAME}'",
@@ -2613,7 +2606,16 @@
 		"inputs": "Inputs",
 		"install": "Install",
 		"internalName": "名称作为内部引用，不会显示给用户。",
-		"interval": "间隔",
+		"interval": {
+			"days": "天",
+			"hours": "小时",
+			"minutes": "分钟",
+			"months": "月",
+			"seconds": "秒",
+			"weeks": "周",
+			"years": "年"
+		},
+		"intervalTitle": "间隔",
 		"job": "Job",
 		"jobs": "Jobs",
 		"jsFunction": "Function (front)",
@@ -2732,6 +2734,8 @@
 			"COALESCE": "Show first non-empty value",
 			"CONCAT": "Combine values as text"
 		},
+		"schedule": "Schedule",
+		"schedules": "计划",
 		"search": "Search",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",

@@ -150,10 +150,10 @@
 				"SEND_UPDATE": "Send updated record"
 			},
 			"loadSource": "Load records via SQL query (SELECT)",
-			"loadSourceHint": "SQL query is executed on the database host '{HOST}' when the job runs. Each SELECT expression (column, sub query, ...) must be assigned to one attribute in REI3 in the given order, to create/update record values in the chosen relation.",
+			"loadSourceHint": "SQL is executed on the host '{HOST}'. Each SELECT expression (column 1, column 2, sub query, ...) must be assigned to an attribute in the correct order.",
 			"loadTargetAttributes": "Assign SELECT expressions to attributes",
 			"loadTargetRelation": "Write loaded records to relation",
-			"loadUniqueIndex": "Unique index for updating records",
+			"loadUniqueIndex": "Unique indexes for updating records",
 			"title": "Database sync '{NAME}'",
 			"titleJob": "Sync job '{NAME}'",
 			"titleJobNew": "New sync job",
@@ -161,6 +161,7 @@
 			"warning": {
 				"missingIndexAttribute": "When using a unqiue index for updating records, all attributes of the index must be assigned as expressions.",
 				"missingLimit": "When a page limit is used, placeholders for LIMIT & OFFSET must be set in the SELECT SQL query. Example: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
+				"missingOrder": "When a page limit is used, an ORDER BY clause should be included to ensure clean page offsets.",
 				"missingSelect": "To load records, SQL query should start with a SELECT statement."
 			}
 		},
@@ -1585,14 +1586,7 @@
 				"fieldSetChart": "Write ECharts option object",
 				"fieldSetError": "Écrire le message d'erreur",
 				"fieldSetFocus": "Sauter à la saisie du champ",
-				"fieldSetOrder": "Set field order in parent",
-				"intervalDays": "Jours",
-				"intervalHours": "Heures",
-				"intervalMinutes": "Minutes",
-				"intervalMonths": "Mois",
-				"intervalSeconds": "Secondes",
-				"intervalWeeks": "Semaines",
-				"intervalYears": "Années"
+				"fieldSetOrder": "Set field order in parent"
 			},
 			"placeholderDoc": "PDFs",
 			"placeholderDocHelp": [
@@ -1618,7 +1612,6 @@
 			"runOnce": "Une fois",
 			"runRegular": "Régulièrement",
 			"runType": "Exécution",
-			"schedules": "Calendriers",
 			"title": "Fonctions",
 			"titleJsOne": "Fonction côté client '{NAME}'",
 			"titlePgOne": "Fonction côté serveur '{NAME}'",
@@ -2613,7 +2606,16 @@
 		"inputs": "Inputs",
 		"install": "Install",
 		"internalName": "Le nom sert de référence interne - il n'est pas affiché aux utilisateurs.",
-		"interval": "Intervalle",
+		"interval": {
+			"days": "Jours",
+			"hours": "Heures",
+			"minutes": "Minutes",
+			"months": "Mois",
+			"seconds": "Secondes",
+			"weeks": "Semaines",
+			"years": "Années"
+		},
+		"intervalTitle": "Intervalle",
 		"job": "Job",
 		"jobs": "Jobs",
 		"jsFunction": "Function (front)",
@@ -2732,6 +2734,8 @@
 			"COALESCE": "Show first non-empty value",
 			"CONCAT": "Combine values as text"
 		},
+		"schedule": "Schedule",
+		"schedules": "Calendriers",
 		"search": "Search",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",
