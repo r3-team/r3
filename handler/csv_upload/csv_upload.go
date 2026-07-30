@@ -350,6 +350,6 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 		}
 	}
 
-	_, err = data_import.FromInterfaceValues_tx(ctx, tx, loginId, valuesIn, columns, joins, lookups, indexMapPgIndexAttributeIds)
+	_, err = data_import.FromInterfaceValues_tx(ctx, tx, loginId, false, valuesIn, columns, joins, lookups, indexMapPgIndexAttributeIds)
 	return err
 }

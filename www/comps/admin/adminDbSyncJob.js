@@ -56,9 +56,8 @@ export default {
 					/>
 				</div>
 			</div>
-
-			<div class="content flex column gap grow">
-				<div class="row gap-large wrap centered default-inputs">
+			<div class="top lower default-inputs">
+				<div class="area">
 					<div class="row gap centered">
 						<span>{{ capGen.name }}</span>
 						<input v-model="job.name" :disabled="readonly" :placeholder="capGen.threeDots" />
@@ -69,7 +68,31 @@ export default {
 							<option v-for="t in jobTypes" :value="t">{{ capApp.jobType[t] }}</option>
 						</select>
 					</div>
+				</div>
+				<div class="area">
 					<template v-if="isLoad">
+						<my-button-check
+							v-model="job.skipLogs"
+							:caption="capGen.changeLogs"
+							:readonly
+							:reversed="true"
+						/>
+						<div class="row gap centered">
+							<my-button-check
+								@update:modelValue="$event ? job.pageLimit = 50 : job.pageLimit = null"
+								:caption="capGen.limitPage"
+								:modelValue="job.pageLimit !== null"
+								:readonly
+							/>
+							<my-input-decimal class="short"
+								v-if="job.pageLimit !== null"
+								v-model="job.pageLimit"
+								:min="0"
+								:allowNull="false"
+								:lengthFract="0"
+								:readonly
+							/>
+						</div>
 						<div class="row gap centered">
 							<my-label image="clock.png" />
 							<span>{{ capGen.every }}</span>
@@ -88,137 +111,123 @@ export default {
 								<option value="weeks"  >{{ capGen.interval.weeks   }}</option>
 							</select>
 						</div>
-						<div class="row gap centered">
-							<my-button-check
-								@update:modelValue="$event ? job.pageLimit = 50 : job.pageLimit = null"
-								:caption="capGen.limitPage"
-								:modelValue="job.pageLimit !== null"
-								:readonly
-							/>
-							<my-input-decimal class="short"
-								v-if="job.pageLimit !== null"
-								v-model="job.pageLimit"
-								:min="0"
-								:allowNull="false"
-								:lengthFract="0"
-								:readonly
-							/>
-						</div>
 					</template>
+				</div>
+				<div class="area">
 					<my-button-check
 						v-model="job.active"
 						:caption="capGen.active"
 						:readonly
 					/>
 				</div>
+			</div>
 
-				<div class="admin-db-sync-job-content">
-					<div class="admin-db-sync-job-content-editor">
-						<my-label image="codeDatabase.png" :caption="capApp.loadSource" :large="true" />
-						<div class="admin-db-sync-job-content-editor-input">
-							<my-code-editor
-								v-model="job.codeSql"
-								:mode="editorMode"
-								:readonly
+			<div class="admin-db-sync-job-content">
+				<div class="admin-db-sync-job-content-editor">
+					<my-label image="codeDatabase.png" :caption="capApp.loadSource" :large="true" />
+					<div class="admin-db-sync-job-content-editor-input">
+						<my-code-editor
+							v-model="job.codeSql"
+							:mode="editorMode"
+							:readonly
+						/>
+					</div>
+					<span>{{ capApp.loadSourceHint.replace('{HOST}',hostName) }}</span>
+				</div>
+				<div class="admin-db-sync-job-content-arrow">
+					<img src="images/arrowsPushRight.png" />
+				</div>
+				<div class="admin-db-sync-job-content-options column gap-large default-inputs">
+					<div class="column gap">
+						<my-label image="edit.png" :caption="capApp.loadTargetRelation" :large="true" />
+						<div class="row gap centered">
+							<my-label
+								:image="module ? '' : 'icon_missing.png'"
+								:imageBase64="module ? srcBase64Icon(module.iconId,'images/module.png') : ''"
 							/>
+							<select
+								@input="changeModuleId($event.target.value)"
+								:disabled="readonly || !isNew"
+								:value="moduleIdActive !== null ? moduleIdActive : ''"
+							>
+								<option value=""> - {{ capGen.application }} - </option>
+								<option v-for="m in modulesUsable" :value="m.id">
+									{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}
+								</option>
+							</select>
 						</div>
-						<span>{{ capApp.loadSourceHint.replace('{HOST}',hostName) }}</span>
+
+						<my-admin-db-sync-job-joins
+							v-if="module !== false"
+							v-model="job.joins"
+							@indexRemoved="indexRemoved"
+							:module
+							:protectRelationBase="!isNew"
+							:readonly
+						/>
 					</div>
-					<div class="admin-db-sync-job-content-arrow">
-						<img src="images/arrowsPushRight.png" />
-					</div>
-					<div class="admin-db-sync-job-content-options column gap-large default-inputs">
+					<template v-if="job.joins.length !== 0">
 						<div class="column gap">
-							<my-label image="edit.png" :caption="capApp.loadTargetRelation" :large="true" />
-							<div class="row gap centered">
-								<my-label
-									:image="module ? '' : 'icon_missing.png'"
-									:imageBase64="module ? srcBase64Icon(module.iconId,'images/module.png') : ''"
-								/>
-								<select
-									@input="changeModuleId($event.target.value)"
-									:disabled="readonly || !isNew"
-									:value="moduleIdActive !== null ? moduleIdActive : ''"
-								>
-									<option value=""> - {{ capGen.application }} - </option>
-									<option v-for="m in modulesUsable" :value="m.id">
-										{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}
-									</option>
-								</select>
-							</div>
-
-							<my-admin-db-sync-job-joins
-								v-if="module !== false"
-								v-model="job.joins"
-								@indexRemoved="indexRemoved"
-								:module
-								:protectRelationBase="!isNew"
+							<hr />
+							<my-label image="databaseAsterisk.png" :caption="capApp.loadUniqueIndex" />
+							<my-admin-db-sync-job-lookups
+								v-if="job.joins.length !== 0"
+								v-model="job.lookups"
+								:joins="job.joins"
+								:readonly
+							/>
+							<my-button-check
+								v-model="job.deleteMissing"
+								:active="isLookupOnBaseRelation"
+								:caption="capApp.deleteMissing"
 								:readonly
 							/>
 						</div>
-						<template v-if="job.joins.length !== 0">
-							<div class="column gap">
-								<hr />
-								<my-label image="databaseAsterisk.png" :caption="capApp.loadUniqueIndex" />
-								<my-admin-db-sync-job-lookups
-									v-if="job.joins.length !== 0"
-									v-model="job.lookups"
-									:joins="job.joins"
-									:readonly
-								/>
-								<my-button-check
-									v-model="job.deleteMissing"
-									:active="isLookupOnBaseRelation"
-									:caption="capApp.deleteMissing"
-									:readonly
+						<div class="column gap">
+							<hr />
+							<div class="row gap centered space-between">
+								<my-label image="files_list2.png" :caption="capApp.loadTargetAttributes" />
+								<my-button image="add.png"
+									@trigger="columnAdd"
+									:active="!readonly"
+									:caption="capGen.button.add"
 								/>
 							</div>
-							<div class="column gap">
-								<hr />
-								<div class="row gap centered space-between">
-									<my-label image="files_list2.png" :caption="capApp.loadTargetAttributes" />
-									<my-button image="add.png"
-										@trigger="columnAdd"
-										:active="!readonly"
-										:caption="capGen.button.add"
+							<div class="admin-db-sync-job-content-options-columns" v-if="job.columns.length !== 0">
+								<div class="row gap centered" v-for="(c,i) in job.columns">
+									<span>#{{ i+1 }}</span>
+									<select @input="columnSetValue($event.target.value,i)" :disabled="readonly" :value="columnGetValue(c)">
+										<template v-for="j in job.joins">
+											<option
+												v-for="a in relationIdMap[j.relationId].attributes.filter(v => v.content !== 'files')"
+												:value="j.index + '_' + a.id"
+											>
+												{{ j.index }}) {{ getCaption('attributeTitle',relationIdMap[j.relationId].moduleId,a.id,a.captions,a.name) }}
+											</option>
+										</template>
+									</select>
+									<my-button image="cancel.png"
+										@trigger="job.columns.splice(i,1)"
+										:naked="true"
 									/>
 								</div>
-								<div class="admin-db-sync-job-content-options-columns" v-if="job.columns.length !== 0">
-									<div class="row gap centered" v-for="(c,i) in job.columns">
-										<span>#{{ i+1 }}</span>
-										<select @input="columnSetValue($event.target.value,i)" :disabled="readonly" :value="columnGetValue(c)">
-											<template v-for="j in job.joins">
-												<option
-													v-for="a in relationIdMap[j.relationId].attributes.filter(v => v.content !== 'files')"
-													:value="j.index + '_' + a.id"
-												>
-													{{ j.index }}) {{ getCaption('attributeTitle',relationIdMap[j.relationId].moduleId,a.id,a.captions,a.name) }}
-												</option>
-											</template>
-										</select>
-										<my-button image="cancel.png"
-											@trigger="job.columns.splice(i,1)"
-											:naked="true"
-										/>
-									</div>
-								</div>
 							</div>
+						</div>
 
-							<template v-if="isPageLimit">
-								<hr />
-								<div class="column gap">
-									<my-label image="code.png" :caption="capGen.placeholders" />
-									<span v-for="(p,k) in placeholdersLoad">{{ k }} <b>{{ p }}</b></span>
-								</div>
-							</template>
-
-							<template v-if="warnings.length !== 0">
-								<hr />
-								<my-label image="warning.png" :caption="capGen.warnings" :error="true" :large="true" />
-								<my-label image="warning.png" v-for="w in warnings" :caption="w" />
-							</template>
+						<template v-if="isPageLimit">
+							<hr />
+							<div class="column gap">
+								<my-label image="code.png" :caption="capGen.placeholders" />
+								<span v-for="(p,k) in placeholdersLoad">{{ k }} <b>{{ p }}</b></span>
+							</div>
 						</template>
-					</div>
+
+						<template v-if="warnings.length !== 0">
+							<hr />
+							<my-label image="warning.png" :caption="capGen.warnings" :error="true" :large="true" />
+							<my-label image="warning.png" v-for="w in warnings" :caption="w" />
+						</template>
+					</template>
 				</div>
 			</div>
 		</div>
@@ -327,7 +336,7 @@ export default {
 				return;
 
 			const r = this.relationIdMap[this.job.joins[0].relationId];
-			this.job.columns.push({ attributeId: r.attributes[0], index: 0 });
+			this.job.columns.push({ attributeId: r.attributes[0].id, index: 0 });
 		},
 		columnGetValue(c) {
 			return `${c.index}_${c.attributeId}`;

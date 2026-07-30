@@ -161,7 +161,7 @@
 			"warning": {
 				"missingIndexAttribute": "Wenn ein eindeutiger Index zur Aktualisierung von Datensätzen genutzt wird, müssen alle Attribute dieses Indexes als Ausdrücke zugeordnet sein.",
 				"missingLimit": "Wenn eine Seitengröße definiert ist, müssen Platzhalter für LIMIT & OFFSET in der SQL-Abfrage gesetzt sein. Beispiel: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
-				"missingOrder": "Wenn eine Seitengröße definiert ist, sollte eine ORDER BY-Klausel inkludiert sein, um saubere Seitenabschnitte zu gewährleisten.",
+				"missingOrder": "Wenn eine Seitengröße definiert ist, sollte eine ORDER BY-Klausel inkludiert sein, um saubere Seitenübergänge zu gewährleisten.",
 				"missingSelect": "Um Datensätze zu laden, sollte SQL-Abfrage mit einem SELECT beginnen."
 			}
 		},

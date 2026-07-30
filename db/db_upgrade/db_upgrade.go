@@ -510,6 +510,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				job_type instance_db_sync.job_type NOT NULL,
 				active BOOLEAN NOT NULL,
 				delete_missing BOOLEAN NOT NULL,
+				skip_logs BOOLEAN NOT NULL,
 				page_limit integer,
 				CONSTRAINT job_pkey PRIMARY KEY (id),
 				CONSTRAINT job_name_key UNIQUE (host_id,name) DEFERRABLE INITIALLY DEFERRED

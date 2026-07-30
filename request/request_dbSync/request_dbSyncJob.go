@@ -32,6 +32,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 
 	// reset invalid inputs based on job type
 	if j.JobType != types.DbSyncJobTypeLoad {
+		j.SkipLogs = false
 		j.DeleteMissing = false
 		j.PageLimit = pgtype.Int4{}
 		j.Lookups = make([]types.QueryLookup, 0)
@@ -44,14 +45,14 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	// cannot update host or job type
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance_db_sync.job (id, host_id, job_type, interval_seconds,
-			name, comment, code_sql, page_limit, delete_missing, active)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+			name, comment, code_sql, page_limit, delete_missing, skip_logs, active)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 		ON CONFLICT (id)
 		DO UPDATE SET
 			interval_seconds = $4, name = $5, comment = $6, code_sql = $7,
-			page_limit = $8, delete_missing = $9, active = $10
+			page_limit = $8, delete_missing = $9, skip_logs = $10, active = $11
 	`, j.Id, j.HostId, j.JobType, j.IntervalSeconds, j.Name, j.Comment, j.CodeSql,
-		j.PageLimit, j.DeleteMissing, j.Active); err != nil {
+		j.PageLimit, j.DeleteMissing, j.SkipLogs, j.Active); err != nil {
 
 		return nil, err
 	}

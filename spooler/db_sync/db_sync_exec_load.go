@@ -41,7 +41,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 		if err != nil {
 			return err
 		}
-		if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
+		if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, j.SkipLogs, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
 			return err
 		}
 	} else {
@@ -61,7 +61,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 			if err != nil {
 				return err
 			}
-			if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
+			if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, j.SkipLogs, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
 				return err
 			}
 			if len(rows) < int(j.PageLimit.Int32) {
@@ -163,7 +163,7 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 }
 
 func doLoadStore(ctx context.Context, columns []types.Column, joins []types.QueryJoin, lookups []types.QueryLookup,
-	recordIdsBaseRelation *[]int64, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
+	skipLogs bool, recordIdsBaseRelation *[]int64, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
 
 	if len(rows) == 0 {
 		return nil
@@ -177,7 +177,7 @@ func doLoadStore(ctx context.Context, columns []types.Column, joins []types.Quer
 
 	for _, values := range rows {
 		// DB sync values are submitted as system (login ID -1)
-		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, -1, values, columns, joins, lookups, indexMapPgIndexAttributeIds)
+		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, -1, skipLogs, values, columns, joins, lookups, indexMapPgIndexAttributeIds)
 		if err != nil {
 			return err
 		}

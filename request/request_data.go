@@ -46,12 +46,11 @@ func DataSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId
 		req map[int]types.DataSet
 		res types.DataSetResult
 	)
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
 
-	res.IndexRecordIds, err = data.Set_tx(ctx, tx, req, loginId)
+	res.IndexRecordIds, err = data.Set_tx(ctx, tx, req, loginId, false)
 	if err != nil {
 		return nil, err
 	}

@@ -2,11 +2,11 @@ import { getUuidV4 } from './crypto.js';
 
 export function getTemplateArgs(name) {
 	switch (name) {
-		case 'loginSync': return '_event TEXT, _user instance.user_data'; break;
+		case 'loginSync': return '_event TEXT, _user instance.user_data';
 		case 'restAuthResponse': // fallthrough
-		case 'restDataResponse': return 'http_status INTEGER, response TEXT, callback TEXT'; break;
-		default: return ''; break;
+		case 'restDataResponse': return 'http_status INTEGER, response TEXT, callback TEXT';
 	}
+	return '';
 };
 export function getTemplateDbSyncHost() {
 	return {
@@ -38,24 +38,23 @@ export function getTemplateDbSyncJob(hostId) {
 		lookups: [],
 		active: true,
 		deleteMissing: false,
+		skipLogs: false,
 		pageLimit: null
 	};
 };
 export function getTemplateFnc(name, isTrigger) {
 	switch (name) {
-		case 'loginSync': return loginSync; break;
-		case 'mailsFromSpooler': return mailsFromSpooler; break;
-		case 'restAuthRequest': return restAuthRequest; break;
-		case 'restAuthResponse': return restAuthResponse; break;
-		case 'restDataResponse': return restDataResponse; break;
-		case 'restFileAttachViaREI3API': return restFileAttachViaREI3API; break;
-		case 'restFileUploadToREI3': return restFileUploadToREI3; break;
-		default:
-			return isTrigger
-				? '$BODY$\nDECLARE\nBEGIN\n\tRETURN NEW;\nEND;\n$BODY$'
-				: '$BODY$\nDECLARE\nBEGIN\n\tRETURN 0;\nEND;\n$BODY$';
-			break;
+		case 'loginSync': return loginSync;
+		case 'mailsFromSpooler': return mailsFromSpooler;
+		case 'restAuthRequest': return restAuthRequest;
+		case 'restAuthResponse': return restAuthResponse;
+		case 'restDataResponse': return restDataResponse;
+		case 'restFileAttachViaREI3API': return restFileAttachViaREI3API;
+		case 'restFileUploadToREI3': return restFileUploadToREI3;
 	}
+	return isTrigger
+		? '$BODY$\nDECLARE\nBEGIN\n\tRETURN NEW;\nEND;\n$BODY$'
+		: '$BODY$\nDECLARE\nBEGIN\n\tRETURN 0;\nEND;\n$BODY$';
 };
 export function getTemplateReturn(isTrigger) {
 	return isTrigger ? 'TRIGGER' : 'INTEGER';

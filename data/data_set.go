@@ -26,7 +26,7 @@ import (
 // if tuple needs to exist for joined relation to refer to, it will be created
 // each index provides tuple ID (0 if new)
 // each index provides values for its relation attributes or partner relation attributes (relationship attributes from other relation)
-func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSet, loginId int64) (map[int]int64, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSet, loginId int64, skipLogs bool) (map[int]int64, error) {
 
 	var indexes = make([]int, 0)                 // all relation indexes
 	var indexRecordIds = make(map[int]int64)     // record IDs by index
@@ -91,7 +91,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		// log data changes if retention is enabled
 		logAttributeIndexesFiles := make([]int, 0)
 		logRecordOld := types.DataGetResult{}
-		useLog := relationUsesLogging(rel.RetentionCount, rel.RetentionDays)
+		useLog := !skipLogs && relationUsesLogging(rel.RetentionCount, rel.RetentionDays)
 
 		if useLog {
 			for i, a := range dataSet.Attributes {

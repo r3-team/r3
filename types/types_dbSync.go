@@ -45,13 +45,14 @@ type DbSyncJob struct {
 	JobType     DbSyncJobType     `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
 	Columns     []DbSyncJobColumn `json:"columns"`
 	Joins       []QueryJoin       `json:"joins"`
-	Lookups     []QueryLookup     `json:"lookups"`
 	Active      bool              `json:"active"`
 
 	// LOAD only
-	DeleteMissing   bool        `json:"deleteMissing"`   // delete non-existing records
-	IntervalSeconds int64       `json:"intervalSeconds"` // execute every X seconds
-	PageLimit       pgtype.Int4 `json:"pageLimit"`       // limit rows fetched in one go
+	DeleteMissing   bool          `json:"deleteMissing"`   // delete non-existing records
+	IntervalSeconds int64         `json:"intervalSeconds"` // execute every X seconds
+	PageLimit       pgtype.Int4   `json:"pageLimit"`       // limit rows fetched in one transaction
+	Lookups         []QueryLookup `json:"lookups"`
+	SkipLogs        bool          `json:"skipLogs"` // skips expensive data SET logs
 }
 
 type DbSyncJobColumn struct {

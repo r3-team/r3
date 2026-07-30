@@ -51,7 +51,7 @@ func ResolveQueryLookups(joins []types.QueryJoin, lookups []types.QueryLookup) m
 // executes a data SET call from a list of ordered any values
 // uses columns to recognize attribute (and their orders)
 // uses query joins/lookups to recognize relationships and resolve records via unique indexes
-func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, valuesIn []any, columns []types.Column,
+func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, skipLogs bool, valuesIn []any, columns []types.Column,
 	joins []types.QueryJoin, lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID) (map[int]int64, error) {
 
 	if len(valuesIn) != len(columns) {
@@ -314,5 +314,5 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, value
 			}
 		}
 	}
-	return data.Set_tx(ctx, tx, dataSetsByIndex, loginId)
+	return data.Set_tx(ctx, tx, dataSetsByIndex, loginId, skipLogs)
 }

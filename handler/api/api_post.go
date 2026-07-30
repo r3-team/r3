@@ -73,7 +73,7 @@ func handlePost_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, r *htt
 		}
 	}
 
-	indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, values, api.Columns,
+	indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, false, values, api.Columns,
 		api.Query.Joins, api.Query.Lookups, data_import.ResolveQueryLookups(api.Query.Joins, api.Query.Lookups))
 
 	if err != nil {
