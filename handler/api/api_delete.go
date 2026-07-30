@@ -82,11 +82,8 @@ func handleDelete_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api 
 		if !join.ApplyDelete || len(relationIndexMapRecordIds[join.Index]) == 0 {
 			continue
 		}
-
-		for _, id := range relationIndexMapRecordIds[join.Index] {
-			if err := data.Del_tx(ctx, tx, join.RelationId, id, loginId); err != nil {
-				return http.StatusConflict, nil, err
-			}
+		if err := data.Del_tx(ctx, tx, join.RelationId, relationIndexMapRecordIds[join.Index], loginId); err != nil {
+			return http.StatusConflict, nil, err
 		}
 	}
 

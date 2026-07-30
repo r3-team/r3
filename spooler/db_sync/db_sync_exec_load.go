@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"r3/cache"
+	"r3/data"
 	"r3/data/data_import"
 	"r3/db"
 	"r3/log"
@@ -29,6 +31,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 			Index:       c.Index,
 		}
 	}
+	recordIdsBaseRelation := make([]int64, 0)
 	indexMapPgIndexAttributeIds := data_import.ResolveQueryLookups(j.Joins, j.Lookups)
 
 	// fetch and store records
@@ -38,7 +41,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 		if err != nil {
 			return err
 		}
-		if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
+		if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
 			return err
 		}
 	} else {
@@ -58,7 +61,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 			if err != nil {
 				return err
 			}
-			if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds, rows); err != nil {
+			if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
 				return err
 			}
 			if len(rows) < int(j.PageLimit.Int32) {
@@ -68,9 +71,49 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 		}
 	}
 
-	/*if j.DeleteMissing && isUniqueIndex {
-		return doLoadDelete(ctx, modName, rel.Name, &uniqueIndexAttributes)
-	}*/
+	if j.DeleteMissing {
+		return doLoadDelete(ctx, j, recordIdsBaseRelation)
+	}
+	return nil
+}
+
+func doLoadDelete(ctx context.Context, j types.DbSyncJob, recordIdsKeep []int64) error {
+
+	if len(j.Joins) == 0 {
+		return fmt.Errorf("failed to execute delete, job has no relations")
+	}
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	relationIdBase := j.Joins[0].RelationId
+	modName, relName, err := cache.GetRelationDbNames(relationIdBase)
+	if err != nil {
+		return err
+	}
+
+	recordIdsDelete := make([]int64, 0)
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
+		SELECT ARRAY_AGG("%s")
+		FROM "%s"."%s"
+		WHERE "%s" <> ALL($1)
+	`, schema.PkName, modName, relName, schema.PkName), recordIdsKeep).Scan(&recordIdsDelete); err != nil {
+		return nil
+	}
+
+	// DB sync deletions are submitted as system (login ID -1)
+	if len(recordIdsDelete) != 0 {
+		if err := data.Del_tx(ctx, tx, relationIdBase, recordIdsDelete, -1); err != nil {
+			return err
+		}
+		if err := tx.Commit(ctx); err != nil {
+			return err
+		}
+		log.Info(log.ContextDbSync, fmt.Sprintf("deleted %d records from local DB, not existing in source", len(recordIdsDelete)))
+	}
 	return nil
 }
 
@@ -108,7 +151,7 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 				if utf8.Valid(v) {
 					resultRow[i] = string(v)
 				} else {
-					resultRow[i] = string(strings.ToValidUTF8(string(v), ""))
+					resultRow[i] = strings.ToValidUTF8(string(v), "")
 				}
 			}
 		}
@@ -119,8 +162,8 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 	return resultRows, nil
 }
 
-func doLoadStore(ctx context.Context, columns []types.Column, joins []types.QueryJoin,
-	lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
+func doLoadStore(ctx context.Context, columns []types.Column, joins []types.QueryJoin, lookups []types.QueryLookup,
+	recordIdsBaseRelation *[]int64, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
 
 	if len(rows) == 0 {
 		return nil
@@ -134,8 +177,12 @@ func doLoadStore(ctx context.Context, columns []types.Column, joins []types.Quer
 
 	for _, values := range rows {
 		// DB sync values are submitted as system (login ID -1)
-		if _, err := data_import.FromInterfaceValues_tx(ctx, tx, -1, values, columns, joins, lookups, indexMapPgIndexAttributeIds); err != nil {
+		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, -1, values, columns, joins, lookups, indexMapPgIndexAttributeIds)
+		if err != nil {
 			return err
+		}
+		if id, exists := indexRecordIds[0]; exists {
+			*recordIdsBaseRelation = append(*recordIdsBaseRelation, id)
 		}
 	}
 	if err := tx.Commit(ctx); err != nil {

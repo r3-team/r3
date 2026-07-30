@@ -68,7 +68,7 @@ func DataDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, data.Del_tx(ctx, tx, req.RelationId, req.RecordId, loginId)
+	return nil, data.Del_tx(ctx, tx, req.RelationId, []int64{req.RecordId}, loginId)
 }
 
 func DataLogGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
