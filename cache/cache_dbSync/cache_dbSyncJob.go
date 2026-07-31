@@ -4,6 +4,7 @@ import (
 	"context"
 	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -26,6 +27,20 @@ func GetJobsToRunLoad() []types.DbSyncJob {
 
 	for _, j := range jobIdMap {
 		if j.Active && j.JobType == types.DbSyncJobTypeLoad && (!j.DateAttempt.Valid || j.DateAttempt.Int64+j.IntervalSeconds < now) {
+			jobs = append(jobs, j)
+		}
+	}
+	return jobs
+}
+
+func GetJobsToRunSend() []types.DbSyncJob {
+	jobs := make([]types.DbSyncJob, 0)
+
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+
+	for _, j := range jobIdMap {
+		if j.Active && slices.Contains(types.DbSyncJobTypesSend, j.JobType) {
 			jobs = append(jobs, j)
 		}
 	}

@@ -18,12 +18,14 @@ const (
 	sqlPlaceholderOffset = "{SQL_OFFSET}"
 )
 
-func DoAllLoad() error {
+func DoAll() error {
+
+	// execute LOAD jobs
 	for _, j := range cache_dbSync.GetJobsToRunLoad() {
 		if err := storeJobDateNow(j.Id, "attempt"); err != nil {
 			return err
 		}
-		if err := do(j); err != nil {
+		if err := doLoad(j); err != nil {
 			log.Error(log.ContextDbSync, fmt.Sprintf("failed to execute job '%s'", j.Name), err)
 			continue
 		}
@@ -31,21 +33,43 @@ func DoAllLoad() error {
 			return err
 		}
 	}
+
+	// execute SEND jobs
+	jobs := cache_dbSync.GetJobsToRunSend()
+	if len(jobs) != 0 {
+		jobTypeMapRelationIdMapRecordIds, err := spoolRecordsGet()
+		if err != nil {
+			return err
+		}
+		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendInsert]; exists {
+			if err := doSend(jobs, types.DbSyncJobTypeSendInsert, m); err != nil {
+				return err
+			}
+		}
+		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendUpdate]; exists {
+			if err := doSend(jobs, types.DbSyncJobTypeSendUpdate, m); err != nil {
+				return err
+			}
+		}
+		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendDelete]; exists {
+			if err := doSend(jobs, types.DbSyncJobTypeSendDelete, m); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
-func do(j types.DbSyncJob) error {
-	host, err := cache_dbSync.GetHostById(j.HostId)
+// get DB connection to external host
+func getExtCon(ctx context.Context, hostId uuid.UUID) (*sql.DB, error) {
+
+	host, err := cache_dbSync.GetHostById(hostId)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	if !host.Active {
-		log.Info(log.ContextDbSync, fmt.Sprintf("skipping job for inactive host '%s'", host.Name))
-		return nil
+		return nil, types.ErrHostInactive
 	}
-
-	log.Info(log.ContextDbSync, fmt.Sprintf("starting %s job '%s' (host '%s')", j.JobType, j.Name, host.Name))
 
 	// connect to external DB host
 	var dbExt *sql.DB
@@ -55,25 +79,14 @@ func do(j types.DbSyncJob) error {
 		dbExt, err = getDbConMysql(host)
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer dbExt.Close()
-
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbSync)
-	defer ctxCanc()
 
 	if err := dbExt.PingContext(ctx); err != nil {
-		return err
+		dbExt.Close()
+		return nil, err
 	}
-
-	// execute sync
-	switch j.JobType {
-	case types.DbSyncJobTypeLoad:
-		return doLoad(ctx, dbExt, j)
-	case types.DbSyncJobTypeSendInsert:
-		return doSend(ctx, dbExt, j)
-	}
-	return fmt.Errorf("invalid job type '%s'", j.JobType)
+	return dbExt, nil
 }
 
 func storeJobDateNow(jobId uuid.UUID, content string) error {

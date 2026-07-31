@@ -378,7 +378,7 @@ func load() error {
 			t.fn = dbOptimize
 		case "dbSync":
 			t.nameLog = "Database sync"
-			t.fn = db_sync.DoAllLoad
+			t.fn = db_sync.DoAll
 		case "docsGenerate":
 			t.nameLog = "Document generation"
 			t.fn = doc_create.DoAll

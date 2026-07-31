@@ -20,7 +20,7 @@ import (
 
 const maxFetchLoops = 10000 // should not be necessary, fallback in case LOOP is not stopped
 
-func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
+func doLoad(j types.DbSyncJob) error {
 
 	// convert to query types
 	columns := make([]types.Column, len(j.Columns))
@@ -33,6 +33,21 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 	}
 	recordIdsBaseRelation := make([]int64, 0)
 	indexMapPgIndexAttributeIds := data_import.ResolveQueryLookups(j.Joins, j.Lookups)
+
+	// connect to external DB system
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbSync)
+	defer ctxCanc()
+
+	// even if pagination is used, keep external DB transaction open to avoid data being changed between pages
+	dbExt, err := getExtCon(ctx, j.HostId)
+	if err != nil {
+		if err == types.ErrHostInactive {
+			log.Info(log.ContextDbSync, "skipping job for inactive host")
+			return nil
+		}
+		return err
+	}
+	defer dbExt.Close()
 
 	// fetch and store records
 	if !j.PageLimit.Valid {
@@ -80,7 +95,7 @@ func doLoad(ctx context.Context, dbExt *sql.DB, j types.DbSyncJob) error {
 func doLoadDelete(ctx context.Context, j types.DbSyncJob, recordIdsKeep []int64) error {
 
 	if len(j.Joins) == 0 {
-		return fmt.Errorf("failed to execute delete, job has no relations")
+		return types.ErrJobNoJoins
 	}
 
 	tx, err := db.Pool.Begin(ctx)

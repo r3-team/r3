@@ -1,6 +1,8 @@
 package types
 
 import (
+	"errors"
+
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -15,7 +17,9 @@ const (
 )
 
 var (
-	DbSyncJobTypesSend = []DbSyncJobType{DbSyncJobTypeSendDelete, DbSyncJobTypeSendInsert, DbSyncJobTypeSendUpdate}
+	DbSyncJobTypesSend       = []DbSyncJobType{DbSyncJobTypeSendDelete, DbSyncJobTypeSendInsert, DbSyncJobTypeSendUpdate}
+	ErrHostInactive    error = errors.New("host is inactive")
+	ErrJobNoJoins      error = errors.New("job has no relation")
 )
 
 type DbSyncHost struct {
@@ -35,16 +39,19 @@ type DbSyncHost struct {
 
 // a job to LOAD from or SEND to external DB systems
 type DbSyncJob struct {
-	Id          uuid.UUID     `json:"id"`
-	HostId      uuid.UUID     `json:"hostId"`
-	JobType     DbSyncJobType `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
-	Name        string        `json:"name"`
-	Comment     string        `json:"comment"`
-	CodeSql     string        `json:"codeSql"`
-	DateAttempt pgtype.Int8   `json:"dateAttempt"`
-	DateSuccess pgtype.Int8   `json:"dateSuccess"`
-	Joins       []QueryJoin   `json:"joins"`
-	Active      bool          `json:"active"`
+	Id      uuid.UUID     `json:"id"`
+	HostId  uuid.UUID     `json:"hostId"`
+	JobType DbSyncJobType `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
+	Name    string        `json:"name"`
+	Comment string        `json:"comment"`
+	CodeSql string        `json:"codeSql"`
+	Joins   []QueryJoin   `json:"joins"`
+	Active  bool          `json:"active"`
+
+	// scheduling (last attempt/success timestamps)
+	// updated in cache on executing node (for speed) and DB (for cache reloads)
+	DateAttempt pgtype.Int8 `json:"dateAttempt"`
+	DateSuccess pgtype.Int8 `json:"dateSuccess"`
 
 	// LOAD
 	DeleteMissing   bool          `json:"deleteMissing"`   // delete non-existing records

@@ -114,8 +114,14 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 
 	// register trigger for SEND jobs for relation/job type combination
 	if slices.Contains(types.DbSyncJobTypesSend, j.JobType) {
-		if err := triggerSendCreateIfNeeded(ctx, tx, j.Id, j.Joins[0].RelationId, j.JobType); err != nil {
-			return nil, err
+		if j.Active {
+			if err := triggerSendCreateIfNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
+				return nil, err
+			}
+		} else {
+			if err := triggerSendRemoveIfNotNeeded(ctx, tx, j.Id, j.Joins[0].RelationId, j.JobType); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return nil, nil
@@ -181,22 +187,22 @@ func jobsDeleteForHost(ctx context.Context, tx pgx.Tx, hostId uuid.UUID) error {
 	}
 	return nil
 }
-func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, jobId, relationId uuid.UUID, jobType types.DbSyncJobType) error {
+func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, jobType types.DbSyncJobType) error {
 
-	// check if there is another job for the same relation/job type combination
+	// check if there is already a job for the same relation/job type combination
 	var exists bool
 	if err := tx.QueryRow(ctx, `
 		SELECT EXISTS(
 			SELECT 1
 			FROM instance_db_sync.job_join AS jj
 			JOIN instance_db_sync.job      AS j ON j.id = jj.job_id
-			WHERE j.id           <> $1
-			AND   j.job_type     =  $2
-			AND   jj.relation_id =  $3
+			WHERE j.active
+			AND   j.job_type     =  $1
+			AND   jj.relation_id =  $2
 			AND   jj.index       =  0
 			LIMIT 1
 		)
-	`, jobId, jobType, relationId).Scan(&exists); err != nil {
+	`, jobType, relationId).Scan(&exists); err != nil {
 		return err
 	}
 
@@ -204,7 +210,7 @@ func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, jobId, relationId
 		return nil
 	}
 
-	// no job exists, create trigger
+	// create missing trigger
 	var triggerEvent string
 	var fncEventName string
 	switch jobType {
@@ -243,7 +249,8 @@ func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId, relatio
 			SELECT 1
 			FROM instance_db_sync.job_join AS jj
 			JOIN instance_db_sync.job      AS j ON j.id = jj.job_id
-			WHERE j.id <> $1
+			WHERE j.active
+			AND   j.id <> $1
 			AND   j.job_type = $2
 			AND   jj.relation_id = $3
 			AND   jj.index = 0
@@ -257,6 +264,7 @@ func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId, relatio
 		return nil
 	}
 
+	// deleted unnecessary trigger
 	modName, relName, err := cache.GetRelationDbNames(relationId)
 	if err != nil {
 		return err
