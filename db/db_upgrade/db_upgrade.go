@@ -586,11 +586,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			VALUES ('dbSync',0,0);
 
 			CREATE TABLE IF NOT EXISTS instance_db_sync.send_spool (
-				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				job_type instance_db_sync.job_type NOT NULL,
 				relation_id uuid NOT NULL,
 				record_id_wofk BIGINT NOT NULL,
-				job_type instance_db_sync.job_type NOT NULL,
-				CONSTRAINT send_spool_pkey PRIMARY KEY (id),
+				date_milli BIGINT NOT NULL,
+				CONSTRAINT send_spool_pkey PRIMARY KEY (job_type, relation_id, record_id_wofk),
 				CONSTRAINT send_spool_relation_id_fkey FOREIGN KEY (relation_id)
 					REFERENCES app.relation (id) MATCH SIMPLE
 					ON UPDATE CASCADE
@@ -598,6 +598,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					DEFERRABLE INITIALLY DEFERRED
 			);
 			CREATE INDEX IF NOT EXISTS fki_send_spool_relation_id_fkey ON instance_db_sync.send_spool USING btree (relation_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS ind_send_spool_date_milli       ON instance_db_sync.send_spool USING btree (date_milli  ASC NULLS LAST);
 
 			CREATE OR REPLACE FUNCTION instance_db_sync.trg_record_send_insert()
 				RETURNS trigger
@@ -609,8 +610,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN NULL;
 				END IF;
 
-				INSERT INTO instance_db_sync.send_spool (relation_id, record_id_wofk, job_type)
-				VALUES (TG_ARGV[0], NEW.id, 'SEND_INSERT');
+				INSERT INTO instance_db_sync.send_spool (job_type, relation_id, record_id_wofk, date_milli)
+				VALUES ('SEND_INSERT', TG_ARGV[0]::UUID, NEW.id, (EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT)
+				ON CONFLICT(job_type, relation_id, record_id_wofk) DO NOTHING;
 
 				RETURN NULL;
 			END;
@@ -626,8 +628,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN NULL;
 				END IF;
 
-				INSERT INTO instance_db_sync.send_spool (relation_id, record_id_wofk, job_type)
-				VALUES (TG_ARGV[0], NEW.id, 'SEND_UPDATE');
+				INSERT INTO instance_db_sync.send_spool (job_type, relation_id, record_id_wofk, date_milli)
+				VALUES ('SEND_UPDATE', TG_ARGV[0]::UUID, NEW.id, (EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT)
+				ON CONFLICT(job_type, relation_id, record_id_wofk) DO NOTHING;
 
 				RETURN NULL;
 			END;
@@ -643,8 +646,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN NULL;
 				END IF;
 
-				INSERT INTO instance_db_sync.send_spool (relation_id, record_id_wofk, job_type)
-				VALUES (TG_ARGV[0], OLD.id, 'SEND_DELETE');
+				INSERT INTO instance_db_sync.send_spool (job_type, relation_id, record_id_wofk, date_milli)
+				VALUES ('SEND_DELETE', TG_ARGV[0]::UUID, OLD.id, (EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT)
+				ON CONFLICT(job_type, relation_id, record_id_wofk) DO NOTHING;
 
 				RETURN NULL;
 			END;

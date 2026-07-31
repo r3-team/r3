@@ -35,24 +35,26 @@ type DbSyncHost struct {
 
 // a job to LOAD from or SEND to external DB systems
 type DbSyncJob struct {
-	Id          uuid.UUID         `json:"id"`
-	HostId      uuid.UUID         `json:"hostId"`
-	Name        string            `json:"name"`
-	Comment     string            `json:"comment"`
-	CodeSql     string            `json:"codeSql"`
-	DateAttempt pgtype.Int8       `json:"dateAttempt"`
-	DateSuccess pgtype.Int8       `json:"dateSuccess"`
-	JobType     DbSyncJobType     `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
-	Columns     []DbSyncJobColumn `json:"columns"`
-	Joins       []QueryJoin       `json:"joins"`
-	Active      bool              `json:"active"`
+	Id          uuid.UUID     `json:"id"`
+	HostId      uuid.UUID     `json:"hostId"`
+	JobType     DbSyncJobType `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
+	Name        string        `json:"name"`
+	Comment     string        `json:"comment"`
+	CodeSql     string        `json:"codeSql"`
+	DateAttempt pgtype.Int8   `json:"dateAttempt"`
+	DateSuccess pgtype.Int8   `json:"dateSuccess"`
+	Joins       []QueryJoin   `json:"joins"`
+	Active      bool          `json:"active"`
 
-	// LOAD only
+	// LOAD
 	DeleteMissing   bool          `json:"deleteMissing"`   // delete non-existing records
 	IntervalSeconds int64         `json:"intervalSeconds"` // execute every X seconds
 	PageLimit       pgtype.Int4   `json:"pageLimit"`       // limit rows fetched in one transaction
 	Lookups         []QueryLookup `json:"lookups"`
 	SkipLogs        bool          `json:"skipLogs"` // skips expensive data SET logs
+
+	// LOAD, SEND_INSERT, SEND_UPDATE
+	Columns []DbSyncJobColumn `json:"columns"`
 }
 
 type DbSyncJobColumn struct {

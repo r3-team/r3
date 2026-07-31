@@ -52,14 +52,14 @@
 	flex-flow:row wrap;
 	gap:var(--spacing);
 }
-.admin-db-sync-job-content-editor{
+.admin-db-sync-job-content-external{
 	flex:3 2 600px;
 	padding:var(--spacing) 0px;
 	display:flex;
 	flex-flow:column nowrap;
 	gap:calc(var(--spacing) / 1.5);
 }
-.admin-db-sync-job-content-editor-input{
+.admin-db-sync-job-content-external-input{
 	flex:1 1 auto;
 	min-height:500px;
 	display:flex;
@@ -83,13 +83,13 @@
 	height:64px;
 	filter:var(--image-filter);
 }
-.admin-db-sync-job-content-options{
+.admin-db-sync-job-content-local{
 	padding:var(--spacing) 0px;
 	flex:1 0 300px;
 	display:flex;
 	flex-flow:column nowrap;
 }
-.admin-db-sync-job-content-options-columns{
+.admin-db-sync-job-content-local-columns{
 	max-height:300px;
 	display:flex;
 	flex-flow:column nowrap;

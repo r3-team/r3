@@ -64,7 +64,7 @@ export default {
 					</div>
 					<div class="row gap centered">
 						<span>{{ capGen.mode }}</span>
-						<select class="auto" v-model="job.jobType" :disabled="readonly || !isNew">
+						<select class="auto" v-model="job.jobType" :disabled="readonly || !isNew || isJoinsMulti">
 							<option v-for="t in jobTypes" :value="t">{{ capApp.jobType[t] }}</option>
 						</select>
 					</div>
@@ -123,23 +123,23 @@ export default {
 			</div>
 
 			<div class="admin-db-sync-job-content">
-				<div class="admin-db-sync-job-content-editor">
-					<my-label image="codeDatabase.png" :caption="capApp.loadSource" :large="true" />
-					<div class="admin-db-sync-job-content-editor-input">
+				<div class="admin-db-sync-job-content-external" :style="styleExternal">
+					<my-label image="codeDatabase.png" :caption="labelExternal" :large="true" />
+					<div class="admin-db-sync-job-content-external-input">
 						<my-code-editor
 							v-model="job.codeSql"
 							:mode="editorMode"
 							:readonly
 						/>
 					</div>
-					<span>{{ capApp.loadSourceHint.replace('{HOST}',hostName) }}</span>
+					<span>{{ labelExternalHint }}</span>
 				</div>
-				<div class="admin-db-sync-job-content-arrow">
+				<div class="admin-db-sync-job-content-arrow" :style="styleArrow">
 					<img src="images/arrowsPushRight.png" />
 				</div>
-				<div class="admin-db-sync-job-content-options column gap-large default-inputs">
+				<div class="admin-db-sync-job-content-local column gap-large default-inputs" :style="styleLocal">
 					<div class="column gap">
-						<my-label image="edit.png" :caption="capApp.loadTargetRelation" :large="true" />
+						<my-label image="edit.png" :caption="labelLocal" :large="true" />
 						<div class="row gap centered">
 							<my-label
 								:image="module ? '' : 'icon_missing.png'"
@@ -162,12 +162,12 @@ export default {
 							v-model="job.joins"
 							@indexRemoved="indexRemoved"
 							:module
-							:protectRelationBase="!isNew"
+							:relationBaseFixed="!isNew"
 							:readonly
 						/>
 					</div>
 					<template v-if="job.joins.length !== 0">
-						<div class="column gap">
+						<div class="column gap" v-if="isLoad">
 							<hr />
 							<my-label image="databaseAsterisk.png" :caption="capApp.loadUniqueIndex" />
 							<my-admin-db-sync-job-lookups
@@ -186,16 +186,16 @@ export default {
 						<div class="column gap">
 							<hr />
 							<div class="row gap centered space-between">
-								<my-label image="files_list2.png" :caption="capApp.loadTargetAttributes" />
+								<my-label image="files_list2.png" :caption="labelAttributes" />
 								<my-button image="add.png"
 									@trigger="columnAdd"
 									:active="!readonly"
 									:caption="capGen.button.add"
 								/>
 							</div>
-							<div class="admin-db-sync-job-content-options-columns" v-if="job.columns.length !== 0">
+							<div class="admin-db-sync-job-content-local-columns" v-if="job.columns.length !== 0">
 								<div class="row gap centered" v-for="(c,i) in job.columns">
-									<span>#{{ i+1 }}</span>
+									<span><b>{{ isLoad ? '#' : '$' }}{{ i+1 }}</b></span>
 									<select @input="columnSetValue($event.target.value,i)" :disabled="readonly" :value="columnGetValue(c)">
 										<template v-for="j in job.joins">
 											<option
@@ -294,12 +294,21 @@ export default {
 		editorMode: s => (s.dbType === 'mssql' ? 'sqlserver' : 'sql'),
 		isLookupOnBaseRelation: s => s.job.lookups.some(v => v.index === 0),
 		isChanged: s => !s.deepIsEqual(s.jobOrg, s.job),
+		isJoinsMulti: s => s.job.joins.length > 1,
 		isLoad: s => s.job.jobType === 'LOAD',
 		isNew: s => s.jobId === null,
 		isPageLimit: s => s.isLoad && s.job.pageLimit !== null,
 		isWithLookups: s => s.job.lookups.length !== 0,
+		labelAttributes: s => s.isLoad ? s.capApp.loadAttributes : s.capApp.sendAttributes,
+		labelExternal: s => s.isLoad ? s.capApp.loadSource : s.capApp.sendTarget.replace('{TYPE}', s.sqlSendType),
+		labelExternalHint: s => s.isLoad ? s.capApp.loadSourceHint.replace('{HOST}', s.hostName) : s.capApp.sendTargetHint.replace('{HOST}', s.hostName).replace('{TYPE}', s.sqlSendType),
+		labelLocal: s => s.isLoad ? s.capApp.loadTarget : s.capApp.sendSource,
 		module: s => s.moduleIdActive !== null ? s.moduleIdMap[s.moduleIdActive] : false,
 		modulesUsable: s => s.modules.filter((v) => v.relations.length !== 0),
+		sqlSendType: s => s.isLoad ? '' : s.job.jobType.replace('SEND_', ''),
+		styleArrow: () => 'order:2;',
+		styleExternal: s => s.isLoad ? 'order:1;' : 'order:3;',
+		styleLocal: s => s.isLoad ? 'order:3;' : 'order:1;',
 
 		// stores
 		capApp: s => s.$store.getters.captions.admin.dbSync,

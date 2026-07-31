@@ -30,12 +30,16 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		return nil, err
 	}
 
-	// reset invalid inputs based on job type
-	if j.JobType != types.DbSyncJobTypeLoad {
-		j.SkipLogs = false
+	// reset irrelevant inputs based on job type
+	switch j.JobType {
+	case types.DbSyncJobTypeLoad:
 		j.DeleteMissing = false
-		j.PageLimit = pgtype.Int4{}
+		j.IntervalSeconds = 0
 		j.Lookups = make([]types.QueryLookup, 0)
+		j.PageLimit = pgtype.Int4{}
+		j.SkipLogs = false
+	case types.DbSyncJobTypeSendDelete:
+		j.Columns = make([]types.DbSyncJobColumn, 0)
 	}
 
 	if len(j.Joins) < 1 {
@@ -110,7 +114,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 
 	// register trigger for SEND jobs for relation/job type combination
 	if slices.Contains(types.DbSyncJobTypesSend, j.JobType) {
-		if err := triggerSendCreateIfNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
+		if err := triggerSendCreateIfNeeded(ctx, tx, j.Id, j.Joins[0].RelationId, j.JobType); err != nil {
 			return nil, err
 		}
 	}
@@ -177,7 +181,7 @@ func jobsDeleteForHost(ctx context.Context, tx pgx.Tx, hostId uuid.UUID) error {
 	}
 	return nil
 }
-func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, jobType types.DbSyncJobType) error {
+func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, jobId, relationId uuid.UUID, jobType types.DbSyncJobType) error {
 
 	// check if there is another job for the same relation/job type combination
 	var exists bool
@@ -186,12 +190,13 @@ func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.U
 			SELECT 1
 			FROM instance_db_sync.job_join AS jj
 			JOIN instance_db_sync.job      AS j ON j.id = jj.job_id
-			WHERE jj.relation_id = $1
-			AND   jj.index       = 0
-			AND   j.job_type     = $2
+			WHERE j.id           <> $1
+			AND   j.job_type     =  $2
+			AND   jj.relation_id =  $3
+			AND   jj.index       =  0
 			LIMIT 1
 		)
-	`, relationId, jobType).Scan(&exists); err != nil {
+	`, jobId, jobType, relationId).Scan(&exists); err != nil {
 		return err
 	}
 
@@ -229,7 +234,7 @@ func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.U
 	return err
 }
 
-func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId uuid.UUID, relationId uuid.UUID, jobType types.DbSyncJobType) error {
+func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId, relationId uuid.UUID, jobType types.DbSyncJobType) error {
 
 	// check if there is another job for the combination of relation/job type that needs this trigger
 	var exists bool

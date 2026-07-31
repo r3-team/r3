@@ -41,7 +41,7 @@ const MyAdminDbSyncJobJoinsNested = {
 				<!-- delete only if last relation in chain -->
 				<my-button image="cancel.png"
 					@trigger="$emit('relationRemove',index)"
-					:active="!readonly && joins.length === 0 && (!isBaseRelation || !protectRelationBase)"
+					:active="!readonly && joins.length === 0 && (!isBaseRelation || !relationBaseFixed)"
 					:naked="true"
 				/>
 			</div>
@@ -78,7 +78,7 @@ const MyAdminDbSyncJobJoinsNested = {
 				:joinRelationId="j.joinRelationId"
 				:module
 				:readonly
-				:protectRelationBase
+				:relationBaseFixed
 				:relationIdParent="joinRelationId"
 			/>
 		</div>
@@ -99,7 +99,7 @@ const MyAdminDbSyncJobJoinsNested = {
 		joinAttributeId: { required: true },
 		joinRelationId: { type: String, required: true },
 		module: { type: Object, required: true },
-		protectRelationBase: { type: Boolean, required: true },
+		relationBaseFixed: { type: Boolean, required: true },
 		readonly: { type: Boolean, required: true },
 		relationIdParent: { type: String, required: false, default: null }
 	},
@@ -234,14 +234,14 @@ export default {
 			:joinRelationId="relationsNested.joinRelationId"
 			:key="relationsNested.index"
 			:module
-			:protectRelationBase
+			:relationBaseFixed
 			:readonly
 		/>
 	</div>`,
 	props: {
 		module: { type: Object, required: true },
 		modelValue: { type: Array, required: true },
-		protectRelationBase: { type: Boolean, required: true },
+		relationBaseFixed: { type: Boolean, required: true },
 		readonly: { type: Boolean, required: true },
 	},
 	emits: ['indexRemoved', 'update:modelValue'],
