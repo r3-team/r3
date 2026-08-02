@@ -17,11 +17,12 @@ const MyAdminDbSyncJobJoinsNested = {
 			<div class="options" v-if="!readonly">
 				<img v-if="index !== 0" class="option clickable" :src="iconJoin" :title="iconJoinTitle" @click="toggleConnector" />
 
-				<img class="option clickable" src="images/databaseAdd.png"
-					@click="relationAddShow = !relationAddShow"
-					:title="capApp.joinAddHint"
+				<my-button image="databaseAdd.png"
+					@trigger="relationAddShow = !relationAddShow"
+					:active="!readonly && !relationBaseOnly"
+					:captionTitle="capApp.joinAddHint"
+					:naked="true"
 				/>
-
 				<img class="option clickable toggle" src="images/recordCreate.png"
 					@click="toggleApply('create')"
 					:class="{ off:!applyCreate }"
@@ -79,6 +80,7 @@ const MyAdminDbSyncJobJoinsNested = {
 				:module
 				:readonly
 				:relationBaseFixed
+				:relationBaseOnly
 				:relationIdParent="joinRelationId"
 			/>
 		</div>
@@ -100,6 +102,7 @@ const MyAdminDbSyncJobJoinsNested = {
 		joinRelationId: { type: String, required: true },
 		module: { type: Object, required: true },
 		relationBaseFixed: { type: Boolean, required: true },
+		relationBaseOnly: { type: Boolean, required: true },
 		readonly: { type: Boolean, required: true },
 		relationIdParent: { type: String, required: false, default: null }
 	},
@@ -235,6 +238,7 @@ export default {
 			:key="relationsNested.index"
 			:module
 			:relationBaseFixed
+			:relationBaseOnly
 			:readonly
 		/>
 	</div>`,
@@ -242,6 +246,7 @@ export default {
 		module: { type: Object, required: true },
 		modelValue: { type: Array, required: true },
 		relationBaseFixed: { type: Boolean, required: true },
+		relationBaseOnly: { type: Boolean, required: true },
 		readonly: { type: Boolean, required: true },
 	},
 	emits: ['indexRemoved', 'update:modelValue'],

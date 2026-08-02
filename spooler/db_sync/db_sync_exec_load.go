@@ -42,7 +42,7 @@ func doLoad(j types.DbSyncJob) error {
 	dbExt, err := getExtCon(ctx, j.HostId)
 	if err != nil {
 		if err == types.ErrHostInactive {
-			log.Info(log.ContextDbSync, "skipping job for inactive host")
+			log.Info(log.ContextDbSync, fmt.Sprintf("skipping job '%s' for inactive host", j.Name))
 			return nil
 		}
 		return err

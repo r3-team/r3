@@ -37,7 +37,13 @@ func doSend(jobs []types.DbSyncJob, jobType types.DbSyncJobType, relationIdMapRe
 			if err := storeJobDateNow(j.Id, "attempt"); err != nil {
 				return err
 			}
-			rows, err := doSendFetch(ctx, j, relationId, rel.AttributeIdPk, recordIds)
+			// fetch local record data based on job type
+			var rows [][]any
+			if j.JobType == types.DbSyncJobTypeSendDelete {
+				rows, err = doSendFetchDeleted(ctx, j, relationId, recordIds)
+			} else {
+				rows, err = doSendFetchActive(ctx, j, relationId, rel.AttributeIdPk, recordIds)
+			}
 			if err != nil {
 				log.Error(log.ContextDbSync, fmt.Sprintf("failed to execute job '%s'", j.Name), err)
 				anyFailures = true
@@ -63,7 +69,7 @@ func doSend(jobs []types.DbSyncJob, jobType types.DbSyncJobType, relationIdMapRe
 	return nil
 }
 
-func doSendFetch(ctx context.Context, j types.DbSyncJob, relationId, attributeIdPk uuid.UUID, recordIds []int64) ([][]any, error) {
+func doSendFetchActive(ctx context.Context, j types.DbSyncJob, relationId, attributeIdPk uuid.UUID, recordIds []int64) ([][]any, error) {
 
 	// fetch record data from local DB
 	dataGet := types.DataGet{
@@ -116,13 +122,66 @@ func doSendFetch(ctx context.Context, j types.DbSyncJob, relationId, attributeId
 	return rows, nil
 }
 
+func doSendFetchDeleted(ctx context.Context, j types.DbSyncJob, relationId uuid.UUID, recordIds []int64) ([][]any, error) {
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, `
+		SELECT record_data_deleted
+		FROM instance_db_sync.send_spool
+		WHERE job_type       = $1
+		AND   relation_id    = $2
+		AND   record_id_wofk = ANY($3)
+	`, types.DbSyncJobTypeSendDelete, relationId, recordIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// lookup attribute names for every job column
+	// data field for deleted records contains all OLD values as JSONB, key = attribute name
+	columnAtrNames := make([]string, len(j.Columns))
+	for i, column := range j.Columns {
+		atr, err := cache.GetAttributeById(column.AttributeId)
+		if err != nil {
+			return nil, err
+		}
+		columnAtrNames[i] = atr.Name
+	}
+
+	resultRows := make([][]any, 0, len(recordIds))
+	for rows.Next() {
+		var d map[string]any
+		if err := rows.Scan(&d); err != nil {
+			return nil, err
+		}
+
+		values := make([]any, len(columnAtrNames))
+		for i, name := range columnAtrNames {
+
+			value, exists := d[name]
+			if exists {
+				values[i] = value
+			} else {
+				values[i] = nil
+			}
+		}
+		resultRows = append(resultRows, values)
+	}
+	return resultRows, nil
+}
+
 func doSendStore(ctx context.Context, j types.DbSyncJob, rows [][]any) error {
 
 	// store records to external DB
 	dbExt, err := getExtCon(ctx, j.HostId)
 	if err != nil {
 		if err == types.ErrHostInactive {
-			log.Info(log.ContextDbSync, "skipping job for inactive host")
+			log.Info(log.ContextDbSync, fmt.Sprintf("skipping job '%s' for inactive host", j.Name))
 			return nil
 		}
 		return err
@@ -147,6 +206,6 @@ func doSendStore(ctx context.Context, j types.DbSyncJob, rows [][]any) error {
 		return err
 	}
 
-	log.Info(log.ContextDbSync, fmt.Sprintf("saved %d loaded rows to external DB", len(rows)))
+	log.Info(log.ContextDbSync, fmt.Sprintf("sent %d row changes to external DB", len(rows)))
 	return nil
 }

@@ -163,6 +163,7 @@ export default {
 							@indexRemoved="indexRemoved"
 							:module
 							:relationBaseFixed="!isNew"
+							:relationBaseOnly="isSendDelete"
 							:readonly
 						/>
 					</div>
@@ -297,6 +298,7 @@ export default {
 		isChanged: s => !s.deepIsEqual(s.jobOrg, s.job),
 		isJoinsMulti: s => s.job.joins.length > 1,
 		isLoad: s => s.job.jobType === 'LOAD',
+		isSendDelete: s => s.job.jobType === 'SEND_DELETE',
 		isNew: s => s.jobId === null,
 		isPageLimit: s => s.isLoad && s.job.pageLimit !== null,
 		isWithLookups: s => s.job.lookups.length !== 0,

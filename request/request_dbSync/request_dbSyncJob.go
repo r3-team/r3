@@ -36,8 +36,6 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		j.Lookups = make([]types.QueryLookup, 0)
 		j.PageLimit = pgtype.Int4{}
 		j.SkipLogs = false
-	case types.DbSyncJobTypeSendDelete:
-		j.Columns = make([]types.DbSyncJobColumn, 0)
 	}
 
 	if len(j.Joins) < 1 {

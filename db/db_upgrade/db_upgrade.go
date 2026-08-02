@@ -589,6 +589,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				job_type instance_db_sync.job_type NOT NULL,
 				relation_id uuid NOT NULL,
 				record_id_wofk BIGINT NOT NULL,
+				record_data_deleted JSONB,
 				date_milli BIGINT NOT NULL,
 				CONSTRAINT send_spool_pkey PRIMARY KEY (job_type, relation_id, record_id_wofk),
 				CONSTRAINT send_spool_relation_id_fkey FOREIGN KEY (relation_id)
@@ -646,8 +647,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN NULL;
 				END IF;
 
-				INSERT INTO instance_db_sync.send_spool (job_type, relation_id, record_id_wofk, date_milli)
-				VALUES ('SEND_DELETE', TG_ARGV[0]::UUID, OLD.id, (EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT)
+				INSERT INTO instance_db_sync.send_spool (job_type, relation_id, record_id_wofk, record_data_deleted, date_milli)
+				VALUES ('SEND_DELETE', TG_ARGV[0]::UUID, OLD.id, TO_JSONB(OLD), (EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT)
 				ON CONFLICT(job_type, relation_id, record_id_wofk) DO NOTHING;
 
 				RETURN NULL;
