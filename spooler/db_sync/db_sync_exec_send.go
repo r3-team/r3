@@ -69,7 +69,7 @@ func doSendFetch(ctx context.Context, j types.DbSyncJob, relationId, attributeId
 	dataGet := types.DataGet{
 		RelationId:  relationId,
 		IndexSource: 0,
-		Limit:       1,
+		Limit:       len(recordIds),
 	}
 	for _, join := range j.Joins {
 		if join.Index == 0 {

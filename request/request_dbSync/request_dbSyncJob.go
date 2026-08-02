@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"r3/cache"
 	"r3/cache/cache_dbSync"
-	"r3/schema"
 	"r3/types"
 	"slices"
 
@@ -44,6 +42,14 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 
 	if len(j.Joins) < 1 {
 		return nil, fmt.Errorf("DB sync job requires at least one relation")
+	}
+	isSend := slices.Contains(types.DbSyncJobTypesSend, j.JobType)
+
+	// register trigger for SEND jobs for relation/job type combination
+	if j.Active && isSend {
+		if err := triggerSendCreateIfNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
+			return nil, err
+		}
 	}
 
 	// cannot update host or job type
@@ -112,16 +118,10 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		}
 	}
 
-	// register trigger for SEND jobs for relation/job type combination
-	if slices.Contains(types.DbSyncJobTypesSend, j.JobType) {
-		if j.Active {
-			if err := triggerSendCreateIfNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
-				return nil, err
-			}
-		} else {
-			if err := triggerSendRemoveIfNotNeeded(ctx, tx, j.Id, j.Joins[0].RelationId, j.JobType); err != nil {
-				return nil, err
-			}
+	// deregister trigger for SEND jobs for relation/job type combination
+	if !j.Active && isSend {
+		if err := triggerSendRemoveIfNotNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
+			return nil, err
 		}
 	}
 	return nil, nil
@@ -149,14 +149,16 @@ func jobDeleteById(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
+	if _, err := tx.Exec(ctx, `DELETE FROM instance_db_sync.job WHERE id = $1`, id); err != nil {
+		return err
+	}
+
 	if slices.Contains(types.DbSyncJobTypesSend, jobType) {
-		if err := triggerSendRemoveIfNotNeeded(ctx, tx, id, relationId, jobType); err != nil {
+		if err := triggerSendRemoveIfNotNeeded(ctx, tx, relationId, jobType); err != nil {
 			return err
 		}
 	}
-
-	_, err := tx.Exec(ctx, `DELETE FROM instance_db_sync.job WHERE id = $1`, id)
-	return err
+	return nil
 }
 func jobsDeleteForHost(ctx context.Context, tx pgx.Tx, hostId uuid.UUID) error {
 
@@ -186,92 +188,4 @@ func jobsDeleteForHost(ctx context.Context, tx pgx.Tx, hostId uuid.UUID) error {
 		}
 	}
 	return nil
-}
-func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, jobType types.DbSyncJobType) error {
-
-	// check if there is already a job for the same relation/job type combination
-	var exists bool
-	if err := tx.QueryRow(ctx, `
-		SELECT EXISTS(
-			SELECT 1
-			FROM instance_db_sync.job_join AS jj
-			JOIN instance_db_sync.job      AS j ON j.id = jj.job_id
-			WHERE j.active
-			AND   j.job_type     =  $1
-			AND   jj.relation_id =  $2
-			AND   jj.index       =  0
-			LIMIT 1
-		)
-	`, jobType, relationId).Scan(&exists); err != nil {
-		return err
-	}
-
-	if exists {
-		return nil
-	}
-
-	// create missing trigger
-	var triggerEvent string
-	var fncEventName string
-	switch jobType {
-	case types.DbSyncJobTypeSendDelete:
-		triggerEvent = "DELETE"
-		fncEventName = "delete"
-	case types.DbSyncJobTypeSendInsert:
-		triggerEvent = "INSERT"
-		fncEventName = "insert"
-	case types.DbSyncJobTypeSendUpdate:
-		triggerEvent = "UPDATE"
-		fncEventName = "update"
-	default:
-		return fmt.Errorf("unknown job type: '%s'", jobType)
-	}
-
-	modName, relName, err := cache.GetRelationDbNames(relationId)
-	if err != nil {
-		return err
-	}
-
-	_, err = tx.Exec(ctx, fmt.Sprintf(`
-		CREATE TRIGGER "%s" AFTER %s ON "%s"."%s" FOR EACH ROW
-		EXECUTE FUNCTION instance_db_sync.trg_record_send_%s('%s');
-	`, schema.GetDbSyncTriggerName(relationId, jobType), triggerEvent, modName, relName, fncEventName, relationId))
-
-	return err
-}
-
-func triggerSendRemoveIfNotNeeded(ctx context.Context, tx pgx.Tx, jobId, relationId uuid.UUID, jobType types.DbSyncJobType) error {
-
-	// check if there is another job for the combination of relation/job type that needs this trigger
-	var exists bool
-	if err := tx.QueryRow(ctx, `
-		SELECT EXISTS(
-			SELECT 1
-			FROM instance_db_sync.job_join AS jj
-			JOIN instance_db_sync.job      AS j ON j.id = jj.job_id
-			WHERE j.active
-			AND   j.id <> $1
-			AND   j.job_type = $2
-			AND   jj.relation_id = $3
-			AND   jj.index = 0
-			LIMIT 1
-		)
-	`, jobId, jobType, relationId).Scan(&exists); err != nil {
-		return err
-	}
-
-	if exists {
-		return nil
-	}
-
-	// deleted unnecessary trigger
-	modName, relName, err := cache.GetRelationDbNames(relationId)
-	if err != nil {
-		return err
-	}
-
-	_, err = tx.Exec(ctx, fmt.Sprintf(`DROP TRIGGER IF EXISTS "%s" ON "%s"."%s"`,
-		schema.GetDbSyncTriggerName(relationId, jobType), modName, relName))
-
-	return err
 }
