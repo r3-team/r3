@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Lejárt változásnaplók tisztítása",
 				"cleanupFiles": "Lejárt fájlfeltöltések tisztítása",
 				"cleanupLogs": "Lejárt rendszer naplók tisztítása",
-				"cleanupMailTraffic": "Cleanup expired email traffic entries",
 				"cleanupTempDir": "Ideiglenes könyvtár tisztítása",
 				"clusterCheckIn": "Klaszter csomópont regisztráció",
 				"clusterProcessEvents": "Klaszter események feldolgozása",

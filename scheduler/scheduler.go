@@ -361,9 +361,6 @@ func load() error {
 		case "cleanupFiles":
 			t.nameLog = "Cleanup of not-referenced files"
 			t.fn = cleanUpFiles
-		case "cleanupMailTraffic":
-			t.nameLog = "Cleanup of mail traffic entries"
-			t.fn = cleanupMailTraffic
 		case "clusterCheckIn":
 			t.nameLog = "Cluster node check-in to database"
 			t.fn = cluster.CheckInNode

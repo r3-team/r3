@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Cleanup expired change logs",
 				"cleanupFiles": "Cleanup expired file uploads",
 				"cleanupLogs": "Cleanup expired system logs",
-				"cleanupMailTraffic": "Cleanup expired email traffic entries",
 				"cleanupTempDir": "Cleanup temporary directory",
 				"clusterCheckIn": "Cluster check-in",
 				"clusterProcessEvents": "Cluster event processing",

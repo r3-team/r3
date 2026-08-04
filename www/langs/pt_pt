@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Limpar registos de alterações expirados",
 				"cleanupFiles": "Limpar ficheiros carregados expirados",
 				"cleanupLogs": "Limpar registos do sistema expirados",
-				"cleanupMailTraffic": "Limpar entradas de tráfego de e-mail expiradas",
 				"cleanupTempDir": "Limpar diretório temporário",
 				"clusterCheckIn": "Registo do cluster",
 				"clusterProcessEvents": "Processamento de eventos do cluster",

@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Süresi dolmuş değişiklik günlüklerini temizleme",
 				"cleanupFiles": "Süresi dolmuş dosya yüklemelerini temizleme",
 				"cleanupLogs": "Süresi dolmuş sistem günlüklerini temizleme",
-				"cleanupMailTraffic": "Süresi dolmuş e-posta trafiği girişlerini temizleme",
 				"cleanupTempDir": "Geçici dizini temizle",
 				"clusterCheckIn": "Küme girişi",
 				"clusterProcessEvents": "Küme olayı işleme",

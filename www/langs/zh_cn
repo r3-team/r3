@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "清理过期的更改日志",
 				"cleanupFiles": "清理过期的文件上传",
 				"cleanupLogs": "清理过期的系统日志",
-				"cleanupMailTraffic": "清理过期的电子邮件流量条目",
 				"cleanupTempDir": "清理临时目录",
 				"clusterCheckIn": "集群签入",
 				"clusterProcessEvents": "集群事件处理",

@@ -592,11 +592,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_job_log_job_id_fkey ON instance_db_sync.job_log USING btree (job_id   ASC  NULLS LAST);
 			CREATE INDEX IF NOT EXISTS ind_job_log_date_ran    ON instance_db_sync.job_log USING btree (date_ran DESC NULLS LAST);
 
+			INSERT INTO instance.config (name,value) VALUES ('dbSyncJobLogKeepDays','90');
+
 			INSERT INTO instance.task (name,interval_seconds,cluster_master_only,embedded_only,active_only,active)
 			VALUES ('dbSync',15,true,false,false,true);
 
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('dbSync',0,0);
+
+			DELETE FROM instance.task     WHERE name      = 'cleanupMailTraffic';
+			DELETE FROM instance.schedule WHERE task_name = 'cleanupMailTraffic';
 
 			CREATE TABLE IF NOT EXISTS instance_db_sync.send_spool (
 				job_type instance_db_sync.job_type NOT NULL,

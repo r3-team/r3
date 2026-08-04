@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Curățare jurnalele de modificări expirate",
 				"cleanupFiles": "Curățați fișierele încărcate expirate",
 				"cleanupLogs": "Curățați jurnalele de sistem expirate",
-				"cleanupMailTraffic": "Cleanup expired email traffic entries",
 				"cleanupTempDir": "Curățați directorul temporar",
 				"clusterCheckIn": "Cluster check-in",
 				"clusterProcessEvents": "Cluster event processing",

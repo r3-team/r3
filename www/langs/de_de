@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Bereinigung abgelaufener Änderungshistorie",
 				"cleanupFiles": "Bereinigung abgelaufener Datei-Uploads",
 				"cleanupLogs": "Bereinigung abgelaufener Systemlogs",
-				"cleanupMailTraffic": "Bereinigung abgelaufener E-Mail-Verkehr-Einträge",
 				"cleanupTempDir": "Bereinigung des temporären Verzeichnisses",
 				"clusterCheckIn": "Cluster-Knoten einchecken",
 				"clusterProcessEvents": "Cluster-Ereignisse verarbeiten",

@@ -55,33 +55,39 @@ func cleanupLogs() error {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
 	defer ctxCanc()
 
+	// system logs
 	keepForDays := config.GetUint64("logsKeepDays")
-	if keepForDays == 0 {
-		return nil
+	if keepForDays != 0 {
+		if _, err := db.Pool.Exec(ctx, `
+			DELETE FROM instance.log
+			WHERE date_milli < $1
+		`, (tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays)))*1000); err != nil {
+			return err
+		}
 	}
 
-	_, err := db.Pool.Exec(ctx, `
-		DELETE FROM instance.log
-		WHERE date_milli < $1
-	`, (tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays)))*1000)
-	return err
-}
-
-// deletes expired mail traffic entries
-func cleanupMailTraffic() error {
-	keepForDays := config.GetUint64("mailTrafficKeepDays")
-	if keepForDays == 0 {
-		return nil
+	// mail traffic logs
+	keepForDays = config.GetUint64("mailTrafficKeepDays")
+	if keepForDays != 0 {
+		if _, err := db.Pool.Exec(ctx, `
+			DELETE FROM instance.mail_traffic
+			WHERE date < $1
+		`, tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays))); err != nil {
+			return err
+		}
 	}
 
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
-	defer ctxCanc()
-
-	_, err := db.Pool.Exec(ctx, `
-		DELETE FROM instance.mail_traffic
-		WHERE date < $1
-	`, tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays)))
-	return err
+	// DB sync job logs
+	keepForDays = config.GetUint64("dbSyncJobLogKeepDays")
+	if keepForDays != 0 {
+		if _, err := db.Pool.Exec(ctx, `
+			DELETE FROM instance_db_sync.job_log
+			WHERE date_ran < $1
+		`, tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays))); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // removes files that were deleted from their attribute or that are not assigned to a record
@@ -127,14 +133,14 @@ func cleanUpFiles() error {
 		rows, err := db.Pool.Query(context.Background(), `
 			SELECT v.file_id, v.version
 			FROM instance.file_version AS v
-			
+
 			-- never touch the latest version
 			WHERE v.version <> (
 				SELECT MAX(s.version)
 				FROM instance.file_version AS s
 				WHERE s.file_id = v.file_id
 			)
-			
+
 			-- retention count not fulfilled
 			AND (
 				SELECT COUNT(*) AS newer_version_cnt
@@ -142,10 +148,10 @@ func cleanUpFiles() error {
 				WHERE c.file_id = v.file_id
 				AND   c.version > v.version
 			) > $1
-			
+
 			-- retention days not fulfilled
 			AND v.date_change < $2
-			
+
 			ORDER BY file_id ASC, version DESC
 			LIMIT $3
 		`, fileVersionsKeepCount, fileVersionsKeepUntil, processLimit)

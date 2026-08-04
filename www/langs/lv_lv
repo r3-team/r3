@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Notīrīt beidzoties izmaiņu žurnālu ierakstiem",
 				"cleanupFiles": "Notīrīt beidzoties augšupielādēto failu",
 				"cleanupLogs": "Notīrīt beidzoties sistēmas žurnālu",
-				"cleanupMailTraffic": "Notīrīt beidzoties e-pasta satiksmes ierakstiem",
 				"cleanupTempDir": "Notīrīt pagaidu katalogu",
 				"clusterCheckIn": "Pārbaudīt klastra statusu",
 				"clusterProcessEvents": "Apstrādāt klastra notikumus",

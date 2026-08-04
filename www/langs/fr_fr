@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Nettoyer les journaux de modifications expirés",
 				"cleanupFiles": "Nettoyer les téléchargements de fichiers expirés",
 				"cleanupLogs": "Nettoyer les journaux système expirés",
-				"cleanupMailTraffic": "Nettoyer les entrées de trafic email expirées",
 				"cleanupTempDir": "Nettoyer le répertoire temporaire",
 				"clusterCheckIn": "Vérification de cluster",
 				"clusterProcessEvents": "Traitement des événements de cluster",

@@ -589,7 +589,6 @@
 				"cleanupDataLogs": "Pulisci i log delle modifiche scadute",
 				"cleanupFiles": "Elimina i caricamenti di file scaduti",
 				"cleanupLogs": "Pulisci i log di sistema scaduti",
-				"cleanupMailTraffic": "Cleanup expired email traffic entries",
 				"cleanupTempDir": "Pulisci cartella temporanea",
 				"clusterCheckIn": "Cluster check-in",
 				"clusterProcessEvents": "Cluster event processing",
