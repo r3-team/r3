@@ -69,6 +69,8 @@ func getExtCon(ctx context.Context, hostId uuid.UUID) (*sql.DB, error) {
 	var dbExt *sql.DB
 
 	switch host.DbType {
+	case "mssql":
+		dbExt, err = getDbConMssql(host)
 	case "mysql":
 		dbExt, err = getDbConMysql(host)
 	case "pgsql":
