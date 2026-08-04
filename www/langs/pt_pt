@@ -135,6 +135,40 @@
 			"tokenKeepEnable": "Permitir que os utilizadores se mantenham ligados",
 			"tokenKeepEnableHint": "Se desativado, a opção 'manter-se ligado' é removida da página de início de sessão. Sem esta opção, os utilizadores devem autenticar-se sempre que acedem ao sistema. Esta definição não afeta o acesso a dispositivos, como subscrições de calendário ou clientes REI3."
 		},
+		"dbSync": {
+			"address": "Network address",
+			"dbName": "Database name",
+			"dbType": "Database type",
+			"deleteMissing": "Delete records not in source",
+			"dialog": {
+				"delete": "Are you sure you want to delete this database sync?"
+			},
+			"jobType": {
+				"LOAD": "Load records",
+				"SEND_DELETE": "Send deleted record",
+				"SEND_INSERT": "Send created record",
+				"SEND_UPDATE": "Send updated record"
+			},
+			"loadAttributes": "Assign SELECT expressions to attributes",
+			"loadSource": "Load records via SQL query (SELECT)",
+			"loadSourceHint": "SQL is executed on the host '{HOST}'. Each SELECT expression (column 1, column 2, sub query, ...) must be assigned to an attribute in the correct order.",
+			"loadTarget": "Write loaded records to relation",
+			"loadUniqueIndex": "Unique indexes for updating records",
+			"sendAttributes": "Assign attributes to parameters",
+			"sendSource": "Load records from relation",
+			"sendTarget": "Write records via SQL query ({TYPE})",
+			"sendTargetHint": "SQL is executed on the host '{HOST}'. Each selected attribute is available as parameter ($1, $2, ...) in {TYPE} query.",
+			"title": "Database sync '{NAME}'",
+			"titleJob": "Sync job '{NAME}'",
+			"titleJobNew": "New sync job",
+			"titleNew": "New database sync",
+			"warning": {
+				"missingIndexAttribute": "When using a unqiue index for updating records, all attributes of the index must be assigned as expressions.",
+				"missingLimit": "When a page limit is used, placeholders for LIMIT & OFFSET must be set in the SELECT SQL query. Example: LIMIT {SQL_LIMIT} OFFSET {SQL_OFFSET}",
+				"missingOrder": "When a page limit is used, an ORDER BY clause should be included to ensure clean page offsets.",
+				"missingSelect": "To load records, SQL query should start with a SELECT statement."
+			}
+		},
 		"files": {
 			"deleteDate": "Ficheiro eliminado",
 			"fileVersionsKeepCount": "Manter pelo menos X versões de ficheiros",
@@ -308,7 +342,9 @@
 				"backup": "Cópia de segurança",
 				"cache": "Cache",
 				"cluster": "Cluster",
+				"code": "QR-/barcode generation",
 				"csv": "Importação/exportação CSV",
+				"dbSync": "Database sync",
 				"doc": "Criador de PDF",
 				"file": "Processamento de ficheiros",
 				"imager": "Processamento de imagens",
@@ -387,6 +423,8 @@
 					"tls": "SSL/TLS"
 				}
 			},
+			"resendCount": "Max. resend attempts",
+			"sendCount": "Max. number of emails",
 			"subject": "Assunto",
 			"testAccount": "Selecionar conta",
 			"testOk": "O e-mail de teste foi adicionado ao spooler com sucesso.",
@@ -442,6 +480,7 @@
 		"navigationCluster": "Cluster",
 		"navigationConfig": "Sistema",
 		"navigationCustom": "Personalização",
+		"navigationDbSync": "Database sync",
 		"navigationFiles": "Ficheiros",
 		"navigationLdaps": "Conectores LDAP",
 		"navigationLicense": "Profissional",
@@ -554,7 +593,9 @@
 				"cleanupTempDir": "Limpar diretório temporário",
 				"clusterCheckIn": "Registo do cluster",
 				"clusterProcessEvents": "Processamento de eventos do cluster",
+				"codesGenerate": "Generate QR-/barcodes",
 				"dbOptimize": "Otimização da base de dados",
+				"dbSync": "Database sync",
 				"docsGenerate": "Gerar documentos PDF",
 				"filesProcess": "Processamento de tarefas de ficheiros",
 				"httpCertRenew": "Recarregar certificado SSL se atualizado",
@@ -649,6 +690,7 @@
 			"versionHint": "Número de versão para esta API. As versões são frequentemente usadas para oferecer novas funcionalidades sem quebrar chamadas anteriores. Não podem existir duas APIs com o mesmo nome e número de versão.",
 			"warning": {
 				"noData": "Para que a API funcione, deve ser selecionada pelo menos 1 relação (separador 'Conteúdo') e pelo menos 1 coluna deve estar ativa.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "As chamadas POST falham ao atualizar registos sem pesquisas de registos (separador 'Conteúdo'). Pelo menos 1 relação está configurada como 'UPDATE' sem uma pesquisa de registos.",
 				"postSubQuery": "As chamadas POST falham se forem incluídas subconsultas. Pelo menos 1 coluna é uma subconsulta."
 			},
@@ -671,6 +713,7 @@
 			"titleAssigned": "Atribuído"
 		},
 		"attribute": {
+			"barcodes": "Barcodes/QR codes",
 			"bigint": "Valores grandes",
 			"bigintDates": "Suportar datas após 2038",
 			"bigintDatesHint": "Necessita mais espaço de armazenamento, mas permite valores de data após janeiro de 2038.",
@@ -909,6 +952,8 @@
 				"serieTypeScatter": "Dispersão",
 				"series": "Séries"
 			},
+			"collapseAllow": "Can be collapsed",
+			"collapseDefault": "Collapsed by default",
 			"collectionHint": "*A coleção só é afetada se for selecionada como critério de filtro na consulta de dados.",
 			"collectionIdDef": "Valor(es) predefinido(s) da coleção",
 			"collectionTitle": "Filtrar coleção",
@@ -1019,7 +1064,7 @@
 			"ganttBatch": "Grupo Gantt",
 			"ganttNotes": "O primeiro lote de colunas agrupa resultados.",
 			"ganttSteps": "Intervalo Gantt",
-			"ganttStepsToggle": "Alternar intervalo Gantt",
+			"ganttStepsShown": "Gantt interval choices",
 			"headerRichtext": "Texto enriquecido",
 			"headerSize": "Tamanho",
 			"helpText": "Texto de ajuda",
@@ -1063,8 +1108,6 @@
 					"slider": "controlo deslizante de valor",
 					"url": "URL"
 				},
-				"ganttStepsDays": "dias",
-				"ganttStepsHours": "horas",
 				"style": {
 					"bold": "Negrito",
 					"italic": "Itálico"
@@ -1074,7 +1117,6 @@
 			"recordTitle": "Mostrar título do registo",
 			"recordTitleHint": "Mostra um nome ou etiqueta do registo aberto. Os títulos de registo devem ser configurados na relação.",
 			"scale": "Escala de UI",
-			"subQuery": "Subconsulta",
 			"systemDefaults": {
 				"false": "Valor 'Não'",
 				"fixed": "Valor personalizado",
@@ -1288,6 +1330,7 @@
 			},
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Aborta a operação e envia uma mensagem para o utilizador que é mostrada na interface.",
+				"barcode_generate": "instance.barcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a barcode image with a given value. The created barcode image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the barcode.</li><li>format: 'CODABAR', 'CODE_39', 'CODE_128', 'EAN_8', 'EAN_13' or 'UPC_A'</li><li>size_x/y: Size of barcode in pixels.</li><li>attribute_id: ID of the attribute that the barcode is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the barcode has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the barcode has been processed.</li></ul>",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Elimina as chaves de dados de encriptação de ponta a ponta para os registos a que um utilizador já não tem acesso. Isto torna a desencriptação impossível para o utilizador.",
 				"data_log_comment_create": "instance.data_log_comment_create({ARGS}) => VOID<br /><br />Cria um comentário no histórico de registo de alterações para o registo fornecido na relação escolhida. Um comentário pode ser qualquer valor de texto, incluindo HTML simples.<br /><br />Os comentários, como todos os registos de alterações, são removidos quando as definições de retenção de registos são satisfeitas.<br /><br />Para definir que um comentário veio de um utilizador específico, pode ser fornecido um ID de utilizador; se o ID de utilizador for NULL, o comentário é definido como tendo vindo do sistema.",
 				"data_log_delete": "instance.data_log_delete({ARGS}) => VOID<br /><br />Elimina o histórico de registo de alterações para o registo fornecido na relação escolhida.",
@@ -1317,6 +1360,7 @@
 				"mail_delete_after_attach": "instance.mail_delete_after_attach({ARGS}) => INTEGER<br /><br />Marca os anexos do e-mail para serem adicionados a um atributo de ficheiro do registo especificado; o e-mail e os seus anexos são posteriormente eliminados.",
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail<br /><br />Devolve o próximo e-mail recebido do spooler de e-mail; devolve NULL se não houver e-mails disponíveis. Quando um nome de conta é especificado, devolve apenas os e-mails recebidos com a conta dada.<br /><br />O tipo devolvido 'instance.mail' consiste em:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Após processar um e-mail, deve ser eliminado; diretamente (mail_delete) ou após armazenar os seus anexos (mail_delete_after_attach).",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER<br /><br />Gera um e-mail de saída para o spooler de e-mail. Parâmetros opcionais:<ul><li>Lista separada por vírgulas de destinatários TO/CC/BCC (um destes deve ser definido)</li><li>Nome da conta de e-mail a partir da qual enviar (é usada uma conta aleatória se não for especificada)</li><li>Atributo de ficheiro e registo a partir dos quais anexar ficheiros</li></ul>",
+				"qrcode_generate": "instance.qrcode_generate({ARGS}) => INTEGER<br /><br />Creates a job to generate a QR code image with a given value. The created QR code image is then stored either in a QR-/barcode attribute as data, or attached as a file to a files attribute. Relevant parameters:<ul><li>text_value: The value of the QR code.</li><li>error_correction: Error correction level, such as 'L' (low), 'M' (medium), 'Q' (quartile) or 'H' (high)</li><li>size_x/y: Size of QR code in pixels.</li><li>attribute_id: ID of the attribute that the QR code is stored in (if QR-/barcode attribute) or attached to (if files attribute).</li><li>record_id: ID of record to update attribute value of.</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the QR code has been processed, it must have one parameter: callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the QR code has been processed.</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER<br /><br />Adiciona uma chamada HTTP REST ao spooler interno para execução imediata. Os métodos suportados são: DELETE, GET, PATCH, POST, PUT.<br /><br />O URL pode incluir parâmetros de consulta se necessário.<br /><br />Os cabeçalhos devem ser fornecidos como JSONB: cada par chave-valor resultará num cabeçalho.<br /><br />A verificação de validade para TLS/SSL pode ser desativada se necessário.<br /><br />Se a resposta REST precisar de ser processada, pode ser definida outra função de backend para a callback. Esta função de callback deve ter três argumentos: INTEGER (para o código de estado HTTP), TEXT (corpo da resposta HTTP), TEXT (valor de callback).<br /><br />Se um 'valor de callback' for definido em instance.rest_call(...), será passado para a função de callback; isto é útil quando devem ser executadas múltiplas chamadas em ordem (como autenticação antes de uma chamada de dados).",
 				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Devolve um texto de marcador de posição que é substituído pelo conteúdo do ficheiro especificado (codificado como BASE64), durante a execução da chamada REST, quando usado no corpo do pedido em instance.rest_call(...).<br /><br />O ID do ficheiro e a versão podem ser obtidos via instance.files_get(...), que percorre os ficheiros anexados a um registo existente e atributo de ficheiros.",
 				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Devolve um texto de marcador de posição que é substituído pelo conteúdo bruto do ficheiro especificado (para pedidos como formData), durante a execução da chamada REST, quando usado no corpo do pedido em instance.rest_call(...).<br /><br />O ID do ficheiro e a versão podem ser obtidos via instance.files_get(...), que percorre os ficheiros anexados a um registo existente e atributo de ficheiros.",
@@ -1327,6 +1371,16 @@
 			"helpPgArgs": {
 				"abort_show_message": [
 					"message TEXT"
+				],
+				"barcode_generate": [
+					"text_value TEXT",
+					"format TEXT",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
 				],
 				"clean_up_e2ee_keys": [
 					"user_id INTEGER",
@@ -1465,6 +1519,16 @@
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
 				],
+				"qrcode_generate": [
+					"text_value TEXT",
+					"error_correction CHARACTER(1)",
+					"size_x INTEGER",
+					"size_y INTEGER",
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
 				"rest_call": [
 					"method TEXT",
 					"url TEXT",
@@ -1509,6 +1573,7 @@
 			"intervalAtDayForYears": "no dia",
 			"intervalAtTime": "à hora",
 			"intervalEvery": "A cada",
+			"isColumnExec": "Column call",
 			"isFrontendExec": "Chamada frontend",
 			"isLoginSync": "Sincronização de utilizador",
 			"isTrigger": "Acionador",
@@ -1525,14 +1590,7 @@
 				"fieldSetChart": "Escrever objeto de opções do ECharts",
 				"fieldSetError": "Escrever mensagem de erro",
 				"fieldSetFocus": "Saltar para a entrada do campo",
-				"fieldSetOrder": "Definir ordem do campo no pai",
-				"intervalDays": "Dias",
-				"intervalHours": "Horas",
-				"intervalMinutes": "Minutos",
-				"intervalMonths": "Meses",
-				"intervalSeconds": "Segundos",
-				"intervalWeeks": "Semanas",
-				"intervalYears": "Anos"
+				"fieldSetOrder": "Definir ordem do campo no pai"
 			},
 			"placeholderDoc": "PDFs",
 			"placeholderDocHelp": [
@@ -1558,7 +1616,6 @@
 			"runOnce": "Uma vez",
 			"runRegular": "Regularmente",
 			"runType": "Execução",
-			"schedules": "Horários",
 			"title": "Funções",
 			"titleJsOne": "Função frontend '{NAME}'",
 			"titlePgOne": "Função backend '{NAME}'",
@@ -1676,6 +1733,7 @@
 			"relationEncryptionHint": "Ativa a encriptação de ponta a ponta (E2EE) para atributos nesta relação. A E2EE tem benefícios e desvantagens - por favor, leia cuidadosamente a documentação do Construtor antes de a usar. Esta definição não pode ser alterada mais tarde.",
 			"role": "Nova função",
 			"searchBar": "Nova barra de pesquisa",
+			"tag": "New tag",
 			"template": {
 				"loginSync": "Função de sincronização de utilizador",
 				"mailsFromSpooler": "Processamento de e-mail (recebido)",
@@ -1829,7 +1887,16 @@
 			"title": "Relações",
 			"titleHint": "O título pode ser traduzido nos idiomas disponíveis da aplicação. É mostrado quando uma relação é referenciada na interface do utilizador, como ao mostrar registos de alterações.",
 			"titleOne": "Relação '{NAME}'",
-			"triggers": "Acionadores ({CNT})"
+			"triggers": "Acionadores ({CNT})",
+			"wizardEnum": {
+				"intro": "Dropdowns, and similar single value selections, are done in REI3 with relationships. This wizard lets you quickly create a new relation containing records to select from, and an attribute on this relation for the selection value.<br /><br />Make sure to grant read access to the new relation afterwards to desired roles.",
+				"nameAttributeHint": "Name of attribute on relation '{NAME}', which stores the selection value.",
+				"nameRelationHint": "Name of relation that contains selectable records.",
+				"protected": "Protect against deletion",
+				"protectedHint": "This setting controls, if the newly created records (ie. selectable values) are protected against deletion by users.",
+				"title": "Dropdown wizard",
+				"valuesHint": "One record is created for each value. At least one value is required."
+			}
 		},
 		"releases": {
 			"button": {
@@ -1904,6 +1971,12 @@
 			"titleRoles": "Preparar funções",
 			"titleRolesHint": "Define o que cada um pode fazer ou ver."
 		},
+		"tag": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this tag?"
+			},
+			"titleOne": "Tag '{NAME}'"
+		},
 		"transfer": {
 			"button": {
 				"generate": "Gerar novo par de chaves",
@@ -1962,7 +2035,6 @@
 		"button": {
 			"ganttShowLabels": "Grupos",
 			"ganttShowLabelsHint": "Mostrar/ocultar grupos",
-			"ganttToggleHint": "Alternar entre modo dia e hora",
 			"ics": "Acesso",
 			"icsHint": "Aceder ao calendário a partir de uma aplicação externa",
 			"icsPublish": "Publicar para uso pessoal"
@@ -2031,7 +2103,12 @@
 			"006": "O nome escolhido não é válido. Por favor, certifique-se de que o nome...<ul><li>... começa com uma letra <b>(a-z)</b>.</li><li>... tem no máximo <b>60</b> caracteres de comprimento.</li><li>... contém apenas letras minúsculas <b>(a-z)</b>, underscores <b>(_)</b> ou números <b>(0-9)</b>.</li></ul>Exemplos: storage_inventory_post21, facility_address, contact_book",
 			"007": "Um módulo referenciado não é conhecido.",
 			"008": "Uma relação referenciada não é conhecida.",
-			"009": "Um atributo referenciado não é conhecido."
+			"009": "Um atributo referenciado não é conhecido.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
+			"012": "A column does not include a valid backend function reference.",
+			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
 		},
 		"CSV": {
 			"001": "Número inválido '{VALUE}' (esperava-se um inteiro).",
@@ -2113,8 +2190,6 @@
 		},
 		"getterHint": "Nome do parâmetro",
 		"javascriptHint": "Ex.: return new Date().getFullYear();",
-		"nestingMain": "Consulta principal",
-		"nestingSub": "Subconsulta",
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Adicionar (número positivo) ou remover (número negativo) X dias/horas/minutos/segundos a partir de agora.",
 		"operatorsArray": "Array",
@@ -2408,10 +2483,13 @@
 		},
 		"category": "Categoria",
 		"certificate": "Certificado",
+		"changeLogs": "Change logs",
 		"changedBy": "Alterado por",
 		"clientEvent": "Evento de cliente",
 		"clientEvents": "Eventos de cliente",
 		"clipboard": "Área de transferência",
+		"codeBar": "Barcode",
+		"codeQr": "QR code",
 		"collection": "Coleção",
 		"collections": "Coleções",
 		"color": "Cor",
@@ -2428,6 +2506,7 @@
 		"conditions": "Condições",
 		"content": "Conteúdo",
 		"contextHelp": "Ajuda contextual",
+		"custom": "Custom",
 		"dark": "Escuro",
 		"data": "Dados",
 		"dataAccess": "Acesso a dados",
@@ -2438,6 +2517,14 @@
 		"dateFormat2": "d.m.Y (30.12.2012)",
 		"dateFormat3": "d/m/Y (30/12/2012)",
 		"dateFormat4": "m/d/Y (12/30/2012)",
+		"dateSteps": {
+			"days": "Days",
+			"half-years": "Half-years",
+			"hours": "Hours",
+			"months": "Months",
+			"quarters": "Quarters",
+			"years": "Years"
+		},
 		"default": "Predefinido",
 		"defaultValue": "Valor predefinido",
 		"description": "Descrição",
@@ -2467,6 +2554,7 @@
 		"errorTitle": "Erro",
 		"event": "Evento",
 		"events": "Eventos",
+		"every": "Every",
 		"everything": "Tudo",
 		"expert": "Especialista",
 		"favorites": "Favoritos",
@@ -2522,7 +2610,18 @@
 		"inputs": "Entradas",
 		"install": "Instalar",
 		"internalName": "O nome serve como referência interna - não é mostrado aos utilizadores.",
-		"interval": "Intervalo",
+		"interval": {
+			"days": "Dias",
+			"hours": "Horas",
+			"minutes": "Minutos",
+			"months": "Meses",
+			"seconds": "Segundos",
+			"weeks": "Semanas",
+			"years": "Anos"
+		},
+		"intervalTitle": "Intervalo",
+		"job": "Job",
+		"jobs": "Jobs",
 		"jsFunction": "Função (frontend)",
 		"jsFunctions": "Funções (frontend)",
 		"keyPrivate": "Chave privada",
@@ -2533,7 +2632,9 @@
 		"less": "Menos",
 		"licenseRequired": "Requer licença",
 		"limit": "Limite",
+		"limitPage": "Page size",
 		"list": "Lista",
+		"listFullpage": "Fullpage list",
 		"loading": "A carregar...",
 		"login": "Iniciar sessão",
 		"loginForm": "Formulário de início de sessão",
@@ -2546,6 +2647,7 @@
 		"menus": "Menus",
 		"menusSub": "Submenus",
 		"missingCaption": "LEGENDA EM FALTA",
+		"mode": "Mode",
 		"module": "Aplicação",
 		"monospace": "Monoespaçada",
 		"more": "Mais",
@@ -2591,6 +2693,7 @@
 		"orientation": "Orientação",
 		"orientationLandscape": "Paisagem",
 		"orientationPortrait": "Retrato",
+		"overview": "Overview",
 		"overwrite": "Substituir",
 		"overwrites": "Substituições",
 		"page": "Página",
@@ -2603,14 +2706,20 @@
 		"policies": "Políticas",
 		"postfix": "Sufixo",
 		"prefix": "Prefixo",
+		"presets": "Presets",
 		"preview": "Pré-visualização",
 		"properties": "Propriedades",
 		"query": "Consulta",
 		"queryChoices": "Conjuntos de filtros",
+		"queryMain": "Main query",
+		"querySub": "Sub query",
 		"readonly": "Só leitura",
 		"record": "Registo",
+		"recordLoad": "Record load",
+		"recordTitle": "Record title",
 		"references": "Referências",
 		"relation": "Relação",
+		"relationBase": "Base relation",
 		"relations": "Relações",
 		"relationship": "Relação",
 		"relationships": "Relações",
@@ -2625,11 +2734,18 @@
 		"roles": "Funções",
 		"row": "Linha",
 		"rows": "Linhas",
+		"scalarFunction": {
+			"COALESCE": "Show first non-empty value",
+			"CONCAT": "Combine values as text"
+		},
+		"schedule": "Schedule",
+		"schedules": "Schedules",
 		"search": "Pesquisar",
 		"searchBar": "Barra de pesquisa",
 		"searchBars": "Barras de pesquisa",
 		"searchCompleted": "Pesquisa concluída",
 		"searchRunning": "A pesquisa está em execução",
+		"seconds": "Seconds",
 		"selected": "Selecionado",
 		"selectedMaxOne": "Selecionado (máx. 1)",
 		"sessionStart": "Início da sessão",
@@ -2654,6 +2770,8 @@
 		"system": "Sistema",
 		"systemModes": "Modos do sistema",
 		"tab": "Separador",
+		"tag": "Tag",
+		"tags": "Tags",
 		"text": "Texto",
 		"textSearch": "Pesquisa de texto",
 		"threeDots": "...",
@@ -2669,10 +2787,16 @@
 		"update": "Atualizar",
 		"updated": "Atualizado",
 		"url": "URL",
+		"useOverview": "Open overview by default",
 		"userSync": "Sincronização de utilizador",
 		"username": "Nome de utilizador",
 		"value": "Valor",
 		"valueExpected": "Valor esperado",
+		"valueFixed": "Fixed value",
+		"valueFixedText": "Fixed text value",
+		"valueMulti": "Multi value",
+		"values": "Values",
+		"valuesSelectable": "Selectable values",
 		"variable": "Variável",
 		"variables": "Variáveis",
 		"version": "Versão",
@@ -2683,6 +2807,7 @@
 		"versionPlatform": "Versão da plataforma",
 		"visibility": "Visibilidade",
 		"visible": "Visível",
+		"warning": "Warning",
 		"warnings": "Avisos",
 		"widget": "Widget",
 		"widgets": "Widgets",
@@ -2866,6 +2991,7 @@
 			"titlePwChange": "Alterar palavra-passe"
 		},
 		"boolAsIcon": "Valores booleanos como ícones",
+		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Bordas",
 		"bordersSquared": "Quadrado",
 		"button": {
@@ -2875,6 +3001,7 @@
 			"intro": "Se a aplicação cliente do REI3 (ver 'Dispositivos') estiver instalada, pode configurar atalhos globais. Estes são usados para interagir com o REI3 enquanto este é executado em segundo plano.",
 			"noEvents": "Atualmente não há aplicações REI3 acessíveis que ofereçam atalhos."
 		},
+		"collapseRemember": "Collapsed fields: Recover last state",
 		"colorClassicMode": "Esquema de cores",
 		"colorClassicMode0": "Moderno",
 		"colorClassicMode1": "Clássico",
@@ -2924,6 +3051,7 @@
 		"listColored": "Contraste",
 		"listRows": "Linhas da lista",
 		"listSpaced": "Maior",
+		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
 		"mobileScrollForm": "Móvel: Deslocar todo o formulário",
 		"pageTitle": "Configurações",
 		"pattern": "Padrão de fundo",
@@ -2935,6 +3063,7 @@
 		"titleEncryption": "Encriptação de ponta a ponta",
 		"titleFixedTokens": "Dispositivos",
 		"titleGeneral": "Geral",
+		"titleSubAdmin": "Admin users",
 		"titleSubHeader": "Menu de cabeçalho",
 		"titleSubMenu": "Menu da aplicação",
 		"titleSubMisc": "Diversos",
