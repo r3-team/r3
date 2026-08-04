@@ -195,7 +195,7 @@ export default {
 							</div>
 							<div class="admin-db-sync-job-content-local-columns" v-if="job.columns.length !== 0">
 								<div class="row gap centered nowrap" v-for="(c,i) in job.columns">
-									<span><b>{{ sqlPlaceholder }}{{ i }}</b></span>
+									<span><b>{{ getPlaceholder(i) }}</b></span>
 									<select @input="columnSetValue($event.target.value,i)" :disabled="readonly" :value="columnGetValue(c)">
 										<template v-for="j in job.joins">
 											<option
@@ -245,7 +245,6 @@ export default {
 	},
 	data() {
 		return {
-			dbTypeQuestionPlaceholders: ['mysql'],
 			intervalType: 'seconds',
 			intervalValue: 0,
 			isReady: false,
@@ -264,6 +263,16 @@ export default {
 			s.job.codeSql !== '' &&
 			s.job.columns.length !== 0 &&
 			s.job.joins.length !== 0,
+		sqlPlaceholder: s => {
+			if (s.isLoad) return '#';
+
+			switch (s.dbType) {
+				case 'mssql': return '@p';
+				case 'mysql': return '?';
+				case 'pgsql': return '$';
+			}
+			return '?';
+		},
 		warnings: s => {
 			const out = [];
 			if (s.isLoad) {
@@ -303,11 +312,12 @@ export default {
 		isWithLookups: s => s.job.lookups.length !== 0,
 		labelAttributes: s => s.isLoad ? s.capApp.loadAttributes : s.capApp.sendAttributes,
 		labelExternal: s => s.isLoad ? s.capApp.loadSource : s.capApp.sendTarget.replace('{TYPE}', s.sqlSendType),
-		labelExternalHint: s => s.isLoad ? s.capApp.loadSourceHint.replace('{HOST}', s.hostName) : s.capApp.sendTargetHint.replace('{HOST}', s.hostName).replace('{TYPE}', s.sqlSendType),
+		labelExternalHint: s => s.isLoad
+			? s.capApp.loadSourceHint.replace('{HOST}', s.hostName)
+			: s.capApp.sendTargetHint.replace('{HOST}', s.hostName).replace('{TYPE}', s.sqlSendType).replace('{HOLDERS}', `${s.getPlaceholder(0)}, ${s.getPlaceholder(1)}`),
 		labelLocal: s => s.isLoad ? s.capApp.loadTarget : s.capApp.sendSource,
 		module: s => s.moduleIdActive !== null ? s.moduleIdMap[s.moduleIdActive] : false,
 		modulesUsable: s => s.modules.filter((v) => v.relations.length !== 0),
-		sqlPlaceholder: s => s.isLoad ? '#' : (s.dbTypeQuestionPlaceholders.includes(s.dbType) ? '?' : '$'),
 		sqlSendType: s => s.isLoad ? '' : s.job.jobType.replace('SEND_', ''),
 		styleArrow: () => 'order:2;',
 		styleExternal: s => s.isLoad ? 'order:1;' : 'order:3;',
@@ -341,6 +351,11 @@ export default {
 		getCaption,
 		getPgIndexTitle,
 		srcBase64Icon,
+
+		// presentation
+		getPlaceholder(i) {
+			return this.sqlPlaceholder !== '?' ? `${this.sqlPlaceholder}${i + 1}` : this.sqlPlaceholder;
+		},
 
 		// actions
 		columnAdd() {

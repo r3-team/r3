@@ -157,7 +157,7 @@
 			"sendAttributes": "Attribute Parametern zuordnen",
 			"sendSource": "Datensätze aus Relation laden",
 			"sendTarget": "Geladene Datensätze via SQL-Abfrage schreiben ({TYPE})",
-			"sendTargetHint": "SQL wird auf dem Host \"{HOST}\" ausgeführt. Jedes ausgewählte Attribut ist als Parameter ($1, $2, ...) in {TYPE}-Abfrage verfügbar.",
+			"sendTargetHint": "SQL wird auf dem Host \"{HOST}\" ausgeführt. Jedes ausgewählte Attribut ist als Parameter ({HOLDERS}, ...) in {TYPE}-Abfrage verfügbar.",
 			"title": "Datenbank-Sync \"{NAME}\"",
 			"titleJob": "Sync-Aufgabe \"{NAME}\"",
 			"titleJobNew": "Neue Sync-Aufgabe",

@@ -157,7 +157,7 @@
 			"sendAttributes": "Assign attributes to parameters",
 			"sendSource": "Load records from relation",
 			"sendTarget": "Write records via SQL query ({TYPE})",
-			"sendTargetHint": "SQL is executed on the host '{HOST}'. Each selected attribute is available as parameter ($1, $2, ...) in {TYPE} query.",
+			"sendTargetHint": "SQL is executed on the host '{HOST}'. Each selected attribute is available as parameter ({HOLDERS}, ...) in {TYPE} query.",
 			"title": "Database sync '{NAME}'",
 			"titleJob": "Sync job '{NAME}'",
 			"titleJobNew": "New sync job",
