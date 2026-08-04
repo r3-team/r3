@@ -33,7 +33,6 @@
 .admin-db-sync-host{}
 .admin-db-sync-host-table{
 	width:100%;
-	max-width:700px;
 	border:var(--border-input);
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
@@ -165,6 +164,13 @@
 		width:300px;
 		flex:2 1 auto;
 	}
+}
+.admin-db-sync-job-logs{
+	overflow:auto;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+	background-color:var(--color-bg-bright);
 }
 
 

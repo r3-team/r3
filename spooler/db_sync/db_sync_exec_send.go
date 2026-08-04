@@ -34,9 +34,8 @@ func doSend(jobs []types.DbSyncJob, jobType types.DbSyncJobType, relationIdMapRe
 			if j.JobType != jobType || len(j.Joins) == 0 || j.Joins[0].RelationId != relationId {
 				continue
 			}
-			if err := storeJobDateNow(j.Id, "attempt"); err != nil {
-				return err
-			}
+			storeJobDateAttempt(j.Id, j.Name)
+
 			// fetch local record data based on job type
 			var rows [][]any
 			if j.JobType == types.DbSyncJobTypeSendDelete {
@@ -54,9 +53,7 @@ func doSend(jobs []types.DbSyncJob, jobType types.DbSyncJobType, relationIdMapRe
 				anyFailures = true
 				continue
 			}
-			if err := storeJobDateNow(j.Id, "success"); err != nil {
-				return err
-			}
+			storeJobDateSuccess(j.Id, j.Name, len(rows))
 		}
 
 		// delete spooled records if all jobs were successful
@@ -176,6 +173,10 @@ func doSendFetchDeleted(ctx context.Context, j types.DbSyncJob, relationId uuid.
 }
 
 func doSendStore(ctx context.Context, j types.DbSyncJob, rows [][]any) error {
+
+	if len(rows) == 0 {
+		return nil
+	}
 
 	// store records to external DB
 	dbExt, err := getExtCon(ctx, j.HostId)

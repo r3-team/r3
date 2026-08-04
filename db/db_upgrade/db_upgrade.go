@@ -579,6 +579,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_job_lookup_job_id_fkey      ON instance_db_sync.job_lookup USING btree (job_id      ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_job_lookup_pg_index_id_fkey ON instance_db_sync.job_lookup USING btree (pg_index_id ASC NULLS LAST);
 
+			CREATE TABLE IF NOT EXISTS instance_db_sync.job_log (
+				job_id uuid NOT NULL,
+				date_ran BIGINT NOT NULL,
+				records_count INTEGER NOT NULL,
+				CONSTRAINT job_log_job_id_fkey FOREIGN KEY (job_id)
+				REFERENCES instance_db_sync.job (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_job_log_job_id_fkey ON instance_db_sync.job_log USING btree (job_id   ASC  NULLS LAST);
+			CREATE INDEX IF NOT EXISTS ind_job_log_date_ran    ON instance_db_sync.job_log USING btree (date_ran DESC NULLS LAST);
+
 			INSERT INTO instance.task (name,interval_seconds,cluster_master_only,embedded_only,active_only,active)
 			VALUES ('dbSync',15,true,false,false,true);
 

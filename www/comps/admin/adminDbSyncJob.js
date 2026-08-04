@@ -15,9 +15,8 @@ export default {
 
 		<div class="contentBox admin-db-sync-job scroll float">
 			<div class="top">
-				<div class="area nowrap">
-					<img class="icon" src="images/cogMultiple.png" />
-					<h1 class="title">{{ isNew ? capApp.titleJobNew : capApp.titleJob.replace('{NAME}',job.name) }}</h1>
+				<div class="area">
+					<my-label image="cogMultiple.png" :caption="isNew ? capApp.titleJobNew : capApp.titleJob.replace('{NAME}',job.name)" />
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"

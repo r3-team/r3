@@ -1,16 +1,16 @@
+import MyInputDateWrap from '../inputDateWrap.js';
+import MyInputOffset from '../inputOffset.js';
+import { getUnixFormat } from '../shared/time.js';
 import MyAdminLogOptions from './adminLogOptions.js';
-import MyInputDateWrap   from '../inputDateWrap.js';
-import MyInputOffset     from '../inputOffset.js';
-import {getUnixFormat}   from '../shared/time.js';
 
 export default {
-	name:'my-admin-logs',
-	components:{
+	name: 'my-admin-logs',
+	components: {
 		MyAdminLogOptions,
 		MyInputDateWrap,
 		MyInputOffset
-},
-	template:`<div class="contentBox admin-logs grow">
+	},
+	template: `<div class="contentBox admin-logs grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/fileText.png" />
@@ -123,76 +123,76 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
 	data() {
 		return {
-			contextsValid:[
+			contextsValid: [
 				'module', 'api', 'backup', 'cache', 'cluster', 'code', 'csv', 'dbSync', 'doc', 'file',
 				'imager', 'ldap', 'oauth', 'mail', 'scheduler', 'server', 'transfer', 'websocket'
 			],
-			messageLengthShow:200,
+			messageLengthShow: 200,
 
 			// inputs
-			byString:'',
-			context:'',
-			levelContext:'logModule',
-			limit:100,
-			offset:0,
-			total:0,
-			unixFrom:null,
-			unixTo:null,
+			byString: '',
+			context: '',
+			levelContext: 'logModule',
+			limit: 100,
+			offset: 0,
+			total: 0,
+			unixFrom: null,
+			unixTo: null,
 
 			// states
-			showOptions:false,
+			showOptions: false,
 
 			// data
-			logs:[]
+			logs: []
 		};
 	},
 	mounted() {
-		this.$store.commit('pageTitle',this.menuTitle);
+		this.$store.commit('pageTitle', this.menuTitle);
 
 		// set date range for log retrieval (7 days ago to now)
-		let d = new Date();
-		d.setDate(d.getDate()-7);
-		d.setHours(0,0,0);
-		this.setDate(Math.floor(d.getTime() / 1000),true);
+		const d = new Date();
+		d.setDate(d.getDate() - 7);
+		d.setHours(0, 0, 0);
+		this.setDate(Math.floor(d.getTime() / 1000), true);
 	},
-	computed:{
+	computed: {
 		// stores
-		settings:s => s.$store.getters.settings,
-		capApp:  s => s.$store.getters.captions.admin.logs,
-		capGen:  s => s.$store.getters.captions.generic
+		settings: s => s.$store.getters.settings,
+		capApp: s => s.$store.getters.captions.admin.logs,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getUnixFormat,
 
 		// presentation
 		displayDate(date) {
-			let format = [this.settings.dateFormat,'H:i:S'];
-			return this.getUnixFormat(date,format.join(' '));
+			const format = [this.settings.dateFormat, 'H:i:S'];
+			return this.getUnixFormat(date, format.join(' '));
 		},
 		displayIndicator(level) {
-			switch(level) {
-				case 1: return '#ca2a2a'; break;
-				case 2: return '#caac2a'; break;
+			switch (level) {
+				case 1: return '#ca2a2a';
+				case 2: return '#caac2a';
 			}
 			return '#b0b0b0';
 		},
 		displayLevel(level) {
-			return this.capApp['level'+level];
+			return this.capApp[`level${level}`];
 		},
 		displayMessage(msg) {
 			return msg.length > this.messageLengthShow
-				? msg.substr(0,this.messageLengthShow)+'...' : msg;
+				? `${msg.substr(0, this.messageLengthShow)}...` : msg;
 		},
 
 		// actions
-		setDate(unix,from) {
-			if(from) {
+		setDate(unix, from) {
+			if (from) {
 				this.unixFrom = unix;
 			}
 			else {
@@ -200,32 +200,32 @@ export default {
 
 				// add 23:59:59 to to date, if from and to date are equal
 				let d = new Date(this.unixTo * 1000);
-				if(d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0)
+				if (d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0)
 					this.unixTo += 86399;
 			}
 			this.offset = 0;
 			this.get();
 		},
 		showMessage(index) {
-			this.$store.commit('dialog',{
-				captionBody:this.logs[index].message,
-				textDisplay:'textarea',
-				width:800
+			this.$store.commit('dialog', {
+				captionBody: this.logs[index].message,
+				textDisplay: 'textarea',
+				width: 800
 			});
 		},
 
 		// backend calls
 		get() {
-			ws.send('log','get',{
-				byString:this.byString,
-				context:this.context,
-				dateFrom:this.unixFrom,
-				dateTo:this.unixTo,
-				limit:this.limit,
-				offset:this.offset
-			},true).then(
+			ws.send('log', 'get', {
+				byString: this.byString,
+				context: this.context,
+				dateFrom: this.unixFrom,
+				dateTo: this.unixTo,
+				limit: this.limit,
+				offset: this.offset
+			}, true).then(
 				res => {
-					this.logs  = res.payload.logs;
+					this.logs = res.payload.logs;
 					this.total = res.payload.total;
 				},
 				this.$root.genericError

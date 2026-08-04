@@ -68,3 +68,9 @@ type DbSyncJobColumn struct {
 	AttributeId uuid.UUID `json:"attributeId"`
 	Index       int       `json:"index"` // relation index
 }
+
+type DbSyncJobLog struct {
+	JobId        string `json:"jobId"`
+	RecordsCount int    `json:"recordsCount"`
+	DateRan      int64  `json:"dateRan"`
+}

@@ -3,10 +3,11 @@ import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
 import { deepIsEqual } from '../shared/generic.js';
 import { getTemplateDbSyncJob } from '../shared/templates.js';
 import MyAdminDbSyncJob from './adminDbSyncJob.js';
+import MyAdminDbSyncJobLogs from './adminDbSyncJobLogs.js';
 
 export default {
 	name: 'my-admin-db-sync-host',
-	components: { MyAdminDbSyncJob, MyInputDecimal },
+	components: { MyAdminDbSyncJob, MyAdminDbSyncJobLogs, MyInputDecimal },
 	template: `<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-db-sync-host scroll float">
@@ -149,6 +150,13 @@ export default {
 						</tbody>
 					</table>
 				</div>
+
+				<!-- host job logs -->
+				<my-admin-db-sync-job-logs
+					v-if="!isNew"
+					:hostId
+					:jobIdMap
+				/>
 			</div>
 		</div>
 
@@ -196,7 +204,7 @@ export default {
 			&& s.host.username !== ''
 			&& s.host.password !== '',
 		jobs: s => {
-			let out = [];
+			const out = [];
 			for (const k in s.jobIdMap) {
 				if (s.jobIdMap[k].hostId === s.hostId)
 					out.push(s.jobIdMap[k]);

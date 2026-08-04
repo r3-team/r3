@@ -29,8 +29,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	}
 
 	// reset irrelevant inputs based on job type
-	switch j.JobType {
-	case types.DbSyncJobTypeLoad:
+	if j.JobType != types.DbSyncJobTypeLoad {
 		j.DeleteMissing = false
 		j.IntervalSeconds = 0
 		j.Lookups = make([]types.QueryLookup, 0)

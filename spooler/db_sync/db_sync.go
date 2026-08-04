@@ -22,15 +22,9 @@ func DoAll() error {
 
 	// execute LOAD jobs
 	for _, j := range cache_dbSync.GetJobsToRunLoad() {
-		if err := storeJobDateNow(j.Id, "attempt"); err != nil {
-			return err
-		}
 		if err := doLoad(j); err != nil {
 			log.Error(log.ContextDbSync, fmt.Sprintf("failed to execute job '%s'", j.Name), err)
 			continue
-		}
-		if err := storeJobDateNow(j.Id, "success"); err != nil {
-			return err
 		}
 	}
 
@@ -43,17 +37,17 @@ func DoAll() error {
 		}
 		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendInsert]; exists {
 			if err := doSend(jobs, types.DbSyncJobTypeSendInsert, m); err != nil {
-				return err
+				log.Error(log.ContextDbSync, "failed to execute SEND INSERT jobs", err)
 			}
 		}
 		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendUpdate]; exists {
 			if err := doSend(jobs, types.DbSyncJobTypeSendUpdate, m); err != nil {
-				return err
+				log.Error(log.ContextDbSync, "failed to execute SEND UPDATE jobs", err)
 			}
 		}
 		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendDelete]; exists {
 			if err := doSend(jobs, types.DbSyncJobTypeSendDelete, m); err != nil {
-				return err
+				log.Error(log.ContextDbSync, "failed to execute SEND DELETE jobs", err)
 			}
 		}
 	}
@@ -89,23 +83,60 @@ func getExtCon(ctx context.Context, hostId uuid.UUID) (*sql.DB, error) {
 	return dbExt, nil
 }
 
-func storeJobDateNow(jobId uuid.UUID, content string) error {
+func storeJobDateAttempt(jobId uuid.UUID, jobName string) {
 	now := tools.GetTimeUnix()
 
-	switch content {
-	case "attempt":
-		cache_dbSync.SetJobDateAttempt(jobId, now)
-	case "success":
-		cache_dbSync.SetJobDateSuccess(jobId, now)
-	default:
-		return fmt.Errorf("invalid job date content '%s'", content)
+	log.Info(log.ContextDbSync, fmt.Sprintf("started job '%s'", jobName))
+	cache_dbSync.SetJobDateAttempt(jobId, now)
+
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutLogWrite)
+	defer ctxCanc()
+
+	if _, err := db.Pool.Exec(ctx, `
+		UPDATE instance_db_sync.job
+		SET date_attempt = $1
+		WHERE id = $2
+	`, now, jobId); err != nil {
+		log.Error(log.ContextDbSync, "failed to write to DB sync history", err)
+		return
+	}
+}
+
+func storeJobDateSuccess(jobId uuid.UUID, jobName string, recordsCount int) {
+	now := tools.GetTimeUnix()
+
+	log.Info(log.ContextDbSync, fmt.Sprintf("finished job '%s'", jobName))
+	cache_dbSync.SetJobDateSuccess(jobId, now)
+
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutLogWrite)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		log.Error(log.ContextDbSync, "failed to write to DB sync history", err)
+		return
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(context.Background(), `
+		UPDATE instance_db_sync.job
+		SET date_success = $1
+		WHERE id = $2
+	`, now, jobId); err != nil {
+		log.Error(log.ContextDbSync, "failed to write to DB sync history", err)
+		return
 	}
 
-	_, err := db.Pool.Exec(context.Background(), fmt.Sprintf(`
-		UPDATE instance_db_sync.job
-		SET date_%s = $1
-		WHERE id = $2
-	`, content), now, jobId)
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO instance_db_sync.job_log (job_id, records_count, date_ran)
+		VALUES ($1,$2,EXTRACT(EPOCH FROM NOW()))
+	`, jobId, recordsCount); err != nil {
+		log.Error(log.ContextDbSync, "failed to write to DB sync history", err)
+		return
+	}
 
-	return err
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(log.ContextDbSync, "failed to write to DB sync history", err)
+		return
+	}
 }

@@ -50,15 +50,19 @@ func doLoad(j types.DbSyncJob) error {
 	defer dbExt.Close()
 
 	// fetch and store records
+	storeJobDateAttempt(j.Id, j.Name)
+
+	var recordsCount int
 	if !j.PageLimit.Valid {
 		// no limit defined, fetch all
 		rows, err := doLoadFetch(ctx, dbExt, j.CodeSql, len(j.Columns))
 		if err != nil {
 			return err
 		}
-		if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, j.SkipLogs, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
+		if err := doLoadStore(ctx, j, columns, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
 			return err
 		}
+		recordsCount += len(rows)
 	} else {
 		// limit defined, loop until fetching is done
 		// we make sure placeholders exist, otherwise LOOP would run forever
@@ -76,9 +80,10 @@ func doLoad(j types.DbSyncJob) error {
 			if err != nil {
 				return err
 			}
-			if err := doLoadStore(ctx, columns, j.Joins, j.Lookups, j.SkipLogs, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
+			if err := doLoadStore(ctx, j, columns, &recordIdsBaseRelation, indexMapPgIndexAttributeIds, rows); err != nil {
 				return err
 			}
+			recordsCount += len(rows)
 			if len(rows) < int(j.PageLimit.Int32) {
 				break
 			}
@@ -87,8 +92,11 @@ func doLoad(j types.DbSyncJob) error {
 	}
 
 	if j.DeleteMissing {
-		return doLoadDelete(ctx, j, recordIdsBaseRelation)
+		if err := doLoadDelete(ctx, j, recordIdsBaseRelation); err != nil {
+			return err
+		}
 	}
+	storeJobDateSuccess(j.Id, j.Name, recordsCount)
 	return nil
 }
 
@@ -177,8 +185,8 @@ func doLoadFetch(ctx context.Context, dbExt *sql.DB, codeSql string, attributeCo
 	return resultRows, nil
 }
 
-func doLoadStore(ctx context.Context, columns []types.Column, joins []types.QueryJoin, lookups []types.QueryLookup,
-	skipLogs bool, recordIdsBaseRelation *[]int64, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
+func doLoadStore(ctx context.Context, j types.DbSyncJob, columns []types.Column,
+	recordIdsBaseRelation *[]int64, indexMapPgIndexAttributeIds map[int][]uuid.UUID, rows [][]any) error {
 
 	if len(rows) == 0 {
 		return nil
@@ -192,7 +200,7 @@ func doLoadStore(ctx context.Context, columns []types.Column, joins []types.Quer
 
 	for _, values := range rows {
 		// DB sync values are submitted as system (login ID -1)
-		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, -1, skipLogs, values, columns, joins, lookups, indexMapPgIndexAttributeIds)
+		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, -1, j.SkipLogs, values, columns, j.Joins, j.Lookups, indexMapPgIndexAttributeIds)
 		if err != nil {
 			return err
 		}
@@ -203,7 +211,7 @@ func doLoadStore(ctx context.Context, columns []types.Column, joins []types.Quer
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
-	log.Info(log.ContextDbSync, fmt.Sprintf("saved %d loaded rows to local DB", len(rows)))
 
+	log.Info(log.ContextDbSync, fmt.Sprintf("saved %d loaded rows to local DB", len(rows)))
 	return nil
 }
