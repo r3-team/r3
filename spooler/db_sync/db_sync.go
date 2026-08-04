@@ -71,9 +71,16 @@ func getExtCon(ctx context.Context, hostId uuid.UUID) (*sql.DB, error) {
 	switch host.DbType {
 	case "mysql":
 		dbExt, err = getDbConMysql(host)
+	case "pgsql":
+		dbExt, err = getDbConPgsql(host)
+	default:
+		return nil, fmt.Errorf("unsupport database type '%s'", host.DbType)
 	}
 	if err != nil {
 		return nil, err
+	}
+	if dbExt == nil {
+		return nil, fmt.Errorf("database connection is nil")
 	}
 
 	if err := dbExt.PingContext(ctx); err != nil {
