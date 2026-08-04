@@ -27,25 +27,13 @@ func DelLogsBackground() error {
 	}
 	defer tx.Rollback(ctx)
 
+	relationIdsDeleteAllLogs := make([]uuid.UUID, 0)
+
 	for _, r := range cache.GetRelationIdMap() {
 
-		// delete logs for relations with no retention
 		if !r.RetentionCount.Valid && !r.RetentionDays.Valid {
-
-			if _, err := tx.Exec(ctx, `
-				DELETE FROM instance.data_log
-				WHERE id IN (
-					SELECT data_log_id
-					FROM instance.data_log_value
-					WHERE attribute_id IN (
-						SELECT id
-						FROM app.attribute
-						WHERE relation_id = $1
-					)
-				)
-			`, r.Id); err != nil {
-				return err
-			}
+			// delete logs for relations with no retention
+			relationIdsDeleteAllLogs = append(relationIdsDeleteAllLogs, r.Id)
 			continue
 		}
 
@@ -69,6 +57,15 @@ func DelLogsBackground() error {
 			-- exclude retained change logs by age
 			AND date_change < $3
 		`, r.Id, r.RetentionCount.Int32, now-(int64(r.RetentionDays.Int32)*86400)); err != nil {
+			return err
+		}
+	}
+
+	if len(relationIdsDeleteAllLogs) != 0 {
+		if _, err := tx.Exec(ctx, `
+			DELETE FROM instance.data_log
+			WHERE relation_id = ANY($1)
+		`, relationIdsDeleteAllLogs); err != nil {
 			return err
 		}
 	}
