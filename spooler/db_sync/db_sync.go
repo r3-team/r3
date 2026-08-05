@@ -64,6 +64,8 @@ func getExtCon(ctx context.Context, host types.DbSyncHost) (*sql.DB, error) {
 	switch host.DbType {
 	case types.DbSyncDbTypeClickhouse:
 		dbExt, err = getDbConClickhouse(host)
+	case types.DbSyncDbTypeFirebird:
+		dbExt, err = getDbConFirebird(host)
 	case types.DbSyncDbTypeMssql:
 		dbExt, err = getDbConMssql(host)
 	case types.DbSyncDbTypeMysql:

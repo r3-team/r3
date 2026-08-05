@@ -103,9 +103,10 @@ export default {
 								<td>{{ capApp.dbType }}*</td>
 								<td>
 									<select v-model="host.dbType" :disabled="readonly">
+										<option value="pgsql">PostgreSQL</option>
 										<option value="mysql">MySQL</option>
 										<option value="mssql">MSSQL</option>
-										<option value="pgsql">PostgreSQL</option>
+										<option value="firebird">Firebird</option>
 										<option value="clickhouse">ClickHouse</option>
 									</select>
 								</td>

@@ -12,6 +12,7 @@ type DbSyncJobType string
 
 const (
 	DbSyncDbTypeClickhouse DbSyncDbType = "clickhouse"
+	DbSyncDbTypeFirebird   DbSyncDbType = "firebird"
 	DbSyncDbTypePgsql      DbSyncDbType = "pgsql"
 	DbSyncDbTypeMssql      DbSyncDbType = "mssql"
 	DbSyncDbTypeMysql      DbSyncDbType = "mysql"
@@ -46,7 +47,7 @@ type DbSyncHost struct {
 type DbSyncJob struct {
 	Id      uuid.UUID     `json:"id"`
 	HostId  uuid.UUID     `json:"hostId"`
-	JobType DbSyncJobType `json:"jobType"` // LOAD, SEND_INSERT, SEND_UPDATE, SEND_DELETE
+	JobType DbSyncJobType `json:"jobType"`
 	Name    string        `json:"name"`
 	Comment string        `json:"comment"`
 	CodeSql string        `json:"codeSql"`

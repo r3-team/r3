@@ -481,7 +481,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- DB sync
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'dbSyncChanged';
 			CREATE SCHEMA instance_db_sync;
-			CREATE TYPE instance_db_sync.db_type AS ENUM('mssql', 'mysql', 'pgsql', 'clickhouse');
+			CREATE TYPE instance_db_sync.db_type AS ENUM('mssql', 'mysql', 'pgsql', 'clickhouse', 'firebird');
 			CREATE TYPE instance_db_sync.job_type AS ENUM('LOAD','SEND_INSERT','SEND_UPDATE','SEND_DELETE');
 
 			CREATE TABLE IF NOT EXISTS instance_db_sync.host (

@@ -6,18 +6,19 @@ import (
 	"net/url"
 	"r3/types"
 
-	_ "github.com/microsoft/go-mssqldb"
+	_ "github.com/nakagami/firebirdsql"
 )
 
-func getDbConMssql(h types.DbSyncHost) (*sql.DB, error) {
+func getDbConFirebird(h types.DbSyncHost) (*sql.DB, error) {
 	q := url.Values{
-		"database": []string{h.DbName},
+		"charset": []string{"UTF8"},
 	}
 	u := &url.URL{
 		Host:     fmt.Sprintf("%s:%d", h.Address, h.Port),
-		Scheme:   "sqlserver",
+		Path:     h.DbName,
 		RawQuery: q.Encode(),
 		User:     url.UserPassword(h.Username, h.Password),
 	}
-	return sql.Open("sqlserver", u.String())
+	// remove leading slashes '//' from DSN URL
+	return sql.Open("firebirdsql", u.String()[2:])
 }
