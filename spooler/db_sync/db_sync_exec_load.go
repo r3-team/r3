@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"r3/cache"
+	"r3/cache/cache_dbSync"
 	"r3/data"
 	"r3/data/data_import"
 	"r3/db"
@@ -34,17 +35,23 @@ func doLoad(j types.DbSyncJob) error {
 	recordIdsBaseRelation := make([]int64, 0)
 	indexMapPgIndexAttributeIds := data_import.ResolveQueryLookups(j.Joins, j.Lookups)
 
+	// get host details for job
+	host, err := cache_dbSync.GetHostById(j.HostId)
+	if err != nil {
+		return err
+	}
+	if !host.Active {
+		log.Info(log.ContextDbSync, fmt.Sprintf("skipping job '%s' for inactive host '%s'", j.Name, host.Name))
+		return nil
+	}
+
 	// connect to external DB system
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbSync)
 	defer ctxCanc()
 
 	// even if pagination is used, keep external DB transaction open to avoid data being changed between pages
-	dbExt, err := getExtCon(ctx, j.HostId)
+	dbExt, err := getExtCon(ctx, host)
 	if err != nil {
-		if err == types.ErrHostInactive {
-			log.Info(log.ContextDbSync, fmt.Sprintf("skipping job '%s' for inactive host", j.Name))
-			return nil
-		}
 		return err
 	}
 	defer dbExt.Close()

@@ -7,9 +7,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DbSyncDbType string
 type DbSyncJobType string
 
 const (
+	DbSyncDbTypeClickhouse DbSyncDbType = "clickhouse"
+	DbSyncDbTypePgsql      DbSyncDbType = "pgsql"
+	DbSyncDbTypeMssql      DbSyncDbType = "mssql"
+	DbSyncDbTypeMysql      DbSyncDbType = "mysql"
+
 	DbSyncJobTypeLoad       DbSyncJobType = "LOAD"
 	DbSyncJobTypeSendDelete DbSyncJobType = "SEND_DELETE"
 	DbSyncJobTypeSendInsert DbSyncJobType = "SEND_INSERT"
@@ -18,17 +24,16 @@ const (
 
 var (
 	DbSyncJobTypesSend       = []DbSyncJobType{DbSyncJobTypeSendDelete, DbSyncJobTypeSendInsert, DbSyncJobTypeSendUpdate}
-	ErrHostInactive    error = errors.New("host is inactive")
 	ErrJobNoJoins      error = errors.New("job has no relation")
 )
 
 type DbSyncHost struct {
-	Id      uuid.UUID `json:"id"`
-	Name    string    `json:"name"`
-	Comment string    `json:"comment"`
-	DbName  string    `json:"dbName"`
-	DbType  string    `json:"dbType"` // mssql, mysql, pgsql, clickhouse
-	Active  bool      `json:"active"`
+	Id      uuid.UUID    `json:"id"`
+	Name    string       `json:"name"`
+	Comment string       `json:"comment"`
+	DbName  string       `json:"dbName"`
+	DbType  DbSyncDbType `json:"dbType"`
+	Active  bool         `json:"active"`
 
 	// connection details
 	Address  string `json:"address"`

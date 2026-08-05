@@ -267,6 +267,7 @@ export default {
 			if (s.isLoad) return '#';
 
 			switch (s.dbType) {
+				case 'clickhouse': return '?';
 				case 'mssql': return '@p';
 				case 'mysql': return '?';
 				case 'pgsql': return '$';

@@ -55,25 +55,20 @@ func DoAll() error {
 }
 
 // get DB connection to external host
-func getExtCon(ctx context.Context, hostId uuid.UUID) (*sql.DB, error) {
-
-	host, err := cache_dbSync.GetHostById(hostId)
-	if err != nil {
-		return nil, err
-	}
-	if !host.Active {
-		return nil, types.ErrHostInactive
-	}
+func getExtCon(ctx context.Context, host types.DbSyncHost) (*sql.DB, error) {
 
 	// connect to external DB host
+	var err error
 	var dbExt *sql.DB
 
 	switch host.DbType {
-	case "mssql":
+	case types.DbSyncDbTypeClickhouse:
+		dbExt, err = getDbConClickhouse(host)
+	case types.DbSyncDbTypeMssql:
 		dbExt, err = getDbConMssql(host)
-	case "mysql":
+	case types.DbSyncDbTypeMysql:
 		dbExt, err = getDbConMysql(host)
-	case "pgsql":
+	case types.DbSyncDbTypePgsql:
 		dbExt, err = getDbConPgsql(host)
 	default:
 		return nil, fmt.Errorf("unsupport database type '%s'", host.DbType)

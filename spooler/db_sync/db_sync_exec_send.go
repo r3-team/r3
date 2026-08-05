@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"r3/cache"
+	"r3/cache/cache_dbSync"
 	"r3/data"
 	"r3/db"
 	"r3/log"
@@ -178,13 +179,19 @@ func doSendStore(ctx context.Context, j types.DbSyncJob, rows [][]any) error {
 		return nil
 	}
 
-	// store records to external DB
-	dbExt, err := getExtCon(ctx, j.HostId)
+	// get host details for job
+	host, err := cache_dbSync.GetHostById(j.HostId)
 	if err != nil {
-		if err == types.ErrHostInactive {
-			log.Info(log.ContextDbSync, fmt.Sprintf("skipping job '%s' for inactive host", j.Name))
-			return nil
-		}
+		return err
+	}
+	if !host.Active {
+		log.Info(log.ContextDbSync, fmt.Sprintf("skipping job '%s' for inactive host '%s'", j.Name, host.Name))
+		return nil
+	}
+
+	// save records to external DB
+	dbExt, err := getExtCon(ctx, host)
+	if err != nil {
 		return err
 	}
 	defer dbExt.Close()
@@ -193,16 +200,30 @@ func doSendStore(ctx context.Context, j types.DbSyncJob, rows [][]any) error {
 	if err != nil {
 		return err
 	}
-	stmt, err := tx.PrepareContext(ctx, j.CodeSql)
-	if err != nil {
-		return err
-	}
 
-	for _, values := range rows {
-		if _, err := stmt.ExecContext(ctx, values...); err != nil {
+	if host.DbType == types.DbSyncDbTypeClickhouse {
+		// clickhouse works differently to regular RDBMS - it´s more like a append-only system for larger sets
+		// SQL is supported, but it does not offer all features and execution differs, some aspects:
+		//  * prepared statements generally do not provide much of a benefit, UPDATES do not support them outright
+		//  * UPDATES are generally slow and should be avoided - to execute one, an ALTER TABLE statement is required (ALTER TABLE X UPDATE Y SET ...)
+		//  * a native connector (in constrast to database/sql) is available to execute large INSERT batches (what clickhouse is more built for)
+		for _, values := range rows {
+			if _, err := tx.ExecContext(ctx, j.CodeSql, values...); err != nil {
+				return err
+			}
+		}
+	} else {
+		stmt, err := tx.PrepareContext(ctx, j.CodeSql)
+		if err != nil {
 			return err
 		}
+		for _, values := range rows {
+			if _, err := stmt.ExecContext(ctx, values...); err != nil {
+				return err
+			}
+		}
 	}
+
 	if err := tx.Commit(); err != nil {
 		return err
 	}
