@@ -1,24 +1,24 @@
 import MyStore from '../../stores/store.js';
 
 const attributeContentNames = {
-	decimal:['numeric','real','double precision'],
-	float:['real','double precision'],
-	integer:['integer','bigint'],
-	relationship:['1:1','n:1','1:n'],
-	text:['varchar','text']
+	decimal: ['numeric', 'real', 'double precision'],
+	float: ['real', 'double precision'],
+	integer: ['integer', 'bigint'],
+	relationship: ['1:1', 'n:1', '1:n'],
+	text: ['varchar', 'text']
 };
-const attributeUseNoTextSearch = ['color','drawing','datetime','date','time'];
-const removeInvalidHrefChars   = s => s.replace(/[#=@?:;\/\\&]/g,'');
+const attributeUseNoTextSearch = ['color', 'drawing', 'datetime', 'date', 'time'];
+const removeInvalidHrefChars = s => s.replace(/[#=@?:;\/\\&]/g, '');
 
-export function getIndexAttributeId(index,attributeId,outsideIn,attributeIdNm) {
+export function getIndexAttributeId(index, attributeId, outsideIn, attributeIdNm) {
 	// creates unique attribute ID, based on relation index
 	//  and whether attribute comes from original relation index or via relationship
 	// used to ascertain whether attribute has already been used
 	// usually, attributes can only be used once (on a form for example)
 	//  if relationship exists that is a self reference, attribute can exist twice
-	if(index         === null) index         = 'null';
-	if(attributeId   === null) attributeId   = 'null';
-	if(attributeIdNm === null) attributeIdNm = 'null';
+	if (index === null) index = 'null';
+	if (attributeId === null) attributeId = 'null';
+	if (attributeIdNm === null) attributeIdNm = 'null';
 
 	return [
 		index,
@@ -28,7 +28,7 @@ export function getIndexAttributeId(index,attributeId,outsideIn,attributeIdNm) {
 	].join('_');
 };
 
-export function getIndexAttributeIdByField(f,altAttribute) {
+export function getIndexAttributeIdByField(f, altAttribute) {
 	return getIndexAttributeId(
 		f.index,
 		!altAttribute ? f.attributeId : f.attributeIdAlt,
@@ -37,19 +37,19 @@ export function getIndexAttributeIdByField(f,altAttribute) {
 	);
 };
 
-export function getIndexAttributeIdsByJoins(joins,atrContentWhitelist,atrContentBlacklist) {
+export function getIndexAttributeIdsByJoins(joins, atrContentWhitelist, atrContentBlacklist) {
 	const atrContentWhitelistUsed = atrContentWhitelist.length !== 0;
 	const atrContentBlacklistUsed = atrContentBlacklist.length !== 0;
-	let out = [];
-	for(const j of joins) {
+	const out = [];
+	for (const j of joins) {
 		const r = MyStore.getters['schema/relationIdMap'][j.relationId];
 
-		for(const a of r.attributes) {
+		for (const a of r.attributes) {
 			if (
 				(!atrContentWhitelistUsed || atrContentWhitelist.includes(a.content)) &&
 				(!atrContentBlacklistUsed || !atrContentBlacklist.includes(a.content))
 			) {
-				out.push(String(j.index)+'_'+a.id);
+				out.push(`${String(j.index)}_${a.id}`);
 			}
 		}
 	}
@@ -57,187 +57,191 @@ export function getIndexAttributeIdsByJoins(joins,atrContentWhitelist,atrContent
 };
 
 export function getDetailsFromIndexAttributeId(indexAttributeId) {
-	if(indexAttributeId === null) return {
-		index:null,
-		attributeId:null,
-		outsideIn:false,
-		attributeIdNm:null
+	if (indexAttributeId === null) return {
+		index: null,
+		attributeId: null,
+		outsideIn: false,
+		attributeIdNm: null
 	};
 
-	let d = indexAttributeId.split('_');
+	const d = indexAttributeId.split('_');
 	return {
-		index:d[0] === 'null' ? null : parseInt(d[0]),
-		attributeId:d[1] === 'null' ? null : d[1],
-		outsideIn:d[2] === 'rel',
-		attributeIdNm:d[3] === 'null' ? null : d[3]
+		index: d[0] === 'null' ? null : parseInt(d[0], 10),
+		attributeId: d[1] === 'null' ? null : d[1],
+		outsideIn: d[2] === 'rel',
+		attributeIdNm: d[3] === 'null' ? null : d[3]
 	};
 };
 
-export function getAttributeFileHref(attributeId,id,name,token) {
+export function getAttributeFileHref(attributeId, id, name, token) {
 	return `/data/download/${removeInvalidHrefChars(name)}?attribute_id=${attributeId}&file_id=${id}&token=${token}`;
 };
-export function getAttributeFileThumbHref(attributeId,id,name,version,token) {
+export function getAttributeFileThumbHref(attributeId, id, name, version, token) {
 	// thumbnails are only available for the latest file version, version getter only serves as cache denial
 	return `/data/download/thumb/${removeInvalidHrefChars(name)}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
 };
-export function getAttributeFileVersionHref(attributeId,id,name,version,token) {
+export function getAttributeFileVersionHref(attributeId, id, name, version, token) {
 	return `/data/download/${removeInvalidHrefChars(name)}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
 };
 
-export function getValueFromQuery(content,queryValue) {
-	if(isAttributeInteger(content) || isAttributeRelationship(content))
-		return parseInt(queryValue);
+export function getValueFromQuery(content, queryValue) {
+	if (isAttributeInteger(content) || isAttributeRelationship(content))
+		return parseInt(queryValue, 10);
 
-	if(isAttributeDecimal(content))
+	if (isAttributeDecimal(content))
 		return parseFloat(queryValue);
 
 	return queryValue;
 };
 
-export function getAttributeValueFromString(content,value) {
-	if(isAttributeBoolean(content))        return value === 'true' || value === 'TRUE';
-	if(isAttributeInteger(content))        return parseInt(value);
-	if(isAttributeDecimal(content))        return parseFloat(value);
-	if(isAttributeRelationship11(content)) return parseInt(value);
-	if(isAttributeRelationshipN1(content)) return JSON.parse(value);
-	if(isAttributeRelationship1N(content)) return JSON.parse(value);
+export function getAttributeValueFromString(content, value) {
+	if (isAttributeBoolean(content)) return value === 'true' || value === 'TRUE';
+	if (isAttributeInteger(content)) return parseInt(value, 10);
+	if (isAttributeDecimal(content)) return parseFloat(value);
+	if (isAttributeRelationship11(content)) return parseInt(value, 10);
+	if (isAttributeRelationshipN1(content)) return JSON.parse(value);
+	if (isAttributeRelationship1N(content)) return JSON.parse(value);
 	return value;
 };
 
 // example: '7b9fecdc-d8c8-43b3-805a-3b276003c81_3,859a48cb-4358-4fd4-be1a-265d86930922_12'
 // (contains two attributes with one value each)
 export function getAttributeValuesFromGetter(getter) {
-	let map  = {};
-	let atrs = getter.split(',');
+	const map = {};
+	const atrs = getter.split(',');
 
-	for(let i = 0, j = atrs.length; i < j; i++) {
+	for (let i = 0, j = atrs.length; i < j; i++) {
 
-		let parts = atrs[i].split('_');
-		if(parts.length !== 2)
+		const parts = atrs[i].split('_');
+		if (parts.length !== 2)
 			continue;
 
-		let atrId = parts[0];
-		let value = parts[1];
+		const atrId = parts[0];
+		const value = parts[1];
 
-		if(typeof MyStore.getters['schema/attributeIdMap'][atrId] !== 'undefined')
+		if (MyStore.getters['schema/attributeIdMap'][atrId] !== undefined)
 			map[atrId] = getValueFromQuery(
-				MyStore.getters['schema/attributeIdMap'][atrId].content,value);
+				MyStore.getters['schema/attributeIdMap'][atrId].content, value);
 	}
 	return map;
 };
 export function getGetterFromAttributeValues(attributeIdMap) {
-	let out = [];
-	for(const k in attributeIdMap) {
+	const out = [];
+	for (const k in attributeIdMap) {
 		out.push(`${k}_${attributeIdMap[k]}`);
 	}
 	return out.length === 0 ? [] : [`attributes=${out.join(',')}`];
 };
 
-export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
+export function getAttributeIcon(content, contentUse, outsideIn, isNm) {
 	if (isAttributeString(content)) {
 		if (contentUse.includes('barcode'))
 			return 'barcode.png';
 
-		switch(contentUse) {
-			case 'default':  return 'text.png';       break;
-			case 'richtext': return 'text_rich.png';  break;
-			case 'textarea': return 'text_lines.png'; break;
-			case 'color':    return 'colors.png';     break;
-			case 'drawing':  return 'drawing.png';    break;
-			case 'iframe':   return 'iframe.png';     break;
+		switch (contentUse) {
+			case 'default': return 'text.png';
+			case 'richtext': return 'text_rich.png';
+			case 'textarea': return 'text_lines.png';
+			case 'color': return 'colors.png';
+			case 'drawing': return 'drawing.png';
+			case 'iframe': return 'iframe.png';
 		}
 	}
-	if(isAttributeInteger(content)) {
-		switch(contentUse) {
-			case 'datetime': return 'calendarTime.png'; break;
-			case 'date':     return 'calendar.png';     break;
-			case 'time':     return 'clock.png';        break;
-			default:         return 'numbers.png';      break;
+	if (isAttributeInteger(content)) {
+		switch (contentUse) {
+			case 'datetime': return 'calendarTime.png';
+			case 'date': return 'calendar.png';
+			case 'time': return 'clock.png';
+			default: return 'numbers.png';
 		}
 	}
-	if(isAttributeBoolean(content))        return 'bool.png';
-	if(isAttributeUuid(content))           return 'uuid.png';
-	if(isAttributeFloat(content))          return 'numbers_float.png';
-	if(isAttributeNumeric(content))        return 'numbers_decimal.png';
-	if(isAttributeFiles(content))          return 'files.png';
-	if(isAttributeRegconfig(content))      return 'languages.png';
-	if(isAttributeRelationship11(content)) return 'link1.png';
-	if(isAttributeRelationship1N(content)) return 'link2.png';
+	if (isAttributeBoolean(content)) return 'bool.png';
+	if (isAttributeGeometry(content)) return 'map.png';
+	if (isAttributeUuid(content)) return 'uuid.png';
+	if (isAttributeFloat(content)) return 'numbers_float.png';
+	if (isAttributeNumeric(content)) return 'numbers_decimal.png';
+	if (isAttributeFiles(content)) return 'files.png';
+	if (isAttributeRegconfig(content)) return 'languages.png';
+	if (isAttributeRelationship11(content)) return 'link1.png';
+	if (isAttributeRelationship1N(content)) return 'link2.png';
 
-	if(isAttributeRelationshipN1(content)) {
-		if(isNm) return 'link4.png';
+	if (isAttributeRelationshipN1(content)) {
+		if (isNm) return 'link4.png';
 
 		return outsideIn ? 'link2.png' : 'link3.png';
 	}
 	return 'noPic.png';
 };
 
-export function getAttributeContentUse(content,use) {
+export function getAttributeContentUse(content, use) {
 	if (isAttributeString(content))
 		return use === 'default' ? 'text' : use;
 
 	if (isAttributeInteger(content))
 		return use;
 
-	if(isAttributeBoolean(content))        return 'boolean';
-	if(isAttributeNumeric(content))        return 'decimal';
-	if(isAttributeFiles(content))          return 'files';
-	if(isAttributeFloat(content))          return 'float';
-	if(isAttributeRegconfig(content))      return 'regconfig';
-	if(isAttributeUuid(content))           return 'uuid';
-	if(isAttributeRelationship11(content)) return 'relationship11';
-	if(isAttributeRelationshipN1(content)) return 'relationshipN1';
-	if(isAttributeRelationship1N(content)) return 'relationship1N';
+	if (isAttributeBoolean(content)) return 'boolean';
+	if (isAttributeGeometry(content)) return 'geometry';
+	if (isAttributeNumeric(content)) return 'decimal';
+	if (isAttributeFiles(content)) return 'files';
+	if (isAttributeFloat(content)) return 'float';
+	if (isAttributeRegconfig(content)) return 'regconfig';
+	if (isAttributeUuid(content)) return 'uuid';
+	if (isAttributeRelationship11(content)) return 'relationship11';
+	if (isAttributeRelationshipN1(content)) return 'relationshipN1';
+	if (isAttributeRelationship1N(content)) return 'relationship1N';
 
 	return 'text';
 }
 export function getAttributeContentsByUse(usedFor, length, largeNumbers) {
 	if (usedFor.includes('barcode'))
-		return { content:'text', contentUse:usedFor };
+		return { content: 'text', contentUse: usedFor };
 
-	switch(usedFor) {
+	switch (usedFor) {
 		// default uses
-		case 'text':           return { content:length === 0 ? 'text'   : 'varchar',       contentUse:'default' }; break;
-		case 'number':         return { content:largeNumbers ? 'bigint' : 'integer',       contentUse:'default' }; break;
-		case 'boolean':        return { content:'boolean',                                 contentUse:'default' }; break;
-		case 'decimal':        return { content:'numeric',                                 contentUse:'default' }; break;
-		case 'files':          return { content:'files',                                   contentUse:'default' }; break;
-		case 'float':          return { content:largeNumbers ? 'double precision': 'real', contentUse:'default' }; break;
-		case 'regconfig':      return { content:'regconfig',                               contentUse:'default' }; break;
-		case 'uuid':           return { content:'uuid',                                    contentUse:'default' }; break;
-		case 'relationship11': return { content:'1:1',                                     contentUse:'default' }; break;
-		case 'relationshipN1': return { content:'n:1',                                     contentUse:'default' }; break;
-		case 'relationship1N': return { content:'1:n',                                     contentUse:'default' }; break;
+		case 'text': return { content: length === 0 ? 'text' : 'varchar', contentUse: 'default' };
+		case 'number': return { content: largeNumbers ? 'bigint' : 'integer', contentUse: 'default' };
+		case 'boolean': return { content: 'boolean', contentUse: 'default' };
+		case 'decimal': return { content: 'numeric', contentUse: 'default' };
+		case 'files': return { content: 'files', contentUse: 'default' };
+		case 'float': return { content: largeNumbers ? 'double precision' : 'real', contentUse: 'default' };
+		case 'geometry': return { content: 'geometry', contentUse: 'default' };
+		case 'regconfig': return { content: 'regconfig', contentUse: 'default' };
+		case 'uuid': return { content: 'uuid', contentUse: 'default' };
+		case 'relationship11': return { content: '1:1', contentUse: 'default' };
+		case 'relationshipN1': return { content: 'n:1', contentUse: 'default' };
+		case 'relationship1N': return { content: '1:n', contentUse: 'default' };
 
 		// special uses: strings
-		case 'color':    return { content:'varchar',                         contentUse:'color' };    break;
-		case 'drawing':  return { content:'text',                            contentUse:'drawing' };  break;
-		case 'iframe':   return { content:'text',                            contentUse:'iframe' };   break;
-		case 'richtext': return { content:length === 0 ? 'text' : 'varchar', contentUse:'richtext' }; break;
-		case 'textarea': return { content:length === 0 ? 'text' : 'varchar', contentUse:'textarea' }; break;
+		case 'color': return { content: 'varchar', contentUse: 'color' };
+		case 'drawing': return { content: 'text', contentUse: 'drawing' };
+		case 'iframe': return { content: 'text', contentUse: 'iframe' };
+		case 'richtext': return { content: length === 0 ? 'text' : 'varchar', contentUse: 'richtext' };
+		case 'textarea': return { content: length === 0 ? 'text' : 'varchar', contentUse: 'textarea' };
 
 		// special uses: integers
-		case 'date':     return { content:largeNumbers ? 'bigint' : 'integer', contentUse:'date' };     break;
-		case 'datetime': return { content:largeNumbers ? 'bigint' : 'integer', contentUse:'datetime' }; break;
-		case 'time':     return { content:'integer',                           contentUse:'time' };     break;
+		case 'date': return { content: largeNumbers ? 'bigint' : 'integer', contentUse: 'date' };
+		case 'datetime': return { content: largeNumbers ? 'bigint' : 'integer', contentUse: 'datetime' };
+		case 'time': return { content: 'integer', contentUse: 'time' };
 	}
-	return { content:'text', contentUse:'default' };
+	return { content: 'text', contentUse: 'default' };
 }
 
-export function isAttributeBoolean(content)            { return content === 'boolean'; };
-export function isAttributeDecimal(content)            { return attributeContentNames.decimal.includes(content); };
-export function isAttributeFiles(content)              { return content === 'files'; };
-export function isAttributeFloat(content)              { return attributeContentNames.float.includes(content); };
-export function isAttributeInteger(content)            { return attributeContentNames.integer.includes(content); };
-export function isAttributeNumeric(content)            { return content === 'numeric'; };
-export function isAttributeRegconfig(content)          { return content === 'regconfig'; };
-export function isAttributeString(content)             { return attributeContentNames.text.includes(content); };
-export function isAttributeUuid(content)               { return content === 'uuid'; };
-export function isAttributeWithLength(content)         { return isAttributeFiles(content) || isAttributeString(content) }
-export function isAttributeRelationship(content)       { return attributeContentNames.relationship.includes(content); };
-export function isAttributeRelationship11(content)     { return content === '1:1'; };
-export function isAttributeRelationshipN1(content)     { return content === 'n:1'; };
-export function isAttributeRelationship1N(content)     { return content === '1:n'; };
-export function isAttributeTextSearchable(content,use) {
+export function isAttributeBoolean(content) { return content === 'boolean'; };
+export function isAttributeDecimal(content) { return attributeContentNames.decimal.includes(content); };
+export function isAttributeFiles(content) { return content === 'files'; };
+export function isAttributeFloat(content) { return attributeContentNames.float.includes(content); };
+export function isAttributeGeometry(content) { return content === 'geometry'; };
+export function isAttributeInteger(content) { return attributeContentNames.integer.includes(content); };
+export function isAttributeNumeric(content) { return content === 'numeric'; };
+export function isAttributeRegconfig(content) { return content === 'regconfig'; };
+export function isAttributeString(content) { return attributeContentNames.text.includes(content); };
+export function isAttributeUuid(content) { return content === 'uuid'; };
+export function isAttributeWithLength(content) { return isAttributeFiles(content) || isAttributeString(content) }
+export function isAttributeRelationship(content) { return attributeContentNames.relationship.includes(content); };
+export function isAttributeRelationship11(content) { return content === '1:1'; };
+export function isAttributeRelationshipN1(content) { return content === 'n:1'; };
+export function isAttributeRelationship1N(content) { return content === '1:n'; };
+export function isAttributeTextSearchable(content, use) {
 	return !isAttributeBoolean(content) && !isAttributeFiles(content) && !attributeUseNoTextSearch.includes(use);
 };

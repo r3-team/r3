@@ -20,14 +20,13 @@ import (
 
 var contentTypes = []string{"integer", "bigint", "numeric", "real",
 	"double precision", "varchar", "text", "boolean", "regconfig", "uuid",
-	"1:1", "n:1", "files"}
+	"1:1", "n:1", "files", "geometry"}
 
 var contentUseTypes = []string{"default", "textarea", "richtext", "date", "datetime", "time",
 	"color", "iframe", "drawing", "barcode", "barcode_codabar", "barcode_code39", "barcode_code128",
 	"barcode_ean8", "barcode_ean13", "barcode_itf", "barcode_qrcode", "barcode_upc_a", "barcode_upc_e"}
 
-var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL",
-	"SET DEFAULT"}
+var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL", "SET DEFAULT"}
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 

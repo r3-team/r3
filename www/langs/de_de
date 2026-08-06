@@ -2581,6 +2581,8 @@
 		"functionsBackend": "Backend-Funktionen",
 		"functionsFrontend": "Frontend-Funktionen",
 		"gap": "Abstand",
+		"geoData": "Geodaten",
+		"geometry": "Geometrie",
 		"global": "Global",
 		"globalSearch": "Globale Suche",
 		"groupBy": "Gruppieren",

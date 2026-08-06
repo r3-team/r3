@@ -1,21 +1,17 @@
-import MyCodeEditor       from '../codeEditor.js';
+import MyCodeEditor from '../codeEditor.js';
+import { getAttributeContentsByUse, getAttributeContentUse, getAttributeIcon } from '../shared/attribute.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog } from '../shared/generic.js';
+import { variableValueGet } from '../shared/variable.js';
 import MyBuilderFormInput from './builderFormInput.js';
-import {dialogDeleteAsk}  from '../shared/dialog.js';
-import {copyValueDialog}  from '../shared/generic.js';
-import {variableValueGet} from '../shared/variable.js';
-import {
-	getAttributeContentUse,
-	getAttributeContentsByUse,
-	getAttributeIcon
-} from '../shared/attribute.js';
 
 export default {
-	name:'my-builder-variable',
-	components:{
+	name: 'my-builder-variable',
+	components: {
 		MyBuilderFormInput,
 		MyCodeEditor
 	},
-	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-variable float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
@@ -172,57 +168,57 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		module:    { type:Object,  required:true },
-		readonly:  { type:Boolean, required:true },
-		variableId:{ required:true }
+	props: {
+		module: { type: Object, required: true },
+		readonly: { type: Boolean, required: true },
+		variableId: { required: true }
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
-			values:null,
-			valuesOrg:null
+			values: null,
+			valuesOrg: null
 		};
 	},
-	computed:{
-		nameTaken:(s) => {
-			for(let v of s.module.variables) {
-				if(v.id !== s.variableId && v.name === s.values.name && v.formId === s.values.formId)
+	computed: {
+		nameTaken: s => {
+			for (const v of s.module.variables) {
+				if (v.id !== s.variableId && v.name === s.values.name && v.formId === s.values.formId)
 					return true;
 			}
 			return false;
 		},
-		usedFor:{
+		usedFor: {
 			get() { return this.getAttributeContentUse(this.values.content, this.values.contentUse); },
 			set(v) {
-				const p = this.getAttributeContentsByUse(v,0,true);
-				this.values.content    = p.content;
+				const p = this.getAttributeContentsByUse(v, 0, true);
+				this.values.content = p.content;
 				this.values.contentUse = p.contentUse;
 			}
 		},
 
 		// simple
-		canSave:   (s) => !s.readonly && s.hasChanges && !s.nameTaken,
-		hasChanges:(s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		preview:   (s) => s.variableValueGet(s.variableId),
-		title:     (s) => s.capApp.edit.replace('{NAME}',s.values.name),
+		canSave: s => !s.readonly && s.hasChanges && !s.nameTaken,
+		hasChanges: s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		preview: s => s.variableValueGet(s.variableId),
+		title: s => s.capApp.edit.replace('{NAME}', s.values.name),
 
 		// stores
-		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
-		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
-		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
-		capApp:             (s) => s.$store.getters.captions.builder.variable,
-		capAppAtr:          (s) => s.$store.getters.captions.builder.attribute,
-		capGen:             (s) => s.$store.getters.captions.generic
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		variableIdMap: s => s.$store.getters['schema/variableIdMap'],
+		capApp: s => s.$store.getters.captions.builder.variable,
+		capAppAtr: s => s.$store.getters.captions.builder.attribute,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// external
 		copyValueDialog,
 		dialogDeleteAsk,
@@ -233,23 +229,23 @@ export default {
 
 		// actions
 		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's' && this.canSave) {
+			if (e.ctrlKey && e.key === 's' && this.canSave) {
 				this.set();
 				e.preventDefault();
 			}
-			if(e.key === 'Escape') {
+			if (e.key === 'Escape') {
 				this.$emit('close');
 				e.preventDefault();
 			}
 		},
 		reset() {
-			this.values    = JSON.parse(JSON.stringify(this.variableIdMap[this.variableId]));
+			this.values = JSON.parse(JSON.stringify(this.variableIdMap[this.variableId]));
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
 
 		// backend calls
 		del() {
-			ws.send('variable','del',this.variableId,true).then(
+			ws.send('variable', 'del', this.variableId, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');
@@ -259,9 +255,9 @@ export default {
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('variable','set',this.values),
-				ws.prepare('schema','check',{ moduleId:this.module.id })
-			],true).then(
+				ws.prepare('variable', 'set', this.values),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');
