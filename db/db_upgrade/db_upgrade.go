@@ -675,6 +675,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- geometry
 			ALTER TYPE app.attribute_content ADD VALUE 'geometry';
+			ALTER TYPE app.field_content ADD VALUE 'map';
 		`)
 		return "3.13", err
 	},

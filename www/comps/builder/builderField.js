@@ -1,32 +1,20 @@
-import MyBuilderCaption       from './builderCaption.js';
+import { isAttributeFiles, isAttributeRelationship } from '../shared/attribute.js';
+import { getFieldHasQuery, getItemTitle, getSqlPreview } from '../shared/builder.js';
+import { getTemplateQuery } from '../shared/builderTemplate.js';
+import { getFieldIcon, getFieldTitle } from '../shared/field.js';
+import { getFlexBasis } from '../shared/form.js';
+import { getJoinsIndexMap } from '../shared/query.js';
+
+import MyBuilderCaption from './builderCaption.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
-import MyBuilderFields        from './builderFields.js';
-import MyBuilderFieldOptions  from './builderFieldOptions.js';
-import MyBuilderQuery         from './builderQuery.js';
-import {getTemplateQuery}     from '../shared/builderTemplate.js';
-import {getFlexBasis}         from '../shared/form.js';
-import {getJoinsIndexMap}     from '../shared/query.js';
-import {
-	MyBuilderColumns,
-	MyBuilderColumnTemplates
-} from './builderColumns.js';
-import {
-	getFieldHasQuery,
-	getItemTitle,
-	getSqlPreview
-} from '../shared/builder.js';
-import {
-	isAttributeFiles,
-	isAttributeRelationship
-} from '../shared/attribute.js';
-import {
-	getFieldIcon,
-	getFieldTitle
-} from '../shared/field.js';
+import { MyBuilderColumns, MyBuilderColumnTemplates } from './builderColumns.js';
+import MyBuilderFieldOptions from './builderFieldOptions.js';
+import MyBuilderFields from './builderFields.js';
+import MyBuilderQuery from './builderQuery.js';
 
 export default {
-	name:'my-builder-field',
-	components:{
+	name: 'my-builder-field',
+	components: {
 		MyBuilderCaption,
 		MyBuilderColumns,
 		MyBuilderColumnOptions,
@@ -34,7 +22,7 @@ export default {
 		MyBuilderFieldOptions,
 		MyBuilderQuery
 	},
-	template:`<div class="builder-field"
+	template: `<div class="builder-field"
 		v-show="show"
 		:class="cssClass"
 		:key="field.id"
@@ -356,207 +344,207 @@ export default {
 			</template>
 		</teleport>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,        required:true },
-		dataFields:     { type:Array,         required:true },
-		entityIdMapRef: { type:Object,        required:true },
-		elmOptions:     { required:true },
-		field:          { type:Object,        required:true },
-		fieldIdMap:     { type:Object,        required:true },
-		fieldIdShow:    { type:[String,null], required:true },
-		fieldMoveList:  { type:[Array,null],  required:true },
-		fieldMoveIndex: { type:Number,        required:true },
-		filterData:     { type:Boolean,       required:true },
-		filterData1n:   { type:Boolean,       required:true },
-		filterDataIndex:{ type:Number,        required:true },
-		filterDataN1:   { type:Boolean,       required:true },
-		filterDataNm:   { type:Boolean,       required:true },
-		flexDirParent:  { type:String,        required:true },
-		formId:         { type:String,        required:true },
-		isTemplate:     { type:Boolean,       required:true },
-		joinsIndexMap:  { type:Object,        required:true },
-		moduleId:       { type:String,        required:true },
-		noMovement:     { type:Boolean,       required:true },
-		readonly:       { type:Boolean,       required:true },
-		uiScale:        { type:Number,        required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		dataFields: { type: Array, required: true },
+		entityIdMapRef: { type: Object, required: true },
+		elmOptions: { required: true },
+		field: { type: Object, required: true },
+		fieldIdMap: { type: Object, required: true },
+		fieldIdShow: { type: [String, null], required: true },
+		fieldMoveList: { type: [Array, null], required: true },
+		fieldMoveIndex: { type: Number, required: true },
+		filterData: { type: Boolean, required: true },
+		filterData1n: { type: Boolean, required: true },
+		filterDataIndex: { type: Number, required: true },
+		filterDataN1: { type: Boolean, required: true },
+		filterDataNm: { type: Boolean, required: true },
+		flexDirParent: { type: String, required: true },
+		formId: { type: String, required: true },
+		isTemplate: { type: Boolean, required: true },
+		joinsIndexMap: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		noMovement: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: true },
+		uiScale: { type: Number, required: true }
 	},
-	emits:['createNew','field-id-show','field-move','field-move-store','field-property-set','field-remove'],
+	emits: ['createNew', 'field-id-show', 'field-move', 'field-move-store', 'field-property-set', 'field-remove'],
 	data() {
 		return {
-			columnIdShow:null,     // currently open column
-			tabIndex:0,            // which tab index to show (tab fields)
-			tabTarget:'properties' // sidebar tab target for column (content, properties)
+			columnIdShow: null,     // currently open column
+			tabIndex: 0,            // which tab index to show (tab fields)
+			tabTarget: 'properties' // sidebar tab target for column (content, properties)
 		};
 	},
-	computed:{
-		columnBatchIndexTitle:s => {
-			if(s.isGantt) return [s.capApp.ganttBatch];
-			if(s.isKanban) {
+	computed: {
+		columnBatchIndexTitle: s => {
+			if (s.isGantt) return [s.capApp.ganttBatch];
+			if (s.isKanban) {
 				const joinsIndexMap = s.getJoinsIndexMap(s.query.joins);
-				const getCaption = function(relationIndex) {
+				const getCaption = relationIndex => {
 					const j = joinsIndexMap[relationIndex];
 					return `${relationIndex} ${s.relationIdMap[j.relationId].name}`;
 				};
 
-				let out = [];
-				if(s.field.relationIndexAxisX !== null)
-					out.push(s.capApp.kanban.columnBatchX.replace('{REL}',getCaption(s.field.relationIndexAxisX)));
-				if(s.field.relationIndexAxisY !== null)
-					out.push(s.capApp.kanban.columnBatchY.replace('{REL}',getCaption(s.field.relationIndexAxisY)));
+				const out = [];
+				if (s.field.relationIndexAxisX !== null)
+					out.push(s.capApp.kanban.columnBatchX.replace('{REL}', getCaption(s.field.relationIndexAxisX)));
+				if (s.field.relationIndexAxisY !== null)
+					out.push(s.capApp.kanban.columnBatchY.replace('{REL}', getCaption(s.field.relationIndexAxisY)));
 
 				return out;
 			}
 			return [];
 		},
-		columnShow:s => {
-			if(s.columnIdShow === null) return false;
-			for(const c of s.field.columns) {
-				if(c.id === s.columnIdShow)
+		columnShow: s => {
+			if (s.columnIdShow === null) return false;
+			for (const c of s.field.columns) {
+				if (c.id === s.columnIdShow)
 					return c;
 			}
 			return false;
 		},
-		cssClass:s => {
+		cssClass: s => {
 			return {
-				container:s.isContainer,
-				isTemplate:s.isTemplate,
-				notData:!s.isData,
-				noGrow:s.flexDirParent === 'column' && (s.isHeader || s.isVariable || (
+				container: s.isContainer,
+				isTemplate: s.isTemplate,
+				notData: !s.isData,
+				noGrow: s.flexDirParent === 'column' && (s.isHeader || s.isVariable || (
 					s.isData && !s.isRelationship1N && !s.isRichtext && !s.isBarcode &&
 					!s.isTextarea && !s.isDrawing && !s.isFiles && !s.isIframe)
 				),
-				selected:s.isOptionsShow,
-				tabs:s.isTabs
+				selected: s.isOptionsShow,
+				tabs: s.isTabs
 			};
 		},
-		cssClassChildren:s => {
-			if(s.isTemplate || !s.isContainer)
+		cssClassChildren: s => {
+			if (s.isTemplate || !s.isContainer)
 				return [];
 
 			// default classed
-			let out = [];
-			if(s.field.fields.length === 0) out.push('empty');
+			const out = [];
+			if (s.field.fields.length === 0) out.push('empty');
 
 			// draggable does not support styling the main element
 			// use custom classes as fallback
-			if(s.field.direction === 'column') out.push('column');
-			if(s.field.wrap)                   out.push('wrap');
+			if (s.field.direction === 'column') out.push('column');
+			if (s.field.wrap) out.push('wrap');
 
 			out.push(`style-justify-content-${s.field.justifyContent}`);
 			out.push(`style-align-content-${s.field.alignContent}`);
 			out.push(`style-align-items-${s.field.alignItems}`);
 			return out;
 		},
-		cssStyleParent:s => {
-			if(typeof s.field.basis === 'undefined')
+		cssStyleParent: s => {
+			if (typeof s.field.basis === 'undefined')
 				return;
 
 			let basis = s.field.basis;
-			if(basis !== 0)
+			if (basis !== 0)
 				basis = Math.floor(basis * s.uiScale / 100);
 
-			let out = [`flex:${s.field.grow} ${s.field.shrink} ${s.getFlexBasis(basis)}`];
-			if(basis !== 0) {
-				let dirMax = s.flexDirParent === 'row' ? 'max-width' : 'max-height';
-				let dirMin = s.flexDirParent === 'row' ? 'min-width' : 'min-height';
-				out.push(`${dirMax}:${basis*s.field.perMax/100}px`);
-				out.push(`${dirMin}:${basis*s.field.perMin/100}px`);
+			const out = [`flex:${s.field.grow} ${s.field.shrink} ${s.getFlexBasis(basis)}`];
+			if (basis !== 0) {
+				const dirMax = s.flexDirParent === 'row' ? 'max-width' : 'max-height';
+				const dirMin = s.flexDirParent === 'row' ? 'min-width' : 'min-height';
+				out.push(`${dirMax}:${basis * s.field.perMax / 100}px`);
+				out.push(`${dirMin}:${basis * s.field.perMin / 100}px`);
 			}
 			return out.join(';');
 		},
-		relationIdStart:s => {
-			if(!s.isData) return null;
+		relationIdStart: s => {
+			if (!s.isData) return null;
 
-			if(!s.isAttributeRelationship(s.attribute.content))
+			if (!s.isAttributeRelationship(s.attribute.content))
 				return null;
 
-			if(s.field.attributeIdNm !== null)
+			if (s.field.attributeIdNm !== null)
 				return s.attributeIdMap[s.field.attributeIdNm].relationshipId;
 
-			if(s.joinsIndexMap[s.field.index].relationId === s.attribute.relationId)
+			if (s.joinsIndexMap[s.field.index].relationId === s.attribute.relationId)
 				return s.attribute.relationshipId;
 
 			return s.attribute.relationId;
 		},
-		show:s => {
+		show: s => {
 			// filter only data fields
-			if(!s.filterData || !s.isData)
+			if (!s.filterData || !s.isData)
 				return true;
 
 			// filter by selected index (if set)
-			if(s.filterDataIndex !== -1 && s.field.index !== s.filterDataIndex)
+			if (s.filterDataIndex !== -1 && s.field.index !== s.filterDataIndex)
 				return false;
 
 			// filter by relationship type (show non-rel fields)
-			if(!s.isRelationship)  return true;
-			if(!s.field.outsideIn) return s.filterDataN1;
-			if(s.filterData1n && s.field.attributeIdNm === null) return true;
-			if(s.filterDataNm && s.field.attributeIdNm !== null) return true;
+			if (!s.isRelationship) return true;
+			if (!s.field.outsideIn) return s.filterDataN1;
+			if (s.filterData1n && s.field.attributeIdNm === null) return true;
+			if (s.filterDataNm && s.field.attributeIdNm !== null) return true;
 			return false;
 		},
-		warnings:s => {
-			let out = [];
-			if(s.hasQuery) {
-				if(s.query.relationId === null) out.push(s.capApp.warning.queryRelationNotSet);
-				if(s.field.columns.length   === 0)    out.push(s.capApp.warning.queryColumnsNotSet);
+		warnings: s => {
+			const out = [];
+			if (s.hasQuery) {
+				if (s.query.relationId === null) out.push(s.capApp.warning.queryRelationNotSet);
+				if (s.field.columns.length === 0) out.push(s.capApp.warning.queryColumnsNotSet);
 
-				for(let c of s.field.columns) {
-					if(c.content === 'query' && c.attributeId === null) {
+				for (const c of s.field.columns) {
+					if (c.content === 'query' && c.attributeId === null) {
 						out.push(s.capApp.warning.columnNoSubQueryAttribute);
 						break;
 					}
 				}
 			}
-			if(s.isCalendar) {
-				if(s.field.attributeIdDate0 === null || s.field.attributeIdDate1 === null)
+			if (s.isCalendar) {
+				if (s.field.attributeIdDate0 === null || s.field.attributeIdDate1 === null)
 					out.push(s.capApp.warning.calendarNoDateFromTo);
 			}
 			return out;
 		},
 
 		// simple
-		hasQuery:        s => s.getFieldHasQuery(s.field),
-		isBarcode:       s => s.isData && s.attribute.contentUse.includes('barcode'),
-		isButton:        s => s.field.content === 'button',
-		isCalendar:      s => s.field.content === 'calendar',
-		isChart:         s => s.field.content === 'chart',
-		isContainer:     s => s.field.content === 'container',
-		isData:          s => s.field.content === 'data',
-		isDrawing:       s => s.isData && s.attribute.contentUse === 'drawing',
-		isFiles:         s => s.isData && s.isAttributeFiles(s.attribute.content),
-		isGantt:         s => s.isCalendar && s.field.gantt,
-		isHeader:        s => s.field.content === 'header',
-		isIframe:        s => s.isData && s.attribute.contentUse === 'iframe',
-		isKanban:        s => s.field.content === 'kanban',
-		isList:          s => s.field.content === 'list',
-		isOptionsShow:   s => s.fieldIdShow === s.field.id,
-		isRichtext:      s => s.isData && s.attribute.contentUse === 'richtext',
-		isTabs:          s => s.field.content === 'tabs',
-		isTextarea:      s => s.isData && s.attribute.contentUse === 'textarea',
-		isRelationship:  s => s.isData && s.isAttributeRelationship(s.attribute.content),
-		isRelationship1N:s => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
-		isVariable:      s => s.field.content === 'variable',
-		moveActive:      s => s.fieldMoveList !== null,
-		parentChildren:  s => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
-		query:           s => s.hasQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
-		queryActive:     s => s.hasQuery && s.field.query !== null && s.field.query.relationId !== null,
-		reference:       s => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
-		showColumns:     s => !s.isTemplate && s.hasQuery && s.fieldIdShow === s.field.id && s.tabTarget === 'content',
-		tabIndexShown:   s => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
-		title:           s => s.getFieldTitle(s.field),
+		hasQuery: s => s.getFieldHasQuery(s.field),
+		isBarcode: s => s.isData && s.attribute.contentUse.includes('barcode'),
+		isButton: s => s.field.content === 'button',
+		isCalendar: s => s.field.content === 'calendar',
+		isChart: s => s.field.content === 'chart',
+		isContainer: s => s.field.content === 'container',
+		isData: s => s.field.content === 'data',
+		isDrawing: s => s.isData && s.attribute.contentUse === 'drawing',
+		isFiles: s => s.isData && s.isAttributeFiles(s.attribute.content),
+		isGantt: s => s.isCalendar && s.field.gantt,
+		isHeader: s => s.field.content === 'header',
+		isIframe: s => s.isData && s.attribute.contentUse === 'iframe',
+		isKanban: s => s.field.content === 'kanban',
+		isList: s => s.field.content === 'list',
+		isOptionsShow: s => s.fieldIdShow === s.field.id,
+		isRichtext: s => s.isData && s.attribute.contentUse === 'richtext',
+		isTabs: s => s.field.content === 'tabs',
+		isTextarea: s => s.isData && s.attribute.contentUse === 'textarea',
+		isRelationship: s => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isRelationship1N: s => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
+		isVariable: s => s.field.content === 'variable',
+		moveActive: s => s.fieldMoveList !== null,
+		parentChildren: s => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
+		query: s => s.hasQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
+		queryActive: s => s.hasQuery && s.field.query !== null && s.field.query.relationId !== null,
+		reference: s => s.isTemplate ? '' : `F${s.entityIdMapRef.field[s.field.id]}`,
+		showColumns: s => !s.isTemplate && s.hasQuery && s.fieldIdShow === s.field.id && s.tabTarget === 'content',
+		tabIndexShown: s => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
+		title: s => s.getFieldTitle(s.field),
 
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		attribute:     s => !s.isData ? false : s.attributeIdMap[s.field.attributeId],
-		capApp:        s => s.$store.getters.captions.builder.form,
-		capGen:        s => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		attribute: s => !s.isData ? false : s.attributeIdMap[s.field.attributeId],
+		capApp: s => s.$store.getters.captions.builder.form,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
 		this.$options.components.MyBuilderFields = MyBuilderFields;
 	},
-	methods:{
+	methods: {
 		// externals
 		getFieldHasQuery,
 		getFieldIcon,
@@ -571,52 +559,54 @@ export default {
 
 		// actions
 		columnAdd(column) {
-			let colsCloned = JSON.parse(JSON.stringify(this.field.columns));
+			const colsCloned = JSON.parse(JSON.stringify(this.field.columns));
 			colsCloned.push(column);
-			this.$emit('field-property-set','columns',colsCloned);
+			this.$emit('field-property-set', 'columns', colsCloned);
 		},
-		columnPropertySet(name,value) {
+		columnPropertySet(name, value) {
 			this.columnShow[name] = value;
 		},
 		columnShowById(id) {
-			if(this.columnIdShow === id)
-				return this.columnIdShow = null;
-
+			if (this.columnIdShow === id) {
+				this.columnIdShow = null;
+				return;
+			}
 			this.columnIdShow = id;
 		},
 		openSettings(tabTarget) {
-			if(this.fieldIdShow === this.field.id && tabTarget !== this.tabTarget)
-				return this.tabTarget = tabTarget;
-
-			this.$emit('field-id-show',this.field.id);
+			if (this.fieldIdShow === this.field.id && tabTarget !== this.tabTarget) {
+				this.tabTarget = tabTarget;
+				return;
+			}
+			this.$emit('field-id-show', this.field.id);
 			this.columnIdShow = null;
 			this.tabTarget = tabTarget;
 		},
 		queryRemoveIndex(index) {
-			let colsCloned = JSON.parse(JSON.stringify(this.field.columns));
-			for(let i = 0, j = colsCloned.length; i < j; i++) {
-				if(colsCloned[i].content === 'attribute' && colsCloned[i].index === index) {
-					colsCloned.splice(i,1);
+			const colsCloned = JSON.parse(JSON.stringify(this.field.columns));
+			for (let i = 0, j = colsCloned.length; i < j; i++) {
+				if (colsCloned[i].content === 'attribute' && colsCloned[i].index === index) {
+					colsCloned.splice(i, 1);
 					i--; j--;
 				}
 			}
-			this.$emit('field-property-set','columns',colsCloned);
+			this.$emit('field-property-set', 'columns', colsCloned);
 		},
 		showWarnings() {
-			this.$store.commit('dialog',{
-				captionBody:`<ul><li>${this.warnings.join('</li><li>')}</li></ul>`,
-				captionTop:this.capGen.warnings,
-				image:'warning.png'
+			this.$store.commit('dialog', {
+				captionBody: `<ul><li>${this.warnings.join('</li><li>')}</li></ul>`,
+				captionTop: this.capGen.warnings,
+				image: 'warning.png'
 			});
 		},
 		toggleDir(oldDir) {
 			return oldDir === 'row' ? 'column' : 'row';
 		},
-		toggleSize(oldVal,change,startSize) {
-			if(oldVal+change < 0) return 0;
-			if(oldVal === 0)      return startSize;
+		toggleSize(oldVal, change, startSize) {
+			if (oldVal + change < 0) return 0;
+			if (oldVal === 0) return startSize;
 
-			return oldVal+change;
+			return oldVal + change;
 		}
 	}
 };

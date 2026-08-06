@@ -362,6 +362,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 			})
 			posListLookup = append(posListLookup, pos)
 
+		case "map":
+			fields = append(fields, types.FieldMap{
+				Id:       fieldId,
+				TabId:    tabId,
+				IconId:   iconId,
+				Content:  content,
+				State:    state,
+				Flags:    flags,
+				OnMobile: onMobile,
+			})
+
 		case "tabs":
 			fields = append(fields, types.FieldTabs{
 				Id:              fieldId,
@@ -826,6 +837,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 			}
 			fieldIdMapQuery[f.Id] = f.Query
 
+		case "map":
+			var f types.FieldMap
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setMap_tx(ctx, tx, f); err != nil {
+				return err
+			}
+
 		case "tabs":
 			var f types.FieldTabs
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
@@ -1103,6 +1123,9 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.FieldList) error {
 		return err
 	}
 	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+}
+func setMap_tx(ctx context.Context, tx pgx.Tx, f types.FieldMap) error {
+	return nil
 }
 func setTabs_tx(ctx context.Context, tx pgx.Tx, f types.FieldTabs) error {
 	_, err := tx.Exec(ctx, `
