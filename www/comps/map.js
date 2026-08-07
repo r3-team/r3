@@ -1,4 +1,5 @@
-import { jsLibraryLoadNoCache } from './shared/jsLibrary.js';
+import { getUuidV4 } from './shared/crypto.js';
+import { jsLibrariesLoadNoCache } from './shared/jsLibrary.js';
 
 export default {
 	name: 'my-map',
@@ -19,13 +20,8 @@ export default {
 		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		this.jsLibraryLoadNoCache('externals/leaflet/leaflet.js').then(
-			() => {
-				this.jsLibraryLoadNoCache("externals/leaflet-geoman/leaflet-geoman.js").then(
-					this.reset,
-					this.$root.genericError
-				);
-			},
+		this.jsLibrariesLoadNoCache(['externals/leaflet/leaflet.js', 'externals/leaflet-geoman/leaflet-geoman.min.js']).then(
+			this.init,
 			this.$root.genericError
 		);
 	},
@@ -33,33 +29,43 @@ export default {
 	},
 	methods: {
 		// externals
-		jsLibraryLoadNoCache,
+		getUuidV4,
+		jsLibrariesLoadNoCache,
 
-		//
-		reset() {
+		// actions
+		layerCreated(e) {
+			e.layer.feature = { id: this.getUuidV4(), type: 'Feature', properties: {} };
+			e.layer.on('pm:cut', this.layerCut);
+			e.layer.on('pm:update', this.layerUpdated);
+
+			console.log('CREATED feature', e.layer.toGeoJSON());
+		},
+		layerCut(e) {
+			// when a layer is cut, the original layer is destroyed and a new one created
+			e.layer.feature.id = e.originalLayer.feature.id;
+			e.layer.on('pm:cut', this.layerCut);
+			e.layer.on('pm:update', this.layerUpdated);
+
+			console.log('CUT feature', e);
+		},
+		layerUpdated(e) {
+			console.log('UPDATED feature', e.layer.toGeoJSON());
+		},
+
+		// system
+		init() {
 			this.map = L.map(this.$refs.map).setView([51.505, -0.09], 13);
 
 			L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 				maxZoon: 19,
-				attribution:
-					'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 			}).addTo(this.map);
 
 			// leaflet geoman
 			this.map.pm.addControls({
 				position: "topleft",
-				drawCircle: false,
 			});
-
-			// set marker with popup
-			const m1 = L.marker([51.5, -0.09]).addTo(this.map);
-			m1.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
-
-			// set popup directly
-			const p1 = L.popup()
-				.setLatLng([51.55, -0.092])
-				.setContent("I am a standalone popup.")
-				.openOn(this.map);
+			this.map.on('pm:create', this.layerCreated);
 		}
 	}
 };
