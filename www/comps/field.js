@@ -15,6 +15,7 @@ import MyInputSelect from './inputSelect.js';
 import MyInputUuid from './inputUuid.js';
 import MyKanban from './kanban.js';
 import MyList from './list.js';
+import MyMap from './map.js';
 import { hasAccessToAttribute } from './shared/access.js';
 import {
 	getIndexAttributeId, isAttributeBoolean, isAttributeDecimal, isAttributeFiles,
@@ -38,7 +39,7 @@ export default {
 		MyInputBarcode, MyInputColor, MyInputDate, MyInputDecimal,
 		MyInputDrawing, MyInputFiles, MyInputIframe, MyInputLogin,
 		MyInputRating, MyInputRichtext, MyInputSelect, MyInputUuid,
-		MyList
+		MyList, MyMap
 	},
 	template: `<div class="field"
 		v-if="isActive"
@@ -47,7 +48,7 @@ export default {
 		:data-field-is-valid="isValid ? '1' : '0'"
 		:style="domStyle"
 	>
-		<template v-if="isData || isList || isTabs || isCalendar || isKanban || isChart">
+		<template v-if="isData || isList || isTabs || isCalendar || isKanban || isChart || isMap">
 
 			<div class="field-caption"
 				v-if="isWithCaption"
@@ -240,6 +241,9 @@ export default {
 						</div>
 					</template>
 				</my-list>
+
+				<!-- map -->
+				<my-map v-if="isMap" :readonly="isReadonly" />
 
 				<!-- tabs -->
 				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">
@@ -1166,7 +1170,7 @@ export default {
 		isTouched: s => s.fieldIdsTouched.includes(s.field.id),
 		isVariable: s => s.field.content === 'variable',
 		isWithCaption: s => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		isWithIntent: s => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
+		isWithIntent: s => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isMap && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
 		isUuid: s => s.isData && s.isAttributeUuid(s.contentData),
 
 		// stores

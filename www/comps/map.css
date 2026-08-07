@@ -1,0 +1,4 @@
+.my-map{
+	flex:1 1 auto;
+	border-radius:var(--border-input-radius);
+}

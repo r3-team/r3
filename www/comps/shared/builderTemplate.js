@@ -543,7 +543,7 @@ export function getTemplateFieldMap() {
 	return {
 		id: getUuidV4(),
 		iconId: null,
-		content: 'header',
+		content: 'map',
 		state: 'default',
 		flags: [],
 		onMobile: true
