@@ -1,10 +1,16 @@
 import { getAttributeFileHref } from './shared/attribute.js';
 import { deepIsEqual } from './shared/generic.js';
+import { jsLibrariesLoadNoCache } from './shared/jsLibrary.js';
 import { getDateFormat } from './shared/time.js';
 
 export default {
 	name: 'my-input-richtext',
-	components: { 'editor': Editor },
+	components: {
+		editor: Vue.defineAsyncComponent(async () => {
+			await jsLibrariesLoadNoCache(['externals/tinymce/tinymce.min.js', 'externals/vue-tinymce.js',]);
+			return Editor;
+		})
+	},
 	template: `<div class="input-richtext">
 		<div class="input-toolbar">
 			<div class="row">
