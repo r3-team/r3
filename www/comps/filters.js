@@ -1115,7 +1115,6 @@ const MyFilter = {
 		// actions
 		showHelp(msg,width) {
 			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.ftsHelp,
 				captionBody:msg,
 				captionTop:this.capGen.contextHelp,
 				image:'question.png',
