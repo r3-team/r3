@@ -39,5 +39,5 @@ This project also contains separate sub-components. These are located in the iso
 ## Section 3: Components licensed under GNU General Public License Version 3 (s. LICENSE.GPL-3.0)
 - *TinyMCE*, 'www/externals/tinymce/' (Copyright (c) 2024, Ephox Corporation DBA Tiny Technologies, Inc.)
 
-## Section 4: Components licensed under BSD 2-Clause License
+## Section 4: Components licensed under BSD 2-Clause License (s. LICENSE.BSD-2)
 - *Leaflet*, 'www/externals/leaflet/' (Copyright (c) 2010-2026, Volodymyr Agafonkin, Copyright (c) 2010-2011, CloudMade)
