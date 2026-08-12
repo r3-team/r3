@@ -459,12 +459,12 @@ const MyFilterSide = {
 				<select v-model="variableId" v-if="!columnsMode && isVariable" :disabled="readonly">
 					<option :value="null">-</option>
 					<optgroup :label="capGen.form">
-						<option v-for="v in module.variables.filter(v => v.formId === formId)" :value="v.id">
+						<option v-for="v in module.variables.filter(v => v.formId === formId)" :title="formIdMap[formId].name + ': ' + v.name" :value="v.id">
 							{{ formIdMap[formId].name + ': ' + v.name }}
 						</option>
 					</optgroup>
 					<optgroup :label="capGen.global">
-						<option v-for="v in module.variables.filter(v => v.formId === null)" :value="v.id">
+						<option v-for="v in module.variables.filter(v => v.formId === null)" :title="v.name" :value="v.id">
 							{{ v.name }}
 						</option>
 					</optgroup>
