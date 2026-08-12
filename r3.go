@@ -40,6 +40,7 @@ import (
 	"r3/handler/ics_download"
 	"r3/handler/license_upload"
 	"r3/handler/manifest_download"
+	"r3/handler/status_show"
 	"r3/handler/transfer_export"
 	"r3/handler/transfer_import"
 	"r3/handler/websocket"
@@ -214,7 +215,7 @@ func main() {
 
 		fmt.Printf("\n################################################################################\n")
 		fmt.Printf("This is the executable of %s, the open low-code platform, v%s\n", appName, appVersion)
-		fmt.Printf("Copyright (c) 2019-2025 Gabriel Victor Herbert\n\n")
+		fmt.Printf("Copyright (c) 2019-2026 Gabriel Victor Herbert\n\n")
 		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n\n", appName)
 		fmt.Printf("When %s is running, use any modern browser to access it (port 443 by default).\n\n", appName)
 		fmt.Printf("For installation instructions, please refer to the included README file or visit\n")
@@ -447,6 +448,7 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/ics/download/", ics_download.Handler)
 	mux.HandleFunc("/license/upload", license_upload.Handler)
 	mux.HandleFunc("/manifests/", manifest_download.Handler)
+	mux.HandleFunc("/status", status_show.Handler)
 	mux.HandleFunc("/websocket", websocket.Handler)
 	mux.HandleFunc("/export/", transfer_export.Handler)
 	mux.HandleFunc("/import", transfer_import.Handler)

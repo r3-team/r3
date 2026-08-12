@@ -30,7 +30,8 @@ const (
 	ContextIcsDownload       handlerContext = 130
 	ContextLicenseUpload     handlerContext = 140
 	ContextManifestDownload  handlerContext = 150
-	ContextWebsocket         handlerContext = 160
+	ContextStatusShow        handlerContext = 160
+	ContextWebsocket         handlerContext = 170
 
 	errHtml = `<!DOCTYPE html>
 <html style="height:100vh;font-family:'Roboto','Arial','Helvetica',sans-serif;font-size:20px;">
@@ -68,6 +69,7 @@ var (
 		ContextIcsDownload:       "ics_download",
 		ContextLicenseUpload:     "license_upload",
 		ContextManifestDownload:  "manifest_download",
+		ContextStatusShow:        "status_show",
 		ContextWebsocket:         "websocket",
 	}
 	NoImage []byte

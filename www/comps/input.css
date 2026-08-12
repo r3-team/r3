@@ -250,21 +250,19 @@
 
 
 /* offset input */
-.input-offset{
+.my-input-offset{
 	display:flex;
 	flex-direction:row;
 	align-items:center;
 	flex:0 0 auto;
 	gap:4px;
 }
-.input-offset .input-offset-caption{
+.my-input-offset-caption{
 	flex:0 0 auto;
 	margin-left:6px;
 }
-.input-offset .input-offset-selector{
-	width:auto;
-	min-width:unset;
-	max-width:unset;
+.my-input-offset select option.currentPage{
+	font-weight:bold;
 }
 
 
