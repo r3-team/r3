@@ -1,50 +1,54 @@
-import {getAttributeIcon} from './attribute.js';
-import {getItemTitle}     from './builder.js';
-import MyStore            from '../../stores/store.js';
+
+import MyStore from '../../stores/store.js';
+import { getAttributeIcon } from './attribute.js';
+import { getItemTitle } from './builder.js';
 
 export function getFieldIcon(field) {
-	switch(field.content) {
+	switch (field.content) {
 		case 'data':
-			const atr = MyStore.getters['schema/attributeIdMap'][field.attributeId];
-			return getAttributeIcon(
-				atr.content,
-				atr.contentUse,
-				field.outsideIn,
-				field.attributeIdNm !== null);
-		break;
-		case 'button':    return 'circle_play.png'; break;
-		case 'calendar':  return field.gantt ? 'gantt.png' : 'calendar.png'; break;
-		case 'chart':     return 'chart.png'; break;
-		case 'container': return 'layout.png'; break;
-		case 'header':    return 'header.png'; break;
-		case 'kanban':    return 'kanban.png'; break;
-		case 'list':      return 'files_list2.png'; break;
-		case 'tabs':      return 'tabs.png'; break;
-		case 'variable':  return 'variable.png'; break;
+			{
+				const atr = MyStore.getters['schema/attributeIdMap'][field.attributeId];
+				return getAttributeIcon(
+					atr.content,
+					atr.contentUse,
+					field.outsideIn,
+					field.attributeIdNm !== null);
+			}
+		case 'button': return 'circle_play.png';
+		case 'calendar': return field.gantt ? 'gantt.png' : 'calendar.png';
+		case 'chart': return 'chart.png';
+		case 'container': return 'layout.png';
+		case 'header': return 'header.png';
+		case 'kanban': return 'kanban.png';
+		case 'list': return 'files_list2.png';
+		case 'map': return 'map.png';
+		case 'tabs': return 'tabs.png';
+		case 'variable': return 'variable.png';
 	}
 	return 'noPic.png';
 };
 
 export function getFieldTitle(field) {
-	switch(field.content) {
-		case 'button':    return 'Button';    break;
-		case 'chart':     return 'Chart';     break;
-		case 'container': return 'Container'; break;
-		case 'header':    return 'Label';     break;
-		case 'tabs':      return 'Tabs';      break;
-		case 'calendar':  return field.gantt ? 'Gantt' : 'Calendar'; break;
-		case 'data':      return getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm); break;
-		case 'kanban':    return field.query === null || field.query.relationId === null ? 'Kanban' : `Kanban: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
-		case 'list':      return field.query === null || field.query.relationId === null ? 'List'   : `List: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
-		case 'variable':  return field.variableId === null ? 'Variable' : `Variable: ${MyStore.getters['schema/variableIdMap'][field.variableId].name}`; break;
+	switch (field.content) {
+		case 'button': return 'Button';
+		case 'chart': return 'Chart';
+		case 'container': return 'Container';
+		case 'header': return 'Label';
+		case 'tabs': return 'Tabs';
+		case 'map': return 'Map';
+		case 'calendar': return field.gantt ? 'Gantt' : 'Calendar';
+		case 'data': return getItemTitle(field.attributeId, field.index, field.outsideIn, field.attributeIdNm);
+		case 'kanban': return field.query === null || field.query.relationId === null ? 'Kanban' : `Kanban: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`;
+		case 'list': return field.query === null || field.query.relationId === null ? 'List' : `List: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`;
+		case 'variable': return field.variableId === null ? 'Variable' : `Variable: ${MyStore.getters['schema/variableIdMap'][field.variableId].name}`;
 	}
 	return '';
 };
 
 export function getFieldOverwriteDefault() {
-	return { caption:{}, chart:{}, error:{}, order:{} };
+	return { caption: {}, chart: {}, error: {}, order: {} };
 };
 
 export function getFieldProcessedDefault() {
-	return { choices:{}, columns:{}, filters:{}, filtersInput:{} };
+	return { choices: {}, columns: {}, filters: {}, filtersInput: {} };
 };

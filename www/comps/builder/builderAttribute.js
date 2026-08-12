@@ -1,36 +1,26 @@
-import MyBuilderCaption       from './builderCaption.js';
-import MyBuilderIconInput     from './builderIconInput.js';
-import MyBuilderSchemaLookup  from './builderSchemaLookup.js';
-import {getUuidV4}            from '../shared/crypto.js';
-import {copyValueDialog}      from '../shared/generic.js';
-import {getTemplateAttribute} from '../shared/builderTemplate.js';
-import {dialogDeleteAsk}      from '../shared/dialog.js';
-import {getHasAnyReferences}  from '../shared/schemaLookup.js';
-import {getDependentModules}  from '../shared/builder.js';
 import {
-	getAttributeContentUse,
-	getAttributeIcon,
-	isAttributeBoolean,
-	isAttributeFiles,
-	isAttributeFloat,
-	isAttributeInteger,
-	isAttributeNumeric,
-	isAttributeRegconfig,
-	isAttributeRelationship,
-	isAttributeRelationship11,
-	isAttributeRelationshipN1,
-	isAttributeString,
-	isAttributeUuid
+	getAttributeContentUse, getAttributeIcon, isAttributeBoolean, isAttributeFiles, isAttributeFloat,
+	isAttributeGeometry, isAttributeInteger, isAttributeNumeric, isAttributeRegconfig, isAttributeRelationship,
+	isAttributeRelationship11, isAttributeRelationshipN1, isAttributeString, isAttributeUuid
 } from '../shared/attribute.js';
+import { getDependentModules } from '../shared/builder.js';
+import { getTemplateAttribute } from '../shared/builderTemplate.js';
+import { getUuidV4 } from '../shared/crypto.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog } from '../shared/generic.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderIconInput from './builderIconInput.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 export default {
-	name:'my-builder-attribute',
-	components:{
+	name: 'my-builder-attribute',
+	components: {
 		MyBuilderCaption,
 		MyBuilderIconInput,
 		MyBuilderSchemaLookup
 	},
-	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-attribute float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
@@ -152,6 +142,9 @@ export default {
 											<option value="barcode_itf" :disabled="!isNew && !isBarcode">ITF</option>
 											<option value="barcode_upc_a" :disabled="!isNew && !isBarcode">UPC A</option>
 											<option value="barcode_upc_e" :disabled="!isNew && !isBarcode">UPC E</option>
+										</optgroup>
+										<optgroup :label="capGen.geoData" :disabled="!isNew">
+											<option value="geometry" :disabled="!isNew && !isGeometry">{{ capGen.geometry }}</option>
 										</optgroup>
 										<optgroup :label="capApp.expert" :disabled="!isNew && !isFloat && !isUuid">
 											<option value="float"     :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
@@ -340,102 +333,102 @@ export default {
 			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
 		/>
 	</div>`,
-	props:{
-		attributeId:    { required:true },
-		builderLanguage:{ type:String,  required:true },
-		readonly:       { type:Boolean, required:true },
-		relation:       { type:Object,  required:true }
+	props: {
+		attributeId: { required: true },
+		builderLanguage: { type: String, required: true },
+		readonly: { type: Boolean, required: true },
+		relation: { type: Object, required: true }
 	},
-	emits:['close','next-language','new-record'],
+	emits: ['close', 'next-language', 'new-record'],
 	data() {
 		return {
-			defaultsOption:'fixed',
-			hasReferences:false,
-			showLookup:false,
+			defaultsOption: 'fixed',
+			hasReferences: false,
+			showLookup: false,
 
 			// attribute values
-			values:null,
-			valuesOrg:null
+			values: null,
+			valuesOrg: null
 		};
 	},
-	computed:{
+	computed: {
 		// indirect inputs (update attribute values)
-		bigint:{
-			get()  { return this.values.content === 'bigint'; },
+		bigint: {
+			get() { return this.values.content === 'bigint'; },
 			set(v) { this.values.content = v ? 'bigint' : 'integer'; }
 		},
-		doublePrecision:{
-			get()  { return this.values.content === 'double precision'; },
+		doublePrecision: {
+			get() { return this.values.content === 'double precision'; },
 			set(v) { this.values.content = v ? 'double precision' : 'real'; }
 		},
-		usedFor:{
+		usedFor: {
 			get() { return this.getAttributeContentUse(this.values.content, this.values.contentUse); },
 			set(v) {
-				switch(v) {
+				switch (v) {
 					// text uses
 					case 'richtext': // fallthrough
 					case 'text':     // fallthrough
 					case 'textarea':
-						if(this.isNew) {
+						if (this.isNew) {
 							this.values.content = 'text';
-							this.values.length  = 0;
+							this.values.length = 0;
 						}
 						// textarea/richtext are specific content uses
 						this.values.contentUse = v === 'text' ? 'default' : v;
-					break;
+						break;
 					case 'color':
-						this.values.content    = 'varchar';
+						this.values.content = 'varchar';
 						this.values.contentUse = 'color';
-						this.values.length     = 6;
-					break;
+						this.values.length = 6;
+						break;
 					case 'drawing':
-						this.values.content    = 'text';
+						this.values.content = 'text';
 						this.values.contentUse = 'drawing';
-						this.values.length     = 0;
-					break;
+						this.values.length = 0;
+						break;
 					case 'iframe':
-						this.values.content    = 'text';
+						this.values.content = 'text';
 						this.values.contentUse = 'iframe';
-						this.values.length     = 0;
-					break;
+						this.values.length = 0;
+						break;
 
 					// boolean uses
 					case 'boolean':
-						this.values.content    = 'boolean';
+						this.values.content = 'boolean';
 						this.values.contentUse = 'default';
-					break;
+						break;
 
 					// integer uses
 					case 'date':     // fallthrough
 					case 'datetime': // fallthrough
 					case 'time':
-						if(this.isNew)
+						if (this.isNew)
 							this.values.content = v === 'time' ? 'integer' : 'bigint';
 
 						this.values.contentUse = v;
-					break;
+						break;
 					case 'number':
-						this.values.content    = this.isNew ? 'integer' : this.values.content;
+						this.values.content = this.isNew ? 'integer' : this.values.content;
 						this.values.contentUse = 'default';
-					break;
+						break;
 
 					// numeric uses
 					case 'decimal':
-						this.values.content    = 'numeric';
+						this.values.content = 'numeric';
 						this.values.contentUse = 'default';
-					break;
+						break;
 
 					// files uses
 					case 'files':
-						this.values.content    = 'files';
+						this.values.content = 'files';
 						this.values.contentUse = 'default';
-					break;
+						break;
 
 					// float uses
 					case 'float':
-						this.values.content    = this.isNew ? 'real' : this.values.content;
+						this.values.content = this.isNew ? 'real' : this.values.content;
 						this.values.contentUse = 'default';
-					break;
+						break;
 
 					// code uses
 					case 'barcode': // fallthrough
@@ -448,105 +441,112 @@ export default {
 					case 'barcode_qrcode': // fallthrough
 					case 'barcode_upc_a': // fallthrough
 					case 'barcode_upc_e':
-						this.values.content    = 'text';
+						this.values.content = 'text';
 						this.values.contentUse = v;
-						this.values.length     = 0;
-					break;
+						this.values.length = 0;
+						break;
 
 					// relationship uses
 					case 'relationship11': // fallthrough
 					case 'relationshipN1':
-						this.values.content    = v === 'relationship11' ? '1:1' : 'n:1';
+						this.values.content = v === 'relationship11' ? '1:1' : 'n:1';
 						this.values.contentUse = 'default';
-					break;
+						break;
+
+					// geometry uses
+					case 'geometry':
+						this.values.content = 'geometry';
+						this.values.contentUse = 'default';
+						break;
 
 					// regconfig uses
 					case 'regconfig':
-						this.values.content    = 'regconfig';
+						this.values.content = 'regconfig';
 						this.values.contentUse = 'default';
-					break;
+						break;
 
 					// UUID uses
 					case 'uuid':
-						this.values.content    = 'uuid';
+						this.values.content = 'uuid';
 						this.values.contentUse = 'default';
-					break;
+						break;
 				}
 
 				// reset defaults
-				this.values.def     = '';
+				this.values.def = '';
 				this.defaultsOption = 'fixed';
 			}
 		},
 
-		lengthTitle:s => {
-			if(s.isString)  return s.capApp.lengthText;
-			if(s.isNumeric) return s.capApp.lengthNumeric;
+		lengthTitle: s => {
+			if (s.isString) return s.capApp.lengthText;
+			if (s.isNumeric) return s.capApp.lengthNumeric;
 			return s.capApp.lengthFiles;
 		},
-		nameTaken:s => {
-			for(let a of s.relation.attributes) {
-				if(a.id !== s.attributeId && a.name === s.values.name)
+		nameTaken: s => {
+			for (const a of s.relation.attributes) {
+				if (a.id !== s.attributeId && a.name === s.values.name)
 					return true;
 			}
 			return false;
 		},
 
 		// simple
-		canEncrypt:    s => s.relation.encryption && s.values.content === 'text',
-		canSave:       s => !s.readonly && s.hasChanges && !s.nameTaken,
-		hasChanges:    s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		hasLength:     s => ['decimal','files','richtext','text','textarea'].includes(s.usedFor),
-		hasLengthFract:s => ['decimal'].includes(s.usedFor),
-		isId:          s => !s.isNew && s.values.name === 'id',
-		isNew:         s => s.attributeId === null,
-		title:         s => s.isNew ? s.capApp.new : s.capApp.edit.replace('{NAME}',s.values.name),
+		canEncrypt: s => s.relation.encryption && s.values.content === 'text',
+		canSave: s => !s.readonly && s.hasChanges && !s.nameTaken,
+		hasChanges: s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		hasLength: s => ['decimal', 'files', 'richtext', 'text', 'textarea'].includes(s.usedFor),
+		hasLengthFract: s => ['decimal'].includes(s.usedFor),
+		isId: s => !s.isNew && s.values.name === 'id',
+		isNew: s => s.attributeId === null,
+		title: s => s.isNew ? s.capApp.new : s.capApp.edit.replace('{NAME}', s.values.name),
 
 		// content
-		isBoolean:       s => s.isAttributeBoolean(s.values.content),
-		isFiles:         s => s.isAttributeFiles(s.values.content),
-		isFloat:         s => s.isAttributeFloat(s.values.content),
-		isInteger:       s => s.isAttributeInteger(s.values.content),
-		isNumeric:       s => s.isAttributeNumeric(s.values.content),
-		isRegconfig:     s => s.isAttributeRegconfig(s.values.content),
-		isRelationship:  s => s.isAttributeRelationship(s.values.content),
-		isRelationship11:s => s.isAttributeRelationship11(s.values.content),
-		isRelationshipN1:s => s.isAttributeRelationshipN1(s.values.content),
-		isString:        s => s.isAttributeString(s.values.content),
-		isUuid:          s => s.isAttributeUuid(s.values.content),
+		isBoolean: s => s.isAttributeBoolean(s.values.content),
+		isFiles: s => s.isAttributeFiles(s.values.content),
+		isFloat: s => s.isAttributeFloat(s.values.content),
+		isGeometry: s => s.isAttributeGeometry(s.values.content),
+		isInteger: s => s.isAttributeInteger(s.values.content),
+		isNumeric: s => s.isAttributeNumeric(s.values.content),
+		isRegconfig: s => s.isAttributeRegconfig(s.values.content),
+		isRelationship: s => s.isAttributeRelationship(s.values.content),
+		isRelationship11: s => s.isAttributeRelationship11(s.values.content),
+		isRelationshipN1: s => s.isAttributeRelationshipN1(s.values.content),
+		isString: s => s.isAttributeString(s.values.content),
+		isUuid: s => s.isAttributeUuid(s.values.content),
 
 		// content use
-		isBarcode: s => s.isString  && s.values.contentUse.includes('barcode'),
-		isColor:   s => s.isString  && s.values.contentUse === 'color',
-		isDate:    s => s.isInteger && s.values.contentUse === 'date',
-		isDatetime:s => s.isInteger && s.values.contentUse === 'datetime',
-		isDrawing: s => s.isString  && s.values.contentUse === 'drawing',
-		isIframe:  s => s.isString  && s.values.contentUse === 'iframe',
-		isNumber:  s => s.isInteger && s.values.contentUse === 'default',
-		isRichtext:s => s.isString  && s.values.contentUse === 'richtext',
-		isText:    s => s.isString  && s.values.contentUse === 'default',
-		isTextarea:s => s.isString  && s.values.contentUse === 'textarea',
-		isTime:    s => s.isInteger && s.values.contentUse === 'time',
+		isBarcode: s => s.isString && s.values.contentUse.includes('barcode'),
+		isColor: s => s.isString && s.values.contentUse === 'color',
+		isDate: s => s.isInteger && s.values.contentUse === 'date',
+		isDatetime: s => s.isInteger && s.values.contentUse === 'datetime',
+		isDrawing: s => s.isString && s.values.contentUse === 'drawing',
+		isIframe: s => s.isString && s.values.contentUse === 'iframe',
+		isNumber: s => s.isInteger && s.values.contentUse === 'default',
+		isRichtext: s => s.isString && s.values.contentUse === 'richtext',
+		isText: s => s.isString && s.values.contentUse === 'default',
+		isTextarea: s => s.isString && s.values.contentUse === 'textarea',
+		isTime: s => s.isInteger && s.values.contentUse === 'time',
 
 		// stores
-		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capApp:        s => s.$store.getters.captions.builder.attribute,
-		capGen:        s => s.$store.getters.captions.generic,
-		module:        s => s.moduleIdMap[s.relation.moduleId]
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.builder.attribute,
+		capGen: s => s.$store.getters.captions.generic,
+		module: s => s.moduleIdMap[s.relation.moduleId]
 	},
 	mounted() {
 		this.reset();
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.close, key: 'Escape' });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
-		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerDel', this.set);
+		this.$store.commit('keyDownHandlerDel', this.close);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	methods:{
+	methods: {
 		// external
 		copyValueDialog,
 		dialogDeleteAsk,
@@ -559,6 +559,7 @@ export default {
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeFloat,
+		isAttributeGeometry,
 		isAttributeInteger,
 		isAttributeNumeric,
 		isAttributeRegconfig,
@@ -570,7 +571,7 @@ export default {
 
 		// actions
 		changedUsedFor() {
-			if(!this.isRelationship && this.values.relationshipId !== null)
+			if (!this.isRelationship && this.values.relationshipId !== null)
 				this.values.relationshipId = null;
 		},
 		close() {
@@ -579,62 +580,63 @@ export default {
 		reset() {
 			this.values = this.attributeId !== null
 				? JSON.parse(JSON.stringify(this.attributeIdMap[this.attributeId]))
-				: this.getTemplateAttribute(this.relation.moduleId,this.relation.id,'');
+				: this.getTemplateAttribute(this.relation.moduleId, this.relation.id, '');
 
 			this.resetOrg();
 
 			// set defaults option
-			switch(this.values.def) {
-				case 'EXTRACT(EPOCH FROM CURRENT_DATE)': this.defaultsOption = 'date';     break;
-				case 'EXTRACT(EPOCH FROM NOW())':        this.defaultsOption = 'datetime'; break;
-				case 'GEN_RANDOM_UUID()':                this.defaultsOption = 'uuid';     break;
+			switch (this.values.def) {
+				case 'EXTRACT(EPOCH FROM CURRENT_DATE)': this.defaultsOption = 'date'; break;
+				case 'EXTRACT(EPOCH FROM NOW())': this.defaultsOption = 'datetime'; break;
+				case 'GEN_RANDOM_UUID()': this.defaultsOption = 'uuid'; break;
 			}
 		},
 		resetOrg() {
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
 		updateDefaultsOption() {
-			switch(this.defaultsOption) {
-				case 'date':     this.values.def = 'EXTRACT(EPOCH FROM CURRENT_DATE)'; break;
-				case 'datetime': this.values.def = 'EXTRACT(EPOCH FROM NOW())';        break;
-				case 'uuid':     this.values.def = 'GEN_RANDOM_UUID()';                break;
-				default:         this.values.def = '';                                 break;
+			switch (this.defaultsOption) {
+				case 'date': this.values.def = 'EXTRACT(EPOCH FROM CURRENT_DATE)'; break;
+				case 'datetime': this.values.def = 'EXTRACT(EPOCH FROM NOW())'; break;
+				case 'uuid': this.values.def = 'GEN_RANDOM_UUID()'; break;
+				default: this.values.def = ''; break;
 			}
 		},
-		updateLengths(name,target) {
-			var newValue = target.value === '' ? 0  : parseInt(target.value);
+		updateLengths(name, target) {
+			var newValue = target.value === '' ? 0 : parseInt(target.value, 10);
 			var oldValue = this.values[name];
 
-			if(newValue < 0) {
+			if (newValue < 0) {
 				newValue = 0;
 				target.value = 0;
 			}
 
-			switch(name) {
+			switch (name) {
 				case 'length':
-					if(this.hasLengthFract)
+					if (this.hasLengthFract)
 						newValue += this.values.lengthFract;
 
-					if(this.isString)
+					if (this.isString)
 						this.values.content = newValue === 0 ? 'text' : 'varchar';
-				break;
+					break;
 				case 'lengthFract':
 					this.values.length += newValue - oldValue;
-				break;
+					break;
 			}
 			this.values[name] = newValue;
 		},
 
 		// backend calls
 		delCheck() {
-			this.hasReferences = this.getHasAnyReferences(this.module,'attribute',this.attributeId);
-			if(this.hasReferences)
-				return this.showLookup = true;
-
-			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
+			this.hasReferences = this.getHasAnyReferences(this.module, 'attribute', this.attributeId);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
 		},
 		del() {
-			ws.send('attribute','del',this.attributeId,true).then(
+			ws.send('attribute', 'del', this.attributeId, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');
@@ -646,19 +648,19 @@ export default {
 			if (!this.canSave)
 				return;
 
-			if(this.values.encrypted && !this.canEncrypt)
+			if (this.values.encrypted && !this.canEncrypt)
 				this.values.encrypted = false;
 
 			ws.sendMultiple([
-				ws.prepare('attribute','set',this.values),
-				ws.prepare('schema','check',{ moduleId:this.module.id })
-			],true).then(
+				ws.prepare('attribute', 'set', this.values),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 
-					if(saveAndNew) {
+					if (saveAndNew) {
 						this.$emit('new-record');
-						this.values.id   = this.getUuidV4();
+						this.values.id = this.getUuidV4();
 						this.values.name = '';
 						this.resetOrg();
 						return;

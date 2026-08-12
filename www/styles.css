@@ -21,6 +21,7 @@
 @import url("comps/label.css");
 @import url("comps/list.css");
 @import url("comps/login.css");
+@import url("comps/map.css");
 @import url("comps/menu.css");
 @import url("comps/settings.css");
 @import url("comps/tabs.css");
@@ -30,3 +31,7 @@
 @import url("comps/builder/builder.css");
 @import url("comps/builder/builderDoc.css");
 @import url("comps/builder/builderForm.css");
+
+/* externals */
+@import url("externals/leaflet/leaflet.css");
+@import url("externals/leaflet-geoman/leaflet-geoman.css");

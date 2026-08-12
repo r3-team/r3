@@ -321,6 +321,15 @@ type FieldList struct {
 	Query        Query                `json:"query"`
 	Captions     CaptionMap           `json:"captions"`
 }
+type FieldMap struct {
+	Id       uuid.UUID   `json:"id"`
+	TabId    pgtype.UUID `json:"tabId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Content  string      `json:"content"`
+	State    string      `json:"state"`
+	Flags    []string    `json:"flags"`
+	OnMobile bool        `json:"onMobile"`
+}
 type FieldTabs struct {
 	Id              uuid.UUID   `json:"id"`
 	TabId           pgtype.UUID `json:"tabId"`

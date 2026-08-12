@@ -1,8 +1,9 @@
 import { openDataImageAsNewTag } from './shared/generic.js';
+import { jsLibrariesLoadNoCache } from './shared/jsLibrary.js';
 
 export default {
-	name:'my-input-barcode',
-	template:`<div class="input-barcode">
+	name: 'my-input-barcode',
+	template: `<div class="input-barcode">
 		<div class="input-toolbar row gap" v-if="!hideInputs">
 			<div class="row grow default-inputs">
 				<slot name="input-icon" />
@@ -99,32 +100,32 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	emits:['copyToClipboard','update:modelValue'],
-	props:{
-		clipboard: { type:Boolean,       required:true },
-		contentUse:{ type:String,        required:true },
-		hideInputs:{ type:Boolean,       required:true },
-		modelValue:{ type:[String,null], required:true },
-		monospace: { type:Boolean,       required:true },
-		readonly:  { type:Boolean,       required:true }
+	emits: ['copyToClipboard', 'update:modelValue'],
+	props: {
+		clipboard: { type: Boolean, required: true },
+		contentUse: { type: String, required: true },
+		hideInputs: { type: Boolean, required: true },
+		modelValue: { type: [String, null], required: true },
+		monospace: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			devices:[],
-			deviceIdSelected:null,
-			scanner:null,
-			showDialog:false,
-			valueInvalid:false
+			devices: [],
+			deviceIdSelected: null,
+			scanner: null,
+			showDialog: false,
+			valueInvalid: false
 		};
 	},
-	watch:{
-		modelValue:{
-			handler(v) { this.preview(); },
-			immediate:false
+	watch: {
+		modelValue: {
+			handler() { this.preview(); },
+			immediate: false
 		}
 	},
-	computed:{
-		inputFormat:{
+	computed: {
+		inputFormat: {
 			get() {
 				if (this.modelValue !== null)
 					return JSON.parse(this.modelValue).format;
@@ -142,14 +143,14 @@ export default {
 				}
 				return null;
 			},
-			set(v) { this.update('format',v); }
+			set(v) { this.update('format', v); }
 		},
-		inputText:{
-			get()  { return this.modelValue === null ? '' : JSON.parse(this.modelValue).text; },
-			set(v) { this.update('text',v); }
+		inputText: {
+			get() { return this.modelValue === null ? '' : JSON.parse(this.modelValue).text; },
+			set(v) { this.update('text', v); }
 		},
 		scannerConfig: s => {
-			let formats = [];
+			const formats = [];
 			if (s.isMixedCode || s.contentUse === 'barcode_codabar') formats.push(Html5QrcodeSupportedFormats.CODABAR);
 			if (s.isMixedCode || s.contentUse === 'barcode_code39') formats.push(Html5QrcodeSupportedFormats.CODE_39);
 			if (s.isMixedCode || s.contentUse === 'barcode_code128') formats.push(Html5QrcodeSupportedFormats.CODE_128);
@@ -168,81 +169,87 @@ export default {
 		},
 
 		// simple
-		imageSrc:    s => s.modelValue === null ? null : JSON.parse(s.modelValue).image,
-		isActive:    s => s.inputText !== '',
+		imageSrc: s => s.modelValue === null ? null : JSON.parse(s.modelValue).image,
+		isActive: s => s.inputText !== '',
 		isMixedCode: s => s.contentUse === 'barcode', // legacy option, allows all codes
 
 		// stores
-		capApp:s => s.$store.getters.captions.input.barcode,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.input.barcode,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 
-		// ref elements are registered after mounted(), so preview must wait until then
-		this.preview();
+		jsLibrariesLoadNoCache(['externals/html5-qrcode.js', 'externals/jsbarcode.js']).then(() => {
+			// ref elements are registered after mounted(), so preview must wait until then
+			this.preview();
+		}, this.$root.genericError);
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		openDataImageAsNewTag,
 
 		// presentation
 		preview() {
 			let format;
-			switch(this.inputFormat) {
-				case 'CODABAR':  format = 'CODABAR'; break;
-				case 'CODE_39':  format = 'CODE39';  break;
+			switch (this.inputFormat) {
+				case 'CODABAR': format = 'CODABAR'; break;
+				case 'CODE_39': format = 'CODE39'; break;
 				case 'CODE_128': format = 'CODE128'; break;
-				case 'EAN_8':    format = 'EAN8';    break;
-				case 'EAN_13':   format = 'EAN13';   break;
-				case 'UPC_A':    format = 'UPC';     break;
-				case 'UPC_E':    format = 'UPC';     break;
-				case 'ITF':      format = 'ITF';     break;
-				case 'QR_CODE':  format = 'QRCODE';  break;
-				default:         format = null;      break;
+				case 'EAN_8': format = 'EAN8'; break;
+				case 'EAN_13': format = 'EAN13'; break;
+				case 'UPC_A': format = 'UPC'; break;
+				case 'UPC_E': format = 'UPC'; break;
+				case 'ITF': format = 'ITF'; break;
+				case 'QR_CODE': format = 'QRCODE'; break;
+				default: format = null; break;
 			}
 
-			if(format === null || this.inputText === '' || this.$refs.barcodePreview === undefined)
+			if (format === null || this.inputText === '' || this.$refs.barcodePreview === undefined)
 				return;
 
 			// display image if exists
-			if (this.imageSrc !== null)
-				return this.$refs.barcodePreview.src = this.imageSrc;
+			if (this.imageSrc !== null) {
+				this.$refs.barcodePreview.src = this.imageSrc;
+				return;
+			}
 
-			if(format !== 'QRCODE') {
+			if (format !== 'QRCODE') {
 				JsBarcode(this.$refs.barcodePreview, this.inputText, {
-					format:format,
-					lineColor:'#000',
-					width:2,
-					valid:(v) => {
+					format: format,
+					lineColor: '#000',
+					width: 2,
+					valid: (v) => {
 						this.valueInvalid = !v;
 
-						if(v === false)
-							return this.$refs.barcodePreview.src = '';
+						if (v === false) {
+							this.$refs.barcodePreview.src = '';
+							return;
+						}
 
 						this.$nextTick(() => {
-							this.update('image',this.$refs.barcodePreview.src);
+							this.update('image', this.$refs.barcodePreview.src);
 						});
 					}
 				});
 			}
 			else {
-				let qr = qrcode(0,'M');
+				let qr = qrcode(0, 'M');
 				qr.addData(this.inputText);
 				qr.make();
 				const src = qr.createDataURL();
 				this.$refs.barcodePreview.src = src;
-				this.update('image',src);
+				this.update('image', src);
 				this.valueInvalid = false;
 			}
 		},
 
 		// actions
 		close() {
-			if(this.scanner !== null)
+			if (this.scanner !== null)
 				this.scanner.stop();
 
 			this.showDialog = false;
@@ -255,46 +262,46 @@ export default {
 					this.deviceIdSelected,
 					this.scannerConfig,
 					this.scanned,
-					() => {} // constant scan errors while running
+					() => { } // constant scan errors while running
 				).catch(console.warn);
 			});
 		},
 		handleHotkeys(e) {
-			if(e.key === 'Escape' && this.showDialog)
+			if (e.key === 'Escape' && this.showDialog)
 				this.close();
 		},
 		openCamera() {
-			this.devices          = [];
+			this.devices = [];
 			this.deviceIdSelected = null;
-			this.showDialog       = true;
+			this.showDialog = true;
 
 			Html5Qrcode.getCameras().then(devices => {
-				if(devices.length === 1) this.deviceInit(devices[0].id);
-				else                     this.devices = devices;
+				if (devices.length === 1) this.deviceInit(devices[0].id);
+				else this.devices = devices;
 			}).catch(console.warn);
 		},
 		openImage() {
-			if(this.modelValue !== null)
+			if (this.modelValue !== null)
 				this.openDataImageAsNewTag(JSON.parse(this.modelValue).image);
 		},
-		scanned(text,res) {
-			this.$emit('update:modelValue',JSON.stringify({
+		scanned(text, res) {
+			this.$emit('update:modelValue', JSON.stringify({
 				format: res.result.format.formatName,
 				image: null,
 				text: text
 			}));
 			this.close();
 		},
-		update(name,value) {
-			let v = {
-				format:this.inputFormat,
-				image:null,
-				text:this.inputText
+		update(name, value) {
+			const v = {
+				format: this.inputFormat,
+				image: null,
+				text: this.inputText
 			};
 			v[name] = value;
 
-			if(v.text === '') this.$emit('update:modelValue',null);
-			else              this.$emit('update:modelValue',JSON.stringify(v));
+			if (v.text === '') this.$emit('update:modelValue', null);
+			else this.$emit('update:modelValue', JSON.stringify(v));
 		}
 	}
 };

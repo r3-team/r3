@@ -1,41 +1,32 @@
-import MyBuilderAttribute          from './builderAttribute.js';
-import MyBuilderCaption            from './builderCaption.js';
-import MyBuilderPreset             from './builderPreset.js';
-import MyBuilderPgIndex            from './builderPgIndex.js';
-import MyBuilderPgTriggers         from './builderPgTriggers.js';
-import MyBuilderPresets            from './builderPresets.js';
-import MyBuilderTagInput           from './builderTagInput.js';
-import MyBuilderSchemaLookup       from './builderSchemaLookup.js';
-import MyBuilderWizardEnum         from './builderWizardEnum.js';
-import MyInputDecimal              from '../inputDecimal.js';
-import MyInputOffset               from '../inputOffset.js';
-import {getTemplateRelationPolicy} from '../shared/builderTemplate.js';
-import {dialogDeleteAsk}           from '../shared/dialog.js';
-import {srcBase64}                 from '../shared/image.js';
-import {getHasAnyReferences}       from '../shared/schemaLookup.js';
+import MyInputDecimal from '../inputDecimal.js';
+import MyInputOffset from '../inputOffset.js';
+
 import {
-	getAttributeIcon,
-	isAttributeDecimal,
-	isAttributeFiles,
-	isAttributeInteger,
-	isAttributeRelationship,
-	isAttributeRelationship11,
-	isAttributeString,
-	isAttributeUuid,
-	isAttributeWithLength
+	getAttributeIcon, isAttributeDecimal, isAttributeFiles, isAttributeInteger,
+	isAttributeRelationship, isAttributeRelationship11, isAttributeString,
+	isAttributeUuid, isAttributeWithLength
 } from '../shared/attribute.js';
-import {
-	getDependentModules,
-	getDependentAttributes
-} from '../shared/builder.js';
-import {
-	copyValueDialog,
-	deepIsEqual
-} from '../shared/generic.js';
+import { getDependentAttributes, getDependentModules } from '../shared/builder.js';
+import { getTemplateRelationPolicy } from '../shared/builderTemplate.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
+import { srcBase64 } from '../shared/image.js';
+import { jsLibrariesLoadNoCache } from '../shared/jsLibrary.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
+import MyBuilderAttribute from './builderAttribute.js';
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderPgIndex from './builderPgIndex.js';
+import MyBuilderPgTriggers from './builderPgTriggers.js';
+import MyBuilderPreset from './builderPreset.js';
+import MyBuilderPresets from './builderPresets.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
+import MyBuilderTagInput from './builderTagInput.js';
+import MyBuilderWizardEnum from './builderWizardEnum.js';
 
 const MyBuilderRelationsItemPolicy = {
-	name:'my-builder-relations-item-policy',
-	template:`<tr>
+	name: 'my-builder-relations-item-policy',
+	template: `<tr>
 		<td><img v-if="!readonly" class="action dragAnchor" src="images/drag.png" /></td>
 		<td>
 			<select v-model="roleId" :disabled="readonly">
@@ -75,73 +66,72 @@ const MyBuilderRelationsItemPolicy = {
 			/>
 		</td>
 	</tr>`,
-	props:{
-		modelValue:{ type:Object,  required:true },
-		moduleId:  { type:String,  required:true },
-		readonly:  { type:Boolean, required:true }
+	props: {
+		modelValue: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['moveDown','moveUp','remove','update:modelValue'],
-	computed:{
+	emits: ['moveDown', 'moveUp', 'remove', 'update:modelValue'],
+	computed: {
 		filterFunctions() {
 			// limit to integer array returns, as in: INTEGER[], bigint[], INT [] or integer ARRAY
 			let pat = /^(integer|bigint|int)(\s?\[\]|\sarray)$/i;
 			let out = [];
-			for(let i = 0, j = this.module.pgFunctions.length; i < j; i++) {
+			for (let i = 0, j = this.module.pgFunctions.length; i < j; i++) {
 				let f = this.module.pgFunctions[i];
 
-				if(pat.test(f.codeReturns))
+				if (pat.test(f.codeReturns))
 					out.push(f);
 			}
 			return out;
 		},
 
 		// inputs
-		actionDelete:{
-			get()  { return this.modelValue.actionDelete; },
-			set(v) { this.update('actionDelete',v); }
+		actionDelete: {
+			get() { return this.modelValue.actionDelete; },
+			set(v) { this.update('actionDelete', v); }
 		},
-		actionSelect:{
-			get()  { return this.modelValue.actionSelect; },
-			set(v) { this.update('actionSelect',v); }
+		actionSelect: {
+			get() { return this.modelValue.actionSelect; },
+			set(v) { this.update('actionSelect', v); }
 		},
-		actionUpdate:{
-			get()  { return this.modelValue.actionUpdate; },
-			set(v) { this.update('actionUpdate',v); }
+		actionUpdate: {
+			get() { return this.modelValue.actionUpdate; },
+			set(v) { this.update('actionUpdate', v); }
 		},
-		pgFunctionIdExcl:{
-			get()  { return this.modelValue.pgFunctionIdExcl; },
-			set(v) { this.update('pgFunctionIdExcl',v); }
+		pgFunctionIdExcl: {
+			get() { return this.modelValue.pgFunctionIdExcl; },
+			set(v) { this.update('pgFunctionIdExcl', v); }
 		},
-		pgFunctionIdIncl:{
-			get()  { return this.modelValue.pgFunctionIdIncl; },
-			set(v) { this.update('pgFunctionIdIncl',v); }
+		pgFunctionIdIncl: {
+			get() { return this.modelValue.pgFunctionIdIncl; },
+			set(v) { this.update('pgFunctionIdIncl', v); }
 		},
-		roleId:{
-			get()  { return this.modelValue.roleId; },
-			set(v) { this.update('roleId',v); }
+		roleId: {
+			get() { return this.modelValue.roleId; },
+			set(v) { this.update('roleId', v); }
 		},
 
 		// stores
-		module:s => s.$store.getters['schema/moduleIdMap'][s.moduleId],
-		capApp:s => s.$store.getters.captions.builder.relation
+		module: s => s.$store.getters['schema/moduleIdMap'][s.moduleId],
+		capApp: s => s.$store.getters.captions.builder.relation
 	},
-	methods:{
+	methods: {
 		// external
 		getDependentModules,
 
-		update(name,value) {
+		update(name, value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
 
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		}
 	}
 };
 
 export default {
-	name:'my-builder-relation',
-	components:{
-		echarts:VueECharts,
+	name: 'my-builder-relation',
+	components: {
 		MyBuilderAttribute,
 		MyBuilderCaption,
 		MyBuilderPreset,
@@ -153,9 +143,13 @@ export default {
 		MyBuilderSchemaLookup,
 		MyBuilderWizardEnum,
 		MyInputDecimal,
-		MyInputOffset
+		MyInputOffset,
+		echarts: Vue.defineAsyncComponent(async () => {
+			await jsLibrariesLoadNoCache(['externals/echarts.js', 'externals/vue-echarts.js',]);
+			return VueECharts;
+		})
 	},
-	template:`<div class="row grow nowrap builder-relations" v-if="module">
+	template: `<div class="row grow nowrap builder-relations" v-if="module">
 		<div class="contentBox grow scroll">
 			<div class="top nowrap">
 				<div class="area">
@@ -604,104 +598,104 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['createNew','nextLanguage'],
-	watch:{
-		relationSchema:{
+	emits: ['createNew', 'nextLanguage'],
+	watch: {
+		relationSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		},
-		tabTarget(vNew,vOld) {
-			if(vNew === 'data')
+		tabTarget(vNew, vOld) {
+			if (vNew === 'data')
 				this.getPreview();
 		}
 	},
 	data() {
 		return {
 			// inputs
-			relation:false,  // relation being edited in this component
-			relationCopy:{}, // copy of relation from schema when component last reset
+			relation: false,  // relation being edited in this component
+			relationCopy: {}, // copy of relation from schema when component last reset
 
 			// states
-			attributeIdEdit:false,
-			hasReferences:false,
-			indexIdEdit:false,
-			nameFilter:'',
-			previewLimit:50,
-			previewOffset:0,
-			previewRows:[],
-			previewRowCount:0,
-			previewValueLength:50,
+			attributeIdEdit: false,
+			hasReferences: false,
+			indexIdEdit: false,
+			nameFilter: '',
+			previewLimit: 50,
+			previewOffset: 0,
+			previewRows: [],
+			previewRowCount: 0,
+			previewValueLength: 50,
 			recordTitleAttributeId: '',
 			showEnumWizard: false,
 			showLookup: false,
 			showSidebar: true,
-			tabTarget:'attributes'
+			tabTarget: 'attributes'
 		};
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	computed:{
-		attributesRecordTitleCandidates:s => {
+	computed: {
+		attributesRecordTitleCandidates: s => {
 			let out = [];
-			for(const a of s.relation.attributes) {
-				if(!s.relation.attributeIdsTitle.includes(a.id) && a.contentUse === 'default' && (
-						s.isAttributeString(a.content) || s.isAttributeDecimal(a.content) ||
-						s.isAttributeInteger(a.content) || s.isAttributeUuid(a.content)
-					)
+			for (const a of s.relation.attributes) {
+				if (!s.relation.attributeIdsTitle.includes(a.id) && a.contentUse === 'default' && (
+					s.isAttributeString(a.content) || s.isAttributeDecimal(a.content) ||
+					s.isAttributeInteger(a.content) || s.isAttributeUuid(a.content)
+				)
 				) {
 					out.push(a);
 				}
 			}
 			return out;
 		},
-		tabCaptions:s => {
+		tabCaptions: s => {
 			let triggerCnt = 0;
-			for(const mod of s.modules) {
+			for (const mod of s.modules) {
 				triggerCnt += mod.pgTriggers.filter(trg => trg.relationId === s.id).length;
 			}
 
 			return [
-				s.capApp.attributes.replace('{CNT}',s.relation.attributes.length),
-				s.capApp.indexes.replace('{CNT}',s.relation.indexes.length),
-				s.capApp.triggers.replace('{CNT}',triggerCnt),
-				s.capApp.presets.replace('{CNT}',s.relation.presets.length),
-				s.capApp.policies.replace('{CNT}',s.relation.policies.length),
+				s.capApp.attributes.replace('{CNT}', s.relation.attributes.length),
+				s.capApp.indexes.replace('{CNT}', s.relation.indexes.length),
+				s.capApp.triggers.replace('{CNT}', triggerCnt),
+				s.capApp.presets.replace('{CNT}', s.relation.presets.length),
+				s.capApp.policies.replace('{CNT}', s.relation.policies.length),
 				s.capApp.graph,
 				s.capApp.preview
 			];
 		},
 
 		// relationship graph
-		graphOption:s => {
+		graphOption: s => {
 			let edges = [];
 			let nodes = [{ // base relation
-				id:s.relation.id,
-				name:s.relation.name,
-				category:0,
-				label:{ show:true },
-				r3:{ relationId:null },
-				symbolSize:50,
-				value:''
+				id: s.relation.id,
+				name: s.relation.name,
+				category: 0,
+				label: { show: true },
+				r3: { relationId: null },
+				symbolSize: 50,
+				value: ''
 			}];
 
 			// relationships to and from base relation
-			for(const a of s.getDependentAttributes(s.module)) {
-				if(!s.isAttributeRelationship(a.content))
+			for (const a of s.getDependentAttributes(s.module)) {
+				if (!s.isAttributeRelationship(a.content))
 					continue;
 
 				// relationship to or from base relation
-				if(a.relationshipId !== s.relation.id && a.relationId !== s.relation.id)
+				if (a.relationshipId !== s.relation.id && a.relationId !== s.relation.id)
 					continue;
 
 				let relIn = a.relationshipId === s.relation.id;
@@ -709,80 +703,80 @@ export default {
 				let rTarget = relIn ? s.relationIdMap[a.relationId] : s.relationIdMap[a.relationshipId];
 
 				let category = 1;
-				if(!s.isAttributeRelationship11(a.content))
+				if (!s.isAttributeRelationship11(a.content))
 					category = relIn ? 3 : 2;
 
 				let external = rTarget.moduleId !== s.relation.moduleId;
 
 				nodes.push({
-					id:relIn ? `${rTarget.id}.${a.id}` : `${rSource.id}.${a.id}`,
-					name:external ? `${s.moduleIdMap[rTarget.moduleId].name}.${rTarget.name}` : rTarget.name,
-					category:category,
-					label:{ show:true },
-					r3:{ relationId:rTarget.id },
-					symbolSize:30,
-					value:relIn ? a.name : `${rSource.name}: ${a.name}`
+					id: relIn ? `${rTarget.id}.${a.id}` : `${rSource.id}.${a.id}`,
+					name: external ? `${s.moduleIdMap[rTarget.moduleId].name}.${rTarget.name}` : rTarget.name,
+					category: category,
+					label: { show: true },
+					r3: { relationId: rTarget.id },
+					symbolSize: 30,
+					value: relIn ? a.name : `${rSource.name}: ${a.name}`
 				});
 				edges.push({
-					'source':relIn ? `${rTarget.id}.${a.id}` : `${rSource.id}`,
-					'target':relIn ? `${rSource.id}` : `${rSource.id}.${a.id}`
+					'source': relIn ? `${rTarget.id}.${a.id}` : `${rSource.id}`,
+					'target': relIn ? `${rSource.id}` : `${rSource.id}.${a.id}`
 				});
 			}
 			let categories = [
-				{name:s.capApp.graphBase},
-				{name:'1:1'},
-				{name:'n:1'},
-				{name:'1:n'}
+				{ name: s.capApp.graphBase },
+				{ name: '1:1' },
+				{ name: 'n:1' },
+				{ name: '1:n' }
 			];
 
 			return {
-				backgroundColor:'transparent',
-				label: { position:'right' },
-				legend:[{
-					data:categories.map(function(a) { return a.name; })
+				backgroundColor: 'transparent',
+				label: { position: 'right' },
+				legend: [{
+					data: categories.map(function (a) { return a.name; })
 				}],
-				series:[{
-					categories:categories,
-					data:nodes,
-					edges:edges,
-					edgeSymbol:['none','arrow'],
-					emphasis: { focus:'adjacency' },
-					force:{
-						edgeLength:150,
-						gravity:0,
-						layoutAnimation:true,
-						repulsion:150
+				series: [{
+					categories: categories,
+					data: nodes,
+					edges: edges,
+					edgeSymbol: ['none', 'arrow'],
+					emphasis: { focus: 'adjacency' },
+					force: {
+						edgeLength: 150,
+						gravity: 0,
+						layoutAnimation: true,
+						repulsion: 150
 					},
-					layout:'force',
-					lineStyle:{
-						color:'source',
-						width:3
+					layout: 'force',
+					lineStyle: {
+						color: 'source',
+						width: 3
 					},
-					roam:true, // user move/zoom
-					type:'graph'
+					roam: true, // user move/zoom
+					type: 'graph'
 				}],
-				tooltip:{} // must be set
+				tooltip: {} // must be set
 			};
 		},
 
 		// simple
-		attributesNotFiles:s => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
-		canSave:           s => s.relation.name !== '' && !s.readonly && s.isChanged,
-		isChanged:         s => !s.deepIsEqual(s.relation,s.relationSchema),
-		module:            s => s.moduleIdMap[s.relation.moduleId],
-		relationSchema:    s => s.relationIdMap[s.id] === undefined ? false : s.relationIdMap[s.id],
+		attributesNotFiles: s => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
+		canSave: s => s.relation.name !== '' && !s.readonly && s.isChanged,
+		isChanged: s => !s.deepIsEqual(s.relation, s.relationSchema),
+		module: s => s.moduleIdMap[s.relation.moduleId],
+		relationSchema: s => s.relationIdMap[s.id] === undefined ? false : s.relationIdMap[s.id],
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		modules:       s => s.$store.getters['schema/modules'],
-		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		modules: s => s.$store.getters['schema/modules'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
-		capApp:        s => s.$store.getters.captions.builder.relation,
-		capGen:        s => s.$store.getters.captions.generic,
-		settings:      s => s.$store.getters.settings
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		capApp: s => s.$store.getters.captions.builder.relation,
+		capGen: s => s.$store.getters.captions.generic,
+		settings: s => s.$store.getters.settings
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
@@ -804,14 +798,14 @@ export default {
 		// presentation
 		displayDataValue(v) {
 			return typeof v !== 'string' || v.length < this.previewValueLength
-				? v : v.substring(0, this.previewValueLength-3) + '...';
+				? v : v.substring(0, this.previewValueLength - 3) + '...';
 		},
 		displayIndexName(ind) {
-			if(ind.method === 'GIN')
+			if (ind.method === 'GIN')
 				return `${this.attributeIdMap[ind.attributes[0].attributeId].name}`;
 
 			let atrs = [];
-			for(let indAtr of ind.attributes) {
+			for (let indAtr of ind.attributes) {
 				atrs.push(`${this.attributeIdMap[indAtr.attributeId].name} (${indAtr.orderAsc ? 'ASC' : 'DESC'})`);
 			}
 			return atrs.join(', ');
@@ -822,8 +816,8 @@ export default {
 			this.relation.policies.push(this.getTemplateRelationPolicy());
 		},
 		graphClicked(ev) {
-			if(typeof ev.data.r3.relationId !== 'undefined' && ev.data.r3.relationId !== null)
-				this.$router.push('/builder/relation/'+ev.data.r3.relationId);
+			if (typeof ev.data.r3.relationId !== 'undefined' && ev.data.r3.relationId !== null)
+				this.$router.push('/builder/relation/' + ev.data.r3.relationId);
 		},
 		previewReload() {
 			this.previewOffset = 0;
@@ -835,51 +829,51 @@ export default {
 		},
 		recordTitleAttributeRemove(id) {
 			const pos = this.relation.attributeIdsTitle.indexOf(id);
-			if(pos !== -1)
-				this.relation.attributeIdsTitle.splice(pos,1);
+			if (pos !== -1)
+				this.relation.attributeIdsTitle.splice(pos, 1);
 		},
 		reset(manuelReset) {
-			if(this.relationSchema !== false && (manuelReset || !this.deepIsEqual(this.relationCopy,this.relationSchema))) {
-				this.relation     = JSON.parse(JSON.stringify(this.relationSchema));
+			if (this.relationSchema !== false && (manuelReset || !this.deepIsEqual(this.relationCopy, this.relationSchema))) {
+				this.relation = JSON.parse(JSON.stringify(this.relationSchema));
 				this.relationCopy = JSON.parse(JSON.stringify(this.relationSchema));
 
-				if(this.tabTarget === 'data')
+				if (this.tabTarget === 'data')
 					this.previewReload();
 			}
 		},
-		showHelp(top,text) {
-			this.$store.commit('dialog',{
-				captionTop:top,
-				captionBody:Array.isArray(text) ? text.join('<br /><br />') : text,
-				image:'question.png'
+		showHelp(top, text) {
+			this.$store.commit('dialog', {
+				captionTop: top,
+				captionBody: Array.isArray(text) ? text.join('<br /><br />') : text,
+				image: 'question.png'
 			});
 		},
 
 		// backend calls
 		delCheck() {
-			this.hasReferences = this.getHasAnyReferences(this.module,'relation',this.id);
-			if(this.hasReferences)
+			this.hasReferences = this.getHasAnyReferences(this.module, 'relation', this.id);
+			if (this.hasReferences)
 				return this.showLookup = true;
 
-			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
 		},
 		del() {
-			ws.send('relation','del',this.relation.id,true).then(
+			ws.send('relation', 'del', this.relation.id, true).then(
 				() => {
 					this.$root.schemaReload(this.relation.moduleId);
-					this.$router.push('/builder/relations/'+this.relation.moduleId);
+					this.$router.push('/builder/relations/' + this.relation.moduleId);
 				},
 				this.$root.genericError
 			);
 		},
 		getPreview() {
-			ws.send('relation','preview',{
-				id:this.id,
-				limit:this.previewLimit,
-				offset:this.previewOffset
-			},true).then(
+			ws.send('relation', 'preview', {
+				id: this.id,
+				limit: this.previewLimit,
+				offset: this.previewOffset
+			}, true).then(
 				res => {
-					this.previewRows     = res.payload.rows;
+					this.previewRows = res.payload.rows;
 					this.previewRowCount = res.payload.rowCount;
 				},
 				this.$root.genericError
@@ -889,7 +883,7 @@ export default {
 			if (!this.canSave)
 				return;
 
-			ws.send('relation','set',this.relation,true).then(
+			ws.send('relation', 'set', this.relation, true).then(
 				() => { this.$root.schemaReload(this.relation.moduleId); },
 				this.$root.genericError
 			);

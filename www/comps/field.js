@@ -1,81 +1,54 @@
-import MyCalendar             from './calendar.js';
-import MyChart                from './chart.js';
-import MyGantt                from './gantt.js';
-import MyKanban               from './kanban.js';
-import MyInputBarcode         from './inputBarcode.js';
-import MyInputColor           from './inputColor.js';
-import MyInputDate            from './inputDate.js';
-import MyInputDecimal         from './inputDecimal.js';
-import MyInputDrawing         from './inputDrawing.js';
-import MyInputFiles           from './inputFiles.js';
-import MyInputIframe          from './inputIframe.js';
-import MyInputLogin           from './inputLogin.js';
-import MyInputRating          from './inputRating.js';
-import MyInputRichtext        from './inputRichtext.js';
-import MyInputSelect          from './inputSelect.js';
-import MyInputUuid            from './inputUuid.js';
-import MyList                 from './list.js';
-import {hasAccessToAttribute} from './shared/access.js';
-import {getFieldHasQuery}     from './shared/builder.js';
-import {getTemplateQuery}     from './shared/builderTemplate.js';
-import {srcBase64}            from './shared/image.js';
-import {getCaption}           from './shared/language.js';
-import {layoutSettleSpace}    from './shared/layout.js';
+import MyCalendar from './calendar.js';
+import MyChart from './chart.js';
+import MyGantt from './gantt.js';
+import MyInputBarcode from './inputBarcode.js';
+import MyInputColor from './inputColor.js';
+import MyInputDate from './inputDate.js';
+import MyInputDecimal from './inputDecimal.js';
+import MyInputDrawing from './inputDrawing.js';
+import MyInputFiles from './inputFiles.js';
+import MyInputIframe from './inputIframe.js';
+import MyInputLogin from './inputLogin.js';
+import MyInputRating from './inputRating.js';
+import MyInputRichtext from './inputRichtext.js';
+import MyInputSelect from './inputSelect.js';
+import MyInputUuid from './inputUuid.js';
+import MyKanban from './kanban.js';
+import MyList from './list.js';
+import MyMap from './map.js';
+import { hasAccessToAttribute } from './shared/access.js';
 import {
-	getIndexAttributeId,
-	isAttributeBoolean,
-	isAttributeDecimal,
-	isAttributeFiles,
-	isAttributeInteger,
-	isAttributeRelationship,
-	isAttributeRegconfig,
-	isAttributeString,
+	getIndexAttributeId, isAttributeBoolean, isAttributeDecimal, isAttributeFiles,
+	isAttributeInteger, isAttributeRegconfig, isAttributeRelationship, isAttributeString,
 	isAttributeUuid
 } from './shared/attribute.js';
-import {
-	getLinkMeta,
-	openLink
-} from './shared/generic.js';
-import {
-	getFlexStyle,
-	getFormPopUpConfig,
-	setGetterArgs
-} from './shared/form.js';
-import {
-	variableValueGet,
-	variableValueSet
-} from './shared/variable.js';
+import { getFieldHasQuery } from './shared/builder.js';
+import { getTemplateQuery } from './shared/builderTemplate.js';
+import { getFlexStyle, getFormPopUpConfig, setGetterArgs } from './shared/form.js';
+import { getLinkMeta, openLink } from './shared/generic.js';
+import { srcBase64 } from './shared/image.js';
+import { getCaption } from './shared/language.js';
+import { layoutSettleSpace } from './shared/layout.js';
+import { variableValueGet, variableValueSet } from './shared/variable.js';
 
 export default {
-	name:'my-field',
-	components:{
-		'chrome-picker':VueColor.Chrome,
-		MyCalendar,
-		MyChart,
-		MyGantt,
-		MyKanban,
-		MyInputBarcode,
-		MyInputColor,
-		MyInputDate,
-		MyInputDecimal,
-		MyInputDrawing,
-		MyInputFiles,
-		MyInputIframe,
-		MyInputLogin,
-		MyInputRating,
-		MyInputRichtext,
-		MyInputSelect,
-		MyInputUuid,
-		MyList
+	name: 'my-field',
+	components: {
+		'chrome-picker': VueColor.Chrome,
+		MyCalendar, MyChart, MyGantt, MyKanban,
+		MyInputBarcode, MyInputColor, MyInputDate, MyInputDecimal,
+		MyInputDrawing, MyInputFiles, MyInputIframe, MyInputLogin,
+		MyInputRating, MyInputRichtext, MyInputSelect, MyInputUuid,
+		MyList, MyMap
 	},
-	template:`<div class="field"
+	template: `<div class="field"
 		v-if="isActive"
 		:class="domClass"
 		:data-field-id="field.id"
 		:data-field-is-valid="isValid ? '1' : '0'"
 		:style="domStyle"
 	>
-		<template v-if="isData || isList || isTabs || isCalendar || isKanban || isChart">
+		<template v-if="isData || isList || isTabs || isCalendar || isKanban || isChart || isMap">
 
 			<div class="field-caption"
 				v-if="isWithCaption"
@@ -268,6 +241,9 @@ export default {
 						</div>
 					</template>
 				</my-list>
+
+				<!-- map -->
+				<my-map v-if="isMap" :readonly="isReadonly" />
 
 				<!-- tabs -->
 				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">
@@ -699,223 +675,223 @@ export default {
 			:variableIdMapLocal
 		/>
 	</div>`,
-	props:{
-		entityIdMapEffect:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
-		favoriteId:         { required:false, default:null },
-		field:              { type:Object,  required:true },
-		fieldIdsChanged:    { type:Array,   required:false, default:() => {return []} },
-		fieldIdsInvalid:    { type:Array,   required:false, default:() => {return []} },
-		fieldIdsTouched:    { type:Array,   required:false, default:() => {return []} },
-		fieldIdMapOverwrite:{ type:Object,  required:true },                 // overwrites for field meta (title, order in parent, error message, ...)
-		fieldIdMapOptions:  { type:Object,  required:true },                 // field options
-		fieldIdMapProcessed:{ type:Object,  required:true },                 // processed data (choices, columns, filters)
-		formBadSave:        { type:Boolean, required:true },                 // attempted save with invalid inputs
-		formBlockInputs:    { type:Boolean, required:true },
-		formIsEmbedded:     { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
-		formLoading:        { type:Boolean, required:true },
-		flexDirParent:      { type:String,  required:true },                 // flex direction (row/column) of parent
-		isAloneInForm:      { type:Boolean, required:true },                 // parent form contains only this field
-		isAloneInTab:       { type:Boolean, required:false, default:false }, // parent tab only contains this field
-		isBulkUpdate:       { type:Boolean, required:false, default:false }, // form is in bulk update mode
-		joinsIndexMap:      { type:Object,  required:true },
-		logViewer:          { type:Boolean, required:false, default:false }, // is part of log viewer
-		moduleId:           { type:String,  required:true },
-		parentIsCounting:   { type:Boolean, required:false, default:false }, // field parent is counting records (tab counter)
-		parentIsHidden:     { type:Boolean, required:false, default:false }, // field parent has its content hidden (tab/container)
-		values:             { type:Object,  required:true },
-		variableIdMapLocal: { type:Object,  required:true }                  // variable values by ID (variables assigned to form)
+	props: {
+		entityIdMapEffect: { type: Object, required: false, default: () => { return {} } }, // overwritten states
+		favoriteId: { required: false, default: null },
+		field: { type: Object, required: true },
+		fieldIdsChanged: { type: Array, required: false, default: () => { return [] } },
+		fieldIdsInvalid: { type: Array, required: false, default: () => { return [] } },
+		fieldIdsTouched: { type: Array, required: false, default: () => { return [] } },
+		fieldIdMapOverwrite: { type: Object, required: true },                 // overwrites for field meta (title, order in parent, error message, ...)
+		fieldIdMapOptions: { type: Object, required: true },                 // field options
+		fieldIdMapProcessed: { type: Object, required: true },                 // processed data (choices, columns, filters)
+		formBadSave: { type: Boolean, required: true },                 // attempted save with invalid inputs
+		formBlockInputs: { type: Boolean, required: true },
+		formIsEmbedded: { type: Boolean, required: true },                 // parent form is embedded (pop-up, inline, widget)
+		formLoading: { type: Boolean, required: true },
+		flexDirParent: { type: String, required: true },                 // flex direction (row/column) of parent
+		isAloneInForm: { type: Boolean, required: true },                 // parent form contains only this field
+		isAloneInTab: { type: Boolean, required: false, default: false }, // parent tab only contains this field
+		isBulkUpdate: { type: Boolean, required: false, default: false }, // form is in bulk update mode
+		joinsIndexMap: { type: Object, required: true },
+		logViewer: { type: Boolean, required: false, default: false }, // is part of log viewer
+		moduleId: { type: String, required: true },
+		parentIsCounting: { type: Boolean, required: false, default: false }, // field parent is counting records (tab counter)
+		parentIsHidden: { type: Boolean, required: false, default: false }, // field parent has its content hidden (tab/container)
+		values: { type: Object, required: true },
+		variableIdMapLocal: { type: Object, required: true }                  // variable values by ID (variables assigned to form)
 	},
-	emits:[
-		'clipboard','execute-function','open-doc','open-form','set-form-args',
-		'set-counter','set-index-record-ids','set-touched','set-valid','set-value'
+	emits: [
+		'clipboard', 'execute-function', 'open-doc', 'open-form', 'set-form-args',
+		'set-counter', 'set-index-record-ids', 'set-touched', 'set-valid', 'set-value'
 	],
 	data() {
 		return {
-			popUpFormInline:null,         // inline form for some field types (list)
-			regconfigInput:'',
+			popUpFormInline: null,         // inline form for some field types (list)
+			regconfigInput: '',
 			showPassword: false,           // for password fields
 
 			// tabs field
-			tabLayoutCheckTimer:null,
-			tabLayoutElements:[],                // elements that are shown, based on available space
+			tabLayoutCheckTimer: null,
+			tabLayoutElements: [],                // elements that are shown, based on available space
 			tabLayoutElementsAvailableInOrder: [ // elements that can be shown, in order of priority
-				'count','label','icon'
+				'count', 'label', 'icon'
 			],
-			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
+			tabIndexFieldIdMapCounter: {}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
 			tabIndexShow: 0,              // tabs only: which tab is shown
 			tabsCollabsed: false
 		};
 	},
-	watch:{
-		isValid:{ // inform parent form about field validity
-			handler(v) { this.$emit('set-valid',v,this.field.id); },
-			immediate:true
+	watch: {
+		isValid: { // inform parent form about field validity
+			handler(v) { this.$emit('set-valid', v, this.field.id); },
+			immediate: true
 		},
-		tabIndexesHidden:{
+		tabIndexesHidden: {
 			handler(v) {
-				if(this.isTabs && v.includes(this.tabIndexShow))
+				if (this.isTabs && v.includes(this.tabIndexShow))
 					this.setTabToValid();
 			},
-			immediate:true
+			immediate: true
 		}
 	},
-	computed:{
+	computed: {
 		// field value for data attribute
-		value:{
+		value: {
 			get() {
-				if(!this.isData) return false;
+				if (!this.isData) return false;
 
-				if(this.isVariable)
-					return this.variable === false ? null : this.variableValueGet(this.variable.id,this.variableIdMapLocal);
+				if (this.isVariable)
+					return this.variable === false ? null : this.variableValueGet(this.variable.id, this.variableIdMapLocal);
 
 				// if only alt attribute is set, field still needs primary attribute value (form log)
-				if(this.values[this.fieldAttributeId] === undefined)
+				if (this.values[this.fieldAttributeId] === undefined)
 					return null;
 
 				return this.values[this.fieldAttributeId];
 			},
-			set(val,valOld) {
-				this.setValue(val,valOld,this.fieldAttributeId,false);
+			set(val, valOld) {
+				this.setValue(val, valOld, this.fieldAttributeId, false);
 			}
 		},
 
 		// field value for alternative data attribute (not available for variables)
-		valueAlt:{
+		valueAlt: {
 			get() {
-				if(!this.isData)    return false;
-				if(this.isVariable) return false;
+				if (!this.isData) return false;
+				if (this.isVariable) return false;
 
 				// if only primary attribute is set, field still needs alt attribute value (form log)
 				return this.values[this.fieldAttributeIdAlt] !== undefined
 					? this.values[this.fieldAttributeIdAlt] : null;
 			},
-			set(val,valOld) {
-				if(this.fieldAttributeIdAlt !== false)
-					this.setValue(val,valOld,this.fieldAttributeIdAlt,false);
+			set(val, valOld) {
+				if (this.fieldAttributeIdAlt !== false)
+					this.setValue(val, valOld, this.fieldAttributeIdAlt, false);
 			}
 		},
 
-		caption:s => {
+		caption: s => {
 			let out = '';
-			if(s.fieldIdMapOverwrite.caption[s.field.id] !== undefined) {
+			if (s.fieldIdMapOverwrite.caption[s.field.id] !== undefined) {
 				out = s.fieldIdMapOverwrite.caption[s.field.id];
 			}
 			else {
-				const title = s.getCaption('fieldTitle',s.moduleId,s.field.id,s.field.captions);
-				if(title !== '') {
+				const title = s.getCaption('fieldTitle', s.moduleId, s.field.id, s.field.captions);
+				if (title !== '') {
 					out = title;
 				}
-				else if(s.attribute) {
-					out = s.getCaption('attributeTitle',s.moduleId,s.attribute.id,s.attribute.captions,s.attribute.name);
+				else if (s.attribute) {
+					out = s.getCaption('attributeTitle', s.moduleId, s.attribute.id, s.attribute.captions, s.attribute.name);
 				}
 			}
-			return s.isRequired ? out + '*' : out;
+			return s.isRequired ? `${out}*` : out;
 		},
-		captionError:s => {
-			if(s.customErr !== null) return s.customErr; // custom error is always shown
-			if(!s.showInvalid)       return '';
+		captionError: s => {
+			if (s.customErr !== null) return s.customErr; // custom error is always shown
+			if (!s.showInvalid) return '';
 
-			if(!s.isValidMin) {
-				if(s.isString) return s.capGen.inputShort.replace('{MIN}',s.field.min);
-				if(s.isFiles)  return s.capGen.inputTooFewFiles;
-				return s.capGen.inputSmall.replace('{MIN}',s.field.min);
+			if (!s.isValidMin) {
+				if (s.isString) return s.capGen.inputShort.replace('{MIN}', s.field.min);
+				if (s.isFiles) return s.capGen.inputTooFewFiles;
+				return s.capGen.inputSmall.replace('{MIN}', s.field.min);
 			}
-			if(!s.isValidMax) {
-				if(s.isString) {
-					if(s.field.max !== null)  return s.capGen.inputLong.replace('{MAX}',s.field.max);
-					if(s.attribute !== false) return s.capGen.inputLong.replace('{MAX}',s.attribute.length);
+			if (!s.isValidMax) {
+				if (s.isString) {
+					if (s.field.max !== null) return s.capGen.inputLong.replace('{MAX}', s.field.max);
+					if (s.attribute !== false) return s.capGen.inputLong.replace('{MAX}', s.attribute.length);
 					return s.capGen.inputInvalid;
 				}
-				if(s.isFiles) return s.capGen.inputTooManyFiles;
-				return s.capGen.inputLarge.replace('{MAX}',s.field.max);
+				if (s.isFiles) return s.capGen.inputTooManyFiles;
+				return s.capGen.inputLarge.replace('{MAX}', s.field.max);
 			}
 
-			if(s.isDecimal)     return s.capGen.inputDecimal;
-			if(!s.isValidValue) return s.capGen.inputInvalid; // generic error
+			if (s.isDecimal) return s.capGen.inputDecimal;
+			if (!s.isValidValue) return s.capGen.inputInvalid; // generic error
 			return '';
 		},
-		captionHelp:s => s.getCaption('fieldHelp',s.moduleId,s.field.id,s.field.captions),
-		domClass:s => {
-			let out = [];
-			if(s.isHidden)     out.push('hidden');
-			if(s.isIframe)     out.push('iframe');
-			if(s.isReadonly)   out.push('readonly');
-			if(s.isRichtext)   out.push('richtext');
+		captionHelp: s => s.getCaption('fieldHelp', s.moduleId, s.field.id, s.field.captions),
+		domClass: s => {
+			const out = [];
+			if (s.isHidden) out.push('hidden');
+			if (s.isIframe) out.push('iframe');
+			if (s.isReadonly) out.push('readonly');
+			if (s.isRichtext) out.push('richtext');
 
-			for(const flag of s.field.flags)   out.push(`flag-${flag}`);
-			if(s.isHeader && s.field.richtext) out.push('headerRichtext');
-			if(s.isContainer)                  out.push('container', s.field.direction);
+			for (const flag of s.field.flags) out.push(`flag-${flag}`);
+			if (s.isHeader && s.field.richtext) out.push('headerRichtext');
+			if (s.isContainer) out.push('container', s.field.direction);
 
-			if(s.flexDirParent === 'column' && (s.isHeader || s.isLineSingle))
+			if (s.flexDirParent === 'column' && (s.isHeader || s.isLineSingle))
 				out.push('noGrow');
 
 			return out;
 		},
-		domStyle:s => {
-			let out = [];
-			if(s.isContainer) {
+		domStyle: s => {
+			const out = [];
+			if (s.isContainer) {
 				out.push(s.getFlexStyle(
-					s.flexDirParent,s.field.justifyContent,s.field.alignItems,
-					s.field.alignContent,s.field.wrap,s.field.grow,s.field.shrink,
-					s.field.basis,s.field.perMax,s.field.perMin));
+					s.flexDirParent, s.field.justifyContent, s.field.alignItems,
+					s.field.alignContent, s.field.wrap, s.field.grow, s.field.shrink,
+					s.field.basis, s.field.perMax, s.field.perMin));
 			}
-			if(s.fieldIdMapOverwrite.order[s.field.id] !== undefined)
+			if (s.fieldIdMapOverwrite.order[s.field.id] !== undefined)
 				out.push(`order:${s.fieldIdMapOverwrite.order[s.field.id]}`);
 
 			return out.join(';');
 		},
-		fieldAttributeId:s => {
-			if(!s.isData || s.isVariable) return false;
+		fieldAttributeId: s => {
+			if (!s.isData || s.isVariable) return false;
 
 			const atrIdNm = s.field.attributeIdNm !== undefined ? s.field.attributeIdNm : null;
-			return s.getIndexAttributeId(s.field.index,s.field.attributeId,s.field.outsideIn === true,atrIdNm);
+			return s.getIndexAttributeId(s.field.index, s.field.attributeId, s.field.outsideIn === true, atrIdNm);
 		},
-		fieldAttributeIdAlt:s => !s.isData || s.isVariable || s.field.attributeIdAlt === null ? false
-			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
-		iconId:s => {
-			if(s.field.iconId !== null) return s.field.iconId;
+		fieldAttributeIdAlt: s => !s.isData || s.isVariable || s.field.attributeIdAlt === null ? false
+			: s.getIndexAttributeId(s.field.index, s.field.attributeIdAlt, false, null),
+		iconId: s => {
+			if (s.field.iconId !== null) return s.field.iconId;
 
 			return s.isData && !s.isVariable && s.attribute.iconId !== null ? s.attribute.iconId : false;
 		},
-		lineInputType:s => {
-			if(s.isMobile && s.isInteger) return 'number';
+		lineInputType: s => {
+			if (s.isMobile && s.isInteger) return 'number';
 			return !s.isPassword || s.showPassword ? 'text' : 'password';
 		},
-		presetValue:s => {
-			if(!s.isData) return false;
+		presetValue: s => {
+			if (!s.isData) return false;
 
 			const join = s.joinsIndexMap[s.field.index];
-			const rel  = s.relationIdMap[join.relationId];
-			for(let preset of rel.presets) {
-				if(s.presetIdMapRecordId[preset.id] !== join.recordId)
+			const rel = s.relationIdMap[join.relationId];
+			for (const preset of rel.presets) {
+				if (s.presetIdMapRecordId[preset.id] !== join.recordId)
 					continue;
 
-				for(let value of preset.values) {
-					if(value.attributeId === s.attribute.id)
+				for (const value of preset.values) {
+					if (value.attributeId === s.attribute.id)
 						return value;
 				}
 			}
 			return false;
 		},
-		regconfigOptions:s => {
-			let out = [];
-			for(let d of s.searchDictionaries) {
-				if((s.regconfigInput === null || s.regconfigInput === '' || d.includes(s.regconfigInput.toLowerCase())) && d !== 'simple' && s.value !== d && out.length < 10)
-					out.push({id:d,name:d});
+		regconfigOptions: s => {
+			const out = [];
+			for (const d of s.searchDictionaries) {
+				if ((s.regconfigInput === null || s.regconfigInput === '' || d.includes(s.regconfigInput.toLowerCase())) && d !== 'simple' && s.value !== d && out.length < 10)
+					out.push({ id: d, name: d });
 			}
 			return out;
 		},
-		relationshipRecordIds:s => {
-			if(!s.isData || s.value === null) return [];
-			if(!s.isRelationship1N)           return [s.value];
+		relationshipRecordIds: s => {
+			if (!s.isData || s.value === null) return [];
+			if (!s.isRelationship1N) return [s.value];
 
-			let ids = [];
-			for(let i = 0, j = s.value.length; i < j; i++) {
+			const ids = [];
+			for (let i = 0, j = s.value.length; i < j; i++) {
 				ids.push(s.value[i]);
 			}
 			return ids;
 		},
-		stateFinal:s => {
+		stateFinal: s => {
 			// field state has a default value, which can be overwritten by form states
 			// hidden:   field is not shown
 			// default:  field is shown, data field state is overwritten depending on circumstance
@@ -925,14 +901,14 @@ export default {
 			let state = s.field.state;
 
 			// apply form state if available
-			if(s.entityIdMapEffect.field[s.field.id]?.state !== undefined)
+			if (s.entityIdMapEffect.field[s.field.id]?.state !== undefined)
 				state = s.entityIdMapEffect.field[s.field.id].state;
 
 			// overwrites for 'default' state for data fields
-			if(s.isData && !s.isVariable && state === 'default') {
-				if(!s.inputCanWrite) state = 'readonly';
+			if (s.isData && !s.isVariable && state === 'default') {
+				if (!s.inputCanWrite) state = 'readonly';
 
-				if(s.inputCanWrite                          // can write
+				if (s.inputCanWrite                          // can write
 					&& !s.isBulkUpdate                      // bulk update is always optional
 					&& !s.attribute.nullable                // value not optional
 					&& !s.isRelationship1N                  // not 0...n partners
@@ -941,53 +917,53 @@ export default {
 			}
 
 			// readonly overwrite for 'visible' states
-			if(state !== 'hidden' && (s.logViewer || (s.formBlockInputs && (s.isData || s.isButton || s.isVariable))))
+			if (state !== 'hidden' && (s.logViewer || (s.formBlockInputs && (s.isData || s.isButton || s.isVariable))))
 				state = 'readonly';
 
 			return state;
 		},
-		tabIndexesHidden:s => {
-			if(!s.isTabs) return [];
-			let out = [];
-			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
-				let t     = s.field.tabs[i];
-				let state = s.entityIdMapEffect.tab[t.id]?.state !== undefined
+		tabIndexesHidden: s => {
+			if (!s.isTabs) return [];
+			const out = [];
+			for (let i = 0, j = s.field.tabs.length; i < j; i++) {
+				const t = s.field.tabs[i];
+				const state = s.entityIdMapEffect.tab[t.id]?.state !== undefined
 					? s.entityIdMapEffect.tab[t.id].state : t.state;
 
-				if(state === 'hidden')
+				if (state === 'hidden')
 					out.push(i);
 			}
 			return out;
 		},
-		tabIndexesInvalidFields:s => {
-			if(!s.isTabs) return [];
-			let hasAnyInvalid = (fields) => {
-				for(let f of fields) {
-					switch(f.content) {
-						case 'data':      if(s.fieldIdsInvalid.includes(f.id)) return true; break;
-						case 'container': if(hasAnyInvalid(f.fields))          return true; break;
+		tabIndexesInvalidFields: s => {
+			if (!s.isTabs) return [];
+			const hasAnyInvalid = fields => {
+				for (const f of fields) {
+					switch (f.content) {
+						case 'data': if (s.fieldIdsInvalid.includes(f.id)) return true; break;
+						case 'container': if (hasAnyInvalid(f.fields)) return true; break;
 						case 'tabs':
-							for(let t of f.tabs) {
-								if(hasAnyInvalid(t.fields)) return true;
+							for (const t of f.tabs) {
+								if (hasAnyInvalid(t.fields)) return true;
 							}
-						break;
+							break;
 					}
 				}
 				return false;
 			};
 
-			let out = [];
-			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
-				if(hasAnyInvalid(s.field.tabs[i].fields))
+			const out = [];
+			for (let i = 0, j = s.field.tabs.length; i < j; i++) {
+				if (hasAnyInvalid(s.field.tabs[i].fields))
 					out.push(i);
 			}
 			return out;
 		},
-		tabIndexesTitle:s => {
-			let out = [];
+		tabIndexesTitle: s => {
+			const out = [];
 			for (let i = 0, j = s.field.tabs.length; i < j; i++) {
 				const tab = s.field.tabs[i];
-				out.push(s.getCaption('tabTitle',s.moduleId,tab.id,tab.captions,'-'));
+				out.push(s.getCaption('tabTitle', s.moduleId, tab.id, tab.captions, '-'));
 
 				if (typeof s.tabIndexFieldIdMapCounter[String(i)] === 'undefined'
 					|| (s.tabLayoutElements.length !== 0 && !s.tabLayoutElements.includes('count'))) {
@@ -996,51 +972,51 @@ export default {
 
 				// aggregate tab counters
 				let ctr = 0;
-				for(let fieldId in s.tabIndexFieldIdMapCounter[String(i)]) {
+				for (const fieldId in s.tabIndexFieldIdMapCounter[String(i)]) {
 					ctr += s.tabIndexFieldIdMapCounter[String(i)][fieldId];
 				}
-				out[out.length-1] += ` (${ctr})`;
+				out[out.length - 1] += ` (${ctr})`;
 			}
 			return out;
 		},
 
 		// data input states
-		inputCanWrite:s => {
-			if(!s.isData)    return false;
-			if(s.isVariable) return true;
+		inputCanWrite: s => {
+			if (!s.isData) return false;
+			if (s.isVariable) return true;
 
 			// block access to protected preset value
-			if(s.presetValue !== false && s.presetValue.protected)
+			if (s.presetValue !== false && s.presetValue.protected)
 				return false;
 
 			// check join permissions
 			const join = s.joinsIndexMap[s.field.index];
-			if(!s.isBulkUpdate) {
-				if(s.isNew  && !join.recordCreate) return false;
-				if(!s.isNew && !join.recordUpdate) return false;
+			if (!s.isBulkUpdate) {
+				if (s.isNew && !join.recordCreate) return false;
+				if (!s.isNew && !join.recordUpdate) return false;
 			}
 
 			// check SET(2) permission for attribute
-			if(!s.hasAccessToAttribute(s.access,s.field.attributeId,
-				s.attributeIdMap[s.field.attributeId].relationId,2)) {
+			if (!s.hasAccessToAttribute(s.access, s.field.attributeId,
+				s.attributeIdMap[s.field.attributeId].relationId, 2)) {
 
 				return false;
 			}
 
-			if(s.isRelationship && s.field.attributeIdNm !== null
-				&& !s.hasAccessToAttribute(s.access,s.field.attributeIdNm,
-				s.attributeIdMap[s.field.attributeIdNm].relationId,2)) {
+			if (s.isRelationship && s.field.attributeIdNm !== null
+				&& !s.hasAccessToAttribute(s.access, s.field.attributeIdNm,
+					s.attributeIdMap[s.field.attributeIdNm].relationId, 2)) {
 
 				return false;
 			}
 
-			if(!s.isNew || s.isBulkUpdate)
+			if (!s.isNew || s.isBulkUpdate)
 				return true;
 
 			// field attribute relation has no record ID
 			// collect relationship chain until source relation
-			let indexChain = [join.index];
-			for(let index = join.indexFrom; index !== -1; index = s.joinsIndexMap[index].indexFrom) {
+			const indexChain = [join.index];
+			for (let index = join.indexFrom; index !== -1; index = s.joinsIndexMap[index].indexFrom) {
 				indexChain.push(index);
 			}
 
@@ -1049,10 +1025,10 @@ export default {
 			// if a single chain piece is broken, we cannot use this data field
 			indexChain.sort();
 			let chainBroken = false;
-			for(let i = 0, j = indexChain.length; i < j; i++) {
+			for (let i = 0, j = indexChain.length; i < j; i++) {
 
-				let relCheck = s.joinsIndexMap[indexChain[i]];
-				if(relCheck.recordId === 0 && !relCheck.applyCreate) {
+				const relCheck = s.joinsIndexMap[indexChain[i]];
+				if (relCheck.recordId === 0 && !relCheck.applyCreate) {
 					chainBroken = true;
 					break;
 				}
@@ -1061,155 +1037,156 @@ export default {
 		},
 
 		// bool states
-		isLineInput:s => s.isData
-			&& !s.isBoolean      && !s.isColor
-			&& !s.isDateInput    && !s.isDrawing
-			&& !s.isFiles        && !s.isIframe
-			&& !s.isLogin        && !s.isSlider
-			&& !s.isTextarea     && !s.isRegconfig
+		isLineInput: s => s.isData
+			&& !s.isBoolean && !s.isColor
+			&& !s.isDateInput && !s.isDrawing
+			&& !s.isFiles && !s.isIframe
+			&& !s.isLogin && !s.isSlider
+			&& !s.isTextarea && !s.isRegconfig
 			&& !s.isRelationship && !s.isRichtext
-			&& !s.isUuid         && !s.isBarcode
-			&& !s.isRating       && !s.isDecimal,
+			&& !s.isUuid && !s.isBarcode
+			&& !s.isRating && !s.isDecimal,
 		isLineSingle: s => (s.isTabs && s.tabsCollabsed) || (
 			s.isData && (
 				s.isLineInput || s.isBoolean || s.isDecimal || s.isColor || s.isDateInput || s.isSlider ||
 				s.isRating || s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
 			)
 		),
-		isValid:s => {
-			if(!s.isData || s.isReadonly) return true;
-			if(s.value === null)          return !s.isRequired;
-			if(!s.isValidValue)           return false;
+		isValid: s => {
+			if (!s.isData || s.isReadonly) return true;
+			if (s.value === null) return !s.isRequired;
+			if (!s.isValidValue) return false;
 			return true;
 		},
-		isValidMax:s => {
-			if(!s.isData || s.isVariable || s.value === null) return true;
-			if(s.isDecimal || s.isInteger)                    return s.field.max === null || s.value <= s.field.max;
+		isValidMax: s => {
+			if (!s.isData || s.isVariable || s.value === null) return true;
+			if (s.isDecimal || s.isInteger) return s.field.max === null || s.value <= s.field.max;
 
-			if(s.isString) {
-				if(s.field.max !== null)                              return s.value.length <= s.field.max;        // field max. settings count if set
-				if(s.attribute !== false && s.attribute.length !== 0) return s.value.length <= s.attribute.length; // attribute length as fallback
+			if (s.isString) {
+				if (s.field.max !== null) return s.value.length <= s.field.max;        // field max. settings count if set
+				if (s.attribute !== false && s.attribute.length !== 0) return s.value.length <= s.attribute.length; // attribute length as fallback
 				return true;
 			}
 
-			if(s.isFiles)
+			if (s.isFiles)
 				return s.field.max === null || (typeof s.value.fileCount !== 'undefined' ? s.value.fileCount <= s.field.max : s.value.length <= s.field.max);
 
 			return true;
 		},
-		isValidMin:s => {
-			if(!s.isData || s.isVariable || s.value === null || s.field.min === null) return true;
-			if(s.isDecimal || s.isInteger)                                            return s.value        >= s.field.min;
-			if(s.isString)                                                            return s.value.length >= s.field.min;
+		isValidMin: s => {
+			if (!s.isData || s.isVariable || s.value === null || s.field.min === null) return true;
+			if (s.isDecimal || s.isInteger) return s.value >= s.field.min;
+			if (s.isString) return s.value.length >= s.field.min;
 
-			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
+			if (s.isFiles) return typeof s.value.fileCount !== 'undefined'
 				? s.value.fileCount >= s.field.min : s.value.length >= s.field.min;
 
 			return true;
 		},
-		isValidValue:s => {
-			if(!s.isData)                                            return true;
-			if(s.customErr !== null)                                 return false;
-			if(s.inputRegex !== null && !s.inputRegex.test(s.value)) return false;
+		isValidValue: s => {
+			if (!s.isData) return true;
+			if (s.customErr !== null) return false;
+			if (s.inputRegex !== null && !s.inputRegex.test(s.value)) return false;
 
-			if(typeof s.value === 'string') {
-				if(s.isDecimal && !/^-?\d+[\.\,]?\d*$/.test(s.value)) return false;
-				if(s.isInteger && !/^-?\d+$/.test(s.value))           return false;
+			if (typeof s.value === 'string') {
+				if (s.isDecimal && !/^-?\d+[\.\,]?\d*$/.test(s.value)) return false;
+				if (s.isInteger && !/^-?\d+$/.test(s.value)) return false;
 			}
 
-			if(s.isUuid && !/^[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}$/i.test(s.value))
+			if (s.isUuid && !/^[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}$/i.test(s.value))
 				return false;
 
 			return s.isValidMin && s.isValidMax;
 		},
 
 		// simple
-		appResized:   s => s.$store.getters.appResized,
-		attribute:    s => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false,
-		collectionIdMapIndexes:s => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),
-		content:      s => s.isVariable ? 'data' : s.field.content,
-		contentData:  s => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
-		contentUse:   s => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
-		customErr:    s => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
+		appResized: s => s.$store.getters.appResized,
+		attribute: s => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false,
+		collectionIdMapIndexes: s => s.$root.getOrFallback(s.loginOptions, 'collectionIdMapIndexes', {}),
+		content: s => s.isVariable ? 'data' : s.field.content,
+		contentData: s => s.isData && !s.isVariable ? s.attribute.content : s.variable.content,
+		contentUse: s => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
+		customErr: s => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
-		dataOptions:  s => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
+		dataOptions: s => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
 		dropdownShow: s => s.dropdownElm === s.$refs.content,
-		inputRegex:   s => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
-		link:         s => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
+		inputRegex: s => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
+		link: s => !s.isData ? false : s.getLinkMeta(s.field.display, s.value),
 		loginOptions: s => s.fieldIdMapOptions[s.field.id] === undefined ? {} : s.fieldIdMapOptions[s.field.id],
-		query:        s => s.getFieldHasQuery(s.field) && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
-		showInvalid:  s => !s.isValid && (s.formBadSave || s.isTouched),
-		variable:     s => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
+		query: s => s.getFieldHasQuery(s.field) && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
+		showInvalid: s => !s.isValid && (s.formBadSave || s.isTouched),
+		variable: s => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
 
 		// processed states
-		choices:     s => s.fieldIdMapProcessed.choices[s.field.id]      ?? [],
-		columns:     s => s.fieldIdMapProcessed.columns[s.field.id]      ?? [],
-		filters:     s => s.fieldIdMapProcessed.filters[s.field.id]      ?? [],
-		filtersInput:s => s.fieldIdMapProcessed.filtersInput[s.field.id] ?? [],
+		choices: s => s.fieldIdMapProcessed.choices[s.field.id] ?? [],
+		columns: s => s.fieldIdMapProcessed.columns[s.field.id] ?? [],
+		filters: s => s.fieldIdMapProcessed.filters[s.field.id] ?? [],
+		filtersInput: s => s.fieldIdMapProcessed.filtersInput[s.field.id] ?? [],
 
 		// bool states
-		isActive:        s => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
-		isAlone:         s => s.isAloneInForm || s.isAloneInTab,
-		isBarcode:       s => s.isData && s.contentUse.includes('barcode'),
-		isButton:        s => s.content === 'button',
-		isCalendar:      s => s.content === 'calendar',
-		isChart:         s => s.content === 'chart',
-		isContainer:     s => s.content === 'container',
-		isData:          s => s.content === 'data',
-		isEncrypted:     s => s.isData && s.attribute.encrypted,
-		isNew:           s => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
-		isBoolean:       s => s.isData && s.isAttributeBoolean(s.contentData),
-		isClipboard:     s => s.isData && !s.isFiles && !s.isRelationship && s.field.flags.includes('clipboard'),
-		isColor:         s => s.isData && s.contentUse === 'color',
-		isDate:          s => s.isData && s.contentUse === 'date',
-		isDatetime:      s => s.isData && s.contentUse === 'datetime',
-		isDateInput:     s => s.isData && s.isDatetime || s.isDate || s.isTime,
-		isDateRange:     s => s.isDateInput && !s.isVariable && s.field.attributeIdAlt !== null,
-		isDecimal:       s => s.isData && s.isAttributeDecimal(s.contentData),
-		isDrawing:       s => s.isData && s.contentUse === 'drawing',
-		isFiles:         s => s.isData && s.isAttributeFiles(s.contentData),
-		isHeader:        s => s.content === 'header',
-		isHidden:        s => s.stateFinal === 'hidden' || s.parentIsHidden,
-		isIframe:        s => s.isData && s.contentUse === 'iframe',
-		isInteger:       s => s.isData && s.isAttributeInteger(s.contentData),
-		isKanban:        s => s.content === 'kanban',
-		isList:          s => s.content === 'list',
-		isLogin:         s => s.isData && s.field.display === 'login',
-		isMonospace:     s => s.field.flags.includes('monospace'),
-		isPassword:      s => s.isData && s.field.display === 'password',
-		isRating:        s => s.isData && s.field.display === 'rating',
-		isReadonly:      s => s.stateFinal === 'readonly',
-		isRelationship:  s => s.isData && s.isAttributeRelationship(s.contentData),
-		isRelationship1N:s => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
-		isRegconfig:     s => s.isData && s.isAttributeRegconfig(s.contentData),
-		isRequired:      s => s.stateFinal === 'required',
-		isRichtext:      s => s.isData && s.contentUse === 'richtext',
-		isSlider:        s => s.isData && s.field.display === 'slider',
-		isString:        s => s.isData && s.isAttributeString(s.contentData),
-		isTabs:          s => s.content === 'tabs',
-		isTabsSingle:    s => s.isTabs && s.field.tabs.length - 1 === s.tabIndexesHidden.length,
-		isTextarea:      s => s.isData && s.contentUse === 'textarea',
-		isTime:          s => s.isData && s.contentUse === 'time',
-		isTouched:       s => s.fieldIdsTouched.includes(s.field.id),
-		isVariable:      s => s.field.content === 'variable',
-		isWithCaption:   s => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		isWithIntent:    s => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
-		isUuid:          s => s.isData && s.isAttributeUuid(s.contentData),
+		isActive: s => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
+		isAlone: s => s.isAloneInForm || s.isAloneInTab,
+		isBarcode: s => s.isData && s.contentUse.includes('barcode'),
+		isButton: s => s.content === 'button',
+		isCalendar: s => s.content === 'calendar',
+		isChart: s => s.content === 'chart',
+		isContainer: s => s.content === 'container',
+		isData: s => s.content === 'data',
+		isEncrypted: s => s.isData && s.attribute.encrypted,
+		isNew: s => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
+		isBoolean: s => s.isData && s.isAttributeBoolean(s.contentData),
+		isClipboard: s => s.isData && !s.isFiles && !s.isRelationship && s.field.flags.includes('clipboard'),
+		isColor: s => s.isData && s.contentUse === 'color',
+		isDate: s => s.isData && s.contentUse === 'date',
+		isDatetime: s => s.isData && s.contentUse === 'datetime',
+		isDateInput: s => s.isData && s.isDatetime || s.isDate || s.isTime,
+		isDateRange: s => s.isDateInput && !s.isVariable && s.field.attributeIdAlt !== null,
+		isDecimal: s => s.isData && s.isAttributeDecimal(s.contentData),
+		isDrawing: s => s.isData && s.contentUse === 'drawing',
+		isFiles: s => s.isData && s.isAttributeFiles(s.contentData),
+		isHeader: s => s.content === 'header',
+		isHidden: s => s.stateFinal === 'hidden' || s.parentIsHidden,
+		isIframe: s => s.isData && s.contentUse === 'iframe',
+		isInteger: s => s.isData && s.isAttributeInteger(s.contentData),
+		isKanban: s => s.content === 'kanban',
+		isList: s => s.content === 'list',
+		isLogin: s => s.isData && s.field.display === 'login',
+		isMap: s => s.content === 'map',
+		isMonospace: s => s.field.flags.includes('monospace'),
+		isPassword: s => s.isData && s.field.display === 'password',
+		isRating: s => s.isData && s.field.display === 'rating',
+		isReadonly: s => s.stateFinal === 'readonly',
+		isRelationship: s => s.isData && s.isAttributeRelationship(s.contentData),
+		isRelationship1N: s => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
+		isRegconfig: s => s.isData && s.isAttributeRegconfig(s.contentData),
+		isRequired: s => s.stateFinal === 'required',
+		isRichtext: s => s.isData && s.contentUse === 'richtext',
+		isSlider: s => s.isData && s.field.display === 'slider',
+		isString: s => s.isData && s.isAttributeString(s.contentData),
+		isTabs: s => s.content === 'tabs',
+		isTabsSingle: s => s.isTabs && s.field.tabs.length - 1 === s.tabIndexesHidden.length,
+		isTextarea: s => s.isData && s.contentUse === 'textarea',
+		isTime: s => s.isData && s.contentUse === 'time',
+		isTouched: s => s.fieldIdsTouched.includes(s.field.id),
+		isVariable: s => s.field.content === 'variable',
+		isWithCaption: s => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
+		isWithIntent: s => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isMap && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
+		isUuid: s => s.isData && s.isAttributeUuid(s.contentData),
 
 		// stores
-		relationIdMap:      s => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:     s => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:          s => s.$store.getters['schema/iconIdMap'],
-		presetIdMapRecordId:s => s.$store.getters['schema/presetIdMapRecordId'],
-		variableIdMap:      s => s.$store.getters['schema/variableIdMap'],
-		access:             s => s.$store.getters.access,
-		capApp:             s => s.$store.getters.captions.form,
-		capGen:             s => s.$store.getters.captions.generic,
-		dropdownElm:        s => s.$store.getters.dropdownElm,
-		isMobile:           s => s.$store.getters.isMobile,
-		isNoAuth:           s => s.$store.getters.isNoAuth,
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		presetIdMapRecordId: s => s.$store.getters['schema/presetIdMapRecordId'],
+		variableIdMap: s => s.$store.getters['schema/variableIdMap'],
+		access: s => s.$store.getters.access,
+		capApp: s => s.$store.getters.captions.form,
+		capGen: s => s.$store.getters.captions.generic,
+		dropdownElm: s => s.$store.getters.dropdownElm,
+		isMobile: s => s.$store.getters.isMobile,
+		isNoAuth: s => s.$store.getters.isNoAuth,
 		searchDictionaries: s => s.$store.getters.searchDictionaries,
-		settings:           s => s.$store.getters.settings
+		settings: s => s.$store.getters.settings
 	},
 	mounted() {
 		if (this.isTabs) {
@@ -1223,10 +1200,10 @@ export default {
 		}
 	},
 	beforeUnmount() {
-		if(this.dropdownShow)
+		if (this.dropdownShow)
 			this.dropdownSet(false);
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
 		getFieldHasQuery,
@@ -1253,33 +1230,33 @@ export default {
 
 		// presentation
 		getTabClasses(tabIndex) {
-			if(!this.isTabs) return {};
-			const active   = tabIndex === this.tabIndexShow;
-			const fields   = this.field.tabs[tabIndex].fields;
+			if (!this.isTabs) return {};
+			const active = tabIndex === this.tabIndexShow;
+			const fields = this.field.tabs[tabIndex].fields;
 			const oneField = fields.length === 1 ? fields[0] : false;
-			let   readonly = false;
-			let   drawing  = false;
-			let   files    = false;
-			let   richtext = false;
+			let readonly = false;
+			let drawing = false;
+			let files = false;
+			let richtext = false;
 
-			if(oneField && typeof this.$refs['tabField_'+oneField.id] !== 'undefined')
-				readonly = this.$refs['tabField_'+oneField.id]['0'].isReadonly;
+			if (oneField && typeof this.$refs[`tabField_${oneField.id}`] !== 'undefined')
+				readonly = this.$refs[`tabField_${oneField.id}`]['0'].isReadonly;
 
-			if(oneField && oneField.content === 'data') {
+			if (oneField && oneField.content === 'data') {
 				const atr = this.attributeIdMap[oneField.attributeId];
-				drawing  = atr.contentUse === 'drawing';
+				drawing = atr.contentUse === 'drawing';
 				richtext = atr.contentUse === 'richtext';
-				files    = atr.content    === 'files';
+				files = atr.content === 'files';
 			}
 
 			return {
-				active:   tabIndex === this.tabIndexShow && !this.tabsCollabsed,
-				collapsed:this.tabsCollabsed,
-				error:    this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				inputBg:  active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
-				grow:     this.isMobile,
+				active: tabIndex === this.tabIndexShow && !this.tabsCollabsed,
+				collapsed: this.tabsCollabsed,
+				error: this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
+				inputBg: active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
+				grow: this.isMobile,
 				readonly: active && oneField && readonly,
-				single:   this.isTabsSingle
+				single: this.isTabsSingle
 			};
 		},
 		resized() {
@@ -1312,90 +1289,91 @@ export default {
 			this.popUpFormInline = null;
 		},
 		dropdownSet(state) {
-			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
-			if(!state && this.dropdownShow) this.$store.commit('dropdownElm',null);
+			if (state && !this.dropdownShow) this.$store.commit('dropdownElm', this.$refs.content);
+			if (!state && this.dropdownShow) this.$store.commit('dropdownElm', null);
 		},
-		openForm(rows,getterArgs,newTab,openFormContext) {
+		openForm(rows, getterArgs, newTab, openFormContext) {
 			// set defaults
-			if(rows            === undefined) rows            = [];
-			if(getterArgs      === undefined) getterArgs      = [];
-			if(newTab          === undefined) newTab          = false;
-			if(openFormContext === undefined) openFormContext = null;
+			if (rows === undefined) rows = [];
+			if (getterArgs === undefined) getterArgs = [];
+			if (newTab === undefined) newTab = false;
+			if (openFormContext === undefined) openFormContext = null;
 
 			// form open context
-			let openForm = JSON.parse(JSON.stringify(
+			const openForm = JSON.parse(JSON.stringify(
 				openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm
 			));
 
-			let recordIds = [];
-			for(let row of rows) {
+			const recordIds = [];
+			for (const row of rows) {
 				const id = row.indexRecordIds[openForm.relationIndexOpen];
 
-				if(id !== undefined && id !== null)
+				if (id !== undefined && id !== null)
 					recordIds.push(id);
 			}
 
 			// apply relationship default attribute value via getter
 			// apply for existing records also, default values are needed for parent reference when clicking 'new' after opening existing record
-			if(openForm.attributeIdApply !== null
+			if (openForm.attributeIdApply !== null
 				&& this.joinsIndexMap[openForm.relationIndexApply] !== undefined
 				&& this.joinsIndexMap[openForm.relationIndexApply].recordId !== 0) {
 
-				const atrId    = openForm.attributeIdApply;
+				const atrId = openForm.attributeIdApply;
 				const recordId = this.joinsIndexMap[openForm.relationIndexApply].recordId;
 
-				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
+				getterArgs = this.setGetterArgs(getterArgs, 'attributes', `${atrId}_${recordId}`);
 			}
 
 			// pop-up inline form (only inside none-inputs fields) and never on mobile
 			// pop-up float forms are sent upwards to the parent form to deal with
-			if(openForm.popUpType === 'inline' && !this.isMobile && !newTab)
-				return this.popUpFormInline = this.getFormPopUpConfig(
-					recordIds,openForm,getterArgs,'attributes');
-
-			this.$emit('open-form',recordIds,openForm,getterArgs,newTab,this.field.id);
+			if (openForm.popUpType === 'inline' && !this.isMobile && !newTab) {
+				this.popUpFormInline = this.getFormPopUpConfig(recordIds, openForm, getterArgs, 'attributes');
+				return;
+			}
+			this.$emit('open-form', recordIds, openForm, getterArgs, newTab, this.field.id);
 		},
-		relationshipRecordsSelected(recordIds,isOriginal) {
+		relationshipRecordsSelected(recordIds, isOriginal) {
 			let v;
-			if     (isOriginal)             v = recordIds;
-			else if(recordIds === null)     v = null;
-			else if(!this.isRelationship1N) v = recordIds[0];
-			else if(this.value === null)    v = recordIds;
-			else                            v = this.value.concat(recordIds);
+			if (isOriginal) v = recordIds;
+			else if (recordIds === null) v = null;
+			else if (!this.isRelationship1N) v = recordIds[0];
+			else if (this.value === null) v = recordIds;
+			else v = this.value.concat(recordIds);
 
-			this.setValue(v,this.value,this.fieldAttributeId,isOriginal);
+			this.setValue(v, this.value, this.fieldAttributeId, isOriginal);
 		},
 		relationshipRecordRemoved(recordId) {
-			if(!this.isRelationship1N)
-				return this.value = null;
-
-			let valueNew = [];
-			for(let i = 0, j = this.value.length; i < j; i++) {
-				if(this.value[i] !== recordId)
+			if (!this.isRelationship1N) {
+				this.value = null;
+				return;
+			}
+			const valueNew = [];
+			for (let i = 0, j = this.value.length; i < j; i++) {
+				if (this.value[i] !== recordId)
 					valueNew.push(this.value[i]);
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
 		setColumnIdsByUser(ids) {
-			this.setLoginOption('columnIdsByUser',ids);
+			this.setLoginOption('columnIdsByUser', ids);
 		},
-		setCollectionIndexes(collectionId,indexes) {
-			let v = JSON.parse(JSON.stringify(this.collectionIdMapIndexes));
+		setCollectionIndexes(collectionId, indexes) {
+			const v = JSON.parse(JSON.stringify(this.collectionIdMapIndexes));
 			v[collectionId] = indexes;
-			this.setLoginOption('collectionIdMapIndexes',v);
+			this.setLoginOption('collectionIdMapIndexes', v);
 		},
-		setLoginOption(name,value) {
-			this.$store.commit('local/loginOption',{
-				favoriteId:this.favoriteId,
-				fieldId:this.field.id,
-				isMobile:this.isMobile,
-				isNoAuth:this.isNoAuth,
-				name:name,
-				value:value
+		setLoginOption(name, value) {
+			this.$store.commit('local/loginOption', {
+				favoriteId: this.favoriteId,
+				fieldId: this.field.id,
+				isMobile: this.isMobile,
+				isNoAuth: this.isNoAuth,
+				name: name,
+				value: value
 			});
 		},
 		setTab(tabIndex) {
-			if(this.settings.tabRemember)
+			if (this.settings.tabRemember)
 				this.setLoginOption('tabIndex', tabIndex);
 
 			if (this.tabIndexShow === tabIndex && this.field.collapseAllow && this.tabsCollabsed === false)
@@ -1404,25 +1382,29 @@ export default {
 			this.tabIndexShow = tabIndex;
 			this.setTagsCollapsed(false);
 		},
-		setTabCounter(tabIndex,fieldId,value) {
-			if(!this.field.tabs[tabIndex].contentCounter)
+		setTabCounter(tabIndex, fieldId, value) {
+			if (!this.field.tabs[tabIndex].contentCounter)
 				return;
 
-			if(this.tabIndexFieldIdMapCounter[String(tabIndex)] === undefined)
+			if (this.tabIndexFieldIdMapCounter[String(tabIndex)] === undefined)
 				this.tabIndexFieldIdMapCounter[String(tabIndex)] = {};
 
 			this.tabIndexFieldIdMapCounter[String(tabIndex)][fieldId] = value;
 		},
 		setTabToValid() {
 			// set tab to valid one, either last remembered or first valid
-			if(this.settings.tabRemember) {
-				const tabIndex = this.$root.getOrFallback(this.loginOptions,'tabIndex',0);
-				if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
-					return this.tabIndexShow = tabIndex;
+			if (this.settings.tabRemember) {
+				const tabIndex = this.$root.getOrFallback(this.loginOptions, 'tabIndex', 0);
+				if (this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex)) {
+					this.tabIndexShow = tabIndex;
+					return;
+				}
 			}
-			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
-				if(!this.tabIndexesHidden.includes(i))
-					return this.tabIndexShow = i;
+			for (let i = 0, j = this.field.tabs.length; i < j; i++) {
+				if (!this.tabIndexesHidden.includes(i)) {
+					this.tabIndexShow = i;
+					return;
+				}
 			}
 		},
 		setTagsCollapsed(state) {
@@ -1431,44 +1413,44 @@ export default {
 
 			this.tabsCollabsed = state;
 		},
-		setValue(val,valOld,indexAttributeId,isOriginal) {
+		setValue(val, valOld, indexAttributeId, isOriginal) {
 			// clean inputs
-			if(val !== null && typeof val === 'string') {
-				if(val === '') {
+			if (val !== null && typeof val === 'string') {
+				if (val === '') {
 					val = null;
 				}
-				else if(this.isInteger && /^\-?\d+$/.test(val)) {
-					val = parseInt(val);
+				else if (this.isInteger && /^\-?\d+$/.test(val)) {
+					val = parseInt(val, 10);
 				}
-				else if(this.isDecimal) {
-					val = val.replace(',','.');
+				else if (this.isDecimal) {
+					val = val.replace(',', '.');
 				}
 			}
 
-			if(!this.isVariable) {
+			if (!this.isVariable) {
 				// regular field, send changes up to the form
-				this.$emit('set-value',indexAttributeId,val,isOriginal,true,this.field.id);
+				this.$emit('set-value', indexAttributeId, val, isOriginal, true, this.field.id);
 			} else {
 				// variable field, send changes to the variable
-				if(!isOriginal && !this.isTouched && val !== valOld)
-					this.$emit('set-touched',this.field.id);
+				if (!isOriginal && !this.isTouched && val !== valOld)
+					this.$emit('set-touched', this.field.id);
 
-				this.variableValueSet(this.variable.id,val,this.variableIdMapLocal);
+				this.variableValueSet(this.variable.id, val, this.variableIdMapLocal);
 			}
 
 			// on field value change, execute registered function
-			if(!isOriginal && this.field.jsFunctionId !== null)
-				this.$emit('execute-function',this.field.jsFunctionId);
+			if (!isOriginal && this.field.jsFunctionId !== null)
+				this.$emit('execute-function', this.field.jsFunctionId);
 		},
 		triggerButton(middleClick) {
-			if(this.field.openDoc !== null)
-				this.$emit('open-doc',this.field.openDoc);
+			if (this.field.openDoc !== null)
+				this.$emit('open-doc', this.field.openDoc);
 
-			if(this.field.openForm !== null)
-				this.openForm([],[],middleClick,null);
+			if (this.field.openForm !== null)
+				this.openForm([], [], middleClick, null);
 
-			if(this.field.jsFunctionId !== null)
-				this.$emit('execute-function',this.field.jsFunctionId);
+			if (this.field.jsFunctionId !== null)
+				this.$emit('execute-function', this.field.jsFunctionId);
 		}
 	}
 };

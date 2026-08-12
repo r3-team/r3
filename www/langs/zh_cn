@@ -2581,6 +2581,8 @@
 		"functionsBackend": "后端函数",
 		"functionsFrontend": "前端函数",
 		"gap": "Gap",
+		"geoData": "Geo data",
+		"geometry": "Geometry",
 		"global": "Global",
 		"globalSearch": "Global search",
 		"groupBy": "按...分组",

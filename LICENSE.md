@@ -6,16 +6,18 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 ## Licenses for sub components
-This project also contains separate sub-components. These are located in the isolated directory 'www/externals'. Components outside section 1 are NOT covered by the MIT license.
+This project also contains separate sub-components. These are located in the isolated directory 'www/externals'.
 - Section 1: Components licensed under MIT
 - Section 2: Components licensed under Apache License Version 2.0
 - Section 3: Components licensed under GNU General Public License Version 3
+- Section 4: Components licensed under BSD 2-Clause License
 
 ## Section 1: Components licensed under MIT (s. LICENSE.MIT)
 - *Ace*, 'www/externals/ace/' (Copyright (c) 2010, Ajax.org B.V.)
 - *html2canvas*, 'www/externals/html2canvas.js' (Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>)
 - *JsBarcode*, 'www/externals/jsbarcode.js' (Copyright (c) 2016 Johan Lindell (johan@lindell.me))
 - *jsPDF*, 'www/externals/jspdf.js' (Copyright (c) 2010-2025 James Hall, https://github.com/MrRio/jsPDF & (c) 2015-2025 yWorks GmbH, https://www.yworks.com/)
+- *leaflet-geoman*, 'www/externals/leaflet-geoman/' (Copyright (c) 2017 Sumit Kumar)
 - *oauth4webapi*, 'www/externals/oauth4webapi.js' (Copyright (c) 2022 Filip Skokan)
 - *QR Code Generator*, 'www/externals/qrcode.js' (Copyright (c) 2009 Kazuhiko Arase)
 - *Sortable*, 'www/externals/sortable.js' (Copyright (c) 2019 All contributors to Sortable)
@@ -34,5 +36,8 @@ This project also contains separate sub-components. These are located in the iso
 - *DOMPurify*, 'www/externals/dompurify.js' (Copyright (c) 2025 Dr.-Ing. Mario Heiderich, Cure53)
 - *Html5-QRCode*, 'www/externals/html5-qrcode.js' (Copyright (c) Minhaz / mebjas)
 
-# Section 3: Components licensed under GNU General Public License Version 3 (s. LICENSE.GPL-3.0)
+## Section 3: Components licensed under GNU General Public License Version 3 (s. LICENSE.GPL-3.0)
 - *TinyMCE*, 'www/externals/tinymce/' (Copyright (c) 2024, Ephox Corporation DBA Tiny Technologies, Inc.)
+
+## Section 4: Components licensed under BSD 2-Clause License (s. LICENSE.BSD-2)
+- *Leaflet*, 'www/externals/leaflet/' (Copyright (c) 2010-2026, Volodymyr Agafonkin, Copyright (c) 2010-2011, CloudMade)
