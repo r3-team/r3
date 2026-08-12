@@ -707,13 +707,13 @@ export default {
 					case 'languageCode':    return s.settings.languageCode; break;
 					case 'login':           return s.loginId; break;
 					case 'preset':          return s.presetIdMapRecordId[side.presetId]; break;
-					case 'record':          return s.joinsIndexMap?.['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
 					case 'recordNew':       return s.isNew; break;
 					case 'role':            return s.access.roleIds.includes(side.roleId); break;
 					case 'true':            return true; break;
 					case 'variable':        return s.variableValueGet(side.variableId,s.variableIdMapLocal); break;
 
 					// use joins index map that does not use form data options overwrite, as it can be set via form state (circular dependency!)
+					case 'record':          return s.joinsIndexMapNoOpt?.['0'] !== undefined ? s.joinsIndexMapNoOpt['0'].recordId : false; break;
 					case 'recordMayCreate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordCreate).length > 0; break;
 					case 'recordMayDelete': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordDelete).length > 0; break;
 					case 'recordMayUpdate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordUpdate).length > 0; break;
