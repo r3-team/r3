@@ -40,4 +40,5 @@ This project also contains separate sub-components. These are located in the iso
 - *TinyMCE*, 'www/externals/tinymce/' (Copyright (c) 2024, Ephox Corporation DBA Tiny Technologies, Inc.)
 
 ## Section 4: Components licensed under BSD 2-Clause License (s. LICENSE.BSD-2)
-- *Leaflet*, 'www/externals/leaflet/' (Copyright (c) 2010-2026, Volodymyr Agafonkin, Copyright (c) 2010-2011, CloudMade)
+- *Leaflet*, 'www/externals/leaflet/' (Copyright (c) 2010-2026, Volodymyr Agafonkin, Copyright (c) 2010-2011, CloudMade, All rights reserved)
+- *OpenLayers*, 'www/externals/openlayers/' (Copyright 2005-present, OpenLayers Contributors, All rights reserved)

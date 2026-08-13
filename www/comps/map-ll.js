@@ -2,8 +2,8 @@ import { getUuidV4 } from './shared/crypto.js';
 import { jsLibrariesLoadNoCache } from './shared/jsLibrary.js';
 
 export default {
-	name: 'my-map',
-	template: `<div class="my-map" ref="map">
+	name: 'my-map-ll',
+	template: `<div class="my-map-ll" ref="map">
 	</div>`,
 	props: {
 		readonly: { type: Boolean, required: false, default: false }

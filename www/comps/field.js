@@ -15,7 +15,7 @@ import MyInputSelect from './inputSelect.js';
 import MyInputUuid from './inputUuid.js';
 import MyKanban from './kanban.js';
 import MyList from './list.js';
-import MyMap from './map.js';
+import MyMapOl from './map-ol.js';
 import { hasAccessToAttribute } from './shared/access.js';
 import {
 	getIndexAttributeId, isAttributeBoolean, isAttributeDecimal, isAttributeFiles,
@@ -39,7 +39,7 @@ export default {
 		MyInputBarcode, MyInputColor, MyInputDate, MyInputDecimal,
 		MyInputDrawing, MyInputFiles, MyInputIframe, MyInputLogin,
 		MyInputRating, MyInputRichtext, MyInputSelect, MyInputUuid,
-		MyList, MyMap
+		MyList, MyMapOl
 	},
 	template: `<div class="field"
 		v-if="isActive"
@@ -243,7 +243,7 @@ export default {
 				</my-list>
 
 				<!-- map -->
-				<my-map v-if="isMap" :readonly="isReadonly" />
+				<my-map-ol v-if="isMap" :readonly="isReadonly" />
 
 				<!-- tabs -->
 				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">
