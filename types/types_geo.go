@@ -7,7 +7,7 @@ type GeoSrid int64
 type GeoJson struct {
 	Type     string `json:"type"` // "feature"
 	Geometry struct {
-		Type        string `json:"type"`        // "Point", "Polygon", ...
+		Type        string `json:"type"`        // 'Point', 'Polygon', ...
 		Coordinates []any  `json:"coordinates"` // depending on type, can be float array, but also deep, multi-level float arrays
 	} `json:"geometry"`
 	Properties struct {
@@ -15,11 +15,12 @@ type GeoJson struct {
 	} `json:"properties"`
 }
 
-type GeoWms struct {
+type GeoLayer struct {
 	Id         uuid.UUID         `json:"id"`
+	Content    string            `json:"content"`    // 'TileWMS'
 	Name       string            `json:"name"`       // internal name
 	Parameters map[string]string `json:"parameters"` // getter parameters to attach to URL (such as 'transparent=true' or 'format=image/png')
-	Srid       int64             `json:"srid"`       // SRID (identifier, like 4326) for the chosen CRS (coordinate reference system, like 'WGS 84') for the map
+	Srid       int64             `json:"srid"`       // SRID (identifier, like 4326) for the chosen CRS (coordinate reference system, like 'WGS 84') for the layer
 	Url        string            `json:"url"`        // main URL for WMS provider
 }
 
