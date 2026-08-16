@@ -197,6 +197,9 @@ func CheckId_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity DbEntity, p
 func IsContentFiles(content string) bool {
 	return content == "files"
 }
+func IsContentGeometry(content string) bool {
+	return content == "geometry"
+}
 func IsContentNumeric(content string) bool {
 	return content == "numeric"
 }

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -222,14 +223,48 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 		}
 
 		// process attribute values for this relation tuple
+		isGeom := schema.IsContentGeometry(atr.Content)
+		geomSrid := types.GeoJsonSridDefault
+		if isGeom && attribute.Value != nil {
+			geoIf, err := json.Marshal(attribute.Value)
+			if err != nil {
+				return err
+			}
+
+			var geo types.GeoJson
+			decoder := json.NewDecoder(bytes.NewReader(geoIf))
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&geo); err != nil {
+				return err
+			}
+
+			geoGeometryJson, err := json.Marshal(geo.Geometry)
+			if err != nil {
+				return err
+			}
+			attribute.Value = string(geoGeometryJson)
+			geomSrid = geo.Properties.Srid
+		}
+
+		// regular attribute value
 		values = append(values, attribute.Value)
+		param := fmt.Sprintf(`$%d`, len(values))
+
+		if isGeom && attribute.Value != nil {
+			if geomSrid == types.GeoJsonSridDefault {
+				param = fmt.Sprintf(`ST_GeomFromGeoJSON($%d)`, len(values))
+			} else {
+				// convert to non-default SRID, GeoJSON always sends 4326
+				param = fmt.Sprintf(`ST_Transform(ST_GeomFromGeoJSON($%d),%d)`, len(values), geomSrid)
+			}
+		}
 
 		if isNewRecord {
 			names = append(names, fmt.Sprintf(`"%s"`, atr.Name))
-			params = append(params, fmt.Sprintf(`$%d`, len(values)))
+			params = append(params, param)
 		} else {
-			params = append(params, fmt.Sprintf(`"%s" = $%d`, atr.Name, len(values)))
-			paramsExcl = append(paramsExcl, fmt.Sprintf(`"%s" IS DISTINCT FROM $%d`, atr.Name, len(values)))
+			params = append(params, fmt.Sprintf(`"%s" = %s`, atr.Name, param))
+			paramsExcl = append(paramsExcl, fmt.Sprintf(`"%s" IS DISTINCT FROM %s`, atr.Name, param))
 		}
 	}
 

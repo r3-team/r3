@@ -3,28 +3,33 @@ import { jsLibraryLoadNoCache } from './shared/jsLibrary.js';
 
 export default {
 	name: 'my-map-ol',
-	template: `<div class="my-map" ref="map">
+	template: `<div class="my-map" ref="map" v-if="geoWms">
 	</div>`,
 	props: {
+		geoWmsId: { type: String, required: false, default: '32e54b0d-8d8c-4353-90b9-d5b709fb13ad' },
 		readonly: { type: Boolean, required: false, default: false }
 	},
 	data() {
 		return {
+			features: [],
 			geoJsonFormatter: null,
-			map: null
+			map: null,
+			vectorSource: null,
 		};
 	},
 	emits: [],
 	watch: {
 	},
 	computed: {
-		capGen: s => s.$store.getters.captions.generic
+		// simple
+		geoWms: s => s.$store.getters.geoWmsIdMap[s.geoWmsId] === undefined ? false : s.$store.getters.geoWmsIdMap[s.geoWmsId],
+
+		// stores
+		capGen: s => s.$store.getters.captions.generic,
+		geoWmsIdMap: s => s.$store.getters.geoWmsIdMap
 	},
 	mounted() {
-		jsLibraryLoadNoCache('externals/openlayers/ol.js').then(
-			this.init,
-			this.$root.genericError
-		);
+		jsLibraryLoadNoCache('externals/openlayers/ol.js').then(this.init, this.$root.genericError);
 	},
 	unmounted() {
 	},
@@ -33,20 +38,26 @@ export default {
 		getUuidV4,
 
 		// conversions
-		toGeoJson(feature) {
-			return this.geoJsonFormatter.writeFeature(feature, {
-				featureProjection: this.map.getView().getProjection(),
+		geoJsonFrom(featureCollectionJson) {
+			return this.geoJsonFormatter.readFeatures(featureCollectionJson, {
 				dataProjection: 'EPSG:4326',
+				featureProjection: this.map.getView().getProjection()
+			});
+		},
+		geoJsonTo(feature) {
+			return this.geoJsonFormatter.writeFeatureObject(feature, {
+				dataProjection: 'EPSG:4326',
+				featureProjection: this.map.getView().getProjection()
 			});
 		},
 
 		// system
 		init() {
 			this.geoJsonFormatter = new ol.format.GeoJSON();
-			const source = new ol.source.Vector();
-			const layerDraw = new ol.layer.Vector({ source });
-			const interactionDraw = new ol.interaction.Draw({ type: 'Polygon', source });
-			const interactionModify = new ol.interaction.Modify({ source });
+			this.vectorSource = new ol.source.Vector();
+			const layerDraw = new ol.layer.Vector({ source: this.vectorSource });
+			const interactionDraw = new ol.interaction.Draw({ type: 'Polygon', source: this.vectorSource });
+			const interactionModify = new ol.interaction.Modify({ source: this.vectorSource });
 
 			this.map = new ol.Map({
 				target: this.$refs.map,
@@ -61,8 +72,8 @@ export default {
 
 			// drawing
 			this.map.addLayer(layerDraw);
-			this.map.addInteraction(new ol.interaction.DragAndDrop({ formatConstructors: [ol.format.GeoJSON], source }));
-			this.map.addInteraction(new ol.interaction.Snap({ source }));
+			this.map.addInteraction(new ol.interaction.DragAndDrop({ formatConstructors: [ol.format.GeoJSON], source: this.vectorSource }));
+			this.map.addInteraction(new ol.interaction.Snap({ source: this.vectorSource }));
 			this.map.addInteraction(interactionDraw);
 			this.map.addInteraction(interactionModify);
 
@@ -72,14 +83,87 @@ export default {
 				Circle Geometry Exception: GeoJSON specification does not natively support true Circle geometries.
 				If you draw circles (type: 'Circle'), GeoJSON.writeFeature() will fail or drop the feature unless you convert the circle into a polygon using ol/geom/Polygon.fromCircle() before serializing.
 				*/
-				console.log(this.toGeoJson(e.feature));
+				this.set([e.feature]);
 			});
 			interactionModify.on('modifyend', e => {
 				// Modify can update multiple features simultaneously (for instance, if a user drags a shared vertex between two polygons).
-				e.features.getArray().forEach(feature => {
-					console.log(this.toGeoJson(feature));
-				});
+				this.set(e.features.getArray());
 			});
+
+			// get data
+			this.get();
+		},
+
+		// backend calls
+		get() {
+			ws.send('data', 'get', {
+				relationId: 'a1611a6d-7739-42ab-a253-0cb17cefd64d',
+				joins: [],
+				expressions: [{
+					attributeId: '2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe',
+					index: 0
+				}],
+				filters: [],
+				getIds: true
+			}, true).then(
+				res => {
+					const featureCollectionJson = { type: "FeatureCollection", features: [] };
+					for (const r of res.payload.rows) {
+						if (r.values[0] === null)
+							continue;
+
+						featureCollectionJson.features.push({
+							type: 'Feature',
+							geometry: r.values[0],
+							id: r.indexRecordIds['0'],
+						});
+					}
+					if (featureCollectionJson.features.length !== 0)
+						this.vectorSource.addFeatures(this.geoJsonFrom(featureCollectionJson));
+				},
+				this.$root.genericError
+			);
+		},
+		set(features) {
+			const requests = [];
+			for (const feature of features) {
+				// takeover SRID from WMS
+				feature.set('srid', this.geoWms.srid);
+
+				const geoJson = this.geoJsonTo(feature);
+				let recordId = 0;
+				if (feature.getId() !== undefined) {
+					// get existing record ID, remove from JSON as its not standard and not required
+					recordId = feature.getId();
+					delete geoJson.id;
+				}
+
+				// TEMP data SET mockup
+				requests.push(ws.prepare('data', 'set', {
+					'0': {
+						relationId: 'a1611a6d-7739-42ab-a253-0cb17cefd64d',
+						indexFrom: -1,
+						recordId,
+						attributes: [{ attributeId: '2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe', value: geoJson }]
+					}
+				}));
+			}
+
+			if (requests.length === 0)
+				return;
+
+			ws.sendMultiple(requests, true).then(
+				results => {
+					for (let i = 0, j = results.length; i < j; i++) {
+						const res = results[i].payload;
+
+						// apply new record ID to feature
+						if (features[i] !== undefined && features[i].getId() === undefined && res.indexRecordIds['0'] !== undefined)
+							features[i].setId(res.indexRecordIds['0']);
+					}
+				},
+				this.$root.genericError
+			);
 		}
 	}
 };

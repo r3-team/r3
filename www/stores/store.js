@@ -65,6 +65,7 @@ const MyStore = Vuex.createStore({
 			attributeId: null,
 			fileIds: []
 		},
+		geoWmsIdMap: {},                // WMS providers by ID
 		globalSearchInput: null,
 		hotkeyModExcl: [],              // disabled modifier keys for hotkeys
 		isAdmin: false,                 // user is admin
@@ -279,6 +280,7 @@ const MyStore = Vuex.createStore({
 		clusterNodeName: (s, p) => s.clusterNodeName = p,
 		dropdownElm: (s, p) => s.dropdownElm = p,
 		filesCopy: (s, p) => s.filesCopy = p,
+		geoWmsIdMap: (s, p) => s.geoWmsIdMap = p,
 		globalSearchInput: (s, p) => s.globalSearchInput = p,
 		hotkeyModExcl: (s, p) => s.hotkeyModExcl = p,
 		isAdmin: (s, p) => s.isAdmin = p,
@@ -462,6 +464,7 @@ const MyStore = Vuex.createStore({
 		dialogTextDisplay: s => s.dialogTextDisplay,
 		dropdownElm: s => s.dropdownElm,
 		filesCopy: s => s.filesCopy,
+		geoWmsIdMap: s => s.geoWmsIdMap,
 		globalSearchInput: s => s.globalSearchInput,
 		hotkeyModExcl: s => s.hotkeyModExcl,
 		isAdmin: s => s.isAdmin,

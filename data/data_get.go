@@ -529,7 +529,13 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 
 	if !expr.OutsideIn {
 		// attribute is from index relation
-		return data_sql.GetExpression(expr, data_sql.GetAttributeCode(relCode, atr.Name), alias), nil
+		exprContent := data_sql.GetAttributeCode(relCode, atr.Name)
+		if schema.IsContentGeometry(atr.Content) {
+			// geometry attribute expressions are returned as GeoJSON, which is standardized as SRID 4326
+			// DB might contain coordinates in varied SRIDs (to enable data processing/filtering)
+			exprContent = fmt.Sprintf("ST_AsGeoJSON(ST_Transform(%s,%d))::JSONB", exprContent, types.GeoJsonSridDefault)
+		}
+		return data_sql.GetExpression(expr, exprContent, alias), nil
 	}
 
 	// attribute comes via relationship from other relation (or self reference from same relation)
