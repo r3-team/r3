@@ -5,12 +5,15 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
+THE SOFTWARE IS PROVIDED "AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 ## Licenses for sub components
 This project also contains separate sub-components. These are located in the isolated directory 'www/externals'.
 - Section 1: Components licensed under MIT
 - Section 2: Components licensed under Apache License Version 2.0
 - Section 3: Components licensed under GNU General Public License Version 3
 - Section 4: Components licensed under BSD 2-Clause License
+- Section 5: Components licensed under ISC License
 
 ## Section 1: Components licensed under MIT (s. LICENSE.MIT)
 - *Ace*, 'www/externals/ace/' (Copyright (c) 2010, Ajax.org B.V.)
@@ -18,6 +21,7 @@ This project also contains separate sub-components. These are located in the iso
 - *JsBarcode*, 'www/externals/jsbarcode.js' (Copyright (c) 2016 Johan Lindell (johan@lindell.me))
 - *jsPDF*, 'www/externals/jspdf.js' (Copyright (c) 2010-2025 James Hall, https://github.com/MrRio/jsPDF & (c) 2015-2025 yWorks GmbH, https://www.yworks.com/)
 - *leaflet-geoman*, 'www/externals/leaflet-geoman/' (Copyright (c) 2017 Sumit Kumar)
+- *Proj4js*, 'www/externals/proj4.js' (Copyright (c) 2014, Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf)
 - *oauth4webapi*, 'www/externals/oauth4webapi.js' (Copyright (c) 2022 Filip Skokan)
 - *QR Code Generator*, 'www/externals/qrcode.js' (Copyright (c) 2009 Kazuhiko Arase)
 - *Sortable*, 'www/externals/sortable.js' (Copyright (c) 2019 All contributors to Sortable)
@@ -41,4 +45,7 @@ This project also contains separate sub-components. These are located in the iso
 
 ## Section 4: Components licensed under BSD 2-Clause License (s. LICENSE.BSD-2)
 - *Leaflet*, 'www/externals/leaflet/' (Copyright (c) 2010-2026, Volodymyr Agafonkin, Copyright (c) 2010-2011, CloudMade, All rights reserved)
-- *OpenLayers*, 'www/externals/openlayers/' (Copyright 2005-present, OpenLayers Contributors, All rights reserved)
+- *OpenLayers*, 'www/externals/openlayers/' (Copyright (c) 2005-present, OpenLayers Contributors, All rights reserved)
+
+## Section 5: Components licensed under ISC License (s. LICENSE.ISC)
+- *proj4-list*, 'www/externals/proj4-list.js' (Copyright (c) 2026 Josue Gutierrez)
