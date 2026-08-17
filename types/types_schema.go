@@ -322,13 +322,22 @@ type FieldList struct {
 	Captions     CaptionMap           `json:"captions"`
 }
 type FieldMap struct {
-	Id       uuid.UUID   `json:"id"`
-	TabId    pgtype.UUID `json:"tabId"`
-	IconId   pgtype.UUID `json:"iconId"`
-	Content  string      `json:"content"`
-	State    string      `json:"state"`
-	Flags    []string    `json:"flags"`
-	OnMobile bool        `json:"onMobile"`
+	Id         uuid.UUID           `json:"id"`
+	TabId      pgtype.UUID         `json:"tabId"`
+	IconId     pgtype.UUID         `json:"iconId"`
+	Content    string              `json:"content"`
+	State      string              `json:"state"`
+	Flags      []string            `json:"flags"`
+	OnMobile   bool                `json:"onMobile"`
+	LayersDraw []FieldMapLayerDraw `json:"layersDraw"`
+}
+type FieldMapLayerDraw struct {
+	AttributeIdColor pgtype.UUID `json:"attributeIdColor"`
+	AttributeIdData  pgtype.UUID `json:"attributeIdData"`
+	Id               uuid.UUID   `json:"id"`
+	OpenForm         OpenForm    `json:"openForm"`
+	Query            Query       `json:"query"`
+	Captions         CaptionMap  `json:"captions"`
 }
 type FieldTabs struct {
 	Id              uuid.UUID   `json:"id"`
@@ -342,7 +351,6 @@ type FieldTabs struct {
 	Tabs            []Tab       `json:"tabs"`
 	CollapseAllow   bool        `json:"collapseAllow"`   // tab field can be collapsed
 	CollapseDefault bool        `json:"collapseDefault"` // tab field is collapsed by default
-
 }
 type FieldVariable struct {
 	Id           uuid.UUID   `json:"id"`

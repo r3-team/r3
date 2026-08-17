@@ -3,36 +3,68 @@ import { jsLibrariesLoadNoCache } from './shared/jsLibrary.js';
 
 export default {
 	name: 'my-map-ol',
-	template: `<div class="my-map" ref="map">
+	template: `<div class="my-map">
+		<div class="my-map-toolbox">
+
+		</div>
+		<div class="my-map-content" ref="map"></div>
 	</div>`,
 	props: {
-		layerIds: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
+		draw: {
+			type: Array, required: false, default: [{
+				attributeIdColor: null,
+				attributeIdData: '2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe',
+				id: 'a7899077-169c-475e-9cfb-68430a1ea82b',
+				openForm: null,
+				query: {
+					relationId: 'a1611a6d-7739-42ab-a253-0cb17cefd64d'
+				},
+				captions: {
+					layerTitle: {
+						de_de: 'Layer 1',
+						en_us: 'Layer 1'
+					}
+				}
+			}]
+		},
+		//layerIdsGeo: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
+		layerIdsGeo: { type: Array, required: false, default: [] },
 		readonly: { type: Boolean, required: false, default: false },
 		viewSrid: { type: Number, required: false, default: 3857 }, // view projection and CRS vectors are stored in
 	},
 	data() {
 		return {
 			geoJsonFormatter: null,
+			drawIdMap: {}, // draw definitions by ID
 			map: null,
 			sridsDefault: [3857, 4326], // supported by openlayers by default
-			vectorSource: null,
 		};
 	},
 	computed: {
 		customSrids: s => {
 			const out = [];
 			if (!s.sridsDefault.includes(s.viewSrid)) out.push(s.viewSrid);
-			for (const layer of s.layers) {
+			for (const id of s.layerIdsGeo) {
+				const layer = s.layerIdMap[id];
 				if (!s.sridsDefault.includes(layer.srid)) out.push(layer.srid);
 			}
 			return out;
 		},
-		layers: s => {
+		layersGeo: s => {
 			const out = [];
-			for (const id of s.layerIds) {
-				if (s.layerIdMap[id] !== undefined)
-					out.push(s.layerIdMap[id]);
+			for (const id of s.layerIdsGeo) {
+				const layer = s.layerIdMap[id];
+				const params = {};
+				for (const k in layer.parameters) {
+					params[k.toUpperCase()] = layer.parameters[k];
+				}
+				const source = new ol.source.TileWMS({ url: layer.url, params, projection: `EPSG:${layer.srid}` })
+				out.push(new ol.layer.Tile({ source }));
 			}
+
+			// TEMP, OSM layer for reference
+			out.push(new ol.layer.Tile({ source: new ol.source.OSM() }));
+
 			return out;
 		},
 
@@ -87,31 +119,11 @@ export default {
 		// system
 		reset() {
 			this.geoJsonFormatter = new ol.format.GeoJSON();
-			this.vectorSource = new ol.source.Vector();
-			const interactionDraw = new ol.interaction.Draw({ type: 'Polygon', source: this.vectorSource });
-			const interactionModify = new ol.interaction.Modify({ source: this.vectorSource });
-
-			// process layers
-			const layers = [];
-			for (const layer of this.layers) {
-				const params = {};
-				for (const k in layer.parameters) {
-					params[k.toUpperCase()] = layer.parameters[k];
-				}
-				const source = new ol.source.TileWMS({ url: layer.url, params, projection: `EPSG:${layer.srid}` })
-				layers.push(new ol.layer.Tile({ source }));
-			}
-
-			// TEMP, OSM layer for reference
-			layers.push(new ol.layer.Tile({ source: new ol.source.OSM() }));
-
-			if (!this.readonly)
-				layers.push(new ol.layer.Vector({ source: this.vectorSource }));
 
 			// map definition
 			this.map = new ol.Map({
 				target: this.$refs.map,
-				layers,
+				layers: this.layersGeo,
 				view: new ol.View({
 					center: [0, 0],
 					projection: `EPSG:${this.viewSrid}`,
@@ -119,25 +131,32 @@ export default {
 				}),
 			});
 
-			// drawing
-			if (!this.readonly) {
-				this.map.addInteraction(new ol.interaction.DragAndDrop({ formatConstructors: [ol.format.GeoJSON], source: this.vectorSource }));
-				this.map.addInteraction(new ol.interaction.Snap({ source: this.vectorSource }));
+			// set draw layers
+			this.drawIdMap = {};
+			for (const d of this.draw) {
+				const source = new ol.source.Vector();
+				const layer = new ol.layer.Vector({ source: source });
+				const interactionDraw = new ol.interaction.Draw({ type: 'Polygon', source });
+				const interactionModify = new ol.interaction.Modify({ source });
+				interactionDraw.on('drawend', e => { this.set([e.feature], d.id); });
+				interactionModify.on('modifyend', e => { this.set(e.features.getArray(), d.id); });
+
+				this.map.addLayer(layer);
+				this.map.addInteraction(new ol.interaction.DragAndDrop({ formatConstructors: [ol.format.GeoJSON], source }));
+				this.map.addInteraction(new ol.interaction.Snap({ source }));
 				this.map.addInteraction(interactionDraw);
 				this.map.addInteraction(interactionModify);
 
-				// events
-				interactionDraw.on('drawend', e => {
-					/*
-					Circle Geometry Exception: GeoJSON specification does not natively support true Circle geometries.
-					If you draw circles (type: 'Circle'), GeoJSON.writeFeature() will fail or drop the feature unless you convert the circle into a polygon using ol/geom/Polygon.fromCircle() before serializing.
-					*/
-					this.set([e.feature]);
-				});
-				interactionModify.on('modifyend', e => {
-					// Modify can update multiple features simultaneously (for instance, if a user drags a shared vertex between two polygons).
-					this.set(e.features.getArray());
-				});
+				this.drawIdMap[d.id] = {
+					attributeIdData: d.attributeIdData,
+					data: source,
+					interaction: {
+						draw: interactionDraw,
+						modify: interactionModify
+					},
+					query: d.query,
+					layer,
+				};
 			}
 
 			// get data
@@ -146,35 +165,59 @@ export default {
 
 		// backend calls
 		get() {
-			ws.send('data', 'get', {
-				relationId: 'a1611a6d-7739-42ab-a253-0cb17cefd64d',
-				joins: [],
-				expressions: [{
-					attributeId: '2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe',
-					index: 0
-				}],
-				filters: [],
-				getIds: true
-			}, true).then(
-				res => {
-					const featureCollectionJson = { type: "FeatureCollection", features: [] };
-					for (const r of res.payload.rows) {
-						if (r.values[0] === null)
-							continue;
+			const requests = [];
+			for (const d of this.draw) {
+				if (d.query === null) {
+					console.warn('data query is undefined');
+					return;
+				}
+				requests.push(ws.prepare('data', 'get', {
+					relationId: d.query.relationId,
+					joins: [],
+					expressions: [{
+						attributeId: d.attributeIdData,
+						index: 0
+					}],
+					filters: [],
+					getIds: true
+				}));
+			}
 
-						featureCollectionJson.features.push({
-							type: 'Feature',
-							geometry: r.values[0],
-							id: r.indexRecordIds['0'],
-						});
+			if (requests.length === 0)
+				return;
+
+			ws.sendMultiple(requests, true).then(
+				responses => {
+					for (let i = 0, j = responses.length; i < j; i++) {
+						const res = responses[i];
+						const featureCollectionJson = { type: "FeatureCollection", features: [] };
+						for (const r of res.payload.rows) {
+							if (r.values[0] === null)
+								continue;
+
+							featureCollectionJson.features.push({
+								type: 'Feature',
+								geometry: r.values[0],
+								id: r.indexRecordIds['0'],
+							});
+						}
+						if (featureCollectionJson.features.length !== 0) {
+							const d = this.draw[i];
+							if (this.drawIdMap[d.id] !== undefined)
+								this.drawIdMap[d.id].data.addFeatures(this.geoJsonFrom(featureCollectionJson));
+						}
 					}
-					if (featureCollectionJson.features.length !== 0)
-						this.vectorSource.addFeatures(this.geoJsonFrom(featureCollectionJson));
 				},
 				this.$root.genericError
 			);
 		},
-		set(features) {
+		set(features, drawId) {
+			const draw = this.drawIdMap[drawId];
+			if (draw.query === null) {
+				console.warn('data query is undefined');
+				return;
+			}
+
 			const requests = [];
 			for (const feature of features) {
 				// takeover SRID from the view
@@ -188,13 +231,12 @@ export default {
 					delete geoJson.id;
 				}
 
-				// TEMP data SET mockup
 				requests.push(ws.prepare('data', 'set', {
 					'0': {
-						relationId: 'a1611a6d-7739-42ab-a253-0cb17cefd64d',
+						relationId: draw.query.relationId,
 						indexFrom: -1,
 						recordId,
-						attributes: [{ attributeId: '2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe', value: geoJson }]
+						attributes: [{ attributeId: draw.attributeIdData, value: geoJson }]
 					}
 				}));
 			}

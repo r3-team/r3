@@ -1,34 +1,34 @@
-let ws = {
-	blockingCount:0, // how many blocking transactions are active?
-	callbacks:{},    // outside callback functions, defined on open()
-	conn:null,       // websocket connection, null if not opened
-	debug:false,     // if true, prints transactions to console.log
-	transactions:{}, // active transactions: key = transaction number
-	
+const ws = {
+	blockingCount: 0, // how many blocking transactions are active?
+	callbacks: {},    // outside callback functions, defined on open()
+	conn: null,       // websocket connection, null if not opened
+	debug: false,     // if true, prints transactions to console.log
+	transactions: {}, // active transactions: key = transaction number
+
 	// open websocket connection to defined URL with optional event callbacks
-	open(url,callbackOpen,callbackBlocking,callbackUnrequested,callbackClose) {
-		this.callbacks.blocking    = callbackBlocking;    // blocking change
-		this.callbacks.close       = callbackClose;       // connection closed
-		this.callbacks.open        = callbackOpen;        // connection opened
+	open(url, callbackOpen, callbackBlocking, callbackUnrequested, callbackClose) {
+		this.callbacks.blocking = callbackBlocking;    // blocking change
+		this.callbacks.close = callbackClose;       // connection closed
+		this.callbacks.open = callbackOpen;        // connection opened
 		this.callbacks.unrequested = callbackUnrequested; // received unrequested message
-		
+
 		this.conn = new WebSocket(url);
-		this.conn.onclose   = ()  => { this.event('close'); };
-		this.conn.onerror   = ()  => { this.event('close'); };
+		this.conn.onclose = () => { this.event('close'); };
+		this.conn.onerror = () => { this.event('close'); };
 		this.conn.onmessage = (e) => { this.received(JSON.parse(e.data)); };
-		this.conn.onopen    = ()  => { this.event('open');  };
+		this.conn.onopen = () => { this.event('open'); };
 	},
-	
+
 	// clear running transactions
 	clear() {
 		this.blockingCount = 0;
-		this.transactions  = {};
-		this.event('blocking',false);
+		this.transactions = {};
+		this.event('blocking', false);
 	},
-	
+
 	// close websocket connection
 	close() {
-		if(this.conn !== null) {
+		if (this.conn !== null) {
 			this.conn.close(1000); // code 1000: Normal Closure
 			this.conn = null;
 		}
@@ -36,103 +36,90 @@ let ws = {
 		this.event('close'); // close callback
 		this.callbacks = {}; // reset event callbacks
 	},
-	
+
 	// trigger websocket event, executes registered callback
-	event(name,argument) {
-		if(this.callbacks[name] !== undefined)
+	event(name, argument) {
+		if (this.callbacks[name] !== undefined)
 			this.callbacks[name](argument);
 	},
-	
+
 	// prepares a request object for sending
-	prepare(ressource,action,payload) {
-		return {
-			ressource:ressource,
-			action:action,
-			payload:payload
-		};
+	prepare(ressource, action, payload) {
+		return { ressource, action, payload };
 	},
-	
+
 	// receives messages from websocket channel
 	received(msg) {
-		if(this.debug)
-			console.log(`WS [${msg.transactionNr}] RES ${msg.responses.length} ${msg.error !== undefined && msg.error !== '' ? 'ERROR:' + msg.error : ''}`, msg.responses);
-		
-		if(msg.transactionNr === 0)
-			return this.event('unrequested',msg.responses[0]);
-		
+		if (this.debug)
+			console.log(`WS [${msg.transactionNr}] RES ${msg.responses.length} ${msg.error !== undefined && msg.error !== '' ? `ERROR:${msg.error}` : ''}`, msg.responses);
+
+		if (msg.transactionNr === 0)
+			return this.event('unrequested', msg.responses[0]);
+
 		const trans = this.transactions[msg.transactionNr];
-		
+
 		// transaction does not exist, discard
-		if(trans === undefined)
+		if (trans === undefined)
 			return false;
-		
+
 		// unblock, if blocking transaction has been active
-		if(trans.blocking) {
+		if (trans.blocking) {
 			this.blockingCount--;
-			
-			if(this.blockingCount < 1) {
+
+			if (this.blockingCount < 1) {
 				this.blockingCount = 0;
-				this.event('blocking',false);
+				this.event('blocking', false);
 			}
 		}
-		
+
 		// delete transaction reference
 		delete this.transactions[msg.transactionNr];
-		
+
 		// resolve promise
-		if(msg.error !== '')
+		if (msg.error !== '')
 			return trans.reject(msg.error);
-		
+
 		trans.resolve(trans.singleResponse ? msg.responses[0] : msg.responses);
 	},
-	
+
 	// send requests message over websocket channel
 	// can optionally trigger block event
-	send(ressource,action,payload,blocking,noDbTx) {
-		return this.sendMultiple([this.prepare(ressource,action,payload)],blocking,noDbTx,true);
+	send(ressource, action, payload, blocking, noDbTx) {
+		return this.sendMultiple([this.prepare(ressource, action, payload)], blocking, noDbTx, true);
 	},
-	sendMultiple(requests,blocking,noDbTx,singleResponse) {
-		return new Promise((resolve,reject) => {
-			if(this.conn === null)
+	sendMultiple(requests, blocking, noDbTx, singleResponse) {
+		return new Promise((resolve, reject) => {
+			if (this.conn === null)
 				return reject('websocket connection not open');
-			
-			if(!Array.isArray(requests) || requests.length === 0)
+
+			if (!Array.isArray(requests) || requests.length === 0)
 				return reject('need non-empty requests array');
-			
+
 			// apply defaults
-			if(blocking       === undefined) blocking       = false;
-			if(noDbTx         === undefined) noDbTx         = false;
-			if(singleResponse === undefined) singleResponse = false;
-			
+			if (blocking === undefined) blocking = false;
+			if (noDbTx === undefined) noDbTx = false;
+			if (singleResponse === undefined) singleResponse = false;
+
 			// get unique transaction number
 			let transactionNr = 0;
-			do{ transactionNr = Math.floor(Math.random() * 399999) + 100000; }
-			while(this.transactions[transactionNr] !== undefined);
-			
+			do { transactionNr = Math.floor(Math.random() * 399999) + 100000; }
+			while (this.transactions[transactionNr] !== undefined);
+
 			// store transaction for response matching
-			this.transactions[transactionNr] = {
-				blocking:blocking,
-				reject:reject,
-				resolve:resolve,
-				singleResponse:singleResponse
-			};
-			
-			if(this.debug)
+			this.transactions[transactionNr] = { blocking, reject, resolve, singleResponse };
+
+			if (this.debug)
 				console.log(`WS [${transactionNr}] REQ ${requests.length} ${noDbTx ? 'NO_DB_TX' : ''}`, requests);
-			
-			this.conn.send(JSON.stringify({
-				transactionNr:transactionNr,
-				requests:requests,
-				noDbTx:noDbTx
-			}));
-			
+
+			this.conn.send(JSON.stringify({ transactionNr, requests, noDbTx }));
+
 			// block entire websocket connection, if transaction is blocking
-			if(blocking) {
+			if (blocking) {
 				this.blockingCount++;
-				
+
 				// only use callback on initial blocking transaction
-				if(this.blockingCount === 1)
-					this.event('blocking',true);
+				if (this.blockingCount === 1)
+					this.event('blocking', true);
 			}
 		});
 	}

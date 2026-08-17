@@ -1,4 +1,14 @@
 .my-map{
 	flex:1 1 auto;
 	border-radius:var(--border-input-radius);
+	display:flex;
+}
+.my-map-content{
+	flex:1 1 auto;
+	border-radius:var(--border-input-radius);
+}
+.my-map-toolbox{
+	display:absolute;
+	top:5px;
+	left:5px;
 }

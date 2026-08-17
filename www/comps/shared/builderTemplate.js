@@ -546,7 +546,19 @@ export function getTemplateFieldMap() {
 		content: 'map',
 		state: 'default',
 		flags: [],
-		onMobile: true
+		onMobile: true,
+		layersDraw: [],
+	};
+};
+export function getTemplateFieldMapLayerDraw() {
+	return {
+		attributeIdColor: null,
+		attributeIdData: null,
+		captions: {
+			layerTitle: {},
+		},
+		openForm: null,
+		query: getTemplateQuery(),
 	};
 };
 export function getTemplateFieldTabs() {
