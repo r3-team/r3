@@ -7,6 +7,7 @@
 .my-map-content {
 	flex: 1 1 auto;
 	border-radius: var(--border-input-radius);
+	overflow: hidden;
 }
 .my-map-toolbox {
 	position: absolute;
@@ -16,6 +17,36 @@
 	border: var(--border-input);
 	border-radius: var(--border-input-radius);
 	background-color: var(--color-input);
+	display: flex;
+	flex-flow: column wrap;
+	gap: 3px;
+}
+.my-map-tool {
+	--my-tool-size: 32px;
+	--my-tool-size-hover-delta: 2px;
+}
+.my-map-tool.clickable:hover {
+	--my-tool-size-hover-delta: 0px;
+}
+.my-map-tool.clickable.active {
+	outline: var(--outline-input-focus);
+	border-radius: var(--border-input-radius);
+}
+.my-map-tool.spacer {
+	border-top: 3px solid var(--color-border);
+}
+.my-map-tool img {
+	width: calc(var(--my-tool-size) - (var(--my-tool-size-hover-delta) * 2));
+	height: calc(var(--my-tool-size) - (var(--my-tool-size-hover-delta) * 2));
+	margin: var(--my-tool-size-hover-delta);
+	transition:
+		margin 0.2s,
+		width 0.2s,
+		height 0.2s;
+	filter: var(--image-filter-alt);
+}
+.my-map-tool.clickable img {
+	filter: var(--image-filter);
 }
 .my-map-layers {
 	position: absolute;

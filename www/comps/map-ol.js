@@ -9,20 +9,31 @@ export default Vue.defineAsyncComponent(async () => {
 	return {
 		name: "my-map-ol",
 		template: `<div class="my-map">
-			<div class="my-map-content" ref="map"></div>
+			<div class="my-map-content" ref="map" @click.right.prevent="switchTool(null)"></div>
 			<div class="my-map-toolbox">
+				<div class="my-map-tool"
+					v-for="t in tools"
+					@click="switchTool(t)"
+					:class="{ clickable:toolUseable[t], active:toolActive === t }"
+				>
+					<img :src="'images/'+toolImages[t]" />
+				</div>
+				<div class="my-map-tool spacer"></div>
+				<div class="my-map-tool"
+					@click="switchTool('delete')"
+					:class="{ clickable:toolUseable.delete, active:toolActive === 'delete' }"
+				>
+					<img :src="'images/'+toolImages.delete" />
+				</div>
 			</div>
 			<div class="my-map-layers">
-				<my-label image="edit.png" />
-
 				<!-- data layer selection -->
-				<div class="row nowrap gap centered"
-					v-if="layersData.length !== 0"
-					v-for="(l,i) in layersData"
-				>
+				<div class="row nowrap gap centered" v-if="layersData.length !== 0">
+					<my-label image="edit.png" />
 					<my-button
-						v-if="!l.readonly"
-						@trigger="layerDataIdEdit = l.id"
+						v-for="(l,i) in layersData"
+						@trigger="switchLayerData(l.id)"
+						:active="!l.readonly"
 						:caption="getCaption('fieldMapLayerDataTitle',moduleId,l.id,l.captions,capGen.layer + ' ' + (i+1))"
 						:image="l.readonly ? '' : (layerDataIdEdit === l.id ? 'radio1.png' : 'radio0.png')"
 						:naked="true"
@@ -78,7 +89,7 @@ export default Vue.defineAsyncComponent(async () => {
 									index: 0,
 									applyCreate: true,
 									applyDelete: true,
-									applyUpdate: true,
+									applyUpdate: false,
 								},
 							],
 						},
@@ -99,10 +110,22 @@ export default Vue.defineAsyncComponent(async () => {
 		},
 		data() {
 			return {
+				interaction: {}, // current interactions (draw, modify, ...)
+				interactionSelect: null, // select interaction, always active
 				layerDataIdEdit: null,
 				geoJsonFormatter: null,
 				map: null,
 				sridsDefault: [3857, 4326], // supported by openlayers by default
+				toolActive: null,
+				tools: ['point', 'line', 'polygon', 'circle', 'modify'],
+				toolImages: {
+					circle: 'all.png',
+					delete: 'delete.png',
+					line: 'dotLine.png',
+					point: 'dot.png',
+					polygon: 'dotPolygon.png',
+					modify: 'dotModify.png',
+				}
 			};
 		},
 		computed: {
@@ -124,20 +147,12 @@ export default Vue.defineAsyncComponent(async () => {
 					for (const k in l.parameters) {
 						params[k.toUpperCase()] = l.parameters[k];
 					}
-					const source = new ol.source.TileWMS({
-						url: l.url,
-						params,
-						projection: `EPSG:${l.srid}`,
-					});
+					const source = new ol.source.TileWMS({ url: l.url, params, projection: `EPSG:${l.srid}` });
 					out.push({ id, name: l.name, layer: new ol.layer.Tile({ source }) });
 				}
 
 				// TEMP, OSM layer for reference
-				out.push({
-					id: "TEMP",
-					name: "OSM",
-					layer: new ol.layer.Tile({ source: new ol.source.OSM() }),
-				});
+				out.push({ id: "TEMP", name: "OSM", layer: new ol.layer.Tile({ source: new ol.source.OSM() }) });
 
 				return out;
 			},
@@ -160,32 +175,17 @@ export default Vue.defineAsyncComponent(async () => {
 					const writableDelete = d.query.joins[0].applyDelete;
 					const writableUpdate = d.query.joins[0].applyUpdate;
 
-					const interaction = {};
-					if (writableCreate) {
-						interaction.draw = new ol.interaction.Draw({
-							type: "Polygon",
-							source,
-						});
-						interaction.draw.on("drawend", (e) => {
-							s.set([e.feature], d.id);
-						});
-					}
-					if (writableDelete) {
-						// TEMP, ToDo
-					}
-					if (writableUpdate) {
-						interaction.modify = new ol.interaction.Modify({ source });
-						interaction.modify.on("modifyend", (e) => {
-							s.set(e.features.getArray(), d.id);
-						});
-					}
 					out.push({
+						action: {
+							create: writableCreate,
+							delete: writableDelete,
+							update: writableUpdate
+						},
 						attributeIdColor: d.attributeIdColor,
 						attributeIdData: d.attributeIdData,
 						captions: d.captions,
 						data: source,
 						id: d.id,
-						interaction,
 						query: d.query,
 						layer: new ol.layer.Vector({ source: source }),
 						readonly: !writableCreate && !writableDelete && !writableUpdate,
@@ -200,6 +200,20 @@ export default Vue.defineAsyncComponent(async () => {
 				}
 				return out;
 			},
+
+			// simple
+			toolUseable: s => {
+				return {
+					circle: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
+					delete: s.layerDataEditActive !== false && s.layerDataEditActive.action.delete,
+					line: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
+					modify: s.layerDataEditActive !== false && s.layerDataEditActive.action.update,
+					point: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
+					polygon: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
+				};
+			},
+			layerDataEditActive: s => s.layerDataIdEdit !== null ? s.layersDataIdMap[s.layerDataIdEdit] : false,
+			layersDataWritable: s => s.layersData.filter(v => !v.readonly),
 
 			// stores
 			capGen: s => s.$store.getters.captions.generic,
@@ -216,9 +230,7 @@ export default Vue.defineAsyncComponent(async () => {
 				for (const srid of this.customSrids) {
 					const epsg = `EPSG:${srid}`;
 					if (list[epsg] === undefined) {
-						console.warn(
-							`cannot find definition for ${epsg}, layer will not work correctly`,
-						);
+						console.warn(`cannot find definition for ${epsg}, layer will not work correctly`,);
 						continue;
 					}
 					epsgDefs.push(list[epsg]);
@@ -234,16 +246,82 @@ export default Vue.defineAsyncComponent(async () => {
 			getCaption,
 			getUuidV4,
 
+			// actions
+			selectFeature(e) {
+				if (this.toolActive === 'delete' && this.layerDataEditActive !== false) {
+					this.del(e.selected);
+				}
+			},
+			switchLayerData(id) {
+				this.layerDataIdEdit = id;
+				this.switchTool(null);
+			},
+			switchTool(tool) {
+				// remove previous interactions
+				if (this.interaction.draw) this.map.removeInteraction(this.interaction.draw);
+				if (this.interaction.modify) this.map.removeInteraction(this.interaction.modify);
+
+				if (this.toolActive === tool || tool === null) {
+					this.toolActive = null;
+					return;
+				}
+				if (this.layerDataEditActive === false || !this.toolUseable[tool])
+					return;
+
+				const source = this.layerDataEditActive.data;
+
+				// register new interactions
+				switch (tool) {
+					case 'circle':
+						this.interaction.draw = new ol.interaction.Draw({ type: 'Circle', source });
+						this.interaction.draw.on('drawend', e => { this.set([e.feature]); });
+						this.map.addInteraction(this.interaction.draw);
+						break;
+					case 'delete':
+						// delete uses regular 'select' interaction, which is always active
+						break;
+					case 'line':
+						this.interaction.draw = new ol.interaction.Draw({ type: 'LineString', source });
+						this.interaction.draw.on('drawend', e => { this.set([e.feature]); });
+						this.map.addInteraction(this.interaction.draw);
+						break;
+					case 'modify':
+						this.interaction.modify = new ol.interaction.Modify({ source });
+						this.interaction.modify.on('modifyend', e => { this.set(e.features.getArray()); });
+						this.map.addInteraction(this.interaction.modify);
+						break;
+					case 'point':
+						this.interaction.draw = new ol.interaction.Draw({ type: 'Point', source });
+						this.interaction.draw.on('drawend', e => { this.set([e.feature]); });
+						this.map.addInteraction(this.interaction.draw);
+						break;
+					case 'polygon':
+						this.interaction.draw = new ol.interaction.Draw({ type: 'Polygon', source });
+						this.interaction.draw.on('drawend', e => { this.set([e.feature]); });
+						this.map.addInteraction(this.interaction.draw);
+						break;
+					default:
+						return console.error(`invalid tool '${tool}'`);
+				}
+				this.map.addInteraction(new ol.interaction.DragAndDrop({ formatConstructors: [ol.format.GeoJSON], source }));
+				this.map.addInteraction(new ol.interaction.Snap({ source }));
+				this.toolActive = tool;
+			},
+
 			// conversions
 			geoJsonFrom(featureCollectionJson) {
 				return this.geoJsonFormatter.readFeatures(featureCollectionJson, {
-					dataProjection: "EPSG:4326",
+					dataProjection: 'EPSG:4326',
 					featureProjection: this.map.getView().getProjection(),
 				});
 			},
 			geoJsonTo(feature) {
+				if (this.toolActive === 'circle') {
+					// GeoJSON does not natively support Circle geometries, conversion to polygon is required
+					feature.setGeometry(ol.geom.Polygon.fromCircle(feature.getGeometry()));
+				}
 				return this.geoJsonFormatter.writeFeatureObject(feature, {
-					dataProjection: "EPSG:4326",
+					dataProjection: 'EPSG:4326',
 					featureProjection: this.map.getView().getProjection(),
 				});
 			},
@@ -262,45 +340,62 @@ export default Vue.defineAsyncComponent(async () => {
 					}),
 				});
 
+				// register default interactions
+				// select action (for opening/deleting records)
+				this.interactionSelect = new ol.interaction.Select();
+				this.interactionSelect.on('select', this.selectFeature);
+				this.map.addInteraction(this.interactionSelect);
+
 				for (const b of this.layersBase) {
 					this.map.addLayer(b.layer);
 				}
 				for (const d of this.layersData) {
 					this.map.addLayer(d.layer);
-					if (!d.readonly) {
-						this.map.addInteraction(
-							new ol.interaction.DragAndDrop({
-								formatConstructors: [ol.format.GeoJSON],
-								source: d.data,
-							}),
-						);
-						this.map.addInteraction(
-							new ol.interaction.Snap({ source: d.data }),
-						);
-
-						if (d.interaction.draw !== undefined)
-							this.map.addInteraction(d.interaction.draw);
-						if (d.interaction.modify !== undefined)
-							this.map.addInteraction(d.interaction.modify);
-					}
 				}
+
+				if (this.layersDataWritable.length !== 0)
+					this.layerDataIdEdit = this.layersDataWritable[0].id;
+
 				this.get();
 			},
 
 			// backend calls
+			del(features) {
+				const requests = [];
+				for (const feature of features) {
+					const layer = this.layersData.find(v => v.data.getFeatures().includes(feature));
+					if (layer === undefined || feature.getId() === undefined) {
+						console.warn('cannot find feature to delete in data sources');
+						return;
+					}
+					requests.push(ws.prepare('data', 'del', {
+						relationId: layer.query.relationId,
+						recordId: feature.getId()
+					}));
+				}
+
+				ws.sendMultiple(requests, true).then(
+					responses => {
+						for (let i = 0, j = responses.length; i < j; i++) {
+							const layer = this.layersData.find(v => v.data.getFeatures().includes(features[i]));
+							if (layer !== undefined)
+								layer.data.removeFeature(features[i]);
+
+							this.interactionSelect.getFeatures().remove(features[i]);
+						}
+					},
+					this.$root.genericError
+				);
+			},
 			get() {
+				console.log('get');
 				const requests = [];
 				for (const d of this.layersData) {
 					requests.push(
-						ws.prepare("data", "get", {
+						ws.prepare('data', 'get', {
 							relationId: d.query.relationId,
 							joins: [],
-							expressions: [
-								{
-									attributeId: d.attributeIdData,
-									index: 0,
-								},
-							],
+							expressions: [{ attributeId: d.attributeIdData, index: 0, },],
 							filters: [],
 							getIds: true,
 						}),
@@ -312,32 +407,22 @@ export default Vue.defineAsyncComponent(async () => {
 				ws.sendMultiple(requests, true).then((responses) => {
 					for (let i = 0, j = responses.length; i < j; i++) {
 						const res = responses[i];
-						const featureCollectionJson = {
-							type: "FeatureCollection",
-							features: [],
-						};
+						const featureCollectionJson = { type: 'FeatureCollection', features: [] };
 						for (const r of res.payload.rows) {
-							if (r.values[0] === null) continue;
-
-							featureCollectionJson.features.push({
-								type: "Feature",
-								geometry: r.values[0],
-								id: r.indexRecordIds["0"],
-							});
+							if (r.values[0] !== null)
+								featureCollectionJson.features.push({ type: 'Feature', geometry: r.values[0], id: r.indexRecordIds['0'] });
 						}
 						if (featureCollectionJson.features.length !== 0)
-							this.layersData[i].data.addFeatures(
-								this.geoJsonFrom(featureCollectionJson),
-							);
+							this.layersData[i].data.addFeatures(this.geoJsonFrom(featureCollectionJson));
 					}
 				}, this.$root.genericError);
 			},
-			set(features, layerDataId) {
-				const layer = this.layersDataIdMap[layerDataId];
+			set(features) {
+				const layer = this.layersDataIdMap[this.layerDataIdEdit];
 				const requests = [];
 				for (const feature of features) {
 					// takeover SRID from the view
-					feature.set("srid", this.viewSrid);
+					feature.set('srid', this.viewSrid);
 
 					const geoJson = this.geoJsonTo(feature);
 					let recordId = 0;
@@ -348,7 +433,7 @@ export default Vue.defineAsyncComponent(async () => {
 					}
 
 					requests.push(
-						ws.prepare("data", "set", {
+						ws.prepare('data', 'set', {
 							0: {
 								relationId: layer.query.relationId,
 								indexFrom: -1,
@@ -361,19 +446,16 @@ export default Vue.defineAsyncComponent(async () => {
 					);
 				}
 
-				if (requests.length === 0) return;
+				if (requests.length === 0)
+					return;
 
 				ws.sendMultiple(requests, true).then((results) => {
 					for (let i = 0, j = results.length; i < j; i++) {
 						const res = results[i].payload;
 
 						// apply new record ID to feature
-						if (
-							features[i] !== undefined &&
-							features[i].getId() === undefined &&
-							res.indexRecordIds["0"] !== undefined
-						)
-							features[i].setId(res.indexRecordIds["0"]);
+						if (features[i] !== undefined && features[i].getId() === undefined && res.indexRecordIds['0'] !== undefined)
+							features[i].setId(res.indexRecordIds['0']);
 					}
 				}, this.$root.genericError);
 			},
