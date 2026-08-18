@@ -329,12 +329,12 @@ type FieldMap struct {
 	State      string              `json:"state"`
 	Flags      []string            `json:"flags"`
 	OnMobile   bool                `json:"onMobile"`
-	LayersDraw []FieldMapLayerDraw `json:"layersDraw"`
+	LayersData []FieldMapLayerData `json:"layersData"`
 }
-type FieldMapLayerDraw struct {
-	AttributeIdColor pgtype.UUID `json:"attributeIdColor"`
-	AttributeIdData  pgtype.UUID `json:"attributeIdData"`
+type FieldMapLayerData struct {
 	Id               uuid.UUID   `json:"id"`
+	AttributeIdData  uuid.UUID   `json:"attributeIdData"`
+	AttributeIdColor pgtype.UUID `json:"attributeIdColor"`
 	OpenForm         OpenForm    `json:"openForm"`
 	Query            Query       `json:"query"`
 	Captions         CaptionMap  `json:"captions"`

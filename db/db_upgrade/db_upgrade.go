@@ -383,7 +383,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_code_spool_attribute_id_attach_id_fkey  ON instance.code_spool USING btree (attribute_id_attach     ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_code_spool_attribute_id_attach_fkey     ON instance.code_spool USING btree (attribute_id_attach     ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_code_spool_pg_function_id_callback_fkey ON instance.code_spool USING btree (pg_function_id_callback ASC NULLS LAST);
 
 			CREATE OR REPLACE FUNCTION instance.barcode_generate(
@@ -676,6 +676,87 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- geometry
 			ALTER TYPE app.attribute_content ADD VALUE 'geometry';
 			ALTER TYPE app.field_content ADD VALUE 'map';
+
+			CREATE TABLE IF NOT EXISTS app.field_map_layer_data (
+				id uuid NOT NULL,
+				field_id uuid NOT NULL,
+				position smallint NOT NULL,
+				attribute_id_data uuid NOT NULL,
+				attribute_id_color uuid,
+				CONSTRAINT field_map_layer_data_pkey PRIMARY KEY (id),
+				CONSTRAINT field_map_layer_data_key UNIQUE (field_id, position),
+				CONSTRAINT field_map_layer_data_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT field_map_layer_data_attribute_id_color_fkey FOREIGN KEY (attribute_id_color)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT field_map_layer_data_attribute_id_data_fkey FOREIGN KEY (attribute_id_data)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_field_map_layer_data_attribute_id_color_fkey ON app.field_map_layer_data USING btree (attribute_id_color ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_field_map_layer_data_attribute_id_data_fkey  ON app.field_map_layer_data USING btree (attribute_id_data  ASC NULLS LAST);
+
+			ALTER TABLE app.query ADD COLUMN     field_map_layer_data_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_field_map_layer_data_id_fkey FOREIGN KEY (field_map_layer_data_id)
+				REFERENCES app.field_map_layer_data (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX IF NOT EXISTS fki_query_field_map_layer_data_id_fkey ON app.query USING btree (field_map_layer_data_id ASC NULLS LAST);
+
+			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
+			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
+				CASE WHEN api_id                  IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id           IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN column_id               IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_id                  IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_column_id           IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_field_id            IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_map_layer_data_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN form_id                 IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN query_filter_query_id   IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN search_bar_id           IS NULL THEN 0 ELSE 1
+				END
+			));
+
+			ALTER TABLE app.open_form ADD COLUMN field_map_layer_data_id uuid;
+			ALTER TABLE app.open_form ADD CONSTRAINT open_form_field_map_layer_data_id_fkey FOREIGN KEY (field_map_layer_data_id)
+				REFERENCES app.field_map_layer_data (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX IF NOT EXISTS fki_open_form_field_map_layer_data_id_fkey ON app.open_form USING btree (field_map_layer_data_id ASC NULLS LAST);
+
+			ALTER TYPE app.caption_content ADD VALUE 'fieldMapLayerDataTitle';
+
+			ALTER TABLE app.caption ADD COLUMN     field_map_layer_data_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_field_map_layer_data_id_fkey FOREIGN KEY (field_map_layer_data_id)
+				REFERENCES app.field_map_layer_data (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX fki_caption_field_map_layer_data_id_fkey ON app.caption USING BTREE (field_map_layer_data_id ASC NULLS LAST);
+
+			ALTER TABLE instance.caption ADD COLUMN field_map_layer_data uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_field_map_layer_data_fkey FOREIGN KEY (field_map_layer_data)
+				REFERENCES app.field_map_layer_data (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX fki_caption_field_map_layer_data_fkey ON instance.caption USING BTREE (field_map_layer_data ASC NULLS LAST);
 		`)
 		return "3.13", err
 	},
