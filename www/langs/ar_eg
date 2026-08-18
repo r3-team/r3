@@ -2630,6 +2630,7 @@
 		"keyPublic": "Public key",
 		"label": "ملصق",
 		"language": "لغة",
+		"layer": "Layer",
 		"lengthChars": "الطول (الحرف)",
 		"less": "أقل",
 		"licenseRequired": "يتطلب الترخيص",

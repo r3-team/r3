@@ -2630,6 +2630,7 @@
 		"keyPublic": "Public key",
 		"label": "Label",
 		"language": "Language",
+		"layer": "Layer",
 		"lengthChars": "Lungime (caractere)",
 		"less": "Less",
 		"licenseRequired": "Implică o licență",

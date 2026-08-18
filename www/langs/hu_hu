@@ -2630,6 +2630,7 @@
 		"keyPublic": "Public key",
 		"label": "Label",
 		"language": "Language",
+		"layer": "Layer",
 		"lengthChars": "Hossz (karakterben)",
 		"less": "Less",
 		"licenseRequired": "Licenc szükséges",

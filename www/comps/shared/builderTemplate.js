@@ -547,15 +547,15 @@ export function getTemplateFieldMap() {
 		state: 'default',
 		flags: [],
 		onMobile: true,
-		layersDraw: [],
+		layersData: [],
 	};
 };
-export function getTemplateFieldMapLayerDraw() {
+export function getTemplateFieldMapLayerData() {
 	return {
 		attributeIdColor: null,
 		attributeIdData: null,
 		captions: {
-			layerTitle: {},
+			fieldMapLayerDataTitle: {},
 		},
 		openForm: null,
 		query: getTemplateQuery(),

@@ -1,14 +1,32 @@
-.my-map{
-	flex:1 1 auto;
-	border-radius:var(--border-input-radius);
-	display:flex;
+.my-map {
+	flex: 1 1 auto;
+	border-radius: var(--border-input-radius);
+	display: flex;
+	position: relative;
 }
-.my-map-content{
-	flex:1 1 auto;
-	border-radius:var(--border-input-radius);
+.my-map-content {
+	flex: 1 1 auto;
+	border-radius: var(--border-input-radius);
 }
-.my-map-toolbox{
-	display:absolute;
-	top:5px;
-	left:5px;
+.my-map-toolbox {
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	padding: 3px;
+	border: var(--border-input);
+	border-radius: var(--border-input-radius);
+	background-color: var(--color-input);
+}
+.my-map-layers {
+	position: absolute;
+	bottom: 5px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	flex-flow: row wrap;
+	gap: calc(var(--spacing) / 2);
+	padding: 3px 8px;
+	border: var(--border-input);
+	border-radius: var(--border-input-radius);
+	background-color: var(--color-input);
 }

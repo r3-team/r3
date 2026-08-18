@@ -243,7 +243,7 @@ export default {
 				</my-list>
 
 				<!-- map -->
-				<my-map-ol v-if="isMap" :readonly="isReadonly" />
+				<my-map-ol v-if="isMap" :moduleId :readonly="isReadonly" />
 
 				<!-- tabs -->
 				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">

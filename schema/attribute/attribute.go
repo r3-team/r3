@@ -193,6 +193,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 		case "numeric": // keep numeric
 			contentUpdateOk = atr.Content == "numeric"
 
+		case "geometry": // keep geometry
+			contentUpdateOk = atr.Content == "geometry"
+
 		case "real", "double precision": // keep real/double or downgrade/upgrade
 			contentUpdateOk = slices.Contains([]string{"real", "double precision"}, atr.Content)
 

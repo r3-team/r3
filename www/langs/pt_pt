@@ -2630,6 +2630,7 @@
 		"keyPublic": "Chave pública",
 		"label": "Etiqueta",
 		"language": "Idioma",
+		"layer": "Layer",
 		"lengthChars": "Comprimento (caracteres)",
 		"less": "Menos",
 		"licenseRequired": "Requer licença",

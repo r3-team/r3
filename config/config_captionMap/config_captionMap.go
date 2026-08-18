@@ -29,6 +29,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 	caps.DocColumnIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.DocFieldIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FieldIdMap = make(map[uuid.UUID]types.CaptionMap)
+	caps.FieldMapLayerDataIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FormIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FormActionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.JsFunctionIdMap = make(map[uuid.UUID]types.CaptionMap)
@@ -53,6 +54,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		WHEN doc_column_id   IS NOT NULL THEN 'docColumn'
 		WHEN doc_field_id    IS NOT NULL THEN 'docField'
 		WHEN field_id        IS NOT NULL THEN 'field'
+		WHEN field_map_layer_data_id IS NOT NULL THEN 'fieldMapLayerData'
 		WHEN form_action_id  IS NOT NULL THEN 'formAction'
 		WHEN form_id         IS NOT NULL THEN 'form'
 		WHEN js_function_id  IS NOT NULL THEN 'jsFunction'
@@ -77,6 +79,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		doc_column_id,
 		doc_field_id,
 		field_id,
+		field_map_layer_data_id,
 		form_id,
 		form_action_id,
 		js_function_id,
@@ -146,6 +149,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			OR field_id IN (
 				SELECT id FROM app.field WHERE form_id IN (
 					SELECT id FROM app.form WHERE module_id = $1
+				)
+			)
+			OR field_map_layer_data_id IN (
+				SELECT id FROM app.field_map_layer_data WHERE field_id IN (
+					SELECT id FROM app.field WHERE form_id IN (
+						SELECT id FROM app.form WHERE module_id = $1
+					)
 				)
 			)
 			OR form_action_id IN (
@@ -227,6 +237,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			captionMap, exists = caps.DocFieldIdMap[entityId]
 		case "field":
 			captionMap, exists = caps.FieldIdMap[entityId]
+		case "fieldMapLayerData":
+			captionMap, exists = caps.FieldMapLayerDataIdMap[entityId]
 		case "form":
 			captionMap, exists = caps.FormIdMap[entityId]
 		case "formAction":
@@ -279,6 +291,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			caps.DocFieldIdMap[entityId] = captionMap
 		case "field":
 			caps.FieldIdMap[entityId] = captionMap
+		case "fieldMapLayerData":
+			caps.FieldMapLayerDataIdMap[entityId] = captionMap
 		case "form":
 			caps.FormIdMap[entityId] = captionMap
 		case "formAction":

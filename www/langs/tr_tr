@@ -2630,6 +2630,7 @@
 		"keyPublic": "Ortak anahtar",
 		"label": "Etiket",
 		"language": "Dil",
+		"layer": "Layer",
 		"lengthChars": "Uzunluk (karakter)",
 		"less": "Az",
 		"licenseRequired": "Lisans gerektirir",

@@ -2630,6 +2630,7 @@
 		"keyPublic": "Public key",
 		"label": "标签",
 		"language": "语言",
+		"layer": "Layer",
 		"lengthChars": "长度（字符）",
 		"less": "更少",
 		"licenseRequired": "需要许可证",

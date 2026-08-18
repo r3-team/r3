@@ -2630,6 +2630,7 @@
 		"keyPublic": "Public key",
 		"label": "Nosaukums",
 		"language": "Language",
+		"layer": "Layer",
 		"lengthChars": "Length (chars.)",
 		"less": "Mazāk",
 		"licenseRequired": "Nepieciešama licences",

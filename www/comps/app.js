@@ -735,7 +735,7 @@ export default {
 			ws.sendMultiple(requests, true).then(
 				async res => {
 					// TEMP Geo WMS provider mockup
-					this.$store.commit("geoLayerIdMap", {
+					this.$store.commit("geoLayerBaseIdMap", {
 						"32e54b0d-8d8c-4353-90b9-d5b709fb13ad": {
 							name: 'MOCK_WMS',
 							srid: 4326,
