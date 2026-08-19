@@ -39,6 +39,7 @@ const (
 	DbFieldHeader           DbEntity = "field_header"
 	DbFieldKanban           DbEntity = "field_kanban"
 	DbFieldList             DbEntity = "field_list"
+	DbFieldMapLayerData     DbEntity = "field_map_layer_data"
 	DbFieldVariable         DbEntity = "field_variable"
 	DbForm                  DbEntity = "form"
 	DbFormAction            DbEntity = "form_action"
@@ -93,6 +94,7 @@ var (
 		DbColumn,
 		DbCollectionConsumer,
 		DbField,
+		DbFieldMapLayerData,
 		DbFormAction,
 		DbSearchBar,
 	}
@@ -104,6 +106,7 @@ var (
 		DbDocColumn,
 		DbDocField,
 		DbField,
+		DbFieldMapLayerData,
 		DbForm,
 		DbQueryFilterQuery,
 		DbSearchBar,

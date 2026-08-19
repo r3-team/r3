@@ -552,11 +552,13 @@ export function getTemplateFieldMap() {
 };
 export function getTemplateFieldMapLayerData() {
 	return {
-		attributeIdColor: null,
 		attributeIdData: null,
+		attributeIdDataColor: null,
 		captions: {
 			fieldMapLayerDataTitle: {},
 		},
+		colorFill: 'A0E5ED',
+		indexDataColor: 0,
 		openForm: null,
 		query: getTemplateQuery(),
 	};

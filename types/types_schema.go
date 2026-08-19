@@ -129,7 +129,7 @@ type Field struct {
 	Id       uuid.UUID   `json:"id"`
 	TabId    pgtype.UUID `json:"tabId"`
 	IconId   pgtype.UUID `json:"iconId"`
-	Content  string      `json:"content"`  // content (button, header, data, list, calendar, chart, tabs)
+	Content  string      `json:"content"`  // content (button, header, data, list, calendar, chart, tabs, map)
 	State    string      `json:"state"`    // default state (hidden, default, readonly, optional, required)
 	Flags    []string    `json:"flags"`    // flags for field display/behaviour options (clipboard, monospace, alignEnd, ...)
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?

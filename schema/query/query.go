@@ -24,7 +24,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID
 	q.Choices = make([]types.QueryChoice, 0)
 
 	if !slices.Contains(schema.DbAssignedQuery, entity) {
-		return q, errors.New("unknown query parent entity")
+		return q, fmt.Errorf("unknown query parent entity '%s'", entity)
 	}
 
 	// sub query (via query filter) requires composite key

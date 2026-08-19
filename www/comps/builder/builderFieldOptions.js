@@ -1,293 +1,34 @@
-import MyBuilderCaption         from './builderCaption.js';
-import MyBuilderCollectionInput from './builderCollectionInput.js';
-import MyBuilderIconInput       from './builderIconInput.js';
-import MyBuilderOpenDoc         from './builderOpenDoc.js';
-import MyBuilderOpenForm        from './builderOpenForm.js';
-import MyCodeEditor             from '../codeEditor.js';
-import {openLink}               from '../shared/generic.js';
-import { getJoinsIndexMap }     from '../shared/query.js';
+
 import {
-	getTemplateCollectionConsumer,
-	getTemplateQuery,
-	getTemplateTab
-} from '../shared/builderTemplate.js';
-import {
-	getDependentModules,
-	getItemTitle,
-	getItemTitlePath,
-	getValueFromJson,
-	setValueInJson
-} from '../shared/builder.js';
-import {
-	getAttributeIcon,
-	getDetailsFromIndexAttributeId,
-	getIndexAttributeId,
-	isAttributeBoolean,
-	isAttributeFiles,
-	isAttributeInteger,
-	isAttributeRegconfig,
-	isAttributeRelationship,
-	isAttributeString
+	getAttributeIcon, getDetailsFromIndexAttributeId, getIndexAttributeId,
+	isAttributeBoolean, isAttributeFiles, isAttributeInteger, isAttributeRegconfig,
+	isAttributeRelationship, isAttributeString
 } from '../shared/attribute.js';
+import { getDependentModules, getItemTitle, getItemTitlePath } from '../shared/builder.js';
+import { getTemplateCollectionConsumer, getTemplateQuery, getTemplateTab } from '../shared/builderTemplate.js';
+import { openLink } from '../shared/generic.js';
+import { getJoinsIndexMap } from '../shared/query.js';
 
-const MyBuilderFieldOptionsChartSerie = {
-	name:'my-builder-field-options-chart-serie',
-	template:`<tr>
-		<td colspan="999">
-			<div class="line">
-				<select v-model="type">
-					<option value="bar"    >{{ capApp.serieTypeBar }}</option>
-					<option value="line"   >{{ capApp.serieTypeLine }}</option>
-					<option value="pie"    >{{ capApp.serieTypePie }}</option>
-					<option value="scatter">{{ capApp.serieTypeScatter }}</option>
-				</select>
-				<select v-model="columnX">
-					<option disabled :value="-1">{{ capApp.serieColumnX }}</option>
-					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(c.attributeId,c.index,false,null) }}
-					</option>
-				</select>
-				<select v-model="columnY">
-					<option disabled :value="-1">{{ capApp.serieColumnY }}</option>
-					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(c.attributeId,c.index,false,null) }}
-					</option>
-				</select>
-				<select v-model="tooltip">
-					<option disabled :value="-1">{{ capApp.serieColumnTooltip }}</option>
-					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(c.attributeId,c.index,false,null) }}
-					</option>
-				</select>
-				<my-button image="cancel.png"
-					@trigger="$emit('remove')"
-					:cancel="true"
-					:naked="true"
-				/>
-			</div>
-		</td>
-	</tr>`,
-	props:{
-		columns:   { type:Array,  required:true },
-		modelValue:{ type:Object, required:true }
-	},
-	emits:['remove','update:modelValue'],
-	computed:{
-		columnX:{
-			get()  { return this.get(['encode',this.type === 'pie' ? 'itemName' : 'x'],0); },
-			set(v) { this.set(['encode',this.type === 'pie' ? 'itemName' : 'x'],v); }
-		},
-		columnY:{
-			get()  { return this.get(['encode',this.type === 'pie' ? 'value' : 'y'],0); },
-			set(v) { this.set(['encode',this.type === 'pie' ? 'value' : 'y'],v); }
-		},
-		serie:{
-			get()  { return this.modelValue; },
-			set(v) { this.$emit('update:modelValue',v); }
-		},
-		tooltip:{
-			get()  { return this.get(['encode','tooltip'],0); },
-			set(v) { this.set(['encode','tooltip'],v); }
-		},
-		type:{
-			get()  { return this.get(['type'],'bar'); },
-			set(v) { this.set(['type'],v); }
-		},
-
-		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.form.chart
-	},
-	methods:{
-		// externals
-		getItemTitle,
-		getValueFromJson,
-		setValueInJson,
-
-		get(nameChain,valueFallback) {
-			return this.getValueFromJson(
-				JSON.stringify(this.serie),nameChain,valueFallback
-			);
-		},
-		set(nameChain,value) {
-			let s = JSON.parse(JSON.stringify(this.serie));
-
-			// apply encoding fix (differences between serie types)
-			if(nameChain.length === 1 && nameChain[0] === 'type') {
-
-				if(value === 'pie')
-					s.encode = { itemName:-1, tooltip:-1, value:-1 };
-				else
-					s.encode = { tooltip:-1, x:-1, y:-1 };
-			}
-
-			this.$emit('update:modelValue',JSON.parse(
-				this.setValueInJson(JSON.stringify(s),nameChain,value)
-			));
-		}
-	}
-};
-
-const MyBuilderFieldOptionsChart = {
-	name:'my-builder-field-options-chart',
-	components:{
-		MyBuilderFieldOptionsChartSerie,
-		MyCodeEditor
-	},
-	template:`
-		<tr>
-			<td>{{ capApp.axisType }} X</td>
-			<td>
-				<select v-model="axisTypeX">
-					<option value="category">{{ capApp.axisTypeCategory }}</option>
-					<option value="log">{{ capApp.axisTypeLog }}</option>
-					<option value="time">{{ capApp.axisTypeTime }}</option>
-					<option value="value">{{ capApp.axisTypeValue }}</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>{{ capApp.axisType }} Y</td>
-			<td>
-				<select v-model="axisTypeY">
-					<option value="category">{{ capApp.axisTypeCategory }}</option>
-					<option value="log">{{ capApp.axisTypeLog }}</option>
-					<option value="time">{{ capApp.axisTypeTime }}</option>
-					<option value="value">{{ capApp.axisTypeValue }}</option>
-				</select>
-			</td>
-		</tr>
-
-		<!-- chart series -->
-		<tr>
-			<td>{{ capApp.series }}</td>
-			<td class="minimum">
-				<my-button image="add.png"
-					@trigger="serieAdd"
-					:caption="capGen.button.add"
-				/>
-			</td>
-		</tr>
-		<my-builder-field-options-chart-serie class="chart-option-serie"
-			v-for="(s,i) in series"
-			:columns="columns"
-			:modelValue="s"
-			@remove="serieSet(i,null)"
-			@update:modelValue="serieSet(i,$event)"
-		/>
-
-		<!-- option input -->
-		<tr>
-			<td colspan="999">
-				<p v-html="capApp.help"></p>
-				<div class="chart-option" :class="{error:jsonBad}">
-					<my-code-editor mode="json"
-						@update:modelValue="optionInput($event)"
-						:modelValue="jsonInput"
-					/>
-				</div>
-			</td>
-		</tr>
-	`,
-	props:{
-		columns:   { type:Array,  required:true },
-		modelValue:{ type:String, required:true }
-	},
-	emits:['update:modelValue'],
-	data() {
-		return {
-			jsonBad:false,      // JSON validity check failed
-			jsonFirstLoad:true, // prettify JSON input on first load
-			jsonInput:''        // separated to execute JSON validity checking
-		};
-	},
-	computed:{
-		axisTypeX:{
-			get()  { return this.getValueFromJson(this.option,['xAxis','type'],'category'); },
-			set(v) { this.option = this.setValueInJson(this.option,['xAxis','type'],v); }
-		},
-		axisTypeY:{
-			get()  { return this.getValueFromJson(this.option,['yAxis','type'],'value'); },
-			set(v) { this.option = this.setValueInJson(this.option,['yAxis','type'],v); }
-		},
-		series:{
-			get()  { return this.getValueFromJson(this.option,['series'],[]); },
-			set(v) {}
-		},
-		option:{
-			get()  { return this.modelValue; },
-			set(v) { this.$emit('update:modelValue',v); }
-		},
-
-		// stores
-		capApp:(s) => s.$store.getters.captions.builder.form.chart,
-		capGen:(s) => s.$store.getters.captions.generic
-	},
-	watch:{
-		option:{
-			handler(v) {
-				if(this.jsonFirstLoad) {
-					this.jsonInput     = JSON.stringify(JSON.parse(v),null,2);
-					this.jsonFirstLoad = false;
-					return;
-				}
-				this.jsonInput = v;
-			},
-			immediate:true
-		}
-	},
-	methods:{
-		// externals
-		getValueFromJson,
-		setValueInJson,
-
-		// actions
-		optionInput(v) {
-			try{
-				let o = JSON.parse(v);
-
-				this.option  = v;
-				this.jsonBad = false;
-			}
-			catch(e) {
-				this.jsonBad = true;
-			}
-		},
-		serieAdd() {
-			let series = this.getValueFromJson(this.option,['series'],[]);
-			series.push({
-				type:'bar',
-				encode:{
-					tooltip:-1,
-					x:-1,
-					y:-1
-				}
-			});
-			this.option = this.setValueInJson(this.option,['series'],series);
-		},
-		serieSet(i,value) {
-			let series = this.getValueFromJson(this.option,['series'],[]);
-
-			if(value === null) series.splice(i,1);
-			else               series[i] = value;
-
-			this.option = this.setValueInJson(this.option,['series'],series);
-		}
-	}
-};
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderCollectionInput from './builderCollectionInput.js';
+import MyBuilderFieldOptionsChart from './builderFieldOptionsChart.js';
+import MyBuilderFieldOptionsMapLayerData from './builderFieldOptionsMapLayerData.js';
+import MyBuilderIconInput from './builderIconInput.js';
+import MyBuilderOpenDoc from './builderOpenDoc.js';
+import MyBuilderOpenForm from './builderOpenForm.js';
 
 export default {
-	name:'my-builder-field-options',
-	components:{
+	name: 'my-builder-field-options',
+	components: {
 		MyBuilderCaption,
 		MyBuilderCollectionInput,
 		MyBuilderFieldOptionsChart,
+		MyBuilderFieldOptionsMapLayerData,
 		MyBuilderIconInput,
 		MyBuilderOpenDoc,
 		MyBuilderOpenForm
 	},
-	template:`<div class="builder-field-options">
+	template: `<div class="builder-field-options">
 		<table class="generic-table-vertical default-inputs">
 			<tbody>
 				<tr v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)">
@@ -1290,6 +1031,13 @@ export default {
 					:modelValue="field.chartOption"
 				/>
 
+				<!-- map options -->
+				<my-builder-field-options-map-layer-data
+					v-if="isMap"
+					@update:modelValue=""
+					:modelValue=""
+				/>
+
 				<!-- variable -->
 				<tr v-if="isVariable">
 					<td>{{ capGen.variable }}</td>
@@ -1458,127 +1206,128 @@ export default {
 			</tbody>
 		</table>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		dataFields:     { type:Array,   required:true },
-		entityIdMapRef: { type:Object,  required:true },
-		field:          { type:Object,  required:true },
-		formId:         { type:String,  required:true },
-		joinsIndexMap:  { type:Object,  required:true },
-		moduleId:       { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		dataFields: { type: Array, required: true },
+		entityIdMapRef: { type: Object, required: true },
+		field: { type: Object, required: true },
+		formId: { type: String, required: true },
+		joinsIndexMap: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['createNew','set'],
-	computed:{
-		displayOptions:s => {
-			let out = ['default'];
-			if(s.isInteger && s.isDisplayDefault) out.push('rating','slider','login');
-			if(s.isString  && s.isDisplayDefault) out.push('password','email','phone','url');
-			if(s.isFiles)                         out.push('gallery');
+	emits: ['createNew', 'set'],
+	computed: {
+		displayOptions: s => {
+			const out = ['default'];
+			if (s.isInteger && s.isDisplayDefault) out.push('rating', 'slider', 'login');
+			if (s.isString && s.isDisplayDefault) out.push('password', 'email', 'phone', 'url');
+			if (s.isFiles) out.push('gallery');
 			return out;
 		},
-		joinsIndexMapField:s => {
+		joinsIndexMapField: s => {
 			return s.isQuery ? s.getJoinsIndexMap(s.query.joins) : {};
 		},
-		joinsKanbanAxis:s => {
-			if(!s.isKanban || s.field.relationIndexData === null)
+		joinsKanbanAxis: s => {
+			if (!s.isKanban || s.field.relationIndexData === null)
 				return [];
 
 			const joinData = s.joinsIndexMapField[s.field.relationIndexData];
 			return s.query.joins.filter(v => v.indexFrom === joinData.index || v.index === joinData.indexFrom);
 		},
-		presetIdMap:s => {
-			if(!s.isRelationship)
+		presetIdMap: s => {
+			if (!s.isRelationship)
 				return {};
 
-			let nm = s.field.attributeIdNm !== null;
-			let trgAtrId = nm ? s.field.attributeIdNm : s.field.attributeId;
+			const nm = s.field.attributeIdNm !== null;
+			const trgAtrId = nm ? s.field.attributeIdNm : s.field.attributeId;
 
-			let presets = !s.field.outsideIn || nm
+			const presets = !s.field.outsideIn || nm
 				? s.relationIdMap[s.attributeIdMap[trgAtrId].relationshipId].presets
 				: s.relationIdMap[s.attributeIdMap[trgAtrId].relationId].presets;
 
-			let map = {};
-			for(let i = 0, j = presets.length; i < j; i++) {
+			const map = {};
+			for (let i = 0, j = presets.length; i < j; i++) {
 				map[presets[i].id] = presets[i];
 			}
 			return map;
 		},
-		systemDefaults:s => {
-			if(s.isRichtext || s.isBarcode || s.isIFrame) return [];
-			if(s.isDate)     return ['{CURR_DATE}'];
-			if(s.isDatetime) return ['{CURR_DATETIME}'];
-			if(s.isTime)     return ['{CURR_TIME}'];
-			if(s.isString)   return ['{CURR_DATE_YYYY}','{CURR_DATE_MM}','{CURR_DATE_DD}'];
-			if(s.isBoolean)  return ['true','false'];
+		systemDefaults: s => {
+			if (s.isRichtext || s.isBarcode || s.isIFrame) return [];
+			if (s.isDate) return ['{CURR_DATE}'];
+			if (s.isDatetime) return ['{CURR_DATETIME}'];
+			if (s.isTime) return ['{CURR_TIME}'];
+			if (s.isString) return ['{CURR_DATE_YYYY}', '{CURR_DATE_MM}', '{CURR_DATE_DD}'];
+			if (s.isBoolean) return ['true', 'false'];
 			return [];
 		},
 
 		// inputs
-		alignment:{
-			get()  {
-				if(this.field.flags.includes('alignEnd')) return 'end';
+		alignment: {
+			get() {
+				if (this.field.flags.includes('alignEnd')) return 'end';
 				return 'def';
 			},
 			set(v) {
-				let flags = JSON.parse(JSON.stringify(this.field.flags));
-				if(v !== 'end' &&  flags.includes('alignEnd')) flags.splice(flags.indexOf('alignEnd'),1);
-				if(v === 'end' && !flags.includes('alignEnd')) flags.push('alignEnd');
+				const flags = JSON.parse(JSON.stringify(this.field.flags));
+				if (v !== 'end' && flags.includes('alignEnd')) flags.splice(flags.indexOf('alignEnd'), 1);
+				if (v === 'end' && !flags.includes('alignEnd')) flags.push('alignEnd');
 				this.field.flags = flags;
 			}
 		},
 
 		// simple states
-		content:          s => s.isVariable ? 'data' : s.field.content,
-		contentData:      s => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
-		contentUse:       s => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
-		hasCaption:       s => s.isData || s.isHeader,
-		hasOpenDoc:       s => !s.isVariable && s.isButton,
-		hasOpenForm:      s => !s.isVariable && (s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.query.relationId !== null)),
-		isBarcode:        s => s.isData && s.contentUse !== undefined && s.contentUse.includes('barcode'),
-		isBoolean:        s => s.isData && s.isAttributeBoolean(s.contentData),
-		isButton:         s => s.content === 'button',
-		isCalendar:       s => s.content === 'calendar',
-		isChart:          s => s.content === 'chart',
-		isContainer:      s => s.content === 'container',
-		isData:           s => s.content === 'data',
-		isDate:           s => s.isData && s.contentUse === 'date',
-		isDatetime:       s => s.isData && s.contentUse === 'datetime',
+		content: s => s.isVariable ? 'data' : s.field.content,
+		contentData: s => s.isData && !s.isVariable ? s.attribute.content : s.variable.content,
+		contentUse: s => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
+		hasCaption: s => s.isData || s.isHeader,
+		hasOpenDoc: s => !s.isVariable && s.isButton,
+		hasOpenForm: s => !s.isVariable && (s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.query.relationId !== null)),
+		isBarcode: s => s.isData && s.contentUse !== undefined && s.contentUse.includes('barcode'),
+		isBoolean: s => s.isData && s.isAttributeBoolean(s.contentData),
+		isButton: s => s.content === 'button',
+		isCalendar: s => s.content === 'calendar',
+		isChart: s => s.content === 'chart',
+		isContainer: s => s.content === 'container',
+		isData: s => s.content === 'data',
+		isDate: s => s.isData && s.contentUse === 'date',
+		isDatetime: s => s.isData && s.contentUse === 'datetime',
 		isDisplayDefault: s => s.isData && s.contentUse === 'default',
-		isDrawing:        s => s.isData && s.contentUse === 'drawing',
-		isFiles:          s => s.isData && s.isAttributeFiles(s.contentData),
-		isHeader:         s => s.content === 'header',
-		isIFrame:         s => s.isData && s.contentUse === 'iframe',
-		isInteger:        s => s.isData && s.isAttributeInteger(s.contentData),
-		isList:           s => s.content === 'list',
-		isKanban:         s => s.content === 'kanban',
-		isQuery:          s => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
-		isTabs:           s => s.content === 'tabs',
-		isRegconfig:      s => s.isData && s.isAttributeRegconfig(s.contentData),
-		isRelationship:   s => s.isData && s.isAttributeRelationship(s.contentData),
+		isDrawing: s => s.isData && s.contentUse === 'drawing',
+		isFiles: s => s.isData && s.isAttributeFiles(s.contentData),
+		isHeader: s => s.content === 'header',
+		isIFrame: s => s.isData && s.contentUse === 'iframe',
+		isInteger: s => s.isData && s.isAttributeInteger(s.contentData),
+		isKanban: s => s.content === 'kanban',
+		isList: s => s.content === 'list',
+		isMap: s => s.content === 'map',
+		isQuery: s => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
+		isTabs: s => s.content === 'tabs',
+		isRegconfig: s => s.isData && s.isAttributeRegconfig(s.contentData),
+		isRelationship: s => s.isData && s.isAttributeRelationship(s.contentData),
 		isRelationship1N: s => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
-		isRichtext:       s => s.isData && s.contentUse === 'richtext',
-		isString:         s => s.isData && s.isAttributeString(s.contentData),
-		isTime:           s => s.isData && s.contentUse === 'time',
-		isVariable:       s => s.field.content === 'variable',
-		query:            s => s.isQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
-		systemDefaultUsed:s => s.systemDefaults.includes(s.field.def),
+		isRichtext: s => s.isData && s.contentUse === 'richtext',
+		isString: s => s.isData && s.isAttributeString(s.contentData),
+		isTime: s => s.isData && s.contentUse === 'time',
+		isVariable: s => s.field.content === 'variable',
+		query: s => s.isQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
+		systemDefaultUsed: s => s.systemDefaults.includes(s.field.def),
 
 		// stores
-		attribute:     s => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined ? false : s.attributeIdMap[s.field.attributeId],
-		module:        s => s.moduleIdMap[s.moduleId],
-		variable:      s => !s.isVariable || s.variableIdMap[s.field.variableId] === undefined ? false : s.variableIdMap[s.field.variableId],
-		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
+		attribute: s => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined ? false : s.attributeIdMap[s.field.attributeId],
+		module: s => s.moduleIdMap[s.moduleId],
+		variable: s => !s.isVariable || s.variableIdMap[s.field.variableId] === undefined ? false : s.variableIdMap[s.field.variableId],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		formIdMap:     s => s.$store.getters['schema/formIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
 		variableIdMap: s => s.$store.getters['schema/variableIdMap'],
-		capApp:        s => s.$store.getters.captions.builder.form,
-		capCal:        s => s.$store.getters.captions.calendar,
-		capGen:        s => s.$store.getters.captions.generic,
-		dateSteps:     s => s.$store.getters.constants.ganttSteps
+		capApp: s => s.$store.getters.captions.builder.form,
+		capCal: s => s.$store.getters.captions.calendar,
+		capGen: s => s.$store.getters.captions.generic,
+		dateSteps: s => s.$store.getters.constants.ganttSteps
 	},
-	methods:{
+	methods: {
 		// externals
 		getAttributeIcon,
 		getDependentModules,
@@ -1602,89 +1351,89 @@ export default {
 		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v.push(this.getTemplateCollectionConsumer());
-			this.set('collections',v);
+			this.set('collections', v);
 		},
 		collectionRemove(i) {
-			let v = JSON.parse(JSON.stringify(this.field.collections));
-			v.splice(i,1);
-			this.set('collections',v);
+			const v = JSON.parse(JSON.stringify(this.field.collections));
+			v.splice(i, 1);
+			this.set('collections', v);
 		},
-		openAttribute(relationId,middle) {
-			if(!middle) this.$router.push('/builder/relation/'+relationId);
-			else        this.openLink('#/builder/relation/'+relationId,true);
+		openAttribute(relationId, middle) {
+			if (!middle) this.$router.push(`/builder/relation/${relationId}`);
+			else this.openLink(`#/builder/relation/${relationId}`, true);
 		},
 		presetIdAdd(value) {
-			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
+			const ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
 
-			if(ids.includes(value))
+			if (ids.includes(value))
 				return;
 
 			ids.push(value);
-			this.set('defPresetIds',ids);
+			this.set('defPresetIds', ids);
 		},
 		presetIdRemove(value) {
-			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
+			const ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
 
-			let pos = ids.indexOf(value);
-			if(pos === -1)
+			const pos = ids.indexOf(value);
+			if (pos === -1)
 				return;
 
-			ids.splice(pos,1);
-			this.set('defPresetIds',ids);
+			ids.splice(pos, 1);
+			this.set('defPresetIds', ids);
 		},
-		set(name,val) {
-			if(name === 'csvImport' && !val) {
+		set(name, val) {
+			if (name === 'csvImport' && !val) {
 				// no CSV import, clear query lookups
-				let q = JSON.parse(JSON.stringify(this.query));
+				const q = JSON.parse(JSON.stringify(this.query));
 				q.lookups = [];
-				this.$emit('set','query',q);
+				this.$emit('set', 'query', q);
 			}
-			if(name === 'relationIndexData') {
-				this.$emit('set','attributeIdSort',null);
-				this.$emit('set','relationIndexAxisX',null);
-				this.$emit('set','relationIndexAxisY',null);
+			if (name === 'relationIndexData') {
+				this.$emit('set', 'attributeIdSort', null);
+				this.$emit('set', 'relationIndexAxisX', null);
+				this.$emit('set', 'relationIndexAxisY', null);
 			}
-			this.$emit('set',name,val);
+			this.$emit('set', name, val);
 		},
-		setCollection(i,value) {
-			let v = JSON.parse(JSON.stringify(this.field.collections));
+		setCollection(i, value) {
+			const v = JSON.parse(JSON.stringify(this.field.collections));
 			v[i] = value;
-			this.set('collections',v);
+			this.set('collections', v);
 		},
-		setFlags(name,state) {
+		setFlags(name, state) {
 			const pos = this.field.flags.indexOf(name);
-			if(state  && pos === -1) this.field.flags.push(name);
-			if(!state && pos !== -1) this.field.flags.splice(pos,1);
+			if (state && pos === -1) this.field.flags.push(name);
+			if (!state && pos !== -1) this.field.flags.splice(pos, 1);
 		},
-		setIndexAttribute(name,indexAttributeId) {
-			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);
-			switch(name) {
+		setIndexAttribute(name, indexAttributeId) {
+			const values = this.getDetailsFromIndexAttributeId(indexAttributeId);
+			switch (name) {
 				case 'dateTo':
-					this.set('attributeIdAlt',values.attributeId);
-				break;
+					this.set('attributeIdAlt', values.attributeId);
+					break;
 				case 'date0':
-					this.set('attributeIdDate0',values.attributeId);
-					this.set('indexDate0',values.index);
-				break;
+					this.set('attributeIdDate0', values.attributeId);
+					this.set('indexDate0', values.index);
+					break;
 				case 'date1':
-					this.set('attributeIdDate1',values.attributeId);
-					this.set('indexDate1',values.index);
-				break;
+					this.set('attributeIdDate1', values.attributeId);
+					this.set('indexDate1', values.index);
+					break;
 				case 'color':
-					this.set('attributeIdColor',values.attributeId);
-					this.set('indexColor',values.index);
-				break;
+					this.set('attributeIdColor', values.attributeId);
+					this.set('indexColor', values.index);
+					break;
 			}
 		},
-		setInt(name,val,allowNull) {
-			if(val !== '')
-				return this.set(name,parseInt(val));
+		setInt(name, val, allowNull) {
+			if (val !== '')
+				return this.set(name, parseInt(val, 10));
 
-			if(allowNull) return this.set(name,null);
-			else          return this.set(name,0);
+			if (allowNull) return this.set(name, null);
+			else return this.set(name, 0);
 		},
-		setNull(name,val) {
-			this.set(name,val === '' ? null : val);
+		setNull(name, val) {
+			this.set(name, val === '' ? null : val);
 		},
 		setGanttStepShow(val) {
 			let v = JSON.parse(JSON.stringify(this.field.ganttStepsShown));
@@ -1695,19 +1444,19 @@ export default {
 			if (pos === -1) v.push(val);
 			else v.splice(pos, 1);
 
-			this.set('ganttStepsShown',v.length === 0 ? null : v);
+			this.set('ganttStepsShown', v.length === 0 ? null : v);
 		},
 		showHelp(help) {
-			this.$store.commit('dialog',{
-				captionBody:help,
-				captionTop:this.capGen.contextHelp,
-				image:'question.png'
+			this.$store.commit('dialog', {
+				captionBody: help,
+				captionTop: this.capGen.contextHelp,
+				image: 'question.png'
 			});
 		},
 		tabAdd() {
-			let v = JSON.parse(JSON.stringify(this.field.tabs));
+			const v = JSON.parse(JSON.stringify(this.field.tabs));
 			v.push(this.getTemplateTab());
-			this.set('tabs',v);
+			this.set('tabs', v);
 		}
 	}
 };

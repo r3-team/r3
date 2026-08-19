@@ -111,6 +111,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	posHeaderLookup := make([]int, 0)
 	posKanbanLookup := make([]int, 0)
 	posListLookup := make([]int, 0)
+	posMapLookup := make([]int, 0)
 	posParentLookup := make([]int, 0)
 	posTabsLookup := make([]int, 0)
 	posVariableLookup := make([]int, 0)
@@ -372,6 +373,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 				Flags:    flags,
 				OnMobile: onMobile,
 			})
+			posMapLookup = append(posMapLookup, pos)
 
 		case "tabs":
 			fields = append(fields, types.FieldTabs{
@@ -570,6 +572,16 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 			return nil, err
 		}
 		field.Collections, err = consumer.Get_tx(ctx, tx, schema.DbField, field.Id, "fieldFilterSelector")
+		if err != nil {
+			return nil, err
+		}
+		fields[pos] = field
+	}
+
+	// lookup map fields: data layers
+	for _, pos := range posMapLookup {
+		var field = fields[pos].(types.FieldMap)
+		field.LayersData, err = getLayerData_tx(ctx, tx, field.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -1125,7 +1137,7 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.FieldList) error {
 	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
 }
 func setMap_tx(ctx context.Context, tx pgx.Tx, f types.FieldMap) error {
-	return nil
+	return setLayerData_tx(ctx, tx, f.Id, f.LayersData)
 }
 func setTabs_tx(ctx context.Context, tx pgx.Tx, f types.FieldTabs) error {
 	_, err := tx.Exec(ctx, `

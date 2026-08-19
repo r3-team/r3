@@ -17,7 +17,7 @@ import (
 func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, formContext pgtype.Text) (f types.OpenForm, err error) {
 
 	if !slices.Contains(schema.DbAssignedOpenForm, entity) {
-		return f, errors.New("invalid open form entity")
+		return f, fmt.Errorf("invalid open form entity '%s'", entity)
 	}
 
 	sqlArgs := make([]any, 0)

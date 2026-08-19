@@ -684,6 +684,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				attribute_id_data uuid NOT NULL,
 				attribute_id_data_color uuid,
 				index_data_color smallint NOT NULL,
+				color_fill character(6) NOT NULL,
 				CONSTRAINT field_map_layer_data_pkey PRIMARY KEY (id),
 				CONSTRAINT field_map_layer_data_key UNIQUE (field_id, position),
 				CONSTRAINT field_map_layer_data_field_id_fkey FOREIGN KEY (field_id)
