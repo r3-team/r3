@@ -332,12 +332,14 @@ type FieldMap struct {
 	LayersData []FieldMapLayerData `json:"layersData"`
 }
 type FieldMapLayerData struct {
-	Id               uuid.UUID   `json:"id"`
-	AttributeIdData  uuid.UUID   `json:"attributeIdData"`
-	AttributeIdColor pgtype.UUID `json:"attributeIdColor"`
-	OpenForm         OpenForm    `json:"openForm"`
-	Query            Query       `json:"query"`
-	Captions         CaptionMap  `json:"captions"`
+	Id                   uuid.UUID   `json:"id"`
+	AttributeIdData      uuid.UUID   `json:"attributeIdData"`
+	AttributeIdDataColor pgtype.UUID `json:"attributeIdDataColor"`
+	IndexDataColor       int         `json:"indexDataColor"`
+	ColorFill            string      `json:"colorFill"`
+	OpenForm             OpenForm    `json:"openForm"`
+	Query                Query       `json:"query"`
+	Captions             CaptionMap  `json:"captions"`
 }
 type FieldTabs struct {
 	Id              uuid.UUID   `json:"id"`

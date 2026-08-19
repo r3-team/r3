@@ -682,7 +682,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				field_id uuid NOT NULL,
 				position smallint NOT NULL,
 				attribute_id_data uuid NOT NULL,
-				attribute_id_color uuid,
+				attribute_id_data_color uuid,
+				index_data_color smallint NOT NULL,
 				CONSTRAINT field_map_layer_data_pkey PRIMARY KEY (id),
 				CONSTRAINT field_map_layer_data_key UNIQUE (field_id, position),
 				CONSTRAINT field_map_layer_data_field_id_fkey FOREIGN KEY (field_id)
@@ -690,7 +691,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT field_map_layer_data_attribute_id_color_fkey FOREIGN KEY (attribute_id_color)
+				CONSTRAINT field_map_layer_data_attribute_id_data_color_fkey FOREIGN KEY (attribute_id_data_color)
 					REFERENCES app.attribute (id) MATCH SIMPLE
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
@@ -701,8 +702,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_field_map_layer_data_attribute_id_color_fkey ON app.field_map_layer_data USING btree (attribute_id_color ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_field_map_layer_data_attribute_id_data_fkey  ON app.field_map_layer_data USING btree (attribute_id_data  ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_field_map_layer_data_attribute_id_data_color_fkey ON app.field_map_layer_data USING btree (attribute_id_data_color ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_field_map_layer_data_attribute_id_data_fkey       ON app.field_map_layer_data USING btree (attribute_id_data       ASC NULLS LAST);
 
 			ALTER TABLE app.query ADD COLUMN     field_map_layer_data_id uuid;
 			ALTER TABLE app.query ADD CONSTRAINT query_field_map_layer_data_id_fkey FOREIGN KEY (field_map_layer_data_id)

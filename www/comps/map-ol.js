@@ -1,4 +1,5 @@
 import { getUuidV4 } from './shared/crypto.js';
+import { colorApplyAlpha, colorDarken } from './shared/generic.js';
 import { jsLibrariesLoadNoCache } from './shared/jsLibrary.js';
 import { getCaption } from './shared/language.js';
 
@@ -75,8 +76,10 @@ export default Vue.defineAsyncComponent(async () => {
 				required: false,
 				default: [
 					{
-						attributeIdColor: null,
 						attributeIdData: "2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe",
+						attributeIdDataColor: null,
+						indexDataColor: 0,
+						colorFill: 'a0e5ed',
 						id: "a7899077-169c-475e-9cfb-68430a1ea82b",
 						openForm: {
 							formIdOpen: '815bc581-e531-47e0-8996-b53e4442776d',
@@ -90,11 +93,11 @@ export default Vue.defineAsyncComponent(async () => {
 							joins: [
 								{
 									relationId: "a1611a6d-7739-42ab-a253-0cb17cefd64d",
-									connector: "AND",
+									connector: "INNER",
 									indexFrom: -1,
 									index: 0,
 									applyCreate: true,
-									applyDelete: true,
+									applyDelete: false,
 									applyUpdate: true,
 								},
 							],
@@ -107,8 +110,10 @@ export default Vue.defineAsyncComponent(async () => {
 						},
 					},
 					{
-						attributeIdColor: null,
 						attributeIdData: "af9553ef-8ffb-417f-98bd-c3379c3f8223",
+						attributeIdDataColor: '2a6d2f39-a6d2-4ca4-89b9-abbcf2544b60',
+						indexDataColor: 1,
+						colorFill: '9de2a8',
 						id: "a7899077-169c-475e-9cfb-68430a1ea82c",
 						openForm: {
 							formIdOpen: 'faef9fcf-4bec-432c-a9c3-537430025c7f',
@@ -122,13 +127,23 @@ export default Vue.defineAsyncComponent(async () => {
 							joins: [
 								{
 									relationId: "efe7b874-75c9-4c3a-8923-68b31693f562",
-									connector: "AND",
+									connector: "INNER",
 									indexFrom: -1,
 									index: 0,
 									applyCreate: true,
 									applyDelete: true,
-									applyUpdate: false,
+									applyUpdate: true,
 								},
+								{
+									relationId: "41672876-6049-4e3b-af24-9ad49c4404f8",
+									attributeId: '0a25f5de-0950-4bc2-9192-080ed7abd70c',
+									connector: "LEFT",
+									indexFrom: 0,
+									index: 1,
+									applyCreate: true,
+									applyDelete: true,
+									applyUpdate: false,
+								}
 							],
 						},
 						captions: {
@@ -210,6 +225,18 @@ export default Vue.defineAsyncComponent(async () => {
 					if (d.query === null || d.query.joins.length === 0) continue;
 
 					const source = new ol.source.Vector();
+					const layer = new ol.layer.Vector({
+						source,
+						style: feature => {
+							let colorFill = feature.get('colorFill') !== undefined ? feature.get('colorFill') : d.colorFill;
+							colorFill = s.colorApplyAlpha(`#${colorFill}`, 0.4);
+							return new ol.style.Style({
+								fill: new ol.style.Fill({ color: colorFill }),
+								stroke: new ol.style.Stroke({ color: s.colorDarken(colorFill, 70), width: 2.5 }),
+							});
+						}
+					});
+
 					const writableCreate = d.query.joins[0].applyCreate;
 					const writableDelete = d.query.joins[0].applyDelete;
 					const writableUpdate = d.query.joins[0].applyUpdate;
@@ -220,12 +247,14 @@ export default Vue.defineAsyncComponent(async () => {
 							delete: writableDelete,
 							update: writableUpdate
 						},
-						attributeIdColor: d.attributeIdColor,
 						attributeIdData: d.attributeIdData,
+						attributeIdDataColor: d.attributeIdDataColor,
 						captions: d.captions,
+						colorFill: d.colorFill,
 						data: source,
 						id: d.id,
-						layer: new ol.layer.Vector({ source: source }),
+						indexDataColor: d.indexDataColor,
+						layer,
 						openForm: d.openForm,
 						query: d.query,
 						readonly: !writableCreate && !writableDelete && !writableUpdate,
@@ -282,6 +311,8 @@ export default Vue.defineAsyncComponent(async () => {
 		unmounted() { },
 		methods: {
 			// externals
+			colorApplyAlpha,
+			colorDarken,
 			getCaption,
 			getUuidV4,
 
@@ -467,12 +498,17 @@ export default Vue.defineAsyncComponent(async () => {
 					return;
 
 				const requests = [];
-				for (const d of this.layersData) {
+				for (const l of this.layersData) {
+					const expressions = [{ attributeId: l.attributeIdData, index: 0 }];
+
+					if (l.attributeIdDataColor !== null)
+						expressions.push({ attributeId: l.attributeIdDataColor, index: l.indexDataColor });
+
 					requests.push(
 						ws.prepare('data', 'get', {
-							relationId: d.query.relationId,
-							joins: [],
-							expressions: [{ attributeId: d.attributeIdData, index: 0, },],
+							relationId: l.query.relationId,
+							joins: l.query.joins,
+							expressions,
 							filters: [],
 							getIds: true,
 						}),
@@ -481,13 +517,21 @@ export default Vue.defineAsyncComponent(async () => {
 				ws.sendMultiple(requests, true).then((responses) => {
 					for (let i = 0, j = responses.length; i < j; i++) {
 						const res = responses[i];
+						const layer = this.layersData[i];
 						const featureCollectionJson = { type: 'FeatureCollection', features: [] };
 						for (const r of res.payload.rows) {
-							if (r.values[0] !== null)
-								featureCollectionJson.features.push({ type: 'Feature', geometry: r.values[0], id: r.indexRecordIds['0'] });
+							if (r.values[0] === null)
+								continue
+
+							const feature = { type: 'Feature', geometry: r.values[0], id: r.indexRecordIds['0'] };
+
+							if (layer.attributeIdDataColor !== null && r.values[1] !== null)
+								feature.properties = { colorFill: r.values[1] };
+
+							featureCollectionJson.features.push(feature);
 						}
 						if (featureCollectionJson.features.length !== 0)
-							this.layersData[i].data.addFeatures(this.geoJsonFrom(featureCollectionJson));
+							layer.data.addFeatures(this.geoJsonFrom(featureCollectionJson));
 					}
 				}, this.$root.genericError);
 			},
