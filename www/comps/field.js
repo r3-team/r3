@@ -245,6 +245,8 @@ export default {
 				<!-- map -->
 				<my-map v-if="isMap"
 					@open-form="(...args) => $emit('open-form',...args)"
+					:formLoading
+					:isHidden
 					:moduleId
 					:readonly="isReadonly"
 				/>

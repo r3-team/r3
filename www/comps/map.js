@@ -155,6 +155,8 @@ export default Vue.defineAsyncComponent(async () => {
 					},
 				],
 			},
+			formLoading: { type: Boolean, required: true },
+			isHidden: { type: Boolean, required: false, default: false },
 			layerBaseIds: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
 			//layerBaseIds: { type: Array, required: false, default: [] },
 			moduleId: { type: String, required: true },
@@ -287,8 +289,17 @@ export default Vue.defineAsyncComponent(async () => {
 			layerBaseIdMapInstance: s => s.$store.getters.geoLayerBaseIdMap,
 		},
 		mounted() {
+			this.geoJsonFormatter = new ol.format.GeoJSON();
+
 			if (this.customSrids.length === 0)
 				return this.reset();
+
+			this.$watch('formLoading', v => {
+				if (!v) this.get();
+			});
+			this.$watch('isHidden', v => {
+				if (!v) this.$nextTick(() => this.reset());
+			});
 
 			// load custom CRS definitions, if need be
 			import("../externals/proj4-list.js").then((module) => {
@@ -433,35 +444,34 @@ export default Vue.defineAsyncComponent(async () => {
 
 			// system
 			reset() {
-				this.geoJsonFormatter = new ol.format.GeoJSON();
+				if (this.map === null) {
+					this.map = new ol.Map({
+						target: this.$refs.map,
+						layers: [],
+						controls: [], // remove default controls like zoom
+						view: new ol.View({
+							center: [0, 0],
+							projection: `EPSG:${this.viewSrid}`,
+							zoom: 2,
+						}),
+					});
 
-				this.map = new ol.Map({
-					target: this.$refs.map,
-					layers: [],
-					controls: [], // remove default controls like zoom
-					view: new ol.View({
-						center: [0, 0],
-						projection: `EPSG:${this.viewSrid}`,
-						zoom: 2,
-					}),
-				});
+					// register default interactions
+					// select action (for opening/deleting records)
+					this.interactionSelect = new ol.interaction.Select();
+					this.interactionSelect.on('select', this.selectFeatures);
+					this.map.addInteraction(this.interactionSelect);
 
-				// register default interactions
-				// select action (for opening/deleting records)
-				this.interactionSelect = new ol.interaction.Select();
-				this.interactionSelect.on('select', this.selectFeatures);
-				this.map.addInteraction(this.interactionSelect);
+					for (const b of this.layersBase) {
+						this.map.addLayer(b.layer);
+					}
+					for (const d of this.layersData) {
+						this.map.addLayer(d.layer);
+					}
 
-				for (const b of this.layersBase) {
-					this.map.addLayer(b.layer);
+					if (this.layersDataWritable.length !== 0)
+						this.layerDataIdEdit = this.layersDataWritable[0].id;
 				}
-				for (const d of this.layersData) {
-					this.map.addLayer(d.layer);
-				}
-
-				if (this.layersDataWritable.length !== 0)
-					this.layerDataIdEdit = this.layersDataWritable[0].id;
-
 				this.get();
 			},
 
@@ -499,6 +509,8 @@ export default Vue.defineAsyncComponent(async () => {
 
 				const requests = [];
 				for (const l of this.layersData) {
+					l.data.clear();
+
 					const expressions = [{ attributeId: l.attributeIdData, index: 0 }];
 
 					if (l.attributeIdDataColor !== null)
