@@ -18,7 +18,9 @@ export default Vue.defineAsyncComponent(async () => {
 				>
 					<img :src="'images/'+toolImages[t]" />
 				</div>
-				<div class="my-map-tool spacer"></div>
+
+				<div class="my-map-spacer vertical"></div>
+
 				<div class="my-map-tool"
 					@click="switchTool('delete')"
 					:class="{ clickable:toolUseable.delete, active:toolActive === 'delete' }"
@@ -27,20 +29,42 @@ export default Vue.defineAsyncComponent(async () => {
 				</div>
 			</div>
 			<div class="my-map-layers">
+				<my-button image="add2.png" @trigger="changeMapZoom(true)" :naked="true" />
+				<my-button image="dash2.png" @trigger="changeMapZoom(false)" :naked="true" />
+
 				<!-- data layer selection -->
-				<div class="row nowrap gap centered" v-if="layersData.length !== 0">
-					<my-label image="edit.png" />
-					<my-button
-						v-for="(l,i) in layersData"
-						@trigger="switchLayerData(l.id)"
-						:active="!l.readonly"
-						:caption="getCaption('fieldMapLayerDataTitle',moduleId,l.id,l.captions,capGen.layer + ' ' + (i+1))"
-						:image="l.readonly ? '' : (layerDataIdEdit === l.id ? 'radio1.png' : 'radio0.png')"
-						:naked="true"
-					/>
-				</div>
+				<template v-if="layersData.length !== 0">
+					<div class="my-map-spacer horizontal"></div>
+					<my-label image="database.png" />
+					<template v-for="(l,i) in layersData">
+						<my-button
+							@trigger="switchLayerData(l.id)"
+							:active="!l.readonly"
+							:caption="getCaption('fieldMapLayerDataTitle',moduleId,l.id,l.captions,capGen.layer + ' ' + (i+1))"
+							:image="l.readonly ? '' : (layerDataIdEdit === l.id ? 'radio1.png' : 'radio0.png')"
+							:naked="true"
+						/>
+						<my-button
+							@trigger="switchLayerVisibility(l.id,true)"
+							:image="layerDataIdsHidden.includes(l.id) ? 'visible0.png' : 'visible1.png'"
+							:naked="true"
+						/>
+					</template>
+				</template>
 
 				<!-- base layer selection -->
+				<template v-if="layersBase.length !== 0">
+					<div class="my-map-spacer horizontal"></div>
+					<my-label image="map.png" />
+					<template v-for="(l,i) in layersBase">
+						<span>{{ l.name }}</span>
+						<my-button
+							@trigger="switchLayerVisibility(l.id,false)"
+							:image="layerBaseIdsHidden.includes(l.id) ? 'visible0.png' : 'visible1.png'"
+							:naked="true"
+						/>
+					</template>
+				</template>
 			</div>
 		</div>`,
 		props: {
@@ -102,8 +126,8 @@ export default Vue.defineAsyncComponent(async () => {
 					},
 				],
 			},
-			//layerIdsBase: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
-			layerBaseIds: { type: Array, required: false, default: [] },
+			layerBaseIds: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
+			//layerBaseIds: { type: Array, required: false, default: [] },
 			moduleId: { type: String, required: true },
 			readonly: { type: Boolean, required: true },
 			viewSrid: { type: Number, required: false, default: 3857 }, // view projection and CRS vectors are stored in
@@ -112,7 +136,9 @@ export default Vue.defineAsyncComponent(async () => {
 			return {
 				interaction: {}, // current interactions (draw, modify, ...)
 				interactionSelect: null, // select interaction, always active
+				layerBaseIdsHidden: [],
 				layerDataIdEdit: null,
+				layerDataIdsHidden: [],
 				geoJsonFormatter: null,
 				map: null,
 				sridsDefault: [3857, 4326], // supported by openlayers by default
@@ -133,16 +159,21 @@ export default Vue.defineAsyncComponent(async () => {
 				const out = [];
 				if (!s.sridsDefault.includes(s.viewSrid)) out.push(s.viewSrid);
 				for (const id of s.layerBaseIds) {
-					const layer = s.layerBaseIdMap[id];
-					if (!s.sridsDefault.includes(layer.srid)) out.push(layer.srid);
+					const l = s.layerBaseIdMapInstance[id];
+					console.log(l);
+					if (!s.sridsDefault.includes(l.srid)) out.push(l.srid);
 				}
 				return out;
 			},
 			// base layers (readonly, WMF, tile map data, etc.) with meta data (id, name, ...)
 			layersBase: s => {
 				const out = [];
+
+				// TEMP, OSM layer for reference
+				out.push({ id: "TEMP", name: "OSM", layer: new ol.layer.Tile({ source: new ol.source.OSM() }) });
+
 				for (const id of s.layerBaseIds) {
-					const l = s.layerBaseIdMap[id];
+					const l = s.layerBaseIdMapInstance[id];
 					const params = {};
 					for (const k in l.parameters) {
 						params[k.toUpperCase()] = l.parameters[k];
@@ -150,17 +181,11 @@ export default Vue.defineAsyncComponent(async () => {
 					const source = new ol.source.TileWMS({ url: l.url, params, projection: `EPSG:${l.srid}` });
 					out.push({ id, name: l.name, layer: new ol.layer.Tile({ source }) });
 				}
-
-				// TEMP, OSM layer for reference
-				out.push({ id: "TEMP", name: "OSM", layer: new ol.layer.Tile({ source: new ol.source.OSM() }) });
-
 				return out;
 			},
-			layersBaseIdMap: s => {
+			layerBaseIdMap: s => {
 				const out = {};
-				for (const layer of s.layersBase) {
-					out[layer.id] = layer;
-				}
+				s.layersBase.forEach(v => { out[v.id] = v });
 				return out;
 			},
 
@@ -193,11 +218,9 @@ export default Vue.defineAsyncComponent(async () => {
 				}
 				return out;
 			},
-			layersDataIdMap: s => {
+			layerDataIdMap: s => {
 				const out = {};
-				for (const layer of s.layersData) {
-					out[layer.id] = layer;
-				}
+				s.layersData.forEach(v => { out[v.id] = v });
 				return out;
 			},
 
@@ -212,12 +235,12 @@ export default Vue.defineAsyncComponent(async () => {
 					polygon: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
 				};
 			},
-			layerDataEditActive: s => s.layerDataIdEdit !== null ? s.layersDataIdMap[s.layerDataIdEdit] : false,
+			layerDataEditActive: s => s.layerDataIdEdit !== null ? s.layerDataIdMap[s.layerDataIdEdit] : false,
 			layersDataWritable: s => s.layersData.filter(v => !v.readonly),
 
 			// stores
 			capGen: s => s.$store.getters.captions.generic,
-			layerBaseIdMap: s => s.$store.getters.geoLayerBaseIdMap,
+			layerBaseIdMapInstance: s => s.$store.getters.geoLayerBaseIdMap,
 		},
 		mounted() {
 			if (this.customSrids.length === 0) return this.reset();
@@ -247,6 +270,9 @@ export default Vue.defineAsyncComponent(async () => {
 			getUuidV4,
 
 			// actions
+			changeMapZoom(add) {
+				this.map.getView().setZoom(this.map.getView().getZoom() + (add ? 1 : -1));
+			},
 			selectFeature(e) {
 				if (this.toolActive === 'delete' && this.layerDataEditActive !== false) {
 					this.del(e.selected);
@@ -255,6 +281,19 @@ export default Vue.defineAsyncComponent(async () => {
 			switchLayerData(id) {
 				this.layerDataIdEdit = id;
 				this.switchTool(null);
+			},
+			switchLayerVisibility(id, isData) {
+				const list = isData ? this.layerDataIdsHidden : this.layerBaseIdsHidden;
+				const layer = isData ? this.layerDataIdMap[id].layer : this.layerBaseIdMap[id].layer;
+				const pos = list.indexOf(id);
+
+				if (pos === -1) {
+					list.push(id);
+					layer.setVisible(false);
+				} else {
+					list.splice(pos, 1);
+					layer.setVisible(true);
+				}
 			},
 			switchTool(tool) {
 				// remove previous interactions
@@ -333,6 +372,7 @@ export default Vue.defineAsyncComponent(async () => {
 				this.map = new ol.Map({
 					target: this.$refs.map,
 					layers: [],
+					controls: [], // remove default controls like zoom
 					view: new ol.View({
 						center: [0, 0],
 						projection: `EPSG:${this.viewSrid}`,
@@ -418,7 +458,7 @@ export default Vue.defineAsyncComponent(async () => {
 				}, this.$root.genericError);
 			},
 			set(features) {
-				const layer = this.layersDataIdMap[this.layerDataIdEdit];
+				const layer = this.layerDataIdMap[this.layerDataIdEdit];
 				const requests = [];
 				for (const feature of features) {
 					// takeover SRID from the view

@@ -13,17 +13,21 @@
 	position: absolute;
 	top: 5px;
 	left: 5px;
-	padding: 3px;
+	padding: 5px;
 	border: var(--border-input);
 	border-radius: var(--border-input-radius);
 	background-color: var(--color-input);
 	display: flex;
 	flex-flow: column wrap;
-	gap: 3px;
+	align-items: center;
+	gap: calc(var(--spacing) / 3);
+	opacity: 0.8;
 }
 .my-map-tool {
-	--my-tool-size: 32px;
+	--my-tool-size: 28px;
 	--my-tool-size-hover-delta: 2px;
+	width: var(--my-tool-size);
+	height: var(--my-tool-size);
 }
 .my-map-tool.clickable:hover {
 	--my-tool-size-hover-delta: 0px;
@@ -31,9 +35,6 @@
 .my-map-tool.clickable.active {
 	outline: var(--outline-input-focus);
 	border-radius: var(--border-input-radius);
-}
-.my-map-tool.spacer {
-	border-top: 3px solid var(--color-border);
 }
 .my-map-tool img {
 	width: calc(var(--my-tool-size) - (var(--my-tool-size-hover-delta) * 2));
@@ -55,9 +56,19 @@
 	transform: translateX(-50%);
 	display: flex;
 	flex-flow: row wrap;
-	gap: calc(var(--spacing) / 2);
-	padding: 3px 8px;
+	align-items: center;
+	gap: calc(var(--spacing) / 1.5);
+	padding: 5px 8px;
 	border: var(--border-input);
 	border-radius: var(--border-input-radius);
 	background-color: var(--color-input);
+	opacity: 0.8;
+}
+.my-map-spacer.horizontal {
+	height: 22px;
+	border-left: 3px solid var(--color-border);
+}
+.my-map-spacer.vertical {
+	width: 22px;
+	border-top: 3px solid var(--color-border);
 }
