@@ -243,7 +243,11 @@ export default {
 				</my-list>
 
 				<!-- map -->
-				<my-map-ol v-if="isMap" :moduleId :readonly="isReadonly" />
+				<my-map-ol v-if="isMap"
+					@open-form="(...args) => $emit('open-form',...args)"
+					:moduleId
+					:readonly="isReadonly"
+				/>
 
 				<!-- tabs -->
 				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">

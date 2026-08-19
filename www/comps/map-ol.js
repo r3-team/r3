@@ -13,7 +13,8 @@ export default Vue.defineAsyncComponent(async () => {
 			<div class="my-map-toolbox">
 				<div class="my-map-tool"
 					v-for="t in tools"
-					@click="switchTool(t)"
+					@click.left.exact="switchTool(t)"
+					@click.right.exact.prevent="switchTool(null)"
 					:class="{ clickable:toolUseable[t], active:toolActive === t }"
 				>
 					<img :src="'images/'+toolImages[t]" />
@@ -22,7 +23,8 @@ export default Vue.defineAsyncComponent(async () => {
 				<div class="my-map-spacer vertical"></div>
 
 				<div class="my-map-tool"
-					@click="switchTool('delete')"
+					@click.left.exact="switchTool('delete')"
+					@click.right.exact.prevent="switchTool(null)"
 					:class="{ clickable:toolUseable.delete, active:toolActive === 'delete' }"
 				>
 					<img :src="'images/'+toolImages.delete" />
@@ -76,7 +78,13 @@ export default Vue.defineAsyncComponent(async () => {
 						attributeIdColor: null,
 						attributeIdData: "2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe",
 						id: "a7899077-169c-475e-9cfb-68430a1ea82b",
-						openForm: null,
+						openForm: {
+							formIdOpen: '815bc581-e531-47e0-8996-b53e4442776d',
+							relationIndexOpen: 0,
+							popUpType: 'float',
+							maxHeight: 500,
+							maxWidth: 600,
+						},
 						query: {
 							relationId: "a1611a6d-7739-42ab-a253-0cb17cefd64d",
 							joins: [
@@ -93,8 +101,8 @@ export default Vue.defineAsyncComponent(async () => {
 						},
 						captions: {
 							fieldMapLayerDataTitle: {
-								de_de: "Gebäude",
-								en_us: "Buildings",
+								de_de: "Länder",
+								en_us: "Countries",
 							},
 						},
 					},
@@ -102,7 +110,13 @@ export default Vue.defineAsyncComponent(async () => {
 						attributeIdColor: null,
 						attributeIdData: "af9553ef-8ffb-417f-98bd-c3379c3f8223",
 						id: "a7899077-169c-475e-9cfb-68430a1ea82c",
-						openForm: null,
+						openForm: {
+							formIdOpen: 'faef9fcf-4bec-432c-a9c3-537430025c7f',
+							relationIndexOpen: 0,
+							popUpType: 'float',
+							maxHeight: 500,
+							maxWidth: 600,
+						},
 						query: {
 							relationId: "efe7b874-75c9-4c3a-8923-68b31693f562",
 							joins: [
@@ -119,8 +133,8 @@ export default Vue.defineAsyncComponent(async () => {
 						},
 						captions: {
 							fieldMapLayerDataTitle: {
-								de_de: "Grundstücke",
-								en_us: "Properties",
+								de_de: "Gebäude",
+								en_us: "Buildings",
 							},
 						},
 					},
@@ -132,6 +146,7 @@ export default Vue.defineAsyncComponent(async () => {
 			readonly: { type: Boolean, required: true },
 			viewSrid: { type: Number, required: false, default: 3857 }, // view projection and CRS vectors are stored in
 		},
+		emits: ['open-form'],
 		data() {
 			return {
 				interaction: {}, // current interactions (draw, modify, ...)
@@ -160,7 +175,6 @@ export default Vue.defineAsyncComponent(async () => {
 				if (!s.sridsDefault.includes(s.viewSrid)) out.push(s.viewSrid);
 				for (const id of s.layerBaseIds) {
 					const l = s.layerBaseIdMapInstance[id];
-					console.log(l);
 					if (!s.sridsDefault.includes(l.srid)) out.push(l.srid);
 				}
 				return out;
@@ -211,8 +225,9 @@ export default Vue.defineAsyncComponent(async () => {
 						captions: d.captions,
 						data: source,
 						id: d.id,
-						query: d.query,
 						layer: new ol.layer.Vector({ source: source }),
+						openForm: d.openForm,
+						query: d.query,
 						readonly: !writableCreate && !writableDelete && !writableUpdate,
 					});
 				}
@@ -243,7 +258,8 @@ export default Vue.defineAsyncComponent(async () => {
 			layerBaseIdMapInstance: s => s.$store.getters.geoLayerBaseIdMap,
 		},
 		mounted() {
-			if (this.customSrids.length === 0) return this.reset();
+			if (this.customSrids.length === 0)
+				return this.reset();
 
 			// load custom CRS definitions, if need be
 			import("../externals/proj4-list.js").then((module) => {
@@ -273,9 +289,28 @@ export default Vue.defineAsyncComponent(async () => {
 			changeMapZoom(add) {
 				this.map.getView().setZoom(this.map.getView().getZoom() + (add ? 1 : -1));
 			},
-			selectFeature(e) {
-				if (this.toolActive === 'delete' && this.layerDataEditActive !== false) {
-					this.del(e.selected);
+			selectFeatures(e) {
+				const features = e.selected;
+				if (this.toolActive === 'delete') {
+					// delete record if enabled
+					if (this.layerDataEditActive !== false)
+						this.del(features);
+
+					return;
+				}
+				if (this.toolActive === null) {
+					// open form for first valid feature with open-form action on layer
+					for (const feature of features) {
+						const l = this.layersData.find(v => v.data.getFeatures().includes(feature));
+						if (l === undefined || feature.getId() === undefined) {
+							console.warn('cannot find feature to open in data sources');
+							return;
+						}
+						if (l.openForm !== null) {
+							this.$emit('open-form', [feature.getId()], l.openForm);
+							break;
+						}
+					}
 				}
 			},
 			switchLayerData(id) {
@@ -383,7 +418,7 @@ export default Vue.defineAsyncComponent(async () => {
 				// register default interactions
 				// select action (for opening/deleting records)
 				this.interactionSelect = new ol.interaction.Select();
-				this.interactionSelect.on('select', this.selectFeature);
+				this.interactionSelect.on('select', this.selectFeatures);
 				this.map.addInteraction(this.interactionSelect);
 
 				for (const b of this.layersBase) {
@@ -428,7 +463,9 @@ export default Vue.defineAsyncComponent(async () => {
 				);
 			},
 			get() {
-				console.log('get');
+				if (this.layersData.length === 0)
+					return;
+
 				const requests = [];
 				for (const d of this.layersData) {
 					requests.push(
@@ -441,9 +478,6 @@ export default Vue.defineAsyncComponent(async () => {
 						}),
 					);
 				}
-
-				if (requests.length === 0) return;
-
 				ws.sendMultiple(requests, true).then((responses) => {
 					for (let i = 0, j = responses.length; i < j; i++) {
 						const res = responses[i];
