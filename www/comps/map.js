@@ -8,7 +8,7 @@ export default Vue.defineAsyncComponent(async () => {
 	await jsLibrariesLoadNoCache(["externals/openlayers/ol.js", "externals/proj4.js"]);
 
 	return {
-		name: "my-map-ol",
+		name: "my-map",
 		template: `<div class="my-map">
 			<div class="my-map-content" ref="map" @click.right.prevent="switchTool(null)"></div>
 			<div class="my-map-toolbox">

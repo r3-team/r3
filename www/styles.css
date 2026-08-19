@@ -33,6 +33,4 @@
 @import url("comps/builder/builderForm.css");
 
 /* externals */
-@import url("externals/leaflet/leaflet.css");
-@import url("externals/leaflet-geoman/leaflet-geoman.css");
 @import url("externals/openlayers/ol.css");

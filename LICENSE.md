@@ -20,7 +20,6 @@ This project also contains separate sub-components. These are located in the iso
 - *html2canvas*, 'www/externals/html2canvas.js' (Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>)
 - *JsBarcode*, 'www/externals/jsbarcode.js' (Copyright (c) 2016 Johan Lindell (johan@lindell.me))
 - *jsPDF*, 'www/externals/jspdf.js' (Copyright (c) 2010-2025 James Hall, https://github.com/MrRio/jsPDF & (c) 2015-2025 yWorks GmbH, https://www.yworks.com/)
-- *leaflet-geoman*, 'www/externals/leaflet-geoman/' (Copyright (c) 2017 Sumit Kumar)
 - *Proj4js*, 'www/externals/proj4.js' (Copyright (c) 2014, Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf)
 - *oauth4webapi*, 'www/externals/oauth4webapi.js' (Copyright (c) 2022 Filip Skokan)
 - *QR Code Generator*, 'www/externals/qrcode.js' (Copyright (c) 2009 Kazuhiko Arase)
@@ -44,7 +43,6 @@ This project also contains separate sub-components. These are located in the iso
 - *TinyMCE*, 'www/externals/tinymce/' (Copyright (c) 2024, Ephox Corporation DBA Tiny Technologies, Inc.)
 
 ## Section 4: Components licensed under BSD 2-Clause License (s. LICENSE.BSD-2)
-- *Leaflet*, 'www/externals/leaflet/' (Copyright (c) 2010-2026, Volodymyr Agafonkin, Copyright (c) 2010-2011, CloudMade, All rights reserved)
 - *OpenLayers*, 'www/externals/openlayers/' (Copyright (c) 2005-present, OpenLayers Contributors, All rights reserved)
 
 ## Section 5: Components licensed under ISC License (s. LICENSE.ISC)
