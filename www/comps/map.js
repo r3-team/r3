@@ -42,9 +42,9 @@ export default Vue.defineAsyncComponent(async () => {
 					<template v-for="(l,i) in layersData">
 						<my-button
 							@trigger="switchLayerData(l.id)"
-							:active="!l.readonly"
+							:active="!l.readonly && !layerDataIdsHidden.includes(l.id)"
 							:caption="getCaption('fieldMapLayerDataTitle',moduleId,l.id,l.captions,capGen.layer + ' ' + (i+1))"
-							:image="l.readonly ? '' : (layerDataIdEdit === l.id ? 'radio1.png' : 'radio0.png')"
+							:image="l.readonly ? '' : (layerDataIdEdit === l.id && !layerDataIdsHidden.includes(l.id) ? 'radio1.png' : 'radio0.png')"
 							:naked="true"
 						/>
 						<my-button
@@ -97,7 +97,7 @@ export default Vue.defineAsyncComponent(async () => {
 									indexFrom: -1,
 									index: 0,
 									applyCreate: true,
-									applyDelete: false,
+									applyDelete: true,
 									applyUpdate: true,
 								},
 							],
@@ -281,7 +281,7 @@ export default Vue.defineAsyncComponent(async () => {
 					polygon: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
 				};
 			},
-			layerDataEditActive: s => s.layerDataIdEdit !== null ? s.layerDataIdMap[s.layerDataIdEdit] : false,
+			layerDataEditActive: s => s.layerDataIdEdit !== null && !s.layerDataIdsHidden.includes(s.layerDataIdEdit) ? s.layerDataIdMap[s.layerDataIdEdit] : false,
 			layersDataWritable: s => s.layersData.filter(v => !v.readonly),
 
 			// stores
@@ -367,9 +367,22 @@ export default Vue.defineAsyncComponent(async () => {
 				if (pos === -1) {
 					list.push(id);
 					layer.setVisible(false);
+
+					if (this.layerDataIdEdit === id) {
+						// switch to other data layer if available, set to null otherwise
+						let idSwitchTo = null;
+						for (const l of this.layersData.filter(v => v.id !== id)) {
+							idSwitchTo = l.id;
+							break;
+						}
+						this.switchLayerData(idSwitchTo);
+					}
 				} else {
 					list.splice(pos, 1);
 					layer.setVisible(true);
+
+					if (isData && this.layerDataIdEdit !== null && this.layerDataIdsHidden.includes(this.layerDataIdEdit))
+						this.switchLayerData(id);
 				}
 			},
 			switchTool(tool) {
@@ -419,7 +432,6 @@ export default Vue.defineAsyncComponent(async () => {
 					default:
 						return console.error(`invalid tool '${tool}'`);
 				}
-				this.map.addInteraction(new ol.interaction.DragAndDrop({ formatConstructors: [ol.format.GeoJSON], source }));
 				this.map.addInteraction(new ol.interaction.Snap({ source }));
 				this.toolActive = tool;
 			},
@@ -480,15 +492,21 @@ export default Vue.defineAsyncComponent(async () => {
 				const requests = [];
 				for (const feature of features) {
 					const layer = this.layersData.find(v => v.data.getFeatures().includes(feature));
+					// to delete a feature, data layer for feature must exist and be in edit mode, feature must have an ID and
 					if (layer === undefined || feature.getId() === undefined) {
 						console.warn('cannot find feature to delete in data sources');
 						return;
 					}
+					if (this.layerDataIdEdit !== layer.id)
+						continue;
+
 					requests.push(ws.prepare('data', 'del', {
 						relationId: layer.query.relationId,
 						recordId: feature.getId()
 					}));
 				}
+				if (requests.length === 0)
+					return;
 
 				ws.sendMultiple(requests, true).then(
 					responses => {
@@ -575,7 +593,6 @@ export default Vue.defineAsyncComponent(async () => {
 						}),
 					);
 				}
-
 				if (requests.length === 0)
 					return;
 
