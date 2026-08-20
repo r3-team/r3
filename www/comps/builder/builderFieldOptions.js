@@ -5,7 +5,7 @@ import {
 	isAttributeRelationship, isAttributeString
 } from '../shared/attribute.js';
 import { getDependentModules, getItemTitle, getItemTitlePath } from '../shared/builder.js';
-import { getTemplateCollectionConsumer, getTemplateQuery, getTemplateTab } from '../shared/builderTemplate.js';
+import { getTemplateCollectionConsumer, getTemplateFieldMapLayerData, getTemplateQuery, getTemplateTab } from '../shared/builderTemplate.js';
 import { openLink } from '../shared/generic.js';
 import { getJoinsIndexMap } from '../shared/query.js';
 
@@ -1032,11 +1032,39 @@ export default {
 				/>
 
 				<!-- map options -->
-				<my-builder-field-options-map-layer-data
-					v-if="isMap"
-					@update:modelValue=""
-					:modelValue=""
-				/>
+				<template v-if="isMap">
+					<tr>
+						<td colspan="2">
+							<div class="row centered space-between">
+								<span>{{ capGen.layersData }}</span>
+								<my-button image="add.png" @trigger="layerDataAdd" />
+							</div>
+						</td>
+					</tr>
+					<tr v-if="field.layersData.length !== 0">
+						<td colspan="2">
+							<div class="builder-field-options-map-layer-data">
+								<my-tabs
+									v-model="tabLayerData"
+									:entries="[...field.layersData.keys()]"
+									:entriesText="tabsLayersData"
+								/>
+								<my-builder-field-options-map-layer-data
+									v-if="field.layersData[tabLayerData] !== undefined"
+									v-model="field.layersData[tabLayerData]"
+									:builderLanguage
+									:entityIdMapRef
+									:fieldIdMap
+									:formId
+									:joinsIndexMap
+									:key="field.layersData[tabLayerData].id"
+									:moduleId
+									:readonly
+								/>
+							</div>
+						</td>
+					</tr>
+				</template>
 
 				<!-- variable -->
 				<tr v-if="isVariable">
@@ -1064,7 +1092,7 @@ export default {
 							/>
 							<my-button image="add.png"
 								v-if="field.variableId === null"
-								@trigger="$emit('createNew','variable',{formId:formId})"
+								@trigger="$emit('createNew','variable',{formId})"
 								:active="!readonly"
 								:captionTitle="capGen.button.new"
 							/>
@@ -1106,7 +1134,7 @@ export default {
 							</select>
 							<my-button image="add.png"
 								v-if="field.jsFunctionId === null"
-								@trigger="$emit('createNew','jsFunction',{formId:formId})"
+								@trigger="$emit('createNew','jsFunction',{formId})"
 								:active="!readonly"
 								:captionTitle="capGen.button.new"
 							/>
@@ -1211,12 +1239,18 @@ export default {
 		dataFields: { type: Array, required: true },
 		entityIdMapRef: { type: Object, required: true },
 		field: { type: Object, required: true },
+		fieldIdMap: { type: Object, required: true },
 		formId: { type: String, required: true },
 		joinsIndexMap: { type: Object, required: true },
 		moduleId: { type: String, required: true },
 		readonly: { type: Boolean, required: true }
 	},
 	emits: ['createNew', 'set'],
+	data() {
+		return {
+			tabLayerData: 0
+		};
+	},
 	computed: {
 		displayOptions: s => {
 			const out = ['default'];
@@ -1224,9 +1258,6 @@ export default {
 			if (s.isString && s.isDisplayDefault) out.push('password', 'email', 'phone', 'url');
 			if (s.isFiles) out.push('gallery');
 			return out;
-		},
-		joinsIndexMapField: s => {
-			return s.isQuery ? s.getJoinsIndexMap(s.query.joins) : {};
 		},
 		joinsKanbanAxis: s => {
 			if (!s.isKanban || s.field.relationIndexData === null)
@@ -1251,6 +1282,14 @@ export default {
 				map[presets[i].id] = presets[i];
 			}
 			return map;
+		},
+		tabsLayersData: s => {
+			if (!s.isMap) return [];
+			const out = [];
+			for (let i = 0, j = s.field.layersData.length; i < j; i++) {
+				out.push(`${s.capGen.layer} ${i + 1}`);
+			}
+			return out;
 		},
 		systemDefaults: s => {
 			if (s.isRichtext || s.isBarcode || s.isIFrame) return [];
@@ -1310,6 +1349,7 @@ export default {
 		isString: s => s.isData && s.isAttributeString(s.contentData),
 		isTime: s => s.isData && s.contentUse === 'time',
 		isVariable: s => s.field.content === 'variable',
+		joinsIndexMapField: s => s.isQuery ? s.getJoinsIndexMap(s.query.joins) : {},
 		query: s => s.isQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
 		systemDefaultUsed: s => s.systemDefaults.includes(s.field.def),
 
@@ -1337,6 +1377,7 @@ export default {
 		getItemTitlePath,
 		getJoinsIndexMap,
 		getTemplateCollectionConsumer,
+		getTemplateFieldMapLayerData,
 		getTemplateQuery,
 		getTemplateTab,
 		isAttributeBoolean,
@@ -1349,7 +1390,7 @@ export default {
 
 		// actions
 		collectionAdd() {
-			let v = JSON.parse(JSON.stringify(this.field.collections));
+			const v = JSON.parse(JSON.stringify(this.field.collections));
 			v.push(this.getTemplateCollectionConsumer());
 			this.set('collections', v);
 		},
@@ -1357,6 +1398,11 @@ export default {
 			const v = JSON.parse(JSON.stringify(this.field.collections));
 			v.splice(i, 1);
 			this.set('collections', v);
+		},
+		layerDataAdd() {
+			const v = JSON.parse(JSON.stringify(this.field.layersData));
+			v.push(this.getTemplateFieldMapLayerData());
+			this.set('layersData', v);
 		},
 		openAttribute(relationId, middle) {
 			if (!middle) this.$router.push(`/builder/relation/${relationId}`);

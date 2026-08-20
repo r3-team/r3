@@ -276,6 +276,7 @@ export default {
 						:dataFields
 						:entityIdMapRef
 						:field
+						:fieldIdMap
 						:formId
 						:joinsIndexMap
 						:moduleId

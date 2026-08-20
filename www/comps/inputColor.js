@@ -1,9 +1,7 @@
-import {colorIsDark} from './shared/generic.js';
-
 export default {
-	name:'my-input-color',
-	components:{ 'chrome-picker':VueColor.Chrome },
-	template:`<div class="input-color"
+	name: 'my-input-color',
+	components: { 'chrome-picker': VueColor.Chrome },
+	template: `<div class="input-color"
 		v-click-outside="closePicker"
 		@click.left="togglePicker"
 		:class="{ clickable:!readonly }"
@@ -44,62 +42,61 @@ export default {
 			/>
 		</teleport>
 	</div>`,
-	props:{
-		allowNull:   { type:Boolean, required:false, default:false },
-		dropdownShow:{ type:Boolean, required:false, default:false },
-		modelValue:  { required:true },
-		readonly:    { type:Boolean, required:false, default:false },
-		showInput:   { type:Boolean, required:false, default:true }
+	props: {
+		allowNull: { type: Boolean, required: false, default: false },
+		dropdownShow: { type: Boolean, required: false, default: false },
+		modelValue: { required: true },
+		readonly: { type: Boolean, required: false, default: false },
+		showInput: { type: Boolean, required: false, default: true }
 	},
 	data() {
 		return {
-			setValueAfterDelay:null
+			setValueAfterDelay: null
 		};
 	},
-	emits:['dropdown-show','update:modelValue'],
-	computed:{
+	emits: ['dropdown-show', 'update:modelValue'],
+	computed: {
 		// inputs
-		input:{
-			get()  { return this.modelValue === null ? '' : this.modelValue; },
+		input: {
+			get() { return this.modelValue === null ? '' : this.modelValue; },
 			set(v) {
-				if(this.setValueAfterDelay === null)
-					setTimeout(this.set,200);
-				
+				if (this.setValueAfterDelay === null)
+					setTimeout(this.set, 200);
+
 				this.setValueAfterDelay = v;
 			}
 		},
-		
+
 		// simple
-		isSet:(s) => (s.allowNull && s.modelValue !== null) || (!s.allowNull && s.modelValue !== ''),
-		
+		isSet: s => (s.allowNull && s.modelValue !== null) || (!s.allowNull && s.modelValue !== ''),
+
 		// stores
-		capApp:(s) => s.$store.getters.captions.input.color,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.input.color,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
-		// externals
-		colorIsDark,
-		
+	methods: {
 		// actions
 		clear() {
 			this.input = '';
-			this.$emit('dropdown-show',false);
+			this.$emit('dropdown-show', false);
 		},
 		closePicker() {
-			this.$emit('dropdown-show',false);
+			this.$emit('dropdown-show', false);
 		},
 		set() {
-			if(this.setValueAfterDelay === null || this.setValueAfterDelay === this.modelValue)
-				return this.setValueAfterDelay = null;
-			
-			this.$emit('update:modelValue',this.allowNull && this.setValueAfterDelay === ''
+			if (this.setValueAfterDelay === null || this.setValueAfterDelay === this.modelValue) {
+				this.setValueAfterDelay = null;
+				return;
+			}
+
+			this.$emit('update:modelValue', this.allowNull && this.setValueAfterDelay === ''
 				? null : this.setValueAfterDelay);
-			
+
 			this.setValueAfterDelay = null;
 		},
 		togglePicker() {
-			if(!this.readonly)
-				this.$emit('dropdown-show',!this.dropdownShow);
+			if (!this.readonly)
+				this.$emit('dropdown-show', !this.dropdownShow);
 		}
 	}
 };

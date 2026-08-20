@@ -34,7 +34,6 @@ import { variableValueGet, variableValueSet } from './shared/variable.js';
 export default {
 	name: 'my-field',
 	components: {
-		'chrome-picker': VueColor.Chrome,
 		MyCalendar, MyChart, MyGantt, MyKanban,
 		MyInputBarcode, MyInputColor, MyInputDate, MyInputDecimal,
 		MyInputDrawing, MyInputFiles, MyInputIframe, MyInputLogin,
@@ -247,6 +246,7 @@ export default {
 					@open-form="(...args) => $emit('open-form',...args)"
 					:formLoading
 					:isHidden
+					:layerDataDefinitions="field.layersData"
 					:moduleId
 					:readonly="isReadonly"
 				/>

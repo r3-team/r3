@@ -71,90 +71,7 @@ export default Vue.defineAsyncComponent(async () => {
 			</div>
 		</div>`,
 		props: {
-			layerDataDefinitions: {
-				type: Array,
-				required: false,
-				default: [
-					{
-						attributeIdData: "2f84cb84-5c80-4326-a9e9-c3a5b2cd59fe",
-						attributeIdDataColor: null,
-						indexDataColor: 0,
-						colorFill: 'a0e5ed',
-						id: "a7899077-169c-475e-9cfb-68430a1ea82b",
-						openForm: {
-							formIdOpen: '815bc581-e531-47e0-8996-b53e4442776d',
-							relationIndexOpen: 0,
-							popUpType: 'float',
-							maxHeight: 500,
-							maxWidth: 600,
-						},
-						query: {
-							relationId: "a1611a6d-7739-42ab-a253-0cb17cefd64d",
-							joins: [
-								{
-									relationId: "a1611a6d-7739-42ab-a253-0cb17cefd64d",
-									connector: "INNER",
-									indexFrom: -1,
-									index: 0,
-									applyCreate: true,
-									applyDelete: true,
-									applyUpdate: true,
-								},
-							],
-						},
-						captions: {
-							fieldMapLayerDataTitle: {
-								de_de: "Länder",
-								en_us: "Countries",
-							},
-						},
-					},
-					{
-						attributeIdData: "af9553ef-8ffb-417f-98bd-c3379c3f8223",
-						attributeIdDataColor: '2a6d2f39-a6d2-4ca4-89b9-abbcf2544b60',
-						indexDataColor: 1,
-						colorFill: '9de2a8',
-						id: "a7899077-169c-475e-9cfb-68430a1ea82c",
-						openForm: {
-							formIdOpen: 'faef9fcf-4bec-432c-a9c3-537430025c7f',
-							relationIndexOpen: 0,
-							popUpType: 'float',
-							maxHeight: 500,
-							maxWidth: 600,
-						},
-						query: {
-							relationId: "efe7b874-75c9-4c3a-8923-68b31693f562",
-							joins: [
-								{
-									relationId: "efe7b874-75c9-4c3a-8923-68b31693f562",
-									connector: "INNER",
-									indexFrom: -1,
-									index: 0,
-									applyCreate: true,
-									applyDelete: true,
-									applyUpdate: true,
-								},
-								{
-									relationId: "41672876-6049-4e3b-af24-9ad49c4404f8",
-									attributeId: '0a25f5de-0950-4bc2-9192-080ed7abd70c',
-									connector: "LEFT",
-									indexFrom: 0,
-									index: 1,
-									applyCreate: true,
-									applyDelete: true,
-									applyUpdate: false,
-								}
-							],
-						},
-						captions: {
-							fieldMapLayerDataTitle: {
-								de_de: "Gebäude",
-								en_us: "Buildings",
-							},
-						},
-					},
-				],
-			},
+			layerDataDefinitions: { type: Array, required: true },
 			formLoading: { type: Boolean, required: true },
 			isHidden: { type: Boolean, required: false, default: false },
 			layerBaseIds: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
@@ -244,22 +161,17 @@ export default Vue.defineAsyncComponent(async () => {
 					const writableUpdate = d.query.joins[0].applyUpdate;
 
 					out.push({
-						action: {
-							create: writableCreate,
-							delete: writableDelete,
-							update: writableUpdate
+						...d,
+						...{
+							action: {
+								create: writableCreate,
+								delete: writableDelete,
+								update: writableUpdate,
+							},
+							data: source,
+							layer,
+							readonly: !writableCreate && !writableDelete && !writableUpdate,
 						},
-						attributeIdData: d.attributeIdData,
-						attributeIdDataColor: d.attributeIdDataColor,
-						captions: d.captions,
-						colorFill: d.colorFill,
-						data: source,
-						id: d.id,
-						indexDataColor: d.indexDataColor,
-						layer,
-						openForm: d.openForm,
-						query: d.query,
-						readonly: !writableCreate && !writableDelete && !writableUpdate,
 					});
 				}
 				return out;
@@ -285,6 +197,7 @@ export default Vue.defineAsyncComponent(async () => {
 			layersDataWritable: s => s.layersData.filter(v => !v.readonly),
 
 			// stores
+			attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 			capGen: s => s.$store.getters.captions.generic,
 			layerBaseIdMapInstance: s => s.$store.getters.geoLayerBaseIdMap,
 		},
@@ -344,12 +257,13 @@ export default Vue.defineAsyncComponent(async () => {
 					// open form for first valid feature with open-form action on layer
 					for (const feature of features) {
 						const l = this.layersData.find(v => v.data.getFeatures().includes(feature));
-						if (l === undefined || feature.getId() === undefined) {
+						const indexRecordIds = feature.get('indexRecordIds');
+						if (l === undefined || indexRecordIds === undefined) {
 							console.warn('cannot find feature to open in data sources');
 							return;
 						}
-						if (l.openForm !== null) {
-							this.$emit('open-form', [feature.getId()], l.openForm);
+						if (l.openForm !== null && indexRecordIds[l.indexData] !== undefined) {
+							this.$emit("open-form", [indexRecordIds[l.indexData]], l.openForm);
 							break;
 						}
 					}
@@ -491,19 +405,19 @@ export default Vue.defineAsyncComponent(async () => {
 			del(features) {
 				const requests = [];
 				for (const feature of features) {
-					const layer = this.layersData.find(v => v.data.getFeatures().includes(feature));
-					// to delete a feature, data layer for feature must exist and be in edit mode, feature must have an ID and
-					if (layer === undefined || feature.getId() === undefined) {
+					const l = this.layersData.find(v => v.data.getFeatures().includes(feature));
+					// to delete a feature, data layer for feature must exist and be in edit mode
+					const indexRecordIds = feature.get('indexRecordIds');
+					if (l === undefined || indexRecordIds === undefined) {
 						console.warn('cannot find feature to delete in data sources');
 						return;
 					}
-					if (this.layerDataIdEdit !== layer.id)
-						continue;
-
-					requests.push(ws.prepare('data', 'del', {
-						relationId: layer.query.relationId,
-						recordId: feature.getId()
-					}));
+					if (this.layerDataIdEdit === l.id && indexRecordIds[l.indexData] !== undefined) {
+						requests.push(ws.prepare('data', 'del', {
+							relationId: this.attributeIdMap[l.attributeIdData].relationId,
+							recordId: indexRecordIds[l.indexData]
+						}));
+					}
 				}
 				if (requests.length === 0)
 					return;
@@ -511,9 +425,9 @@ export default Vue.defineAsyncComponent(async () => {
 				ws.sendMultiple(requests, true).then(
 					responses => {
 						for (let i = 0, j = responses.length; i < j; i++) {
-							const layer = this.layersData.find(v => v.data.getFeatures().includes(features[i]));
-							if (layer !== undefined)
-								layer.data.removeFeature(features[i]);
+							const l = this.layersData.find(v => v.data.getFeatures().includes(features[i]));
+							if (l !== undefined)
+								l.data.removeFeature(features[i]);
 
 							this.interactionSelect.getFeatures().remove(features[i]);
 						}
@@ -528,8 +442,7 @@ export default Vue.defineAsyncComponent(async () => {
 				const requests = [];
 				for (const l of this.layersData) {
 					l.data.clear();
-
-					const expressions = [{ attributeId: l.attributeIdData, index: 0 }];
+					const expressions = [{ attributeId: l.attributeIdData, index: l.indexData }];
 
 					if (l.attributeIdDataColor !== null)
 						expressions.push({ attributeId: l.attributeIdDataColor, index: l.indexDataColor });
@@ -539,7 +452,7 @@ export default Vue.defineAsyncComponent(async () => {
 							relationId: l.query.relationId,
 							joins: l.query.joins,
 							expressions,
-							filters: [],
+							filters: l.query.filters,
 							getIds: true,
 						}),
 					);
@@ -551,12 +464,16 @@ export default Vue.defineAsyncComponent(async () => {
 						const featureCollectionJson = { type: 'FeatureCollection', features: [] };
 						for (const r of res.payload.rows) {
 							if (r.values[0] === null)
-								continue
+								continue;
 
-							const feature = { type: 'Feature', geometry: r.values[0], id: r.indexRecordIds['0'] };
+							const feature = {
+								type: 'Feature',
+								geometry: r.values[0],
+								properties: { indexRecordIds: r.indexRecordIds },
+							};
 
 							if (layer.attributeIdDataColor !== null && r.values[1] !== null)
-								feature.properties = { colorFill: r.values[1] };
+								feature.properties.colorFill = r.values[1];
 
 							featureCollectionJson.features.push(feature);
 						}
@@ -569,40 +486,39 @@ export default Vue.defineAsyncComponent(async () => {
 				const layer = this.layerDataIdMap[this.layerDataIdEdit];
 				const requests = [];
 				for (const feature of features) {
+
+					const indexRecordIds = feature.get('indexRecordIds');
+					const relationIndexMap = {};
+
 					// takeover SRID from the view
 					feature.set('srid', this.viewSrid);
+					feature.unset('indexRecordIds');
 
-					const geoJson = this.geoJsonTo(feature);
-					let recordId = 0;
-					if (feature.getId() !== undefined) {
-						// get existing record ID, remove from JSON as its not standard and not required
-						recordId = feature.getId();
-						delete geoJson.id;
+					for (const j of layer.query.joins) {
+						const recordId = indexRecordIds?.[j.index] !== undefined ? indexRecordIds[j.index] : 0;
+
+						if (recordId === 0 && !j.applyCreate)
+							continue;
+
+						relationIndexMap[j.index] = {
+							relationId: j.relationId,
+							attributeId: j.attributeId,
+							indexFrom: j.indexFrom,
+							recordId,
+							attributes: j.index !== layer.indexData ? [] : [
+								{ attributeId: layer.attributeIdData, value: this.geoJsonTo(feature) }
+							],
+						};
 					}
-
-					requests.push(
-						ws.prepare('data', 'set', {
-							0: {
-								relationId: layer.query.relationId,
-								indexFrom: -1,
-								recordId,
-								attributes: [
-									{ attributeId: layer.attributeIdData, value: geoJson },
-								],
-							},
-						}),
-					);
+					requests.push(ws.prepare('data', 'set', relationIndexMap));
 				}
 				if (requests.length === 0)
 					return;
 
 				ws.sendMultiple(requests, true).then((results) => {
 					for (let i = 0, j = results.length; i < j; i++) {
-						const res = results[i].payload;
-
-						// apply new record ID to feature
-						if (features[i] !== undefined && features[i].getId() === undefined && res.indexRecordIds['0'] !== undefined)
-							features[i].setId(res.indexRecordIds['0']);
+						if (features[i] !== undefined)
+							features[i].set('indexRecordIds', results[i].payload.indexRecordIds);
 					}
 				}, this.$root.genericError);
 			},

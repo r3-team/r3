@@ -335,6 +335,7 @@ type FieldMapLayerData struct {
 	Id                   uuid.UUID   `json:"id"`
 	AttributeIdData      uuid.UUID   `json:"attributeIdData"`
 	AttributeIdDataColor pgtype.UUID `json:"attributeIdDataColor"`
+	IndexData            int         `json:"indexData"`
 	IndexDataColor       int         `json:"indexDataColor"`
 	ColorFill            string      `json:"colorFill"`
 	OpenForm             OpenForm    `json:"openForm"`

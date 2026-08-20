@@ -2,7 +2,6 @@ package caption
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"r3/schema"
 	"r3/types"
@@ -207,6 +206,9 @@ func GetEntityName(content string) (schema.DbEntity, error) {
 	case "fieldTitle", "fieldHelp":
 		return schema.DbField, nil
 
+	case "fieldMapLayerDataTitle":
+		return schema.DbFieldMapLayerData, nil
+
 	case "formActionTitle":
 		return schema.DbFormAction, nil
 
@@ -249,5 +251,5 @@ func GetEntityName(content string) (schema.DbEntity, error) {
 	case "widgetTitle":
 		return schema.DbWidget, nil
 	}
-	return "", errors.New("bad caption content name")
+	return "", fmt.Errorf("bad caption content name '%s'", content)
 }

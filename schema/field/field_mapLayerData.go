@@ -16,7 +16,7 @@ import (
 func getLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID) ([]types.FieldMapLayerData, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, attribute_id_data, attribute_id_data_color, index_data_color, color_fill
+		SELECT id, attribute_id_data, attribute_id_data_color, index_data, index_data_color, color_fill
 		FROM app.field_map_layer_data
 		WHERE field_id = $1
 		ORDER BY position ASC
@@ -29,7 +29,7 @@ func getLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID) ([]types
 	layers := make([]types.FieldMapLayerData, 0)
 	for rows.Next() {
 		var l types.FieldMapLayerData
-		if err := rows.Scan(&l.Id, &l.AttributeIdData, &l.AttributeIdDataColor, &l.IndexDataColor, &l.ColorFill); err != nil {
+		if err := rows.Scan(&l.Id, &l.AttributeIdData, &l.AttributeIdDataColor, &l.IndexData, &l.IndexDataColor, &l.ColorFill); err != nil {
 			return nil, err
 		}
 		layers = append(layers, l)
@@ -60,15 +60,15 @@ func setLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, layers [
 	for i, l := range layers {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_map_layer_data (
-				field_id, position, id, attribute_id_data,
-				attribute_id_data_color, index_data_color, color_fill
+				field_id, position, id, attribute_id_data, attribute_id_data_color,
+				index_data, index_data_color, color_fill
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 			ON CONFLICT (id)
 			DO UPDATE SET
 				position = $2, attribute_id_data = $4, attribute_id_data_color = $5,
-				index_data_color = $6, color_fill = $7
-		`, fieldId, i, l.Id, l.AttributeIdData, l.AttributeIdDataColor, l.IndexDataColor, l.ColorFill); err != nil {
+				index_data = $6, index_data_color = $7, color_fill = $8
+		`, fieldId, i, l.Id, l.AttributeIdData, l.AttributeIdDataColor, l.IndexData, l.IndexDataColor, l.ColorFill); err != nil {
 			return err
 		}
 		idsKeep[i] = l.Id
