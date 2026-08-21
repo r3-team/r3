@@ -101,7 +101,7 @@ export default Vue.defineAsyncComponent(async () => {
 			return {
 				featurePropertiesFrontend: ['colorFill', 'indexRecordIds'],
 				interaction: {}, // current interactions (draw, modify, ...)
-				interactionSelect: null, // select interaction, always active
+				interactionHover: null, // hover interaction, always active
 				layerBaseIdsHidden: [],
 				layerDataIdEdit: null,
 				layerDataIdsHidden: [],
@@ -154,7 +154,13 @@ export default Vue.defineAsyncComponent(async () => {
 					if (d.query === null || d.query.joins.length === 0) continue;
 
 					const source = new ol.source.Vector();
-					const layer = new ol.layer.Vector({ source, style: f => s.getFeatureStyle(f, d.colorFill, false) });
+					const layer = new ol.layer.Vector({
+						source,
+						style: f => {
+							const isPoint = f.getGeometry().getType() === 'Point';
+							return s.getFeatureStyle(f.get('colorFill') ?? d.colorFill, false, isPoint);
+						}
+					});
 					layer.set('id', d.id);
 
 					const writableCreate = d.query.joins[0].applyCreate;
@@ -206,6 +212,7 @@ export default Vue.defineAsyncComponent(async () => {
 			// simple
 			layerDataEditActive: s => s.layerDataIdEdit !== null && !s.layerDataIdsHidden.includes(s.layerDataIdEdit) ? s.layerDataIdMap[s.layerDataIdEdit] : false,
 			layersDataWritable: s => s.layersData.filter(v => !v.readonly),
+			toolHoverEnabled: s => s.layerDataEditActive !== false && (s.toolActive === null || s.toolActive === 'delete'),
 
 			// stores
 			attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
@@ -256,16 +263,13 @@ export default Vue.defineAsyncComponent(async () => {
 			getUuidV4,
 
 			// actions
-			getFeatureStyle(feature, colorFillFallback, onHover) {
+			getFeatureStyle(colorFill, onHover, isPoint) {
 				const alpha = onHover ? 0.7 : 0.4;
 				const borderWidth = onHover ? 3.5 : 2.5;
 				const scaleImage = onHover ? 0.8 : 0.6;
-
-				let colorFill = feature.get('colorFill') ?? colorFillFallback;
 				colorFill = this.colorApplyAlpha(`#${colorFill}`, alpha);
 
-				const geom = feature.getGeometry();
-				if (geom.getType() === 'Point') {
+				if (isPoint) {
 					return [
 						new ol.style.Style({
 							image: new ol.style.Circle({
@@ -410,11 +414,17 @@ export default Vue.defineAsyncComponent(async () => {
 						}),
 					});
 
-					// register default interactions
-					// select action (for opening/deleting records)
-					//this.interactionSelect = new ol.interaction.Select({ style: f => this.getFeatureStyle(f, '000000', true) });
-					//this.interactionSelect.on('select', this.selectFeatures);
-					//this.map.addInteraction(this.interactionSelect);
+					// default hover action
+					this.interactionHover = new ol.interaction.Select({
+						condition: ol.events.condition.pointerMove,
+						filter: (f, l) => this.toolHoverEnabled && l.get('id') === this.layerDataIdEdit,
+						style: f => {
+							const l = this.layerDataEditActive;
+							const isPoint = f.getGeometry().getType() === 'Point';
+							return this.getFeatureStyle(f.get('colorFill') ?? l.colorFill, true, isPoint);
+						}
+					});
+					this.map.addInteraction(this.interactionHover);
 
 					// click actions (record open/delete)
 					this.map.on('singleclick', e => {
