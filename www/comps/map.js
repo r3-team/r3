@@ -11,7 +11,12 @@ export default Vue.defineAsyncComponent(async () => {
 		name: "my-map",
 		template: `<div class="my-map">
 			<div class="my-map-content" ref="map" @click.right.prevent="switchTool(null)"></div>
-			<div class="my-map-toolbox">
+			<div class="my-map-toolbox" v-if="layersData.length !== 0">
+
+				<div class="my-map-tool clickable" @click.left.exact="get">
+					<img src="images/refresh.png" />
+				</div>
+				<div class="my-map-spacer vertical"></div>
 				<div class="my-map-tool"
 					v-for="t in tools"
 					@click.left.exact="switchTool(t)"
@@ -28,7 +33,7 @@ export default Vue.defineAsyncComponent(async () => {
 					@click.right.exact.prevent="switchTool(null)"
 					:class="{ clickable:toolUseable.delete, active:toolActive === 'delete' }"
 				>
-					<img :src="'images/'+toolImages.delete" />
+					<img src="images/delete.png" />
 				</div>
 			</div>
 			<div class="my-map-layers">
@@ -83,6 +88,7 @@ export default Vue.defineAsyncComponent(async () => {
 		emits: ['open-form'],
 		data() {
 			return {
+				featurePropertiesFrontend: ['colorFill', 'indexRecordIds'],
 				interaction: {}, // current interactions (draw, modify, ...)
 				interactionSelect: null, // select interaction, always active
 				layerBaseIdsHidden: [],
@@ -95,7 +101,6 @@ export default Vue.defineAsyncComponent(async () => {
 				tools: ['point', 'line', 'polygon', 'circle', 'modify'],
 				toolImages: {
 					circle: 'all.png',
-					delete: 'delete.png',
 					line: 'dotLine.png',
 					point: 'dot.png',
 					polygon: 'dotPolygon.png',
@@ -404,6 +409,7 @@ export default Vue.defineAsyncComponent(async () => {
 			// backend calls
 			del(features) {
 				const requests = [];
+				const requestIndexMapFeature = {};
 				for (const feature of features) {
 					const l = this.layersData.find(v => v.data.getFeatures().includes(feature));
 					// to delete a feature, data layer for feature must exist and be in edit mode
@@ -413,10 +419,13 @@ export default Vue.defineAsyncComponent(async () => {
 						return;
 					}
 					if (this.layerDataIdEdit === l.id && indexRecordIds[l.indexData] !== undefined) {
-						requests.push(ws.prepare('data', 'del', {
-							relationId: this.attributeIdMap[l.attributeIdData].relationId,
-							recordId: indexRecordIds[l.indexData]
-						}));
+						for (const j of l.query.joins) {
+							const recordId = indexRecordIds?.[j.index] !== undefined ? indexRecordIds[j.index] : 0;
+							if (recordId !== 0 && j.applyDelete) {
+								requestIndexMapFeature[String(requests.length)] = feature;
+								requests.push(ws.prepare('data', 'del', { relationId: j.relationId, recordId }));
+							}
+						}
 					}
 				}
 				if (requests.length === 0)
@@ -425,11 +434,19 @@ export default Vue.defineAsyncComponent(async () => {
 				ws.sendMultiple(requests, true).then(
 					responses => {
 						for (let i = 0, j = responses.length; i < j; i++) {
-							const l = this.layersData.find(v => v.data.getFeatures().includes(features[i]));
-							if (l !== undefined)
-								l.data.removeFeature(features[i]);
+							const f = requestIndexMapFeature[i];
+							if (f === undefined)
+								continue;
 
-							this.interactionSelect.getFeatures().remove(features[i]);
+							const l = this.layersData.find(v => v.data.getFeatures().includes(f));
+							if (l !== undefined)
+								l.data.removeFeature(f);
+
+							this.interactionSelect.getFeatures().remove(f);
+
+							// any feature could be part of multiple DEL requests (if multiple records involved)
+							// feature itself must only be removed once so we delete the reference
+							delete requestIndexMapFeature[i];
 						}
 					},
 					this.$root.genericError
@@ -492,7 +509,11 @@ export default Vue.defineAsyncComponent(async () => {
 
 					// takeover SRID from the view
 					feature.set('srid', this.viewSrid);
-					feature.unset('indexRecordIds');
+
+					// remove all properties we use for frontend
+					for (const prop of this.featurePropertiesFrontend) {
+						feature.unset(prop);
+					}
 
 					for (const j of layer.query.joins) {
 						const recordId = indexRecordIds?.[j.index] !== undefined ? indexRecordIds[j.index] : 0;

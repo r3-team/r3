@@ -1032,39 +1032,38 @@ export default {
 				/>
 
 				<!-- map options -->
-				<template v-if="isMap">
-					<tr>
-						<td colspan="2">
+				<tr v-if="isMap">
+					<td colspan="2">
+						<div class="column gap">
 							<div class="row centered space-between">
 								<span>{{ capGen.layersData }}</span>
 								<my-button image="add.png" @trigger="layerDataAdd" />
 							</div>
-						</td>
-					</tr>
-					<tr v-if="field.layersData.length !== 0">
-						<td colspan="2">
-							<div class="builder-field-options-map-layer-data">
+							<div class="builder-field-options-map-layer-data" v-if="field.layersData.length !== 0">
 								<my-tabs
 									v-model="tabLayerData"
 									:entries="[...field.layersData.keys()]"
 									:entriesText="tabsLayersData"
 								/>
-								<my-builder-field-options-map-layer-data
-									v-if="field.layersData[tabLayerData] !== undefined"
-									v-model="field.layersData[tabLayerData]"
-									:builderLanguage
-									:entityIdMapRef
-									:fieldIdMap
-									:formId
-									:joinsIndexMap
-									:key="field.layersData[tabLayerData].id"
-									:moduleId
-									:readonly
-								/>
+								<div class="content">
+									<my-builder-field-options-map-layer-data
+										v-if="field.layersData[tabLayerData] !== undefined"
+										v-model="field.layersData[tabLayerData]"
+										@remove="layerDataRem"
+										:builderLanguage
+										:entityIdMapRef
+										:fieldIdMap
+										:formId
+										:joinsIndexMap
+										:key="field.layersData[tabLayerData].id"
+										:moduleId
+										:readonly
+									/>
+								</div>
 							</div>
-						</td>
-					</tr>
-				</template>
+						</div>
+					</td>
+				</tr>
 
 				<!-- variable -->
 				<tr v-if="isVariable">
@@ -1286,8 +1285,9 @@ export default {
 		tabsLayersData: s => {
 			if (!s.isMap) return [];
 			const out = [];
+			const prefix = s.field.layersData.length < 4 ? `${s.capGen.layer} ` : 'L';
 			for (let i = 0, j = s.field.layersData.length; i < j; i++) {
-				out.push(`${s.capGen.layer} ${i + 1}`);
+				out.push(`${prefix}${i + 1}`);
 			}
 			return out;
 		},
@@ -1403,6 +1403,12 @@ export default {
 			const v = JSON.parse(JSON.stringify(this.field.layersData));
 			v.push(this.getTemplateFieldMapLayerData());
 			this.set('layersData', v);
+		},
+		layerDataRem() {
+			const v = JSON.parse(JSON.stringify(this.field.layersData));
+			v.splice(this.tabLayerData, 1);
+			this.set('layersData', v);
+			this.tabLayerData = 0;
 		},
 		openAttribute(relationId, middle) {
 			if (!middle) this.$router.push(`/builder/relation/${relationId}`);

@@ -1,4 +1,4 @@
-import MyInputColor from '../inputColor.js';
+import MyInputColorWrap from '../inputColorWrap.js';
 import { getJoinsIndexMap } from '../shared/query.js';
 
 import MyBuilderCaption from './builderCaption.js';
@@ -9,35 +9,11 @@ import MyBuilderQuery from './builderQuery.js';
 export default {
 	name: 'my-builder-field-options-map-layer-data',
 	components: {
-		MyInputColor, MyBuilderCaption, MyBuilderIndexAttributeInput,
+		MyInputColorWrap, MyBuilderCaption, MyBuilderIndexAttributeInput,
 		MyBuilderOpenForm, MyBuilderQuery
 	},
 	template: `<table>
 		<tbody>
-			<tr>
-				<td>{{ capGen.title }}</td>
-				<td>
-					<my-builder-caption
-						v-model="layer.captions.fieldMapLayerDataTitle"
-						:language="builderLanguage"
-						:readonly
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capGen.colorFill }}</td>
-				<td>
-					<div class="input-custom">
-						<my-input-color
-							v-model="layer.colorFill"
-							@dropdown-show="dropdownColor = $event"
-							:allowNull="false"
-							:dropdownShow="dropdownColor"
-							:readonly
-						/>
-					</div>
-				</td>
-			</tr>
 			<tr>
 				<td colspan="2">
 					<my-builder-query
@@ -55,6 +31,27 @@ export default {
 				</td>
 			</tr>
 			<template v-if="layer.query !== null && layer.query.relationId !== null">
+				<tr>
+					<td>{{ capGen.title }}</td>
+					<td>
+						<my-builder-caption
+							v-model="layer.captions.fieldMapLayerDataTitle"
+							:language="builderLanguage"
+							:readonly
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capGen.colorFill }}</td>
+					<td>
+						<my-input-color-wrap
+							v-model="layer.colorFill"
+							@dropdown-show="dropdownColor = $event"
+							:allowNull="false"
+							:readonly
+						/>
+					</td>
+				</tr>
 				<tr>
 					<td>{{ capGen.attributeGeo }}*</td>
 					<td>
@@ -93,6 +90,15 @@ export default {
 					</td>
 				</tr>
 			</template>
+			<tr>
+				<td colspan="2">
+					<my-button image="delete.png"
+						@trigger="$emit('remove')"
+						:cancel="true"
+						:caption="capGen.button.delete"
+					/>
+				</td>
+			</tr>
 		</tbody>
 	</table>`,
 	props: {
@@ -105,12 +111,7 @@ export default {
 		moduleId: { type: String, required: true },
 		readonly: { type: Boolean, required: true },
 	},
-	emits: ['update:modelValue'],
-	data() {
-		return {
-			dropdownColor: false
-		};
-	},
+	emits: ['remove', 'update:modelValue'],
 	computed: {
 		// inputs
 		layer: { // this method updates obj directly
