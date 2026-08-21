@@ -1,39 +1,32 @@
-import {hasAccessToRelation}         from './access.js';
-import {getIndexAttributeId}         from './attribute.js';
-import {getItemTitle}                from './builder.js';
-import {getCollectionValues}         from './collection.js';
-import {variableValueGet}            from './variable.js';
-import MyStore                       from '../../stores/store.js';
-import {
-	checkDataOptions,
-	filterOperatorIsSingleValue
-} from './generic.js';
-import {
-	getUnixNowDate,
-	getUnixNowDatetime,
-	getUnixNowTime
-} from './time.js';
+import MyStore from '../../stores/store.js';
+import { hasAccessToRelation } from './access.js';
+import { getIndexAttributeId } from './attribute.js';
+import { getItemTitle } from './builder.js';
+import { getCollectionValues } from './collection.js';
+import { checkDataOptions, filterOperatorIsSingleValue } from './generic.js';
+import { getUnixNowDate, getUnixNowDatetime, getUnixNowTime } from './time.js';
+import { variableValueGet } from './variable.js';
 
 // map of joins keyed by relation index
 export function getJoinsIndexMap(joins) {
-	let map = {};
-	for(const j of joins) {
+	const map = {};
+	for (const j of joins) {
 		map[j.index] = j;
 	}
 	return map;
 };
-export function getJoinsIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,indexesNoSet,dataOptions) {
-	let map = {};
+export function getJoinsIndexMapExpanded(joins, indexMapRecordId, indexesNoDel, indexesNoSet, dataOptions) {
+	const map = {};
 	joins = JSON.parse(JSON.stringify(joins));
-	for(let j of joins) {
+	for (const j of joins) {
 		const recordId = indexMapRecordId[j.index];
-		j.recordId     = Number.isInteger(recordId) ? recordId : 0;
-		j.recordNew    = j.applyCreate && checkDataOptions(4,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2);
+		j.recordId = Number.isInteger(recordId) ? recordId : 0;
+		j.recordNew = j.applyCreate && checkDataOptions(4, dataOptions) && hasAccessToRelation(MyStore.getters.access, j.relationId, 2);
 
 		// states based on combined join settings, data option overwrite, user access, state of record on current join, protection setting of preset record (delete only)
-		j.recordCreate = j.applyCreate && j.recordId === 0 && checkDataOptions(4,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2);
-		j.recordUpdate = j.applyUpdate && j.recordId !== 0 && checkDataOptions(2,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2) && !indexesNoSet.includes(j.index);
-		j.recordDelete = j.applyDelete && j.recordId !== 0 && checkDataOptions(1,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,3) && !indexesNoDel.includes(j.index) &&
+		j.recordCreate = j.applyCreate && j.recordId === 0 && checkDataOptions(4, dataOptions) && hasAccessToRelation(MyStore.getters.access, j.relationId, 2);
+		j.recordUpdate = j.applyUpdate && j.recordId !== 0 && checkDataOptions(2, dataOptions) && hasAccessToRelation(MyStore.getters.access, j.relationId, 2) && !indexesNoSet.includes(j.index);
+		j.recordDelete = j.applyDelete && j.recordId !== 0 && checkDataOptions(1, dataOptions) && hasAccessToRelation(MyStore.getters.access, j.relationId, 3) && !indexesNoDel.includes(j.index) &&
 			MyStore.getters['schema/relationIdMap'][j.relationId].presets.filter(p => p.protected && MyStore.getters['schema/presetIdMapRecordId'][p.id] === j.recordId).length === 0;
 
 		map[j.index] = j;
@@ -43,24 +36,24 @@ export function getJoinsIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,ind
 
 export function fillRelationRecordIds(joinsOrg) {
 	// clone to not update referenced joins
-	let joins = JSON.parse(JSON.stringify(joinsOrg));
-	for(let i = 0, j = joins.length; i < j; i++) {
+	const joins = JSON.parse(JSON.stringify(joinsOrg));
+	for (let i = 0, j = joins.length; i < j; i++) {
 		joins[i].recordId = 0;
 	}
 	return joins;
 };
 
 export function getRelationsJoined(joins) {
-	let out = [];
-	for(const j of joins) {
-		if(j.index === 0) // ignore source relation
+	const out = [];
+	for (const j of joins) {
+		if (j.index === 0) // ignore source relation
 			continue;
 
 		out.push({
-			attributeId:j.attributeId,
-			index:j.index,
-			indexFrom:j.indexFrom,
-			connector:j.connector
+			attributeId: j.attributeId,
+			index: j.index,
+			indexFrom: j.indexFrom,
+			connector: j.connector
 		});
 	}
 	return out;
@@ -69,87 +62,88 @@ export function getRelationsJoined(joins) {
 export function getQueryExpressions(columns) {
 	const getForAttribute = c => {
 		return {
-			attributeId:c.attributeId,
-			index:c.index,
-			groupBy:c.groupBy,
-			aggregator:c.aggregator,
-			distincted:c.distincted
+			attributeId: c.attributeId,
+			index: c.index,
+			groupBy: c.groupBy,
+			aggregator: c.aggregator,
+			distincted: c.distincted
 		};
 	};
 	const getForFncPg = c => {
 		return {
-			aggregator:c.aggregator,
-			arguments:c.arguments,
-			distincted:c.distincted,
-			groupBy:c.groupBy,
-			pgFunctionId:c.pgFunctionId
+			aggregator: c.aggregator,
+			arguments: c.arguments,
+			distincted: c.distincted,
+			groupBy: c.groupBy,
+			pgFunctionId: c.pgFunctionId
 		};
 	};
 	const getForFncScalar = c => {
 		return {
-			aggregator:c.aggregator,
-			arguments:c.arguments,
-			distincted:c.distincted,
-			groupBy:c.groupBy,
-			scalar:c.scalar
+			aggregator: c.aggregator,
+			arguments: c.arguments,
+			distincted: c.distincted,
+			groupBy: c.groupBy,
+			scalar: c.scalar
 		};
 	};
 
-	let out = [];
-	for(const c of columns) {
-		switch(c.content) {
-			case 'attribute':  out.push(getForAttribute(c)); break;
-			case 'fnc_pg':     out.push(getForFncPg(c)); break;
+	const out = [];
+	for (const c of columns) {
+		switch (c.content) {
+			case 'attribute': out.push(getForAttribute(c)); break;
+			case 'fnc_pg': out.push(getForFncPg(c)); break;
 			case 'fnc_scalar': out.push(getForFncScalar(c)); break;
 			case 'query':
 				// move expression aggregator to query (allows ORDER BY in aggregation)
-				let expr = getForAttribute(c);
-				expr.aggregator = null;
-
-				out.push({
-					aggregator:c.aggregator,
-					query:{
-						relationId:c.query.relationId,
-						limit:c.query.fixedLimit,
-						joins:c.query.joins,
-						expressions:[expr],
-						filters:c.query.filters,
-						orders:c.query.orders
-					}
-				});
-			break;
+				{
+					const expr = getForAttribute(c);
+					expr.aggregator = null;
+					out.push({
+						aggregator: c.aggregator,
+						query: {
+							relationId: c.query.relationId,
+							limit: c.query.fixedLimit,
+							joins: c.query.joins,
+							expressions: [expr],
+							filters: c.query.filters,
+							orders: c.query.orders
+						}
+					});
+				}
+				break;
 		}
 	}
 	return out;
 };
 
-export function getQueryExpressionsDateRange(attributeId0,index0,attributeId1,index1,attributeIdColor,indexColor) {
+export function getQueryExpressionsDateRange(attributeId0, index0, attributeId1, index1, attributeIdColor, indexColor) {
 	// fixed date range expressions
-	let expr = [
-		{ attributeId:attributeId0,index:index0,groupBy:false,aggregator:null },
-		{ attributeId:attributeId1,index:index1,groupBy:false,aggregator:null }
+	const expr = [
+		{ attributeId: attributeId0, index: index0, groupBy: false, aggregator: null },
+		{ attributeId: attributeId1, index: index1, groupBy: false, aggregator: null }
 	];
 
 	// attribute color expression
-	if(attributeIdColor !== null)
+	if (attributeIdColor !== null)
 		expr.push({
-			attributeId:attributeIdColor,
-			index:indexColor,
-			groupBy:false,
-			aggregator:null
+			attributeId: attributeIdColor,
+			index: indexColor,
+			groupBy: false,
+			aggregator: null
 		});
 
 	// add expressions from selected columns
 	return expr;
 };
 
-export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypted) {
-	let out = [];
-	for(const join of joins) {
+export function getNestedIndexAttributeIdsByJoins(joins, nestingLevel, inclEncrypted) {
+	const out = [];
+	for (const join of joins) {
 		const r = MyStore.getters['schema/relationIdMap'][join.relationId];
 
-		for(const atr of r.attributes) {
-			if(!atr.encrypted || inclEncrypted)
+		for (const atr of r.attributes) {
+			if (!atr.encrypted || inclEncrypted)
 				out.push(`${nestingLevel}_${join.index}_${atr.id}`);
 		}
 	}
@@ -158,35 +152,35 @@ export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypt
 
 export function getCaptionByIndexAttributeId(indexAttributeId) {
 	const v = indexAttributeId.split('_');
-	return getItemTitle(v[1],v[0],false,null);
+	return getItemTitle(v[1], v[0], false, null);
 };
 
 export function getSubQueryFilterExpressions(subQuery) {
 	return [{
-		aggregator:subQuery.queryAggregator,
-		attributeId:subQuery.attributeId,
-		index:subQuery.attributeIndex
+		aggregator: subQuery.queryAggregator,
+		attributeId: subQuery.attributeId,
+		index: subQuery.attributeIndex
 	}];
 };
 
-export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,globalSearchDict,
-	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
-	recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal) {
+export function getQueryFiltersProcessed(filters, joinsIndexMap, globalSearch, globalSearchDict,
+	dataFieldIdMap, fieldIdsChanged, fieldIdsInvalid, fieldValues, recordMayCreate, recordMayDelete,
+	recordMayUpdate, collectionIdMapIndexFilter, variableIdMapLocal) {
 
-	if(globalSearch               === undefined) globalSearch               = null;
-	if(globalSearchDict           === undefined) globalSearchDict           = null;
-	if(dataFieldIdMap             === undefined) dataFieldIdMap             = {};
-	if(fieldIdsChanged            === undefined) fieldIdsChanged            = [];
-	if(fieldIdsInvalid            === undefined) fieldIdsInvalid            = [];
-	if(fieldValues                === undefined) fieldValues                = {};
-	if(recordMayCreate            === undefined) recordMayCreate            = false;
-	if(recordMayDelete            === undefined) recordMayDelete            = false;
-	if(recordMayUpdate            === undefined) recordMayUpdate            = false;
-	if(collectionIdMapIndexFilter === undefined) collectionIdMapIndexFilter = {};
-	if(variableIdMapLocal         === undefined) variableIdMapLocal         = {};
+	if (globalSearch === undefined) globalSearch = null;
+	if (globalSearchDict === undefined) globalSearchDict = null;
+	if (dataFieldIdMap === undefined) dataFieldIdMap = {};
+	if (fieldIdsChanged === undefined) fieldIdsChanged = [];
+	if (fieldIdsInvalid === undefined) fieldIdsInvalid = [];
+	if (fieldValues === undefined) fieldValues = {};
+	if (recordMayCreate === undefined) recordMayCreate = false;
+	if (recordMayDelete === undefined) recordMayDelete = false;
+	if (recordMayUpdate === undefined) recordMayUpdate = false;
+	if (collectionIdMapIndexFilter === undefined) collectionIdMapIndexFilter = {};
+	if (variableIdMapLocal === undefined) variableIdMapLocal = {};
 
-	const getFilterSideProcessed = function(s,operator) {
-		switch(s.content) {
+	const getFilterSideProcessed = (s, operator) => {
+		switch (s.content) {
 			// data
 			case 'collection':
 				s.value = getCollectionValues(
@@ -194,123 +188,122 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,glob
 					s.columnId,
 					filterOperatorIsSingleValue(operator),
 					collectionIdMapIndexFilter[s.collectionId]);
-			break;
+				break;
 			case 'subQuery':
-				if(s.query !== null) {
+				if (s.query !== null) {
 					s.query.expressions = getSubQueryFilterExpressions(s);
-					s.query.filters     = getQueryFiltersProcessed(
-						s.query.filters,joinsIndexMap,globalSearch,globalSearchDict,dataFieldIdMap,
-						fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
-						recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal
+					s.query.filters = getQueryFiltersProcessed(
+						s.query.filters, joinsIndexMap, globalSearch, globalSearchDict, dataFieldIdMap,
+						fieldIdsChanged, fieldIdsInvalid, fieldValues, recordMayCreate, recordMayDelete,
+						recordMayUpdate, collectionIdMapIndexFilter, variableIdMapLocal
 					);
 					s.query.limit = s.query.fixedLimit;
 				}
-			break;
-			case 'true':     s.value = true; break;
-			case 'variable': s.value = variableValueGet(s.variableId,variableIdMapLocal); break;
+				break;
+			case 'true': s.value = true; break;
+			case 'variable': s.value = variableValueGet(s.variableId, variableIdMapLocal); break;
 
 			// global search
 			case 'globalSearch':
 				s.ftsDict = globalSearchDict;
-				s.value   = globalSearch;
-			break;
+				s.value = globalSearch;
+				break;
 
 			// form
 			case 'field':
-				const fld = dataFieldIdMap[s.fieldId];
-				if(fld !== undefined) {
-					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
-						? fld.attributeIdNm : null;
-
-					s.value = JSON.parse(JSON.stringify(fieldValues[getIndexAttributeId(
-						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
-					)]));
+				{
+					const fld = dataFieldIdMap[s.fieldId];
+					if (fld !== undefined) {
+						s.value = JSON.parse(JSON.stringify(fieldValues[getIndexAttributeId(
+							fld.index, fld.attributeId, fld.outsideIn === true, fld.attributeIdNm ?? null
+						)]));
+					}
 				}
-			break;
-			case 'fieldChanged':    s.value = fieldIdsChanged.includes(s.fieldId);                                    break;
-			case 'fieldValid':      s.value = !fieldIdsInvalid.includes(s.fieldId);                                   break;
-			case 'formChanged':     s.value = fieldIdsChanged.length !== 0;                                           break;
-			case 'javascript':      s.value = Function(s.value)();                                                    break;
-			case 'preset':          s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId];              break;
-			case 'record':          if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId;       break;
-			case 'recordMayCreate': s.value = recordMayCreate;                                                        break;
-			case 'recordMayDelete': s.value = recordMayDelete;                                                        break;
-			case 'recordMayUpdate': s.value = recordMayUpdate;                                                        break;
-			case 'recordNew':       if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId === 0; break;
+				break;
+			case 'fieldChanged': s.value = fieldIdsChanged.includes(s.fieldId); break;
+			case 'fieldValid': s.value = !fieldIdsInvalid.includes(s.fieldId); break;
+			case 'formChanged': s.value = fieldIdsChanged.length !== 0; break;
+			case 'javascript': s.value = Function(s.value)(); break;
+			case 'preset': s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId]; break;
+			case 'record': if (joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId; break;
+			case 'recordMayCreate': s.value = recordMayCreate; break;
+			case 'recordMayDelete': s.value = recordMayDelete; break;
+			case 'recordMayUpdate': s.value = recordMayUpdate; break;
+			case 'recordNew': if (joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId === 0; break;
 
 			// login
-			case 'languageCode': s.value = MyStore.getters.settings.languageCode;             break;
-			case 'login':        s.value = MyStore.getters.loginId;                           break;
-			case 'role':         s.value = MyStore.getters.access.roleIds.includes(s.roleId); break;
+			case 'languageCode': s.value = MyStore.getters.settings.languageCode; break;
+			case 'login': s.value = MyStore.getters.loginId; break;
+			case 'role': s.value = MyStore.getters.access.roleIds.includes(s.roleId); break;
 
 			// date & time
-			case 'nowDate':     s.value = getUnixNowDate()     + s.nowOffset; break;
+			case 'nowDate': s.value = getUnixNowDate() + s.nowOffset; break;
 			case 'nowDatetime': s.value = getUnixNowDatetime() + s.nowOffset; break;
-			case 'nowTime':     s.value = getUnixNowTime()     + s.nowOffset; break;
+			case 'nowTime': s.value = getUnixNowTime() + s.nowOffset; break;
 		}
 
 		// remove unnecessary data
-		if(s.content !== 'subQuery') {
-			delete(s.query);
-			delete(s.queryAggregator);
+		if (s.content !== 'subQuery') {
+			delete (s.query);
+			delete (s.queryAggregator);
 		} else {
-			if(s.query !== null) {
-				delete(s.query.choices);
-				delete(s.query.fixedLimit);
-				delete(s.query.id);
-				delete(s.query.lookups);
+			if (s.query !== null) {
+				delete (s.query.choices);
+				delete (s.query.fixedLimit);
+				delete (s.query.id);
+				delete (s.query.lookups);
 			}
 		}
-		delete(s.collectionId);
-		delete(s.columnId);
-		delete(s.content);
-		delete(s.fieldId);
-		delete(s.presetId);
-		delete(s.roleId);
-		delete(s.variableId);
+		delete (s.collectionId);
+		delete (s.columnId);
+		delete (s.content);
+		delete (s.fieldId);
+		delete (s.presetId);
+		delete (s.roleId);
+		delete (s.variableId);
 		return s;
 	};
 
-	let out = [];
+	const out = [];
 	filters = JSON.parse(JSON.stringify(filters));
-	for(let f of filters) {
-		f.side0 = getFilterSideProcessed(f.side0,f.operator);
-		f.side1 = getFilterSideProcessed(f.side1,f.operator);
+	for (const f of filters) {
+		f.side0 = getFilterSideProcessed(f.side0, f.operator);
+		f.side1 = getFilterSideProcessed(f.side1, f.operator);
 		out.push(f);
 	}
 	return getFiltersEncapsulated(out);
 };
 
-export function getQueryAttributePkFilter(relationId,recordId,index,not) {
+export function getQueryAttributePkFilter(relationId, recordId, index, not) {
 	return {
-		connector:'AND',
-		index:0,
-		operator:not ? '<>' : '=',
-		side0:{
-			attributeId:MyStore.getters['schema/relationIdMap'][relationId].attributeIdPk,
-			attributeIndex:index,
-			brackets:0
+		connector: 'AND',
+		index: 0,
+		operator: not ? '<>' : '=',
+		side0: {
+			attributeId: MyStore.getters['schema/relationIdMap'][relationId].attributeIdPk,
+			attributeIndex: index,
+			brackets: 0
 		},
-		side1:{
-			brackets:0,
-			value:recordId
+		side1: {
+			brackets: 0,
+			value: recordId
 		}
 	};
 };
 
-export function getQueryAttributesPkFilter(relationId,recordIds,index,not) {
+export function getQueryAttributesPkFilter(relationId, recordIds, index, not) {
 	return {
-		connector:'AND',
-		index:0,
-		operator:not ? '<> ALL' : '= ANY',
-		side0:{
-			attributeId:MyStore.getters['schema/relationIdMap'][relationId].attributeIdPk,
-			attributeIndex:index,
-			brackets:0
+		connector: 'AND',
+		index: 0,
+		operator: not ? '<> ALL' : '= ANY',
+		side0: {
+			attributeId: MyStore.getters['schema/relationIdMap'][relationId].attributeIdPk,
+			attributeIndex: index,
+			brackets: 0
 		},
-		side1:{
-			brackets:0,
-			value:recordIds
+		side1: {
+			brackets: 0,
+			value: recordIds
 		}
 	};
 };
@@ -321,83 +314,83 @@ export function getQueryFiltersDateRange(subJoinFilter, adjustOffset, attributeI
 		// reason: dates are stored as UTC 00:00:00
 		// January  1. 00:00:00 GMT-3 would be January  1. UTC 03:00:00 (looses dates on same day, dates are stored at UTC 00:00:00)
 		// January 31. 00:00:00 GMT+2 would be January 30. UTC 22:00:00 (prev. day)
-		let sec = new Date().getTimezoneOffset()*60;
-		if(sec < 0) date1 -= sec;
-		else        date0 -= sec;
+		const sec = new Date().getTimezoneOffset() * 60;
+		if (sec < 0) date1 -= sec;
+		else date0 -= sec;
 	}
 
 	// set query filters for attribute date values (attribute 0 to 1) occuring in date range (date 0 to 1)
 	// if sub join filter is used, we apply filter to relation joins, allowing for other relation data to be retrieved
 	//  useful for queries where grouping data is to be received even if date dependent records are not there (like in Gantts)
 	return [{
-		connector:'AND',
-		index:subJoinFilter ? index0 : 0,
-		operator:'<=',
-		side0:{
-			attributeId:attributeId0,
-			attributeIndex:index0
+		connector: 'AND',
+		index: subJoinFilter ? index0 : 0,
+		operator: '<=',
+		side0: {
+			attributeId: attributeId0,
+			attributeIndex: index0
 		},
-		side1:{
-			value:date1
+		side1: {
+			value: date1
 		}
-	},{
-		connector:'AND',
-		index:subJoinFilter ? index1 : 0,
-		operator:'<=',
-		side0:{
-			value:date0
+	}, {
+		connector: 'AND',
+		index: subJoinFilter ? index1 : 0,
+		operator: '<=',
+		side0: {
+			value: date0
 		},
-		side1:{
-			attributeId:attributeId1,
-			attributeIndex:index1
+		side1: {
+			attributeId: attributeId1,
+			attributeIndex: index1
 		}
 	}];
 };
 
 export function getFiltersEncapsulated(filters) {
-	let filtersBase = filters.filter(v => v.index === 0);
-	let filtersJoin = filters.filter(v => v.index !== 0);
+	const filtersBase = filters.filter(v => v.index === 0);
+	const filtersJoin = filters.filter(v => v.index !== 0);
 
 	// add brackets to encapsulate filter set from other sets (query filters, quick filters, user filters, ...)
 	// otherwise a single OR would negate all other filters
-	if(filtersBase.length !== 0) {
+	if (filtersBase.length !== 0) {
 		filtersBase[0].side0.brackets++;
-		filtersBase[filtersBase.length-1].side1.brackets++;
+		filtersBase[filtersBase.length - 1].side1.brackets++;
 	}
 	return filtersBase.concat(filtersJoin);
 };
 
-export function getIsContentInAnyFilter(filters,columns,content) {
-	for(const f of filters) {
-		if(f.side0.content === content || f.side1.content === content)
+export function getIsContentInAnyFilter(filters, columns, content) {
+	for (const f of filters) {
+		if (f.side0.content === content || f.side1.content === content)
 			return true;
 
-		if(f.side0.content === 'subQuery' && getIsContentInAnyFilter(f.side0.query.filters,[],content))
+		if (f.side0.content === 'subQuery' && getIsContentInAnyFilter(f.side0.query.filters, [], content))
 			return true;
 
-		if(f.side1.content === 'subQuery' && getIsContentInAnyFilter(f.side1.query.filters,[],content))
+		if (f.side1.content === 'subQuery' && getIsContentInAnyFilter(f.side1.query.filters, [], content))
 			return true;
 	}
-	for(const c of columns) {
-		if(c.content === 'query' && getIsContentInAnyFilter(c.query.filters,[],content))
+	for (const c of columns) {
+		if (c.content === 'query' && getIsContentInAnyFilter(c.query.filters, [], content))
 			return true;
 	}
 	return false;
 };
 
-export function getIsOperatorInAnyFilter(filters,columns,operator) {
-	for(const f of filters) {
-		if(f.operator === operator)
+export function getIsOperatorInAnyFilter(filters, columns, operator) {
+	for (const f of filters) {
+		if (f.operator === operator)
 			return true;
 
-		if(f.side0.content === 'subQuery' && getIsOperatorInAnyFilter(f.side0.query.filters,[],operator))
+		if (f.side0.content === 'subQuery' && getIsOperatorInAnyFilter(f.side0.query.filters, [], operator))
 			return true;
 
-		if(f.side1.content === 'subQuery' && getIsOperatorInAnyFilter(f.side1.query.filters,[],operator))
+		if (f.side1.content === 'subQuery' && getIsOperatorInAnyFilter(f.side1.query.filters, [], operator))
 			return true;
 	}
-	for(const c of columns) {
-		if(c.content === 'query' && getIsOperatorInAnyFilter(c.query.filters,[],operator))
+	for (const c of columns) {
+		if (c.content === 'query' && getIsOperatorInAnyFilter(c.query.filters, [], operator))
 			return true;
 	}
 	return false;

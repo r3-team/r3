@@ -244,6 +244,7 @@ export default {
 				<!-- map -->
 				<my-map v-if="isMap"
 					@open-form="(...args) => $emit('open-form',...args)"
+					:layerIdMapFilters="layerFilters"
 					:formLoading
 					:isHidden
 					:layerDataDefinitions="field.layersData"
@@ -688,15 +689,15 @@ export default {
 		fieldIdsChanged: { type: Array, required: false, default: () => { return [] } },
 		fieldIdsInvalid: { type: Array, required: false, default: () => { return [] } },
 		fieldIdsTouched: { type: Array, required: false, default: () => { return [] } },
-		fieldIdMapOverwrite: { type: Object, required: true },                 // overwrites for field meta (title, order in parent, error message, ...)
-		fieldIdMapOptions: { type: Object, required: true },                 // field options
-		fieldIdMapProcessed: { type: Object, required: true },                 // processed data (choices, columns, filters)
-		formBadSave: { type: Boolean, required: true },                 // attempted save with invalid inputs
+		fieldIdMapOverwrite: { type: Object, required: true }, // overwrites for field meta (title, order in parent, error message, ...)
+		fieldIdMapOptions: { type: Object, required: true }, // field options
+		fieldIdMapProcessed: { type: Object, required: true }, // processed data (choices, columns, filters, map data layers)
+		formBadSave: { type: Boolean, required: true }, // attempted save with invalid inputs
 		formBlockInputs: { type: Boolean, required: true },
-		formIsEmbedded: { type: Boolean, required: true },                 // parent form is embedded (pop-up, inline, widget)
+		formIsEmbedded: { type: Boolean, required: true }, // parent form is embedded (pop-up, inline, widget)
 		formLoading: { type: Boolean, required: true },
-		flexDirParent: { type: String, required: true },                 // flex direction (row/column) of parent
-		isAloneInForm: { type: Boolean, required: true },                 // parent form contains only this field
+		flexDirParent: { type: String, required: true }, // flex direction (row/column) of parent
+		isAloneInForm: { type: Boolean, required: true }, // parent form contains only this field
 		isAloneInTab: { type: Boolean, required: false, default: false }, // parent tab only contains this field
 		isBulkUpdate: { type: Boolean, required: false, default: false }, // form is in bulk update mode
 		joinsIndexMap: { type: Object, required: true },
@@ -705,7 +706,7 @@ export default {
 		parentIsCounting: { type: Boolean, required: false, default: false }, // field parent is counting records (tab counter)
 		parentIsHidden: { type: Boolean, required: false, default: false }, // field parent has its content hidden (tab/container)
 		values: { type: Object, required: true },
-		variableIdMapLocal: { type: Object, required: true }                  // variable values by ID (variables assigned to form)
+		variableIdMapLocal: { type: Object, required: true } // variable values by ID (variables assigned to form)
 	},
 	emits: [
 		'clipboard', 'execute-function', 'open-doc', 'open-form', 'set-form-args',
@@ -1128,6 +1129,7 @@ export default {
 		columns: s => s.fieldIdMapProcessed.columns[s.field.id] ?? [],
 		filters: s => s.fieldIdMapProcessed.filters[s.field.id] ?? [],
 		filtersInput: s => s.fieldIdMapProcessed.filtersInput[s.field.id] ?? [],
+		layerFilters: s => s.fieldIdMapProcessed.layerFilters[s.field.id] ?? {},
 
 		// bool states
 		isActive: s => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),

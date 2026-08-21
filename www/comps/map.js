@@ -76,11 +76,12 @@ export default Vue.defineAsyncComponent(async () => {
 			</div>
 		</div>`,
 		props: {
-			layerDataDefinitions: { type: Array, required: true },
 			formLoading: { type: Boolean, required: true },
 			isHidden: { type: Boolean, required: false, default: false },
 			layerBaseIds: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
 			//layerBaseIds: { type: Array, required: false, default: [] },
+			layerDataDefinitions: { type: Array, required: true },
+			layerIdMapFilters: { type: Object, required: true }, // processed filters for each layer
 			moduleId: { type: String, required: true },
 			readonly: { type: Boolean, required: true },
 			viewSrid: { type: Number, required: false, default: 3857 }, // view projection and CRS vectors are stored in
@@ -217,6 +218,10 @@ export default Vue.defineAsyncComponent(async () => {
 			});
 			this.$watch('isHidden', v => {
 				if (!v) this.$nextTick(() => this.reset());
+			});
+			this.$watch("layerIdMapFilters", (v, o) => {
+				if (JSON.stringify(v) !== JSON.stringify(o))
+					this.get();
 			});
 
 			// load custom CRS definitions, if need be
@@ -469,7 +474,7 @@ export default Vue.defineAsyncComponent(async () => {
 							relationId: l.query.relationId,
 							joins: l.query.joins,
 							expressions,
-							filters: l.query.filters,
+							filters: this.layerIdMapFilters[l.id] ?? [],
 							getIds: true,
 						}),
 					);

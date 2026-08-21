@@ -50,5 +50,5 @@ export function getFieldOverwriteDefault() {
 };
 
 export function getFieldProcessedDefault() {
-	return { choices: {}, columns: {}, filters: {}, filtersInput: {} };
+	return { choices: {}, columns: {}, filters: {}, filtersInput: {}, layerFilters: {} };
 };
