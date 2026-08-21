@@ -1,14 +1,14 @@
 export default {
-	name:'my-list-input-rows',
-	template:`<div class="list-input-rows-wrap">
+	name: 'my-list-input-rows',
+	template: `<div class="list-input-rows-wrap">
 			<table class="list-input-rows" :class="{ clickable:!readonly, 'multi-line':showAllValues }">
 				<tbody>
 					<tr v-for="(r,i) in rows" @click.stop="clickRow(r)">
-						
+
 						<!-- icons -->
 						<td class="minimum">
 							<div class="list-input-row-items nowrap">
-								
+
 								<!-- either field/attribute icon or gallery file from first column -->
 								<slot name="input-icon"
 									v-if="!hasGalleryIcon || r.values[0] === null"
@@ -33,14 +33,14 @@ export default {
 								/>
 							</div>
 						</td>
-						
+
 						<!-- category input check box -->
 						<td class="minimum" v-if="showAllValues">
 							<div class="list-input-row-checkbox">
 								<my-label :disabled="readonly" :image="getCheckIcon(recordIdsSelected.includes(r.indexRecordIds['0']))" />
 							</div>
 						</td>
-						
+
 						<!-- values -->
 						<td v-for="(b,bi) in columnBatches" :style="b.style">
 							<div class="list-input-row-items">
@@ -68,7 +68,7 @@ export default {
 								</template>
 							</div>
 						</td>
-						
+
 						<!-- actions -->
 						<td class="minimum">
 							<div class="list-input-row-items nowrap justifyEnd">
@@ -77,7 +77,7 @@ export default {
 									@trigger="$emit('clicked-open',r)"
 									@trigger-middle="$emit('clicked-open-middle',r)"
 									:blockBubble="true"
-									:captionTitle="capApp.inputHintOpen"
+									:captionTitle="capGen.recordOpen"
 									:naked="true"
 								/>
 								<my-button image="cancel.png"
@@ -85,7 +85,7 @@ export default {
 									@trigger="$emit('clicked-row-remove',i)"
 									:active="!readonly"
 									:blockBubble="true"
-									:captionTitle="capApp.inputHintRemove"
+									:captionTitle="capGen.recordRemove"
 									:naked="true"
 								/>
 							</div>
@@ -94,33 +94,33 @@ export default {
 				</tbody>
 			</table>
 	</div>`,
-	props:{
-		columns:          { type:Array,   required:true },
-		columnBatches:    { type:Array,   required:true },
-		hasGalleryIcon:   { type:Boolean, required:true },
-		multiInput:       { type:Boolean, required:true }, // more than 1 row can be selected at the same time
-		readonly:         { type:Boolean, required:true },
-		recordIdsSelected:{ type:Array,   required:true },
-		rows:             { type:Array,   required:true },
-		showAllValues:    { type:Boolean, required:true }, // for category display option
-		showOpen:         { type:Boolean, required:true }
+	props: {
+		columns: { type: Array, required: true },
+		columnBatches: { type: Array, required: true },
+		hasGalleryIcon: { type: Boolean, required: true },
+		multiInput: { type: Boolean, required: true }, // more than 1 row can be selected at the same time
+		readonly: { type: Boolean, required: true },
+		recordIdsSelected: { type: Array, required: true },
+		rows: { type: Array, required: true },
+		showAllValues: { type: Boolean, required: true }, // for category display option
+		showOpen: { type: Boolean, required: true }
 	},
-	emits:['clicked-open','clicked-open-middle','clicked-row','clicked-row-remove','focus'],
-	computed:{
-		capApp:s => s.$store.getters.captions.list
+	emits: ['clicked-open', 'clicked-open-middle', 'clicked-row', 'clicked-row-remove', 'focus'],
+	computed: {
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// presentation
 		getCheckIcon(s) {
 			return this.multiInput
 				? (s ? 'checkbox1.png' : 'checkbox0.png')
-				: (s ? 'radio1.png'    : 'radio0.png');
+				: (s ? 'radio1.png' : 'radio0.png');
 		},
 
 		// actions
 		clickRow(r) {
-			if(!this.readonly)
-				this.$emit('clicked-row',r);
+			if (!this.readonly)
+				this.$emit('clicked-row', r);
 		}
 	}
 };

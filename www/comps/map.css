@@ -51,9 +51,8 @@
 }
 .my-map-layers {
 	position: absolute;
-	bottom: 5px;
-	left: 50%;
-	transform: translateX(-50%);
+	top: 5px;
+	left: 50px;
 	display: flex;
 	flex-flow: row wrap;
 	align-items: center;
@@ -63,6 +62,18 @@
 	border-radius: var(--border-input-radius);
 	background-color: var(--color-input);
 	opacity: 0.8;
+}
+.my-map-layer {
+	border-radius: 3px;
+	padding: 0px 8px 0px 5px;
+	background-color: rgba(0, 0, 0, 0.1);
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	gap: calc(var(--spacing) / 2);
+}
+.my-map-layer.active {
+	outline: var(--outline-input-focus);
 }
 .my-map-spacer.horizontal {
 	height: 22px;

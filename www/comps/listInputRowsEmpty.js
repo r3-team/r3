@@ -1,6 +1,6 @@
 export default {
-	name:'my-list-input-rows-empty',
-	template:`<table class="list-input-rows"
+	name: 'my-list-input-rows-empty',
+	template: `<table class="list-input-rows"
 		@click="$emit('clicked')"
 		:class="{ clickable:!readonly }"
 	>
@@ -31,7 +31,7 @@ export default {
 							@trigger="$emit('clicked-open')"
 							@trigger-middle="$emit('clicked-open-middle')"
 							:blockBubble="true"
-							:captionTitle="capApp.inputHintCreate"
+							:captionTitle="capGen.recordCreate"
 							:naked="true"
 						/>
 						<my-button image="pageDown.png"
@@ -43,19 +43,19 @@ export default {
 			</tr>
 		</tbody>
 	</table>`,
-	props:{
-		anyRows:   { type:Boolean, required:true },
-		readonly:  { type:Boolean, required:true },
-		text:      { type:String,  required:true },
-		showCreate:{ type:Boolean, required:true },
-		valid:     { type:Boolean, required:true }
+	props: {
+		anyRows: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: true },
+		text: { type: String, required: true },
+		showCreate: { type: Boolean, required: true },
+		valid: { type: Boolean, required: true }
 	},
-	emits:['clicked','clicked-open','clicked-open-middle','focus','key-pressed','text-updated'],
-	computed:{
-		placeholder:s => s.anyRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots,
+	emits: ['clicked', 'clicked-open', 'clicked-open-middle', 'focus', 'key-pressed', 'text-updated'],
+	computed: {
+		placeholder: s => s.anyRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots,
 
 		// stores
-		capApp:s => s.$store.getters.captions.list,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.list,
+		capGen: s => s.$store.getters.captions.generic
 	}
 };

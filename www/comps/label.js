@@ -1,24 +1,25 @@
 export default {
-	name:'my-label',
-	template:`<div class="label" :class="{ bold, darkBg, disabled, error, large, wrap }">
+	name: 'my-label',
+	template: `<div class="label" :class="{ bold, darkBg, disabled, error, large, wrap }" :title="captionTitle">
 		<img draggable="false"
 			v-if="image !== '' || imageBase64 !== ''"
 			:src="image !== '' ? 'images/'+image : imageBase64"
 		/>
 		<span v-if="caption !== ''" v-html="caption" />
 	</div>`,
-	props:{
+	props: {
 		// content props
-		caption:    { type:String,  required:false, default:'' },
-		error:      { type:Boolean, required:false, default:false },
-		image:      { type:String,  required:false, default:'' },
-		imageBase64:{ type:String,  required:false, default:'' },
+		caption: { type: String, required: false, default: '' },
+		captionTitle: { type: String, required: false, default: '' },
+		error: { type: Boolean, required: false, default: false },
+		image: { type: String, required: false, default: '' },
+		imageBase64: { type: String, required: false, default: '' },
 
 		// style props
-		bold:    { type:Boolean, required:false, default:false },
-		darkBg:  { type:Boolean, required:false, default:false },
-		large:   { type:Boolean, required:false, default:false },
-		disabled:{ type:Boolean, required:false, default:false },
-		wrap:    { type:Boolean, required:false, default:false }
+		bold: { type: Boolean, required: false, default: false },
+		darkBg: { type: Boolean, required: false, default: false },
+		large: { type: Boolean, required: false, default: false },
+		disabled: { type: Boolean, required: false, default: false },
+		wrap: { type: Boolean, required: false, default: false }
 	}
 };

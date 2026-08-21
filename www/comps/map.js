@@ -13,7 +13,7 @@ export default Vue.defineAsyncComponent(async () => {
 			<div class="my-map-content" ref="map" @click.right.prevent="switchTool(null)"></div>
 			<div class="my-map-toolbox" v-if="layersData.length !== 0">
 
-				<div class="my-map-tool clickable" @click.left.exact="get">
+				<div class="my-map-tool clickable" @click.left.exact="get" :title="capGen.button.refresh">
 					<img src="images/refresh.png" />
 				</div>
 				<div class="my-map-spacer vertical"></div>
@@ -22,29 +22,34 @@ export default Vue.defineAsyncComponent(async () => {
 					@click.left.exact="switchTool(t)"
 					@click.right.exact.prevent="switchTool(null)"
 					:class="{ clickable:toolUseable[t], active:toolActive === t }"
+					:title="toolMeta[t].hint"
 				>
-					<img :src="'images/'+toolImages[t]" />
+					<img :src="'images/'+toolMeta[t].image" />
 				</div>
 
 				<div class="my-map-spacer vertical"></div>
-
+				<div class="my-map-tool"
+					@click.left.exact="switchTool(null)"
+					:class="{ clickable:toolUseable.select, active:toolActive === null }"
+					:title="capGen.recordOpen"
+				>
+					<img src="images/open.png" />
+				</div>
 				<div class="my-map-tool"
 					@click.left.exact="switchTool('delete')"
 					@click.right.exact.prevent="switchTool(null)"
 					:class="{ clickable:toolUseable.delete, active:toolActive === 'delete' }"
+					:title="capGen.recordRemove"
 				>
 					<img src="images/delete.png" />
 				</div>
 			</div>
 			<div class="my-map-layers">
-				<my-button image="add2.png" @trigger="changeMapZoom(true)" :naked="true" />
-				<my-button image="dash2.png" @trigger="changeMapZoom(false)" :naked="true" />
 
 				<!-- data layer selection -->
 				<template v-if="layersData.length !== 0">
-					<div class="my-map-spacer horizontal"></div>
-					<my-label image="database.png" />
-					<template v-for="(l,i) in layersData">
+					<my-label image="database.png" :captionTitle="capGen.layersData" />
+					<div class="my-map-layer" v-for="(l,i) in layersData" :class="{ active:layerDataIdEdit === l.id && !layerDataIdsHidden.includes(l.id) }">
 						<my-button
 							@trigger="switchLayerData(l.id)"
 							:active="!l.readonly && !layerDataIdsHidden.includes(l.id)"
@@ -57,22 +62,27 @@ export default Vue.defineAsyncComponent(async () => {
 							:image="layerDataIdsHidden.includes(l.id) ? 'visible0.png' : 'visible1.png'"
 							:naked="true"
 						/>
-					</template>
+					</div>
 				</template>
 
 				<!-- base layer selection -->
 				<template v-if="layersBase.length !== 0">
 					<div class="my-map-spacer horizontal"></div>
-					<my-label image="map.png" />
-					<template v-for="(l,i) in layersBase">
+					<my-label image="map.png" :captionTitle="capGen.layersBase"  />
+					<div class="my-map-layer" v-for="(l,i) in layersBase">
 						<span>{{ l.name }}</span>
 						<my-button
 							@trigger="switchLayerVisibility(l.id,false)"
 							:image="layerBaseIdsHidden.includes(l.id) ? 'visible0.png' : 'visible1.png'"
 							:naked="true"
 						/>
-					</template>
+					</div>
 				</template>
+
+				<div class="my-map-spacer horizontal"></div>
+				<my-button image="search.png" @trigger="mapZoomReset" :naked="true" />
+				<my-button image="add2.png" @trigger="mapZoomChange(true)" :naked="true" />
+				<my-button image="dash2.png" @trigger="mapZoomChange(false)" :naked="true" />
 			</div>
 		</div>`,
 		props: {
@@ -100,13 +110,7 @@ export default Vue.defineAsyncComponent(async () => {
 				sridsDefault: [3857, 4326], // supported by openlayers by default
 				toolActive: null,
 				tools: ['point', 'line', 'polygon', 'circle', 'modify'],
-				toolImages: {
-					circle: 'all.png',
-					line: 'dotLine.png',
-					point: 'dot.png',
-					polygon: 'dotPolygon.png',
-					modify: 'dotModify.png',
-				}
+				zoomDefault: 2,
 			};
 		},
 		computed: {
@@ -150,17 +154,8 @@ export default Vue.defineAsyncComponent(async () => {
 					if (d.query === null || d.query.joins.length === 0) continue;
 
 					const source = new ol.source.Vector();
-					const layer = new ol.layer.Vector({
-						source,
-						style: feature => {
-							let colorFill = feature.get('colorFill') !== undefined ? feature.get('colorFill') : d.colorFill;
-							colorFill = s.colorApplyAlpha(`#${colorFill}`, 0.4);
-							return new ol.style.Style({
-								fill: new ol.style.Fill({ color: colorFill }),
-								stroke: new ol.style.Stroke({ color: s.colorDarken(colorFill, 70), width: 2.5 }),
-							});
-						}
-					});
+					const layer = new ol.layer.Vector({ source, style: f => s.getFeatureStyle(f, d.colorFill, false) });
+					layer.set('id', d.id);
 
 					const writableCreate = d.query.joins[0].applyCreate;
 					const writableDelete = d.query.joins[0].applyDelete;
@@ -187,8 +182,15 @@ export default Vue.defineAsyncComponent(async () => {
 				s.layersData.forEach(v => { out[v.id] = v });
 				return out;
 			},
-
-			// simple
+			toolMeta: s => {
+				return {
+					circle: { hint: `${s.capGen.draw}: ${s.capGen.circle}`, image: 'all.png' },
+					line: { hint: `${s.capGen.draw}: ${s.capGen.line}`, image: 'dotLine.png' },
+					point: { hint: `${s.capGen.draw}: ${s.capGen.point}`, image: 'dot.png' },
+					polygon: { hint: `${s.capGen.draw}: ${s.capGen.polygon}`, image: 'dotPolygon.png' },
+					modify: { hint: s.capGen.button.edit, image: 'dotModify.png' },
+				};
+			},
 			toolUseable: s => {
 				return {
 					circle: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
@@ -197,8 +199,11 @@ export default Vue.defineAsyncComponent(async () => {
 					modify: s.layerDataEditActive !== false && s.layerDataEditActive.action.update,
 					point: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
 					polygon: s.layerDataEditActive !== false && s.layerDataEditActive.action.create,
+					select: s.layerDataEditActive !== false && s.layerDataEditActive.action.update,
 				};
 			},
+
+			// simple
 			layerDataEditActive: s => s.layerDataIdEdit !== null && !s.layerDataIdsHidden.includes(s.layerDataIdEdit) ? s.layerDataIdMap[s.layerDataIdEdit] : false,
 			layersDataWritable: s => s.layersData.filter(v => !v.readonly),
 
@@ -251,33 +256,46 @@ export default Vue.defineAsyncComponent(async () => {
 			getUuidV4,
 
 			// actions
-			changeMapZoom(add) {
+			getFeatureStyle(feature, colorFillFallback, onHover) {
+				const alpha = onHover ? 0.7 : 0.4;
+				const borderWidth = onHover ? 3.5 : 2.5;
+				const scaleImage = onHover ? 0.8 : 0.6;
+
+				let colorFill = feature.get('colorFill') ?? colorFillFallback;
+				colorFill = this.colorApplyAlpha(`#${colorFill}`, alpha);
+
+				const geom = feature.getGeometry();
+				if (geom.getType() === 'Point') {
+					return [
+						new ol.style.Style({
+							image: new ol.style.Circle({
+								radius: 8,
+								fill: new ol.style.Fill({ color: colorFill }),
+								stroke: new ol.style.Stroke({ color: this.colorDarken(colorFill, 70), width: borderWidth }),
+							})
+						}),
+						new ol.style.Style({
+							image: new ol.style.Icon({
+								anchor: [0.5, 1],
+								anchorXUnits: 'fraction',
+								anchorYUnits: 'fraction',
+								opacity: 0.8,
+								src: 'images/location.png',
+								scale: scaleImage,
+							})
+						})
+					];
+				}
+				return new ol.style.Style({
+					fill: new ol.style.Fill({ color: colorFill }),
+					stroke: new ol.style.Stroke({ color: this.colorDarken(colorFill, 70), width: borderWidth }),
+				});
+			},
+			mapZoomChange(add) {
 				this.map.getView().setZoom(this.map.getView().getZoom() + (add ? 1 : -1));
 			},
-			selectFeatures(e) {
-				const features = e.selected;
-				if (this.toolActive === 'delete') {
-					// delete record if enabled
-					if (this.layerDataEditActive !== false)
-						this.del(features);
-
-					return;
-				}
-				if (this.toolActive === null) {
-					// open form for first valid feature with open-form action on layer
-					for (const feature of features) {
-						const l = this.layersData.find(v => v.data.getFeatures().includes(feature));
-						const indexRecordIds = feature.get('indexRecordIds');
-						if (l === undefined || indexRecordIds === undefined) {
-							console.warn('cannot find feature to open in data sources');
-							return;
-						}
-						if (l.openForm !== null && indexRecordIds[l.indexData] !== undefined) {
-							this.$emit("open-form", [indexRecordIds[l.indexData]], l.openForm);
-							break;
-						}
-					}
-				}
+			mapZoomReset() {
+				this.map.getView().setZoom(this.zoomDefault);
 			},
 			switchLayerData(id) {
 				this.layerDataIdEdit = id;
@@ -388,15 +406,40 @@ export default Vue.defineAsyncComponent(async () => {
 						view: new ol.View({
 							center: [0, 0],
 							projection: `EPSG:${this.viewSrid}`,
-							zoom: 2,
+							zoom: this.zoomDefault,
 						}),
 					});
 
 					// register default interactions
 					// select action (for opening/deleting records)
-					this.interactionSelect = new ol.interaction.Select();
-					this.interactionSelect.on('select', this.selectFeatures);
-					this.map.addInteraction(this.interactionSelect);
+					//this.interactionSelect = new ol.interaction.Select({ style: f => this.getFeatureStyle(f, '000000', true) });
+					//this.interactionSelect.on('select', this.selectFeatures);
+					//this.map.addInteraction(this.interactionSelect);
+
+					// click actions (record open/delete)
+					this.map.on('singleclick', e => {
+						this.map.forEachFeatureAtPixel(e.pixel, f => {
+							if (this.layerDataEditActive === false)
+								return;
+
+							if (this.toolActive === 'delete')
+								return this.del(f);
+
+							if (this.toolActive === null && this.toolUseable.select) {
+								const l = this.layerDataEditActive;
+								const data = l.data;
+								if (data.getFeatures().includes(f) === undefined)
+									return console.warn("cannot find feature to open in data sources");
+
+								// open form for first valid feature with open-form action on layer
+								const indexRecordIds = f.get('indexRecordIds');
+								if (l.openForm !== null && indexRecordIds?.[l.indexData] !== undefined)
+									return this.$emit("open-form", [indexRecordIds[l.indexData]], l.openForm);
+							}
+						}, {
+							layerFilter: l => l.get('id') === this.layerDataIdEdit
+						});
+					});
 
 					for (const b of this.layersBase) {
 						this.map.addLayer(b.layer);
@@ -412,46 +455,29 @@ export default Vue.defineAsyncComponent(async () => {
 			},
 
 			// backend calls
-			del(features) {
+			del(feature) {
 				const requests = [];
-				const requestIndexMapFeature = {};
-				for (const feature of features) {
-					const l = this.layersData.find(v => v.data.getFeatures().includes(feature));
-					// to delete a feature, data layer for feature must exist and be in edit mode
-					const indexRecordIds = feature.get('indexRecordIds');
-					if (l === undefined || indexRecordIds === undefined) {
-						console.warn('cannot find feature to delete in data sources');
-						return;
-					}
-					if (this.layerDataIdEdit === l.id && indexRecordIds[l.indexData] !== undefined) {
-						for (const j of l.query.joins) {
-							const recordId = indexRecordIds?.[j.index] !== undefined ? indexRecordIds[j.index] : 0;
-							if (recordId !== 0 && j.applyDelete) {
-								requestIndexMapFeature[String(requests.length)] = feature;
-								requests.push(ws.prepare('data', 'del', { relationId: j.relationId, recordId }));
-							}
-						}
+				const indexRecordIds = feature.get('indexRecordIds');
+				const l = this.layerDataEditActive;
+				if (l !== false && indexRecordIds?.[l.indexData] !== undefined) {
+					for (const j of l.query.joins) {
+						const recordId = indexRecordIds?.[j.index] !== undefined ? indexRecordIds[j.index] : 0;
+						if (recordId !== 0 && j.applyDelete)
+							requests.push(ws.prepare('data', 'del', { relationId: j.relationId, recordId }));
 					}
 				}
 				if (requests.length === 0)
 					return;
 
+				let featureRemoved = false;
 				ws.sendMultiple(requests, true).then(
-					responses => {
-						for (let i = 0, j = responses.length; i < j; i++) {
-							const f = requestIndexMapFeature[i];
-							if (f === undefined)
-								continue;
+					() => {
+						if (!featureRemoved) {
+							const l = this.layerDataEditActive;
+							if (l !== false)
+								l.data.removeFeature(feature);
 
-							const l = this.layersData.find(v => v.data.getFeatures().includes(f));
-							if (l !== undefined)
-								l.data.removeFeature(f);
-
-							this.interactionSelect.getFeatures().remove(f);
-
-							// any feature could be part of multiple DEL requests (if multiple records involved)
-							// feature itself must only be removed once so we delete the reference
-							delete requestIndexMapFeature[i];
+							featureRemoved = true;
 						}
 					},
 					this.$root.genericError

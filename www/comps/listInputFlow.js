@@ -1,6 +1,6 @@
 export default {
-	name:'my-list-input-flow',
-	template:`<div class="list-input-flow">
+	name: 'my-list-input-flow',
+	template: `<div class="list-input-flow">
 			<slot name="input-icon" />
 			<div class="list-input-flow-entry-wrap"
 				v-for="(r,i) in rows"
@@ -37,7 +37,7 @@ export default {
 							@trigger="$emit('clicked-open',r)"
 							@trigger-middle="$emit('clicked-open-middle',r)"
 							:blockBubble="true"
-							:captionTitle="capApp.inputHintOpen"
+							:captionTitle="capGen.recordOpen"
 							:darkBg="i <= rowLastIndexActive"
 							:naked="true"
 						/>
@@ -45,28 +45,28 @@ export default {
 				</div>
 			</div>
 	</div>`,
-	props:{
-		columns:          { type:Array,   required:true },
-		columnBatches:    { type:Array,   required:true },
-		readonly:         { type:Boolean, required:true },
-		recordIdsSelected:{ type:Array,   required:true },
-		rows:             { type:Array,   required:true },
-		showOpen:         { type:Boolean, required:true }
+	props: {
+		columns: { type: Array, required: true },
+		columnBatches: { type: Array, required: true },
+		readonly: { type: Boolean, required: true },
+		recordIdsSelected: { type: Array, required: true },
+		rows: { type: Array, required: true },
+		showOpen: { type: Boolean, required: true }
 	},
-	emits:['clicked-open','clicked-open-middle','clicked-row'],
-	computed:{
-		rowLastIndexActive:(s) => {
-			for(let i = s.rows.length - 1; i >= 0; i--) {
-				if(s.recordIdsSelected.includes(s.rows[i].indexRecordIds['0']))
+	emits: ['clicked-open', 'clicked-open-middle', 'clicked-row'],
+	computed: {
+		rowLastIndexActive: s => {
+			for (let i = s.rows.length - 1; i >= 0; i--) {
+				if (s.recordIdsSelected.includes(s.rows[i].indexRecordIds['0']))
 					return i;
 			}
 			return -1;
 		},
 
 		// simple
-		anyActions:(s) => s.showOpen,
+		anyActions: s => s.showOpen,
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.list
+		capGen: s => s.$store.getters.captions.generic
 	}
 };
