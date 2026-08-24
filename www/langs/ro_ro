@@ -177,6 +177,15 @@
 			"titleConfig": "Global configuration",
 			"titleDeleted": "Deleted files"
 		},
+		"geoLayerBase": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this base layer?"
+			},
+			"srid": "SRID",
+			"sridHint": "Spatial Reference System Identifier (SRID) for the coordinate reference system (CRS) for this base layer.",
+			"title": "Base layer '{NAME}'",
+			"titleNew": "New base layer"
+		},
 		"ldaps": {
 			"assignRoles": "Setați roluri în funcție de apartenența la grup<br />(dezactivați atribuirea manuală a rolului)",
 			"bindUserDn": "Fixați utilizatorul DN",
@@ -482,6 +491,7 @@
 		"navigationCustom": "Personalizare",
 		"navigationDbSync": "Database sync",
 		"navigationFiles": "Files",
+		"navigationGeoLayersBase": "Geo data: Base layers",
 		"navigationLdaps": "LDAP-Connectors",
 		"navigationLicense": "Professional",
 		"navigationLoginSessions": "User sessions",
@@ -2706,6 +2716,9 @@
 		"overwrite": "Overwrite",
 		"overwrites": "Overwrites",
 		"page": "Page",
+		"parameter": "Parameter",
+		"parameterNew": "New parameter",
+		"parameters": "Parameters",
 		"password": "Parolă",
 		"pdf": "PDF",
 		"pdfs": "PDFs",

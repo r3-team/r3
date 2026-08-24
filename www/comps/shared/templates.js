@@ -56,6 +56,20 @@ export function getTemplateFnc(name, isTrigger) {
 		? '$BODY$\nDECLARE\nBEGIN\n\tRETURN NEW;\nEND;\n$BODY$'
 		: '$BODY$\nDECLARE\nBEGIN\n\tRETURN 0;\nEND;\n$BODY$';
 };
+export function getTemplateGeoLayerBase() {
+	return {
+		id: getUuidV4(),
+		name: '',
+		parameters: {
+			crs: 'EPSG:3857',
+			format: 'image/png',
+			transparent: 'true',
+			version: '1.3.0'
+		},
+		srid: 3857,
+		url: '',
+	};
+};
 export function getTemplateReturn(isTrigger) {
 	return isTrigger ? 'TRIGGER' : 'INTEGER';
 };

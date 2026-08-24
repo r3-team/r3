@@ -244,10 +244,11 @@ export default {
 				<!-- map -->
 				<my-map v-if="isMap"
 					@open-form="(...args) => $emit('open-form',...args)"
-					:layerIdMapFilters="layerFilters"
+					:fieldId="field.id"
 					:formLoading
 					:isHidden
 					:layerDataDefinitions="field.layersData"
+					:layerIdMapFilters="layerFilters"
 					:moduleId
 					:readonly="isReadonly"
 				/>

@@ -177,6 +177,15 @@
 			"titleConfig": "Configuración global",
 			"titleDeleted": "Archivos eliminados"
 		},
+		"geoLayerBase": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this base layer?"
+			},
+			"srid": "SRID",
+			"sridHint": "Spatial Reference System Identifier (SRID) for the coordinate reference system (CRS) for this base layer.",
+			"title": "Base layer '{NAME}'",
+			"titleNew": "New base layer"
+		},
 		"ldaps": {
 			"assignRoles": "Asignar roles por membresía de grupo<br />(desactiva la asignación manual de roles)",
 			"bindUserDn": "DN del usuario de enlace",
@@ -482,6 +491,7 @@
 		"navigationCustom": "Personalización",
 		"navigationDbSync": "Database sync",
 		"navigationFiles": "Archivos",
+		"navigationGeoLayersBase": "Geo data: Base layers",
 		"navigationLdaps": "Conectores LDAP",
 		"navigationLicense": "Profesional",
 		"navigationLoginSessions": "Sesiones de usuario",
@@ -2706,6 +2716,9 @@
 		"overwrite": "Overwrite",
 		"overwrites": "Overwrites",
 		"page": "Page",
+		"parameter": "Parameter",
+		"parameterNew": "New parameter",
+		"parameters": "Parameters",
 		"password": "Contraseña",
 		"pdf": "PDF",
 		"pdfs": "PDFs",

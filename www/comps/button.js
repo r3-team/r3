@@ -1,8 +1,8 @@
-export {MyButtonCheck};
+export { MyButton, MyButtonCheck };
 
-export default {
-	name:'my-button',
-	template:`<div class="my-button" data-is-input="1"
+const MyButton = {
+	name: 'my-button',
+	template: `<div class="my-button" data-is-input="1"
 		@click.ctrl.exact="triggerMiddle"
 		@click.left.exact="trigger"
 		@click.shift.exact="triggerShift"
@@ -28,66 +28,66 @@ export default {
 			:title="captionTitle"
 		>{{ caption }}</span>
 	</div>`,
-	props:{
+	props: {
 		// content props
-		active:      { type:Boolean, required:false, default:true },
-		blockBubble: { type:Boolean, required:false, default:false },
-		caption:     { type:String,  required:false, default:'' },
-		captionTitle:{ type:String,  required:false, default:'' },
-		image:       { type:String,  required:false, default:'' },
-		images:      { type:Array,   required:false, default:() => [] },
-		imageBase64: { type:String,  required:false, default:'' },
+		active: { type: Boolean, required: false, default: true },
+		blockBubble: { type: Boolean, required: false, default: false },
+		caption: { type: String, required: false, default: '' },
+		captionTitle: { type: String, required: false, default: '' },
+		image: { type: String, required: false, default: '' },
+		images: { type: Array, required: false, default: () => [] },
+		imageBase64: { type: String, required: false, default: '' },
 
 		// style props
-		adjusts:{ type:Boolean, required:false, default:false }, // adjusts its length to avail. space (text is ellipsed if too small)
-		cancel: { type:Boolean, required:false, default:false },
-		darkBg: { type:Boolean, required:false, default:false },
-		large:  { type:Boolean, required:false, default:false },
-		naked:  { type:Boolean, required:false, default:false }
+		adjusts: { type: Boolean, required: false, default: false }, // adjusts its length to avail. space (text is ellipsed if too small)
+		cancel: { type: Boolean, required: false, default: false },
+		darkBg: { type: Boolean, required: false, default: false },
+		large: { type: Boolean, required: false, default: false },
+		naked: { type: Boolean, required: false, default: false }
 	},
-	emits:['trigger','trigger-middle','trigger-right','trigger-shift'],
-	computed:{
-		classes:(s) => {
+	emits: ['trigger', 'trigger-middle', 'trigger-right', 'trigger-shift'],
+	computed: {
+		classes: s => {
 			return {
-				adjusts:s.adjusts,
-				background:!s.naked,
-				cancel:s.cancel,
-				clickable:s.active,
-				darkBg:s.darkBg,
-				large:s.large,
-				naked:s.naked
+				adjusts: s.adjusts,
+				background: !s.naked,
+				cancel: s.cancel,
+				clickable: s.active,
+				darkBg: s.darkBg,
+				large: s.large,
+				naked: s.naked
 			};
 		}
 	},
-	methods:{
+	methods: {
 		trigger(ev) {
-			if(!this.active) return;
+			if (!this.active) return;
 
-			if(this.blockBubble)
+			if (this.blockBubble)
 				ev.stopPropagation();
 
 			this.$emit('trigger');
 		},
 		triggerMiddle(ev) {
-			if(!this.active) return;
+			if (!this.active) return;
 
-			if(this.blockBubble)
+			if (this.blockBubble)
 				ev.stopPropagation();
 
 			this.$emit('trigger-middle');
 		},
 		triggerRight(ev) {
-			if(!this.active) return;
+			if (!this.active) return;
 
-			if(this.blockBubble)
+			if (this.blockBubble)
 				ev.stopPropagation();
 
 			this.$emit('trigger-right');
 		},
 		triggerShift(ev) {
-			if(!this.active) return;
+			if (!this.active) return;
 
-			if(this.blockBubble)
+			if (this.blockBubble)
 				ev.stopPropagation();
 
 			this.$emit('trigger-shift');
@@ -96,8 +96,8 @@ export default {
 };
 
 const MyButtonCheck = {
-	name:'my-button-check',
-	template:`<my-button
+	name: 'my-button-check',
+	template: `<my-button
 		@trigger="$emit('update:modelValue',!modelValue)"
 		:active="!readonly"
 		:caption="caption"
@@ -105,12 +105,12 @@ const MyButtonCheck = {
 		:image="(reversed ? !modelValue : modelValue) ? 'checkbox1.png' : 'checkbox0.png'"
 		:naked="true"
 	/>`,
-	props:{
-		caption:     { type:String,  required:true },
-		captionTitle:{ type:String,  required:false, default:'' },
-		modelValue:  { type:Boolean, required:true },
-		readonly:    { type:Boolean, required:false, default:false },
-		reversed:    { type:Boolean, required:false, default:false }
+	props: {
+		caption: { type: String, required: true },
+		captionTitle: { type: String, required: false, default: '' },
+		modelValue: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: false, default: false },
+		reversed: { type: Boolean, required: false, default: false }
 	},
-	emits:['update:modelValue']
+	emits: ['update:modelValue']
 };

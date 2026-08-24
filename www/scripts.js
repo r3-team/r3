@@ -1,22 +1,3 @@
-import MyApp from './comps/app.js';
-import MyButton from './comps/button.js';
-import MyButtonGroup from './comps/buttonGroup.js';
-import MyFilters from './comps/filters.js';
-import MyHome from './comps/home.js';
-import MyLabel from './comps/label.js';
-import MyTabs from './comps/tabs.js';
-import MyValueRich from './comps/valueRich.js';
-import MyStore from './stores/store.js';
-import { MyButtonCheck } from './comps/button.js';
-import {
-	MyGoForm,
-	MyGoModule
-} from './comps/go.js';
-import {
-	MyBool,
-	MyBoolStringNumber
-} from './comps/inputBool.js';
-
 // admin
 import MyAdmin from './comps/admin/admin.js';
 import MyAdminBackups from './comps/admin/adminBackups.js';
@@ -26,10 +7,11 @@ import MyAdminConfig from './comps/admin/adminConfig.js';
 import MyAdminCustom from './comps/admin/adminCustom.js';
 import MyAdminDbSync from './comps/admin/adminDbSync.js';
 import MyAdminFiles from './comps/admin/adminFiles.js';
+import MyAdminGeoLayersBase from './comps/admin/adminGeoLayersBase.js';
 import MyAdminLdaps from './comps/admin/adminLdaps.js';
 import MyAdminLicense from './comps/admin/adminLicense.js';
-import MyAdminLogins from './comps/admin/adminLogins.js';
 import MyAdminLoginSessions from './comps/admin/adminLoginSessions.js';
+import MyAdminLogins from './comps/admin/adminLogins.js';
 import MyAdminLoginTemplates from './comps/admin/adminLoginTemplates.js';
 import MyAdminLogs from './comps/admin/adminLogs.js';
 import MyAdminMailAccounts from './comps/admin/adminMailAccounts.js';
@@ -40,6 +22,9 @@ import MyAdminOauthClients from './comps/admin/adminOauthClients.js';
 import MyAdminRoles from './comps/admin/adminRoles.js';
 import MyAdminScheduler from './comps/admin/adminScheduler.js';
 import MyAdminSystemMsg from './comps/admin/adminSystemMsg.js';
+
+// main app
+import MyApp from './comps/app.js';
 
 // builder
 import MyBuilder from './comps/builder/builder.js';
@@ -74,6 +59,18 @@ import MyBuilderStart from './comps/builder/builderStart.js';
 import MyBuilderTags from './comps/builder/builderTags.js';
 import MyBuilderVariables from './comps/builder/builderVariables.js';
 import MyBuilderWidgets from './comps/builder/builderWidgets.js';
+
+import { MyButton, MyButtonCheck } from './comps/button.js';
+import MyButtonGroup from './comps/buttonGroup.js';
+import MyFilters from './comps/filters.js';
+import { MyGoForm, MyGoModule } from './comps/go.js';
+import MyHome from './comps/home.js';
+import { MyBool, MyBoolStringNumber } from './comps/inputBool.js';
+import MyLabel from './comps/label.js';
+import MyTabs from './comps/tabs.js';
+import MyValueRich from './comps/valueRich.js';
+
+import MyStore from './stores/store.js';
 
 // router
 const MyRouterPositions = Object.create(null);
@@ -119,6 +116,7 @@ const MyRouter = VueRouter.createRouter({
 			{ path: 'custom', component: MyAdminCustom },
 			{ path: 'db-sync', component: MyAdminDbSync },
 			{ path: 'files', component: MyAdminFiles },
+			{ path: 'geo-layers-base', component: MyAdminGeoLayersBase },
 			{ path: 'ldaps', component: MyAdminLdaps },
 			{ path: 'license', component: MyAdminLicense },
 			{ path: 'logins', component: MyAdminLogins },
@@ -318,12 +316,11 @@ const MyRouter = VueRouter.createRouter({
 		path: '/:pathMatch(.*)*',
 		redirect: '/home'
 	}],
-	scrollBehavior(to, from, savedPosition) {
+	scrollBehavior(to) {
 
 		// recover scroll position of form element if available
 		if (MyRouterPositions[to.path] !== undefined) {
-			let e = document.getElementById(MyStore.getters.constants.scrollFormId);
-
+			const e = document.getElementById(MyStore.getters.constants.scrollFormId);
 			if (e !== null)
 				setTimeout(() => e.scrollTop = MyRouterPositions[to.path], 50);
 
@@ -332,11 +329,9 @@ const MyRouter = VueRouter.createRouter({
 
 		// hash scrolling for HTML anchors
 		if (to.hash !== '') {
-			let parts = to.hash.substr(1).split('#')
-
+			const parts = to.hash.substr(1).split('#')
 			if (parts.length > 0) {
-				let e = document.getElementById(parts[0]);
-
+				const e = document.getElementById(parts[0]);
 				if (e !== null)
 					e.scrollIntoView();
 			}
@@ -358,7 +353,7 @@ MyRouter.beforeEach((to, from) => {
 
 	return true;
 });
-MyRouter.afterEach((to, from) => {
+MyRouter.afterEach(() => {
 	if (window.history?.state !== undefined) {
 		MyStore.commit('isAtHistoryEnd', window.history.state.forward === null);
 		MyStore.commit('isAtHistoryStart', window.history.state.back === null);
@@ -382,9 +377,8 @@ const app = Vue.createApp(MyApp)
 	.component('my-value-rich', MyValueRich);
 
 app.directive('click-outside', {
-	beforeMount(el, binding, vnode) {
-		el.clickOutsideEvent = function (event) {
-
+	beforeMount(el, binding) {
+		el.clickOutsideEvent = event => {
 			if (el !== event.target && !el.contains(event.target))
 				binding.value();
 		};
@@ -401,16 +395,16 @@ app.mount('#app-mount');
 // basic service worker
 // keep worker script name consistent so that browser can check for updates
 if ('serviceWorker' in navigator) {
-	window.addEventListener('load', function () {
+	window.addEventListener('load', () => {
 		navigator.serviceWorker
 			.register('/worker.js')
-			.then(function (reg) {
+			.then(reg => {
 				if (!navigator.serviceWorker.controller || reg.waiting || reg.installing)
 					return;
 
-				reg.addEventListener('updatefound', function () {
-					let worker = reg.installing;
-					worker.addEventListener('statechange', function () {
+				reg.addEventListener('updatefound', () => {
+					const worker = reg.installing;
+					worker.addEventListener('statechange', () => {
 
 						// reload page if new worker has been activated
 						if (worker.state === 'activated')

@@ -14,6 +14,7 @@ import (
 	"r3/log"
 	"r3/repo"
 	"r3/request/request_dbSync"
+	"r3/request/request_geo"
 	"r3/request/request_login"
 	"r3/types"
 
@@ -148,6 +149,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		switch action {
 		case "paste":
 			return filesPaste_tx(ctx, tx, reqJson, loginId)
+		}
+	case "geoLayerBase":
+		switch action {
+		case "get":
+			return request_geo.LayerBaseGet_tx(ctx, tx)
+		case "getFieldAssign":
+			return request_geo.LayerBaseFieldGet_tx(ctx, tx, reqJson)
 		}
 	case "login":
 		switch action {
@@ -383,10 +391,10 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "geoLayerBase":
 		switch action {
-		case "get":
-			return GeoLayerBaseGet_tx(ctx, tx)
+		case "del":
+			return nil, request_geo.LayerBaseDel_tx(ctx, tx, reqJson)
 		case "set":
-			return nil, GeoLayerBaseSet_tx(ctx, tx, reqJson)
+			return nil, request_geo.LayerBaseSet_tx(ctx, tx, reqJson)
 		}
 	case "icon":
 		switch action {

@@ -6,7 +6,7 @@ import (
 	"r3/types"
 )
 
-func BackupGet() (interface{}, error) {
+func BackupGet() (any, error) {
 
 	// no backup directory set, return empty value
 	if config.GetString("backupDir") == "" {

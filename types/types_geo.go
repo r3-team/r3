@@ -8,6 +8,13 @@ import (
 
 type GeoSrid int64
 
+type GeoFieldAssign struct {
+	LayerBaseIdsHide []uuid.UUID `json:"layerBaseIdsHide"` // base layers to include and keep hidden by default
+	LayerBaseIdsShow []uuid.UUID `json:"layerBaseIdsShow"` // base layers to include and show by default
+	Srid             int64       `json:"srid"`             // view SRID for field
+	Zoom             int64       `json:"zoom"`
+}
+
 type GeoJson struct {
 	Type     string `json:"type"` // "feature"
 	Geometry struct {
@@ -25,11 +32,6 @@ type GeoLayerBase struct {
 	Parameters json.RawMessage `json:"parameters"` // getter parameters to attach to URL (such as 'transparent=true' or 'format=image/png')
 	Srid       int64           `json:"srid"`       // SRID (identifier, like 4326) for the chosen CRS (coordinate reference system, like 'WGS 84') for the layer
 	Url        string          `json:"url"`        // main URL for WMS provider
-}
-
-type GeoLayerBaseField struct {
-	LayerBaseId uuid.UUID `json:"layerBaseId"`
-	FieldId     uuid.UUID `json:"fieldId"`
 }
 
 const GeoJsonSridDefault GeoSrid = 4326

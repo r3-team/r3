@@ -86,15 +86,13 @@ export default Vue.defineAsyncComponent(async () => {
 			</div>
 		</div>`,
 		props: {
+			fieldId: { type: String, required: true },
 			formLoading: { type: Boolean, required: true },
 			isHidden: { type: Boolean, required: false, default: false },
-			layerBaseIds: { type: Array, required: false, default: ['32e54b0d-8d8c-4353-90b9-d5b709fb13ad'] },
-			//layerBaseIds: { type: Array, required: false, default: [] },
 			layerDataDefinitions: { type: Array, required: true },
 			layerIdMapFilters: { type: Object, required: true }, // processed filters for each layer
 			moduleId: { type: String, required: true },
 			readonly: { type: Boolean, required: true },
-			viewSrid: { type: Number, required: false, default: 3857 }, // view projection and CRS vectors are stored in
 		},
 		emits: ['open-form'],
 		data() {
@@ -102,36 +100,29 @@ export default Vue.defineAsyncComponent(async () => {
 				featurePropertiesFrontend: ['colorFill', 'indexRecordIds'],
 				interaction: {}, // current interactions (draw, modify, ...)
 				interactionHover: null, // hover interaction, always active
-				layerBaseIdsHidden: [],
-				layerDataIdEdit: null,
-				layerDataIdsHidden: [],
+				isReady: false,
+				layerBaseIds: [], // IDs of base layers used for this map
+				layerBaseIdsHidden: [], // IDs of hidden base layers
+				layerDataIdEdit: null, // ID of data layer active for editing
+				layerDataIdsHidden: [], // IDs of hidden data layers
 				geoJsonFormatter: null,
 				map: null,
 				sridsDefault: [3857, 4326], // supported by openlayers by default
 				toolActive: null,
 				tools: ['point', 'line', 'polygon', 'circle', 'modify'],
+				viewSrid: 3857, // view projection and CRS vectors are stored in
 				zoomDefault: 2,
 			};
 		},
 		computed: {
-			customSrids: s => {
-				const out = [];
-				if (!s.sridsDefault.includes(s.viewSrid)) out.push(s.viewSrid);
-				for (const id of s.layerBaseIds) {
-					const l = s.layerBaseIdMapInstance[id];
-					if (!s.sridsDefault.includes(l.srid)) out.push(l.srid);
-				}
-				return out;
-			},
 			// base layers (readonly, WMF, tile map data, etc.) with meta data (id, name, ...)
 			layersBase: s => {
 				const out = [];
-
-				// TEMP, OSM layer for reference
-				out.push({ id: "TEMP", name: "OSM", layer: new ol.layer.Tile({ source: new ol.source.OSM() }) });
-
 				for (const id of s.layerBaseIds) {
 					const l = s.layerBaseIdMapInstance[id];
+					if (l === undefined)
+						continue;
+
 					const params = {};
 					for (const k in l.parameters) {
 						params[k.toUpperCase()] = l.parameters[k];
@@ -222,37 +213,85 @@ export default Vue.defineAsyncComponent(async () => {
 		mounted() {
 			this.geoJsonFormatter = new ol.format.GeoJSON();
 
-			if (this.customSrids.length === 0)
-				return this.reset();
-
 			this.$watch('formLoading', v => {
 				if (!v) this.get();
 			});
 			this.$watch('isHidden', v => {
 				if (!v) this.$nextTick(() => this.reset());
 			});
-			this.$watch("layerIdMapFilters", (v, o) => {
+			this.$watch('layerIdMapFilters', (v, o) => {
 				if (JSON.stringify(v) !== JSON.stringify(o))
 					this.get();
 			});
 
-			// load custom CRS definitions, if need be
-			import("../externals/proj4-list.js").then((module) => {
-				const list = module.default;
+			// fetch base layers assigned to field
+			ws.send('geoLayerBase', 'getFieldAssign', this.fieldId, true).then(
+				res => {
+					let isUnknownLayerBase = false;
+					this.viewSrid = res.payload.srid;
+					//this.zoomDefault = res.payload.zoom;
 
-				const epsgDefs = [];
-				for (const srid of this.customSrids) {
-					const epsg = `EPSG:${srid}`;
-					if (list[epsg] === undefined) {
-						console.warn(`cannot find definition for ${epsg}, layer will not work correctly`,);
-						continue;
+					for (const id of res.payload.layerBaseIdsShow) {
+						this.layerBaseIds.push(id);
 					}
-					epsgDefs.push(list[epsg]);
-				}
-				proj4.defs(epsgDefs);
-				ol.proj.proj4.register(proj4);
-				this.reset();
-			}, this.$root.genericError);
+					for (const id of res.payload.layerBaseIdsHide) {
+						this.layerBaseIds.push(id);
+						this.layerBaseIdsHidden.push(id);
+					}
+					for (const id of this.layerBaseIds) {
+						if (this.layerBaseIdMapInstance[id] === undefined)
+							isUnknownLayerBase = true;
+					}
+
+					if (!isUnknownLayerBase)
+						this.reset();
+
+					// refresh base layers
+					const customSrids = [];
+					ws.send('geoLayerBase', 'get', null, true).then(
+						res => {
+							const layerBaseIdMap = {};
+							for (const l of res.payload) {
+								layerBaseIdMap[l.id] = l;
+							}
+							this.$store.commit('geoLayerBaseIdMap', layerBaseIdMap);
+
+							// check for non-default CRS
+							if (!this.sridsDefault.includes(this.viewSrid))
+								customSrids.push(this.viewSrid);
+
+							for (const id of this.layerBaseIds) {
+								const l = this.layerBaseIdMapInstance[id];
+								if (!this.sridsDefault.includes(l.srid))
+									customSrids.push(l.srid);
+							}
+
+							if (customSrids.length === 0)
+								return this.reset();
+
+							// register custom CRS definitions if needed
+							import('../externals/proj4-list.js').then(module => {
+								const list = module.default;
+
+								const epsgDefs = [];
+								for (const srid of customSrids) {
+									const epsg = `EPSG:${srid}`;
+									if (list[epsg] === undefined) {
+										console.warn(`cannot find definition for ${epsg}, layer will not work correctly`,);
+										continue;
+									}
+									epsgDefs.push(list[epsg]);
+								}
+								proj4.defs(epsgDefs);
+								ol.proj.proj4.register(proj4);
+								this.reset();
+							}, this.$root.genericError);
+						},
+						this.$root.genericError
+					);
+				},
+				this.$root.genericError
+			);
 		},
 		unmounted() { },
 		methods: {

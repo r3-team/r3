@@ -772,17 +772,28 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CONSTRAINT layer_base_pkey PRIMARY KEY (id),
 				CONSTRAINT layer_base_key UNIQUE (name)
 			);
-			CREATE TABLE IF NOT EXISTS instance_geo.layer_base_field (
-				layer_base_id uuid NOT NULL,
+			CREATE TABLE IF NOT EXISTS instance_geo.field_assign (
 				field_id uuid NOT NULL,
+				srid integer NOT NULL,
+				CONSTRAINT field_assign_pkey PRIMARY KEY (field_id),
+				CONSTRAINT field_assign_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE TABLE IF NOT EXISTS instance_geo.field_assign_layer_base (
+				field_id uuid NOT NULL,
+				layer_base_id uuid NOT NULL,
 				"position" smallint NOT NULL,
-				CONSTRAINT layer_base_field_pkey PRIMARY KEY (layer_base_id,field_id),
-				CONSTRAINT layer_base_field_field_id_fkey FOREIGN KEY (field_id)
+				hidden bool NOT NULL,
+				CONSTRAINT field_assign_layer_base_pkey PRIMARY KEY (field_id,layer_base_id),
+				CONSTRAINT field_assign_layer_base_field_id_fkey FOREIGN KEY (field_id)
 					REFERENCES app.field (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT layer_base_field_layer_base_id_fkey FOREIGN KEY (layer_base_id)
+				CONSTRAINT field_assign_layer_base_layer_base_id_fkey FOREIGN KEY (layer_base_id)
 					REFERENCES instance_geo.layer_base (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE

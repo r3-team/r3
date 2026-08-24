@@ -1,9 +1,9 @@
 import MyAdminHelp from './adminHelp.js';
 
 export default {
-	name:'my-admin',
-	components:{MyAdminHelp},
-	template:`<div class="admin">
+	name: 'my-admin',
+	components: { MyAdminHelp },
+	template: `<div class="admin">
 		<div class="navigation" :class="{ isDark:colorMenu.isDark() }" :style="bgStyle">
 			<div class="navigation-header">
 				<div class="row gap centered">
@@ -141,6 +141,12 @@ export default {
 				<span>{{ capApp.navigationDbSync }}</span>
 			</router-link>
 
+			<!-- Geo: Base layers -->
+			<router-link class="entry clickable" tag="div" to="/admin/geo-layers-base" :class="{ inactive:!activated }">
+				<img src="images/map.png" />
+				<span>{{ capApp.navigationGeoLayersBase }}</span>
+			</router-link>
+
 			<!-- cluster -->
 			<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
 				<img src="images/cluster.png" />
@@ -161,74 +167,75 @@ export default {
 			@close="showHelp = false"
 		/>
 	</div>`,
-	watch:{
+	watch: {
 		$route(val) {
-			if(val.hash === '')
+			if (val.hash === '')
 				this.showHelp = false;
 
-			if(this.activated && (val.path.includes('license') || val.path.includes('login-sessions')))
+			if (this.activated && (val.path.includes('license') || val.path.includes('login-sessions')))
 				this.getConcurrentLogins();
 		}
 	},
 	data() {
 		return {
-			concurrentLogins:0,        // count of concurrent logins (full)
-			concurrentLoginsLimited:0, // count of concurrent logins (limited)
-			ready:false,
-			showHelp:false
+			concurrentLogins: 0,        // count of concurrent logins (full)
+			concurrentLoginsLimited: 0, // count of concurrent logins (limited)
+			ready: false,
+			showHelp: false
 		};
 	},
 	mounted() {
-		if(!this.isAdmin)
+		if (!this.isAdmin)
 			return this.$router.push('/');
 
 		this.getConcurrentLogins();
 		this.ready = true;
 	},
-	computed:{
-		contentTitle:s => {
-			if(s.$route.path.includes('backups'))         return s.capApp.navigationBackups;
-			if(s.$route.path.includes('caption-map'))     return s.capApp.navigationCaptionMap;
-			if(s.$route.path.includes('cluster'))         return s.capApp.navigationCluster;
-			if(s.$route.path.includes('config'))          return s.capApp.navigationConfig;
-			if(s.$route.path.includes('custom'))          return s.capApp.navigationCustom;
-			if(s.$route.path.includes('db-sync'))         return s.capApp.navigationDbSync;
-			if(s.$route.path.includes('files'))           return s.capApp.navigationFiles;
-			if(s.$route.path.includes('license'))         return s.capApp.navigationActivation;
-			if(s.$route.path.includes('logins'))          return s.capApp.navigationLogins;
-			if(s.$route.path.includes('login-sessions'))  return s.capApp.navigationLoginSessions;
-			if(s.$route.path.includes('login-templates')) return s.capApp.navigationLoginTemplates;
-			if(s.$route.path.includes('logs'))            return s.capApp.navigationLogs;
-			if(s.$route.path.includes('ldaps'))           return s.capApp.navigationLdaps;
-			if(s.$route.path.includes('mail-accounts'))   return s.capApp.navigationMailAccounts;
-			if(s.$route.path.includes('mail-spooler'))    return s.capApp.navigationMailSpooler;
-			if(s.$route.path.includes('mail-traffic'))    return s.capApp.navigationMailTraffic;
-			if(s.$route.path.includes('modules'))         return s.capApp.navigationModules;
-			if(s.$route.path.includes('oauth-clients'))   return s.capApp.navigationOauthClients;
-			if(s.$route.path.includes('roles'))           return s.capApp.navigationRoles;
-			if(s.$route.path.includes('scheduler'))       return s.capApp.navigationScheduler;
-			if(s.$route.path.includes('system-msg'))      return s.capApp.navigationSystemMsg;
+	computed: {
+		contentTitle: s => {
+			if (s.$route.path.includes('backups')) return s.capApp.navigationBackups;
+			if (s.$route.path.includes('caption-map')) return s.capApp.navigationCaptionMap;
+			if (s.$route.path.includes('cluster')) return s.capApp.navigationCluster;
+			if (s.$route.path.includes('config')) return s.capApp.navigationConfig;
+			if (s.$route.path.includes('custom')) return s.capApp.navigationCustom;
+			if (s.$route.path.includes('db-sync')) return s.capApp.navigationDbSync;
+			if (s.$route.path.includes('files')) return s.capApp.navigationFiles;
+			if (s.$route.path.includes('geo-layers-base')) return s.capApp.navigationGeoLayersBase;
+			if (s.$route.path.includes('license')) return s.capApp.navigationActivation;
+			if (s.$route.path.includes('logins')) return s.capApp.navigationLogins;
+			if (s.$route.path.includes('login-sessions')) return s.capApp.navigationLoginSessions;
+			if (s.$route.path.includes('login-templates')) return s.capApp.navigationLoginTemplates;
+			if (s.$route.path.includes('logs')) return s.capApp.navigationLogs;
+			if (s.$route.path.includes('ldaps')) return s.capApp.navigationLdaps;
+			if (s.$route.path.includes('mail-accounts')) return s.capApp.navigationMailAccounts;
+			if (s.$route.path.includes('mail-spooler')) return s.capApp.navigationMailSpooler;
+			if (s.$route.path.includes('mail-traffic')) return s.capApp.navigationMailTraffic;
+			if (s.$route.path.includes('modules')) return s.capApp.navigationModules;
+			if (s.$route.path.includes('oauth-clients')) return s.capApp.navigationOauthClients;
+			if (s.$route.path.includes('roles')) return s.capApp.navigationRoles;
+			if (s.$route.path.includes('scheduler')) return s.capApp.navigationScheduler;
+			if (s.$route.path.includes('system-msg')) return s.capApp.navigationSystemMsg;
 			return '';
 		},
-		licenseTitle:s => !s.activated
+		licenseTitle: s => !s.activated
 			? s.capApp.navigationLicense
-			:`${s.capApp.navigationLicense} (${s.concurrentLogins}/${s.license.loginCount} - ${s.concurrentLoginsLimited}/${s.license.loginCount * s.limitedFactor})`,
+			: `${s.capApp.navigationLicense} (${s.concurrentLogins}/${s.license.loginCount} - ${s.concurrentLoginsLimited}/${s.license.loginCount * s.limitedFactor})`,
 
 		// stores
-		activated:    s => s.$store.getters['local/activated'],
-		bgStyle:      s => s.$store.getters.colorMenuStyle,
-		capApp:       s => s.$store.getters.captions.admin,
-		colorMenu:    s => s.$store.getters.colorMenu,
-		isAdmin:      s => s.$store.getters.isAdmin,
-		license:      s => s.$store.getters.license,
-		limitedFactor:s => s.$store.getters.constants.loginLimitedFactor
+		activated: s => s.$store.getters['local/activated'],
+		bgStyle: s => s.$store.getters.colorMenuStyle,
+		capApp: s => s.$store.getters.captions.admin,
+		colorMenu: s => s.$store.getters.colorMenu,
+		isAdmin: s => s.$store.getters.isAdmin,
+		license: s => s.$store.getters.license,
+		limitedFactor: s => s.$store.getters.constants.loginLimitedFactor
 	},
-	methods:{
+	methods: {
 		// backend calls
 		getConcurrentLogins() {
-			ws.send('loginSession','getConcurrent',{},true).then(
+			ws.send('loginSession', 'getConcurrent', {}, true).then(
 				res => {
-					this.concurrentLogins        = res.payload.full;
+					this.concurrentLogins = res.payload.full;
 					this.concurrentLoginsLimited = res.payload.limited;
 				},
 				this.$root.genericError

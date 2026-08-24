@@ -734,23 +734,6 @@ export default {
 
 			ws.sendMultiple(requests, true).then(
 				async res => {
-					// TEMP Geo WMS provider mockup
-					this.$store.commit("geoLayerBaseIdMap", {
-						"32e54b0d-8d8c-4353-90b9-d5b709fb13ad": {
-							name: 'MOCK_WMS',
-							srid: 4326,
-							parameters: {
-								layers: 'web_light',
-								transparent: true,
-								format: 'image/png',
-								styles: '',
-								version: '1.3.0',
-							},
-							url: 'https://TEMP'
-						},
-					});
-					// TEMP
-
 					this.$store.commit('local/loginFavorites', res[0].payload);
 					this.$store.commit('local/loginOptions', res[1].payload);
 					this.$store.commit('settings', res[2].payload);

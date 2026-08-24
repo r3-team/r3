@@ -1,14 +1,25 @@
-package request
+package request_geo
 
 import (
 	"context"
 	"encoding/json"
 	"r3/types"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func GeoLayerBaseGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
+func LayerBaseDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+
+	var id uuid.UUID
+	if err := json.Unmarshal(reqJson, &id); err != nil {
+		return err
+	}
+	_, err := tx.Exec(ctx, `DELETE FROM instance_geo.layer_base WHERE id = $1`, id)
+	return err
+}
+
+func LayerBaseGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, parameters, srid, url
@@ -31,7 +42,7 @@ func GeoLayerBaseGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	return res, nil
 }
 
-func GeoLayerBaseSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+func LayerBaseSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var l types.GeoLayerBase
 	if err := json.Unmarshal(reqJson, &l); err != nil {
