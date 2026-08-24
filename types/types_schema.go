@@ -330,6 +330,7 @@ type FieldMap struct {
 	Flags      []string            `json:"flags"`
 	OnMobile   bool                `json:"onMobile"`
 	LayersData []FieldMapLayerData `json:"layersData"`
+	Captions   CaptionMap          `json:"captions"`
 }
 type FieldMapLayerData struct {
 	Id                   uuid.UUID   `json:"id"`

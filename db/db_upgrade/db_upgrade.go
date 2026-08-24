@@ -774,7 +774,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE TABLE IF NOT EXISTS instance_geo.field_assign (
 				field_id uuid NOT NULL,
+				coord_lat real NOT NULL,
+				coord_lon real NOT NULL,
 				srid integer NOT NULL,
+				zoom real NOT NULL,
 				CONSTRAINT field_assign_pkey PRIMARY KEY (field_id),
 				CONSTRAINT field_assign_field_id_fkey FOREIGN KEY (field_id)
 					REFERENCES app.field (id) MATCH SIMPLE
@@ -787,7 +790,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				layer_base_id uuid NOT NULL,
 				"position" smallint NOT NULL,
 				hidden bool NOT NULL,
-				CONSTRAINT field_assign_layer_base_pkey PRIMARY KEY (field_id,layer_base_id),
+				CONSTRAINT field_assign_layer_base_pkey PRIMARY KEY (field_id,hidden,layer_base_id),
 				CONSTRAINT field_assign_layer_base_field_id_fkey FOREIGN KEY (field_id)
 					REFERENCES app.field (id) MATCH SIMPLE
 					ON UPDATE CASCADE

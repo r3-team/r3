@@ -7,6 +7,7 @@ import MyAdminConfig from './comps/admin/adminConfig.js';
 import MyAdminCustom from './comps/admin/adminCustom.js';
 import MyAdminDbSync from './comps/admin/adminDbSync.js';
 import MyAdminFiles from './comps/admin/adminFiles.js';
+import MyAdminGeoFieldsAssign from './comps/admin/adminGeoFieldsAssign.js';
 import MyAdminGeoLayersBase from './comps/admin/adminGeoLayersBase.js';
 import MyAdminLdaps from './comps/admin/adminLdaps.js';
 import MyAdminLicense from './comps/admin/adminLicense.js';
@@ -116,6 +117,7 @@ const MyRouter = VueRouter.createRouter({
 			{ path: 'custom', component: MyAdminCustom },
 			{ path: 'db-sync', component: MyAdminDbSync },
 			{ path: 'files', component: MyAdminFiles },
+			{ path: 'geo-fields-assign', component: MyAdminGeoFieldsAssign },
 			{ path: 'geo-layers-base', component: MyAdminGeoLayersBase },
 			{ path: 'ldaps', component: MyAdminLdaps },
 			{ path: 'license', component: MyAdminLicense },

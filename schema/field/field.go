@@ -372,6 +372,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 				State:    state,
 				Flags:    flags,
 				OnMobile: onMobile,
+				Captions: types.CaptionMap{},
 			})
 			posMapLookup = append(posMapLookup, pos)
 
@@ -582,6 +583,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posMapLookup {
 		var field = fields[pos].(types.FieldMap)
 		field.LayersData, err = getLayerData_tx(ctx, tx, field.Id)
+		if err != nil {
+			return nil, err
+		}
+		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -855,6 +860,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 				return err
 			}
 			if err := setMap_tx(ctx, tx, f); err != nil {
+				return err
+			}
+			if err := caption.Set_tx(ctx, tx, f.Id, f.Captions); err != nil {
 				return err
 			}
 

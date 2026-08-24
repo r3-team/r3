@@ -97,6 +97,7 @@ export default Vue.defineAsyncComponent(async () => {
 		emits: ['open-form'],
 		data() {
 			return {
+				coordinatesStart: [0, 0],
 				featurePropertiesFrontend: ['colorFill', 'indexRecordIds'],
 				interaction: {}, // current interactions (draw, modify, ...)
 				interactionHover: null, // hover interaction, always active
@@ -225,26 +226,22 @@ export default Vue.defineAsyncComponent(async () => {
 			});
 
 			// fetch base layers assigned to field
-			ws.send('geoLayerBase', 'getFieldAssign', this.fieldId, true).then(
+			ws.send('geoFieldAssign', 'get', this.fieldId, true).then(
 				res => {
 					let isUnknownLayerBase = false;
+					this.coordinatesStart = [res.payload.coordLon, res.payload.coordLat];
+					this.layerBaseIds = res.payload.layerBaseIds;
+					this.layerBaseIdsHidden = res.payload.layerBaseIdsHidden;
 					this.viewSrid = res.payload.srid;
-					//this.zoomDefault = res.payload.zoom;
+					this.zoomDefault = res.payload.zoom;
 
-					for (const id of res.payload.layerBaseIdsShow) {
-						this.layerBaseIds.push(id);
-					}
-					for (const id of res.payload.layerBaseIdsHide) {
-						this.layerBaseIds.push(id);
-						this.layerBaseIdsHidden.push(id);
-					}
 					for (const id of this.layerBaseIds) {
 						if (this.layerBaseIdMapInstance[id] === undefined)
 							isUnknownLayerBase = true;
 					}
 
 					if (!isUnknownLayerBase)
-						this.reset();
+						return this.reset();
 
 					// refresh base layers
 					const customSrids = [];
@@ -447,7 +444,7 @@ export default Vue.defineAsyncComponent(async () => {
 						layers: [],
 						controls: [], // remove default controls like zoom
 						view: new ol.View({
-							center: [0, 0],
+							center: ol.proj.fromLonLat(this.coordinatesStart),
 							projection: `EPSG:${this.viewSrid}`,
 							zoom: this.zoomDefault,
 						}),
@@ -492,6 +489,9 @@ export default Vue.defineAsyncComponent(async () => {
 
 					for (const b of this.layersBase) {
 						this.map.addLayer(b.layer);
+
+						if (this.layerBaseIdsHidden.includes(b.id))
+							b.layer.setVisible(false);
 					}
 					for (const d of this.layersData) {
 						this.map.addLayer(d.layer);

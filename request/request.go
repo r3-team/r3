@@ -150,12 +150,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "paste":
 			return filesPaste_tx(ctx, tx, reqJson, loginId)
 		}
+	case "geoFieldAssign":
+		switch action {
+		case "get":
+			return request_geo.FieldAssignGet_tx(ctx, tx, reqJson)
+		}
 	case "geoLayerBase":
 		switch action {
 		case "get":
 			return request_geo.LayerBaseGet_tx(ctx, tx)
-		case "getFieldAssign":
-			return request_geo.LayerBaseFieldGet_tx(ctx, tx, reqJson)
 		}
 	case "login":
 		switch action {
@@ -388,6 +391,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, FormDel_tx(ctx, tx, reqJson)
 		case "set":
 			return nil, FormSet_tx(ctx, tx, reqJson)
+		}
+	case "geoFieldAssign":
+		switch action {
+		case "set":
+			return request_geo.FieldAssignSet_tx(ctx, tx, reqJson)
 		}
 	case "geoLayerBase":
 		switch action {

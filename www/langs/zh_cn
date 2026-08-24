@@ -177,12 +177,20 @@
 			"titleConfig": "全局配置",
 			"titleDeleted": "已删除的文件"
 		},
+		"geoFieldAssign": {
+			"coordinates": "Start coordinates (latitude/longitude)",
+			"layerBaseIds": "Base layers",
+			"srid": "SRID",
+			"sridHint": "Spatial Reference System Identifier (SRID) used to store data in this map field.",
+			"title": "Configure map field",
+			"zoom": "Start zoom"
+		},
 		"geoLayerBase": {
 			"dialog": {
 				"delete": "Are you sure you want to delete this base layer?"
 			},
 			"srid": "SRID",
-			"sridHint": "Spatial Reference System Identifier (SRID) for the coordinate reference system (CRS) for this base layer.",
+			"sridHint": "Spatial Reference System Identifier (SRID) used for this base layer.",
 			"title": "Base layer '{NAME}'",
 			"titleNew": "New base layer"
 		},
@@ -491,6 +499,7 @@
 		"navigationCustom": "定制",
 		"navigationDbSync": "Database sync",
 		"navigationFiles": "文件",
+		"navigationGeoFieldsAssign": "Geo data: Configure maps",
 		"navigationGeoLayersBase": "Geo data: Base layers",
 		"navigationLdaps": "LDAP-Connectors",
 		"navigationLicense": "专业版",

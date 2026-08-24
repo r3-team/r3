@@ -9,10 +9,12 @@ import (
 type GeoSrid int64
 
 type GeoFieldAssign struct {
-	LayerBaseIdsHide []uuid.UUID `json:"layerBaseIdsHide"` // base layers to include and keep hidden by default
-	LayerBaseIdsShow []uuid.UUID `json:"layerBaseIdsShow"` // base layers to include and show by default
-	Srid             int64       `json:"srid"`             // view SRID for field
-	Zoom             int64       `json:"zoom"`
+	LayerBaseIds       []uuid.UUID `json:"layerBaseIds"`       // base layers to include
+	LayerBaseIdsHidden []uuid.UUID `json:"layerBaseIdsHidden"` // base layers to keep hidden by default (subset of layerBaseIds)
+	Srid               int64       `json:"srid"`               // view SRID
+	CoordLat           float64     `json:"coordLat"`
+	CoordLon           float64     `json:"coordLon"`
+	Zoom               float64     `json:"zoom"` // default zoom level
 }
 
 type GeoJson struct {

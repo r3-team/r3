@@ -177,12 +177,20 @@
 			"titleConfig": "Globale Konfiguration",
 			"titleDeleted": "Gelöschte Dateien"
 		},
+		"geoFieldAssign": {
+			"coordinates": "Startkoordinaten (Breitengrad/Längengrad)",
+			"layerBaseIds": "Basisebenen",
+			"srid": "SRID",
+			"sridHint": "Spatial Reference System Identifier (SRID), welcher für die Datenspeicherung von diesem Kartenfeld genutzt wird.",
+			"title": "Kartenfeld konfigurieren",
+			"zoom": "Startzoom-Faktor"
+		},
 		"geoLayerBase": {
 			"dialog": {
 				"delete": "Bist du sicher, dass du diese Basisebene löschen möchtest?"
 			},
 			"srid": "SRID",
-			"sridHint": "Spatial Reference System Identifier (SRID) für das Koordinaten-Referenzsystem (CRS) für diese Basisebene.",
+			"sridHint": "Spatial Reference System Identifier (SRID), welcher für diese Basisebene genutzt wird.",
 			"title": "Basisebene \"{NAME}\"",
 			"titleNew": "Neue Basisebene"
 		},
@@ -491,6 +499,7 @@
 		"navigationCustom": "Anpassungen",
 		"navigationDbSync": "Datenbank-Sync",
 		"navigationFiles": "Dateien",
+		"navigationGeoFieldsAssign": "Geodaten: Karten konfigurieren",
 		"navigationGeoLayersBase": "Geodaten: Basisebenen",
 		"navigationLdaps": "LDAP-Konnektoren",
 		"navigationLicense": "Professional",

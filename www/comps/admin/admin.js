@@ -147,6 +147,12 @@ export default {
 				<span>{{ capApp.navigationGeoLayersBase }}</span>
 			</router-link>
 
+			<!-- Geo: Fields assign -->
+			<router-link class="entry clickable" tag="div" to="/admin/geo-fields-assign" :class="{ inactive:!activated }">
+				<img src="images/map.png" />
+				<span>{{ capApp.navigationGeoFieldsAssign }}</span>
+			</router-link>
+
 			<!-- cluster -->
 			<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
 				<img src="images/cluster.png" />
@@ -200,6 +206,7 @@ export default {
 			if (s.$route.path.includes('custom')) return s.capApp.navigationCustom;
 			if (s.$route.path.includes('db-sync')) return s.capApp.navigationDbSync;
 			if (s.$route.path.includes('files')) return s.capApp.navigationFiles;
+			if (s.$route.path.includes('geo-fields-assign')) return s.capApp.navigationGeoFieldsAssign;
 			if (s.$route.path.includes('geo-layers-base')) return s.capApp.navigationGeoLayersBase;
 			if (s.$route.path.includes('license')) return s.capApp.navigationActivation;
 			if (s.$route.path.includes('logins')) return s.capApp.navigationLogins;

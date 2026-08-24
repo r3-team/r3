@@ -31,7 +31,7 @@ export default {
 	template: `<div class="builder-field-options">
 		<table class="generic-table-vertical default-inputs">
 			<tbody>
-				<tr v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)">
+				<tr v-if="isButton || isChart || isData || isList || isTabs || isMap || (isHeader && !field.richtext)">
 					<td>{{ capGen.title }}</td>
 					<td>
 						<my-builder-caption
