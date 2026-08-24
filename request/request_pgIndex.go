@@ -10,21 +10,21 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PgIndexDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func PgIndexDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, pgIndex.Del_tx(ctx, tx, req)
+	return pgIndex.Del_tx(ctx, tx, req)
 }
 
-func PgIndexSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func PgIndexSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.PgIndex
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 	// overwrite values that can only be set on the backend
 	req.AutoFki = false
 	req.PrimaryKey = false
-	return nil, pgIndex.Set_tx(ctx, tx, req)
+	return pgIndex.Set_tx(ctx, tx, req)
 }

@@ -109,7 +109,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "data":
 		switch action {
 		case "del":
-			return DataDel_tx(ctx, tx, reqJson, loginId)
+			return nil, DataDel_tx(ctx, tx, reqJson, loginId)
 		case "get":
 			return DataGet_tx(ctx, tx, reqJson, loginId)
 		case "getKeys":
@@ -121,7 +121,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return DataSet_tx(ctx, tx, reqJson, loginId)
 		case "setKeys":
-			return DataSetKeys_tx(ctx, tx, reqJson)
+			return nil, DataSetKeys_tx(ctx, tx, reqJson)
 		}
 	case "doc":
 		switch action {
@@ -131,18 +131,18 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "event":
 		switch action {
 		case "clientEventsChanged":
-			return eventClientEventsChanged_tx(ctx, tx, loginId, address)
+			return nil, eventClientEventsChanged_tx(ctx, tx, loginId, address)
 		case "filesCopied":
-			return eventFilesCopied_tx(ctx, tx, reqJson, loginId, address)
+			return nil, eventFilesCopied_tx(ctx, tx, reqJson, loginId, address)
 		case "fileRequested":
-			return eventFileRequested_tx(ctx, tx, reqJson, loginId, address)
+			return nil, eventFileRequested_tx(ctx, tx, reqJson, loginId, address)
 		case "keystrokesRequested":
-			return eventKeystrokesRequested_tx(ctx, tx, reqJson, loginId, address)
+			return nil, eventKeystrokesRequested_tx(ctx, tx, reqJson, loginId, address)
 		}
 	case "feedback":
 		switch action {
 		case "send":
-			return FeedbackSend(reqJson)
+			return nil, FeedbackSend(reqJson)
 		}
 	case "file":
 		switch action {
@@ -154,7 +154,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "getNames":
 			return request_login.GetNames_tx(ctx, tx, reqJson)
 		case "delTokenFixed":
-			return request_login.DelTokenFixed_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.DelTokenFixed_tx(ctx, tx, reqJson, loginId)
 		case "getTokensFixed":
 			return request_login.GetTokensFixed_tx(ctx, tx, loginId)
 		case "setTokenFixed":
@@ -163,11 +163,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginClientEvent":
 		switch action {
 		case "del":
-			return request_login.ClientEventDel_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.ClientEventDel_tx(ctx, tx, reqJson, loginId)
 		case "get":
 			return request_login.ClientEventGet_tx(ctx, tx, loginId)
 		case "set":
-			return request_login.ClientEventSet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.ClientEventSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginFavorites":
 		switch action {
@@ -182,18 +182,18 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return request_login.SetFavorites_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.SetFavorites_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginKeys":
 		switch action {
 		case "getPublic":
 			return request_login.KeysGetPublic_tx(ctx, tx, reqJson)
 		case "reset":
-			return request_login.KeysReset_tx(ctx, tx, loginId)
+			return nil, request_login.KeysReset_tx(ctx, tx, loginId)
 		case "store":
-			return request_login.KeysStore_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.KeysStore_tx(ctx, tx, reqJson, loginId)
 		case "storePrivate":
-			return request_login.KeysStorePrivate_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.KeysStorePrivate_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginOptions":
 		switch action {
@@ -201,14 +201,14 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return request_login.OptionsDel_tx(ctx, tx, loginId)
+			return nil, request_login.OptionsDel_tx(ctx, tx, loginId)
 		case "get":
 			return request_login.OptionsGet_tx(ctx, tx, reqJson, loginId, isNoAuth)
 		case "set":
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return request_login.OptionsSet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.OptionsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginPassword":
 		switch action {
@@ -216,7 +216,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return request_login.PasswortSet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.PasswortSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginSetting":
 		switch action {
@@ -226,14 +226,14 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return request_login.SettingsSet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.SettingsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginWidgetGroups":
 		switch action {
 		case "get":
 			return request_login.WidgetGroupsGet_tx(ctx, tx, loginId)
 		case "set":
-			return request_login.WidgetGroupsSet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.WidgetGroupsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "lookup":
 		switch action {
@@ -256,27 +256,27 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "api":
 		switch action {
 		case "copy":
-			return ApiCopy_tx(ctx, tx, reqJson)
+			return nil, ApiCopy_tx(ctx, tx, reqJson)
 		case "del":
-			return ApiDel_tx(ctx, tx, reqJson)
+			return nil, ApiDel_tx(ctx, tx, reqJson)
 		case "set":
-			return ApiSet_tx(ctx, tx, reqJson)
+			return nil, ApiSet_tx(ctx, tx, reqJson)
 		}
 	case "article":
 		switch action {
 		case "assign":
-			return ArticleAssign_tx(ctx, tx, reqJson)
+			return nil, ArticleAssign_tx(ctx, tx, reqJson)
 		case "del":
-			return ArticleDel_tx(ctx, tx, reqJson)
+			return nil, ArticleDel_tx(ctx, tx, reqJson)
 		case "set":
-			return ArticleSet_tx(ctx, tx, reqJson)
+			return nil, ArticleSet_tx(ctx, tx, reqJson)
 		}
 	case "attribute":
 		switch action {
 		case "del":
-			return AttributeDel_tx(ctx, tx, reqJson)
+			return nil, AttributeDel_tx(ctx, tx, reqJson)
 		case "set":
-			return AttributeSet_tx(ctx, tx, reqJson)
+			return nil, AttributeSet_tx(ctx, tx, reqJson)
 		}
 	case "backup":
 		switch action {
@@ -293,39 +293,39 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return CaptionMapGet_tx(ctx, tx, reqJson)
 		case "setOne":
-			return CaptionMapSetOne_tx(ctx, tx, reqJson)
+			return nil, CaptionMapSetOne_tx(ctx, tx, reqJson)
 		}
 	case "clientEvent":
 		switch action {
 		case "del":
-			return clientEventDel_tx(ctx, tx, reqJson)
+			return nil, clientEventDel_tx(ctx, tx, reqJson)
 		case "set":
-			return clientEventSet_tx(ctx, tx, reqJson)
+			return nil, clientEventSet_tx(ctx, tx, reqJson)
 		}
 	case "collection":
 		switch action {
 		case "del":
-			return CollectionDel_tx(ctx, tx, reqJson)
+			return nil, CollectionDel_tx(ctx, tx, reqJson)
 		case "set":
-			return CollectionSet_tx(ctx, tx, reqJson)
+			return nil, CollectionSet_tx(ctx, tx, reqJson)
 		}
 	case "config":
 		switch action {
 		case "get":
 			return ConfigGet()
 		case "set":
-			return ConfigSet_tx(ctx, tx, reqJson)
+			return nil, ConfigSet_tx(ctx, tx, reqJson)
 		}
 	case "cluster":
 		switch action {
 		case "delNode":
-			return ClusterNodeDel_tx(ctx, tx, reqJson)
+			return nil, ClusterNodeDel_tx(ctx, tx, reqJson)
 		case "getNodes":
 			return ClusterNodesGet_tx(ctx, tx)
 		case "setNode":
-			return ClusterNodeSet_tx(ctx, tx, reqJson)
+			return nil, ClusterNodeSet_tx(ctx, tx, reqJson)
 		case "shutdownNode":
-			return ClusterNodeShutdown_tx(ctx, tx, reqJson)
+			return nil, ClusterNodeShutdown_tx(ctx, tx, reqJson)
 		}
 	case "dataSql":
 		switch action {
@@ -335,9 +335,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "dbSync":
 		switch action {
 		case "delHost":
-			return request_dbSync.HostDel_tx(ctx, tx, reqJson)
+			return nil, request_dbSync.HostDel_tx(ctx, tx, reqJson)
 		case "delJob":
-			return request_dbSync.JobDel_tx(ctx, tx, reqJson)
+			return nil, request_dbSync.JobDel_tx(ctx, tx, reqJson)
 		case "getHosts":
 			return request_dbSync.HostsGet_tx(ctx, tx)
 		case "getJobs":
@@ -345,55 +345,62 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "getJobLogs":
 			return request_dbSync.JobLogGet(ctx, tx, reqJson)
 		case "setHost":
-			return request_dbSync.HostSet_tx(ctx, tx, reqJson)
+			return nil, request_dbSync.HostSet_tx(ctx, tx, reqJson)
 		case "setJob":
-			return request_dbSync.JobSet_tx(ctx, tx, reqJson)
+			return nil, request_dbSync.JobSet_tx(ctx, tx, reqJson)
 		case "informChanged":
 			return nil, cluster.DbSyncChanged_tx(ctx, tx, true)
 		}
 	case "doc":
 		switch action {
 		case "copy":
-			return DocCopy_tx(ctx, tx, reqJson)
+			return nil, DocCopy_tx(ctx, tx, reqJson)
 		case "del":
-			return DocDel_tx(ctx, tx, reqJson)
+			return nil, DocDel_tx(ctx, tx, reqJson)
 		case "set":
-			return DocSet_tx(ctx, tx, reqJson)
+			return nil, DocSet_tx(ctx, tx, reqJson)
 		}
 	case "field":
 		switch action {
 		case "del":
-			return FieldDel_tx(ctx, tx, reqJson)
+			return nil, FieldDel_tx(ctx, tx, reqJson)
 		}
 	case "file":
 		switch action {
 		case "get":
 			return FileGet_tx(ctx, tx)
 		case "restore":
-			return FileRestore_tx(ctx, tx, reqJson)
+			return nil, FileRestore_tx(ctx, tx, reqJson)
 		}
 	case "form":
 		switch action {
 		case "copy":
-			return FormCopy_tx(ctx, tx, reqJson)
+			return nil, FormCopy_tx(ctx, tx, reqJson)
 		case "del":
-			return FormDel_tx(ctx, tx, reqJson)
+			return nil, FormDel_tx(ctx, tx, reqJson)
 		case "set":
-			return FormSet_tx(ctx, tx, reqJson)
+			return nil, FormSet_tx(ctx, tx, reqJson)
+		}
+	case "geoLayerBase":
+		switch action {
+		case "get":
+			return GeoLayerBaseGet_tx(ctx, tx)
+		case "set":
+			return nil, GeoLayerBaseSet_tx(ctx, tx, reqJson)
 		}
 	case "icon":
 		switch action {
 		case "del":
-			return IconDel_tx(ctx, tx, reqJson)
+			return nil, IconDel_tx(ctx, tx, reqJson)
 		case "setName":
-			return IconSetName_tx(ctx, tx, reqJson)
+			return nil, IconSetName_tx(ctx, tx, reqJson)
 		}
 	case "jsFunction":
 		switch action {
 		case "del":
-			return JsFunctionDel_tx(ctx, tx, reqJson)
+			return nil, JsFunctionDel_tx(ctx, tx, reqJson)
 		case "set":
-			return JsFunctionSet_tx(ctx, tx, reqJson)
+			return nil, JsFunctionSet_tx(ctx, tx, reqJson)
 		}
 	case "key":
 		switch action {
@@ -403,20 +410,20 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "ldap":
 		switch action {
 		case "check":
-			return LdapCheck(reqJson)
+			return nil, LdapCheck(reqJson)
 		case "del":
-			return LdapDel_tx(ctx, tx, reqJson)
+			return nil, LdapDel_tx(ctx, tx, reqJson)
 		case "get":
 			return LdapGet_tx(ctx, tx)
 		case "reload":
 			return nil, ldap.UpdateCache_tx(ctx, tx)
 		case "set":
-			return LdapSet_tx(ctx, tx, reqJson)
+			return nil, LdapSet_tx(ctx, tx, reqJson)
 		}
 	case "license":
 		switch action {
 		case "del":
-			return LicenseDel_tx(ctx, tx)
+			return nil, LicenseDel_tx(ctx, tx)
 		case "get":
 			return config.GetLicense(), nil
 		}
@@ -428,7 +435,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "login":
 		switch action {
 		case "del":
-			return request_login.Del_tx(ctx, tx, reqJson)
+			return nil, request_login.Del_tx(ctx, tx, reqJson)
 		case "get":
 			return request_login.Get_tx(ctx, tx, reqJson)
 		case "getIsNotUnique":
@@ -438,42 +445,42 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "getRecords":
 			return request_login.GetRecords_tx(ctx, tx, reqJson)
 		case "kick":
-			return request_login.Kick(ctx, tx, reqJson)
+			return nil, request_login.Kick(ctx, tx, reqJson)
 		case "reauth":
-			return request_login.Reauth_tx(ctx, tx, reqJson)
+			return nil, request_login.Reauth_tx(ctx, tx, reqJson)
 		case "reauthAll":
-			return request_login.ReauthAll_tx(ctx, tx)
+			return nil, request_login.ReauthAll_tx(ctx, tx)
 		case "resetTotp":
-			return request_login.ResetTotp_tx(ctx, tx, reqJson)
+			return nil, request_login.ResetTotp_tx(ctx, tx, reqJson)
 		case "set":
 			return request_login.Set_tx(ctx, tx, reqJson)
 		case "setMembers":
-			return request_login.SetMembers_tx(ctx, tx, reqJson)
+			return nil, request_login.SetMembers_tx(ctx, tx, reqJson)
 		}
 	case "loginExportKey":
 		switch action {
 		case "del":
-			return request_login.ExportKeyDel_tx(ctx, tx, loginId)
+			return nil, request_login.ExportKeyDel_tx(ctx, tx, loginId)
 		case "get":
 			return request_login.ExportKeyGet_tx(ctx, tx, loginId)
 		case "set":
-			return request_login.ExportKeySet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.ExportKeySet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginForm":
 		switch action {
 		case "del":
-			return request_login.FormDel_tx(ctx, tx, reqJson)
+			return nil, request_login.FormDel_tx(ctx, tx, reqJson)
 		case "set":
-			return request_login.FormSet_tx(ctx, tx, reqJson)
+			return nil, request_login.FormSet_tx(ctx, tx, reqJson)
 		}
 	case "loginRepoCred":
 		switch action {
 		case "del":
-			return request_login.RepoCredDel_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.RepoCredDel_tx(ctx, tx, reqJson, loginId)
 		case "get":
 			return request_login.RepoCredGet_tx(ctx, tx, reqJson, loginId)
 		case "set":
-			return request_login.RepoCredSet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.RepoCredSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginSession":
 		switch action {
@@ -485,7 +492,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginTemplate":
 		switch action {
 		case "del":
-			return request_login.TemplateDel_tx(ctx, tx, reqJson)
+			return nil, request_login.TemplateDel_tx(ctx, tx, reqJson)
 		case "get":
 			return request_login.TemplateGet_tx(ctx, tx, reqJson)
 		case "set":
@@ -494,26 +501,26 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "mailAccount":
 		switch action {
 		case "del":
-			return MailAccountDel_tx(ctx, tx, reqJson)
+			return nil, MailAccountDel_tx(ctx, tx, reqJson)
 		case "get":
 			return MailAccountGet()
 		case "reload":
 			return nil, cache.LoadMailAccountMap_tx(ctx, tx)
 		case "set":
-			return MailAccountSet_tx(ctx, tx, reqJson)
+			return nil, MailAccountSet_tx(ctx, tx, reqJson)
 		case "test":
-			return MailAccountTest_tx(ctx, tx, reqJson)
+			return nil, MailAccountTest_tx(ctx, tx, reqJson)
 		}
 	case "mailSpooler":
 		switch action {
 		case "del":
-			return MailSpoolerDel_tx(ctx, tx, reqJson)
+			return nil, MailSpoolerDel_tx(ctx, tx, reqJson)
 		case "get":
 			return MailSpoolerGet_tx(ctx, tx, reqJson)
 		case "getCountStuck":
 			return mailSpoolerGetCountStuck(ctx, tx, loginId)
 		case "reset":
-			return MailSpoolerReset_tx(ctx, tx, reqJson)
+			return nil, MailSpoolerReset_tx(ctx, tx, reqJson)
 		}
 	case "mailTraffic":
 		switch action {
@@ -523,116 +530,116 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "menuTab":
 		switch action {
 		case "del":
-			return MenuTabDel_tx(ctx, tx, reqJson)
+			return nil, MenuTabDel_tx(ctx, tx, reqJson)
 		case "set":
-			return MenuTabSet_tx(ctx, tx, reqJson)
+			return nil, MenuTabSet_tx(ctx, tx, reqJson)
 		}
 	case "module":
 		switch action {
 		case "checkChange":
 			return ModuleCheckChange_tx(ctx, tx, reqJson)
 		case "del":
-			return ModuleDel_tx(ctx, tx, reqJson)
+			return nil, ModuleDel_tx(ctx, tx, reqJson)
 		case "set":
 			return ModuleSet_tx(ctx, tx, reqJson)
 		}
 	case "moduleMeta":
 		switch action {
 		case "setLanguagesCustom":
-			return ModuleMetaSetLanguagesCustom_tx(ctx, tx, reqJson)
+			return nil, ModuleMetaSetLanguagesCustom_tx(ctx, tx, reqJson)
 		case "setOptions":
-			return ModuleMetaSetOptions_tx(ctx, tx, reqJson)
+			return nil, ModuleMetaSetOptions_tx(ctx, tx, reqJson)
 		}
 	case "oauthClient":
 		switch action {
 		case "del":
-			return OauthClientDel_tx(ctx, tx, reqJson)
+			return nil, OauthClientDel_tx(ctx, tx, reqJson)
 		case "get":
 			return OauthClientGet()
 		case "reload":
-			return OauthClientReload_tx(ctx, tx)
+			return nil, OauthClientReload_tx(ctx, tx)
 		case "set":
-			return OauthClientSet_tx(ctx, tx, reqJson)
+			return nil, OauthClientSet_tx(ctx, tx, reqJson)
 		}
 	case "package":
 		switch action {
 		case "install":
-			return PackageInstall(ctx)
+			return nil, PackageInstall(ctx)
 		}
 	case "pgFunction":
 		switch action {
 		case "del":
-			return PgFunctionDel_tx(ctx, tx, reqJson)
+			return nil, PgFunctionDel_tx(ctx, tx, reqJson)
 		case "execAny": // admin may exec any non-trigger backend function
 			return PgFunctionExec_tx(ctx, tx, reqJson, false)
 		case "set":
-			return PgFunctionSet_tx(ctx, tx, reqJson)
+			return nil, PgFunctionSet_tx(ctx, tx, reqJson)
 		}
 	case "pgIndex":
 		switch action {
 		case "del":
-			return PgIndexDel_tx(ctx, tx, reqJson)
+			return nil, PgIndexDel_tx(ctx, tx, reqJson)
 		case "set":
-			return PgIndexSet_tx(ctx, tx, reqJson)
+			return nil, PgIndexSet_tx(ctx, tx, reqJson)
 		}
 	case "pgTrigger":
 		switch action {
 		case "del":
-			return PgTriggerDel_tx(ctx, tx, reqJson)
+			return nil, PgTriggerDel_tx(ctx, tx, reqJson)
 		case "set":
-			return PgTriggerSet_tx(ctx, tx, reqJson)
+			return nil, PgTriggerSet_tx(ctx, tx, reqJson)
 		}
 	case "preset":
 		switch action {
 		case "del":
-			return PresetDel_tx(ctx, tx, reqJson)
+			return nil, PresetDel_tx(ctx, tx, reqJson)
 		case "set":
-			return PresetSet_tx(ctx, tx, reqJson)
+			return nil, PresetSet_tx(ctx, tx, reqJson)
 		}
 	case "pwaDomain":
 		switch action {
 		case "reset":
 			return nil, cache.LoadPwaDomainMap_tx(ctx, tx)
 		case "set":
-			return PwaDomainSet_tx(ctx, tx, reqJson)
+			return nil, PwaDomainSet_tx(ctx, tx, reqJson)
 		}
 	case "relation":
 		switch action {
 		case "del":
-			return RelationDel_tx(ctx, tx, reqJson)
+			return nil, RelationDel_tx(ctx, tx, reqJson)
 		case "preview":
 			return RelationPreview_tx(ctx, tx, reqJson)
 		case "set":
-			return RelationSet_tx(ctx, tx, reqJson)
+			return nil, RelationSet_tx(ctx, tx, reqJson)
 		}
 	case "repo":
 		switch action {
 		case "commit":
-			return RepoCommit(ctx, reqJson, loginId)
+			return nil, RepoCommit(ctx, reqJson, loginId)
 		case "del":
-			return RepoDel_tx(ctx, tx, reqJson)
+			return nil, RepoDel_tx(ctx, tx, reqJson)
 		case "get":
 			return cache.GetRepos(), nil
 		case "refresh":
 			return nil, repo.RefreshAll_tx(ctx, tx)
 		case "set":
-			return RepoSet_tx(ctx, tx, reqJson)
+			return nil, RepoSet_tx(ctx, tx, reqJson)
 		}
 	case "repoModule":
 		switch action {
 		case "get":
 			return RepoModuleGet_tx(ctx, tx, reqJson)
 		case "install":
-			return RepoModuleInstall(ctx, reqJson)
+			return nil, RepoModuleInstall(ctx, reqJson)
 		case "installAll":
 			return nil, repo.InstallModulesNewVersions(ctx)
 		}
 	case "role":
 		switch action {
 		case "del":
-			return RoleDel_tx(ctx, tx, reqJson)
+			return nil, RoleDel_tx(ctx, tx, reqJson)
 		case "set":
-			return RoleSet_tx(ctx, tx, reqJson)
+			return nil, RoleSet_tx(ctx, tx, reqJson)
 		}
 	case "scheduler":
 		switch action {
@@ -642,53 +649,53 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "schema":
 		switch action {
 		case "check":
-			return SchemaCheck_tx(ctx, tx, reqJson)
+			return nil, SchemaCheck_tx(ctx, tx, reqJson)
 		case "reload":
-			return SchemaReload_tx(ctx, tx, reqJson)
+			return nil, SchemaReload_tx(ctx, tx, reqJson)
 		}
 	case "searchBar":
 		switch action {
 		case "del":
-			return SearchBarDel_tx(ctx, tx, reqJson)
+			return nil, SearchBarDel_tx(ctx, tx, reqJson)
 		case "set":
-			return SearchBarSet_tx(ctx, tx, reqJson)
+			return nil, SearchBarSet_tx(ctx, tx, reqJson)
 		}
 	case "tag":
 		switch action {
 		case "del":
-			return TagDel_tx(ctx, tx, reqJson)
+			return nil, TagDel_tx(ctx, tx, reqJson)
 		case "set":
-			return TagSet_tx(ctx, tx, reqJson)
+			return nil, TagSet_tx(ctx, tx, reqJson)
 		}
 	case "task":
 		switch action {
 		case "informChanged":
 			return nil, cluster.TasksChanged_tx(ctx, tx, true)
 		case "run":
-			return TaskRun_tx(ctx, tx, reqJson)
+			return nil, TaskRun_tx(ctx, tx, reqJson)
 		case "set":
-			return TaskSet_tx(ctx, tx, reqJson)
+			return nil, TaskSet_tx(ctx, tx, reqJson)
 		}
 	case "transfer":
 		switch action {
 		case "addVersion":
-			return TransferAddVersion_tx(ctx, tx, reqJson)
+			return nil, TransferAddVersion_tx(ctx, tx, reqJson)
 		case "storeExportKey":
-			return TransferStoreExportKey(reqJson, loginId)
+			return nil, TransferStoreExportKey(reqJson, loginId)
 		}
 	case "variable":
 		switch action {
 		case "del":
-			return VariableDel_tx(ctx, tx, reqJson)
+			return nil, VariableDel_tx(ctx, tx, reqJson)
 		case "set":
-			return VariableSet_tx(ctx, tx, reqJson)
+			return nil, VariableSet_tx(ctx, tx, reqJson)
 		}
 	case "widget":
 		switch action {
 		case "del":
-			return WidgetDel_tx(ctx, tx, reqJson)
+			return nil, WidgetDel_tx(ctx, tx, reqJson)
 		case "set":
-			return WidgetSet_tx(ctx, tx, reqJson)
+			return nil, WidgetSet_tx(ctx, tx, reqJson)
 		}
 	}
 	return nil, fmt.Errorf("unknown resource or action")

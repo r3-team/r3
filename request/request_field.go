@@ -9,10 +9,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func FieldDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func FieldDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, field.Del_tx(ctx, tx, req)
+	return field.Del_tx(ctx, tx, req)
 }

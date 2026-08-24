@@ -10,22 +10,21 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ModuleMetaSetLanguagesCustom_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ModuleMetaSetLanguagesCustom_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		Id        uuid.UUID `json:"id"`
 		Languages []string  `json:"languages"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, config_moduleMeta.SetLanguagesCustom_tx(ctx, tx, req.Id, req.Languages)
+	return config_moduleMeta.SetLanguagesCustom_tx(ctx, tx, req.Id, req.Languages)
 }
 
-func ModuleMetaSetOptions_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ModuleMetaSetOptions_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.ModuleMeta
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, config_moduleMeta.SetOptions_tx(ctx, tx, req.Id, req.Hidden, req.Owner, req.Position)
+	return config_moduleMeta.SetOptions_tx(ctx, tx, req.Id, req.Hidden, req.Owner, req.Position)
 }

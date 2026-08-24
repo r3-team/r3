@@ -9,12 +9,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err := tx.Exec(ctx, `
@@ -22,7 +22,7 @@ func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 		WHERE id = ANY($1)
 	`, req.Ids)
 
-	return nil, err
+	return err
 }
 
 func MailSpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
@@ -155,12 +155,12 @@ func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, sear
 	return mails, total, nil
 }
 
-func MailSpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func MailSpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err := tx.Exec(ctx, `
@@ -169,5 +169,5 @@ func MailSpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage
 		WHERE id = ANY($1)
 	`, req.Ids)
 
-	return nil, err
+	return err
 }

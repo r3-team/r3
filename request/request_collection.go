@@ -10,19 +10,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func CollectionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func CollectionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, collection.Del_tx(ctx, tx, req)
+	return collection.Del_tx(ctx, tx, req)
 }
 
-func CollectionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func CollectionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.Collection
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, collection.Set_tx(ctx, tx, req.ModuleId, req.Id,
+	return collection.Set_tx(ctx, tx, req.ModuleId, req.Id,
 		req.IconId, req.Name, req.Columns, req.Query, req.InHeader)
 }

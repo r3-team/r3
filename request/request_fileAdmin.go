@@ -73,14 +73,14 @@ func FileGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 
 // removed deletion state from file
 // file must still be assigned to a record to be restored to its file attribute
-func FileRestore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func FileRestore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
 		RecordId    int64     `json:"recordId"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err := tx.Exec(ctx, fmt.Sprintf(`
@@ -89,5 +89,5 @@ func FileRestore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (an
 		WHERE file_id   = $1
 		AND   record_id = $2
 	`, schema.GetFilesTableName(req.AttributeId)), req.FileId, req.RecordId)
-	return nil, err
+	return err
 }

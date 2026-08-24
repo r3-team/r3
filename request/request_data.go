@@ -23,7 +23,6 @@ func DataGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId
 			Rows  []types.DataGetResult `json:"rows"`
 		}
 	)
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
@@ -57,17 +56,16 @@ func DataSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId
 	return res, nil
 }
 
-func DataDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func DataDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
 
 	var req struct {
 		RelationId uuid.UUID `json:"relationId"`
 		RecordId   int64     `json:"recordId"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, data.Del_tx(ctx, tx, req.RelationId, []int64{req.RecordId}, loginId)
+	return data.Del_tx(ctx, tx, req.RelationId, []int64{req.RecordId}, loginId)
 }
 
 func DataLogGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
@@ -104,24 +102,22 @@ func DataGetKeys_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, log
 		RelationId uuid.UUID `json:"relationId"`
 		RecordIds  []int64   `json:"recordIds"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
 	return data_enc.GetKeys_tx(ctx, tx, req.RelationId, req.RecordIds, loginId)
 }
-func DataSetKeys_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func DataSetKeys_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req struct {
 		RelationId uuid.UUID              `json:"relationId"`
 		RecordId   int64                  `json:"recordId"`
 		EncKeys    []types.DataSetEncKeys `json:"encKeys"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, data_enc.SetKeys_tx(ctx, tx, req.RelationId, req.RecordId, req.EncKeys)
+	return data_enc.SetKeys_tx(ctx, tx, req.RelationId, req.RecordId, req.EncKeys)
 }
 
 func DataGetRecordTitles_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {

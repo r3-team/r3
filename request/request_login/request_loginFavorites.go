@@ -63,10 +63,10 @@ func GetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, lo
 	return res, nil
 }
 
-func SetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func SetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
 	var req map[uuid.UUID][]types.LoginFavorite
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, login_favorites.Set_tx(ctx, tx, loginId, req)
+	return login_favorites.Set_tx(ctx, tx, loginId, req)
 }

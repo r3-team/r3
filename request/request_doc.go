@@ -16,16 +16,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func DocCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func DocCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		Id       uuid.UUID `json:"id"`
 		ModuleId uuid.UUID `json:"moduleId"`
 		NewName  string    `json:"newName"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, doc.Copy_tx(ctx, tx, req.ModuleId, req.Id, req.NewName)
+	return doc.Copy_tx(ctx, tx, req.ModuleId, req.Id, req.NewName)
 }
 
 func DocCreate(ctx context.Context, reqJson json.RawMessage, loginId int64) (any, error) {
@@ -65,18 +65,18 @@ func DocCreate(ctx context.Context, reqJson json.RawMessage, loginId int64) (any
 	}, nil
 }
 
-func DocDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func DocDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var id uuid.UUID
 	if err := json.Unmarshal(reqJson, &id); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, doc.Del_tx(ctx, tx, id)
+	return doc.Del_tx(ctx, tx, id)
 }
 
-func DocSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func DocSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.Doc
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, doc.Set_tx(ctx, tx, req)
+	return doc.Set_tx(ctx, tx, req)
 }

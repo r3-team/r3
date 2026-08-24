@@ -9,14 +9,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func TemplateDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func TemplateDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		Id int64 `json:"id"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, login_template.Del_tx(ctx, tx, req.Id)
+	return login_template.Del_tx(ctx, tx, req.Id)
 }
 func TemplateGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {

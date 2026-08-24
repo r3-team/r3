@@ -15,20 +15,20 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func clientEventDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func clientEventDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, clientEvent.Del_tx(ctx, tx, req)
+	return clientEvent.Del_tx(ctx, tx, req)
 }
 
-func clientEventSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func clientEventSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.ClientEvent
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, clientEvent.Set_tx(ctx, tx, req)
+	return clientEvent.Set_tx(ctx, tx, req)
 }
 
 // fat client requests

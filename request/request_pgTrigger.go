@@ -10,18 +10,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PgTriggerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func PgTriggerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, pgTrigger.Del_tx(ctx, tx, req)
+	return pgTrigger.Del_tx(ctx, tx, req)
 }
 
-func PgTriggerSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func PgTriggerSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.PgTrigger
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, pgTrigger.Set_tx(ctx, tx, req)
+	return pgTrigger.Set_tx(ctx, tx, req)
 }

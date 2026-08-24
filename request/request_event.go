@@ -14,7 +14,7 @@ import (
 )
 
 // requests for browser clients
-func eventFilesCopied_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (any, error) {
+func eventFilesCopied_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) error {
 	// request file(s) to be copied (synchronized across all browser clients)
 	var req struct {
 		AttributeId uuid.UUID   `json:"attributeId"`
@@ -22,16 +22,16 @@ func eventFilesCopied_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage
 		RecordId    int64       `json:"recordId"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, cluster.FilesCopied_tx(ctx, tx, true, address, loginId, req.AttributeId, req.FileIds, req.RecordId)
+	return cluster.FilesCopied_tx(ctx, tx, true, address, loginId, req.AttributeId, req.FileIds, req.RecordId)
 }
 
 // requests for fat clients
-func eventClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, loginId int64, address string) (any, error) {
-	return nil, cluster.ClientEventsChanged_tx(ctx, tx, true, address, loginId)
+func eventClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, loginId int64, address string) error {
+	return cluster.ClientEventsChanged_tx(ctx, tx, true, address, loginId)
 }
-func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (any, error) {
+func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) error {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
@@ -40,7 +40,7 @@ func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 
 	// get current file name and latest hash
@@ -54,11 +54,11 @@ func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 			ON  r.file_id   = v.file_id
 			AND r.record_id = $1
 		WHERE v.file_id = $2
-		ORDER BY v.version DESC 
+		ORDER BY v.version DESC
 		LIMIT 1
 	`, schema.GetFilesTableName(req.AttributeId)),
 		req.RecordId, req.FileId).Scan(&hash, &name); err != nil {
-		return nil, err
+		return err
 	}
 
 	// compatibility fix
@@ -75,14 +75,13 @@ func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 		"\\", "",
 		"&", "").Replace(name)
 
-	return nil, cluster.FileRequested_tx(ctx, tx, true, address, loginId,
+	return cluster.FileRequested_tx(ctx, tx, true, address, loginId,
 		req.AttributeId, req.FileId, hash.String, name, req.ChooseApp)
 }
-func eventKeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (any, error) {
+func eventKeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) error {
 	var keystrokes string
-
 	if err := json.Unmarshal(reqJson, &keystrokes); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, cluster.KeystrokesRequested_tx(ctx, tx, true, address, loginId, keystrokes)
+	return cluster.KeystrokesRequested_tx(ctx, tx, true, address, loginId, keystrokes)
 }

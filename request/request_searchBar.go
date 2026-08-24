@@ -10,18 +10,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func SearchBarDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func SearchBarDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, searchBar.Del_tx(ctx, tx, req)
+	return searchBar.Del_tx(ctx, tx, req)
 }
 
-func SearchBarSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func SearchBarSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.SearchBar
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, searchBar.Set_tx(ctx, tx, req)
+	return searchBar.Set_tx(ctx, tx, req)
 }

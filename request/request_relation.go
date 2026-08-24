@@ -10,20 +10,20 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func RelationDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func RelationDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, relation.Del_tx(ctx, tx, req)
+	return relation.Del_tx(ctx, tx, req)
 }
 
-func RelationSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func RelationSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.Relation
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, relation.Set_tx(ctx, tx, req, true)
+	return relation.Set_tx(ctx, tx, req, true)
 }
 
 func RelationPreview_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {

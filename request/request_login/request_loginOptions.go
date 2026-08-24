@@ -12,8 +12,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func OptionsDel_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
-	return nil, login_options.Del_tx(ctx, tx, loginId)
+func OptionsDel_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
+	return login_options.Del_tx(ctx, tx, loginId)
 }
 
 func OptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (any, error) {
@@ -50,7 +50,7 @@ func OptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, logi
 	return res, nil
 }
 
-func OptionsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func OptionsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
 	var req struct {
 		FavoriteId pgtype.UUID `json:"favoriteId"` // NULL if option is for non-favorited form
 		FieldId    uuid.UUID   `json:"fieldId"`
@@ -58,7 +58,7 @@ func OptionsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, logi
 		Options    string      `json:"options"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, login_options.Set_tx(ctx, tx, loginId, req.FavoriteId, req.FieldId, req.IsMobile, req.Options)
+	return login_options.Set_tx(ctx, tx, loginId, req.FavoriteId, req.FieldId, req.IsMobile, req.Options)
 }

@@ -22,7 +22,7 @@ func CaptionMapGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 	return config_captionMap.Get_tx(ctx, tx, req.ModuleId, req.Target)
 }
 
-func CaptionMapSetOne_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func CaptionMapSetOne_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req struct {
 		Content      string    `json:"content"`
@@ -32,7 +32,7 @@ func CaptionMapSetOne_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage
 		Value        string    `json:"value"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, config_captionMap.SetOne_tx(ctx, tx, req.Target, req.EntityId, req.Content, req.LanguageCode, req.Value)
+	return config_captionMap.SetOne_tx(ctx, tx, req.Target, req.EntityId, req.Content, req.LanguageCode, req.Value)
 }

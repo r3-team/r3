@@ -10,21 +10,21 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func TagDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func TagDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, tag.Del_tx(ctx, tx, req)
+	return tag.Del_tx(ctx, tx, req)
 }
 
-func TagSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func TagSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		ModuleId uuid.UUID `json:"moduleId"`
 		Tag      types.Tag `json:"tag"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, tag.Set_tx(ctx, tx, req.ModuleId, req.Tag)
+	return tag.Set_tx(ctx, tx, req.ModuleId, req.Tag)
 }

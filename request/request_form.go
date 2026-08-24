@@ -10,30 +10,30 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func FormCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func FormCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		Id       uuid.UUID `json:"id"`
 		ModuleId uuid.UUID `json:"moduleId"`
 		NewName  string    `json:"newName"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, form.Copy_tx(ctx, tx, req.ModuleId, req.Id, req.NewName)
+	return form.Copy_tx(ctx, tx, req.ModuleId, req.Id, req.NewName)
 }
 
-func FormDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func FormDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, form.Del_tx(ctx, tx, req)
+	return form.Del_tx(ctx, tx, req)
 }
 
-func FormSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func FormSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.Form
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, form.Set_tx(ctx, tx, req)
+	return form.Set_tx(ctx, tx, req)
 }

@@ -10,33 +10,33 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ApiCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ApiCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, api.Copy_tx(ctx, tx, req.Id)
+	return api.Copy_tx(ctx, tx, req.Id)
 }
 
-func ApiDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ApiDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, api.Del_tx(ctx, tx, req.Id)
+	return api.Del_tx(ctx, tx, req.Id)
 }
 
-func ApiSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ApiSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req types.Api
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, api.Set_tx(ctx, tx, req)
+	return api.Set_tx(ctx, tx, req)
 }

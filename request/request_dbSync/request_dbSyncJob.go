@@ -14,18 +14,18 @@ import (
 )
 
 // DB sync jobs
-func JobDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func JobDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var id uuid.UUID
 	if err := json.Unmarshal(reqJson, &id); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, jobDeleteById(ctx, tx, id)
+	return jobDeleteById(ctx, tx, id)
 }
 
-func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var j types.DbSyncJob
 	if err := json.Unmarshal(reqJson, &j); err != nil {
-		return nil, err
+		return err
 	}
 
 	// reset irrelevant inputs based on job type
@@ -38,14 +38,14 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	}
 
 	if len(j.Joins) < 1 {
-		return nil, fmt.Errorf("DB sync job requires at least one relation")
+		return fmt.Errorf("DB sync job requires at least one relation")
 	}
 	isSend := slices.Contains(types.DbSyncJobTypesSend, j.JobType)
 
 	// register trigger for SEND jobs for relation/job type combination
 	if j.Active && isSend {
 		if err := triggerSendCreateIfNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -61,7 +61,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	`, j.Id, j.HostId, j.JobType, j.IntervalSeconds, j.Name, j.Comment, j.CodeSql,
 		j.PageLimit, j.DeleteMissing, j.SkipLogs, j.Active); err != nil {
 
-		return nil, err
+		return err
 	}
 
 	// columns
@@ -69,14 +69,14 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		DELETE FROM instance_db_sync.job_column
 		WHERE job_id = $1
 	`, j.Id); err != nil {
-		return nil, err
+		return err
 	}
 	for i, c := range j.Columns {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance_db_sync.job_column (job_id, position, attribute_id, index)
 			VALUES ($1,$2,$3,$4)
 		`, j.Id, i, c.AttributeId, c.Index); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -85,7 +85,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		DELETE FROM instance_db_sync.job_join
 		WHERE job_id = $1
 	`, j.Id); err != nil {
-		return nil, err
+		return err
 	}
 	for i, e := range j.Joins {
 		if _, err := tx.Exec(ctx, `
@@ -95,7 +95,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		`, j.Id, i, e.RelationId, e.AttributeId, e.IndexFrom, e.Index, e.Connector,
 			e.ApplyCreate, e.ApplyUpdate, e.ApplyDelete); err != nil {
 
-			return nil, err
+			return err
 		}
 	}
 
@@ -104,24 +104,24 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 		DELETE FROM instance_db_sync.job_lookup
 		WHERE job_id = $1
 	`, j.Id); err != nil {
-		return nil, err
+		return err
 	}
 	for _, l := range j.Lookups {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance_db_sync.job_lookup (job_id, pg_index_id, index)
 			VALUES ($1,$2,$3)
 		`, j.Id, l.PgIndexId, l.Index); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	// deregister trigger for SEND jobs for relation/job type combination
 	if !j.Active && isSend {
 		if err := triggerSendRemoveIfNotNeeded(ctx, tx, j.Joins[0].RelationId, j.JobType); err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func JobsGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {

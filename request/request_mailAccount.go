@@ -10,23 +10,23 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailAccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func MailAccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req int64
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 	_, err := tx.Exec(ctx, `DELETE FROM instance.mail_account WHERE id = $1`, req)
-	return nil, err
+	return err
 }
 
 func MailAccountGet() (any, error) {
 	return cache.GetMailAccountMap(), nil
 }
 
-func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.MailAccount
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 
 	var err error
@@ -34,7 +34,7 @@ func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 
 	if req.AuthMethod == "xoauth2" {
 		if !req.OauthClientId.Valid {
-			return nil, errors.New("cannot set email account with OAuth authentication but no OAuth client")
+			return errors.New("cannot set email account with OAuth authentication but no OAuth client")
 		}
 	} else {
 		req.OauthClientId.Valid = false
@@ -63,10 +63,10 @@ func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 			req.SmimePathKey, req.SmimeSign, req.SendCount, req.SendSeconds, req.ResendCount,
 			req.ResendSeconds, req.Id)
 	}
-	return nil, err
+	return err
 }
 
-func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req struct {
 		AccountName string `json:"accountName"`
@@ -75,7 +75,7 @@ func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage)
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 
 	body := "If you can read this, your mail configuration appears to work."
@@ -83,5 +83,5 @@ func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage)
 	_, err := tx.Exec(ctx, `SELECT instance.mail_send($1,$2,$3,'','',$4)`,
 		req.Subject, body, req.Recipient, req.AccountName)
 
-	return nil, err
+	return err
 }

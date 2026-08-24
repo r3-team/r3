@@ -1,6 +1,10 @@
 package types
 
-import "github.com/gofrs/uuid/v5"
+import (
+	"encoding/json"
+
+	"github.com/gofrs/uuid/v5"
+)
 
 type GeoSrid int64
 
@@ -15,13 +19,17 @@ type GeoJson struct {
 	} `json:"properties"`
 }
 
-type GeoLayer struct {
-	Id         uuid.UUID         `json:"id"`
-	Content    string            `json:"content"`    // 'TileWMS'
-	Name       string            `json:"name"`       // internal name
-	Parameters map[string]string `json:"parameters"` // getter parameters to attach to URL (such as 'transparent=true' or 'format=image/png')
-	Srid       int64             `json:"srid"`       // SRID (identifier, like 4326) for the chosen CRS (coordinate reference system, like 'WGS 84') for the layer
-	Url        string            `json:"url"`        // main URL for WMS provider
+type GeoLayerBase struct {
+	Id         uuid.UUID       `json:"id"`
+	Name       string          `json:"name"`       // internal name
+	Parameters json.RawMessage `json:"parameters"` // getter parameters to attach to URL (such as 'transparent=true' or 'format=image/png')
+	Srid       int64           `json:"srid"`       // SRID (identifier, like 4326) for the chosen CRS (coordinate reference system, like 'WGS 84') for the layer
+	Url        string          `json:"url"`        // main URL for WMS provider
+}
+
+type GeoLayerBaseField struct {
+	LayerBaseId uuid.UUID `json:"layerBaseId"`
+	FieldId     uuid.UUID `json:"fieldId"`
 }
 
 const GeoJsonSridDefault GeoSrid = 4326

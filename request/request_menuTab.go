@@ -10,21 +10,21 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MenuTabDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func MenuTabDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, menuTab.Del_tx(ctx, tx, req)
+	return menuTab.Del_tx(ctx, tx, req)
 }
 
-func MenuTabSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func MenuTabSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		MenuTab  types.MenuTab `json:"menuTab"`
 		Position int           `json:"position"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, menuTab.Set_tx(ctx, tx, req.Position, req.MenuTab)
+	return menuTab.Set_tx(ctx, tx, req.Position, req.MenuTab)
 }

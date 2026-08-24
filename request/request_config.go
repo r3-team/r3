@@ -61,11 +61,11 @@ func ConfigGet() (any, error) {
 	return res, nil
 }
 
-func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req map[string]string
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 
 	// check for config changes that have specific consequences
@@ -81,40 +81,40 @@ func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any,
 
 		if slices.Contains(config.NamesString, name) {
 			if err := config.SetString_tx(ctx, tx, name, value); err != nil {
-				return nil, err
+				return err
 			}
 		} else if slices.Contains(config.NamesStringSlice, name) {
 
 			var val []string
 			if err := json.Unmarshal([]byte(value), &val); err != nil {
-				return nil, err
+				return err
 			}
 
 			if err := config.SetStringSlice_tx(ctx, tx, name, val); err != nil {
-				return nil, err
+				return err
 			}
 		} else if slices.Contains(config.NamesUint64, name) {
 
 			val, err := strconv.ParseUint(value, 10, 64)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			if err := config.SetUint64_tx(ctx, tx, name, val); err != nil {
-				return nil, err
+				return err
 			}
 
 		} else if slices.Contains(config.NamesUint64Slice, name) {
 
 			var val []uint64
 			if err := json.Unmarshal([]byte(value), &val); err != nil {
-				return nil, err
+				return err
 			}
 
 			if err := config.SetUint64Slice_tx(ctx, tx, name, val); err != nil {
-				return nil, err
+				return err
 			}
 		}
 	}
-	return nil, cluster.ConfigChanged_tx(ctx, tx, true, false, productionModeChange)
+	return cluster.ConfigChanged_tx(ctx, tx, true, false, productionModeChange)
 }

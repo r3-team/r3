@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func FeedbackSend(reqJson json.RawMessage) (any, error) {
+func FeedbackSend(reqJson json.RawMessage) error {
 
 	var req struct {
 		Code          int         `json:"code"`
@@ -20,10 +20,9 @@ func FeedbackSend(reqJson json.RawMessage) (any, error) {
 		Mood          int         `json:"mood"`
 		Text          string      `json:"text"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, repo.SendFeedback(req.IsAdmin, req.ModuleRelated, req.RepoId,
+	return repo.SendFeedback(req.IsAdmin, req.ModuleRelated, req.RepoId,
 		req.ModuleId, req.FormId, req.Mood, req.Code, req.Text)
 }

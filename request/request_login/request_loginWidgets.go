@@ -12,10 +12,10 @@ import (
 func WidgetGroupsGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return login_widget.Get_tx(ctx, tx, loginId)
 }
-func WidgetGroupsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func WidgetGroupsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
 	var req []types.LoginWidgetGroup
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, login_widget.Set_tx(ctx, tx, loginId, req)
+	return login_widget.Set_tx(ctx, tx, loginId, req)
 }

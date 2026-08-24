@@ -10,18 +10,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func AttributeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func AttributeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, attribute.Del_tx(ctx, tx, req)
+	return attribute.Del_tx(ctx, tx, req)
 }
 
-func AttributeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func AttributeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.Attribute
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, attribute.Set_tx(ctx, tx, req, true)
+	return attribute.Set_tx(ctx, tx, req, true)
 }

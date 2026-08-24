@@ -11,12 +11,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PgFunctionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func PgFunctionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, pgFunction.Del_tx(ctx, tx, req)
+	return pgFunction.Del_tx(ctx, tx, req)
 }
 
 func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, frontendCall bool) (any, error) {
@@ -30,10 +30,10 @@ func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, 
 	return spooler.ExecutePgFunction_tx(ctx, tx, req.Id, req.Args, frontendCall)
 }
 
-func PgFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func PgFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.PgFunction
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, pgFunction.Set_tx(ctx, tx, req)
+	return pgFunction.Set_tx(ctx, tx, req)
 }

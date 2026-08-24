@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func RepoCommit(ctx context.Context, reqJson json.RawMessage, loginId int64) (any, error) {
+func RepoCommit(ctx context.Context, reqJson json.RawMessage, loginId int64) error {
 	var req struct {
 		CredPass string    `json:"credPass"`
 		CredUser string    `json:"credUser"`
@@ -19,25 +19,25 @@ func RepoCommit(ctx context.Context, reqJson json.RawMessage, loginId int64) (an
 		RepoId   uuid.UUID `json:"repoId"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, repo.RepoCommit(ctx, loginId, req.RepoId, req.CredUser, req.CredPass, req.ModuleId, req.FileName)
+	return repo.RepoCommit(ctx, loginId, req.RepoId, req.CredUser, req.CredPass, req.ModuleId, req.FileName)
 }
 
-func RepoDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func RepoDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var id uuid.UUID
 	if err := json.Unmarshal(reqJson, &id); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, repo.Del_Tx(ctx, tx, id)
+	return repo.Del_Tx(ctx, tx, id)
 }
 
-func RepoSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func RepoSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.Repo
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, repo.Set_tx(ctx, tx, req)
+	return repo.Set_tx(ctx, tx, req)
 }
 
 func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
@@ -72,10 +72,10 @@ func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 	return res, nil
 }
 
-func RepoModuleInstall(ctx context.Context, reqJson json.RawMessage) (any, error) {
+func RepoModuleInstall(ctx context.Context, reqJson json.RawMessage) error {
 	var moduleId uuid.UUID
 	if err := json.Unmarshal(reqJson, &moduleId); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, repo.InstallModules(ctx, []uuid.UUID{moduleId})
+	return repo.InstallModules(ctx, []uuid.UUID{moduleId})
 }

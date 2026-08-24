@@ -10,19 +10,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func TransferAddVersion_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func TransferAddVersion_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var moduleId uuid.UUID
 	if err := json.Unmarshal(reqJson, &moduleId); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, transfer.AddVersion_tx(ctx, tx, moduleId)
+	return transfer.AddVersion_tx(ctx, tx, moduleId)
 }
 
-func TransferStoreExportKey(reqJson json.RawMessage, loginId int64) (any, error) {
+func TransferStoreExportKey(reqJson json.RawMessage, loginId int64) error {
 	var exportKey string
 	if err := json.Unmarshal(reqJson, &exportKey); err != nil {
-		return nil, err
+		return err
 	}
 	cache.SetExportKey(loginId, exportKey)
-	return nil, nil
+	return nil
 }

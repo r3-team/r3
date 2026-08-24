@@ -10,25 +10,25 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func HostDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func HostDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var id uuid.UUID
 	if err := json.Unmarshal(reqJson, &id); err != nil {
-		return nil, err
+		return err
 	}
 
 	// delete all jobs beforehand (to clear unneeded triggers)
 	if err := jobsDeleteForHost(ctx, tx, id); err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err := tx.Exec(ctx, `DELETE FROM instance_db_sync.host WHERE id = $1`, id)
-	return nil, err
+	return err
 }
 
-func HostSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func HostSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var h types.DbSyncHost
 	if err := json.Unmarshal(reqJson, &h); err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err := tx.Exec(ctx, `
@@ -42,7 +42,7 @@ func HostSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, e
 	`, h.Id, h.Name, h.Comment, h.DbName, h.DbType, h.Active,
 		h.Address, h.Port, h.Username, h.Password)
 
-	return nil, err
+	return err
 }
 
 func HostsGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {

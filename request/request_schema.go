@@ -11,26 +11,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func SchemaCheck_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func SchemaCheck_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		ModuleId uuid.UUID `json:"moduleId"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, schema.ValidateDependency_tx(ctx, tx, req.ModuleId)
+	return schema.ValidateDependency_tx(ctx, tx, req.ModuleId)
 }
 
-func SchemaReload_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func SchemaReload_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		ModuleId pgtype.UUID `json:"moduleId"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
 	modIds := make([]uuid.UUID, 0)
 	if req.ModuleId.Valid {
 		modIds = append(modIds, req.ModuleId.Bytes)
 	}
-	return nil, cluster.SchemaChanged_tx(ctx, tx, true, modIds)
+	return cluster.SchemaChanged_tx(ctx, tx, true, modIds)
 }

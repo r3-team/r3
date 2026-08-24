@@ -30,12 +30,12 @@ func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	return res, nil
 }
 
-func ModuleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ModuleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, module.Del_tx(ctx, tx, req)
+	return module.Del_tx(ctx, tx, req)
 }
 
 func ModuleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
