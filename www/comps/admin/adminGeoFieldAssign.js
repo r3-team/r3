@@ -62,15 +62,17 @@ export default {
 										<span>{{ layerBaseIdMap[id].name }}</span>
 										<my-button
 											@trigger="layerToggleHide(id)"
+											:active="!readonly"
 											:image="fieldAssign.layerBaseIdsHidden.includes(id) ? 'visible0.png' : 'visible1.png'"
 											:naked="true"
 										/>
 										<my-button image="cancel.png"
 											@trigger="layerDelete(id)"
+											:active="!readonly"
 											:naked="true"
 										/>
 									</div>
-									<select @input="layerAdd($event.target.value)" :value="layerBase">
+									<select @input="layerAdd($event.target.value)" :disabled="readonly" :value="layerBase">
 										<option value="">- {{ capGen.button.add }} -</option>
 										<option v-for="l in layersBaseUnused" :value="l.id">{{ l.name }}</option>
 									</select>
