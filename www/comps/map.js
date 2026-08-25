@@ -444,7 +444,8 @@ export default Vue.defineAsyncComponent(async () => {
 						layers: [],
 						controls: [], // remove default controls like zoom
 						view: new ol.View({
-							center: ol.proj.fromLonLat(this.coordinatesStart),
+							// lon/lat coordinates are assumed to be WGS 84 (EPSG:4326), we transform them to the view SRID
+							center: ol.proj.fromLonLat(this.coordinatesStart, `EPSG:${this.viewSrid}`),
 							projection: `EPSG:${this.viewSrid}`,
 							zoom: this.zoomDefault,
 						}),

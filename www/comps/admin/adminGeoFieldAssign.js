@@ -44,10 +44,11 @@ export default {
 						</tr>
 						<tr>
 							<td>{{ capApp.coordinates }}*</td>
-							<td colspan="2">
+							<td>
 								<my-input-decimal class="short" v-model="fieldAssign.coordLat" :min="0" :allowNull="false" :lengthFract="5" :readonly />
 								<my-input-decimal class="short" v-model="fieldAssign.coordLon" :min="0" :allowNull="false" :lengthFract="5" :readonly />
 							</td>
+							<td>{{ capApp.coordinatesHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.zoom }}*</td>

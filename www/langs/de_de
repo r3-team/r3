@@ -178,7 +178,8 @@
 			"titleDeleted": "Gelöschte Dateien"
 		},
 		"geoFieldAssign": {
-			"coordinates": "Startkoordinaten (Breitengrad/Längengrad)",
+			"coordinates": "Startkoordinaten",
+			"coordinatesHint": "Breitengrad/Längengrad, in WGS 84 (EPSG:4326)",
 			"layerBaseIds": "Basisebenen",
 			"srid": "SRID",
 			"sridHint": "Spatial Reference System Identifier (SRID), welcher für die Datenspeicherung von diesem Kartenfeld genutzt wird.",

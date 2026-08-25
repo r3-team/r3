@@ -178,7 +178,8 @@
 			"titleDeleted": "Archivos eliminados"
 		},
 		"geoFieldAssign": {
-			"coordinates": "Start coordinates (latitude/longitude)",
+			"coordinates": "Start coordinates",
+			"coordinatesHint": "latitude/longitude, in WGS 84 (EPSG:4326)",
 			"layerBaseIds": "Base layers",
 			"srid": "SRID",
 			"sridHint": "Spatial Reference System Identifier (SRID) used to store data in this map field.",
