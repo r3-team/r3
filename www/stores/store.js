@@ -98,6 +98,7 @@ const MyStore = Vuex.createStore({
 		loginWidgetGroups: [],          // user widgets, starting with widget groups
 		mailSpoolerStuckIn: 0,          // count of mails stuck in spooler (incoming), retrieved for admins
 		mailSpoolerStuckOut: 0,         // count of mails stuck in spooler (outgoing), retrieved for admins
+		mfaSetupRequired: false,        // user authenticated without MFA, but MFA use is required
 		mirrorMode: false,              // instance runs in mirror mode (eg. mirrors another, likely production instance)
 		moduleEntries: [],              // module entries for header/home page
 		moduleIdLast: null,             // module ID of last active module
@@ -310,6 +311,7 @@ const MyStore = Vuex.createStore({
 		loginWidgetGroups: (s, p) => s.loginWidgetGroups = p,
 		mailSpoolerStuckIn: (s, p) => s.mailSpoolerStuckIn = p,
 		mailSpoolerStuckOut: (s, p) => s.mailSpoolerStuckOut = p,
+		mfaSetupRequired: (s, p) => s.mfaSetupRequired = p,
 		mirrorMode: (s, p) => s.mirrorMode = p,
 		moduleEntries: (s, p) => s.moduleEntries = p,
 		moduleIdLast: (s, p) => s.moduleIdLast = p,
@@ -501,6 +503,7 @@ const MyStore = Vuex.createStore({
 		loginWidgetGroups: s => s.loginWidgetGroups,
 		mailSpoolerStuckIn: s => s.mailSpoolerStuckIn,
 		mailSpoolerStuckOut: s => s.mailSpoolerStuckOut,
+		mfaSetupRequired: s => s.mfaSetupRequired,
 		mirrorMode: s => s.mirrorMode,
 		moduleEntries: s => s.moduleEntries,
 		moduleIdLast: s => s.moduleIdLast,

@@ -223,9 +223,10 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		}
 		defer tx.Rollback(ctx)
 
-		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
-			pgtype.Text{String: idToken.Issuer, Valid: true}, pgtype.Text{String: idToken.Subject, Valid: true},
-			l.Name, "", l.Admin, false, true, tokenExpiryHours, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
+		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{},
+			pgtype.Int4{Int32: c.Id, Valid: true}, pgtype.Text{String: idToken.Issuer, Valid: true},
+			pgtype.Text{String: idToken.Subject, Valid: true}, l.Name, "", l.Admin, false, true,
+			tokenExpiryHours, pgtype.Bool{}, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
 
 		if err != nil {
 			return types.LoginAuthResult{}, err

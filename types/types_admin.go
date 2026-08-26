@@ -34,6 +34,7 @@ type LoginAdmin struct {
 	NoAuth           bool               `json:"noAuth"`
 	LanguageCode     string             `json:"languageCode"`
 	Limited          bool               `json:"limited"`
+	MfaRequired      pgtype.Bool        `json:"mfaRequired"`
 	TokenExpiryHours pgtype.Int4        `json:"tokenExpiryHours"`
 	Records          []LoginAdminRecord `json:"records"`
 	RoleIds          []uuid.UUID        `json:"roleIds"`

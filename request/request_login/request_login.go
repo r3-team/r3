@@ -162,6 +162,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error
 		NoAuth           bool                        `json:"noAuth"`
 		TokenExpiryHours pgtype.Int4                 `json:"tokenExpiryHours"`
 		Meta             types.LoginMeta             `json:"meta"`
+		MfaRequired      pgtype.Bool                 `json:"mfaRequired"`
 		RoleIds          []uuid.UUID                 `json:"roleIds"`
 		Records          []types.LoginAdminRecordSet `json:"records"`
 		TemplateId       pgtype.Int8                 `json:"templateId"`
@@ -172,8 +173,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error
 	}
 	// LDAP / OAUTH details are only used during login creation, which happens during LDAP import or OAUTH authentication
 	return login.Set_tx(ctx, tx, req.Id, req.TemplateId, pgtype.Int4{}, pgtype.Text{},
-		pgtype.Int4{}, pgtype.Text{}, pgtype.Text{}, req.Name, req.Pass, req.Admin,
-		req.NoAuth, req.Active, req.TokenExpiryHours, req.Meta, req.RoleIds, req.Records)
+		pgtype.Int4{}, pgtype.Text{}, pgtype.Text{}, req.Name, req.Pass, req.Admin, req.NoAuth,
+		req.Active, req.TokenExpiryHours, req.MfaRequired, req.Meta, req.RoleIds, req.Records)
 }
 func SetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 

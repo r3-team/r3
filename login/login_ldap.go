@@ -53,7 +53,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 			WHERE l.ldap_id  = $1::integer
 			AND   l.ldap_key = $2::text
 		) AS r1
-		
+
 		INNER JOIN (
 			SELECT $3::uuid[] AS roles
 		) AS r2 ON true
@@ -96,8 +96,8 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	log.Info(log.ContextLdap, fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
 	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, pgtype.Int4{},
-		pgtype.Text{}, pgtype.Text{}, name, "", adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx,
-		[]types.LoginAdminRecordSet{}); err != nil {
+		pgtype.Text{}, pgtype.Text{}, name, "", adminEx, false, active, pgtype.Int4{}, pgtype.Bool{},
+		metaEx, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err
 	}

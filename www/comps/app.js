@@ -6,6 +6,7 @@ import MyGlobalSearch from './globalSearch.js';
 import MyHeader from './header.js';
 import MyLogin from './login.js';
 import MySettings from './settings.js';
+import MySettingsMfa from './settingsMfa.js';
 
 import { getStartFormId } from './shared/access.js';
 import { updateCollections } from './shared/collection.js';
@@ -20,8 +21,8 @@ import { getCaption } from './shared/language.js';
 export default {
 	name: 'app',
 	components: {
-		MyDialog, MyDropdown, MyFeedback, MyForm,
-		MyGlobalSearch, MyHeader, MyLogin, MySettings
+		MyDialog, MyDropdown, MyFeedback, MyForm, MyGlobalSearch,
+		MyHeader, MyLogin, MySettings, MySettingsMfa
 	},
 	template: `<div :class="classes" id="app" :style="styles">
 
@@ -34,7 +35,14 @@ export default {
 
 		<my-dropdown />
 
-		<template v-if="appReady">
+		<!-- MFA setup -->
+		<my-settings-mfa
+			v-if="appReady && mfaSetupRequired"
+			@confirmed="$store.commit('mfaSetupRequired', false)"
+			:forced="true"
+		/>
+
+		<template v-if="appReady && !mfaSetupRequired">
 			<my-header
 				v-show="!loginSessionExpired"
 				v-if="!isWithoutMenuHeader"
@@ -398,6 +406,7 @@ export default {
 		loginPrivateKey: s => s.$store.getters.loginPrivateKey,
 		loginSessionExpired: s => s.$store.getters.loginSessionExpired,
 		loginSessionExpires: s => s.$store.getters.loginSessionExpires,
+		mfaSetupRequired: s => s.$store.getters.mfaSetupRequired,
 		moduleIdLast: s => s.$store.getters.moduleIdLast,
 		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta,
 		patternStyle: s => s.$store.getters.patternStyle,

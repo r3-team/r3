@@ -6,6 +6,7 @@ import (
 	"encoding/base32"
 	"errors"
 	"r3/cache"
+	"r3/config"
 	"r3/db"
 	"r3/handler"
 	"r3/ldap/ldap_auth"
@@ -18,7 +19,7 @@ import (
 	"github.com/xlzd/gotp"
 )
 
-// performs authentication attempt for known login via username + password + MFA PINs (if used)
+// performs authentication attempt for known login via username + password + MFA (if used)
 // if MFA is enabled but MFA PIN not given, returns list of available MFAs
 func User(ctx context.Context, username string, password string, mfaTokenId pgtype.Int4, mfaTokenPin pgtype.Text) (types.LoginAuthResult, error) {
 
@@ -27,27 +28,31 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 	}
 
 	// get known login details
-	var err error
 	var l = types.LoginAuthResult{
+		MfaSetup:  false,
 		MfaTokens: make([]types.LoginMfaToken, 0),
 		Name:      strings.ToLower(username), // usernames are case insensitive
 	}
+	var err error
 	var ldapId pgtype.Int4
 	var salt sql.NullString
 	var hash sql.NullString
 	var limited bool
 	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
+	var mfaRequiredInstance = config.GetUint64("mfaRequired") == 1
+	var mfaRequiredLogin pgtype.Bool
 
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT l.id, l.ldap_id, l.salt, l.hash, l.salt_kdf, l.admin,
-			l.no_auth, l.limited, l.token_expiry_hours, lm.name_display
+			l.no_auth, l.limited, l.token_expiry_hours, l.mfa_required, lm.name_display
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
 		WHERE l.active
 		AND   l.name            = $1
 		AND   l.oauth_client_id IS NULL
-	`, l.Name).Scan(&l.Id, &ldapId, &salt, &hash, &l.SaltKdf, &l.Admin, &l.NoAuth, &limited, &tokenExpiryHours, &nameDisplay); err != nil {
+	`, l.Name).Scan(&l.Id, &ldapId, &salt, &hash, &l.SaltKdf, &l.Admin, &l.NoAuth,
+		&limited, &tokenExpiryHours, &mfaRequiredLogin, &nameDisplay); err != nil {
 
 		if err == pgx.ErrNoRows {
 			// name not found / login inactive must result in same response as authentication failed
@@ -102,7 +107,9 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 		}
 
 	} else {
-		// check for active MFAs, ignore if not used
+
+		// no MFA token provided, check for active MFA
+		// if login uses MFA, we apply it regardless of MFA requirements
 		rows, err := db.Pool.Query(ctx, `
 			SELECT id, name
 			FROM instance.login_token_fixed
@@ -123,10 +130,15 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 		}
 		rows.Close()
 
-		// if MFA tokens available, return with list, continue otherwise
+		// if MFA tokens available, return with MFA token list for selection
 		if len(mfaTokens) != 0 {
 			return types.LoginAuthResult{MfaTokens: mfaTokens}, nil
 		}
+
+		// no MFA tokens available, check for MFA requirement
+		// either it´s required on the instance and not defined for login (ie. inherited) - or it is required for login directly
+		// even if required, allow authentication but inform endpoint that MFA needs to be setup
+		l.MfaSetup = (mfaRequiredInstance && !mfaRequiredLogin.Valid) || mfaRequiredLogin.Bool
 	}
 
 	// everything in order, auth successful

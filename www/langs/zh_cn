@@ -69,6 +69,8 @@
 			"licenseState": "许可证状态",
 			"licenseStateNok": "没有激活的许可证",
 			"licenseStateOk": "剩余有效期 {COUNT} 天",
+			"mfa": "Force for all users",
+			"mfaHint": "Forces multi-factor authentication via TOTP (Time-based One-time Password) for all users. Not relevant for external authentication via OAuth. Can be overwritten for specific users.",
 			"productionMode": "维护模式",
 			"proxyUrl": "代理 URL",
 			"proxyUrlDesc": "代理 URL，例如 'http://my-proxy.intern:8080' 或 'https://user:pass@my-proxy:8080'。",
@@ -89,6 +91,7 @@
 			"titleMail": "发送邮件",
 			"titlePerformance": "性能",
 			"tokenExpiryHours": "会话最长时间（小时）",
+			"tokenExpiryHoursHint": "Valid for all users sessions, this includes sessions created for API users. Can be overwritten for specific users.",
 			"updateCheck": "版本状态",
 			"updateCheckCurrent": "当前",
 			"updateCheckNewer": "最新",
@@ -276,6 +279,7 @@
 			"hint": {
 				"active": "停用后，活动会话将被终止。",
 				"admin": "管理员权限包括管理应用程序和用户。管理员还可以启用维护和构建器模式。",
+				"mfaRequired": "Overwrites the global setting.",
 				"name": "Username - must be unique within the system.",
 				"noAuth": "Public users do not require authentication. System access is possible with only a URL.",
 				"password": "This will overwrite the current password for this user. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
@@ -2675,6 +2679,7 @@
 		"menu": "菜单",
 		"menus": "菜单",
 		"menusSub": "子菜单",
+		"mfa": "Multi-factor authentication",
 		"missingCaption": "缺少标题",
 		"mode": "Mode",
 		"module": "应用程序",
@@ -2806,6 +2811,7 @@
 		"status": "状态",
 		"styles": "Styles",
 		"system": "System",
+		"systemDefault": "System default",
 		"systemModes": "System modes",
 		"tab": "Tab",
 		"tag": "Tag",
@@ -3087,6 +3093,25 @@
 		"listRows": "列表行数",
 		"listSpaced": "较大",
 		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
+		"mfa": {
+			"apps": [
+				"Google Authenticator",
+				"Microsoft Authenticator",
+				"Aegis Authenticator",
+				"...或任何支持 TOTP 的应用程序"
+			],
+			"appsExample": "一些示例：",
+			"button": {
+				"finished": "Authenticator app is ready"
+			},
+			"intro": "您可以通过启用多因素身份验证（MFA）来增加帐户安全性。要启用 MFA，请在另一台设备上（如智能手机）使用身份验证器应用程序。",
+			"introForced": "To access this system, you are required to enable multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+			"name": "为您的设备选择一个名称",
+			"nameHint": "'我的智能手机'",
+			"outro": "使用 QR 码将此帐户添加到您的身份验证器应用程序。完成后关闭此窗口。您可以重复此过程以使用多个设备启用 MFA。",
+			"outroForced": "Use the QR code to add this account to your authenticator app. When you are done, confirm below to continue.",
+			"title": "设置多因素身份验证"
+		},
 		"mobileScrollForm": "移动端：滚动整个表单",
 		"pageTitle": "设置",
 		"pattern": "背景图案",
@@ -3134,23 +3159,9 @@
 			"message": {
 				"delete": "您确定要删除此条目吗？此操作无法撤消。"
 			},
-			"mfa": {
-				"apps": [
-					"Google Authenticator",
-					"Microsoft Authenticator",
-					"Aegis Authenticator",
-					"...或任何支持 TOTP 的应用程序"
-				],
-				"appsExample": "一些示例：",
-				"intro": "您可以通过启用多因素身份验证（MFA）来增加帐户安全性。要启用 MFA，请在另一台设备上（如智能手机）使用身份验证器应用程序。",
-				"name": "为您的设备选择一个名称",
-				"nameHint": "'我的智能手机'",
-				"outro": "使用 QR 码将此帐户添加到您的身份验证器应用程序。完成后关闭此窗口。您可以重复此过程以使用多个设备启用 MFA。"
-			},
 			"titleAdd": "Manage REI3 client application",
 			"titleContext": "使用",
 			"titleDateCreate": "创建日期",
-			"titleMfa": "设置多因素身份验证",
 			"titleName": "设备名称"
 		},
 		"translation": {

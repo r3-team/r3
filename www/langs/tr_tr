@@ -69,6 +69,8 @@
 			"licenseState": "Lisans durumu",
 			"licenseStateNok": "Aktif lisans yok",
 			"licenseStateOk": "{COUNT} gün daha geçerli",
+			"mfa": "Force for all users",
+			"mfaHint": "Forces multi-factor authentication via TOTP (Time-based One-time Password) for all users. Not relevant for external authentication via OAuth. Can be overwritten for specific users.",
 			"productionMode": "Bakım modu",
 			"proxyUrl": "Vekil URL",
 			"proxyUrlDesc": "'http://my-proxy.intern:8080' veya 'https://user:pass@my-proxy:8080'. gibi bir proxy URL",
@@ -89,6 +91,7 @@
 			"titleMail": "Posta gönder",
 			"titlePerformance": "Performans",
 			"tokenExpiryHours": "Maks. saat cinsinden oturum süresi",
+			"tokenExpiryHoursHint": "Valid for all users sessions, this includes sessions created for API users. Can be overwritten for specific users.",
 			"updateCheck": "Sürüm durumu",
 			"updateCheckCurrent": "Akım",
 			"updateCheckNewer": "Keskin kenar",
@@ -276,6 +279,7 @@
 			"hint": {
 				"active": "Devre dışı bırakıldığında aktif oturumlar sonlandırılacaktır.",
 				"admin": "Yönetici ayrıcalıkları uygulamaların ve kullanıcıların yönetimini içerir. Yöneticiler ayrıca bakım ve oluşturucu modlarını da etkinleştirebilir.",
+				"mfaRequired": "Overwrites the global setting.",
 				"name": "Kullanıcı adı - sistem içinde benzersiz olmalıdır.",
 				"noAuth": "Genel kullanıcılar kimlik doğrulama gerektirmez. Sistem erişimi yalnızca URL ile mümkündür.",
 				"password": "Bu, bu kullanıcının mevcut şifresinin üzerine yazılacaktır. Çok faktörlü kimlik doğrulama bu değişiklikten etkilenmez. Kullanıcı ilgili yedekleme kodunu sağlayana kadar uçtan uca şifreleme (E2EE) kullanılamayacaktır.",
@@ -2675,6 +2679,7 @@
 		"menu": "Menü",
 		"menus": "Menüler",
 		"menusSub": "Alt menüler",
+		"mfa": "Multi-factor authentication",
 		"missingCaption": "EKSİK BAŞLIK",
 		"mode": "Mode",
 		"module": "Başvuru",
@@ -2806,6 +2811,7 @@
 		"status": "Durum",
 		"styles": "Stiller",
 		"system": "Sistem",
+		"systemDefault": "System default",
 		"systemModes": "Sistem modları",
 		"tab": "Sekme",
 		"tag": "Tag",
@@ -3087,6 +3093,25 @@
 		"listRows": "Satırları listele",
 		"listSpaced": "Daha büyük",
 		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
+		"mfa": {
+			"apps": [
+				"Google Kimlik Doğrulayıcı",
+				"Microsoft Kimlik Doğrulayıcı",
+				"Aegis Kimlik Doğrulayıcı",
+				"...veya TOTP'yi destekleyen herhangi bir uygulama"
+			],
+			"appsExample": "Bazı örnekler:",
+			"button": {
+				"finished": "Authenticator app is ready"
+			},
+			"intro": "Çok faktörlü kimlik doğrulamayı (MFA) etkinleştirerek hesap güvenliğinizi artırabilirsiniz. MFA'yı etkinleştirmek için lütfen ayrı bir cihazdaki (akıllı telefon gibi) bir kimlik doğrulama uygulaması kullanın.",
+			"introForced": "To access this system, you are required to enable multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+			"name": "Cihazınız için bir ad seçin",
+			"nameHint": "'Akıllı telefonum'",
+			"outro": "Bu hesabı kimlik doğrulayıcı uygulamanıza eklemek için QR kodunu kullanın. İşiniz bittiğinde bu pencereyi kapatın. MFA'yı birden fazla cihazla etkinleştirmek için bu işlemi tekrarlayabilirsiniz.",
+			"outroForced": "Use the QR code to add this account to your authenticator app. When you are done, confirm below to continue.",
+			"title": "Çok faktörlü kimlik doğrulamayı ayarlayın"
+		},
 		"mobileScrollForm": "Mobil: Formun tamamını kaydır",
 		"pageTitle": "Ayarlar",
 		"pattern": "Arka plan deseni",
@@ -3134,23 +3159,9 @@
 			"message": {
 				"delete": "Bu girişi silmek istediğinizden emin misiniz? Bu geri alınamaz."
 			},
-			"mfa": {
-				"apps": [
-					"Google Kimlik Doğrulayıcı",
-					"Microsoft Kimlik Doğrulayıcı",
-					"Aegis Kimlik Doğrulayıcı",
-					"...veya TOTP'yi destekleyen herhangi bir uygulama"
-				],
-				"appsExample": "Bazı örnekler:",
-				"intro": "Çok faktörlü kimlik doğrulamayı (MFA) etkinleştirerek hesap güvenliğinizi artırabilirsiniz. MFA'yı etkinleştirmek için lütfen ayrı bir cihazdaki (akıllı telefon gibi) bir kimlik doğrulama uygulaması kullanın.",
-				"name": "Cihazınız için bir ad seçin",
-				"nameHint": "'Akıllı telefonum'",
-				"outro": "Bu hesabı kimlik doğrulayıcı uygulamanıza eklemek için QR kodunu kullanın. İşiniz bittiğinde bu pencereyi kapatın. MFA'yı birden fazla cihazla etkinleştirmek için bu işlemi tekrarlayabilirsiniz."
-			},
 			"titleAdd": "REI3 istemci uygulamasını yönetin",
 			"titleContext": "Kullanmak",
 			"titleDateCreate": "Oluşturuldu",
-			"titleMfa": "Çok faktörlü kimlik doğrulamayı ayarlayın",
 			"titleName": "Cihaz adı"
 		},
 		"translation": {

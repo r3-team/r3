@@ -75,7 +75,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
 	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.oauth_client_id", "l.name",
-		"l.admin", "l.limited", "l.no_auth", "l.active", "l.token_expiry_hours"})
+		"l.admin", "l.limited", "l.no_auth", "l.active", "l.token_expiry_hours", "l.mfa_required"})
 
 	qb.SetFrom("instance.login AS l")
 
@@ -153,7 +153,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 		var records []string
 
 		if err := rows.Scan(&l.Id, &l.LdapId, &l.OauthClientId, &l.Name, &l.Admin, &l.Limited,
-			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &records); err != nil {
+			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &l.MfaRequired, &records); err != nil {
 
 			return nil, 0, err
 		}
@@ -234,9 +234,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 // set login with meta data
 // returns created login ID if new login
-func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4, ldapKey pgtype.Text,
-	oauthClientId pgtype.Int4, oauthIss pgtype.Text, oauthSub pgtype.Text, name string, pass string, admin bool, noAuth bool,
-	active bool, tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
+	ldapKey pgtype.Text, oauthClientId pgtype.Int4, oauthIss pgtype.Text, oauthSub pgtype.Text, name string,
+	pass string, admin bool, noAuth bool, active bool, tokenExpiryHours pgtype.Int4, mfaRequired pgtype.Bool,
+	meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")
@@ -266,12 +267,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
 				ldap_id, ldap_key, oauth_client_id, oauth_iss, oauth_sub, name, salt, hash,
-				salt_kdf, admin, no_auth, limited, active, token_expiry_hours, date_favorites
+				salt_kdf, admin, no_auth, limited, active, token_expiry_hours, mfa_required,
+				date_favorites
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,0)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,0)
 			RETURNING id
-		`, ldapId, ldapKey, oauthClientId, oauthIss, oauthSub, name, &salt, &hash,
-			saltKdf, admin, noAuth, isLimited, active, tokenExpiryHours).Scan(&id); err != nil {
+		`, ldapId, ldapKey, oauthClientId, oauthIss, oauthSub, name, &salt, &hash, saltKdf,
+			admin, noAuth, isLimited, active, tokenExpiryHours, mfaRequired).Scan(&id); err != nil {
 
 			return 0, err
 		}
@@ -297,9 +299,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	} else {
 		if _, err := tx.Exec(ctx, `
 			UPDATE instance.login
-			SET name = $1, admin = $2, no_auth = $3, limited = $4, active = $5, token_expiry_hours = $6
-			WHERE id = $7
-		`, name, admin, noAuth, isLimited, active, tokenExpiryHours, id); err != nil {
+			SET name = $1, admin = $2, no_auth = $3, limited = $4,
+				active = $5, token_expiry_hours = $6, mfa_required = $7
+			WHERE id = $8
+		`, name, admin, noAuth, isLimited, active, tokenExpiryHours, mfaRequired, id); err != nil {
 			return 0, err
 		}
 
@@ -513,8 +516,9 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Text{},
-		username, password, true, false, true, pgtype.Int4{}, types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
+	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{},
+		pgtype.Text{}, pgtype.Text{}, username, password, true, false, true, pgtype.Int4{},
+		pgtype.Bool{}, types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
 		[]uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err

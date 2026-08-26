@@ -1,18 +1,19 @@
+
+import MyForm from '../form.js';
+import MyInputDecimal from '../inputDecimal.js';
+import MyInputSelect from '../inputSelect.js';
+
+import { getLoginIcon } from '../shared/admin.js';
+import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
+import { deepIsEqual } from '../shared/generic.js';
+import srcBase64Icon from '../shared/image.js';
+import { getCaption } from '../shared/language.js';
+
 import MyAdminLoginMeta from './adminLoginMeta.js';
-import MyForm           from '../form.js';
-import MyInputSelect    from '../inputSelect.js';
-import {getLoginIcon}   from '../shared/admin.js';
-import {deepIsEqual}    from '../shared/generic.js';
-import srcBase64Icon    from '../shared/image.js';
-import {getCaption}     from '../shared/language.js';
-import {
-	dialogCloseAsk,
-	dialogDeleteAsk
-} from '../shared/dialog.js';
 
 const MyAdminLoginRole = {
-	name:'my-admin-login-role',
-	template:`<td class="minimum role-content">
+	name: 'my-admin-login-role',
+	template: `<td class="minimum role-content">
 		<div class="row wrap gap">
 			<my-button
 				v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
@@ -25,28 +26,23 @@ const MyAdminLoginRole = {
 			/>
 		</div>
 	</td>`,
-	props:{
-		content: { type:String,  required:true }, // role content to filter by
-		module:  { type:Object,  required:true }, // current module
-		readonly:{ type:Boolean, required:true },
-		roleIds: { type:Array,   required:true }  // already enabled roles by ID
+	props: {
+		content: { type: String, required: true }, // role content to filter by
+		module: { type: Object, required: true }, // current module
+		readonly: { type: Boolean, required: true },
+		roleIds: { type: Array, required: true }  // already enabled roles by ID
 	},
-	emits:['toggle'],
-	methods:{
+	emits: ['toggle'],
+	methods: {
 		getCaption
 	}
 };
 
 export default {
-	name:'my-admin-login',
-	components:{
-		MyAdminLoginMeta,
-		MyAdminLoginRole,
-		MyForm,
-		MyInputSelect
-	},
-	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
-		
+	name: 'my-admin-login',
+	components: { MyAdminLoginMeta, MyAdminLoginRole, MyForm, MyInputDecimal, MyInputSelect },
+	template: `<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
+
 		<!-- login record form -->
 		<div class="app-sub-window under-header"
 			v-if="isFormOpen"
@@ -64,7 +60,7 @@ export default {
 				:showButtonNew="false"
 			/>
 		</div>
-		
+
 		<div class="contentBox admin-login float" v-if="ready">
 			<div class="top">
 				<div class="area nowrap">
@@ -114,7 +110,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding">
 				<table class="generic-table-vertical w1200">
 					<tbody>
@@ -195,7 +191,7 @@ export default {
 								:readonly="!isAuthR3"
 							/>
 						</template>
-						
+
 						<!-- roles -->
 						<table class="generic-table sticky-top bright" v-if="tabTarget === 'roles'">
 							<thead>
@@ -234,7 +230,7 @@ export default {
 											<span>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
 										</div>
 									</td>
-									
+
 									<!-- roles to toggle -->
 									<my-admin-login-role content="admin" @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="inputs.roleIds" />
 									<my-admin-login-role content="user"  @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="inputs.roleIds" />
@@ -256,7 +252,7 @@ export default {
 									<td><my-bool v-model="inputs.admin" /></td>
 									<td>{{ capApp.hint.admin }}</td>
 								</tr>
-								
+
 								<!-- login records -->
 								<tr v-for="(lf,lfi) in loginForms">
 									<td>
@@ -287,7 +283,7 @@ export default {
 									</td>
 									<td></td>
 								</tr>
-								
+
 								<tr>
 									<td>
 										<div class="title-cell">
@@ -322,14 +318,36 @@ export default {
 								<tr>
 									<td>
 										<div class="title-cell">
+											<img src="images/smartphone.png" />
+											<span>{{ capGen.mfa }}</span>
+										</div>
+									</td>
+									<td class="default-inputs">
+										<select v-model="mfaRequiredSelect" :disabled="inputs.noAuth || !isAuthR3">
+											<option value="">{{ capGen.systemDefault }}</option>
+											<option value="1">{{ capGen.required }}</option>
+											<option value="0">{{ capGen.optional }}</option>
+										</select>
+									</td>
+									<td>{{ inputs.mfaRequired === null ? '' : capApp.hint.mfaRequired }}</td>
+								</tr>
+								<tr>
+									<td>
+										<div class="title-cell">
 											<img src="images/clock.png" />
 											<span>{{ capApp.tokenExpiryHours }}</span>
 										</div>
 									</td>
 									<td class="default-inputs">
-										<input v-model="inputs.tokenExpiryHours" />
+										<my-input-decimal
+											v-model="inputs.tokenExpiryHours"
+											:allowNull="true"
+											:lengthFract="0"
+											:min="0"
+											:placeholder="capGen.systemDefault"
+										/>
 									</td>
-									<td>{{ capApp.hint.tokenExpiryHours }}</td>
+									<td>{{ inputs.tokenExpiryHours === null ? '' : capApp.hint.tokenExpiryHours }}</td>
 								</tr>
 
 								<tr v-if="anyAction"><td colspan="3" class="grouping">{{ capGen.actions }}</td></tr>
@@ -363,93 +381,102 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		ldaps:           { type:Array,  required:true },
-		loginId:         { type:Number, required:true }, // login ID to load, 0 if new
-		loginForms:      { type:Array,  required:true },
-		loginFormLookups:{ type:Array,  required:true },
-		oauthClients:    { type:Array,  required:true }
+	props: {
+		ldaps: { type: Array, required: true },
+		loginId: { type: Number, required: true }, // login ID to load, 0 if new
+		loginForms: { type: Array, required: true },
+		loginFormLookups: { type: Array, required: true },
+		oauthClients: { type: Array, required: true }
 	},
-	emits:['close','set-login-id'],
+	emits: ['close', 'set-login-id'],
 	data() {
 		return {
 			// states
-			inputs:{},         // input values
-			inputsOrg:{},      // input values on load
-			notUniqueEmail:false,
-			notUniqueName:false,
-			ready:false,
-			recordInput:'',    // record lookup input
-			recordList:[],     // record lookup dropdown values
-			roleFilter:'',     // filter for role selection
-			tabTarget:'meta',
-			templates:[],      // login templates
-			templateId:null,   // login template, selected
-			timerNotUniqueCheck:null,
-			
+			inputs: {},         // input values
+			inputsOrg: {},      // input values on load
+			notUniqueEmail: false,
+			notUniqueName: false,
+			ready: false,
+			recordInput: '',    // record lookup input
+			recordList: [],     // record lookup dropdown values
+			roleFilter: '',     // filter for role selection
+			tabTarget: 'meta',
+			templates: [],      // login templates
+			templateId: null,   // login template, selected
+			timerNotUniqueCheck: null,
+
 			// login form
-			loginFormIndexesDropdown:[],
-			loginFormIndexOpen:null,
-			loginFormRecords:null
+			loginFormIndexesDropdown: [],
+			loginFormIndexOpen: null,
+			loginFormRecords: null
 		};
 	},
-	computed:{
-		roleTotalNonHidden:(s) => {
+	computed: {
+		roleTotalNonHidden: s => {
 			let cnt = 0;
-			for(const roleId of s.inputs.roleIds) {
-				if(!s.moduleIdMapMeta[s.roleIdMap[roleId].moduleId].hidden)
+			for (const roleId of s.inputs.roleIds) {
+				if (!s.moduleIdMapMeta[s.roleIdMap[roleId].moduleId].hidden)
 					cnt++
 			}
 			return cnt;
 		},
-		modulesFiltered:(s) => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
-			(s.roleFilter === '' || s.getCaption('moduleTitle',v.id,v.id,v.captions,v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
-		
-		// simple states
-		anyAction: (s) => s.isAuthR3,
-		anyInfo:   (s) => s.isLimited,
-		canSave:   (s) => s.isChanged && !s.notUniqueName && s.inputs.name !== '',
-		isAuthR3:  (s) => !s.isLdap && !s.isOauth,
-		isChanged: (s) => s.ready && !s.deepIsEqual(s.inputsOrg,s.inputs),
-		isExtRole: (s) => s.isLdapAssignedRoles || s.isOauthClientAssignedRoles,
-		isFormOpen:(s) => s.loginFormIndexOpen !== null,
-		isLdap:    (s) => s.inputs.ldapId !== null,
-		isLimited: (s) => s.activated && s.inputs.roleIds.length < 2 && !s.inputs.admin && !s.inputs.noAuth,
-		isNew:     (s) => s.loginId === 0,
-		isOauth:   (s) => s.inputs.oauthClientId !== null,
-		noAuthUrl: (s) => !s.inputs.noAuth ? '' : `${location.protocol}//${location.host}/#/?login=${s.inputs.name}`,
+		modulesFiltered: s => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
+			(s.roleFilter === '' || s.getCaption('moduleTitle', v.id, v.id, v.captions, v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 
-		isLdapAssignedRoles:       (s) => s.ldaps.filter(v => v.assignRoles && v.id === s.inputs.ldapId).length !== 0,
-		isOauthClientAssignedRoles:(s) => s.oauthClients.filter(v => v.claimRoles !== null && v.claimRoles !== '' && v.id === s.inputs.oauthClientId).length !== 0,
-		
+		// inputs
+		mfaRequiredSelect: {
+			get() {
+				return this.inputs.mfaRequired === null ? '' : (this.inputs.mfaRequired ? '1' : '0');
+			},
+			set(v) {
+				this.inputs.mfaRequired = v === '' ? null : v === '1';
+			}
+		},
+
+		// simple states
+		anyAction: s => s.isAuthR3,
+		anyInfo: s => s.isLimited,
+		canSave: s => s.isChanged && !s.notUniqueName && s.inputs.name !== '',
+		isAuthR3: s => !s.isLdap && !s.isOauth,
+		isChanged: s => s.ready && !s.deepIsEqual(s.inputsOrg, s.inputs),
+		isExtRole: s => s.isLdapAssignedRoles || s.isOauthClientAssignedRoles,
+		isFormOpen: s => s.loginFormIndexOpen !== null,
+		isLdap: s => s.inputs.ldapId !== null,
+		isLdapAssignedRoles: s => s.ldaps.filter(v => v.assignRoles && v.id === s.inputs.ldapId).length !== 0,
+		isLimited: s => s.activated && s.inputs.roleIds.length < 2 && !s.inputs.admin && !s.inputs.noAuth,
+		isNew: s => s.loginId === 0,
+		isOauth: s => s.inputs.oauthClientId !== null,
+		isOauthClientAssignedRoles: s => s.oauthClients.filter(v => v.claimRoles !== null && v.claimRoles !== '' && v.id === s.inputs.oauthClientId).length !== 0,
+		noAuthUrl: s => !s.inputs.noAuth ? '' : `${location.protocol}//${location.host}/#/?login=${s.inputs.name}`,
+
 		// stores
-		activated:      (s) => s.$store.getters['local/activated'],
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
-		capApp:         (s) => s.$store.getters.captions.admin.login,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta
+		activated: s => s.$store.getters['local/activated'],
+		modules: s => s.$store.getters['schema/modules'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
+		capApp: s => s.$store.getters.captions.admin.login,
+		capGen: s => s.$store.getters.captions.generic,
+		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta
 	},
 	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 		this.reset(true);
-		
-		if(!this.isNew)
+
+		if (!this.isNew)
 			this.get();
-		
-		if(this.isNew) {
+
+		if (this.isNew) {
 			// set defaults
-			for(let lf of this.loginForms) {
-				this.inputs.records.push({id:null,label:''});
+			for (const lf of this.loginForms) {
+				this.inputs.records.push({ id: null, label: '' });
 			}
 		}
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		deepIsEqual,
 		dialogCloseAsk,
@@ -457,23 +484,23 @@ export default {
 		getCaption,
 		getLoginIcon,
 		srcBase64Icon,
-		
+
 		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's') {
-				if(this.canSave)
+			if (e.ctrlKey && e.key === 's') {
+				if (this.canSave)
 					this.set();
-				
+
 				e.preventDefault();
 			}
-			if(e.key === 'Escape' && !this.isFormOpen) {
+			if (e.key === 'Escape' && !this.isFormOpen) {
 				this.closeAsk();
 				e.preventDefault();
 			}
 		},
-		
+
 		// actions
 		closeAsk() {
-			this.dialogCloseAsk(this.close,this.isChanged);
+			this.dialogCloseAsk(this.close, this.isChanged);
 		},
 		close() {
 			this.$emit('close');
@@ -482,94 +509,92 @@ export default {
 			navigator.clipboard.writeText(this.noAuthUrl);
 		},
 		openLoginForm(index) {
-			const frm = this.formIdMap[this.loginForms[index].formId];
-			const mod = this.moduleIdMap[frm.moduleId];
-			
 			this.loginFormIndexOpen = index;
-			this.loginFormRecords   = this.inputs.records[index].id !== null
+			this.loginFormRecords = this.inputs.records[index].id !== null
 				? [this.inputs.records[index].id] : [];
 		},
-		openLoginFormDropdown(index,state) {
+		openLoginFormDropdown(index, state) {
 			const pos = this.loginFormIndexesDropdown.indexOf(index);
-			if(pos === -1 && state)  this.loginFormIndexesDropdown.push(index);
-			if(pos !== -1 && !state) this.loginFormIndexesDropdown.splice(pos,1);
+			if (pos === -1 && state) this.loginFormIndexesDropdown.push(index);
+			if (pos !== -1 && !state) this.loginFormIndexesDropdown.splice(pos, 1);
 		},
 		reset(initNew) {
-			if(initNew) {
+			if (initNew) {
 				this.inputs = {
-					ldapId:null,
-					oauthClientId:null,
-					active:true,
-					admin:false,
-					meta:{},
-					name:'',
-					noAuth:false,
-					pass:'',
-					tokenExpiryHours:'',
-					records:[],
-					roleIds:[]
+					ldapId: null,
+					oauthClientId: null,
+					active: true,
+					admin: false,
+					meta: {},
+					mfaRequired: null,
+					name: '',
+					noAuth: false,
+					pass: '',
+					tokenExpiryHours: null,
+					records: [],
+					roleIds: []
 				};
 			} else {
-				this.$emit('set-login-id',0);
-				this.inputs.ldapId        = null;
+				this.$emit('set-login-id', 0);
+				this.inputs.ldapId = null;
 				this.inputs.oauthClientId = null;
-				this.inputs.name          = '';
-				this.inputs.meta.email    = '';
-				this.getIsNotUnique('email',this.inputs.meta.email);
+				this.inputs.name = '';
+				this.inputs.meta.email = '';
+				this.getIsNotUnique('email', this.inputs.meta.email);
 			}
-			this.inputsOrg      = JSON.parse(JSON.stringify(this.inputs));
+			this.inputsOrg = JSON.parse(JSON.stringify(this.inputs));
 			this.notUniqueEmail = false;
-			this.notUniqueName  = false;
-			this.ready          = true;
+			this.notUniqueName = false;
+			this.ready = true;
 			this.getTemplates();
 		},
 		toggleRoleId(roleId) {
 			const pos = this.inputs.roleIds.indexOf(roleId);
-			if(pos === -1) this.inputs.roleIds.push(roleId);
-			else           this.inputs.roleIds.splice(pos,1);
+			if (pos === -1) this.inputs.roleIds.push(roleId);
+			else this.inputs.roleIds.splice(pos, 1);
 		},
 		toggleRolesByContent(content) {
-			let roleIdsByContent = [];
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				for(let x = 0, y = this.modules[i].roles.length; x < y; x++) {
-					let r = this.modules[i].roles[x];
-					
-					if(r.assignable && r.content === content)
+			const roleIdsByContent = [];
+			for (let i = 0, j = this.modules.length; i < j; i++) {
+				for (let x = 0, y = this.modules[i].roles.length; x < y; x++) {
+					const r = this.modules[i].roles[x];
+
+					if (r.assignable && r.content === content)
 						roleIdsByContent.push(r.id);
 				}
 			}
-			
+
 			// has all roles, remove all
-			if(roleIdsByContent.length === this.inputs.roleIds.filter(v => roleIdsByContent.includes(v)).length) {
-				for(let i = 0, j = roleIdsByContent.length; i < j; i++) {
-					this.inputs.roleIds.splice(this.inputs.roleIds.indexOf(roleIdsByContent[i]),1);
+			if (roleIdsByContent.length === this.inputs.roleIds.filter(v => roleIdsByContent.includes(v)).length) {
+				for (let i = 0, j = roleIdsByContent.length; i < j; i++) {
+					this.inputs.roleIds.splice(this.inputs.roleIds.indexOf(roleIdsByContent[i]), 1);
 				}
 				return;
 			}
-			
+
 			// does not have all roles, add missing
-			for(let i = 0, j = roleIdsByContent.length; i < j; i++) {
-				if(!this.inputs.roleIds.includes(roleIdsByContent[i]))
+			for (let i = 0, j = roleIdsByContent.length; i < j; i++) {
+				if (!this.inputs.roleIds.includes(roleIdsByContent[i]))
 					this.inputs.roleIds.push(roleIdsByContent[i]);
 			}
 		},
-		typedUniqueField(content,value) {
+		typedUniqueField(content, value) {
 			clearInterval(this.timerNotUniqueCheck);
-			this.timerNotUniqueCheck = setTimeout(() => this.getIsNotUnique(content,value),750);
+			this.timerNotUniqueCheck = setTimeout(() => this.getIsNotUnique(content, value), 750);
 		},
-		updateLoginRecord(loginFormIndex,recordId) {
+		updateLoginRecord(loginFormIndex, recordId) {
 			this.recordInput = '';
 			this.inputs.records[loginFormIndex].id = recordId;
-			
-			if(recordId !== null) this.getRecords(loginFormIndex);
-			else                  this.inputs.records[loginFormIndex].label = '';
+
+			if (recordId !== null) this.getRecords(loginFormIndex);
+			else this.inputs.records[loginFormIndex].label = '';
 		},
-		
+
 		// backend calls
 		del() {
-			ws.send('login','del',{id:this.loginId},true).then(
+			ws.send('login', 'del', { id: this.loginId }, true).then(
 				() => {
-					ws.send('login','kick',{id:this.loginId},true).then(
+					ws.send('login', 'kick', { id: this.loginId }, true).then(
 						() => this.$emit('close'),
 						this.$root.genericError
 					);
@@ -578,36 +603,36 @@ export default {
 			);
 		},
 		get() {
-			ws.send('login','get',{
-				byId:this.loginId,
-				meta:true,
-				roles:true,
-				recordRequests:this.loginFormLookups
-			},true).then(
+			ws.send('login', 'get', {
+				byId: this.loginId,
+				meta: true,
+				roles: true,
+				recordRequests: this.loginFormLookups
+			}, true).then(
 				res => {
-					if(res.payload.logins.length !== 1) return;
-					
-					this.inputs    = res.payload.logins[0];
+					if (res.payload.logins.length !== 1) return;
+
+					this.inputs = res.payload.logins[0];
 					this.inputsOrg = JSON.parse(JSON.stringify(this.inputs));
-					this.getIsNotUnique('email',this.inputs.meta.email);
+					this.getIsNotUnique('email', this.inputs.meta.email);
 				},
 				this.$root.genericError
 			);
 		},
-		getIsNotUnique(content,value) {
+		getIsNotUnique(content, value) {
 			value = value.trim().toLowerCase();
-			if(value === '')
+			if (value === '')
 				return;
 
-			ws.send('login','getIsNotUnique',{
-				loginId:this.loginId,
-				content:content,
-				value:value
-			},true).then(
+			ws.send('login', 'getIsNotUnique', {
+				loginId: this.loginId,
+				content: content,
+				value: value
+			}, true).then(
 				res => {
-					switch(content) {
+					switch (content) {
 						case 'email': this.notUniqueEmail = res.payload; break;
-						case 'name':  this.notUniqueName  = res.payload; break;
+						case 'name': this.notUniqueName = res.payload; break;
 					}
 				},
 				this.$root.genericError
@@ -615,92 +640,94 @@ export default {
 		},
 		getRecords(loginFormIndex) {
 			this.recordList = [];
-			let isIdLookup = this.inputs.records[loginFormIndex].id !== null;
-			
-			ws.send('login','getRecords',{
-				attributeIdLookup:this.loginForms[loginFormIndex].attributeIdLookup,
-				byId:isIdLookup ? this.inputs.records[loginFormIndex].id : 0,
-				byString:isIdLookup ? '' : this.recordInput
-			},true).then(
+			const isIdLookup = this.inputs.records[loginFormIndex].id !== null;
+
+			ws.send('login', 'getRecords', {
+				attributeIdLookup: this.loginForms[loginFormIndex].attributeIdLookup,
+				byId: isIdLookup ? this.inputs.records[loginFormIndex].id : 0,
+				byString: isIdLookup ? '' : this.recordInput
+			}, true).then(
 				res => {
-					if(!isIdLookup)
-						return this.recordList = res.payload;
-					
-					if(res.payload.length === 1)
+					if (!isIdLookup) {
+						this.recordList = res.payload;
+						return;
+					}
+					if (res.payload.length === 1)
 						this.inputs.records[loginFormIndex].label = res.payload[0].name;
 				},
 				this.$root.genericError
 			);
 		},
 		getTemplates() {
-			ws.send('loginTemplate','get',{byId:0},true).then(
+			ws.send('loginTemplate', 'get', { byId: 0 }, true).then(
 				res => {
 					this.templates = res.payload;
-					
+
 					// apply global template if empty
-					if(this.templateId === null && this.templates.length > 0)
+					if (this.templateId === null && this.templates.length > 0)
 						this.templateId = this.templates[0].id;
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
-			let records = [];
-			for(let i = 0, j = this.loginForms.length; i < j; i++) {
+			const records = [];
+			for (let i = 0, j = this.loginForms.length; i < j; i++) {
 				records.push({
-					attributeId:this.loginForms[i].attributeIdLogin,
-					recordId:this.inputs.records[i].id
+					attributeId: this.loginForms[i].attributeIdLogin,
+					recordId: this.inputs.records[i].id
 				});
 			}
-			
-			ws.send('login','set',{
-				id:this.loginId,
-				templateId:this.templateId,
-				name:this.inputs.name,
-				pass:this.inputs.pass,
-				active:this.inputs.active,
-				admin:this.inputs.admin,
-				meta:this.inputs.meta,
-				noAuth:this.inputs.noAuth,
-				tokenExpiryHours:/^(0|[1-9]\d*)$/.test(this.inputs.tokenExpiryHours) ? parseInt(this.inputs.tokenExpiryHours) : null,
-				roleIds:this.inputs.roleIds,
-				records:records
-			},true).then(
+
+			ws.send('login', 'set', {
+				id: this.loginId,
+				templateId: this.templateId,
+				name: this.inputs.name,
+				pass: this.inputs.pass,
+				active: this.inputs.active,
+				admin: this.inputs.admin,
+				meta: this.inputs.meta,
+				mfaRequired: this.inputs.mfaRequired,
+				noAuth: this.inputs.noAuth,
+				tokenExpiryHours: this.inputs.tokenExpiryHours,
+				roleIds: this.inputs.roleIds,
+				records
+			}, true).then(
 				res => {
 					// if login was changed, reauth. or kick client
-					if(!this.isNew)
-						ws.send('login',this.inputs.active ? 'reauth' : 'kick',{id:this.loginId},false);
-					
-					if(this.isNew)
-						this.$emit('set-login-id',res.payload);
-					
+					if (!this.isNew)
+						ws.send('login', this.inputs.active ? 'reauth' : 'kick', { id: this.loginId }, false);
+
+					if (this.isNew)
+						this.$emit('set-login-id', res.payload);
+
 					this.$nextTick(this.get);
 				},
 				this.$root.genericError
 			);
 		},
-		
+
 		// MFA calls
 		resetTotpAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.resetTotp,
-				image:'warning.png',
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.reset,
-					exec:this.resetTotp,
-					keyEnter:true,
-					image:'refresh.png'
-				},{
-					caption:this.capGen.button.cancel,
-					keyEscape:true,
-					image:'cancel.png'
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.dialog.resetTotp,
+				image: 'warning.png',
+				buttons: [{
+					cancel: true,
+					caption: this.capGen.button.reset,
+					exec: this.resetTotp,
+					keyEnter: true,
+					image: 'refresh.png'
+				}, {
+					caption: this.capGen.button.cancel,
+					keyEscape: true,
+					image: 'cancel.png'
 				}]
 			});
 		},
 		resetTotp() {
-			ws.send('login','resetTotp',{id:this.loginId},true).then(
-				res => {},this.$root.genericError
+			ws.send('login', 'resetTotp', { id: this.loginId }, true).then(
+				() => { }, this.$root.genericError
 			);
 		}
 	}

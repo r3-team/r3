@@ -802,6 +802,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
+
+			-- MFA requirement
+			ALTER TABLE instance.login ADD COLUMN mfa_required BOOLEAN;
+			INSERT INTO instance.config (name,value) VALUES ('mfaRequired',0);
 		`)
 		return "3.13", err
 	},

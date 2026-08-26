@@ -69,6 +69,8 @@
 			"licenseState": "État de la licence",
 			"licenseStateNok": "Aucune licence active",
 			"licenseStateOk": "Valide pendant {COUNT} jour(s) supplémentaire(s)",
+			"mfa": "Force for all users",
+			"mfaHint": "Forces multi-factor authentication via TOTP (Time-based One-time Password) for all users. Not relevant for external authentication via OAuth. Can be overwritten for specific users.",
 			"productionMode": "Mode maintenance",
 			"proxyUrl": "Proxy URL",
 			"proxyUrlDesc": "A proxy URL, such as 'http://my-proxy.intern:8080' or 'https://user:pass@my-proxy:8080'.",
@@ -89,6 +91,7 @@
 			"titleMail": "Envoi de courriers",
 			"titlePerformance": "Performance",
 			"tokenExpiryHours": "Durée maximale de session en heures",
+			"tokenExpiryHoursHint": "Valid for all users sessions, this includes sessions created for API users. Can be overwritten for specific users.",
 			"updateCheck": "État de la version",
 			"updateCheckCurrent": "Actuelle",
 			"updateCheckNewer": "Dernière version",
@@ -276,6 +279,7 @@
 			"hint": {
 				"active": "Lorsqu'il est désactivé, les sessions actives seront terminées.",
 				"admin": "Les privilèges d'administrateur incluent la gestion des applications et des utilisateurs. Les administrateurs peuvent également activer les modes de maintenance et de création.",
+				"mfaRequired": "Overwrites the global setting.",
 				"name": "Nom d'utilisateur - doit être unique dans le système.",
 				"noAuth": "Les utilisateurs publiques ne nécessitent pas d'authentification. L'accès au système est possible uniquement avec une URL.",
 				"password": "Cette opération écrase le mot de passe actuel de l'utilisateur. L'authentification multi-facteurs n'est pas affectée par ce changement. Le chiffrement de bout en bout (E2EE) ne sera pas disponible tant que l'utilisateur ne fournira pas le code de sauvegarde associé.",
@@ -2675,6 +2679,7 @@
 		"menu": "Menu",
 		"menus": "Menus",
 		"menusSub": "Sous-menus",
+		"mfa": "Multi-factor authentication",
 		"missingCaption": "LÉGENDE MANQUANTE",
 		"mode": "Mode",
 		"module": "Application",
@@ -2806,6 +2811,7 @@
 		"status": "Statut",
 		"styles": "Styles",
 		"system": "System",
+		"systemDefault": "System default",
 		"systemModes": "System modes",
 		"tab": "Tab",
 		"tag": "Tag",
@@ -3087,6 +3093,25 @@
 		"listRows": "Lignes de liste",
 		"listSpaced": "Plus grand",
 		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
+		"mfa": {
+			"apps": [
+				"Google Authenticator",
+				"Microsoft Authenticator",
+				"Aegis Authenticator",
+				"...ou toute application prenant en charge TOTP"
+			],
+			"appsExample": "Quelques exemples :",
+			"button": {
+				"finished": "Authenticator app is ready"
+			},
+			"intro": "Vous pouvez renforcer la sécurité de votre compte en activant l'authentification multi-facteur (MFA). Pour activer la MFA, veuillez utiliser une application d'authentification sur un appareil distinct (comme un smartphone).",
+			"introForced": "To access this system, you are required to enable multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+			"name": "Choisissez un nom pour votre appareil",
+			"nameHint": "'Mon smartphone'",
+			"outro": "Utilisez le code QR pour ajouter ce compte à votre application d'authentification. Une fois terminé, fermez cette fenêtre. Vous pouvez répéter ce processus pour activer la MFA avec plusieurs appareils.",
+			"outroForced": "Use the QR code to add this account to your authenticator app. When you are done, confirm below to continue.",
+			"title": "Configuration de l'authentification multi-facteur"
+		},
 		"mobileScrollForm": "Mobile : Faire défiler tout le formulaire",
 		"pageTitle": "Paramètres",
 		"pattern": "Motif de fond",
@@ -3134,23 +3159,9 @@
 			"message": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cette entrée ? Cela ne peut pas être annulé."
 			},
-			"mfa": {
-				"apps": [
-					"Google Authenticator",
-					"Microsoft Authenticator",
-					"Aegis Authenticator",
-					"...ou toute application prenant en charge TOTP"
-				],
-				"appsExample": "Quelques exemples :",
-				"intro": "Vous pouvez renforcer la sécurité de votre compte en activant l'authentification multi-facteur (MFA). Pour activer la MFA, veuillez utiliser une application d'authentification sur un appareil distinct (comme un smartphone).",
-				"name": "Choisissez un nom pour votre appareil",
-				"nameHint": "'Mon smartphone'",
-				"outro": "Utilisez le code QR pour ajouter ce compte à votre application d'authentification. Une fois terminé, fermez cette fenêtre. Vous pouvez répéter ce processus pour activer la MFA avec plusieurs appareils."
-			},
 			"titleAdd": "Manage REI3 client application",
 			"titleContext": "Utilisation",
 			"titleDateCreate": "Créé",
-			"titleMfa": "Configuration de l'authentification multi-facteur",
 			"titleName": "Nom de l'appareil"
 		},
 		"translation": {

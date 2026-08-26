@@ -20,6 +20,23 @@ type LoginAccess struct {
 	SearchBar   map[uuid.UUID]Access `json:"searchBar"`   // effective access to specific search bars
 	Widget      map[uuid.UUID]Access `json:"widget"`      // effective access to specific widgets
 }
+type LoginAuthRequestOpenId struct {
+	Code          string `json:"code"`
+	CodeVerifier  string `json:"codeVerifier"`
+	OauthClientId int32  `json:"oauthClientId"`
+}
+type LoginAuthRequestTokenFixed struct {
+	LoginId    int64  `json:"loginId"`
+	TokenFixed string `json:"tokenFixed"`
+}
+type LoginAuthRequestUser struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+
+	// MFA details, sent together with credentials (usually on second auth attempt)
+	MfaTokenId  pgtype.Int4 `json:"mfaTokenId"`
+	MfaTokenPin pgtype.Text `json:"mfaTokenPin"`
+}
 type LoginAuthResult struct {
 	// auth types: user, token, fixed token, openId
 	Admin bool   `json:"admin"` // login has instance admin permissions
@@ -28,7 +45,8 @@ type LoginAuthResult struct {
 	Token string `json:"token"` // login token
 
 	// auth types: user
-	MfaTokens []LoginMfaToken `json:"mfaTokens"` // available MFAs, filled if user auth ok, but MFA not satisfied
+	MfaSetup  bool            `json:"mfaSetup"`  // true if MFA is required for login but not configured yet
+	MfaTokens []LoginMfaToken `json:"mfaTokens"` // available MFAs for this login, filled if auth ok, but MFA not provided
 	NoAuth    bool            `json:"noAuth"`    // login is without authentication (public auth with only name)
 
 	// auth types: user, openId

@@ -1,8 +1,8 @@
-import {getBuildFromVersion} from '../shared/generic.js';
+import { getBuildFromVersion } from '../shared/generic.js';
 
 export default {
-	name:'my-admin-config',
-	template:`<div class="contentBox admin-config" v-if="ready">
+	name: 'my-admin-config',
+	template: `<div class="contentBox admin-config" v-if="ready">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/server.png" />
@@ -23,16 +23,16 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content no-padding">
-			
+
 			<!-- general -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/settings.png" />
 					<h1>{{ capApp.titleGeneral }}</h1>
 				</div>
-				
+
 				<table class="default-inputs">
 					<tbody>
 						<tr>
@@ -59,9 +59,7 @@ export default {
 							<td>
 								<div class="row gap centered">
 									<input v-model="configInput.publicHostName" />
-									<my-button image="question.png"
-										@trigger="showHelp(capApp.publicHostNameDesc)"
-									/>
+									<my-button image="question.png" @trigger="showHelp(capApp.publicHostNameDesc)" />
 								</div>
 							</td>
 						</tr>
@@ -70,9 +68,7 @@ export default {
 							<td>
 								<div class="row gap centered">
 									<input v-model="configInput.proxyUrl" />
-									<my-button image="question.png"
-										@trigger="showHelp(capApp.proxyUrlDesc)"
-									/>
+									<my-button image="question.png" @trigger="showHelp(capApp.proxyUrlDesc)" />
 								</div>
 							</td>
 						</tr>
@@ -102,19 +98,24 @@ export default {
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- security -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/admin.png" />
 					<h1>{{ capApp.titleLogins }}</h1>
 				</div>
-				
+
 				<table class="default-inputs">
 					<tbody>
 						<tr>
 							<td>{{ capApp.tokenExpiryHours }}</td>
-							<td><input v-model="configInput.tokenExpiryHours" /></td>
+							<td>
+								<div class="row gap centered">
+									<input v-model="configInput.tokenExpiryHours" />
+									<my-button image="question.png" @trigger="showHelp(capApp.tokenExpiryHoursHint)" />
+								</div>
+							</td>
 						</tr>
 						<tr><td colspan="2"><hr /></td></tr>
 						<tr><td colspan="2"><br /><b>{{ capApp.pwTitle }}</b></td></tr>
@@ -138,17 +139,29 @@ export default {
 							<td>{{ capApp.pwForceSpecial }}</td>
 							<td><my-bool-string-number v-model="configInput.pwForceSpecial" /></td>
 						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><br /><b>{{ capGen.mfa }}</b></td></tr>
+						<tr>
+							<td>{{ capApp.mfa }}</td>
+							<td>
+								<div class="row gap centered space-between">
+									<div />
+									<my-bool-string-number v-model="configInput.mfaRequired" />
+									<my-button image="question.png" @trigger="showHelp(capApp.mfaHint)" />
+								</div>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- login backgrounds -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/admin.png" />
 					<h1>{{ capApp.titleLoginBackgrounds }}</h1>
 				</div>
-				
+
 				<div class="login-bg">
 					<div class="preview clickable"
 						v-for="n in loginBackgroundCount"
@@ -158,14 +171,14 @@ export default {
 					></div>
 				</div>
 			</div>
-			
+
 			<!-- performance -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/speedmeter.png" />
 					<h1>{{ capApp.titlePerformance }}</h1>
 				</div>
-				
+
 				<table class="default-inputs">
 					<tbody>
 						<tr>
@@ -199,14 +212,14 @@ export default {
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- ICS -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/calendar.png" />
 					<h1>{{ capApp.titleIcs }}</h1>
 				</div>
-				
+
 				<table class="default-inputs">
 					<tbody>
 						<tr>
@@ -228,14 +241,14 @@ export default {
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- security settings -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/lock.png" />
 					<h1>{{ capApp.bruteforceTitle }}</h1>
 				</div>
-				
+
 				<table class="default-inputs">
 					<tbody>
 						<tr>
@@ -263,19 +276,19 @@ export default {
 
 				<span v-html="capApp.bruteforceDesc"></span>
 			</div>
-			
+
 			<!-- admin mails -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/lock.png" />
 					<h1>{{ capApp.adminMailsTitle }}</h1>
 				</div>
-				
+
 				<p>{{ capApp.adminMailsDesc }}</p>
 				<ul>
 					<li v-for="l in capApp.adminMailsList">{{ l }}</li>
 				</ul>
-				
+
 				<div class="column">
 					<my-button image="cancel.png"
 						v-for="(c,i) in adminMailAddresses"
@@ -285,7 +298,7 @@ export default {
 					/>
 				</div>
 				<br />
-				
+
 				<div class="row gap centered default-inputs">
 					<input
 						v-model="adminMailInput"
@@ -298,7 +311,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<!-- client events -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -320,132 +333,132 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
-	watch:{
-		config:{
+	watch: {
+		config: {
 			handler(v) {
 				this.configInput = JSON.parse(JSON.stringify(v));
 			},
-			immediate:true
+			immediate: true
 		}
 	},
 	data() {
 		return {
-			adminMailInput:'',
-			configInput:{},
-			bruteforceCountBlocked:0,
-			bruteforceCountTracked:0,
-			loginBackgroundCount:12,
-			ready:false
+			adminMailInput: '',
+			configInput: {},
+			bruteforceCountBlocked: 0,
+			bruteforceCountTracked: 0,
+			loginBackgroundCount: 12,
+			ready: false
 		};
 	},
 	mounted() {
 		this.get();
-		this.$store.commit('pageTitle',this.menuTitle);
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('pageTitle', this.menuTitle);
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
-	computed:{
-		updateCheckText:s => {
-			if(s.config.updateCheckVersion === '')
+	computed: {
+		updateCheckText: s => {
+			if (s.config.updateCheckVersion === '')
 				return s.capApp.updateCheckUnknown;
-			
-			let buildNew = s.getBuildFromVersion(s.config.updateCheckVersion);
-			let buildOld = s.getBuildFromVersion(s.appVersion);
-			
-			if(buildNew === buildOld) return s.capApp.updateCheckCurrent;
-			if(buildNew > buildOld)   return s.capApp.updateCheckOlder;
-			
+
+			const buildNew = s.getBuildFromVersion(s.config.updateCheckVersion);
+			const buildOld = s.getBuildFromVersion(s.appVersion);
+
+			if (buildNew === buildOld) return s.capApp.updateCheckCurrent;
+			if (buildNew > buildOld) return s.capApp.updateCheckOlder;
+
 			return s.capApp.updateCheckNewer;
 		},
 
 		// values
-		adminMailAddresses:s => JSON.parse(s.configInput.adminMailAddresses),
-		hotkeyModExcl:     s => JSON.parse(s.configInput.hotkeyModExcl),
-		loginBackgrounds:  s => JSON.parse(s.configInput.loginBackgrounds),
-		
+		adminMailAddresses: s => JSON.parse(s.configInput.adminMailAddresses),
+		hotkeyModExcl: s => JSON.parse(s.configInput.hotkeyModExcl),
+		loginBackgrounds: s => JSON.parse(s.configInput.loginBackgrounds),
+
 		// simple
-		hasChanges:s => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
-		
+		hasChanges: s => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
+
 		// stores
-		appVersion:  s => s.$store.getters['local/appVersion'],
-		token:       s => s.$store.getters['local/token'],
-		capApp:      s => s.$store.getters.captions.admin.config,
-		capGen:      s => s.$store.getters.captions.generic,
-		config:      s => s.$store.getters.config,
-		hotkeyMod:   s => s.$store.getters.constants.hotkeyMod,
-		license:     s => s.$store.getters.license,
+		appVersion: s => s.$store.getters['local/appVersion'],
+		token: s => s.$store.getters['local/token'],
+		capApp: s => s.$store.getters.captions.admin.config,
+		capGen: s => s.$store.getters.captions.generic,
+		config: s => s.$store.getters.config,
+		hotkeyMod: s => s.$store.getters.constants.hotkeyMod,
+		license: s => s.$store.getters.license,
 		licenseDays: s => s.$store.getters.licenseDays,
-		licenseValid:s => s.$store.getters.licenseValid
+		licenseValid: s => s.$store.getters.licenseValid
 	},
-	methods:{
+	methods: {
 		// externals
 		getBuildFromVersion,
-		
+
 		// presentation
 		loginBgStyle(n) {
 			return `background-image:url('../images/backgrounds/${n}_prev.webp')`;
 		},
-		
+
 		// actions
 		adminMailAdd() {
-			if(this.adminMailInput === '') return;
-			
-			let v = JSON.parse(JSON.stringify(this.adminMailAddresses));
+			if (this.adminMailInput === '') return;
+
+			const v = JSON.parse(JSON.stringify(this.adminMailAddresses));
 			v.push(this.adminMailInput);
 			this.configInput.adminMailAddresses = JSON.stringify(v);
 			this.adminMailInput = '';
 		},
 		adminMailDel(index) {
-			let v = JSON.parse(JSON.stringify(this.adminMailAddresses));
-			v.splice(index,1);
+			const v = JSON.parse(JSON.stringify(this.adminMailAddresses));
+			v.splice(index, 1);
 			this.configInput.adminMailAddresses = JSON.stringify(v);
 		},
 		hotkeyModExclToggle(key) {
-			let   v   = JSON.parse(JSON.stringify(this.hotkeyModExcl));
+			const v = JSON.parse(JSON.stringify(this.hotkeyModExcl));
 			const pos = v.indexOf(key);
-			if(pos === -1) v.push(key);
-			else           v.splice(pos,1);
+			if (pos === -1) v.push(key);
+			else v.splice(pos, 1);
 			this.configInput.hotkeyModExcl = JSON.stringify(v);
 		},
 		informBuilderMode() {
-			if(this.configInput.builderMode === '0')
+			if (this.configInput.builderMode === '0')
 				return;
-			
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.builderMode,
-				captionTop:this.capApp.dialog.pleaseRead
+
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.dialog.builderMode,
+				captionTop: this.capApp.dialog.pleaseRead
 			});
 		},
 		informProductionMode() {
-			if(this.configInput.productionMode !== '0')
+			if (this.configInput.productionMode !== '0')
 				return;
-			
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.productionMode,
-				captionTop:this.capApp.dialog.pleaseRead
+
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.dialog.productionMode,
+				captionTop: this.capApp.dialog.pleaseRead
 			});
 		},
 		loginBgToggle(n) {
 			var list = JSON.parse(this.configInput.loginBackgrounds);
-			
+
 			const pos = list.indexOf(n);
-			if(pos !== -1) list.splice(pos,1);
-			else           list.push(n);
-			
+			if (pos !== -1) list.splice(pos, 1);
+			else list.push(n);
+
 			this.configInput.loginBackgrounds = JSON.stringify(list);
 		},
 		showHelp(msg) {
-			this.$store.commit('dialog',{ captionBody:msg });
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.contextHelp });
 		},
-		
+
 		// backend calls
 		get() {
-			ws.send('bruteforce','get',{},true).then(
+			ws.send('bruteforce', 'get', {}, true).then(
 				res => {
 					this.bruteforceCountBlocked = res.payload.hostsBlocked;
 					this.bruteforceCountTracked = res.payload.hostsTracked;
@@ -455,10 +468,10 @@ export default {
 			);
 		},
 		set() {
-			if(!this.hasChanges) return;
-			
-			ws.send('config','set',this.configInput,true).then(
-				() => {}, this.$root.genericError
+			if (!this.hasChanges) return;
+
+			ws.send('config', 'set', this.configInput, true).then(
+				() => { }, this.$root.genericError
 			);
 		}
 	}

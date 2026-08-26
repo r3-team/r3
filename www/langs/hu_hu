@@ -69,6 +69,8 @@
 			"licenseState": "Licenc állapota",
 			"licenseStateNok": "Nincs aktív licenc",
 			"licenseStateOk": "Érvényes még {COUNT} napig",
+			"mfa": "Force for all users",
+			"mfaHint": "Forces multi-factor authentication via TOTP (Time-based One-time Password) for all users. Not relevant for external authentication via OAuth. Can be overwritten for specific users.",
 			"productionMode": "Karbantartási mód",
 			"proxyUrl": "Proxy URL",
 			"proxyUrlDesc": "A proxy URL, such as 'http://my-proxy.intern:8080' or 'https://user:pass@my-proxy:8080'.",
@@ -89,6 +91,7 @@
 			"titleMail": "E-mailek küldése",
 			"titlePerformance": "Teljesítmény",
 			"tokenExpiryHours": "Makszimális munkamenet-idő órában",
+			"tokenExpiryHoursHint": "Valid for all users sessions, this includes sessions created for API users. Can be overwritten for specific users.",
 			"updateCheck": "Verzióellenőrzés",
 			"updateCheckCurrent": "Jelenlegi",
 			"updateCheckNewer": "Cutting-Edge",
@@ -276,6 +279,7 @@
 			"hint": {
 				"active": "A deaktiválás aktív munkameneteket zár le.",
 				"admin": "Az adminisztrátori jogosultságok lehetővé teszik az alkalmazások és bejelentkezések kezelését. Az adminok aktiválhatják a karbantartási és építő módot is.",
+				"mfaRequired": "Overwrites the global setting.",
 				"name": "Username - must be unique within the system.",
 				"noAuth": "Public users do not require authentication. System access is possible with only a URL.",
 				"password": "This will overwrite the current password for this user. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
@@ -2675,6 +2679,7 @@
 		"menu": "Menü",
 		"menus": "Menük",
 		"menusSub": "Sub menus",
+		"mfa": "Multi-factor authentication",
 		"missingCaption": "HIÁNYZÓ CÍM",
 		"mode": "Mode",
 		"module": "Alkalmazás",
@@ -2806,6 +2811,7 @@
 		"status": "Állapot",
 		"styles": "Styles",
 		"system": "System",
+		"systemDefault": "System default",
 		"systemModes": "System modes",
 		"tab": "Tab",
 		"tag": "Tag",
@@ -3087,6 +3093,25 @@
 		"listRows": "List rows",
 		"listSpaced": "Larger",
 		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
+		"mfa": {
+			"apps": [
+				"Google Authenticator",
+				"Microsoft Authenticator",
+				"Aegis Authenticator",
+				"...vagy bármely alkalmazás, ami támogatja a TOTP-t"
+			],
+			"appsExample": "Néhány példa:",
+			"button": {
+				"finished": "Authenticator app is ready"
+			},
+			"intro": "Növelheti fiókja biztonságát a Több Faktoros Hitelesítés (MFA) használatával. Az MFA aktiválásához használjon egy hitelesítő alkalmazást egy különálló eszközön (például okostelefonon).",
+			"introForced": "To access this system, you are required to enable multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+			"name": "Válasszon egy nevet az eszközéhez",
+			"nameHint": "'Saját okostelefonom'",
+			"outro": "Használja a QR-kódot a fiókjának hozzáadásához az Authenticator alkalmazásához. Ha befejezte, zárja be ezt az ablakot. Ezt a folyamatot megismételheti, hogy több eszközön is aktiválja a Több Faktoros Hitelesítést (MFA).",
+			"outroForced": "Use the QR code to add this account to your authenticator app. When you are done, confirm below to continue.",
+			"title": "Több Faktoros Hitelesítés hozzáadása"
+		},
 		"mobileScrollForm": "Mobil: Teljes űrlap görgetése",
 		"pageTitle": "Beállítások",
 		"pattern": "Háttérminta",
@@ -3134,23 +3159,9 @@
 			"message": {
 				"delete": "Biztos benne, hogy törölni szeretné ezt a bejegyzést? Ezt nem lehet visszavonni."
 			},
-			"mfa": {
-				"apps": [
-					"Google Authenticator",
-					"Microsoft Authenticator",
-					"Aegis Authenticator",
-					"...vagy bármely alkalmazás, ami támogatja a TOTP-t"
-				],
-				"appsExample": "Néhány példa:",
-				"intro": "Növelheti fiókja biztonságát a Több Faktoros Hitelesítés (MFA) használatával. Az MFA aktiválásához használjon egy hitelesítő alkalmazást egy különálló eszközön (például okostelefonon).",
-				"name": "Válasszon egy nevet az eszközéhez",
-				"nameHint": "'Saját okostelefonom'",
-				"outro": "Használja a QR-kódot a fiókjának hozzáadásához az Authenticator alkalmazásához. Ha befejezte, zárja be ezt az ablakot. Ezt a folyamatot megismételheti, hogy több eszközön is aktiválja a Több Faktoros Hitelesítést (MFA)."
-			},
 			"titleAdd": "Manage REI3 client application",
 			"titleContext": "Használat",
 			"titleDateCreate": "Létrehozva",
-			"titleMfa": "Több Faktoros Hitelesítés hozzáadása",
 			"titleName": "Eszköz neve"
 		},
 		"translation": {

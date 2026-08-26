@@ -69,6 +69,8 @@
 			"licenseState": "Estado da licença",
 			"licenseStateNok": "Não há licença ativa",
 			"licenseStateOk": "Válido por mais {COUNT} dia(s)",
+			"mfa": "Force for all users",
+			"mfaHint": "Forces multi-factor authentication via TOTP (Time-based One-time Password) for all users. Not relevant for external authentication via OAuth. Can be overwritten for specific users.",
 			"productionMode": "Modo de manutenção",
 			"proxyUrl": "URL do proxy",
 			"proxyUrlDesc": "Um URL de proxy, como 'http://meu-proxy.interno:8080' ou 'https://utilizador:palavra-passe@meu-proxy:8080'.",
@@ -89,6 +91,7 @@
 			"titleMail": "Enviar e-mails",
 			"titlePerformance": "Desempenho",
 			"tokenExpiryHours": "Tempo máximo de sessão em horas",
+			"tokenExpiryHoursHint": "Valid for all users sessions, this includes sessions created for API users. Can be overwritten for specific users.",
 			"updateCheck": "Estado da versão",
 			"updateCheckCurrent": "Atual",
 			"updateCheckNewer": "Última versão",
@@ -276,6 +279,7 @@
 			"hint": {
 				"active": "Quando desativado, as sessões ativas serão terminadas.",
 				"admin": "Os privilégios de administrador incluem a gestão de aplicações e utilizadores. Os administradores também podem ativar os modos de manutenção e construtor.",
+				"mfaRequired": "Overwrites the global setting.",
 				"name": "Nome de utilizador - deve ser único dentro do sistema.",
 				"noAuth": "Os utilizadores públicos não requerem autenticação. O acesso ao sistema é possível apenas com um URL.",
 				"password": "Isto irá substituir a palavra-passe atual deste utilizador. A autenticação multifator não é afetada por esta alteração. A encriptação de ponta a ponta (E2EE) não estará disponível até que o utilizador forneça o código de backup associado.",
@@ -2675,6 +2679,7 @@
 		"menu": "Menu",
 		"menus": "Menus",
 		"menusSub": "Submenus",
+		"mfa": "Multi-factor authentication",
 		"missingCaption": "LEGENDA EM FALTA",
 		"mode": "Mode",
 		"module": "Aplicação",
@@ -2806,6 +2811,7 @@
 		"status": "Estado",
 		"styles": "Estilos",
 		"system": "Sistema",
+		"systemDefault": "System default",
 		"systemModes": "Modos do sistema",
 		"tab": "Separador",
 		"tag": "Tag",
@@ -3087,6 +3093,25 @@
 		"listRows": "Linhas da lista",
 		"listSpaced": "Maior",
 		"mailSpoolerStuckSec": "Warn if emails are stuck in spooler longer than X seconds",
+		"mfa": {
+			"apps": [
+				"Google Authenticator",
+				"Microsoft Authenticator",
+				"Aegis Authenticator",
+				"...ou qualquer aplicação que suporte TOTP"
+			],
+			"appsExample": "Alguns exemplos:",
+			"button": {
+				"finished": "Authenticator app is ready"
+			},
+			"intro": "Pode aumentar a segurança da sua conta ativando a autenticação multifator (MFA). Para ativar o MFA, utilize uma aplicação de autenticação num dispositivo separado (como um smartphone).",
+			"introForced": "To access this system, you are required to enable multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+			"name": "Escolha um nome para o seu dispositivo",
+			"nameHint": "'Meu smartphone'",
+			"outro": "Use o código QR para adicionar esta conta à sua aplicação de autenticação. Quando terminar, feche esta janela. Pode repetir este processo para ativar o MFA com múltiplos dispositivos.",
+			"outroForced": "Use the QR code to add this account to your authenticator app. When you are done, confirm below to continue.",
+			"title": "Configurar autenticação multifator"
+		},
 		"mobileScrollForm": "Móvel: Deslocar todo o formulário",
 		"pageTitle": "Configurações",
 		"pattern": "Padrão de fundo",
@@ -3134,23 +3159,9 @@
 			"message": {
 				"delete": "Tem a certeza de que deseja eliminar esta entrada? Isto não pode ser desfeito."
 			},
-			"mfa": {
-				"apps": [
-					"Google Authenticator",
-					"Microsoft Authenticator",
-					"Aegis Authenticator",
-					"...ou qualquer aplicação que suporte TOTP"
-				],
-				"appsExample": "Alguns exemplos:",
-				"intro": "Pode aumentar a segurança da sua conta ativando a autenticação multifator (MFA). Para ativar o MFA, utilize uma aplicação de autenticação num dispositivo separado (como um smartphone).",
-				"name": "Escolha um nome para o seu dispositivo",
-				"nameHint": "'Meu smartphone'",
-				"outro": "Use o código QR para adicionar esta conta à sua aplicação de autenticação. Quando terminar, feche esta janela. Pode repetir este processo para ativar o MFA com múltiplos dispositivos."
-			},
 			"titleAdd": "Gerir aplicação cliente REI3",
 			"titleContext": "Uso",
 			"titleDateCreate": "Criado",
-			"titleMfa": "Configurar autenticação multifator",
 			"titleName": "Nome do dispositivo"
 		},
 		"translation": {

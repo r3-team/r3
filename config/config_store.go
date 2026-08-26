@@ -37,8 +37,8 @@ var (
 		"logCache", "logCluster", "logCode", "logCsv", "logDbSync", "logDoc",
 		"logFile", "logImager", "logLdap", "logMail", "logModule", "logOauth",
 		"logServer", "logScheduler", "logTransfer", "logWebsocket", "logsKeepDays",
-		"mailTrafficKeepDays", "productionMode", "pwForceDigit", "pwForceLower",
-		"pwForceSpecial", "pwForceUpper", "pwLengthMin", "systemMsgDate0",
+		"mailTrafficKeepDays", "mfaRequired", "productionMode", "pwForceDigit",
+		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin", "systemMsgDate0",
 		"systemMsgDate1", "systemMsgMaintenance", "tokenExpiryHours", "tokenKeepEnable"}
 
 	NamesUint64Slice = []string{"loginBackgrounds"}
@@ -111,37 +111,34 @@ func GetString(name string) string {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
 
-	if _, exists := storeString[name]; !exists {
-		log.Error(log.ContextServer, "configuration store get error",
-			fmt.Errorf("string value '%s' does not exist", name))
-
+	v, exists := storeString[name]
+	if !exists {
+		log.Error(log.ContextServer, "configuration store get error", fmt.Errorf("string value '%s' does not exist", name))
 		return ""
 	}
-	return storeString[name]
+	return v
 }
 func GetStringSlice(name string) []string {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
 
-	if _, exists := storeStringSlice[name]; !exists {
-		log.Error(log.ContextServer, "configuration store get error",
-			fmt.Errorf("string slice value '%s' does not exist", name))
-
+	v, exists := storeStringSlice[name]
+	if !exists {
+		log.Error(log.ContextServer, "configuration store get error", fmt.Errorf("string slice value '%s' does not exist", name))
 		return make([]string, 0)
 	}
-	return storeStringSlice[name]
+	return v
 }
 func GetUint64(name string) uint64 {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
 
-	if _, exists := storeUint64[name]; !exists {
-		log.Error(log.ContextServer, "configuration store get error",
-			fmt.Errorf("uint64 value '%s' does not exist", name))
-
+	v, exists := storeUint64[name]
+	if !exists {
+		log.Error(log.ContextServer, "configuration store get error", fmt.Errorf("uint64 value '%s' does not exist", name))
 		return 0
 	}
-	return storeUint64[name]
+	return v
 }
 func GetUint64Slice(name string) []uint64 {
 	access_mx.RLock()
