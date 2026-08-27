@@ -143,7 +143,7 @@ export default {
 											<option value="barcode_upc_a" :disabled="!isNew && !isBarcode">UPC A</option>
 											<option value="barcode_upc_e" :disabled="!isNew && !isBarcode">UPC E</option>
 										</optgroup>
-										<optgroup :label="capGen.geoData" :disabled="!isNew">
+										<optgroup :label="capGen.geoData" :disabled="!isNew" v-if="isGeoEnabled">
 											<option value="geometry" :disabled="!isNew && !isGeometry">{{ capGen.geometry }}</option>
 										</optgroup>
 										<optgroup :label="capApp.expert" :disabled="!isNew && !isFloat && !isUuid">
@@ -533,6 +533,7 @@ export default {
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		capApp: s => s.$store.getters.captions.builder.attribute,
 		capGen: s => s.$store.getters.captions.generic,
+		isGeoEnabled: s => s.$store.getters.isGeoEnabled,
 		module: s => s.moduleIdMap[s.relation.moduleId]
 	},
 	mounted() {

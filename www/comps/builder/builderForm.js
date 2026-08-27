@@ -453,7 +453,10 @@ export default {
 				fields.push(this.getTemplateFieldGantt());
 				fields.push(this.getTemplateFieldKanban());
 				fields.push(this.getTemplateFieldChart());
-				fields.push(this.getTemplateFieldMap());
+
+				if (this.isGeoEnabled)
+					fields.push(this.getTemplateFieldMap());
+
 				fields.push(this.getTemplateFieldHeader());
 				fields.push(this.getTemplateFieldButton());
 				fields.push(this.getTemplateFieldVariable());
@@ -534,7 +537,8 @@ export default {
 		capApp: s => s.$store.getters.captions.builder.form,
 		capFldTitle: s => s.$store.getters.captions.fieldTitle,
 		capFldHelp: s => s.$store.getters.captions.fieldHelp,
-		capGen: s => s.$store.getters.captions.generic
+		capGen: s => s.$store.getters.captions.generic,
+		isGeoEnabled: s => s.$store.getters.isGeoEnabled
 	},
 	watch: {
 		$route: {

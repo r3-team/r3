@@ -93,17 +93,19 @@ export default {
 				<span>{{ capApp.navigationScheduler }}</span>
 			</router-link>
 
-			<!-- Geo: Base layers -->
-			<router-link class="entry clickable" tag="div" to="/admin/geo-layers-base">
-				<img src="images/map.png" />
-				<span>{{ capApp.navigationGeoLayersBase }}</span>
-			</router-link>
+			<template v-if="isGeoEnabled">
+				<!-- Geo: Base layers -->
+				<router-link class="entry clickable" tag="div" to="/admin/geo-layers-base">
+					<img src="images/map.png" />
+					<span>{{ capApp.navigationGeoLayersBase }}</span>
+				</router-link>
 
-			<!-- Geo: Fields assign -->
-			<router-link class="entry clickable" tag="div" to="/admin/geo-fields-assign">
-				<img src="images/map.png" />
-				<span>{{ capApp.navigationGeoFieldsAssign }}</span>
-			</router-link>
+				<!-- Geo: Fields assign -->
+				<router-link class="entry clickable" tag="div" to="/admin/geo-fields-assign">
+					<img src="images/map.png" />
+					<span>{{ capApp.navigationGeoFieldsAssign }}</span>
+				</router-link>
+			</template>
 
 			<!-- caption map -->
 			<router-link class="entry clickable" tag="div" to="/admin/caption-map">
@@ -234,6 +236,7 @@ export default {
 		capApp: s => s.$store.getters.captions.admin,
 		colorMenu: s => s.$store.getters.colorMenu,
 		isAdmin: s => s.$store.getters.isAdmin,
+		isGeoEnabled: s => s.$store.getters.isGeoEnabled,
 		license: s => s.$store.getters.license,
 		limitedFactor: s => s.$store.getters.constants.loginLimitedFactor
 	},

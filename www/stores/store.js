@@ -73,6 +73,7 @@ const MyStore = Vuex.createStore({
 		isAtFavorites: false,           // is the favorites menu entry active?
 		isAtFavoritesEdit: false,       // is the favorites menu entry active and in edit mode?
 		isAtFeedback: false,            // app shows feedback dialog
+		isGeoEnabled: false,            // are geo data features enabled
 		isAtHistoryEnd: false,          // current page is at browser history end
 		isAtHistoryStart: false,        // current page is at browser history start
 		isAtMenu: false,                // user navigated to menu (only relevant if isMobile)
@@ -294,6 +295,7 @@ const MyStore = Vuex.createStore({
 		isAtMenu: (s, p) => s.isAtMenu = p,
 		isAtModule: (s, p) => s.isAtModule = p,
 		isCollapsedMenuApp: (s, p) => s.isCollapsedMenuApp = p,
+		isGeoEnabled: (s, p) => s.isGeoEnabled = p,
 		isMobile: (s, p) => s.isMobile = p,
 		isNoAuth: (s, p) => s.isNoAuth = p,
 		isSecureContext: (s, p) => s.isSecureContext = p,
@@ -481,6 +483,7 @@ const MyStore = Vuex.createStore({
 		isAtMenu: s => s.isAtMenu,
 		isAtModule: s => s.isAtModule && s.moduleIdLast !== null,
 		isCollapsedMenuApp: s => s.isCollapsedMenuApp,
+		isGeoEnabled: s => s.isGeoEnabled,
 		isMobile: s => s.isMobile,
 		isNoAuth: s => s.loginType === s.constants.loginType.noAuth,
 		isSecureContext: s => s.isSecureContext,
