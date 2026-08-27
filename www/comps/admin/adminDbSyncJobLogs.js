@@ -6,7 +6,7 @@ export default {
 	components: { MyInputOffset },
 	template: `<div class="content flex wrap grow column gap">
 		<div class="row nowrap centered gap-large space-between">
-			<my-label image="fileText.png" :caption="capGen.jobHistory" />
+			<div />
 			<my-input-offset
 				@input="offset = $event;get()"
 				:caption="true"

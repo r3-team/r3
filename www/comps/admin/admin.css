@@ -29,6 +29,10 @@
 }
 
 /* DB sync */
+.admin-db-sync-host {
+	min-width: 600px;
+	max-height: 95%;
+}
 .admin-db-sync-host-table {
 	width: 100%;
 	border: var(--border-input);

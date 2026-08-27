@@ -22,10 +22,10 @@ export default {
 					@trigger="get"
 					:caption="capGen.button.refresh"
 				/>
-				<my-button image="warning.png"
+				<my-button image="question.png"
 					v-if="isAnyHosts"
 					@trigger="showHelp('<p>' + capApp.intro.join('</p><p>') + '</p>')"
-					:caption="capGen.warning"
+					:caption="capGen.information"
 				/>
 			</div>
 		</div>

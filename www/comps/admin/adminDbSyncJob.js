@@ -27,7 +27,8 @@ export default {
 		<div class="contentBox admin-db-sync-job scroll float">
 			<div class="top">
 				<div class="area">
-					<my-label image="cogMultiple.png" :caption="isNew ? capApp.titleJobNew : capApp.titleJob.replace('{NAME}',job.name)" />
+					<img class="icon" src="images/cogMultiple.png" />
+					<h1>{{ isNew ? capApp.titleJobNew : capApp.titleJob.replace('{NAME}',job.name) }}</h1>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -122,7 +123,7 @@ export default {
 								:modelValue="intervalValue"
 								:readonly
 							/>
-							<select class="auto" @input="intervalTypeSet($event.target.value)" :value="intervalType">
+							<select class="auto" @input="intervalTypeSet($event.target.value)" :disabled="readonly" :value="intervalType">
 								<option value="seconds">{{ capGen.interval.seconds }}</option>
 								<option value="minutes">{{ capGen.interval.minutes }}</option>
 								<option value="hours"  >{{ capGen.interval.hours   }}</option>
@@ -133,11 +134,8 @@ export default {
 					</template>
 				</div>
 				<div class="area">
-					<my-button-check
-						v-model="job.active"
-						:caption="capGen.active"
-						:readonly
-					/>
+					<span>{{ capGen.active }}</span>
+					<my-bool v-model="job.active" :readonly />
 				</div>
 			</div>
 
@@ -228,6 +226,7 @@ export default {
 									</select>
 									<my-button image="cancel.png"
 										@trigger="job.columns.splice(i,1)"
+										:active="!readonly"
 										:naked="true"
 									/>
 								</div>

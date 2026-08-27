@@ -54,111 +54,118 @@ export default {
 				</div>
 			</div>
 
-			<div class="row wrap">
-				<!-- host details -->
-				<div class="content no-padding default-inputs">
-					<table class="generic-table-vertical">
-						<tbody>
-							<tr>
-								<td>{{ capGen.name }}*</td>
-								<td><input v-model="host.name" :disabled="readonly" v-focus /></td>
-							</tr>
-							<tr>
-								<td>{{ capGen.active }}*</td>
-								<td><my-bool v-model="host.active" :readonly /></td>
-							</tr>
-							<tr>
-								<td>{{ capGen.comments }}</td>
-								<td><textarea v-model="host.comment" :disabled="readonly" /></td>
-							</tr>
-							<tr>
-								<td>{{ capApp.address }}*</td>
-								<td>
-									<div class="row gap">
-										<input v-model="host.address" :disabled="readonly" />
-										<my-input-decimal class="short"
-											v-model="host.port"
-											:min="0"
-											:max="65535"
-											:allowNull="false"
-											:lengthFract="0"
-											:readonly
-										/>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td>{{ capGen.username }}*</td>
-								<td><input v-model="host.username" :disabled="readonly" /></td>
-							</tr>
-							<tr>
-								<td>{{ capGen.password }}*</td>
-								<td><input type="password" v-model="host.password" :disabled="readonly" /></td>
-							</tr>
-							<tr>
-								<td>{{ capApp.dbName }}*</td>
-								<td><input v-model="host.dbName" :disabled="readonly" /></td>
-							</tr>
-							<tr>
-								<td>{{ capApp.dbType }}*</td>
-								<td>
-									<select v-model="host.dbType" :disabled="readonly">
-										<option value="pgsql">PostgreSQL</option>
-										<option value="mysql">MySQL</option>
-										<option value="mssql">MSSQL</option>
-										<option value="firebird">Firebird</option>
-										<option value="clickhouse">ClickHouse</option>
-									</select>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+			<my-tabs
+				v-if="!isNew"
+				v-model="tabTarget"
+				:entries="['host','jobs','logs']"
+				:entriesIcon="['images/network.png','images/cogMultiple.png','images/fileText.png']"
+				:entriesText="[capGen.connection,capGen.jobs,capGen.jobHistory]"
+			/>
 
-				<!-- host jobs -->
-				<div class="content flex grow column gap" v-if="!isNew">
-					<div class="row gap centered space-between">
-						<my-label image="cogMultiple.png" :caption="capGen.jobs" />
-						<my-button image="add.png"
-							v-if="!readonly"
-							@trigger="jobOpenNew"
-							:caption="capGen.button.create"
-						/>
-					</div>
-					<table class="generic-table bright admin-db-sync-host-table">
-						<thead>
-							<tr>
-								<th>{{ capGen.name }}</th>
-								<th>{{ capGen.job }}</th>
-								<th>{{ capGen.relationBase }}</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-if="jobs.length !== 0" v-for="j in jobs">
-								<td>
-									<div class="row gap centered">
-										<my-button image="open.png" @trigger="jobOpen(j.id)" />
-										<my-label image="remove.png" v-if="!j.active" />
-										<span>{{ j.name }}</span>
-									</div>
-								</td>
-								<td>{{ capApp.jobType[j.jobType] }}</td>
-								<td v-if="j.joins.length !== 0">{{ relationIdMap[j.joins[0].relationId].name }}</td>
-							</tr>
-							<tr v-if="jobs.length === 0">
-								<td colspan="999">{{ capGen.nothingThere }}</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-
-				<!-- host job logs -->
-				<my-admin-db-sync-job-logs
-					v-if="!isNew"
-					:hostId
-					:jobIdMap
-				/>
+			<!-- host details -->
+			<div class="content no-padding default-inputs" v-if="tabTarget === 'host'">
+				<table class="generic-table-vertical">
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}*</td>
+							<td><input v-model="host.name" :disabled="readonly" v-focus /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.active }}*</td>
+							<td><my-bool v-model="host.active" :readonly /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.address }}*</td>
+							<td>
+								<div class="row gap centered">
+									<input class="auto" v-model="host.address" :disabled="readonly" />
+									<span>:</span>
+									<my-input-decimal class="short"
+										v-model="host.port"
+										:min="0"
+										:max="65535"
+										:allowNull="false"
+										:lengthFract="0"
+										:readonly
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.username }}*</td>
+							<td><input v-model="host.username" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.password }}*</td>
+							<td><input type="password" v-model="host.password" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dbName }}*</td>
+							<td><input v-model="host.dbName" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dbType }}*</td>
+							<td>
+								<select v-model="host.dbType" :disabled="readonly">
+									<option value="pgsql">PostgreSQL</option>
+									<option value="mysql">MySQL</option>
+									<option value="mssql">MSSQL</option>
+									<option value="firebird">Firebird</option>
+									<option value="clickhouse">ClickHouse</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.comments }}</td>
+							<td><textarea v-model="host.comment" :disabled="readonly" /></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
+
+			<!-- host jobs -->
+			<div class="content flex grow column gap" v-if="tabTarget === 'jobs'">
+				<div class="row gap centered space-between">
+					<div />
+					<my-button image="add.png"
+						v-if="!readonly"
+						@trigger="jobOpenNew"
+						:caption="capGen.button.create"
+					/>
+				</div>
+				<table class="generic-table bright admin-db-sync-host-table">
+					<thead>
+						<tr>
+							<th>{{ capGen.name }}</th>
+							<th>{{ capGen.job }}</th>
+							<th>{{ capGen.relationBase }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-if="jobs.length !== 0" v-for="j in jobs">
+							<td>
+								<div class="row gap centered">
+									<my-button image="open.png" @trigger="jobOpen(j.id)" />
+									<my-label image="remove.png" v-if="!j.active" />
+									<span>{{ j.name }}</span>
+								</div>
+							</td>
+							<td>{{ capApp.jobType[j.jobType] }}</td>
+							<td v-if="j.joins.length !== 0">{{ relationIdMap[j.joins[0].relationId].name }}</td>
+						</tr>
+						<tr v-if="jobs.length === 0">
+							<td colspan="999">{{ capGen.nothingThere }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- host job logs -->
+			<my-admin-db-sync-job-logs
+				 v-if="tabTarget === 'logs'"
+				:hostId
+				:jobIdMap
+			/>
 		</div>
 
 		<my-admin-db-sync-job
@@ -186,6 +193,10 @@ export default {
 			handler() { this.reset(); },
 			immediate: true
 		},
+		isNew(v) {
+			if (v && this.tabTarget !== 'host')
+				this.tabTarget = 'host';
+		}
 	},
 	data() {
 		return {
@@ -193,9 +204,10 @@ export default {
 			host: {},
 
 			// states
+			isReady: false,
 			jobIdEdit: null, // ID of job to be edited (null = new job or closed)
 			jobNew: false,
-			isReady: false,
+			tabTarget: 'host',
 		};
 	},
 	computed: {
