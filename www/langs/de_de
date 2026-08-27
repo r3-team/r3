@@ -146,6 +146,11 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Datenbank-Sync löschen möchtest?"
 			},
+			"intro": [
+				"Datenbank-Sync ermöglicht Datenaustausch zwischen REI3 und externen SQL-Datenbanken in beide Richtungen. Ein Datenbank-Sync besteht aus einem oder mehreren Jobs, welche Daten aus anderen Datenbanken laden oder lokale Änderungen an diese senden.",
+				"Wenn möglich, sollte Datenaustausch über APIs erfolgen. REI3 kann sowohl als REST-Endpunkt dienen, als auch Aufrufe gegen externe REST-Endpunkte durchführen. Auch wenn Datenaustausch über SQL bequem sein kann, ist dieser fragil. Änderungen in einer der beiden Datenbanken, kann den Job auf Fehler laufen lassen; im besten Fall muss der Job repariert werden - im schlimmsten Fall erfolgen unerwartete Datenänderungen.",
+				"Dieses Feature existiert für die Verbindung mit Legacy-Systemen, wo das Risiko der Nichtnutzung von APIs teilweise mitigiert wird, weil alte Systeme sich nicht oft oder nur wenig ändern. Fehlende APIs zu erstellen, oder für API-Nutzung bestehender Werkzeuge zu zahlen, ist normalerweise der bessere Ansatz."
+			],
 			"jobType": {
 				"LOAD": "Datensätze laden",
 				"SEND_DELETE": "Datensatzlöschung senden",

@@ -22,10 +22,21 @@ export default {
 					@trigger="get"
 					:caption="capGen.button.refresh"
 				/>
+				<my-button image="warning.png"
+					v-if="isAnyHosts"
+					@trigger="showHelp('<p>' + capApp.intro.join('</p><p>') + '</p>')"
+					:caption="capGen.warning"
+				/>
 			</div>
 		</div>
 
 		<div class="content grow">
+			<div class="contentPart long" v-if="!isAnyHosts">
+				<div class="column gap">
+					<span v-for="l in capApp.intro">{{ l }}</span>
+				</div>
+			</div>
+
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
 					v-for="(h,k) in hostIdMap"
@@ -73,6 +84,8 @@ export default {
 		};
 	},
 	computed: {
+		isAnyHosts: s => Object.keys(s.hostIdMap).length !== 0,
+
 		// stores
 		capApp: s => s.$store.getters.captions.admin.dbSync,
 		capGen: s => s.$store.getters.captions.generic,
@@ -98,6 +111,9 @@ export default {
 				this.hostIdOpen = id;
 				this.hostOpen = this.hostIdMap[id];
 			}
+		},
+		showHelp(msg) {
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.warning });
 		},
 
 		// backend calls

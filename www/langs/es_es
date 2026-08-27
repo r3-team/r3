@@ -146,6 +146,11 @@
 			"dialog": {
 				"delete": "Are you sure you want to delete this database sync?"
 			},
+			"intro": [
+				"Database sync enables data exchange between REI3 and external SQL databases in both directions. A database sync consists of one or more jobs, loading external data from, or sending local changes to, other databases.",
+				"If possible, data exchange should be done via APIs. REI3 can both serve as REST endpoint, as well as execute REST calls against external endpoints. While possibly convenient, syncing data via SQL is fragile, as changes in either database can break the existing jobs; at best, job execution fails until fixed - at worst, data can be changed in unexpected ways.",
+				"This feature exists for connection with legacy systems, where the risks of not using APIs is mitigated by old systems not changing too much or too often. Creating missing APIs, or paying for API usage in existing tools, is the recommended approach in most cases."
+			],
 			"jobType": {
 				"LOAD": "Load records",
 				"SEND_DELETE": "Send deleted record",
