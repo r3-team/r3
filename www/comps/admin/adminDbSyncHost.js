@@ -121,7 +121,7 @@ export default {
 						<my-label image="cogMultiple.png" :caption="capGen.jobs" />
 						<my-button image="add.png"
 							v-if="!readonly"
-							@trigger="openJob(null)"
+							@trigger="jobOpenNew"
 							:caption="capGen.button.create"
 						/>
 					</div>
@@ -137,7 +137,7 @@ export default {
 							<tr v-if="jobs.length !== 0" v-for="j in jobs">
 								<td>
 									<div class="row gap centered">
-										<my-button image="open.png" @trigger="openJob(j.id)" />
+										<my-button image="open.png" @trigger="jobOpen(j.id)" />
 										<my-label image="remove.png" v-if="!j.active" />
 										<span>{{ j.name }}</span>
 									</div>
@@ -162,14 +162,15 @@ export default {
 		</div>
 
 		<my-admin-db-sync-job
-			v-if="jobOpen !== null"
-			@close="closeJob"
-			@makeNew="openJob(null)"
+			v-if="jobEdit !== false"
+			@close="jobClose"
+			@open="jobOpen($event)"
+			@makeNew="jobOpenNew"
 			@reload="$emit('reload')"
 			:dbType="host.dbType"
 			:hostName="host.name"
-			:jobId="jobIdOpen"
-			:jobOrg="jobOpen"
+			:isNew="jobNew"
+			:jobOrg="jobEdit"
 			:readonly
 		/>
 	</div>`,
@@ -192,8 +193,8 @@ export default {
 			host: {},
 
 			// states
-			jobIdOpen: null, // ID of job to be edited (null = new job)
-			jobOpen: null,   // contains job as object (null = no job open)
+			jobIdEdit: null, // ID of job to be edited (null = new job or closed)
+			jobNew: false,
 			isReady: false,
 		};
 	},
@@ -216,6 +217,11 @@ export default {
 		// simple
 		isChanged: s => !s.deepIsEqual(s.hostOrg, s.host),
 		isNew: s => s.hostId === null,
+		jobEdit: s => {
+			if (!s.jobNew && s.jobIdEdit === null) return false;
+			if ((s.jobNew && s.jobIdEdit === null) || s.jobIdMap[s.jobIdEdit] === undefined) return s.getTemplateDbSyncJob(s.hostId);
+			return s.jobIdMap[s.jobIdEdit];
+		},
 
 		// stores
 		capApp: s => s.$store.getters.captions.admin.dbSync,
@@ -246,17 +252,17 @@ export default {
 		close() {
 			this.$emit('close');
 		},
-		closeJob() {
-			this.jobOpen = null;
+		jobClose() {
+			this.jobIdEdit = null;
+			this.jobNew = false;
 		},
-		openJob(id) {
-			if (id === null) {
-				this.jobIdOpen = null;
-				this.jobOpen = this.getTemplateDbSyncJob(this.hostId);
-			} else if (this.jobIdMap[id] !== undefined) {
-				this.jobIdOpen = id;
-				this.jobOpen = this.jobIdMap[id];
-			}
+		jobOpen(id) {
+			this.jobIdEdit = id;
+			this.jobNew = false;
+		},
+		jobOpenNew() {
+			this.jobIdEdit = null;
+			this.jobNew = true;
 		},
 		reloadAndClose() {
 			ws.send('dbSync', 'informChanged', {}, true).then(
@@ -280,6 +286,9 @@ export default {
 			);
 		},
 		set() {
+			if (!this.canSave)
+				return;
+
 			ws.send('dbSync', 'setHost', this.host, true).then(
 				this.reloadAndClose,
 				this.$root.genericError

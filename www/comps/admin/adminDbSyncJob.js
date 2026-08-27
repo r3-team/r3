@@ -6,12 +6,23 @@ import srcBase64Icon from '../shared/image.js';
 import { getCaption } from '../shared/language.js';
 import { getPgIndexTitle } from '../shared/schema.js';
 import MyAdminDbSyncJobJoins from './adminDbSyncJobJoins.js';
+import MyAdminDbSyncJobLoadPreview from './adminDbSyncJobLoadPreview.js';
 import MyAdminDbSyncJobLookups from './adminDbSyncJobLookups.js';
 
 export default {
 	name: 'my-admin-db-sync-job',
-	components: { MyAdminDbSyncJobJoins, MyAdminDbSyncJobLookups, MyCodeEditor, MyInputDecimal },
+	components: {
+		MyAdminDbSyncJobJoins, MyAdminDbSyncJobLoadPreview,
+		MyAdminDbSyncJobLookups, MyCodeEditor, MyInputDecimal
+	},
 	template: `<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
+
+		<my-admin-db-sync-job-load-preview
+			v-if="previewRows !== null"
+			@close="previewRows = null"
+			:expressionCount="job.columns.length"
+			:rows="previewRows"
+		/>
 
 		<div class="contentBox admin-db-sync-job scroll float">
 			<div class="top">
@@ -43,6 +54,15 @@ export default {
 						@trigger="$emit('makeNew')"
 						:active="!readonly"
 						:caption="capGen.button.new"
+					/>
+				</div>
+				<div class="area">
+					<my-button
+						v-if="isLoad"
+						@trigger="previewLoadGet"
+						:active="!isNew && !readonly && !isChanged"
+						:caption="capGen.preview"
+						:image="previewRunning ? 'load.gif' : 'databaseVisible1.png'"
 					/>
 				</div>
 				<div class="area">
@@ -235,13 +255,13 @@ export default {
 	props: {
 		dbType: { type: String, required: true },
 		hostName: { type: String, required: true },
-		jobId: { type: [String, null], required: true },
+		isNew: { type: Boolean, required: true },
 		jobOrg: { type: Object, required: true },
 		readonly: { type: Boolean, required: true },
 	},
-	emits: ['close', 'makeNew', 'reload'],
+	emits: ['close', 'makeNew', 'open', 'reload'],
 	watch: {
-		jobId() { this.reset(); },
+		jobOrg() { this.reset(); },
 	},
 	data() {
 		return {
@@ -255,6 +275,8 @@ export default {
 				LIMIT: '{SQL_LIMIT}',
 				OFFSET: '{SQL_OFFSET}',
 			},
+			previewRows: null, // null if preview not used, array if rows exist
+			previewRunning: false,
 		};
 	},
 	computed: {
@@ -308,7 +330,6 @@ export default {
 		isJoinsMulti: s => s.job.joins.length > 1,
 		isLoad: s => s.job.jobType === 'LOAD',
 		isSendDelete: s => s.job.jobType === 'SEND_DELETE',
-		isNew: s => s.jobId === null,
 		isPageLimit: s => s.isLoad && s.job.pageLimit !== null,
 		isWithLookups: s => s.job.lookups.length !== 0,
 		labelAttributes: s => s.isLoad ? s.capApp.loadAttributes : s.capApp.sendAttributes,
@@ -340,8 +361,8 @@ export default {
 		this.reset();
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel', this.set);
 		this.$store.commit('keyDownHandlerDel', this.closeAsk);
+		this.$store.commit('keyDownHandlerDel', this.set);
 		this.$store.commit('keyDownHandlerWake');
 	},
 	methods: {
@@ -410,12 +431,6 @@ export default {
 			else if (this.intervalType === 'minutes') this.job.intervalSeconds = v * 60;
 			else this.job.intervalSeconds = v;
 		},
-		reloadAndClose() {
-			ws.send('dbSync', 'informChanged', {}, true).then(() => {
-				this.$emit('reload');
-				this.close();
-			}, this.$root.genericError);
-		},
 		reset() {
 			this.job = JSON.parse(JSON.stringify(this.jobOrg));
 
@@ -444,14 +459,37 @@ export default {
 
 		// backend calls
 		del() {
-			ws.send('dbSync', 'delJob', this.jobId, true).then(
-				this.reloadAndClose,
+			ws.send("dbSync", "delJob", this.job.id, true).then(
+				() => { this.reload(true); },
 				this.$root.genericError,
 			);
 		},
+		previewLoadGet() {
+			this.previewRunning = true;
+
+			ws.send('dbSync', 'getJobLoadPreview', this.job.id, true).then(
+				res => { this.previewRows = res.payload; },
+				this.$root.genericError
+			).finally(() => { this.previewRunning = false; });
+		},
+		reload(closeAfter) {
+			ws.send('dbSync', 'informChanged', {}, true).then(() => {
+				this.$emit('reload');
+
+				if (closeAfter)
+					this.close();
+			}, this.$root.genericError);
+		},
 		set() {
-			ws.send('dbSync', 'setJob', this.job, true).then(
-				this.reloadAndClose,
+			if (!this.canSave)
+				return;
+
+			ws.send("dbSync", "setJob", this.job, true).then(
+				() => {
+					this.reload(false);
+					if (this.isNew)
+						this.$emit('open', this.job.id);
+				},
 				this.$root.genericError,
 			);
 		},

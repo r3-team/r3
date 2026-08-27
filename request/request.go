@@ -353,6 +353,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return request_dbSync.HostsGet_tx(ctx, tx)
 		case "getJobs":
 			return request_dbSync.JobsGet_tx(ctx, tx)
+		case "getJobLoadPreview":
+			return request_dbSync.JobLoadPreviewGet(ctx, reqJson)
 		case "getJobLogs":
 			return request_dbSync.JobLogGet(ctx, tx, reqJson)
 		case "setHost":

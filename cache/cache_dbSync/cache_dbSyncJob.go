@@ -2,6 +2,7 @@ package cache_dbSync
 
 import (
 	"context"
+	"fmt"
 	"r3/tools"
 	"r3/types"
 	"slices"
@@ -16,6 +17,17 @@ func GetJobs() map[uuid.UUID]types.DbSyncJob {
 	defer access_mx.RUnlock()
 
 	return jobIdMap
+}
+
+func GetJobById(id uuid.UUID) (types.DbSyncJob, error) {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+
+	j, exists := jobIdMap[id]
+	if !exists {
+		return j, fmt.Errorf("unknown DB sync job ID '%s'", id)
+	}
+	return j, nil
 }
 
 func GetJobsToRunLoad() []types.DbSyncJob {

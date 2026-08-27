@@ -21,6 +21,36 @@ import (
 
 const maxFetchLoops = 10000 // should not be necessary, fallback in case LOOP is not stopped
 
+// execute a single load call to produce results as preview
+func DoLoadPreview(ctx context.Context, j types.DbSyncJob) ([][]any, error) {
+
+	host, err := cache_dbSync.GetHostById(j.HostId)
+	if err != nil {
+		return nil, err
+	}
+	dbExt, err := getExtCon(ctx, host)
+	if err != nil {
+		return nil, err
+	}
+	defer dbExt.Close()
+
+	// deal with placeholders
+	codeSql := j.CodeSql
+	if strings.Contains(j.CodeSql, sqlPlaceholderLimit) {
+		limit := j.PageLimit.Int32
+		if !j.PageLimit.Valid {
+			// overwrite limit if placeholder is used and limit is undefined
+			// otherwise preview would be empty
+			limit = 10
+		}
+		codeSql = strings.ReplaceAll(codeSql, sqlPlaceholderLimit, fmt.Sprintf("%d", limit))
+	}
+	if strings.Contains(j.CodeSql, sqlPlaceholderOffset) {
+		codeSql = strings.ReplaceAll(codeSql, sqlPlaceholderOffset, "0")
+	}
+	return doLoadFetch(ctx, dbExt, codeSql, len(j.Columns))
+}
+
 func doLoad(j types.DbSyncJob) error {
 
 	// convert to query types

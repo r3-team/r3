@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/cache/cache_dbSync"
+	"r3/spooler/db_sync"
 	"r3/types"
 	"slices"
 
@@ -126,6 +127,18 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 func JobsGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	return cache_dbSync.GetJobs(), nil
+}
+
+func JobLoadPreviewGet(ctx context.Context, reqJson json.RawMessage) (any, error) {
+	var jobId uuid.UUID
+	if err := json.Unmarshal(reqJson, &jobId); err != nil {
+		return nil, err
+	}
+	job, err := cache_dbSync.GetJobById(jobId)
+	if err != nil {
+		return nil, err
+	}
+	return db_sync.DoLoadPreview(ctx, job)
 }
 
 // helpers
