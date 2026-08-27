@@ -15,7 +15,6 @@ export default {
 			<div class="area">
 				<my-button image="add.png"
 					@trigger="open(null)"
-					:active="licenseValid"
 					:caption="capGen.button.new"
 				/>
 				<my-button image="refresh.png"
@@ -48,7 +47,6 @@ export default {
 			@makeNew="open(null)"
 			@reload="get"
 			:isNew
-			:readonly="!licenseValid"
 		/>
 	</div>`,
 	props: {
@@ -66,8 +64,7 @@ export default {
 	},
 	computed: {
 		// stores
-		capGen: s => s.$store.getters.captions.generic,
-		licenseValid: s => s.$store.getters.licenseValid
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.get();

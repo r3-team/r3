@@ -39,20 +39,20 @@ export default {
 					<tbody>
 						<tr>
 							<td>{{ capApp.srid }}*</td>
-							<td><my-input-decimal v-model="fieldAssign.srid" :min="0" :allowNull="false" :lengthFract="0" :readonly /></td>
+							<td><my-input-decimal v-model="fieldAssign.srid" :min="0" :allowNull="false" :lengthFract="0" /></td>
 							<td>{{ capApp.sridHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.coordinates }}*</td>
 							<td>
-								<my-input-decimal class="short" v-model="fieldAssign.coordLat" :min="0" :allowNull="false" :lengthFract="5" :readonly />
-								<my-input-decimal class="short" v-model="fieldAssign.coordLon" :min="0" :allowNull="false" :lengthFract="5" :readonly />
+								<my-input-decimal class="short" v-model="fieldAssign.coordLat" :min="0" :allowNull="false" :lengthFract="5" />
+								<my-input-decimal class="short" v-model="fieldAssign.coordLon" :min="0" :allowNull="false" :lengthFract="5" />
 							</td>
 							<td>{{ capApp.coordinatesHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.zoom }}*</td>
-							<td colspan="2"><my-input-decimal class="short" v-model="fieldAssign.zoom" :min="0" :allowNull="false" :lengthFract="1" :readonly /></td>
+							<td colspan="2"><my-input-decimal class="short" v-model="fieldAssign.zoom" :min="0" :allowNull="false" :lengthFract="1" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.layerBaseIds }}</td>
@@ -62,17 +62,15 @@ export default {
 										<span>{{ layerBaseIdMap[id].name }}</span>
 										<my-button
 											@trigger="layerToggleHide(id)"
-											:active="!readonly"
 											:image="fieldAssign.layerBaseIdsHidden.includes(id) ? 'visible0.png' : 'visible1.png'"
 											:naked="true"
 										/>
 										<my-button image="cancel.png"
 											@trigger="layerDelete(id)"
-											:active="!readonly"
 											:naked="true"
 										/>
 									</div>
-									<select @input="layerAdd($event.target.value)" :disabled="readonly" :value="layerBase">
+									<select @input="layerAdd($event.target.value)" :value="layerBase">
 										<option value="">- {{ capGen.button.add }} -</option>
 										<option v-for="l in layersBaseUnused" :value="l.id">{{ l.name }}</option>
 									</select>
@@ -86,8 +84,7 @@ export default {
 	</div>`,
 	props: {
 		fieldIdOpen: { type: String, required: true },
-		layersBase: { type: Array, required: true },
-		readonly: { type: Boolean, required: true }
+		layersBase: { type: Array, required: true }
 	},
 	emits: ['close'],
 	data() {
@@ -109,7 +106,7 @@ export default {
 		},
 
 		// simple
-		canSave: s => s.isReady && !s.readonly && s.isChanged && s.fieldAssign.srid !== 0,
+		canSave: s => s.isReady && s.isChanged && s.fieldAssign.srid !== 0,
 		isChanged: s => !s.deepIsEqual(s.fieldAssign, s.fieldAssignOrg),
 		layersBaseUnused: s => s.layersBase.filter(v => !s.fieldAssign.layerBaseIds.includes(v.id)),
 

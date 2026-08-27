@@ -42,7 +42,6 @@ export default {
 			@close="close"
 			:fieldIdOpen
 			:layersBase
-			:readonly="!licenseValid"
 		/>
 	</div>`,
 	props: {
@@ -89,7 +88,6 @@ export default {
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		capGen: s => s.$store.getters.captions.generic,
 		formIdMap: s => s.$store.getters['schema/formIdMap'],
-		licenseValid: s => s.$store.getters.licenseValid,
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 	},
 	mounted() {

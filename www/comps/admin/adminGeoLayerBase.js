@@ -36,7 +36,6 @@ export default {
 					<my-button image="add.png"
 						v-if="!isNew"
 						@trigger="$emit('makeNew')"
-						:active="!readonly"
 						:caption="capGen.button.new"
 					/>
 				</div>
@@ -44,7 +43,6 @@ export default {
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
-						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
@@ -55,15 +53,15 @@ export default {
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}*</td>
-							<td colspan="2"><input v-model="layerBase.name" :disabled="readonly" v-focus /></td>
+							<td colspan="2"><input v-model="layerBase.name" v-focus /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.url }}*</td>
-							<td colspan="2"><input class="long" v-model="layerBase.url" :disabled="readonly" /></td>
+							<td colspan="2"><input class="long" v-model="layerBase.url" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.srid }}*</td>
-							<td><my-input-decimal v-model="layerBase.srid" :min="0" :allowNull="false" :lengthFract="0" :readonly /></td>
+							<td><my-input-decimal v-model="layerBase.srid" :min="0" :allowNull="false" :lengthFract="0" /></td>
 							<td>{{ capApp.sridHint }}</td>
 						</tr>
 						<tr>
@@ -74,11 +72,10 @@ export default {
 										<tbody>
 											<tr v-for="(v,p) in layerBase.parameters">
 												<td><b>{{ p }}</b></td>
-												<td><input v-model="layerBase.parameters[p]" :disabled="readonly" /></td>
+												<td><input v-model="layerBase.parameters[p]" /></td>
 												<td>
 													<my-button image="delete.png"
 														@trigger="parameterDelete(p)"
-														:active="!readonly"
 														:cancel="true"
 													/>
 												</td>
@@ -86,10 +83,10 @@ export default {
 										</tbody>
 									</table>
 									<div class="row gap centered">
-										<input v-model="parameterNameNew" :disabled="readonly" :placeholder="capGen.parameterNew" />
+										<input v-model="parameterNameNew" :placeholder="capGen.parameterNew" />
 										<my-button image="add.png"
 											@trigger="parameterAdd"
-											:active="parameterNameNew !== '' && !readonly"
+											:active="parameterNameNew !== ''"
 											:caption="capGen.button.add"
 										/>
 									</div>
@@ -103,8 +100,7 @@ export default {
 	</div>`,
 	props: {
 		isNew: { type: Boolean, required: true },
-		modelValue: { type: Object, required: true },
-		readonly: { type: Boolean, required: true }
+		modelValue: { type: Object, required: true }
 	},
 	emits: ['close', 'makeNew', 'reload'],
 	watch: {
@@ -124,7 +120,7 @@ export default {
 		};
 	},
 	computed: {
-		canSave: s => s.isReady && !s.readonly && s.isChanged
+		canSave: s => s.isReady && s.isChanged
 			&& s.layerBase.name !== ''
 			&& s.layerBase.srid !== 0
 			&& s.layerBase.url !== '',

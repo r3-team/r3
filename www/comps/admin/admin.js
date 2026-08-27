@@ -93,6 +93,18 @@ export default {
 				<span>{{ capApp.navigationScheduler }}</span>
 			</router-link>
 
+			<!-- Geo: Base layers -->
+			<router-link class="entry clickable" tag="div" to="/admin/geo-layers-base">
+				<img src="images/map.png" />
+				<span>{{ capApp.navigationGeoLayersBase }}</span>
+			</router-link>
+
+			<!-- Geo: Fields assign -->
+			<router-link class="entry clickable" tag="div" to="/admin/geo-fields-assign">
+				<img src="images/map.png" />
+				<span>{{ capApp.navigationGeoFieldsAssign }}</span>
+			</router-link>
+
 			<!-- caption map -->
 			<router-link class="entry clickable" tag="div" to="/admin/caption-map">
 				<img src="images/languages.png" />
@@ -139,18 +151,6 @@ export default {
 			<router-link class="entry clickable" tag="div" to="/admin/db-sync" :class="{ inactive:!activated }">
 				<img src="images/databaseSync.png" />
 				<span>{{ capApp.navigationDbSync }}</span>
-			</router-link>
-
-			<!-- Geo: Base layers -->
-			<router-link class="entry clickable" tag="div" to="/admin/geo-layers-base" :class="{ inactive:!activated }">
-				<img src="images/map.png" />
-				<span>{{ capApp.navigationGeoLayersBase }}</span>
-			</router-link>
-
-			<!-- Geo: Fields assign -->
-			<router-link class="entry clickable" tag="div" to="/admin/geo-fields-assign" :class="{ inactive:!activated }">
-				<img src="images/map.png" />
-				<span>{{ capApp.navigationGeoFieldsAssign }}</span>
 			</router-link>
 
 			<!-- cluster -->
