@@ -3016,33 +3016,32 @@
 		"quick": "Filtrer les résultats dans toutes les colonnes",
 		"valueLimit": "Only the first {CNT} values are loaded"
 	},
-	"settings": {
-		"account": {
-			"button": {
-				"loginOptionsDel": "Reset all field settings"
-			},
-			"dialog": {
-				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
-			},
-			"messagePwCurrentWrong": "Le mot de passe actuel est invalide",
-			"messagePwDiff": "Les mots de passe ne correspondent pas",
-			"messagePwRequiresDigit": "Le mot de passe doit contenir un chiffre",
-			"messagePwRequiresLower": "Le mot de passe doit contenir une lettre minuscule",
-			"messagePwRequiresSpecial": "Le mot de passe doit contenir un caractère spécial (!, ?, #, etc.)",
-			"messagePwRequiresUpper": "Le mot de passe doit contenir une lettre majuscule",
-			"messagePwShort": "Le mot de passe est trop court",
-			"nodeName": "Connecté avec : {NAME}",
-			"pwChangeNotAllowed": "Login data is managed externally",
-			"pwNew0": "Nouveau mot de passe",
-			"pwNew1": "Nouveau mot de passe (répété)",
-			"pwOld": "Mot de passe actuel",
-			"titlePwChange": "Changer le mot de passe"
+	"pwChange": {
+		"message": {
+			"currentWrong": "Le mot de passe actuel est invalide",
+			"diff": "Les mots de passe ne correspondent pas",
+			"requiresDigit": "Le mot de passe doit contenir un chiffre",
+			"requiresLower": "Le mot de passe doit contenir une lettre minuscule",
+			"requiresSpecial": "Le mot de passe doit contenir un caractère spécial (!, ?, #, etc.)",
+			"requiresUpper": "Le mot de passe doit contenir une lettre majuscule",
+			"short": "Le mot de passe est trop court",
 		},
+		"new0": "Nouveau mot de passe",
+		"new1": "Nouveau mot de passe (répété)",
+		"notAllowed": "Login data is managed externally",
+		"old": "Mot de passe actuel",
+		"title": "Changer le mot de passe"
+	},
+	"pwReset": {
+		"title": "Choose a password to continue"
+	},
+	"settings": {
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Bordures",
 		"bordersSquared": "Carrées",
 		"button": {
+			"loginOptionsDel": "Reset all field settings",
 			"logout": "Déconnexion"
 		},
 		"clientEvents": {
@@ -3058,6 +3057,9 @@
 		"colorMenu": "Couleur écrasée",
 		"dark": "Mode sombre",
 		"dateFormat": "Format de date",
+		"dialog": {
+			"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+		},
 		"encryption": {
 			"backupCode": "Code de sauvegarde",
 			"backupCodeDesc": "Le code de sauvegarde est <b>très important</b> ; il sert à rétablir l'accès si vous oubliez votre mot de passe.",
@@ -3120,6 +3122,7 @@
 			"title": "Configuration de l'authentification multi-facteur"
 		},
 		"mobileScrollForm": "Mobile : Faire défiler tout le formulaire",
+		"nodeName": "Connecté avec : {NAME}",
 		"pageTitle": "Paramètres",
 		"pattern": "Motif de fond",
 		"spacing": "Espacement",

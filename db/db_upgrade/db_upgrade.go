@@ -806,6 +806,21 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- MFA requirement
 			ALTER TABLE instance.login ADD COLUMN mfa_required BOOLEAN;
 			INSERT INTO instance.config (name,value) VALUES ('mfaRequired',0);
+
+			-- login reset via message
+			CREATE TABLE IF NOT EXISTS instance.login_reset (
+				login_id INTEGER NOT NULL,
+				code_hash CHAR(64) NOT NULL,
+				date_create BIGINT NOT NULL,
+				date_expiry BIGINT NOT NULL,
+				CONSTRAINT login_reset_pkey PRIMARY KEY (login_id),
+				CONSTRAINT login_reset_code_hash_key UNIQUE (code_hash),
+				CONSTRAINT login_reset_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
 		`)
 		return "3.13", err
 	},

@@ -86,7 +86,7 @@ export default {
 				</div>
 				<input autocomplete="username" class="placeholder-bright" type="text" spellcheck="false"
 					@keyup="badAuth = false"
-					@keyup.enter="authenticate"
+					@keyup.enter="authenticateByCred"
 					v-model="username"
 					v-focus
 					:placeholder="message.username[language]"
@@ -94,7 +94,7 @@ export default {
 
 				<input autocomplete="current-password" class="placeholder-bright" type="password"
 					@keyup="badAuth = false"
-					@keyup.enter="authenticate"
+					@keyup.enter="authenticateByCred"
 					v-model="password"
 					:placeholder="message.password[language]"
 				/>
@@ -110,7 +110,7 @@ export default {
 				</select>
 				<input autocomplete="one-time-code" class="placeholder-bright" type="text" maxlength="6"
 					@keyup="badAuth = false"
-					@keyup.enter="authenticate"
+					@keyup.enter="authenticateByCred"
 					v-model="mfaTokenPin"
 					v-focus
 					:placeholder="message.mfaHint[language]"
@@ -126,8 +126,8 @@ export default {
 					/>
 				</div>
 				<button
-					@click="authenticate"
-					@keyup.enter="authenticate"
+					@click="authenticateByCred"
+					@keyup.enter="authenticateByCred"
 					:class="{ active:isValid, clickable:isValid }"
 				>{{ message.login[language] }}</button>
 			</div>
@@ -300,14 +300,23 @@ export default {
 		loginReady(v) {
 			if (!v) return;
 
-			// authenticate via login getter, if set
+			// check for getters in hash part
 			const pos = window.location.hash.indexOf('?');
 			if (pos !== -1) {
 				const params = new URLSearchParams(window.location.hash.substring(pos));
-				if (params.has('login')) {
-					this.authenticatePublic(params.get('login'));
-					params.delete('login');
 
+				// authenticate via getter, if set
+				const authNoAuth = params.has('login');
+				const authReset = params.has('reset');
+				if (authNoAuth || authReset) {
+					if (authNoAuth) {
+						this.authenticateByPublic(params.get('login'));
+						params.delete('login');
+					}
+					if (authReset) {
+						this.authenticateByReset(params.get('reset'));
+						params.delete('reset');
+					}
 					const p = params.size === 0
 						? `${window.location.hash.substring(1, pos)}`
 						: `${window.location.hash.substring(1, pos)}?${params.toString()}`;
@@ -430,7 +439,7 @@ export default {
 		},
 
 		// authentication against backend
-		authenticate() {
+		authenticateByCred() {
 			if (!this.isValid) return;
 
 			ws.send('auth', 'user', {
@@ -440,7 +449,7 @@ export default {
 				mfaTokenPin: this.mfaTokenPin
 			}, true).then(
 				res => {
-					// MFA token list returned, MFA is required
+					// MFA token list returned, MFA is required for auth to complete
 					if (res.payload.mfaTokens.length !== 0) {
 						this.mfaTokens = res.payload.mfaTokens;
 						this.mfaTokenId = res.payload.mfaTokens[0].id;
@@ -449,34 +458,12 @@ export default {
 						return;
 					}
 					if (res.payload.mfaSetup) {
-						// MFA not setup but required
-						this.$store.commit('mfaSetupRequired', true);
+						// MFA not setup but required, auth still goes through
+						this.$store.commit('loginMfaSetup', true);
 						this.$store.commit('local/tokenKeep', false);
 					}
-					this.authenticatedByUser(
-						res.payload.id,
-						res.payload.name,
-						res.payload.token,
-						res.payload.saltKdf,
-						false
-					);
+					this.authenticated(res.payload.id, res.payload.name, res.payload.token, res.payload.saltKdf, false);
 				},
-				err => this.handleError('authUser', err)
-			);
-			this.loading = true;
-		},
-		authenticatePublic(username) {
-			// keep token as public user is not asked
-			this.$store.commit('local/tokenKeep', true);
-
-			ws.send('auth', 'user', { username }, true).then(
-				res => this.authenticatedByUser(
-					res.payload.id,
-					res.payload.name,
-					res.payload.token,
-					null,
-					true
-				),
 				err => this.handleError('authUser', err)
 			);
 			this.loading = true;
@@ -487,19 +474,10 @@ export default {
 				codeVerifier: codeVerifier,
 				oauthClientId: oauthClientId
 			}, true).then(
-				res => {
-					this.authenticatedByUser(
-						res.payload.id,
-						res.payload.name,
-						res.payload.token,
-						res.payload.saltKdf,
-						true
-					);
-				},
+				res => this.authenticated(res.payload.id, res.payload.name, res.payload.token, res.payload.saltKdf, true),
 				err => this.handleError('authUser', err)
 			);
 			this.loading = true;
-
 		},
 		authenticateByToken() {
 			ws.send('auth', 'token', this.token, true).then(
@@ -508,9 +486,32 @@ export default {
 			);
 			this.loading = true;
 		},
+		authenticateByPublic(username) {
+			ws.send('auth', 'user', { username }, true).then(
+				res => {
+					// keep token as public user is not asked
+					this.$store.commit('local/tokenKeep', true);
+					this.authenticated(res.payload.id, res.payload.name, res.payload.token, null, true);
+				},
+				err => this.handleError('authUser', err)
+			);
+			this.loading = true;
+		},
+		authenticateByReset(code) {
+			ws.send('auth', 'reset', code, true).then(
+				res => {
+					// clear token as reset is a single time auth
+					this.$store.commit('local/tokenKeep', false);
+					this.$store.commit('loginPwResetCode', code);
+					this.authenticated(res.payload.id, res.payload.name, res.payload.token, res.payload.saltKdf, true);
+				},
+				err => this.handleError('authUser', err)
+			);
+			this.loading = true;
+		},
 
 		// authentication results
-		authenticatedByUser(loginId, loginName, token, saltKdf, noCredentials) {
+		authenticated(loginId, loginName, token, saltKdf, noCredentials) {
 			if (token === '')
 				return this.handleError('authUser', '');
 

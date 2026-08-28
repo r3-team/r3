@@ -222,11 +222,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, request_login.OptionsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginPassword":
+		if isNoAuth {
+			return nil, errors.New(handler.ErrUnauthorized)
+		}
 		switch action {
+		case "reset":
+			return nil, request_login.PasswortReset_tx(ctx, tx, reqJson, loginId)
 		case "set":
-			if isNoAuth {
-				return nil, errors.New(handler.ErrUnauthorized)
-			}
 			return nil, request_login.PasswortSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginSetting":

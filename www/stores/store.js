@@ -45,11 +45,11 @@ const MyStore = Vuex.createStore({
 			],
 			loginLimitedFactor: 3,      // factor, how many limited logins are enabled for each full login
 			loginType: {                // all login types, as defined in the backend
-				fixed: 'fixed',
-				ldap: 'ldap',
-				local: 'local',
-				noAuth: 'noAuth',
-				oauth: 'oauth'
+				fixed: 'fixed',         // fixed token login, only used for r3 client application
+				ldap: 'ldap',           // login via external LDAP provider
+				local: 'local',         // login via internal/local backend
+				noAuth: 'noAuth',       // login via public access (username only)
+				oauth: 'oauth'          // login via external OAuth provider
 			},
 			hotkeyMod: ['ALT', 'CMD', 'CTRL', 'SHIFT'], // modifier keys for hotkeys
 			scrollFormId: 'form-scroll' // ID of form page element (to recover scroll position during routing)
@@ -88,18 +88,19 @@ const MyStore = Vuex.createStore({
 		licenseValid: false,            // license is valid (set and within validity period)
 		loginHasClient: false,          // login has an associated client (to allow for local file handling)
 		loginId: -1,                    // user login ID
+		loginMfaSetup: false,           // user login requires MFA setup to continue
 		loginName: '',                  // user login name
 		loginPrivateKey: null,          // user login private key for decryption (non-exportable key)
 		loginPrivateKeyEnc: null,       // user login private key PEM, encrypted with login key
 		loginPrivateKeyEncBackup: null, // user login private key PEM, encrypted with backup code
 		loginPublicKey: null,           // user login public key for encryption (exportable key)
+		loginPwResetCode: null,         // user login PW reset code, if not null, PW reset is requred
 		loginSessionExpired: false,     // set to true, when session expires
 		loginSessionExpires: null,      // unix timestamp of session expiration date
 		loginType: null,                // user login type (local, oauth, ldap, noAuth, fixed)
 		loginWidgetGroups: [],          // user widgets, starting with widget groups
 		mailSpoolerStuckIn: 0,          // count of mails stuck in spooler (incoming), retrieved for admins
 		mailSpoolerStuckOut: 0,         // count of mails stuck in spooler (outgoing), retrieved for admins
-		mfaSetupRequired: false,        // user authenticated without MFA, but MFA use is required
 		mirrorMode: false,              // instance runs in mirror mode (eg. mirrors another, likely production instance)
 		moduleEntries: [],              // module entries for header/home page
 		moduleIdLast: null,             // module ID of last active module
@@ -313,7 +314,8 @@ const MyStore = Vuex.createStore({
 		loginWidgetGroups: (s, p) => s.loginWidgetGroups = p,
 		mailSpoolerStuckIn: (s, p) => s.mailSpoolerStuckIn = p,
 		mailSpoolerStuckOut: (s, p) => s.mailSpoolerStuckOut = p,
-		mfaSetupRequired: (s, p) => s.mfaSetupRequired = p,
+		loginMfaSetup: (s, p) => s.loginMfaSetup = p,
+		loginPwResetCode: (s, p) => s.loginPwResetCode = p,
 		mirrorMode: (s, p) => s.mirrorMode = p,
 		moduleEntries: (s, p) => s.moduleEntries = p,
 		moduleIdLast: (s, p) => s.moduleIdLast = p,
@@ -506,7 +508,8 @@ const MyStore = Vuex.createStore({
 		loginWidgetGroups: s => s.loginWidgetGroups,
 		mailSpoolerStuckIn: s => s.mailSpoolerStuckIn,
 		mailSpoolerStuckOut: s => s.mailSpoolerStuckOut,
-		mfaSetupRequired: s => s.mfaSetupRequired,
+		loginMfaSetup: s => s.loginMfaSetup,
+		loginPwResetCode: s => s.loginPwResetCode,
 		mirrorMode: s => s.mirrorMode,
 		moduleEntries: s => s.moduleEntries,
 		moduleIdLast: s => s.moduleIdLast,

@@ -8,6 +8,7 @@ import (
 	"r3/cache"
 	"r3/db"
 	"r3/log"
+	"r3/login/login_check"
 	"r3/login/login_external"
 	"r3/login/login_meta"
 	"r3/login/login_role"
@@ -355,6 +356,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	syncLogin_tx(ctx, tx, "UPDATED", id)
 
 	return id, nil
+}
+
+func SetCredentials_tx(ctx context.Context, tx pgx.Tx, loginId int64, pw string) error {
+	if err := login_check.PasswordComplexity(pw); err != nil {
+		return err
+	}
+	salt, hash := GenerateSaltHash(pw)
+	return SetSaltHash_tx(ctx, tx, salt, hash, loginId)
 }
 
 func SetSaltHash_tx(ctx context.Context, tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {

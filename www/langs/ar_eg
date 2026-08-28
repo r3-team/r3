@@ -3016,33 +3016,32 @@
 		"quick": "تصفية النتائج في كافة الأعمدة",
 		"valueLimit": "Only the first {CNT} values are loaded"
 	},
-	"settings": {
-		"account": {
-			"button": {
-				"loginOptionsDel": "Reset all field settings"
-			},
-			"dialog": {
-				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
-			},
-			"messagePwCurrentWrong": "كلمة المرور الحالية غير صالحة",
-			"messagePwDiff": "كلمات المرور غير متطابقة",
-			"messagePwRequiresDigit": "كلمة المرور يجب أن تحتوي على رقم",
-			"messagePwRequiresLower": "يجب أن تحتوي كلمة المرور على حرف صغير",
-			"messagePwRequiresSpecial": "يجب أن تحتوي كلمة المرور على حرف خاص (!، ?، #، إلخ.)",
-			"messagePwRequiresUpper": "يجب أن تحتوي كلمة المرور على حرف كبير",
-			"messagePwShort": "كلمة المرور قصيرة جدًا",
-			"nodeName": "متصل بـ: {NAME}",
-			"pwChangeNotAllowed": "Login data is managed externally",
-			"pwNew0": "كلمة المرور الجديدة",
-			"pwNew1": "كلمة المرور الجديدة (متكررة)",
-			"pwOld": "كلمة المرور الحالية",
-			"titlePwChange": "تغيير كلمة المرور"
+	"pwChange": {
+		"message": {
+			"currentWrong": "كلمة المرور الحالية غير صالحة",
+			"diff": "كلمات المرور غير متطابقة",
+			"requiresDigit": "كلمة المرور يجب أن تحتوي على رقم",
+			"requiresLower": "يجب أن تحتوي كلمة المرور على حرف صغير",
+			"requiresSpecial": "يجب أن تحتوي كلمة المرور على حرف خاص (!، ?، #، إلخ.)",
+			"requiresUpper": "يجب أن تحتوي كلمة المرور على حرف كبير",
+			"short": "كلمة المرور قصيرة جدًا",
 		},
+		"new0": "كلمة المرور الجديدة",
+		"new1": "كلمة المرور الجديدة (متكررة)",
+		"notAllowed": "Login data is managed externally",
+		"old": "كلمة المرور الحالية",
+		"title": "تغيير كلمة المرور"
+	},
+	"pwReset": {
+		"title": "Choose a password to continue"
+	},
+	"settings": {
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "الحدود",
 		"bordersSquared": "تربيع",
 		"button": {
+			"loginOptionsDel": "Reset all field settings",
 			"logout": "تسجيل الخروج"
 		},
 		"clientEvents": {
@@ -3058,6 +3057,9 @@
 		"colorMenu": "الكتابة فوق اللون",
 		"dark": "الوضع المظلم",
 		"dateFormat": "تنسيق التاريخ",
+		"dialog": {
+			"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+		},
 		"encryption": {
 			"backupCode": "رمز النسخ الاحتياطي",
 			"backupCodeDesc": "الرمز الاحتياطي هو <b>مهم جدا</b>; ",
@@ -3120,6 +3122,7 @@
 			"title": "إعداد المصادقة متعددة العوامل"
 		},
 		"mobileScrollForm": "الهاتف المحمول: قم بتمرير النموذج بأكمله",
+		"nodeName": "متصل بـ: {NAME}",
 		"pageTitle": "إعدادات",
 		"pattern": "نمط الخلفية",
 		"spacing": "تباعد",

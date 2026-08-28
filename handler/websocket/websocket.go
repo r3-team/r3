@@ -374,6 +374,9 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			login, err = request_login.AuthTokenFixed(ctx, req.Payload)
 			client.device = types.WebsocketClientDeviceFatClient
 
+		case "reset": // authentication via reset code
+			login, err = request_login.AuthReset(ctx, req.Payload)
+
 		case "user": // authentication via username + password (+ MFA if used)
 			login, err = request_login.AuthUser(ctx, req.Payload)
 		}

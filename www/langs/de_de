@@ -3016,33 +3016,32 @@
 		"quick": "Ergebnisse in allen Spalten filtern",
 		"valueLimit": "Es werden nur die ersten {CNT} Werte geladen"
 	},
-	"settings": {
-		"account": {
-			"button": {
-				"loginOptionsDel": "Alle Feldeinstellungen zurücksetzen"
-			},
-			"dialog": {
-				"loginOptionsDel": "<p>Hiermit werden alle Feldeinstellungen, wie Sortierungen in Listen, sichtbare Spalten, Filter und so weiter, auf ihre Standardwerte zurückgesetzt.</p><p>Fortfahren?</p>"
-			},
-			"messagePwCurrentWrong": "Aktuelles Passwort ist inkorrekt",
-			"messagePwDiff": "Passwörter stimmen nicht überein",
-			"messagePwRequiresDigit": "Passwort muss eine Zahl beinhalten",
-			"messagePwRequiresLower": "Passwort muss einen Kleinbuchstaben beinhalten",
-			"messagePwRequiresSpecial": "Passwort muss ein Sonderzeichen beinhalten (!, ?, #, usw.)",
-			"messagePwRequiresUpper": "Passwort muss einen Großbuchstaben beinhalten",
-			"messagePwShort": "Password is too short",
-			"nodeName": "Verbunden mit: {NAME}",
-			"pwChangeNotAllowed": "Zugangsdaten werden extern verwaltet",
-			"pwNew0": "Neues Passwort",
-			"pwNew1": "Neues Passwort (wiederholt)",
-			"pwOld": "Aktuelles Passwort",
-			"titlePwChange": "Passwort ändern"
+	"pwChange": {
+		"message": {
+			"currentWrong": "Aktuelles Passwort ist inkorrekt",
+			"diff": "Passwörter stimmen nicht überein",
+			"requiresDigit": "Passwort muss eine Zahl beinhalten",
+			"requiresLower": "Passwort muss einen Kleinbuchstaben beinhalten",
+			"requiresSpecial": "Passwort muss ein Sonderzeichen beinhalten (!, ?, #, usw.)",
+			"requiresUpper": "Passwort muss einen Großbuchstaben beinhalten",
+			"short": "Passwort ist zu kurz",
 		},
+		"new0": "Neues Passwort",
+		"new1": "Neues Passwort (wiederholt)",
+		"notAllowed": "Zugangsdaten werden extern verwaltet",
+		"old": "Aktuelles Passwort",
+		"title": "Passwort ändern"
+	},
+	"pwReset": {
+		"title": "Passwort auswählen, um fortzufahren"
+	},
+	"settings": {
 		"boolAsIcon": "Icons für Wahrheitswerte in Sichten",
 		"boolAsToggle": "Schalter für Wahrheitswerte in Eingaben",
 		"borders": "Rahmen",
 		"bordersSquared": "Eckig",
 		"button": {
+			"loginOptionsDel": "Alle Feldeinstellungen zurücksetzen",
 			"logout": "Abmelden"
 		},
 		"clientEvents": {
@@ -3058,6 +3057,9 @@
 		"colorMenu": "Farbe überschreiben",
 		"dark": "Dunkle Ansicht",
 		"dateFormat": "Datumsformat",
+		"dialog": {
+			"loginOptionsDel": "<p>Hiermit werden alle Feldeinstellungen, wie Sortierungen in Listen, sichtbare Spalten, Filter und so weiter, auf ihre Standardwerte zurückgesetzt.</p><p>Fortfahren?</p>"
+		},
 		"encryption": {
 			"backupCode": "Backup-Code",
 			"backupCodeDesc": "Der Backup-Code ist <b>sehr wichtig</b>; er stellt Zugriff wieder her, falls du dein Passwort vergessen hast.",
@@ -3120,6 +3122,7 @@
 			"title": "Multifaktor-Authentifizierung hinzufügen"
 		},
 		"mobileScrollForm": "Mobil: Gesamtes Formular scrollen",
+		"nodeName": "Verbunden mit: {NAME}",
 		"pageTitle": "Einstellungen",
 		"pattern": "Hintergrundmuster",
 		"spacing": "Abstände",

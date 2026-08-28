@@ -53,10 +53,7 @@ export default {
 						@click="showMfaText = !showMfaText"
 					></div>
 
-					<template v-if="showMfaText">
-						<span class="settings-mfa-uri">{{ qrCodeUri }}</span>
-						<br />
-					</template>
+					<span class="settings-mfa-uri" v-if="showMfaText">{{ qrCodeUri }}</span>
 
 					<span v-if="tokenSet && !forced">{{ capApp.outro }}</span>
 					<span v-if="tokenSet && forced">{{ capApp.outroForced }}</span>

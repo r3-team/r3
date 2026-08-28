@@ -3016,33 +3016,32 @@
 		"quick": "Sonuçları tüm sütunlarda filtrele",
 		"valueLimit": "Only the first {CNT} values are loaded"
 	},
-	"settings": {
-		"account": {
-			"button": {
-				"loginOptionsDel": "Tüm saha ayarlarını sıfırla"
-			},
-			"dialog": {
-				"loginOptionsDel": "<p>Bu, liste sıralama, görünür sütunlar, filtreler vb. gibi tüm alan ayarlarını varsayılan değerlerine sıfırlayacaktır.</p><p>Devam etmek istiyor musunuz?</p>"
-			},
-			"messagePwCurrentWrong": "Mevcut şifre geçersiz",
-			"messagePwDiff": "Şifreler eşleşmiyor",
-			"messagePwRequiresDigit": "Şifre bir rakam içermelidir",
-			"messagePwRequiresLower": "Şifre küçük harf içermelidir",
-			"messagePwRequiresSpecial": "Şifre özel bir karakter içermelidir (!, ?, #, vb.)",
-			"messagePwRequiresUpper": "Şifre büyük harf içermelidir",
-			"messagePwShort": "Şifre çok kısa",
-			"nodeName": "Bağlantılı olduğu yer: {NAME}",
-			"pwChangeNotAllowed": "Oturum açma verileri harici olarak yönetilir",
-			"pwNew0": "Yeni Şifre",
-			"pwNew1": "Yeni şifre (tekrarlandı)",
-			"pwOld": "Mevcut Şifre",
-			"titlePwChange": "Şifre değiştir"
+	"pwChange": {
+		"message": {
+			"currentWrong": "Mevcut şifre geçersiz",
+			"diff": "Şifreler eşleşmiyor",
+			"requiresDigit": "Şifre bir rakam içermelidir",
+			"requiresLower": "Şifre küçük harf içermelidir",
+			"requiresSpecial": "Şifre özel bir karakter içermelidir (!, ?, #, vb.)",
+			"requiresUpper": "Şifre büyük harf içermelidir",
+			"short": "Şifre çok kısa",
 		},
+		"new0": "Yeni Şifre",
+		"new1": "Yeni şifre (tekrarlandı)",
+		"notAllowed": "Oturum açma verileri harici olarak yönetilir",
+		"old": "Mevcut Şifre",
+		"title": "Şifre değiştir"
+	},
+	"pwReset": {
+		"title": "Choose a password to continue"
+	},
+	"settings": {
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Kenarlıklar",
 		"bordersSquared": "Kare",
 		"button": {
+			"loginOptionsDel": "Tüm saha ayarlarını sıfırla",
 			"logout": "Oturumu kapat"
 		},
 		"clientEvents": {
@@ -3058,6 +3057,9 @@
 		"colorMenu": "Rengin üzerine yaz",
 		"dark": "Karanlık mod",
 		"dateFormat": "Tarih formatı",
+		"dialog": {
+			"loginOptionsDel": "<p>Bu, liste sıralama, görünür sütunlar, filtreler vb. gibi tüm alan ayarlarını varsayılan değerlerine sıfırlayacaktır.</p><p>Devam etmek istiyor musunuz?</p>"
+		},
 		"encryption": {
 			"backupCode": "Yedekleme kodu",
 			"backupCodeDesc": "Yedek kod <b>çok önemli</b>; şifrenizi unutursanız erişimi yeniden sağlamaya yarar.",
@@ -3120,6 +3122,7 @@
 			"title": "Çok faktörlü kimlik doğrulamayı ayarlayın"
 		},
 		"mobileScrollForm": "Mobil: Formun tamamını kaydır",
+		"nodeName": "Bağlantılı olduğu yer: {NAME}",
 		"pageTitle": "Ayarlar",
 		"pattern": "Arka plan deseni",
 		"spacing": "Aralık",

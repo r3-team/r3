@@ -3016,33 +3016,32 @@
 		"quick": "Eredmények szűrése minden oszlopban",
 		"valueLimit": "Only the first {CNT} values are loaded"
 	},
-	"settings": {
-		"account": {
-			"button": {
-				"loginOptionsDel": "Reset all field settings"
-			},
-			"dialog": {
-				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
-			},
-			"messagePwCurrentWrong": "A jelenlegi jelszó helytelen",
-			"messagePwDiff": "A jelszavak nem egyeznek meg",
-			"messagePwRequiresDigit": "A jelszónak tartalmaznia kell számot",
-			"messagePwRequiresLower": "A jelszónak tartalmaznia kell kisbetűt",
-			"messagePwRequiresSpecial": "A jelszónak tartalmaznia kell speciális karaktert (!, ?, #, stb.)",
-			"messagePwRequiresUpper": "A jelszónak tartalmaznia kell nagybetűt",
-			"messagePwShort": "A jelszó túl rövid",
-			"nodeName": "Kapcsolódva: {NAME}",
-			"pwChangeNotAllowed": "Login data is managed externally",
-			"pwNew0": "Új jelszó",
-			"pwNew1": "Új jelszó (újra)",
-			"pwOld": "Jelenlegi jelszó",
-			"titlePwChange": "Jelszó megváltoztatása"
+	"pwChange": {
+		"message": {
+			"currentWrong": "A jelenlegi jelszó helytelen",
+			"diff": "A jelszavak nem egyeznek meg",
+			"requiresDigit": "A jelszónak tartalmaznia kell számot",
+			"requiresLower": "A jelszónak tartalmaznia kell kisbetűt",
+			"requiresSpecial": "A jelszónak tartalmaznia kell speciális karaktert (!, ?, #, stb.)",
+			"requiresUpper": "A jelszónak tartalmaznia kell nagybetűt",
+			"short": "A jelszó túl rövid",
 		},
+		"new0": "Új jelszó",
+		"new1": "Új jelszó (újra)",
+		"notAllowed": "Login data is managed externally",
+		"old": "Jelenlegi jelszó",
+		"title": "Jelszó megváltoztatása"
+	},
+	"pwReset": {
+		"title": "Choose a password to continue"
+	},
+	"settings": {
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Borders",
 		"bordersSquared": "Squared",
 		"button": {
+			"loginOptionsDel": "Reset all field settings",
 			"logout": "Kijelentkezés"
 		},
 		"clientEvents": {
@@ -3058,6 +3057,9 @@
 		"colorMenu": "Overwrite color",
 		"dark": "Sötét nézet",
 		"dateFormat": "Dátumformátum",
+		"dialog": {
+			"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+		},
 		"encryption": {
 			"backupCode": "Biztonsági kód",
 			"backupCodeDesc": "A biztonsági kód <b>nagyon fontos</b>; visszaállítja a hozzáférést, ha elfelejted a jelszavad.",
@@ -3120,6 +3122,7 @@
 			"title": "Több Faktoros Hitelesítés hozzáadása"
 		},
 		"mobileScrollForm": "Mobil: Teljes űrlap görgetése",
+		"nodeName": "Kapcsolódva: {NAME}",
 		"pageTitle": "Beállítások",
 		"pattern": "Háttérminta",
 		"spacing": "Térköz",

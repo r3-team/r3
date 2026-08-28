@@ -8,7 +8,6 @@ import (
 )
 
 // attempt login via Open ID Connect
-// applies login ID, admin to provided parameters if successful
 func AuthOpenId(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 	var req types.LoginAuthRequestOpenId
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -18,7 +17,6 @@ func AuthOpenId(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthRe
 }
 
 // attempt login via JWT
-// applies login ID, admin and no auth state to provided parameters if successful
 func AuthToken(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 	var req string
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -28,7 +26,6 @@ func AuthToken(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthRes
 }
 
 // attempt login via fixed token
-// applies login ID to provided parameters if successful
 func AuthTokenFixed(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 	var req types.LoginAuthRequestTokenFixed
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -37,8 +34,16 @@ func AuthTokenFixed(ctx context.Context, reqJson json.RawMessage) (types.LoginAu
 	return login_auth.TokenFixed(ctx, req.LoginId, "client", req.TokenFixed)
 }
 
+// attempt login via reset code
+func AuthReset(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
+	var req string
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return types.LoginAuthResult{}, err
+	}
+	return login_auth.Reset(ctx, req)
+}
+
 // attempt login via user credentials (username, password, MFA if used)
-// applies login ID, admin and no auth state to provided parameters if successful
 func AuthUser(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 	var req types.LoginAuthRequestUser
 	if err := json.Unmarshal(reqJson, &req); err != nil {

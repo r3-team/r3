@@ -1,119 +1,109 @@
-.settings{
-	width:95%;
-	max-width:1800px;
+.settings {
+	width: 95%;
+	max-width: 1800px;
 }
-.settings .content{
-	display:flex;
-	flex-flow:row wrap;
-	justify-content:center;
+.settings .content {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
 }
-.settings table{
-	width:100%;
+.settings table {
+	width: 100%;
 }
 .settings td,
-.settings th{
-	padding:4px 8px 4px 0px;
+.settings th {
+	padding: 4px 8px 4px 0px;
 }
-.settings .module-icon{
-	width:24px;
-	filter:var(--image-filter);
+.settings .module-icon {
+	width: 24px;
+	filter: var(--image-filter);
 }
-.settings .encryption .backup-code{
-	font-family:monospace;
-	margin:20px 10px;
-	padding:16px;
-	color:var(--color-font);
-	border:1px solid var(--color-border);
-	border-radius:5px;
-	background-color:var(--color-bg);
+.settings .encryption .backup-code {
+	font-family: monospace;
+	margin: 20px 10px;
+	padding: 16px;
+	color: var(--color-font);
+	border: 1px solid var(--color-border);
+	border-radius: 5px;
+	background-color: var(--color-bg);
 }
-.settings .message-error{
-	padding:10px 0px 30px;
-	color:var(--color-error);
+.settings .settings-page-limit {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
 }
-.settings .settings-page-limit{
-	display:flex;
-	flex-direction:row;
-	justify-content:center;
-	align-items:center;
+.settings .settings-page-limit div {
+	margin-right: 16px;
 }
-.settings .settings-page-limit div{
-	margin-right:16px;
+.settings-account-actions {
+	margin: 20px 0px;
 }
-.settings-account-actions{
-	margin:20px 0px;
+.settings img.settings-install {
+	max-width: 420px;
+	margin: 10px 0px;
+	box-shadow: 1px 1px 3px #000;
+	border-radius: 6px;
 }
-.settings-account-pw-change-action{
-	display:flex;
-	flex-flow:row nowrap;
-	justify-content:flex-end;
-	margin:10px 5px 10px 10px;
+.settings-tokens {
+	max-height: 420px;
+	margin: 0px 0px 10px;
+	border-radius: 5px;
+	background-color: var(--color-input);
+	box-shadow: 1px 1px 3px var(--color-shade);
+	overflow: auto;
 }
-.settings img.settings-install{
-	max-width:420px;
-	margin:10px 0px;
-	box-shadow:1px 1px 3px #000;
-	border-radius:6px;
-}
-.settings-tokens{
-	max-height:420px;
-	margin:0px 0px 10px;
-	border-radius:5px;
-	background-color:var(--color-input);
-	box-shadow:1px 1px 3px var(--color-shade);
-	overflow:auto;
-}
-.settings-token-actions{
-	display:flex;
-	flex-flow:row wrap;
-	align-items:center;
-	gap:9px;
+.settings-token-actions {
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: 9px;
 }
 
 /* multi factor authentication */
-.settings-mfa{
-	max-width:500px;
+.settings-mfa {
+	max-width: 500px;
 }
-.settings-mfa-qrcode{
-	margin:10px auto 20px;
-	border:1px solid var(--color-border);
-	border-radius:5px;
-	overflow:hidden;
+.settings-mfa-qrcode {
+	margin: 10px auto 20px;
+	border: 1px solid var(--color-border);
+	border-radius: 5px;
+	overflow: hidden;
 }
-.settings-mfa-input{
-	max-width:200px;
+.settings-mfa-input {
+	max-width: 200px;
 }
-.settings-mfa-uri{
-	font-style:italic;
-	word-break:break-all;
+.settings-mfa-uri {
+	font-style: italic;
+	word-break: break-all;
 }
 
 /* devices */
-.settings-devices{
-	width:100%;
-	max-width:650px;
+.settings-devices {
+	width: 100%;
+	max-width: 650px;
 }
-.settings-devices-header{
-	padding:20px;
-	border-bottom:1px solid var(--color-border);
+.settings-devices-header {
+	padding: 20px;
+	border-bottom: 1px solid var(--color-border);
 }
-.settings-devices ol{
-	min-height:400px;
+.settings-devices ol {
+	min-height: 400px;
 }
-.settings-devices ol li{
-	padding:5px 5px 12px 5px;
+.settings-devices ol li {
+	padding: 5px 5px 12px 5px;
 }
 
 /* client events */
-.settings-client-events{
-	display:flex;
-	flex-flow:column nowrap;
-	gap:9px;
+.settings-client-events {
+	display: flex;
+	flex-flow: column nowrap;
+	gap: 9px;
 }
 
 /* mobile overwrites */
-.is-mobile .settings{
-	width:100%;
-	max-width:unset;
-	max-height:unset;
+.is-mobile .settings {
+	width: 100%;
+	max-width: unset;
+	max-height: unset;
 }

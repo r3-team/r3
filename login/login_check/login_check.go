@@ -8,24 +8,19 @@ import (
 	"regexp"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Password(ctx context.Context, tx pgx.Tx, loginId int64, pwOld string) error {
 	var salt, hash string
-	var ldapId pgtype.Int4
-
 	if err := tx.QueryRow(ctx, `
-		SELECT salt, hash, ldap_id
+		SELECT salt, hash
 		FROM instance.login
 		WHERE active
-		AND id = $1
-	`, loginId).Scan(&salt, &hash, &ldapId); err != nil {
+		AND id              = $1
+		AND ldap_id         IS NULL
+		AND oauth_client_id IS NULL
+	`, loginId).Scan(&salt, &hash); err != nil {
 		return err
-	}
-
-	if ldapId.Valid {
-		return fmt.Errorf("cannot set password for LDAP login")
 	}
 	if hash != tools.Hash(salt+pwOld) {
 		return fmt.Errorf("PW_CURRENT_WRONG")

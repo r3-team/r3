@@ -3,6 +3,7 @@ import MyInputDateFormat from './inputDateFormat.js';
 import MyInputDecimal from './inputDecimal.js';
 import MyInputHotkey from './inputHotkey.js';
 import MyInputNumberSep from './inputNumberSep.js';
+import MyPwChange from './pwChange.js';
 import MySettingsMfa from './settingsMfa.js';
 import {
 	aesGcmDecryptBase64, aesGcmDecryptBase64WithPhrase, aesGcmEncryptBase64,
@@ -40,7 +41,7 @@ const MySettingsEncryption = {
 			</div>
 		</template>
 
-		<div class="message-error" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
+		<div class="textError" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
 
 		<!-- login without credentials -->
 		<template v-if="loginNoCred && !newKeys">
@@ -207,22 +208,22 @@ const MySettingsEncryption = {
 		noCredMasterKeyChanged: s => s.noCredMasterKey !== s.noCredMasterKeyLast,
 
 		// stores
-		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.settings.encryption,
+		capErr: s => s.$store.getters.captions.error,
+		capGen: s => s.$store.getters.captions.generic,
+		cryptoApiAvailable: s => s.$store.getters.cryptoApiAvailable,
+		kdfIterations: s => s.$store.getters.constants.kdfIterations,
+		loginEncEnabled: s => s.$store.getters.loginEncEnabled,
+		loginEncLocked: s => s.$store.getters.loginEncLocked,
 		loginKeyAes: s => s.$store.getters['local/loginKeyAes'],
 		loginKeySalt: s => s.$store.getters['local/loginKeySalt'],
 		loginNoCred: s => s.$store.getters['local/loginNoCred'],
-		cryptoApiAvailable: s => s.$store.getters.cryptoApiAvailable,
-		loginEncEnabled: s => s.$store.getters.loginEncEnabled,
-		loginEncLocked: s => s.$store.getters.loginEncLocked,
 		loginPrivateKey: s => s.$store.getters.loginPrivateKey,
 		loginPrivateKeyEnc: s => s.$store.getters.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup: s => s.$store.getters.loginPrivateKeyEncBackup,
 		loginPublicKey: s => s.$store.getters.loginPublicKey,
 		moduleEntries: s => s.$store.getters.moduleEntries,
-		kdfIterations: s => s.$store.getters.constants.kdfIterations,
-		capApp: s => s.$store.getters.captions.settings.encryption,
-		capErr: s => s.$store.getters.captions.error,
-		capGen: s => s.$store.getters.captions.generic
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap']
 	},
 	methods: {
 		// externals
@@ -408,7 +409,7 @@ const MySettingsEncryption = {
 		},
 		reset() {
 			ws.send('loginKeys', 'reset', {}, true).then(
-				res => {
+				() => {
 					this.$store.commit('loginPrivateKey', null);
 					this.$store.commit('loginPrivateKeyEnc', null);
 					this.$store.commit('loginPrivateKeyEncBackup', null);
@@ -435,244 +436,6 @@ const MySettingsEncryption = {
 							this.newKeyPrivateEncBackup = null;
 						}
 					);
-				},
-				this.$root.genericError
-			);
-		}
-	}
-};
-
-const MySettingsAccount = {
-	name: 'my-settings-account',
-	template: `<table class="default-inputs">
-		<tbody>
-			<!-- pw change -->
-			<tr>
-				<td>{{ capGen.name }}</td>
-				<td><input disabled="disabled" :value="loginName" /></td>
-			</tr>
-			<template v-if="isAllowedPwChange">
-				<tr><td colspan="2"><hr /></td></tr>
-				<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
-				<tr>
-					<td>{{ capApp.pwOld }}</td>
-					<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.pwNew0 }}</td>
-					<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.pwNew1 }}</td>
-					<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
-				</tr>
-			</template>
-
-			<template v-if="!isAllowedPwChange">
-				<tr><td colspan="2"></td></tr>
-				<tr><td colspan="2"><b>{{ capApp.pwChangeNotAllowed }}</b></td></tr>
-			</template>
-		</tbody>
-	</table>
-
-	<div class="settings-account-pw-change-action">
-		<my-button image="save.png"
-			v-if="isAllowedPwChange"
-			@trigger="setCheck"
-			:active="canSave"
-			:caption="capGen.button.save"
-		/>
-	</div>
-
-	<div class="settings-account-actions">
-		<h2>{{ capGen.actions }}</h2>
-		<div class="row">
-			<my-button image="refresh.png"
-				@trigger="delOptionsAsk"
-				:caption="capApp.button.loginOptionsDel"
-			/>
-		</div>
-	</div>
-
-	<div class="message-error" v-if="message !== ''">{{ message }}</div>
-
-	<div class="column grow"></div>
-	<span><i>{{ capApp.nodeName.replace('{NAME}',clusterNodeName) }}</i></span>`,
-	data() {
-		return {
-			// states
-			newInput: false,  // new input was entered by user
-			pwSettings: null, // server side password settings (require digits, minimum length, etc.)
-
-			// inputs
-			pwNew0: '',
-			pwNew1: '',
-			pwOld: '',
-			pwOldKey: ''
-		};
-	},
-	computed: {
-		canSave: s => s.pwOldValid
-			&& s.pwMatch
-			&& s.pwMetDigits
-			&& s.pwMetLength
-			&& s.pwMetLower
-			&& s.pwMetUpper
-			&& s.pwMetSpecial,
-		message: s => {
-			if (!s.newInput || s.pwSettings === null)
-				return '';
-
-			if (!s.pwOldValid)
-				return s.capApp.messagePwCurrentWrong;
-
-			if (s.pwNew0 === '')
-				return '';
-
-			if (!s.pwMatch) return s.capApp.messagePwDiff;
-			if (!s.pwMetDigits) return s.capApp.messagePwRequiresDigit;
-			if (!s.pwMetLength) return s.capApp.messagePwShort;
-			if (!s.pwMetLower) return s.capApp.messagePwRequiresLower;
-			if (!s.pwMetUpper) return s.capApp.messagePwRequiresUpper;
-			if (!s.pwMetSpecial) return s.capApp.messagePwRequiresSpecial;
-			return '';
-		},
-
-		// simple
-		e2eeInactive: s => !s.loginEncEnabled || s.loginEncLocked, // encryption not enabled or private key locked
-		pwMatch: s => s.pwNew0.length !== 0 && s.pwNew0 === s.pwNew1,
-		pwMetLength: s => s.pwSettings.length <= s.pwNew0.length,
-		pwOldValid: s => s.loginKeyAes === s.pwOldKey || s.e2eeInactive,   // without login key, we cannot check old PW (backend still checks)
-		pwMetDigits: s => !s.pwSettings.requireDigits || /\p{Nd}/u.test(s.pwNew0),
-		pwMetLower: s => !s.pwSettings.requireLower || /\p{Ll}/u.test(s.pwNew0),
-		pwMetSpecial: s => !s.pwSettings.requireSpecial || /[\p{P}\p{M}\p{S}\p{Z}]+/u.test(s.pwNew0),
-		pwMetUpper: s => !s.pwSettings.requireUpper || /\p{Lu}/u.test(s.pwNew0),
-
-		// stores
-		loginKeyAes: s => s.$store.getters['local/loginKeyAes'],
-		loginKeySalt: s => s.$store.getters['local/loginKeySalt'],
-		isAllowedPwChange: s => s.$store.getters.isAllowedPwChange,
-		loginEncEnabled: s => s.$store.getters.loginEncEnabled,
-		loginEncLocked: s => s.$store.getters.loginEncLocked,
-		loginName: s => s.$store.getters.loginName,
-		loginPrivateKey: s => s.$store.getters.loginPrivateKey,
-		loginPrivateKeyEnc: s => s.$store.getters.loginPrivateKeyEnc,
-		kdfIterations: s => s.$store.getters.constants.kdfIterations,
-		capApp: s => s.$store.getters.captions.settings.account,
-		capGen: s => s.$store.getters.captions.generic,
-		clusterNodeName: s => s.$store.getters.clusterNodeName
-	},
-	mounted() {
-		ws.send('lookup', 'get', { name: 'passwordSettings' }, true).then(
-			res => this.pwSettings = res.payload,
-			this.$root.genericError
-		);
-	},
-	methods: {
-		// externals
-		aesGcmDecryptBase64,
-		aesGcmEncryptBase64,
-		aesGcmExportBase64,
-		aesGcmImportBase64,
-		pbkdf2PassToAesGcmKey,
-
-		generateOldPwKey() {
-			if (this.e2eeInactive)
-				return;
-
-			this.pbkdf2PassToAesGcmKey(this.pwOld, this.loginKeySalt, this.kdfIterations, true).then(
-				key => {
-					this.aesGcmExportBase64(key).then(
-						keyBase64 => this.pwOldKey = keyBase64,
-						this.$root.genericError
-					);
-				},
-				this.$root.genericError
-			);
-		},
-
-		// actions
-		setCheck() {
-			if (this.e2eeInactive)
-				return this.set(null, null);
-
-			this.aesGcmImportBase64(this.loginKeyAes).then(
-				loginKey => {
-					// decrypt private key with current login key
-					// generate login key from new password for re-encryption
-					Promise.all([
-						this.aesGcmDecryptBase64(this.loginPrivateKeyEnc, loginKey),
-						this.pbkdf2PassToAesGcmKey(this.pwNew0, this.loginKeySalt, this.kdfIterations, true)
-					]).then(
-						res => {
-							const privateKeyPem = res[0]; // private key PEM to be encrypted
-							const newLoginKey = res[1]; // login key based on new password
-
-							// re-encrypt private key with new login key
-							this.aesGcmEncryptBase64(privateKeyPem, newLoginKey).then(
-								newPrivateKeyEnc => this.set(newPrivateKeyEnc, newLoginKey)
-							);
-						},
-						this.$root.genericError
-					);
-				},
-				this.$root.genericError
-			);
-		},
-
-		// backend calls
-		delOptionsAsk() {
-			this.$store.commit('dialog', {
-				captionBody: this.capApp.dialog.loginOptionsDel,
-				image: 'warning.png',
-				buttons: [{
-					cancel: true,
-					caption: this.capGen.button.reset,
-					exec: this.delOptions,
-					keyEnter: true,
-					image: 'refresh.png'
-				}, {
-					caption: this.capGen.button.cancel,
-					keyEscape: true,
-					image: 'cancel.png'
-				}]
-			});
-		},
-		delOptions() {
-			ws.send('loginOptions', 'del', null, true).then(
-				() => { this.$store.commit('local/loginOptionsClear'); },
-				this.$root.genericError
-			);
-		},
-		set(newPrivateKeyEnc, newLoginKey) {
-			const requests = [
-				ws.prepare('loginPassword', 'set', {
-					pwNew0: this.pwNew0,
-					pwNew1: this.pwNew1,
-					pwOld: this.pwOld
-				})
-			];
-
-			// update encrypted private key if given
-			if (newPrivateKeyEnc !== null)
-				requests.push(ws.prepare('loginKeys', 'storePrivate', {
-					privateKeyEnc: newPrivateKeyEnc
-				}));
-
-			// use same request/transaction to update password & encrypted private key
-			// one must not change without the other
-			ws.sendMultiple(requests, true).then(
-				res => {
-					this.pwNew0 = '';
-					this.pwNew1 = '';
-					this.pwOld = '';
-					this.newInput = false;
-
-					if (res.length > 1)
-						this.aesGcmExportBase64(newLoginKey).then(keyBase64 => {
-							this.$store.commit('loginPrivateKeyEnc', newPrivateKeyEnc);
-							this.$store.commit('local/loginKeyAes', keyBase64);
-						});
 				},
 				this.$root.genericError
 			);
@@ -1132,7 +895,7 @@ export default {
 		MyInputDateFormat,
 		MyInputDecimal,
 		MyInputNumberSep,
-		MySettingsAccount,
+		MyPwChange,
 		MySettingsClientEvents,
 		MySettingsEncryption,
 		MySettingsFixedTokens
@@ -1358,7 +1121,21 @@ export default {
 					<img class="icon" src="images/lock.png" />
 					<h1>{{ capApp.titleAccount }}</h1>
 				</div>
-				<my-settings-account />
+
+				<my-pw-change />
+
+				<div class="settings-account-actions">
+					<h2>{{ capGen.actions }}</h2>
+					<div class="row">
+						<my-button image="refresh.png"
+							@trigger="delOptionsAsk"
+							:caption="capApp.button.loginOptionsDel"
+						/>
+					</div>
+				</div>
+
+				<div class="column grow"></div>
+				<span><i>{{ capApp.nodeName.replace('{NAME}',clusterNodeName) }}</i></span>
 			</div>
 
 			<!-- fixed tokens (device access) -->
@@ -1420,8 +1197,9 @@ export default {
 		// stores
 		languageCodes: s => s.$store.getters['schema/languageCodes'],
 		languageCodesModules: s => s.$store.getters['schema/languageCodesModules'],
-		capGen: s => s.$store.getters.captions.generic,
 		capApp: s => s.$store.getters.captions.settings,
+		capGen: s => s.$store.getters.captions.generic,
+		clusterNodeName: s => s.$store.getters.clusterNodeName,
 		isAdmin: s => s.$store.getters.isAdmin,
 		languageCodesOfficial: s => s.$store.getters.constants.languageCodesOfficial,
 		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta,
@@ -1447,5 +1225,30 @@ export default {
 				e.preventDefault();
 			}
 		},
+
+		// backend calls
+		delOptionsAsk() {
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.dialog.loginOptionsDel,
+				image: 'warning.png',
+				buttons: [{
+					cancel: true,
+					caption: this.capGen.button.reset,
+					exec: this.delOptions,
+					keyEnter: true,
+					image: 'refresh.png'
+				}, {
+					caption: this.capGen.button.cancel,
+					keyEscape: true,
+					image: 'cancel.png'
+				}]
+			});
+		},
+		delOptions() {
+			ws.send('loginOptions', 'del', null, true).then(
+				() => { this.$store.commit('local/loginOptionsClear'); },
+				this.$root.genericError
+			);
+		}
 	}
 };

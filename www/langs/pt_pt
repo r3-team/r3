@@ -3016,33 +3016,32 @@
 		"quick": "Filtrar resultados em todas as colunas",
 		"valueLimit": "Apenas os primeiros {CNT} valores são carregados"
 	},
-	"settings": {
-		"account": {
-			"button": {
-				"loginOptionsDel": "Repor todas as definições de campo"
-			},
-			"dialog": {
-				"loginOptionsDel": "<p>Isto irá repor todas as definições de campo, como ordenação de listas, colunas visíveis, filtros, etc., para os seus valores predefinidos.</p><p>Deseja continuar?</p>"
-			},
-			"messagePwCurrentWrong": "A palavra-passe atual é inválida",
-			"messagePwDiff": "As palavras-passe não coincidem",
-			"messagePwRequiresDigit": "A palavra-passe deve conter um dígito",
-			"messagePwRequiresLower": "A palavra-passe deve conter uma letra minúscula",
-			"messagePwRequiresSpecial": "A palavra-passe deve conter um caractere especial (!, ?, #, etc.)",
-			"messagePwRequiresUpper": "A palavra-passe deve conter uma letra maiúscula",
-			"messagePwShort": "A palavra-passe é demasiado curta",
-			"nodeName": "Ligado a: {NAME}",
-			"pwChangeNotAllowed": "Os dados de início de sessão são geridos externamente",
-			"pwNew0": "Nova palavra-passe",
-			"pwNew1": "Nova palavra-passe (repetida)",
-			"pwOld": "Palavra-passe atual",
-			"titlePwChange": "Alterar palavra-passe"
+	"pwChange": {
+		"message": {
+			"currentWrong": "A palavra-passe atual é inválida",
+			"diff": "As palavras-passe não coincidem",
+			"requiresDigit": "A palavra-passe deve conter um dígito",
+			"requiresLower": "A palavra-passe deve conter uma letra minúscula",
+			"requiresSpecial": "A palavra-passe deve conter um caractere especial (!, ?, #, etc.)",
+			"requiresUpper": "A palavra-passe deve conter uma letra maiúscula",
+			"short": "A palavra-passe é demasiado curta",
 		},
+		"new0": "Nova palavra-passe",
+		"new1": "Nova palavra-passe (repetida)",
+		"notAllowed": "Os dados de início de sessão são geridos externamente",
+		"old": "Palavra-passe atual",
+		"title": "Alterar palavra-passe"
+	},
+	"pwReset": {
+		"title": "Choose a password to continue"
+	},
+	"settings": {
 		"boolAsIcon": "Valores booleanos como ícones",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Bordas",
 		"bordersSquared": "Quadrado",
 		"button": {
+			"loginOptionsDel": "Repor todas as definições de campo",
 			"logout": "Terminar sessão"
 		},
 		"clientEvents": {
@@ -3058,6 +3057,9 @@
 		"colorMenu": "Substituir cor",
 		"dark": "Modo escuro",
 		"dateFormat": "Formato de data",
+		"dialog": {
+			"loginOptionsDel": "<p>Isto irá repor todas as definições de campo, como ordenação de listas, colunas visíveis, filtros, etc., para os seus valores predefinidos.</p><p>Deseja continuar?</p>"
+		},
 		"encryption": {
 			"backupCode": "Código de backup",
 			"backupCodeDesc": "O código de backup é <b>muito importante</b>; serve para repor o acesso se se esquecer da sua palavra-passe.",
@@ -3120,6 +3122,7 @@
 			"title": "Configurar autenticação multifator"
 		},
 		"mobileScrollForm": "Móvel: Deslocar todo o formulário",
+		"nodeName": "Ligado a: {NAME}",
 		"pageTitle": "Configurações",
 		"pattern": "Padrão de fundo",
 		"spacing": "Espaçamento",

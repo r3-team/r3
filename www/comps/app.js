@@ -5,6 +5,7 @@ import MyForm from './form.js';
 import MyGlobalSearch from './globalSearch.js';
 import MyHeader from './header.js';
 import MyLogin from './login.js';
+import MyPwReset from './pwReset.js';
 import MySettings from './settings.js';
 import MySettingsMfa from './settingsMfa.js';
 
@@ -22,27 +23,33 @@ export default {
 	name: 'app',
 	components: {
 		MyDialog, MyDropdown, MyFeedback, MyForm, MyGlobalSearch,
-		MyHeader, MyLogin, MySettings, MySettingsMfa
+		MyHeader, MyLogin, MyPwReset, MySettings, MySettingsMfa
 	},
 	template: `<div :class="classes" id="app" :style="styles">
 
 		<my-login ref="login" v-if="!appReady || loginSessionExpired"
 			@authenticated="initApp"
 			:backendReady="wsConnected"
-			:httpMode="httpMode"
-			:loginReady="loginReady"
+			:httpMode
+			:loginReady
 		/>
 
 		<my-dropdown />
 
 		<!-- MFA setup -->
 		<my-settings-mfa
-			v-if="appReady && mfaSetupRequired"
-			@confirmed="$store.commit('mfaSetupRequired', false)"
+			v-if="appReady && loginMfaSetup"
+			@confirmed="$store.commit('loginMfaSetup', false)"
 			:forced="true"
 		/>
 
-		<template v-if="appReady && !mfaSetupRequired">
+		<!-- PW reset -->
+		<my-pw-reset
+			v-if="appReady && loginPwResetCode !== null"
+			@confirmed="$store.commit('loginPwResetCode', null)"
+		/>
+
+		<template v-if="appReady && !loginMfaSetup && loginPwResetCode === null">
 			<my-header
 				v-show="!loginSessionExpired"
 				v-if="!isWithoutMenuHeader"
@@ -52,7 +59,7 @@ export default {
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
 				:keysLocked="loginEncLocked"
-				:logoutInSec="logoutInSec"
+				:logoutInSec
 			/>
 
 			<router-view class="app-content"
@@ -403,10 +410,11 @@ export default {
 		isWithoutMenuHeader: s => s.$store.getters.isWithoutMenuHeader,
 		keyDownHandlers: s => s.$store.getters.keyDownHandlers,
 		loginEncLocked: s => s.$store.getters.loginEncLocked,
+		loginMfaSetup: s => s.$store.getters.loginMfaSetup,
 		loginPrivateKey: s => s.$store.getters.loginPrivateKey,
+		loginPwResetCode: s => s.$store.getters.loginPwResetCode,
 		loginSessionExpired: s => s.$store.getters.loginSessionExpired,
 		loginSessionExpires: s => s.$store.getters.loginSessionExpires,
-		mfaSetupRequired: s => s.$store.getters.mfaSetupRequired,
 		moduleIdLast: s => s.$store.getters.moduleIdLast,
 		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta,
 		patternStyle: s => s.$store.getters.patternStyle,
