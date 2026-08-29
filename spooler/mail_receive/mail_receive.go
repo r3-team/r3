@@ -346,7 +346,7 @@ func processMessage(mailAccountId int32, msg *imap.Message, section *imap.BodySe
 		fileList = append(fileList, fmt.Sprintf("%s (%dkb)", file.Name, file.Size))
 	}
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
+		INSERT INTO instance_mail.traffic (from_list, to_list, cc_list,
 			subject, date, files, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,FALSE)
 	`, getStringListFromAddress(from), getStringListFromAddress(to), getStringListFromAddress(cc),

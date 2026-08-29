@@ -4,6 +4,33 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
+type ClusterEventContent string
+
+const ClusterEventContentClientEventsChanged ClusterEventContent = "clientEventsChanged"
+const ClusterEventContentCollectionUpdated ClusterEventContent = "collectionUpdated"
+const ClusterEventContentConfigChanged ClusterEventContent = "configChanged"
+const ClusterEventContentDbSyncChanged ClusterEventContent = "dbSyncChanged"
+const ClusterEventContentFileRequested ClusterEventContent = "fileRequested"
+const ClusterEventContentFilesCopied ClusterEventContent = "filesCopied"
+const ClusterEventContentJsFunctionCalled ClusterEventContent = "jsFunctionCalled"
+const ClusterEventContentKeystrokesRequested ClusterEventContent = "keystrokesRequested"
+const ClusterEventContentKick ClusterEventContent = "kick"
+const ClusterEventContentKickNonAdmin ClusterEventContent = "kickNonAdmin"
+const ClusterEventContentLoginDisabled ClusterEventContent = "loginDisabled"
+const ClusterEventContentLoginReauthorized ClusterEventContent = "loginReauthorized"
+const ClusterEventContentLoginReauthorizedAll ClusterEventContent = "loginReauthorizedAll"
+const ClusterEventContentMailAccountsChanged ClusterEventContent = "mailAccountsChanged"
+const ClusterEventContentMailTemplatesChanged ClusterEventContent = "mailTemplatesChanged"
+const ClusterEventContentMasterAssigned ClusterEventContent = "masterAssigned"
+const ClusterEventContentRenew ClusterEventContent = "renew"
+const ClusterEventContentReposChanged ClusterEventContent = "reposChanged"
+const ClusterEventContentSchemaChanged ClusterEventContent = "schemaChanged"
+const ClusterEventContentSchemaLoaded ClusterEventContent = "schemaLoaded"
+const ClusterEventContentSchemaLoading ClusterEventContent = "schemaLoading"
+const ClusterEventContentShutdownTriggered ClusterEventContent = "shutdownTriggered"
+const ClusterEventContentTasksChanged ClusterEventContent = "tasksChanged"
+const ClusterEventContentTaskTriggered ClusterEventContent = "taskTriggered"
+
 // cluster node
 type ClusterNode struct {
 	ClusterMaster bool      `json:"clusterMaster"`
@@ -65,7 +92,7 @@ type ClusterEventTarget struct {
 
 // cluster event to be processed by nodes and, in most cases, to be distributed to clients of cluster nodes
 type ClusterEvent struct {
-	Content string             `json:"content"` // collectionChanged, configChanged, kick, kickNoAdmin, renew, schemaLoading, schemaLoaded, ...
-	Payload any                `json:"payload"` // content dependent payload
-	Target  ClusterEventTarget `json:"target"`  // target filter, to which clients this event is to be sent
+	Content ClusterEventContent `json:"content"` // collectionUpdated, configChanged, kick, kickNoAdmin, renew, schemaLoading, schemaLoaded, ...
+	Payload any                 `json:"payload"` // content dependent payload
+	Target  ClusterEventTarget  `json:"target"`  // target filter, to which clients this event is to be sent
 }

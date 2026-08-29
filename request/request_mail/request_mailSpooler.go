@@ -1,4 +1,4 @@
-package request
+package request_mail
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+func SpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
@@ -25,7 +25,7 @@ func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return err
 }
 
-func MailSpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func SpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
 		err error
@@ -44,14 +44,14 @@ func MailSpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 		return nil, err
 	}
 
-	res.Mails, res.Total, err = mailSpoolerRead(ctx, tx, req.Limit, req.Offset, req.Search)
+	res.Mails, res.Total, err = spoolerRead(ctx, tx, req.Limit, req.Offset, req.Search)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func mailSpoolerGetCountStuck(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+func SpoolerGetCountStuck(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	var res struct {
 		Incoming int `json:"incoming"`
 		Outgoing int `json:"outgoing"`
@@ -72,7 +72,24 @@ func mailSpoolerGetCountStuck(ctx context.Context, tx pgx.Tx, loginId int64) (an
 	return res, err
 }
 
-func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, search string) ([]types.Mail, int64, error) {
+func SpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+	var req struct {
+		Ids []int64 `json:"ids"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return err
+	}
+
+	_, err := tx.Exec(ctx, `
+		UPDATE instance.mail_spool
+		SET attempt_count = 0, attempt_date = 0
+		WHERE id = ANY($1)
+	`, req.Ids)
+
+	return err
+}
+
+func spoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, search string) ([]types.Mail, int64, error) {
 
 	var searchFields = []string{"from_list", "to_list", "cc_list", "bcc_list", "subject", "body"}
 
@@ -153,21 +170,4 @@ func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, sear
 		return mails, 0, err
 	}
 	return mails, total, nil
-}
-
-func MailSpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
-	var req struct {
-		Ids []int64 `json:"ids"`
-	}
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return err
-	}
-
-	_, err := tx.Exec(ctx, `
-		UPDATE instance.mail_spool
-		SET attempt_count = 0, attempt_date = 0
-		WHERE id = ANY($1)
-	`, req.Ids)
-
-	return err
 }

@@ -180,29 +180,29 @@ func (hub *hubType) start() {
 			kickNonAdmin := false
 
 			switch event.Content {
-			case "clientEventsChanged":
+			case types.ClusterEventContentClientEventsChanged:
 				jsonMsg, err = prepareUnrequested("clientEventsChanged", nil)
-			case "collectionChanged":
-				jsonMsg, err = prepareUnrequested("collectionChanged", event.Payload)
-			case "configChanged":
+			case types.ClusterEventContentCollectionUpdated:
+				jsonMsg, err = prepareUnrequested("collectionUpdated", event.Payload)
+			case types.ClusterEventContentConfigChanged:
 				jsonMsg, err = prepareUnrequested("configChanged", nil)
-			case "filesCopied":
+			case types.ClusterEventContentFilesCopied:
 				jsonMsg, err = prepareUnrequested("filesCopied", event.Payload)
-			case "fileRequested":
+			case types.ClusterEventContentFileRequested:
 				jsonMsg, err = prepareUnrequested("fileRequested", event.Payload)
-			case "jsFunctionCalled":
+			case types.ClusterEventContentJsFunctionCalled:
 				jsonMsg, err = prepareUnrequested("jsFunctionCalled", event.Payload)
 				singleRecipient = true
-			case "keystrokesRequested":
+			case types.ClusterEventContentKeystrokesRequested:
 				jsonMsg, err = prepareUnrequested("keystrokesRequested", event.Payload)
 				singleRecipient = true
-			case "kick":
+			case types.ClusterEventContentKick:
 				kick = true
-			case "kickNonAdmin":
+			case types.ClusterEventContentKickNonAdmin:
 				kickNonAdmin = true
-			case "renew":
+			case types.ClusterEventContentRenew:
 				jsonMsg, err = prepareUnrequested("reauthorized", nil)
-			case "schemaLoaded":
+			case types.ClusterEventContentSchemaLoaded:
 				data := struct {
 					ModuleIdMapData     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapData"`
 					PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
@@ -213,7 +213,7 @@ func (hub *hubType) start() {
 					CaptionMapCustom:    cache.GetCaptionMapCustom(),
 				}
 				jsonMsg, err = prepareUnrequested("schemaLoaded", data)
-			case "schemaLoading":
+			case types.ClusterEventContentSchemaLoading:
 				jsonMsg, err = prepareUnrequested("schemaLoading", nil)
 			}
 

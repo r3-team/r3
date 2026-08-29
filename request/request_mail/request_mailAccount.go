@@ -1,4 +1,4 @@
-package request
+package request_mail
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailAccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+func AccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req int64
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
@@ -19,11 +19,11 @@ func MailAccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return err
 }
 
-func MailAccountGet() (any, error) {
+func AccountGet() (any, error) {
 	return cache.GetMailAccountMap(), nil
 }
 
-func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req types.MailAccount
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
@@ -66,7 +66,7 @@ func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return err
 }
 
-func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+func AccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 
 	var req struct {
 		AccountName string `json:"accountName"`

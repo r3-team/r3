@@ -70,7 +70,7 @@ func cleanupLogs() error {
 	keepForDays = config.GetUint64("mailTrafficKeepDays")
 	if keepForDays != 0 {
 		if _, err := db.Pool.Exec(ctx, `
-			DELETE FROM instance.mail_traffic
+			DELETE FROM instance_mail.traffic
 			WHERE date < $1
 		`, tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays))); err != nil {
 			return err

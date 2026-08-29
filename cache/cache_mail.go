@@ -10,17 +10,18 @@ import (
 )
 
 var (
-	mail_mx          sync.RWMutex
-	mailAccountIdMap map[int32]types.MailAccount
+	mail_mx           sync.RWMutex
+	mailAccountIdMap  map[int32]types.MailAccount
+	mailTemplateIdMap map[int32]types.MailTemplate
 )
 
+// mail accounts
 func GetMailAccountMap() map[int32]types.MailAccount {
 	mail_mx.RLock()
 	defer mail_mx.RUnlock()
 
 	return mailAccountIdMap
 }
-
 func GetMailAccountsByMode(mode string) []types.MailAccount {
 	mail_mx.RLock()
 	defer mail_mx.RUnlock()
@@ -33,7 +34,6 @@ func GetMailAccountsByMode(mode string) []types.MailAccount {
 	}
 	return mas
 }
-
 func GetMailAccount(id int32, mode string) (types.MailAccount, error) {
 	mail_mx.RLock()
 	defer mail_mx.RUnlock()
@@ -44,7 +44,6 @@ func GetMailAccount(id int32, mode string) (types.MailAccount, error) {
 	}
 	return ma, nil
 }
-
 func GetMailAccountAny(mode string) (types.MailAccount, error) {
 	mail_mx.RLock()
 	defer mail_mx.RUnlock()
@@ -85,6 +84,49 @@ func LoadMailAccountMap_tx(ctx context.Context, tx pgx.Tx) error {
 			return err
 		}
 		mailAccountIdMap[ma.Id] = ma
+	}
+	return nil
+}
+
+// mail templates
+func GetMailTemplateMap() map[int32]types.MailTemplate {
+	mail_mx.RLock()
+	defer mail_mx.RUnlock()
+
+	return mailTemplateIdMap
+}
+func GetMailTemplate(id int32, content types.MailTemplateContent) (types.MailTemplate, error) {
+	mail_mx.RLock()
+	defer mail_mx.RUnlock()
+
+	mt, exists := mailTemplateIdMap[id]
+	if !exists || content != mt.Content {
+		return mt, fmt.Errorf("mail template with ID %d does not exist for content '%s'", id, content)
+	}
+	return mt, nil
+}
+func LoadMailTemplateMap_tx(ctx context.Context, tx pgx.Tx) error {
+
+	rows, err := tx.Query(ctx, `
+		SELECT id, content, name, body, subject
+		FROM instance_mail.template
+	`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	mail_mx.Lock()
+	defer mail_mx.Unlock()
+
+	mailTemplateIdMap = make(map[int32]types.MailTemplate)
+	for rows.Next() {
+		var mt types.MailTemplate
+
+		if err := rows.Scan(&mt.Id, &mt.Content, &mt.Name, &mt.Body, &mt.Subject); err != nil {
+			return err
+		}
+		mailTemplateIdMap[mt.Id] = mt
 	}
 	return nil
 }

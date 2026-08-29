@@ -16,6 +16,7 @@ import (
 	"r3/request/request_dbSync"
 	"r3/request/request_geo"
 	"r3/request/request_login"
+	"r3/request/request_mail"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -521,31 +522,42 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "mailAccount":
 		switch action {
 		case "del":
-			return nil, MailAccountDel_tx(ctx, tx, reqJson)
+			return nil, request_mail.AccountDel_tx(ctx, tx, reqJson)
 		case "get":
-			return MailAccountGet()
+			return request_mail.AccountGet()
 		case "reload":
-			return nil, cache.LoadMailAccountMap_tx(ctx, tx)
+			return nil, cluster.MailAccountsChanged_tx(ctx, tx, true)
 		case "set":
-			return nil, MailAccountSet_tx(ctx, tx, reqJson)
+			return nil, request_mail.AccountSet_tx(ctx, tx, reqJson)
 		case "test":
-			return nil, MailAccountTest_tx(ctx, tx, reqJson)
+			return nil, request_mail.AccountTest_tx(ctx, tx, reqJson)
 		}
 	case "mailSpooler":
 		switch action {
 		case "del":
-			return nil, MailSpoolerDel_tx(ctx, tx, reqJson)
+			return nil, request_mail.SpoolerDel_tx(ctx, tx, reqJson)
 		case "get":
-			return MailSpoolerGet_tx(ctx, tx, reqJson)
+			return request_mail.SpoolerGet_tx(ctx, tx, reqJson)
 		case "getCountStuck":
-			return mailSpoolerGetCountStuck(ctx, tx, loginId)
+			return request_mail.SpoolerGetCountStuck(ctx, tx, loginId)
 		case "reset":
-			return nil, MailSpoolerReset_tx(ctx, tx, reqJson)
+			return nil, request_mail.SpoolerReset_tx(ctx, tx, reqJson)
+		}
+	case "mailTemplate":
+		switch action {
+		case "del":
+			return nil, request_mail.TemplateDel_tx(ctx, tx, reqJson)
+		case "get":
+			return request_mail.TemplateGet()
+		case "reload":
+			return nil, cluster.MailTemplatesChanged_tx(ctx, tx, true)
+		case "set":
+			return nil, request_mail.TemplateSet_tx(ctx, tx, reqJson)
 		}
 	case "mailTraffic":
 		switch action {
 		case "get":
-			return MailTrafficGet_tx(ctx, tx, reqJson)
+			return request_mail.TrafficGet_tx(ctx, tx, reqJson)
 		}
 	case "menuTab":
 		switch action {

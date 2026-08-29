@@ -265,7 +265,7 @@ func do(m types.Mail) error {
 
 	// add to mail traffic log
 	_, err = db.Pool.Exec(context.Background(), `
-		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
+		INSERT INTO instance_mail.traffic (from_list, to_list, cc_list,
 			subject, date, files, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)
 	`, m.FromList, m.ToList, m.CcList, m.Subject,
@@ -299,7 +299,7 @@ func getMailsByAccount(ma types.MailAccount) ([]types.Mail, error) {
 			GREATEST(
 				$4 - (
 					SELECT COUNT(*)
-					FROM instance.mail_traffic
+					FROM instance_mail.traffic
 					WHERE date            >= EXTRACT(EPOCH FROM NOW()) - $5
 					AND   mail_account_id =  $1
 				),

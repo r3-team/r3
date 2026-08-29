@@ -88,80 +88,103 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 	}
 
 	switch e.Content {
-	case "clientEventsChanged":
+	case types.ClusterEventContentClientEventsChanged:
 		err = cluster.ClientEventsChanged_tx(ctx, tx, false, e.Target.Address, e.Target.LoginId)
-	case "collectionUpdated":
+
+	case types.ClusterEventContentCollectionUpdated:
 		var p types.ClusterEventCollectionUpdated
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
 		}
 		*collectionUpdates = append(*collectionUpdates, p)
 		err = nil
-	case "configChanged":
+
+	case types.ClusterEventContentConfigChanged:
 		var switchToMaintenance bool
 		if err := json.Unmarshal(jsonPayload, &switchToMaintenance); err != nil {
 			return err
 		}
 		err = cluster.ConfigChanged_tx(ctx, tx, false, true, switchToMaintenance)
-	case "dbSyncChanged":
+
+	case types.ClusterEventContentDbSyncChanged:
 		err = cluster.DbSyncChanged_tx(ctx, tx, false)
-	case "filesCopied":
-		var p types.ClusterEventFilesCopied
-		if err := json.Unmarshal(jsonPayload, &p); err != nil {
-			return err
-		}
-		err = cluster.FilesCopied_tx(ctx, tx, false, e.Target.Address,
-			e.Target.LoginId, p.AttributeId, p.FileIds, p.RecordId)
-	case "fileRequested":
+
+	case types.ClusterEventContentFileRequested:
 		var p types.ClusterEventFileRequested
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
 		}
 		err = cluster.FileRequested_tx(ctx, tx, false, e.Target.Address, e.Target.LoginId,
 			p.AttributeId, p.FileId, p.FileHash, p.FileName, p.ChooseApp)
-	case "jsFunctionCalled":
+
+	case types.ClusterEventContentFilesCopied:
+		var p types.ClusterEventFilesCopied
+		if err := json.Unmarshal(jsonPayload, &p); err != nil {
+			return err
+		}
+		err = cluster.FilesCopied_tx(ctx, tx, false, e.Target.Address,
+			e.Target.LoginId, p.AttributeId, p.FileIds, p.RecordId)
+
+	case types.ClusterEventContentJsFunctionCalled:
 		var p types.ClusterEventJsFunctionCalled
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
 		}
 		err = cluster.JsFunctionCalled_tx(ctx, tx, false, e.Target.Address,
 			e.Target.LoginId, p.ModuleId, p.JsFunctionId, p.Arguments)
-	case "keystrokesRequested":
+
+	case types.ClusterEventContentKeystrokesRequested:
 		var keystrokes string
 		if err := json.Unmarshal(jsonPayload, &keystrokes); err != nil {
 			return err
 		}
 		err = cluster.KeystrokesRequested_tx(ctx, tx, false, e.Target.Address, e.Target.LoginId, keystrokes)
-	case "loginDisabled":
+
+	case types.ClusterEventContentLoginDisabled:
 		err = cluster.LoginDisabled_tx(ctx, tx, false, e.Target.LoginId)
-	case "loginReauthorized":
+
+	case types.ClusterEventContentLoginReauthorized:
 		err = cluster.LoginReauthorized_tx(ctx, tx, false, e.Target.LoginId)
-	case "loginReauthorizedAll":
+
+	case types.ClusterEventContentLoginReauthorizedAll:
 		err = cluster.LoginReauthorizedAll_tx(ctx, tx, false)
-	case "masterAssigned":
+
+	case types.ClusterEventContentMailAccountsChanged:
+		err = cluster.MailAccountsChanged_tx(ctx, tx, false)
+
+	case types.ClusterEventContentMailTemplatesChanged:
+		err = cluster.MailTemplatesChanged_tx(ctx, tx, false)
+
+	case types.ClusterEventContentMasterAssigned:
 		var p types.ClusterEventMasterAssigned
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
 		}
 		err = cluster.MasterAssigned(p.State)
-	case "reposChanged":
+
+	case types.ClusterEventContentReposChanged:
 		err = cluster.ReposChanged(ctx, tx, false)
-	case "schemaChanged":
+
+	case types.ClusterEventContentSchemaChanged:
 		var moduleIds []uuid.UUID
 		if err := json.Unmarshal(jsonPayload, &moduleIds); err != nil {
 			return err
 		}
 		err = cluster.SchemaChanged_tx(ctx, tx, false, moduleIds)
-	case "tasksChanged":
+
+	case types.ClusterEventContentShutdownTriggered:
+		OsExit <- syscall.SIGTERM
+
+	case types.ClusterEventContentTasksChanged:
 		err = cluster.TasksChanged_tx(ctx, tx, false)
-	case "taskTriggered":
+
+	case types.ClusterEventContentTaskTriggered:
 		var p types.ClusterEventTaskTriggered
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
 		}
 		runTaskDirectly(p.TaskName, p.PgFunctionId, p.PgFunctionScheduleId)
-	case "shutdownTriggered":
-		OsExit <- syscall.SIGTERM
+
 	}
 	return err
 }

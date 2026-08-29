@@ -821,6 +821,31 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
+
+			-- mail templates
+			CREATE SCHEMA instance_mail;
+			CREATE TYPE instance_mail.template_content AS ENUM('loginInvitation','loginPwReset');
+			CREATE TABLE IF NOT EXISTS instance_mail.template (
+				id SERIAL NOT NULL,
+				content instance_mail.template_content NOT NULL,
+				name CHARACTER VARYING(128) NOT NULL,
+				body TEXT NOT NULL,
+				subject TEXT NOT NULL,
+				CONSTRAINT template_pkey PRIMARY KEY (id),
+				CONSTRAINT template_name_key UNIQUE (content,name)
+			);
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'mailAccountsChanged';
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'mailTemplatesChanged';
+
+			-- migrate mail traffic to new schema
+			ALTER TABLE instance.mail_traffic SET SCHEMA instance_mail;
+			ALTER TABLE instance_mail.mail_traffic RENAME TO traffic;
+
+			ALTER TABLE instance_mail.traffic RENAME CONSTRAINT mail_traffic_mail_account_fkey TO traffic_mail_account_fkey;
+
+			ALTER INDEX fki_mail_traffic_mail_account_id_fkey RENAME TO fki_traffic_mail_account_id_fkey;
+			ALTER INDEX ind_mail_traffic_date                 RENAME TO ind_traffic_date;
+			ALTER INDEX ind_mail_traffic_outgoing             RENAME TO ind_traffic_outgoing;
 		`)
 		return "3.13", err
 	},

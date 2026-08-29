@@ -1,4 +1,4 @@
-package request
+package request_mail
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func TrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
 		req struct {
@@ -48,7 +48,7 @@ func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT from_list, to_list, cc_list, bcc_list,
 			subject, outgoing, date, files, mail_account_id
-		FROM instance.mail_traffic
+		FROM instance_mail.traffic
 		%s
 		ORDER BY date DESC
 		LIMIT $1
@@ -86,7 +86,7 @@ func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 
 	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT COUNT(*)
-		FROM instance.mail_traffic
+		FROM instance_mail.traffic
 		%s
 	`, sqlWhere), sqlArgs...).Scan(&res.Total); err != nil {
 		return nil, err

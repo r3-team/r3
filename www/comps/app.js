@@ -536,7 +536,7 @@ export default {
 					break;
 
 				// affects everyone logged in
-				case 'collectionChanged':
+				case 'collectionUpdated':
 					this.updateCollections(res.payload);
 					break;
 				case 'configChanged':

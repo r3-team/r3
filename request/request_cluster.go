@@ -46,5 +46,5 @@ func ClusterNodeShutdown_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMess
 		return err
 	}
 	return cluster.CreateEventForNodes_tx(ctx, tx, []uuid.UUID{req.Id},
-		"shutdownTriggered", "{}", types.ClusterEventTarget{})
+		types.ClusterEventContentShutdownTriggered, "{}", types.ClusterEventTarget{})
 }
