@@ -195,6 +195,24 @@ export default {
 
 							<template v-if="!isRoot">
 								<tr v-if="isResizeInGrid">
+									<td>{{ capGen.posX }}</td>
+									<td>
+										<div class="row gap centered">
+											<my-input-decimal class="short" v-model="field.posX" :readonly :min="0" :max="sizeXMax" :allowNull="false" :length="5" :lengthFract="2" />
+											<span>mm</span>
+										</div>
+									</td>
+								</tr>
+								<tr v-if="isResizeInGrid">
+									<td>{{ capGen.posY }}</td>
+									<td>
+										<div class="row gap centered">
+											<my-input-decimal class="short" v-model="field.posY" :readonly :min="0" :max="sizeYMax" :allowNull="false" :length="5" :lengthFract="2" />
+											<span>mm</span>
+										</div>
+									</td>
+								</tr>
+								<tr v-if="isResizeInGrid">
 									<td>{{ capGen.sizeX }}</td>
 									<td>
 										<div class="row gap centered">

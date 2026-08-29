@@ -2602,6 +2602,8 @@
 		"placeholders": "Placeholders",
 		"policies": "Policies",
 		"postfix": "Postfix",
+		"posX": "Position ↦",
+		"posY": "Position ↧",
 		"prefix": "Prefix",
 		"preview": "Előnézet",
 		"properties": "Tulajdonságok",

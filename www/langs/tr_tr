@@ -2602,6 +2602,8 @@
 		"placeholders": "Yer tutucular",
 		"policies": "Policies",
 		"postfix": "Sonek",
+		"posX": "Position ↦",
+		"posY": "Position ↧",
 		"prefix": "Önek",
 		"preview": "Önizleme",
 		"properties": "Özellikler",

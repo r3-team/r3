@@ -2602,6 +2602,8 @@
 		"placeholders": "Placeholders",
 		"policies": "Richtlinien",
 		"postfix": "Postfix",
+		"posX": "Position ↦",
+		"posY": "Position ↧",
 		"prefix": "Prefix",
 		"preview": "Vorschau",
 		"properties": "Eigenschaften",
