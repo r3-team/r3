@@ -2602,6 +2602,8 @@
 		"placeholders": "Placeholders",
 		"policies": "Policies",
 		"postfix": "Postfix",
+		"posX": "Position ↦",
+		"posY": "Position ↧",
 		"prefix": "Prefix",
 		"preview": "预览",
 		"properties": "属性",

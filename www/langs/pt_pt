@@ -2602,6 +2602,8 @@
 		"placeholders": "Marcadores de posição",
 		"policies": "Políticas",
 		"postfix": "Sufixo",
+		"posX": "Position ↦",
+		"posY": "Position ↧",
 		"prefix": "Prefixo",
 		"preview": "Pré-visualização",
 		"properties": "Propriedades",
