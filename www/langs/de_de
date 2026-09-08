@@ -519,6 +519,7 @@
 		"navigationLogs": "Logs",
 		"navigationMailAccounts": "E-Mail-Accounts",
 		"navigationMailSpooler": "E-Mail-Warteschlange",
+		"navigationMailTemplates": "E-Mail-Vorlagen",
 		"navigationMailTraffic": "E-Mail-Verkehr",
 		"navigationModules": "Anwendungen",
 		"navigationOauthClients": "OAuth-Clients",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "Passwort muss einen Kleinbuchstaben beinhalten",
 			"requiresSpecial": "Passwort muss ein Sonderzeichen beinhalten (!, ?, #, usw.)",
 			"requiresUpper": "Passwort muss einen Großbuchstaben beinhalten",
-			"short": "Passwort ist zu kurz",
+			"short": "Passwort ist zu kurz"
 		},
 		"new0": "Neues Passwort",
 		"new1": "Neues Passwort (wiederholt)",

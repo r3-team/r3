@@ -70,6 +70,15 @@ export function getTemplateGeoLayerBase() {
 		url: '',
 	};
 };
+export function getTemplateMailTemplate() {
+	return {
+		id: null,
+		name: '',
+		content: 'loginPwReset',
+		body: '',
+		subject: ''
+	};
+};
 export function getTemplateReturn(isTrigger) {
 	return isTrigger ? 'TRIGGER' : 'INTEGER';
 };

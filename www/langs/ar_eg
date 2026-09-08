@@ -519,6 +519,7 @@
 		"navigationLogs": "سجلات",
 		"navigationMailAccounts": "حسابات البريد الإلكتروني",
 		"navigationMailSpooler": "التخزين المؤقت للبريد الإلكتروني",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "حركة البريد الإلكتروني",
 		"navigationModules": "التطبيقات",
 		"navigationOauthClients": "عملاء OAuth",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "يجب أن تحتوي كلمة المرور على حرف صغير",
 			"requiresSpecial": "يجب أن تحتوي كلمة المرور على حرف خاص (!، ?، #، إلخ.)",
 			"requiresUpper": "يجب أن تحتوي كلمة المرور على حرف كبير",
-			"short": "كلمة المرور قصيرة جدًا",
+			"short": "كلمة المرور قصيرة جدًا"
 		},
 		"new0": "كلمة المرور الجديدة",
 		"new1": "كلمة المرور الجديدة (متكررة)",

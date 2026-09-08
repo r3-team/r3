@@ -519,6 +519,7 @@
 		"navigationLogs": "Jurnale",
 		"navigationMailAccounts": "Conturi de e-mail",
 		"navigationMailSpooler": "Spooler de e-mail",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "Trafic de e-mail",
 		"navigationModules": "Aplicații",
 		"navigationOauthClients": "OAuth clients",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "Parola trebuie să conțină o literă mică",
 			"requiresSpecial": "Parola trebuie să conțină un caracter special (!, ?, #, etc.)",
 			"requiresUpper": "Parola trebuie să conțină o literă mare",
-			"short": "Parola este prea scurtă",
+			"short": "Parola este prea scurtă"
 		},
 		"new0": "Parola nouă",
 		"new1": "Parola nouă (repetată)",

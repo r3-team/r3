@@ -462,6 +462,10 @@
 			"toList": "To",
 			"trafficKeepDays": "Keep data (in days)"
 		},
+		"mailTemplate": {
+			"title": "Email template '{NAME}'",
+			"titleNew": "New email template"
+		},
 		"modules": {
 			"button": {
 				"repositoryRefresh": "Check repositories for updates",
@@ -519,6 +523,7 @@
 		"navigationLogs": "Logs",
 		"navigationMailAccounts": "Email accounts",
 		"navigationMailSpooler": "Email spooler",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "Email traffic",
 		"navigationModules": "Applications",
 		"navigationOauthClients": "OAuth clients",

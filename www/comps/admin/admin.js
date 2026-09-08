@@ -69,6 +69,12 @@ export default {
 				<span>{{ capApp.navigationMailTraffic }}</span>
 			</router-link>
 
+			<!-- mail templates -->
+			<router-link class="entry clickable" tag="div" to="/admin/mail-templates">
+				<img src="images/mailPlus.png" />
+				<span>{{ capApp.navigationMailTemplates }}</span>
+			</router-link>
+
 			<!-- backups -->
 			<router-link class="entry clickable" tag="div" to="/admin/backups">
 				<img src="images/backup.png" />
@@ -218,6 +224,7 @@ export default {
 			if (s.$route.path.includes('ldaps')) return s.capApp.navigationLdaps;
 			if (s.$route.path.includes('mail-accounts')) return s.capApp.navigationMailAccounts;
 			if (s.$route.path.includes('mail-spooler')) return s.capApp.navigationMailSpooler;
+			if (s.$route.path.includes('mail-templates')) return s.capApp.navigationMailTemplates;
 			if (s.$route.path.includes('mail-traffic')) return s.capApp.navigationMailTraffic;
 			if (s.$route.path.includes('modules')) return s.capApp.navigationModules;
 			if (s.$route.path.includes('oauth-clients')) return s.capApp.navigationOauthClients;

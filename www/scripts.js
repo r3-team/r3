@@ -17,6 +17,7 @@ import MyAdminLoginTemplates from './comps/admin/adminLoginTemplates.js';
 import MyAdminLogs from './comps/admin/adminLogs.js';
 import MyAdminMailAccounts from './comps/admin/adminMailAccounts.js';
 import MyAdminMailSpooler from './comps/admin/adminMailSpooler.js';
+import MyAdminMailTemplates from './comps/admin/adminMailTemplates.js';
 import MyAdminMailTraffic from './comps/admin/adminMailTraffic.js';
 import MyAdminModules from './comps/admin/adminModules.js';
 import MyAdminOauthClients from './comps/admin/adminOauthClients.js';
@@ -127,6 +128,7 @@ const MyRouter = VueRouter.createRouter({
 			{ path: 'logs', component: MyAdminLogs },
 			{ path: 'mail-accounts', component: MyAdminMailAccounts },
 			{ path: 'mail-spooler', component: MyAdminMailSpooler },
+			{ path: 'mail-templates', component: MyAdminMailTemplates },
 			{ path: 'mail-traffic', component: MyAdminMailTraffic },
 			{ path: 'modules', component: MyAdminModules },
 			{ path: 'oauth-clients', component: MyAdminOauthClients },

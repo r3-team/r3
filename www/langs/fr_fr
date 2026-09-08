@@ -519,6 +519,7 @@
 		"navigationLogs": "Journaux",
 		"navigationMailAccounts": "Comptes email",
 		"navigationMailSpooler": "Spooler email",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "Trafic email",
 		"navigationModules": "Applications",
 		"navigationOauthClients": "OAuth clients",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "Le mot de passe doit contenir une lettre minuscule",
 			"requiresSpecial": "Le mot de passe doit contenir un caractère spécial (!, ?, #, etc.)",
 			"requiresUpper": "Le mot de passe doit contenir une lettre majuscule",
-			"short": "Le mot de passe est trop court",
+			"short": "Le mot de passe est trop court"
 		},
 		"new0": "Nouveau mot de passe",
 		"new1": "Nouveau mot de passe (répété)",

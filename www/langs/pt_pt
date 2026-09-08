@@ -519,6 +519,7 @@
 		"navigationLogs": "Registos",
 		"navigationMailAccounts": "Contas de e-mail",
 		"navigationMailSpooler": "Spooler de e-mail",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "Tráfego de e-mail",
 		"navigationModules": "Aplicações",
 		"navigationOauthClients": "Clientes OAuth",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "A palavra-passe deve conter uma letra minúscula",
 			"requiresSpecial": "A palavra-passe deve conter um caractere especial (!, ?, #, etc.)",
 			"requiresUpper": "A palavra-passe deve conter uma letra maiúscula",
-			"short": "A palavra-passe é demasiado curta",
+			"short": "A palavra-passe é demasiado curta"
 		},
 		"new0": "Nova palavra-passe",
 		"new1": "Nova palavra-passe (repetida)",

@@ -519,6 +519,7 @@
 		"navigationLogs": "Naplók",
 		"navigationMailAccounts": "E-mail Fiókok",
 		"navigationMailSpooler": "E-mail Várólista",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "Email traffic",
 		"navigationModules": "Alkalmazások",
 		"navigationOauthClients": "OAuth clients",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "A jelszónak tartalmaznia kell kisbetűt",
 			"requiresSpecial": "A jelszónak tartalmaznia kell speciális karaktert (!, ?, #, stb.)",
 			"requiresUpper": "A jelszónak tartalmaznia kell nagybetűt",
-			"short": "A jelszó túl rövid",
+			"short": "A jelszó túl rövid"
 		},
 		"new0": "Új jelszó",
 		"new1": "Új jelszó (újra)",

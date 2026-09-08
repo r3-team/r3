@@ -519,6 +519,7 @@
 		"navigationLogs": "Logs",
 		"navigationMailAccounts": "Account Email",
 		"navigationMailSpooler": "Spooler Email",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "Traffico Email",
 		"navigationModules": "Applicazioni",
 		"navigationOauthClients": "OAuth clients",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "La password deve contente una lettera minuscola",
 			"requiresSpecial": "La password deve contenere un carattere speciale (!, ?, #, ecc.)",
 			"requiresUpper": "La password deve contente una lettera maiuscola",
-			"short": "Password troppo corta",
+			"short": "Password troppo corta"
 		},
 		"new0": "Nuova password",
 		"new1": "Nuova password (ripetere)",

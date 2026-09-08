@@ -360,12 +360,12 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return request_dbSync.JobLoadPreviewGet(ctx, reqJson)
 		case "getJobLogs":
 			return request_dbSync.JobLogGet(ctx, tx, reqJson)
+		case "informChanged":
+			return nil, cluster.DbSyncChanged_tx(ctx, tx, true)
 		case "setHost":
 			return nil, request_dbSync.HostSet_tx(ctx, tx, reqJson)
 		case "setJob":
 			return nil, request_dbSync.JobSet_tx(ctx, tx, reqJson)
-		case "informChanged":
-			return nil, cluster.DbSyncChanged_tx(ctx, tx, true)
 		}
 	case "doc":
 		switch action {
@@ -549,7 +549,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, request_mail.TemplateDel_tx(ctx, tx, reqJson)
 		case "get":
 			return request_mail.TemplateGet()
-		case "reload":
+		case "informChanged":
 			return nil, cluster.MailTemplatesChanged_tx(ctx, tx, true)
 		case "set":
 			return nil, request_mail.TemplateSet_tx(ctx, tx, reqJson)

@@ -519,6 +519,7 @@
 		"navigationLogs": "日志",
 		"navigationMailAccounts": "邮件帐户",
 		"navigationMailSpooler": "邮件暂存器",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "邮件流量",
 		"navigationModules": "应用程序",
 		"navigationOauthClients": "OAuth 客户端",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "密码必须包含小写字母",
 			"requiresSpecial": "密码必须包含特殊字符（！、？、#等）",
 			"requiresUpper": "密码必须包含大写字母",
-			"short": "密码过短",
+			"short": "密码过短"
 		},
 		"new0": "新密码",
 		"new1": "重复新密码",
@@ -3041,6 +3042,7 @@
 		"borders": "边框",
 		"bordersSquared": "方形",
 		"button": {
+			"loginOptionsDel": "Reset all field settings",
 			"logout": "登出"
 		},
 		"clientEvents": {
@@ -3056,6 +3058,9 @@
 		"colorMenu": "覆盖颜色",
 		"dark": "夜间模式",
 		"dateFormat": "日期格式",
+		"dialog": {
+			"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+		},
 		"encryption": {
 			"backupCode": "备份代码",
 			"backupCodeDesc": "备份代码非常重要；如果忘记密码，它用于重新获得访问权限。",

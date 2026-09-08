@@ -519,6 +519,7 @@
 		"navigationLogs": "Günlükler",
 		"navigationMailAccounts": "E-posta hesapları",
 		"navigationMailSpooler": "E-posta biriktiricisi",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "E-posta trafiği",
 		"navigationModules": "Uygulamalar",
 		"navigationOauthClients": "OAuth istemcileri",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "Şifre küçük harf içermelidir",
 			"requiresSpecial": "Şifre özel bir karakter içermelidir (!, ?, #, vb.)",
 			"requiresUpper": "Şifre büyük harf içermelidir",
-			"short": "Şifre çok kısa",
+			"short": "Şifre çok kısa"
 		},
 		"new0": "Yeni Şifre",
 		"new1": "Yeni şifre (tekrarlandı)",

@@ -519,6 +519,7 @@
 		"navigationLogs": "Registros",
 		"navigationMailAccounts": "Cuentas de correo",
 		"navigationMailSpooler": "Spooler de correo",
+		"navigationMailTemplates": "Email templates",
 		"navigationMailTraffic": "Tráfico de correo",
 		"navigationModules": "Aplicaciones",
 		"navigationOauthClients": "Clientes OAuth",
@@ -3024,7 +3025,7 @@
 			"requiresLower": "La contraseña debe contener una letra minúscula",
 			"requiresSpecial": "La contraseña debe contener un carácter especial (!, ?, #, etc.)",
 			"requiresUpper": "La contraseña debe contener una letra mayúscula",
-			"short": "La contraseña es demasiado corta",
+			"short": "La contraseña es demasiado corta"
 		},
 		"new0": "Nueva contraseña",
 		"new1": "Nueva contraseña (repetida)",
