@@ -174,7 +174,7 @@ export default {
 			const requests = [
 				this.isReset
 					? ws.prepare('loginPassword', 'reset', { code: this.loginPwResetCode, pwNew: this.pwNew, })
-					: ws.prepare('loginPassword', 'set', { pwNew0: this.pwNew0, pwNew1: this.pwNew1, pwOld: this.pwOld })
+					: ws.prepare('loginPassword', 'set', { pwNew: this.pwNew0, pwOld: this.pwOld })
 			];
 
 			// update encrypted private key if given

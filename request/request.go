@@ -230,7 +230,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "reset":
 			return nil, request_login.PasswortReset_tx(ctx, tx, reqJson, loginId)
 		case "set":
-			return nil, request_login.PasswortSet_tx(ctx, tx, reqJson, loginId)
+			return nil, request_login.PasswortSet_tx(ctx, tx, reqJson, loginId, isAdmin)
 		}
 	case "loginSetting":
 		switch action {

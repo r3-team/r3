@@ -260,11 +260,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 		}
 	}
 
-	// generate password hash, if password was provided
-	salt, hash := GenerateSaltHash(pass)
-	saltKdf := tools.RandStringRunes(16)
-
 	if isNew {
+		salt, hash := GenerateSaltHash(pass)
+		saltKdf := tools.RandStringRunes(16)
+
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
 				ldap_id, ldap_key, oauth_client_id, oauth_iss, oauth_sub, name, salt, hash,
@@ -305,12 +304,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 			WHERE id = $8
 		`, name, admin, noAuth, isLimited, active, tokenExpiryHours, mfaRequired, id); err != nil {
 			return 0, err
-		}
-
-		if pass != "" {
-			if err := SetSaltHash_tx(ctx, tx, salt, hash, id); err != nil {
-				return 0, err
-			}
 		}
 	}
 

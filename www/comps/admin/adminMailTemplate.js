@@ -98,12 +98,11 @@ export default {
 		</div>
 	</div>`,
 	props: {
-		templateId: { type: [Number, null], required: true },
 		templateOrg: { type: Object, required: true }
 	},
 	emits: ['close', 'makeNew', 'reload'],
 	watch: {
-		templateId: {
+		templateOrg: {
 			handler() { this.reset(); },
 			immediate: true
 		}
@@ -125,7 +124,7 @@ export default {
 
 		// simple
 		isChanged: s => !s.deepIsEqual(s.templateOrg, s.template),
-		isNew: s => s.templateId === null,
+		isNew: s => s.template.id === 0,
 
 		// stores
 		capApp: s => s.$store.getters.captions.admin.mailTemplate,
@@ -173,7 +172,7 @@ export default {
 
 		// backend calls
 		del() {
-			ws.send('mailTemplate', 'del', this.templateId, true).then(
+			ws.send('mailTemplate', 'del', this.template.id, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

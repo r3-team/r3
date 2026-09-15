@@ -270,9 +270,6 @@
 		},
 		"login": {
 			"admin": "Admin",
-			"button": {
-				"resetMfa": "Restablecer MFA"
-			},
 			"dialog": {
 				"delete": "¿Estás seguro de que deseas eliminar este usuario?<br /><br />Esta acción es irreversible.</b>",
 				"notUniqueName": "El mismo nombre de usuario ya ha sido asignado a un usuario diferente.",
@@ -285,9 +282,11 @@
 				"active": "Cuando se desactiva, las sesiones activas se terminarán.",
 				"admin": "Los privilegios de administrador incluyen la gestión de aplicaciones y usuarios. Los administradores también pueden habilitar los modos de mantenimiento y constructor.",
 				"mfaRequired": "Overwrites the global setting.",
+				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "Nombre de usuario - debe ser único dentro del sistema.",
 				"noAuth": "Los usuarios públicos no requieren autenticación. El acceso al sistema es posible solo con una URL.",
 				"password": "Esto sobrescribirá la contraseña actual de este usuario. La autenticación multifactor no se ve afectada por este cambio. El cifrado de extremo a extremo (E2EE) no estará disponible hasta que el usuario proporcione el código de respaldo asociado.",
+				"passwordReset": "This will send out an email, containing a one-time link for a password reset action. Multi-factor authentication is not affected by this reset. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"tokenExpiryHours": "Sobrescribe la configuración global para el tiempo máximo de sesión."
 			},
 			"ldap": "Asignado por LDAP",
@@ -295,11 +294,13 @@
 			"ldapMeta": "Los detalles se importan a través de LDAP",
 			"limited": "Usuario limitado",
 			"limitedDesc": "Cuando un usuario tiene como máximo un solo rol asignado, se cuenta como un usuario 'limitado'. Útil cuando solo se necesita acceso a partes de una aplicación para cosas como manejo de solicitudes o envío de formularios.<br /><br />Los usuarios limitados no pueden tener acceso de administrador o público y se toman de un grupo de licencias separado.",
+			"mfaReset": "Reset multi-factor authentication",
 			"noAuth": "Acceso público",
 			"oauth": "OAuth client",
 			"oauthAssignActive": "Roles are assigned by ID token claim",
 			"oauthMeta": "Details are set by ID token claims",
 			"password": "Establecer nueva contraseña",
+			"passwordReset": "Send email for password reset",
 			"roleContentAdmin": "Admin",
 			"roleContentOther": "Especial",
 			"roleContentUser": "Usuario",
@@ -2475,6 +2476,7 @@
 			"editBulk": "Editar ({COUNT})",
 			"empty": "Vaciar",
 			"enable": "Habilitar",
+			"execute": "Execute",
 			"expert": "Avanzado",
 			"export": "Exportar",
 			"filter": "Filtrar",
@@ -2690,6 +2692,8 @@
 		"loginForms": "Formularios de inicio de sesión",
 		"loginTemplate": "User template",
 		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
+		"mailAccount": "Email account",
+		"mailTemplate": "Email template",
 		"maintenance": "Maintenance",
 		"manual": "Manual",
 		"menu": "Menú",

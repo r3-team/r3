@@ -1,20 +1,17 @@
 import MyInputDecimal from '../inputDecimal.js';
-import {deepIsEqual} from '../shared/generic.js';
-import {
-	dialogCloseAsk,
-	dialogDeleteAsk
-} from '../shared/dialog.js';
+import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
+import { deepIsEqual } from '../shared/generic.js';
 
 export default {
 	name: 'my-admin-mail-account',
-	components: {MyInputDecimal},
-	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
+	components: { MyInputDecimal },
+	template: `<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 
 		<div class="contentBox scroll float">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/mail2.png" />
-					<h1 class="title">{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',inputs.name) }}</h1>
+					<h1 class="title">{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',account.name) }}</h1>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -57,13 +54,13 @@ export default {
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}*</td>
-							<td><input v-model="inputs.name" /></td>
+							<td><input v-model="account.name" /></td>
 							<td></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.accountMode }}*</td>
 							<td>
-								<select v-model="inputs.mode" :disabled="!isNew">
+								<select v-model="account.mode" :disabled="!isNew">
 									<option value="smtp">SMTP</option>
 									<option value="imap">IMAP</option>
 								</select>
@@ -74,26 +71,26 @@ export default {
 						<tr>
 							<td>{{ capApp.accountAuthMethod }}*</td>
 							<td>
-								<select v-model="inputs.authMethod">
+								<select v-model="account.authMethod">
 									<option value="plain">{{ capApp.option.authMethod.plain }}</option>
 									<option value="xoauth2">{{ capApp.option.authMethod.xoauth2 }}</option>
 									<option value="login" v-if="isSmtp">{{ capApp.option.authMethod.login }}</option>
 									<option value="none"  v-if="isSmtp">[{{ capApp.option.authMethod.none }}]</option>
 								</select>
 							</td>
-							<td v-if="inputs.authMethod === 'login'">{{ capApp.accountAuthMethodHintLogin }}</td>
-							<td v-if="inputs.authMethod === 'plain'">{{ capApp.accountAuthMethodHintPlain }}</td>
-							<td v-if="inputs.authMethod === 'xoauth2'">{{ capApp.accountAuthMethodHintXOAuth2 }}</td>
-							<td v-if="inputs.authMethod === 'none'">{{ capApp.accountAuthMethodHintNone }}</td>
+							<td v-if="account.authMethod === 'login'">{{ capApp.accountAuthMethodHintLogin }}</td>
+							<td v-if="account.authMethod === 'plain'">{{ capApp.accountAuthMethodHintPlain }}</td>
+							<td v-if="account.authMethod === 'xoauth2'">{{ capApp.accountAuthMethodHintXOAuth2 }}</td>
+							<td v-if="account.authMethod === 'none'">{{ capApp.accountAuthMethodHintNone }}</td>
 						</tr>
 						<tr v-if="!isNoAuth">
 							<td>{{ capApp.accountUser }}*</td>
-							<td><input v-model="inputs.username" /></td>
+							<td><input v-model="account.username" /></td>
 							<td></td>
 						</tr>
 						<tr v-if="!isNoAuth && !isOauth">
 							<td>{{ capApp.accountPass }}*</td>
-							<td><input v-model="inputs.password" type="password" /></td>
+							<td><input v-model="account.password" type="password" /></td>
 							<td></td>
 						</tr>
 						<tr v-if="isOauth">
@@ -101,8 +98,8 @@ export default {
 							<td>
 								<div class="row gap centered">
 									<select
-										@change="inputs.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
-										:value="inputs.oauthClientId !== null ? String(inputs.oauthClientId) : ''"
+										@change="account.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
+										:value="account.oauthClientId !== null ? String(account.oauthClientId) : ''"
 									>
 										<option value="">-</option>
 										<option v-for="o in oauthClientIdMap" :value="o.id">{{ o.name }}</option>
@@ -117,7 +114,7 @@ export default {
 						</tr>
 						<tr v-if="isSmtp">
 							<td>{{ capApp.accountSendAs }}*</td>
-							<td><input v-model="inputs.sendAs" /></td>
+							<td><input v-model="account.sendAs" /></td>
 							<td><span v-html="capApp.accountSendAsHint" /></td>
 						</tr>
 						<tr v-if="isSmtp">
@@ -125,12 +122,12 @@ export default {
 							<td>
 								<table>
 									<tbody>
-										<tr><td><my-bool v-model="inputs.smimeSign" /></td></tr>
+										<tr><td><my-bool v-model="account.smimeSign" /></td></tr>
 										<tr v-if="isSmimeSign">
-											<td><input v-model="inputs.smimePathCrt" :placeholder="capGen.file + ': ' + capGen.certificate" /></td>
+											<td><input v-model="account.smimePathCrt" :placeholder="capGen.file + ': ' + capGen.certificate" /></td>
 										</tr>
 										<tr v-if="isSmimeSign">
-											<td><input v-model="inputs.smimePathKey" :placeholder="capGen.file + ': ' + capGen.keyPrivate" /></td>
+											<td><input v-model="account.smimePathKey" :placeholder="capGen.file + ': ' + capGen.keyPrivate" /></td>
 										</tr>
 									</tbody>
 								</table>
@@ -140,7 +137,7 @@ export default {
 						<tr>
 							<td>{{ capGen.encryption }}*</td>
 							<td>
-								<select v-model="inputs.connectMethod">
+								<select v-model="account.connectMethod">
 									<option value="tls">{{ capApp.option.connectMethod.tls }}</option>
 									<option value="starttls">{{ capApp.option.connectMethod.starttls }}</option>
 									<option value="plain" v-if="isSmtp">[{{ capApp.option.connectMethod.plain }}]</option>
@@ -150,21 +147,21 @@ export default {
 						</tr>
 						<tr>
 							<td>{{ capApp.accountHost }}*</td>
-							<td><input v-model="inputs.hostName" /></td>
+							<td><input v-model="account.hostName" /></td>
 							<td></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.accountPort }}*</td>
-							<td><input v-model.number="inputs.hostPort" /></td>
+							<td><input v-model.number="account.hostPort" /></td>
 							<td></td>
 						</tr>
 						<tr v-if="isSmtp">
 							<td>{{ capApp.sendCount }}</td>
 							<td colspan="2">
 								<div class="row gap centered">
-									<my-input-decimal class="short" v-model="inputs.sendCount" :min="1" :allowNull="false" :lengthFract="0" />
+									<my-input-decimal class="short" v-model="account.sendCount" :min="1" :allowNull="false" :lengthFract="0" />
 									<span>{{ capGen.every }}</span>
-									<my-input-decimal class="short" v-model="inputs.sendSeconds" :min="1" :allowNull="false" :lengthFract="0" />
+									<my-input-decimal class="short" v-model="account.sendSeconds" :min="1" :allowNull="false" :lengthFract="0" />
 									<span>{{ capGen.seconds }}</span>
 								</div>
 							</td>
@@ -173,113 +170,91 @@ export default {
 							<td>{{ capApp.resendCount }}</td>
 							<td colspan="2">
 								<div class="row gap centered">
-									<my-input-decimal class="short" v-model="inputs.resendCount" :min="0" :allowNull="false" :lengthFract="0" />
+									<my-input-decimal class="short" v-model="account.resendCount" :min="0" :allowNull="false" :lengthFract="0" />
 									<span>{{ capGen.every }}</span>
-									<my-input-decimal class="short" v-model="inputs.resendSeconds" :min="0" :allowNull="false" :lengthFract="0" />
+									<my-input-decimal class="short" v-model="account.resendSeconds" :min="0" :allowNull="false" :lengthFract="0" />
 									<span>{{ capGen.seconds }}</span>
 								</div>
 							</td>
 						</tr>
 						<tr>
 							<td>{{ capGen.comments }}</td>
-							<td colspan="2"><textarea v-model="inputs.comment"></textarea></td>
+							<td colspan="2"><textarea v-model="account.comment"></textarea></td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>`,
-	props:{
-		id:              { type:Number, required:true },
-		mailAccountIdMap:{ type:Object, required:true },
-		oauthClientIdMap:{ type:Object, required:true }
+	props: {
+		accountOrg: { type: Object, required: true },
+		oauthClientIdMap: { type: Object, required: true }
 	},
-	emits:['close','makeNew'],
-	watch:{
-		id:{
-			handler(v) { this.reset(); },
-			immediate:true
-		},
+	emits: ['close', 'makeNew'],
+	watch: {
+		accountOrg: {
+			handler() { this.reset(); },
+			immediate: true
+		}
 	},
 	data() {
 		return {
-			inputs:{},
-			isReady:false
+			account: {},
+			isReady: false
 		};
 	},
-	computed:{
-		inputsOrg:s => s.isNew ? {
-			id:0,
-			name:'',
-			comment:null,
-			mode:'smtp',
-			connectMethod:'tls',
-			authMethod:'plain',
-			username:'',
-			password:'',
-			sendAs:'',
-			hostName:'',
-			hostPort:465,
-			oauthClientId:null,
-			smimeSign:false,
-			smimePathCrt:null,
-			smimePathKey: null,
-			sendCount: 999,
-			sendSeconds: 60,
-			resendCount: 5,
-			resendSeconds: 60
-		} : s.mailAccountIdMap[s.id],
-
-		// simple states
-		canSave:s =>
+	computed: {
+		canSave: s =>
 			s.isReady &&
 			s.isChanged &&
-			s.inputs.name     !== '' &&
-			s.inputs.mode     !== '' &&
-			s.inputs.hostName !== '' &&
-			s.inputs.hostPort !== '' && (
+			s.account.name !== '' &&
+			s.account.mode !== '' &&
+			s.account.hostName !== '' &&
+			s.account.hostPort !== '' && (
 				s.isNoAuth ||
-				(s.isOauth && s.inputs.oauthClientId !== null && s.inputs.username !== '') ||
-				(s.inputs.password !== '' && s.inputs.username !== '')
+				(s.isOauth && s.account.oauthClientId !== null && s.account.username !== '') ||
+				(s.account.password !== '' && s.account.username !== '')
 			) && (
 				!s.isSmtp ||
 				!s.isSmimeSign ||
 				(
-					s.inputs.smimePathCrt !== null && s.inputs.smimePathCrt !== '' &&
-					s.inputs.smimePathKey !== null && s.inputs.smimePathKey !== ''
+					s.account.smimePathCrt !== null && s.account.smimePathCrt !== '' &&
+					s.account.smimePathKey !== null && s.account.smimePathKey !== ''
 				)
 			),
-		isChanged:  s => !s.deepIsEqual(s.inputsOrg,s.inputs),
-		isNew:      s => s.id                === 0,
-		isNoAuth:   s => s.inputs.authMethod === 'none',
-		isOauth:    s => s.inputs.authMethod === 'xoauth2',
-		isSmimeSign:s => s.inputs.smimeSign,
-		isSmtp:     s => s.inputs.mode       === 'smtp',
+
+		// simple
+		isChanged: s => !s.deepIsEqual(s.accountOrg, s.account),
+		isNew: s => s.account.id === 0,
+		isNoAuth: s => s.account.authMethod === 'none',
+		isOauth: s => s.account.authMethod === 'xoauth2',
+		isSmimeSign: s => s.account.smimeSign,
+		isSmtp: s => s.account.mode === 'smtp',
 
 		// stores
-		capApp:s => s.$store.getters.captions.admin.mails,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.admin.mails,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		deepIsEqual,
 		dialogCloseAsk,
 		dialogDeleteAsk,
 
 		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's') {
-				if(this.canSave)
+			if (e.ctrlKey && e.key === 's') {
+				if (this.canSave)
 					this.set();
 
 				e.preventDefault();
 			}
-			if(e.key === 'Escape') {
+			if (e.key === 'Escape') {
 				this.closeAsk();
 				e.preventDefault();
 			}
@@ -287,36 +262,36 @@ export default {
 
 		// actions
 		closeAsk() {
-			this.dialogCloseAsk(this.close,this.isChanged);
+			this.dialogCloseAsk(this.close, this.isChanged);
 		},
 		close() {
 			this.$emit('close');
 		},
 		reloadAndClose() {
-			ws.send('mailAccount','reload',{},true).then(
+			ws.send('mailAccount', 'reload', {}, true).then(
 				this.close,
 				this.$root.genericError
 			);
 		},
 		reset() {
-			this.inputs  = JSON.parse(JSON.stringify(this.inputsOrg));
+			this.account = JSON.parse(JSON.stringify(this.accountOrg));
 			this.isReady = true;
 		},
 
 		// backend calls
 		del() {
-			ws.send('mailAccount','del',this.id,true).then(
+			ws.send('mailAccount', 'del', this.account.id, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);
 		},
 		set() {
 			// set nulls where applicable
-			if(this.inputs.comment === '')      this.inputs.comment      = null;
-			if(this.inputs.smimePathCrt === '') this.inputs.smimePathCrt = null;
-			if(this.inputs.smimePathKey === '') this.inputs.smimePathKey = null;
+			if (this.account.comment === '') this.account.comment = null;
+			if (this.account.smimePathCrt === '') this.account.smimePathCrt = null;
+			if (this.account.smimePathKey === '') this.account.smimePathKey = null;
 
-			ws.send('mailAccount','set',this.inputs,true).then(
+			ws.send('mailAccount', 'set', this.account, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

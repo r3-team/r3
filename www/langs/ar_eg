@@ -270,9 +270,6 @@
 		},
 		"login": {
 			"admin": "مسؤل",
-			"button": {
-				"resetMfa": "إعادة تعيين وزارة الخارجية"
-			},
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف تسجيل الدخول هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>",
 				"notUniqueName": "The same username has already been assigned to a different user.",
@@ -285,9 +282,11 @@
 				"active": "عند إلغاء التنشيط، سيتم إنهاء الجلسات النشطة.",
 				"admin": "تتضمن امتيازات المسؤول إدارة التطبيقات والمستخدمين. ",
 				"mfaRequired": "Overwrites the global setting.",
+				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "اسم مستخدم تسجيل الدخول - يجب أن يكون فريدًا داخل النظام.",
 				"noAuth": "تسجيلات الدخول العامة لا تتطلب المصادقة. ",
 				"password": "سيؤدي هذا إلى استبدال كلمة المرور الحالية لتسجيل الدخول هذا. ",
+				"passwordReset": "This will send out an email, containing a one-time link for a password reset action. Multi-factor authentication is not affected by this reset. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"tokenExpiryHours": "يقوم بالكتابة فوق الإعداد العام للحد الأقصى. "
 			},
 			"ldap": "تم تعيين LDAP",
@@ -295,11 +294,13 @@
 			"ldapMeta": "Details are imported via LDAP",
 			"limited": "Limited user",
 			"limitedDesc": "When a user has at most a single role assigned, it counts as a 'limited' user. Useful for when only access to parts of an application is needed for things like request handling or form submission.<br /><br />Limited users cannot have admin or public access and take from a separate license pool.",
+			"mfaReset": "Reset multi-factor authentication",
 			"noAuth": "الوصول العام",
 			"oauth": "OAuth client",
 			"oauthAssignActive": "Roles are assigned by ID token claim",
 			"oauthMeta": "Details are set by ID token claims",
 			"password": "تعيين كلمة مرور جديدة",
+			"passwordReset": "Send email for password reset",
 			"roleContentAdmin": "مسؤل",
 			"roleContentOther": "خاص",
 			"roleContentUser": "مستخدم",
@@ -2475,6 +2476,7 @@
 			"editBulk": "تحرير ({COUNT})",
 			"empty": "فارغ",
 			"enable": "Enable",
+			"execute": "Execute",
 			"expert": "متقدم",
 			"export": "يصدّر",
 			"filter": "فلتر",
@@ -2690,6 +2692,8 @@
 		"loginForms": "نماذج تسجيل الدخول",
 		"loginTemplate": "User template",
 		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
+		"mailAccount": "Email account",
+		"mailTemplate": "Email template",
 		"maintenance": "Maintenance",
 		"manual": "Manual",
 		"menu": "قائمة طعام",

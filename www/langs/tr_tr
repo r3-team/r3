@@ -270,9 +270,6 @@
 		},
 		"login": {
 			"admin": "Yönetici",
-			"button": {
-				"resetMfa": "MFA'yı sıfırla"
-			},
 			"dialog": {
 				"delete": "Bu kullanıcıyı silmek istediğinizden emin misiniz?<br /><br />Bu işlem geri alınamaz.</b>",
 				"notUniqueName": "Aynı kullanıcı adı zaten farklı bir kullanıcıya atanmış.",
@@ -285,9 +282,11 @@
 				"active": "Devre dışı bırakıldığında aktif oturumlar sonlandırılacaktır.",
 				"admin": "Yönetici ayrıcalıkları uygulamaların ve kullanıcıların yönetimini içerir. Yöneticiler ayrıca bakım ve oluşturucu modlarını da etkinleştirebilir.",
 				"mfaRequired": "Overwrites the global setting.",
+				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "Kullanıcı adı - sistem içinde benzersiz olmalıdır.",
 				"noAuth": "Genel kullanıcılar kimlik doğrulama gerektirmez. Sistem erişimi yalnızca URL ile mümkündür.",
 				"password": "Bu, bu kullanıcının mevcut şifresinin üzerine yazılacaktır. Çok faktörlü kimlik doğrulama bu değişiklikten etkilenmez. Kullanıcı ilgili yedekleme kodunu sağlayana kadar uçtan uca şifreleme (E2EE) kullanılamayacaktır.",
+				"passwordReset": "This will send out an email, containing a one-time link for a password reset action. Multi-factor authentication is not affected by this reset. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"tokenExpiryHours": "Maks. için genel ayarın üzerine yazar. oturum süresi."
 			},
 			"ldap": "LDAP atandı",
@@ -295,11 +294,13 @@
 			"ldapMeta": "Ayrıntılar LDAP aracılığıyla içe aktarılır",
 			"limited": "Sınırlı kullanıcı",
 			"limitedDesc": "Bir kullanıcıya en fazla tek bir rol atanmışsa, 'sınırlı' kullanıcı olarak sayılır. İstek işleme veya form gönderme gibi şeyler için bir uygulamanın yalnızca bölümlerine erişimin gerekli olduğu durumlarda kullanışlıdır.<br /><br />Sınırlı kullanıcılar yönetici veya genel erişime sahip olamaz ve ayrı bir lisans havuzundan yararlanamaz.",
+			"mfaReset": "Reset multi-factor authentication",
 			"noAuth": "Genel erişim",
 			"oauth": "OAuth istemcisi",
 			"oauthAssignActive": "Roller, kimlik belirteci talebine göre atanır",
 			"oauthMeta": "Ayrıntılar kimlik belirteci taleplerine göre belirlenir",
 			"password": "Yeni şifre belirle",
+			"passwordReset": "Send email for password reset",
 			"roleContentAdmin": "Yönetici",
 			"roleContentOther": "Özel",
 			"roleContentUser": "Kullanıcı",
@@ -2475,6 +2476,7 @@
 			"editBulk": "Düzenle ({COUNT})",
 			"empty": "Boş",
 			"enable": "Olanak vermek",
+			"execute": "Execute",
 			"expert": "Gelişmiş",
 			"export": "İhracat",
 			"filter": "Filtre",
@@ -2690,6 +2692,8 @@
 		"loginForms": "Giriş formları",
 		"loginTemplate": "Kullanıcı şablonu",
 		"loginTemplateHint": "Yeni bir kullanıcı oluşturulduğunda, önceden tanımlanmış ayarlar seçilen şablondan bir kez uygulanır. Burada hiçbir şey seçilmezse global şablon kullanılır.",
+		"mailAccount": "Email account",
+		"mailTemplate": "Email template",
 		"maintenance": "Bakım",
 		"manual": "Manuel",
 		"menu": "Menü",

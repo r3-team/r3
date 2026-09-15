@@ -270,9 +270,6 @@
 		},
 		"login": {
 			"admin": "Administrators",
-			"button": {
-				"resetMfa": "Atjaunot MFA"
-			},
 			"dialog": {
 				"delete": "Are you sure you want to delete this user?<br /><br />This action is irreversible.</b>",
 				"notUniqueName": "The same username has already been assigned to a different user.",
@@ -285,9 +282,11 @@
 				"active": "Ja tiek deaktivizēts, aktīvās sesijas tiks pārtrauktas.",
 				"admin": "Administratora privilēģijas ietver lietojumprogrammu un lietotāju pārvaldību. Administratori var arī aktivizēt uzturēšanas un veidotāja režīmus.",
 				"mfaRequired": "Overwrites the global setting.",
+				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "Username - must be unique within the system.",
 				"noAuth": "Public users do not require authentication. System access is possible with only a URL.",
 				"password": "This will overwrite the current password for this user. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
+				"passwordReset": "This will send out an email, containing a one-time link for a password reset action. Multi-factor authentication is not affected by this reset. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"tokenExpiryHours": "Overwrites the global setting for max. session time."
 			},
 			"ldap": "Assigned to LDAP",
@@ -295,11 +294,13 @@
 			"ldapMeta": "Details are imported via LDAP",
 			"limited": "Limited user",
 			"limitedDesc": "When a user has at most a single role assigned, it counts as a 'limited' user. Useful for when only access to parts of an application is needed for things like request handling or form submission.<br /><br />Limited users cannot have admin or public access and take from a separate license pool.",
+			"mfaReset": "Reset multi-factor authentication",
 			"noAuth": "Public access",
 			"oauth": "OAuth client",
 			"oauthAssignActive": "Roles are assigned by ID token claim",
 			"oauthMeta": "Details are set by ID token claims",
 			"password": "Set new password",
+			"passwordReset": "Send email for password reset",
 			"roleContentAdmin": "Administrator",
 			"roleContentOther": "Special",
 			"roleContentUser": "User",
@@ -2475,6 +2476,7 @@
 			"editBulk": "Rediģēt ({COUNT})",
 			"empty": "Tukšs",
 			"enable": "Enable",
+			"execute": "Execute",
 			"expert": "Eksperts",
 			"export": "Eksportēt",
 			"filter": "Filtrs",
@@ -2690,6 +2692,8 @@
 		"loginForms": "Login forms",
 		"loginTemplate": "User template",
 		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
+		"mailAccount": "Email account",
+		"mailTemplate": "Email template",
 		"maintenance": "Maintenance",
 		"manual": "Manual",
 		"menu": "Izvēlne",

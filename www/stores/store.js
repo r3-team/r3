@@ -99,8 +99,10 @@ const MyStore = Vuex.createStore({
 		loginSessionExpires: null,      // unix timestamp of session expiration date
 		loginType: null,                // user login type (local, oauth, ldap, noAuth, fixed)
 		loginWidgetGroups: [],          // user widgets, starting with widget groups
-		mailSpoolerStuckIn: 0,          // count of mails stuck in spooler (incoming), retrieved for admins
-		mailSpoolerStuckOut: 0,         // count of mails stuck in spooler (outgoing), retrieved for admins
+		mailAccountIdMap: {},           // map of mail accounts by ID (admin only)
+		mailSpoolerStuckIn: 0,          // count of incoming mails stuck in spooler, (admin only)
+		mailSpoolerStuckOut: 0,         // count of outgoing mails stuck in spooler, (admin only)
+		mailTemplateIdMap: {},          // map of mail templates by ID (admin only)
 		mirrorMode: false,              // instance runs in mirror mode (eg. mirrors another, likely production instance)
 		moduleEntries: [],              // module entries for header/home page
 		moduleIdLast: null,             // module ID of last active module
@@ -304,18 +306,20 @@ const MyStore = Vuex.createStore({
 		isWithoutMenuHeader: (s, p) => s.isWithoutMenuHeader = p,
 		loginHasClient: (s, p) => s.loginHasClient = p,
 		loginId: (s, p) => s.loginId = p,
+		loginMfaSetup: (s, p) => s.loginMfaSetup = p,
 		loginName: (s, p) => s.loginName = p,
 		loginPrivateKey: (s, p) => s.loginPrivateKey = p,
 		loginPrivateKeyEnc: (s, p) => s.loginPrivateKeyEnc = p,
 		loginPrivateKeyEncBackup: (s, p) => s.loginPrivateKeyEncBackup = p,
+		loginPwResetCode: (s, p) => s.loginPwResetCode = p,
 		loginPublicKey: (s, p) => s.loginPublicKey = p,
 		loginSessionExpired: (s, p) => s.loginSessionExpired = p,
 		loginSessionExpires: (s, p) => s.loginSessionExpires = p,
 		loginWidgetGroups: (s, p) => s.loginWidgetGroups = p,
+		mailAccountIdMap: (s, p) => s.mailAccountIdMap = p,
 		mailSpoolerStuckIn: (s, p) => s.mailSpoolerStuckIn = p,
 		mailSpoolerStuckOut: (s, p) => s.mailSpoolerStuckOut = p,
-		loginMfaSetup: (s, p) => s.loginMfaSetup = p,
-		loginPwResetCode: (s, p) => s.loginPwResetCode = p,
+		mailTemplateIdMap: (s, p) => s.mailTemplateIdMap = p,
 		mirrorMode: (s, p) => s.mirrorMode = p,
 		moduleEntries: (s, p) => s.moduleEntries = p,
 		moduleIdLast: (s, p) => s.moduleIdLast = p,
@@ -396,6 +400,29 @@ const MyStore = Vuex.createStore({
 
 			const seconds = s.license.validUntil - Date.now() / 1000;
 			return Math.round(seconds / 60 / 60 / 24);
+		},
+		mailAccountsSmtp: s => {
+			const out = [];
+			for (const k in s.mailAccountIdMap) {
+				if (s.mailAccountIdMap[k].mode === 'smtp')
+					out.push(s.mailAccountIdMap[k]);
+			}
+			out.sort((a, b) => a.name < b.name ? -1 : 1);
+			return out;
+		},
+		mailTemplatesPwReset: s => {
+			const out = [];
+			for (const k in s.mailTemplateIdMap) {
+				if (s.mailTemplateIdMap[k].content === 'loginPwReset')
+					out.push(s.mailTemplateIdMap[k]);
+			}
+			out.sort((a, b) => a.name < b.name ? -1 : 1);
+			return out;
+		},
+		mailTemplatesSorted: s => {
+			const out = Object.values(s.mailTemplateIdMap);
+			out.sort((a, b) => `${a.content}_${a.name}` > `${b.content}_${b.name}` ? 1 : -1);
+			return out;
 		},
 		moduleIdMapLang: s => {
 			const out = {};
@@ -498,18 +525,20 @@ const MyStore = Vuex.createStore({
 		loginEncLocked: s => s.loginPrivateKeyEnc !== null && s.loginPrivateKey === null,
 		loginHasClient: s => s.loginHasClient,
 		loginId: s => s.loginId,
+		loginMfaSetup: s => s.loginMfaSetup,
 		loginName: s => s.loginName,
 		loginPrivateKey: s => s.loginPrivateKey,
 		loginPrivateKeyEnc: s => s.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup: s => s.loginPrivateKeyEncBackup,
+		loginPwResetCode: s => s.loginPwResetCode,
 		loginPublicKey: s => s.loginPublicKey,
 		loginSessionExpired: s => s.loginSessionExpired,
 		loginSessionExpires: s => s.loginSessionExpires,
 		loginWidgetGroups: s => s.loginWidgetGroups,
+		mailAccountIdMap: s => s.mailAccountIdMap,
 		mailSpoolerStuckIn: s => s.mailSpoolerStuckIn,
 		mailSpoolerStuckOut: s => s.mailSpoolerStuckOut,
-		loginMfaSetup: s => s.loginMfaSetup,
-		loginPwResetCode: s => s.loginPwResetCode,
+		mailTemplateIdMap: s => s.mailTemplateIdMap,
 		mirrorMode: s => s.mirrorMode,
 		moduleEntries: s => s.moduleEntries,
 		moduleIdLast: s => s.moduleIdLast,

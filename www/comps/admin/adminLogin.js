@@ -95,13 +95,6 @@ export default {
 					/>
 				</div>
 				<div class="area">
-					<my-button image="warning.png"
-						v-if="!isNew"
-						@trigger="resetTotpAsk"
-						:active="!inputs.noAuth && !isOauth"
-						:cancel="true"
-						:caption="capApp.button.resetMfa"
-					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
@@ -123,7 +116,7 @@ export default {
 							</td>
 							<td class="default-inputs">
 								<div class="column gap">
-									<input v-model="inputs.name" v-focus @input="typedUniqueField('name',inputs.name)" :disabled="!isAuthR3" />
+									<input v-model="inputs.name" v-focus @input="typedUniqueField('name',inputs.name)" :disabled="!isAuthLocal" />
 									<div v-if="notUniqueName && inputs.name !== ''" class="message error">
 										{{ capApp.dialog.notUniqueName }}
 									</div>
@@ -131,23 +124,40 @@ export default {
 							</td>
 							<td>{{ capApp.hint.name }}</td>
 						</tr>
-						<tr v-if="isNew">
-							<td>
-								<div class="title-cell">
-									<img src="images/personTemplate.png" />
-									<span>{{ capGen.loginTemplate }}</span>
-								</div>
-							</td>
-							<td class="default-inputs">
-								<select v-model="templateId">
-									<option v-for="t in templates" :title="t.comment" :value="t.id">
-										{{ t.name }}
-									</option>
-								</select>
-							</td>
-							<td>{{ capGen.loginTemplateHint }}</td>
-						</tr>
-						<tr v-if="!isAuthR3">
+						<template v-if="isNew">
+							<tr>
+								<td>
+									<div class="title-cell">
+										<img src="images/personTemplate.png" />
+										<span>{{ capGen.loginTemplate }}</span>
+									</div>
+								</td>
+								<td class="default-inputs">
+									<select v-model="templateId">
+										<option v-for="t in templates" :title="t.comment" :value="t.id">
+											{{ t.name }}
+										</option>
+									</select>
+								</td>
+								<td>{{ capGen.loginTemplateHint }}</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="title-cell">
+										<img src="images/key.png" />
+										<span>{{ capGen.password }}</span>
+									</div>
+								</td>
+								<td class="default-inputs">
+									<input autocomplete="new-password" type="password"
+										v-model="inputs.pass"
+										:disabled="!isAuthLocalPw"
+										:placeholder="capGen.threeDots"
+									/>
+								</td>
+							</tr>
+						</template>
+						<tr v-if="!isAuthLocal">
 							<td>
 								<div v-if="isLdap" class="title-cell">
 									<img src="images/hierarchy.png" />
@@ -174,9 +184,9 @@ export default {
 				<div class="login-details">
 					<my-tabs class="login-details-tabs"
 						v-model="tabTarget"
-						:entries="['meta','roles','properties']"
-						:entriesIcon="['images/editBox.png','images/personMultiple.png','images/personCog.png']"
-						:entriesText="[capGen.details,capApp.roles.replace('{COUNT}',roleTotalNonHidden),capGen.properties]"
+						:entries="tabs.items"
+						:entriesIcon="tabs.icons"
+						:entriesText="tabs.names"
 					/>
 					<div class="login-details-content" :class="{ roles:tabTarget === 'roles' }">
 
@@ -188,7 +198,7 @@ export default {
 								@input-in-unique-field="typedUniqueField"
 								v-model="inputs.meta"
 								:notUniqueEmail="notUniqueEmail"
-								:readonly="!isAuthR3"
+								:readonly="!isAuthLocal"
 							/>
 						</template>
 
@@ -301,11 +311,11 @@ export default {
 											<span>{{ capApp.noAuth }}</span>
 										</div>
 									</td>
-									<td><my-bool v-model="inputs.noAuth" :readonly="!isAuthR3" /></td>
+									<td><my-bool v-model="inputs.noAuth" :readonly="!isAuthLocal" /></td>
 									<td>
 										<div class="column gap default-inputs">
 											<span>{{ capApp.hint.noAuth }}</span>
-											<div class="row gap centered" v-if="inputs.noAuth">
+											<div class="row gap centered" v-if="isAuthPublic">
 												<input disabled :value="noAuthUrl" />
 												<my-button image="copyClipboard.png"
 													@trigger="copyToClipboard"
@@ -323,7 +333,7 @@ export default {
 										</div>
 									</td>
 									<td class="default-inputs">
-										<select v-model="mfaRequiredSelect" :disabled="inputs.noAuth || !isAuthR3">
+										<select v-model="mfaRequiredSelect" :disabled="isAuthPublic || isOauth">
 											<option value="">{{ capGen.systemDefault }}</option>
 											<option value="1">{{ capGen.required }}</option>
 											<option value="0">{{ capGen.optional }}</option>
@@ -350,20 +360,6 @@ export default {
 									<td>{{ inputs.tokenExpiryHours === null ? '' : capApp.hint.tokenExpiryHours }}</td>
 								</tr>
 
-								<tr v-if="anyAction"><td colspan="3" class="grouping">{{ capGen.actions }}</td></tr>
-								<tr v-if="isAuthR3">
-									<td>
-										<div class="title-cell">
-											<img src="images/lock.png" />
-											<span>{{ capApp.password }}</span>
-										</div>
-									</td>
-									<td class="default-inputs">
-										<input autocomplete="new-password" type="password" v-model="inputs.pass" :placeholder="capGen.threeDots" />
-									</td>
-									<td>{{ capApp.hint.password }}</td>
-								</tr>
-
 								<tr v-if="anyInfo"><td colspan="3" class="grouping">{{ capGen.information }}</td></tr>
 								<tr v-if="isLimited">
 									<td>
@@ -373,6 +369,74 @@ export default {
 										</div>
 									</td>
 									<td colspan="2"><span v-html="capApp.limitedDesc"></span></td>
+								</tr>
+							</tbody>
+						</table>
+
+						<!-- actions -->
+						<table class="generic-table-vertical w1200" v-if="tabTarget === 'actions'">
+							<tbody>
+								<tr><td colspan="3" class="grouping">{{ capApp.passwordReset }}</td></tr>
+								<tr>
+									<td class="default-inputs">
+										<div class="column gap">
+											<select
+												@input="mailAccountId = parseInt($event.target.value)"
+												:disabled="!isAuthLocalPw"
+												:value="String(mailAccountId)"
+											>
+												<option value="0">- {{ capGen.mailAccount }} -</option>
+												<option v-for="a in mailAccountsSmtp" :value="a.id">{{ a.name }}</option>
+											</select>
+											<select
+												@input="mailTemplateId = parseInt($event.target.value)"
+												:disabled="!isAuthLocalPw"
+												:value="String(mailTemplateId)"
+											>
+												<option value="0">- {{ capGen.mailTemplate }} -</option>
+												<option v-for="t in mailTemplatesPwReset" :value="t.id">{{ t.name }}</option>
+											</select>
+											<div class="row">
+												<my-button image="mail2.png"
+													@trigger="sendResetMail"
+													:active="mailAccountId !== 0 && mailTemplateId !== 0"
+													:caption="capGen.button.send"
+												/>
+											</div>
+										</div>
+									</td>
+									<td>{{ capApp.hint.passwordReset }}</td>
+								</tr>
+								<tr><td colspan="3" class="grouping">{{ capApp.password }}</td></tr>
+								<tr>
+									<td class="default-inputs">
+										<div class="column gap">
+											<input autocomplete="new-password" type="password"
+												v-model="passSet"
+												:disabled="!isAuthLocalPw"
+												:placeholder="capGen.threeDots"
+											/>
+											<div class="row">
+												<my-button image="save.png"
+													@trigger="setPassword"
+													:active="passSet !== ''"
+													:caption="capGen.button.execute"
+												/>
+											</div>
+										</div>
+									</td>
+									<td>{{ capApp.hint.password }}</td>
+								</tr>
+								<tr><td colspan="3" class="grouping">{{ capApp.mfaReset }}</td></tr>
+								<tr>
+									<td>
+										<my-button image="save.png"
+											@trigger="resetTotpAsk"
+											:active="!isAuthPublic && !isOauth"
+											:caption="capGen.button.execute"
+										/>
+									</td>
+									<td>{{ capApp.hint.mfaReset }}</td>
 								</tr>
 							</tbody>
 						</table>
@@ -408,10 +472,19 @@ export default {
 			// login form
 			loginFormIndexesDropdown: [],
 			loginFormIndexOpen: null,
-			loginFormRecords: null
+			loginFormRecords: null,
+
+			// PW set action
+			passSet: '',
+
+			// PW reset action
+			mailAccountId: 0,
+			mailTemplateId: 0
 		};
 	},
 	computed: {
+		modulesFiltered: s => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
+			(s.roleFilter === '' || s.getCaption('moduleTitle', v.id, v.id, v.captions, v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		roleTotalNonHidden: s => {
 			let cnt = 0;
 			for (const roleId of s.inputs.roleIds) {
@@ -420,8 +493,19 @@ export default {
 			}
 			return cnt;
 		},
-		modulesFiltered: s => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
-			(s.roleFilter === '' || s.getCaption('moduleTitle', v.id, v.id, v.captions, v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
+		tabs: s => {
+			const out = {
+				icons: ['images/editBox.png', 'images/personMultiple.png', 'images/personCog.png'],
+				items: ['meta', 'roles', 'properties'],
+				names: [s.capGen.details, s.capApp.roles.replace('{COUNT}', s.roleTotalNonHidden), s.capGen.properties]
+			};
+			if (!s.isNew) {
+				out.icons.push('images/cogMultiple.png');
+				out.items.push('actions');
+				out.names.push(s.capGen.actions);
+			}
+			return out;
+		},
 
 		// inputs
 		mfaRequiredSelect: {
@@ -434,10 +518,11 @@ export default {
 		},
 
 		// simple states
-		anyAction: s => s.isAuthR3,
 		anyInfo: s => s.isLimited,
 		canSave: s => s.isChanged && !s.notUniqueName && s.inputs.name !== '',
-		isAuthR3: s => !s.isLdap && !s.isOauth,
+		isAuthLocal: s => !s.isLdap && !s.isOauth,
+		isAuthLocalPw: s => s.isAuthLocal && !s.isAuthPublic,
+		isAuthPublic: s => s.inputs.noAuth,
 		isChanged: s => s.ready && !s.deepIsEqual(s.inputsOrg, s.inputs),
 		isExtRole: s => s.isLdapAssignedRoles || s.isOauthClientAssignedRoles,
 		isFormOpen: s => s.loginFormIndexOpen !== null,
@@ -457,6 +542,8 @@ export default {
 		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
 		capApp: s => s.$store.getters.captions.admin.login,
 		capGen: s => s.$store.getters.captions.generic,
+		mailAccountsSmtp: s => s.$store.getters.mailAccountsSmtp,
+		mailTemplatesPwReset: s => s.$store.getters.mailTemplatesPwReset,
 		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta
 	},
 	mounted() {
@@ -471,6 +558,18 @@ export default {
 			for (const lf of this.loginForms) {
 				this.inputs.records.push({ id: null, label: '' });
 			}
+		}
+		if (this.mailAccountsSmtp.length === 0) {
+			ws.send('mailAccount', 'get', {}, true).then(
+				res => this.$store.commit('mailAccountIdMap', res.payload),
+				this.$root.genericError
+			);
+		}
+		if (this.mailTemplatesPwReset.length === 0) {
+			ws.send('mailTemplate', 'get', {}, true).then(
+				res => this.$store.commit('mailTemplateIdMap', res.payload),
+				this.$root.genericError
+			);
 		}
 	},
 	unmounted() {
@@ -705,6 +804,20 @@ export default {
 				},
 				this.$root.genericError
 			);
+		},
+		setPassword() {
+			ws.send('loginPassword', 'set', {
+				loginIdTarget: this.loginId,
+				pwNew: this.passSet
+			}, true).then(
+				() => this.passSet = '',
+				this.$root.genericError
+			);
+		},
+
+		// PW reset calls
+		sendResetMail() {
+
 		},
 
 		// MFA calls

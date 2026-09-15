@@ -270,9 +270,6 @@
 		},
 		"login": {
 			"admin": "Admin",
-			"button": {
-				"resetMfa": "Repor MFA"
-			},
 			"dialog": {
 				"delete": "Tem a certeza de que deseja eliminar este utilizador?<br /><br />Esta ação é irreversível.</b>",
 				"notUniqueName": "O mesmo nome de utilizador já foi atribuído a um utilizador diferente.",
@@ -285,9 +282,11 @@
 				"active": "Quando desativado, as sessões ativas serão terminadas.",
 				"admin": "Os privilégios de administrador incluem a gestão de aplicações e utilizadores. Os administradores também podem ativar os modos de manutenção e construtor.",
 				"mfaRequired": "Overwrites the global setting.",
+				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "Nome de utilizador - deve ser único dentro do sistema.",
 				"noAuth": "Os utilizadores públicos não requerem autenticação. O acesso ao sistema é possível apenas com um URL.",
 				"password": "Isto irá substituir a palavra-passe atual deste utilizador. A autenticação multifator não é afetada por esta alteração. A encriptação de ponta a ponta (E2EE) não estará disponível até que o utilizador forneça o código de backup associado.",
+				"passwordReset": "This will send out an email, containing a one-time link for a password reset action. Multi-factor authentication is not affected by this reset. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"tokenExpiryHours": "Substitui a configuração global para o tempo máximo de sessão."
 			},
 			"ldap": "Atribuído por LDAP",
@@ -295,11 +294,13 @@
 			"ldapMeta": "Os detalhes são importados via LDAP",
 			"limited": "Utilizador limitado",
 			"limitedDesc": "Quando um utilizador tem no máximo uma única função atribuída, é contado como um utilizador 'limitado'. Útil quando apenas é necessário acesso a partes de uma aplicação para coisas como tratamento de pedidos ou envio de formulários.<br /><br />Utilizadores limitados não podem ter acesso de administrador ou público e são contabilizados num grupo de licenças separado.",
+			"mfaReset": "Reset multi-factor authentication",
 			"noAuth": "Acesso público",
 			"oauth": "Cliente OAuth",
 			"oauthAssignActive": "As funções são atribuídas por declaração do token ID",
 			"oauthMeta": "Os detalhes são definidos por declarações do token ID",
 			"password": "Definir nova palavra-passe",
+			"passwordReset": "Send email for password reset",
 			"roleContentAdmin": "Admin",
 			"roleContentOther": "Especial",
 			"roleContentUser": "Utilizador",
@@ -2475,6 +2476,7 @@
 			"editBulk": "Editar ({COUNT})",
 			"empty": "Esvaziar",
 			"enable": "Ativar",
+			"execute": "Execute",
 			"expert": "Avançado",
 			"export": "Exportar",
 			"filter": "Filtrar",
@@ -2690,6 +2692,8 @@
 		"loginForms": "Formulários de início de sessão",
 		"loginTemplate": "Modelo de utilizador",
 		"loginTemplateHint": "As definições predefinidas são aplicadas uma vez a partir do modelo selecionado quando um novo utilizador é criado. Se nada for selecionado aqui, o modelo global é usado.",
+		"mailAccount": "Email account",
+		"mailTemplate": "Email template",
 		"maintenance": "Manutenção",
 		"manual": "Manual",
 		"menu": "Menu",

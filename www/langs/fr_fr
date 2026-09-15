@@ -270,9 +270,6 @@
 		},
 		"login": {
 			"admin": "Admin",
-			"button": {
-				"resetMfa": "Réinitialiser le MFA"
-			},
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cet utilisateur?<br /><br />Cette action est irréversible.",
 				"notUniqueName": "The same username has already been assigned to a different user.",
@@ -285,9 +282,11 @@
 				"active": "Lorsqu'il est désactivé, les sessions actives seront terminées.",
 				"admin": "Les privilèges d'administrateur incluent la gestion des applications et des utilisateurs. Les administrateurs peuvent également activer les modes de maintenance et de création.",
 				"mfaRequired": "Overwrites the global setting.",
+				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "Nom d'utilisateur - doit être unique dans le système.",
 				"noAuth": "Les utilisateurs publiques ne nécessitent pas d'authentification. L'accès au système est possible uniquement avec une URL.",
 				"password": "Cette opération écrase le mot de passe actuel de l'utilisateur. L'authentification multi-facteurs n'est pas affectée par ce changement. Le chiffrement de bout en bout (E2EE) ne sera pas disponible tant que l'utilisateur ne fournira pas le code de sauvegarde associé.",
+				"passwordReset": "This will send out an email, containing a one-time link for a password reset action. Multi-factor authentication is not affected by this reset. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"tokenExpiryHours": "Overwrites the global setting for max. session time."
 			},
 			"ldap": "Attribué LDAP",
@@ -295,11 +294,13 @@
 			"ldapMeta": "Details are imported via LDAP",
 			"limited": "Utilisateur limité",
 			"limitedDesc": "When a user has at most a single role assigned, it counts as a 'limited' user. Useful for when only access to parts of an application is needed for things like request handling or form submission.<br /><br />Limited users cannot have admin or public access and take from a separate license pool.",
+			"mfaReset": "Reset multi-factor authentication",
 			"noAuth": "Accès public",
 			"oauth": "OAuth client",
 			"oauthAssignActive": "Roles are assigned by ID token claim",
 			"oauthMeta": "Details are set by ID token claims",
 			"password": "Définir un nouveau mot de passe",
+			"passwordReset": "Send email for password reset",
 			"roleContentAdmin": "Admin",
 			"roleContentOther": "Spécial",
 			"roleContentUser": "Utilisateur",
@@ -2475,6 +2476,7 @@
 			"editBulk": "Modifier ({COUNT})",
 			"empty": "Vide",
 			"enable": "Enable",
+			"execute": "Execute",
 			"expert": "Avancé",
 			"export": "Exporter",
 			"filter": "Filtrer",
@@ -2690,6 +2692,8 @@
 		"loginForms": "Formulaires de connexion",
 		"loginTemplate": "User template",
 		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
+		"mailAccount": "Email account",
+		"mailTemplate": "Email template",
 		"maintenance": "Maintenance",
 		"manual": "Manual",
 		"menu": "Menu",

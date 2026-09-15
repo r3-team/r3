@@ -27,9 +27,10 @@ func TemplateSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) err
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
+	newRecord := req.Id == 0
 
 	var err error
-	if !req.Id.Valid {
+	if newRecord {
 		_, err = tx.Exec(ctx, `
 			INSERT INTO instance_mail.template (content,name,body,subject)
 			VALUES ($1,$2,$3,$4)

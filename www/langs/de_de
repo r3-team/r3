@@ -270,9 +270,6 @@
 		},
 		"login": {
 			"admin": "Admin",
-			"button": {
-				"resetMfa": "MFA zurücksetzen"
-			},
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Benutzer löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
 				"notUniqueName": "Der gleiche Benutzername wurde bereits einem anderen Benutzer zugewiesen.",
@@ -285,9 +282,11 @@
 				"active": "Bei Deaktivierung werden aktive Sitzungen beendet.",
 				"admin": "Adminberechtigungen erlauben die Verwaltung von Anwendungen und Benutzern. Admins können ebenfalls den Wartungs- und Builder-Modus aktivieren.",
 				"mfaRequired": "Überschreibt die globale Einstellung.",
+				"mfaReset": "Hiermit werden existierende Tokens des Benutzers für Multi-Faktor-Authentifizierung (MFA) gelöscht. Der Benutzer kann sich dann ohne MFA einloggen. Falls MFA für den Benutzer erforderlich ist, muss dieses nach der nächsten Authentifizierung erneut eingerichtet werden.",
 				"name": "Benutzername - muss im System einzigartig sein.",
 				"noAuth": "Öffentliche Benutzer brauchen keine Authentifizierung. Systemzugriff ist nur mit einer URL möglich.",
 				"password": "Hiermit wird das aktuelle Password für den Benutzer überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
+				"passwordReset": "Hiermit wird eine E-Mail mit einem Einmallink für das Zurücksetzen des Passworts versendet. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
 				"tokenExpiryHours": "Überschreibt die globale Einstellung für die max. Sitzungszeit."
 			},
 			"ldap": "LDAP zugewiesen",
@@ -295,11 +294,13 @@
 			"ldapMeta": "Details werden über LDAP importiert",
 			"limited": "Limitierter Benutzer",
 			"limitedDesc": "Wenn einem Benutzer nicht mehr als eine Rolle zugewiesen ist, zählt dieser als \"limitiert\". Praktisch für Benutzer, die nur Zugriff auf Teile einer Anwendung brauchen, für Dinge wie Anfragen oder Abschicken von Formularen.<br /><br />Limitierte Benutzer können keine Admins oder öffentliche Benutzer sein und bedienen sich von einem separaten Lizenz-Vorrat.",
+			"mfaReset": "Multi-Faktor-Authentifizierung zurücksetzen",
 			"noAuth": "Öffentlicher Zugriff",
 			"oauth": "OAuth-Client",
 			"oauthAssignActive": "Rollen werden über Claims im ID-Token zugewiesen",
 			"oauthMeta": "Details werden über Claims im ID-Token gesetzt",
 			"password": "Neues Passwort setzen",
+			"passwordReset": "E-Mail zum Passwort-Reset senden",
 			"roleContentAdmin": "Admin",
 			"roleContentOther": "Besonders",
 			"roleContentUser": "Benutzer",
@@ -2475,6 +2476,7 @@
 			"editBulk": "Bearbeiten ({COUNT})",
 			"empty": "Leer",
 			"enable": "Aktivieren",
+			"execute": "Ausführen",
 			"expert": "Erweitert",
 			"export": "Exportieren",
 			"filter": "Filtern",
@@ -2690,6 +2692,8 @@
 		"loginForms": "Anmeldeformulare",
 		"loginTemplate": "Benutzervorlage",
 		"loginTemplateHint": "Vordefinierte Einstellungen werden einmalig von gewählter Vorlage angewendet, wenn neuer Benutzer erstellt wird. Wenn nichts ausgewählt wurde, wird die globale Vorlage angewendet.",
+		"mailAccount": "E-Mail-Account",
+		"mailTemplate": "E-Mail-Vorlage",
 		"maintenance": "Wartung",
 		"manual": "Manuell",
 		"menu": "Menü",
@@ -3132,7 +3136,7 @@
 			"nameHint": "'Mein Smartphone'",
 			"outro": "Verwenden Sie den QR-Code, um dieses Konto zu Ihrer Authenticator-App hinzuzufügen. Wenn Sie fertig sind, schließen Sie dieses Fenster. Sie können diesen Vorgang wiederholen, um MFA für mehrere Geräte zu aktivieren.",
 			"outroForced": "Verwenden Sie den QR-Code, um dieses Konto zu Ihrer Authenticator-App hinzuzufügen. Wenn Sie fertig sind, bestätigen Sie unten, um fortzufahren.",
-			"title": "Multifaktor-Authentifizierung hinzufügen"
+			"title": "Multi-Faktor-Authentifizierung hinzufügen"
 		},
 		"mobileScrollForm": "Mobil: Gesamtes Formular scrollen",
 		"nodeName": "Verbunden mit: {NAME}",

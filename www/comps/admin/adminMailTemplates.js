@@ -27,7 +27,7 @@ export default {
 		<div class="content grow">
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
-					v-for="t in templatesSorted"
+					v-for="t in mailTemplatesSorted"
 					@click="open(t.id)"
 					:key="t.id"
 					:title="t.name"
@@ -44,7 +44,6 @@ export default {
 			@close="close"
 			@makeNew="open(null)"
 			@reload="get"
-			:templateId="templateIdOpen"
 			:templateOrg="templateOpen"
 		/>
 	</div>`,
@@ -53,27 +52,21 @@ export default {
 	},
 	data() {
 		return {
-			// data
-			templateIdMap: {},
-
 			// states
-			templateIdOpen: null, // ID of template to be edited (null = new template)
-			templateOpen: null    // contains template as object (null = no template open)
+			templateOpen: null // contains template as object (null = no template open)
 		};
 	},
 	computed: {
-		templatesSorted: s => {
-			const out = Object.values(s.templateIdMap);
-			out.sort((a, b) => `${a.content}_${a.name}` > `${b.content}_${b.name}` ? 1 : -1);
-			return out;
-		},
-
 		// stores
-		capGen: s => s.$store.getters.captions.generic
+		capGen: s => s.$store.getters.captions.generic,
+		mailTemplateIdMap: s => s.$store.getters.mailTemplateIdMap,
+		mailTemplatesSorted: s => s.$store.getters.mailTemplatesSorted
 	},
 	mounted() {
-		this.get();
 		this.$store.commit('pageTitle', this.menuTitle);
+
+		if (this.mailTemplatesSorted.length === 0)
+			this.get();
 	},
 	methods: {
 		// externals
@@ -94,19 +87,15 @@ export default {
 			this.templateOpen = null;
 		},
 		open(id) {
-			if (id === null) {
-				this.templateIdOpen = null;
-				this.templateOpen = this.getTemplateMailTemplate();
-			} else if (this.templateIdMap[id] !== undefined) {
-				this.templateIdOpen = id;
-				this.templateOpen = this.templateIdMap[id];
-			}
+			this.templateOpen = id === null
+				? this.getTemplateMailTemplate()
+				: this.mailTemplateIdMap[id] ?? null;
 		},
 
 		// backend calls
 		get() {
 			ws.send('mailTemplate', 'get', {}, true).then(
-				res => this.templateIdMap = res.payload,
+				res => this.$store.commit('mailTemplateIdMap', res.payload),
 				this.$root.genericError
 			);
 		}

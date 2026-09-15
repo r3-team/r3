@@ -70,9 +70,32 @@ export function getTemplateGeoLayerBase() {
 		url: '',
 	};
 };
+export function getTemplateMailAccount() {
+	return {
+		id: 0,
+		name: '',
+		comment: null,
+		mode: 'smtp',
+		connectMethod: 'tls',
+		authMethod: 'plain',
+		username: '',
+		password: '',
+		sendAs: '',
+		hostName: '',
+		hostPort: 465,
+		oauthClientId: null,
+		smimeSign: false,
+		smimePathCrt: null,
+		smimePathKey: null,
+		sendCount: 999,
+		sendSeconds: 60,
+		resendCount: 5,
+		resendSeconds: 60
+	};
+};
 export function getTemplateMailTemplate() {
 	return {
-		id: null,
+		id: 0,
 		name: '',
 		content: 'loginPwReset',
 		body: '',

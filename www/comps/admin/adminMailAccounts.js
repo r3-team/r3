@@ -1,10 +1,10 @@
+import { getTemplateMailAccount } from '../shared/templates.js';
 import MyAdminMailAccount from './adminMailAccount.js';
-export {MyAdminMailAccounts as default};
 
-let MyAdminMailAccounts = {
-	name:'my-admin-mail-accounts',
-	components:{ MyAdminMailAccount, },
-	template:`<div class="admin-mails contentBox grow">
+export default {
+	name: 'my-admin-mail-accounts',
+	components: { MyAdminMailAccount, },
+	template: `<div class="admin-mails contentBox grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/mail2.png" />
@@ -14,7 +14,7 @@ let MyAdminMailAccounts = {
 		<div class="top lower">
 			<div class="area">
 				<my-button image="add.png"
-					@trigger="idOpen = 0"
+					@trigger="open(0)"
 					:caption="capGen.button.new"
 				/>
 				<my-button image="refresh.png"
@@ -24,7 +24,7 @@ let MyAdminMailAccounts = {
 			</div>
 			<div class="area wrap default-inputs mail-testing">
 				<h1>{{ capApp.accountTest }}</h1>
-				
+
 				<select v-model="testAccountName">
 					<option value="">{{ capApp.testAccount }}</option>
 					<option v-for="a in accountNamesSmtp" :value="a">{{ a }}</option>
@@ -43,12 +43,12 @@ let MyAdminMailAccounts = {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content grow">
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
 					v-for="(e,k) in mailAccountIdMap"
-					@click="idOpen = e.id"
+					@click="open(e.id)"
 					:key="e.id"
 					:title="e.name"
 				>
@@ -58,74 +58,83 @@ let MyAdminMailAccounts = {
 					</div>
 				</div>
 			</div>
-			
+
 			<my-admin-mail-account
-				v-if="idOpen !== null"
-				@close="idOpen = null;get()"
-				@makeNew="idOpen = 0"
-				:id="idOpen"
-				:mailAccountIdMap="mailAccountIdMap"
-				:oauthClientIdMap="oauthClientIdMap"
+				v-if="accountOpen !== null"
+				@close="accountOpen = null;get()"
+				@makeNew="open(0)"
+				:accountOrg="accountOpen"
+				:oauthClientIdMap
 			/>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
 	data() {
 		return {
-			idOpen:null,
-			mailAccountIdMap:{},
-			oauthClientIdMap:{},
-			
+			accountOpen: null, // contains account as object (null = no account open)
+			oauthClientIdMap: {},
+
 			// testing
-			testAccountName:'',
-			testRecipient:'',
-			testSubject:'R3 test mail'
+			testAccountName: '',
+			testRecipient: '',
+			testSubject: 'R3 test mail'
 		};
 	},
-	computed:{
-		accountNamesSmtp:(s) => {
-			let out = [];
-			for(let k in s.mailAccountIdMap) {
-				if(s.mailAccountIdMap[k].mode === 'smtp')
+	computed: {
+		accountNamesSmtp: s => {
+			const out = [];
+			for (const k in s.mailAccountIdMap) {
+				if (s.mailAccountIdMap[k].mode === 'smtp')
 					out.push(s.mailAccountIdMap[k].name);
 			}
 			return out;
 		},
-		
+
 		// stores
-		capApp:(s) => s.$store.getters.captions.admin.mails,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.admin.mails,
+		capGen: s => s.$store.getters.captions.generic,
+		mailAccountIdMap: s => s.$store.getters.mailAccountIdMap
 	},
 	mounted() {
 		this.get();
 		this.getOauthClients();
-		this.$store.commit('pageTitle',this.menuTitle);
+		this.$store.commit('pageTitle', this.menuTitle);
 	},
-	methods:{
+	methods: {
+		// externals
+		getTemplateMailAccount,
+
+		// actions
+		open(id) {
+			this.accountOpen = id === 0
+				? this.getTemplateMailAccount()
+				: this.mailAccountIdMap[id] ?? null;
+		},
+
 		// backend calls
 		get() {
-			ws.send('mailAccount','get',{},true).then(
-				res => this.mailAccountIdMap = res.payload,
+			ws.send('mailAccount', 'get', {}, true).then(
+				res => this.$store.commit('mailAccountIdMap', res.payload),
 				this.$root.genericError
 			);
 		},
 		getOauthClients() {
-			ws.send('oauthClient','get',true).then(
+			ws.send('oauthClient', 'get', true).then(
 				res => this.oauthClientIdMap = res.payload,
 				this.$root.genericError
 			);
 		},
 		test() {
-			ws.send('mailAccount','test',{
-				accountName:this.testAccountName,
-				recipient:this.testRecipient,
-				subject:this.testSubject
-			},true).then(
+			ws.send('mailAccount', 'test', {
+				accountName: this.testAccountName,
+				recipient: this.testRecipient,
+				subject: this.testSubject
+			}, true).then(
 				() => {
-					this.$store.commit('dialog',{
-						captionBody:this.capApp.testOk
+					this.$store.commit('dialog', {
+						captionBody: this.capApp.testOk
 					});
 					this.testRecipient = '';
 				},

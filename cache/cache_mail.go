@@ -125,7 +125,7 @@ func LoadMailTemplateMap_tx(ctx context.Context, tx pgx.Tx) error {
 		if err := rows.Scan(&mt.Id, &mt.Content, &mt.Name, &mt.Body, &mt.Subject); err != nil {
 			return err
 		}
-		mailTemplateIdMap[mt.Id.Int32] = mt
+		mailTemplateIdMap[mt.Id] = mt
 	}
 	return nil
 }

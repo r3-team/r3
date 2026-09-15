@@ -837,7 +837,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'mailAccountsChanged';
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'mailTemplatesChanged';
 
-			-- migrate mail traffic to new schema
+			-- migrate mail traffic to new mail schema
 			ALTER TABLE instance.mail_traffic SET SCHEMA instance_mail;
 			ALTER TABLE instance_mail.mail_traffic RENAME TO traffic;
 

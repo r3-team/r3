@@ -17,7 +17,6 @@ import (
 
 // user requests
 func GetNames_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
-
 	var req struct {
 		ByString     string  `json:"byString"`
 		Id           int64   `json:"id"`
@@ -42,7 +41,6 @@ func GetTokensFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, erro
 	return login.GetTokensFixed_tx(ctx, tx, loginId)
 }
 func SetTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
-
 	var (
 		err error
 		req struct {

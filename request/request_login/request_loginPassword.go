@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"r3/handler"
 	"r3/login"
 	"r3/login/login_check"
 	"r3/login/login_reset"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func PasswortReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
@@ -36,22 +38,34 @@ func PasswortReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, l
 	return login.SetCredentials_tx(ctx, tx, loginId, req.PwNew)
 }
 
-func PasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
+func PasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isAdmin bool) error {
 
 	var req struct {
-		PwNew0 string `json:"pwNew0"`
-		PwNew1 string `json:"pwNew1"`
-		PwOld  string `json:"pwOld"`
+		LoginIdTarget pgtype.Int8 `json:"loginIdTarget"` // set PW for other login, only allowed for admins
+		PwNew         string      `json:"pwNew"`
+		PwOld         string      `json:"pwOld"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
 
-	if req.PwOld == "" || req.PwNew0 == "" || req.PwNew0 != req.PwNew1 {
-		return fmt.Errorf("invalid input")
+	if req.PwNew == "" {
+		return fmt.Errorf(handler.ErrGeneral)
+	}
+
+	if req.LoginIdTarget.Valid {
+		if !isAdmin {
+			return fmt.Errorf(handler.ErrGeneral)
+		}
+		// admins may set password for any login, PW check is skipped
+		return login.SetCredentials_tx(ctx, tx, req.LoginIdTarget.Int64, req.PwNew)
+	}
+
+	if req.PwOld == "" {
+		return fmt.Errorf(handler.ErrGeneral)
 	}
 	if err := login_check.Password(ctx, tx, loginId, req.PwOld); err != nil {
 		return err
 	}
-	return login.SetCredentials_tx(ctx, tx, loginId, req.PwNew0)
+	return login.SetCredentials_tx(ctx, tx, loginId, req.PwNew)
 }
