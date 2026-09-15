@@ -63,7 +63,6 @@ export default {
 			isMounted: false,   // wait for mount as toolbar ref must exist for tinymce init object to target it
 			images: [],         // image links to offer in editor
 			key: 0,             // forces recreation of the editor on init change, 0 = not yet initialized
-			toolbarBase: 'bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify',
 			wasfocussed: false, // user focussed editor input
 
 			// tokens are used to authenticate with the current user session
@@ -93,7 +92,7 @@ export default {
 				relative_urls: false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
 				resize: false,
 				skin: s.settings.dark ? 'oxide-dark' : 'oxide',
-				toolbar: s.toolbar,
+				toolbar: s.readonly ? false : `undo redo | bold italic | forecolor paragraphgroup | numlist bullist | alignleft aligncenter alignright alignjustify | outdent indent | insertgroup code | customPrint searchreplace`,
 				toolbar_groups: {
 					paragraphgroup: {
 						icon: 'change-case',
@@ -104,7 +103,7 @@ export default {
 						items: 'hr emoticons link image table'
 					}
 				},
-				toolbar_mode: 'wrap',
+				toolbar_mode: 'floating',
 				toolbar_persist: true,
 
 				// adds more elements that tiny does not convert (adds to default valid_elements)
@@ -161,10 +160,6 @@ export default {
 		// component is expensive, do not load if hidden
 		// unless it was already loaded once, keep it to avoid expensive reload and keep editor state
 		active: s => s.isMounted && (!s.isHidden || s.editor !== null),
-		toolbar: s => {
-			if (s.readonly) return false;
-			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code customPrint searchreplace`;
-		},
 
 		// simple
 		editorId: s => s.editor === null ? 'NOT REGISTERED' : s.editor.id,
