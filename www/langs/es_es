@@ -398,6 +398,13 @@
 			"module": "Aplicación",
 			"node": "Nodo del clúster"
 		},
+		"mailTemplate": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this email template?<br /><br />This action is irreversible.</b>"
+			},
+			"title": "Email template '{NAME}'",
+			"titleNew": "New email template"
+		},
 		"mails": {
 			"account": "Cuenta de correo",
 			"accountAuthMethod": "Método de autenticación",
@@ -2656,6 +2663,7 @@
 			"years": "Años"
 		},
 		"intervalTitle": "Intervalo",
+		"invitation": "Invitation",
 		"job": "Job",
 		"jobHistory": "Job history",
 		"jobs": "Jobs",
@@ -2687,6 +2695,7 @@
 		"menu": "Menú",
 		"menus": "Menús",
 		"menusSub": "Submenús",
+		"message": "Message",
 		"mfa": "Multi-factor authentication",
 		"missingCaption": "LEYENDA FALTANTE",
 		"mode": "Mode",
@@ -2743,6 +2752,7 @@
 		"parameterNew": "New parameter",
 		"parameters": "Parameters",
 		"password": "Contraseña",
+		"passwordReset": "Password reset",
 		"pdf": "PDF",
 		"pdfs": "PDFs",
 		"pgFunction": "Función (trasera)",
@@ -2818,6 +2828,7 @@
 		"state": "Estado",
 		"status": "Estado",
 		"styles": "Styles",
+		"subject": "Subject",
 		"system": "System",
 		"systemDefault": "System default",
 		"systemModes": "System modes",
@@ -2839,6 +2850,7 @@
 		"update": "Actualizar",
 		"updated": "Updated",
 		"url": "URL",
+		"usage": "Usage",
 		"useOverview": "Open overview by default",
 		"userSync": "User sync",
 		"username": "Nombre de usuario",

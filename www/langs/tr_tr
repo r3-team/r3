@@ -398,6 +398,13 @@
 			"module": "Başvuru",
 			"node": "Küme düğümü"
 		},
+		"mailTemplate": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this email template?<br /><br />This action is irreversible.</b>"
+			},
+			"title": "Email template '{NAME}'",
+			"titleNew": "New email template"
+		},
 		"mails": {
 			"account": "E-posta hesabı",
 			"accountAuthMethod": "Kimlik doğrulama yöntemi",
@@ -2656,6 +2663,7 @@
 			"years": "Yıllar"
 		},
 		"intervalTitle": "Aralık",
+		"invitation": "Invitation",
 		"job": "Job",
 		"jobHistory": "Job history",
 		"jobs": "Jobs",
@@ -2687,6 +2695,7 @@
 		"menu": "Menü",
 		"menus": "Menüler",
 		"menusSub": "Alt menüler",
+		"message": "Message",
 		"mfa": "Multi-factor authentication",
 		"missingCaption": "EKSİK BAŞLIK",
 		"mode": "Mode",
@@ -2743,6 +2752,7 @@
 		"parameterNew": "New parameter",
 		"parameters": "Parameters",
 		"password": "Şifre",
+		"passwordReset": "Password reset",
 		"pdf": "PDF",
 		"pdfs": "PDF'ler",
 		"pgFunction": "İşlev (geri)",
@@ -2818,6 +2828,7 @@
 		"state": "Durum",
 		"status": "Durum",
 		"styles": "Stiller",
+		"subject": "Subject",
 		"system": "Sistem",
 		"systemDefault": "System default",
 		"systemModes": "Sistem modları",
@@ -2839,6 +2850,7 @@
 		"update": "Güncelleme",
 		"updated": "Güncellendi",
 		"url": "URL",
+		"usage": "Usage",
 		"useOverview": "Open overview by default",
 		"userSync": "User sync",
 		"username": "Kullanıcı adı",

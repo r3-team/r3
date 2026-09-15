@@ -398,6 +398,13 @@
 			"module": "应用程序",
 			"node": "集群节点"
 		},
+		"mailTemplate": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this email template?<br /><br />This action is irreversible.</b>"
+			},
+			"title": "Email template '{NAME}'",
+			"titleNew": "New email template"
+		},
 		"mails": {
 			"account": "电子邮件帐户",
 			"accountAuthMethod": "认证方法",
@@ -2656,6 +2663,7 @@
 			"years": "年"
 		},
 		"intervalTitle": "间隔",
+		"invitation": "Invitation",
 		"job": "Job",
 		"jobHistory": "Job history",
 		"jobs": "Jobs",
@@ -2687,6 +2695,7 @@
 		"menu": "菜单",
 		"menus": "菜单",
 		"menusSub": "子菜单",
+		"message": "Message",
 		"mfa": "Multi-factor authentication",
 		"missingCaption": "缺少标题",
 		"mode": "Mode",
@@ -2743,6 +2752,7 @@
 		"parameterNew": "New parameter",
 		"parameters": "Parameters",
 		"password": "密码",
+		"passwordReset": "Password reset",
 		"pdf": "PDF",
 		"pdfs": "PDFs",
 		"pgFunction": "Function (back)",
@@ -2818,6 +2828,7 @@
 		"state": "状态",
 		"status": "状态",
 		"styles": "Styles",
+		"subject": "Subject",
 		"system": "System",
 		"systemDefault": "System default",
 		"systemModes": "System modes",
@@ -2839,6 +2850,7 @@
 		"update": "Update",
 		"updated": "Updated",
 		"url": "URL",
+		"usage": "Usage",
 		"useOverview": "Open overview by default",
 		"userSync": "User sync",
 		"username": "用户名",

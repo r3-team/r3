@@ -27,13 +27,13 @@ export default {
 		<div class="content grow">
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
-					v-for="(t,k) in templateIdMap"
+					v-for="t in templatesSorted"
 					@click="open(t.id)"
 					:key="t.id"
 					:title="t.name"
 				>
 					<div class="lines">
-						<span>{{ t.name }}</span>
+						<span>{{ getTitle(t) }}</span>
 					</div>
 				</div>
 			</div>
@@ -62,6 +62,12 @@ export default {
 		};
 	},
 	computed: {
+		templatesSorted: s => {
+			const out = Object.values(s.templateIdMap);
+			out.sort((a, b) => `${a.content}_${a.name}` > `${b.content}_${b.name}` ? 1 : -1);
+			return out;
+		},
+
 		// stores
 		capGen: s => s.$store.getters.captions.generic
 	},
@@ -72,6 +78,16 @@ export default {
 	methods: {
 		// externals
 		getTemplateMailTemplate,
+
+		// presentation
+		getTitle(template) {
+			let prefix = '';
+			switch (template.content) {
+				case 'loginInvitation': prefix = this.capGen.invitation; break;
+				case 'loginPwReset': prefix = this.capGen.passwordReset; break;
+			}
+			return `${prefix}: ${template.name}`;
+		},
 
 		// actions
 		close() {

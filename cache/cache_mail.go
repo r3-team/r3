@@ -122,11 +122,10 @@ func LoadMailTemplateMap_tx(ctx context.Context, tx pgx.Tx) error {
 	mailTemplateIdMap = make(map[int32]types.MailTemplate)
 	for rows.Next() {
 		var mt types.MailTemplate
-
 		if err := rows.Scan(&mt.Id, &mt.Content, &mt.Name, &mt.Body, &mt.Subject); err != nil {
 			return err
 		}
-		mailTemplateIdMap[mt.Id] = mt
+		mailTemplateIdMap[mt.Id.Int32] = mt
 	}
 	return nil
 }

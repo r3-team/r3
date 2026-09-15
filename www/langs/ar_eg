@@ -398,6 +398,13 @@
 			"module": "طلب",
 			"node": "عقدة الكتلة"
 		},
+		"mailTemplate": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this email template?<br /><br />This action is irreversible.</b>"
+			},
+			"title": "Email template '{NAME}'",
+			"titleNew": "New email template"
+		},
 		"mails": {
 			"account": "حساب البريد الإلكتروني",
 			"accountAuthMethod": "طريقة المصادقة",
@@ -2656,6 +2663,7 @@
 			"years": "سنين"
 		},
 		"intervalTitle": "فاصلة",
+		"invitation": "Invitation",
 		"job": "Job",
 		"jobHistory": "Job history",
 		"jobs": "Jobs",
@@ -2687,6 +2695,7 @@
 		"menu": "قائمة طعام",
 		"menus": "القوائم",
 		"menusSub": "القوائم الفرعية",
+		"message": "Message",
 		"mfa": "Multi-factor authentication",
 		"missingCaption": "تسمية توضيحية مفقودة",
 		"mode": "Mode",
@@ -2743,6 +2752,7 @@
 		"parameterNew": "New parameter",
 		"parameters": "Parameters",
 		"password": "كلمة المرور",
+		"passwordReset": "Password reset",
 		"pdf": "PDF",
 		"pdfs": "PDFs",
 		"pgFunction": "الوظيفة (الخلفية)",
@@ -2818,6 +2828,7 @@
 		"state": "ولاية",
 		"status": "حالة",
 		"styles": "Styles",
+		"subject": "Subject",
 		"system": "System",
 		"systemDefault": "System default",
 		"systemModes": "System modes",
@@ -2839,6 +2850,7 @@
 		"update": "تحديث",
 		"updated": "Updated",
 		"url": "URL",
+		"usage": "Usage",
 		"useOverview": "Open overview by default",
 		"userSync": "User sync",
 		"username": "اسم المستخدم",

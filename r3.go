@@ -576,6 +576,9 @@ func initCaches(ctx context.Context) error {
 	if err := cache.LoadMailAccountMap_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize mail account cache, %v", err)
 	}
+	if err := cache.LoadMailTemplateMap_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize mail template cache, %v", err)
+	}
 	if err := cache.LoadOauthClientMap_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize oauth client cache, %v", err)
 	}

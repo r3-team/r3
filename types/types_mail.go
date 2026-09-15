@@ -65,7 +65,7 @@ type MailFile struct {
 	Size int64     `json:"size"`
 }
 type MailTemplate struct {
-	Id      int32               `json:"id"`
+	Id      pgtype.Int4         `json:"id"`
 	Content MailTemplateContent `json:"content"`
 	Name    string              `json:"name"`
 	Body    string              `json:"body"`

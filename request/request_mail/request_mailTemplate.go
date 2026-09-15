@@ -27,12 +27,19 @@ func TemplateSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) err
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	_, err := tx.Exec(ctx, `
-		INSERT INTO instance_mail.template (id,content,name,body,subject)
-		VALUES ($1,$2,$3,$4,$5)
-		ON CONFLICT (id) DO UPDATE
-		SET name = $3, body = $4, subject = $5
-	`, req.Id, req.Content, req.Name, req.Body, req.Subject)
 
+	var err error
+	if !req.Id.Valid {
+		_, err = tx.Exec(ctx, `
+			INSERT INTO instance_mail.template (content,name,body,subject)
+			VALUES ($1,$2,$3,$4)
+		`, req.Content, req.Name, req.Body, req.Subject)
+	} else {
+		_, err = tx.Exec(ctx, `
+			UPDATE instance_mail.template
+			SET name = $1, body = $2, subject = $3
+			WHERE id = $4
+		`, req.Name, req.Body, req.Subject, req.Id)
+	}
 	return err
 }

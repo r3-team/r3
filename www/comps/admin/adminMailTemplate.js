@@ -1,8 +1,11 @@
+import MyInputRichtext from '../inputRichtext.js';
+
 import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
 import { deepIsEqual } from '../shared/generic.js';
 
 export default {
 	name: 'my-admin-mail-template',
+	components: { MyInputRichtext },
 	template: `<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-mail-template scroll float">
@@ -47,11 +50,55 @@ export default {
 				</div>
 			</div>
 
-
+			<div class="content no-padding grow">
+				<table class="generic-table-vertical default-inputs">
+					<tbody>
+						<tr>
+							<td>{{ capGen.usage }}</td>
+							<td>
+								<select v-model="template.content" :disabled="!isNew">
+									<option value="loginInvitation">{{ capGen.invitation }}</option>
+									<option value="loginPwReset">{{ capGen.passwordReset }}</option>
+								</select>
+							</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td colspan="2"><input class="long" v-model="template.name" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.subject }}</td>
+							<td colspan="2"><input class="dynamic" v-model="template.subject" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.message }}</td>
+							<td colspan="2" class="no-padding">
+								<div class="admin-mail-template-body">
+									<my-input-richtext v-model="template.body" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.placeholders }}</td>
+							<td>
+								<table>
+									<tbody>
+										<tr>
+											<td class="minimum"><my-button image="copyClipboard.png" @trigger="toClipboard('')" /></td>
+											<td>TEST</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>`,
 	props: {
-		templateId: { type: [String, null], required: true },
+		templateId: { type: [Number, null], required: true },
 		templateOrg: { type: Object, required: true }
 	},
 	emits: ['close', 'makeNew', 'reload'],
@@ -119,6 +166,9 @@ export default {
 		reset() {
 			this.template = JSON.parse(JSON.stringify(this.templateOrg));
 			this.isReady = true;
+		},
+		toClipboard(value) {
+			navigator.clipboard.writeText(value);
 		},
 
 		// backend calls

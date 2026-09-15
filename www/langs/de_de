@@ -398,6 +398,13 @@
 			"module": "Anwendung",
 			"node": "Cluster-Knoten"
 		},
+		"mailTemplate": {
+			"dialog": {
+				"delete": "Bist du sicher, dass du diese E-Mail-Vorlage löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
+			},
+			"title": "E-Mail-Vorlage \"{NAME}\"",
+			"titleNew": "Neue E-Mail-Vorlage"
+		},
 		"mails": {
 			"account": "E-Mail-Account",
 			"accountAuthMethod": "Authentifizierungsmethode",
@@ -2656,6 +2663,7 @@
 			"years": "Jahre"
 		},
 		"intervalTitle": "Intervall",
+		"invitation": "Einladung",
 		"job": "Aufgabe",
 		"jobHistory": "Aufgabenhistorie",
 		"jobs": "Aufgaben",
@@ -2687,6 +2695,7 @@
 		"menu": "Menü",
 		"menus": "Menüs",
 		"menusSub": "Untermenüs",
+		"message": "Nachricht",
 		"mfa": "Multi-Faktor-Authentifizierung",
 		"missingCaption": "MISSING CAPTION",
 		"mode": "Modus",
@@ -2743,6 +2752,7 @@
 		"parameterNew": "Neuer Parameter",
 		"parameters": "Parameter",
 		"password": "Passwort",
+		"passwordReset": "Passwort-Reset",
 		"pdf": "PDF",
 		"pdfs": "PDFs",
 		"pgFunction": "Funktion (back)",
@@ -2818,6 +2828,7 @@
 		"state": "Status",
 		"status": "Status",
 		"styles": "Stile",
+		"subject": "Betreff",
 		"system": "System",
 		"systemDefault": "Systemstandard",
 		"systemModes": "Betriebsarten",
@@ -2839,6 +2850,7 @@
 		"update": "Aktualisieren",
 		"updated": "Aktualisiert",
 		"url": "URL",
+		"usage": "Verwendung",
 		"useOverview": "Übersicht zuerst öffnen",
 		"userSync": "User sync",
 		"username": "Benutzername",
