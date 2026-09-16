@@ -4,16 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/schema"
+	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func SetAssign_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, tagIds []uuid.UUID) error {
+func SetAssign_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, tagIds []uuid.UUID) error {
 
-	if !slices.Contains(schema.DbAssignedTag, entity) {
+	if !slices.Contains(constants.DbAssignedTag, entity) {
 		return errors.New("bad entity")
 	}
 

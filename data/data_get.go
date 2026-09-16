@@ -10,6 +10,7 @@ import (
 	"r3/handler"
 	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"slices"
 	"strconv"
@@ -273,7 +274,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 				attributeIdsReadAccess = append(attributeIdsReadAccess, expr.AttributeId.Bytes)
 			}
 		}
-		if !authorizedAttributes(loginId, attributeIdsReadAccess, types.AccessRead) {
+		if !authorizedAttributes(loginId, attributeIdsReadAccess, constants.AccessRead) {
 			return "", errors.New(handler.ErrUnauthorized)
 		}
 	}
@@ -630,7 +631,7 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 	}
 
 	// define JOIN type
-	if !slices.Contains(types.QueryJoinConnectors, join.Connector) {
+	if !slices.Contains(constants.QueryJoinConnectors, join.Connector) {
 		return "", errors.New("invalid join type")
 	}
 
@@ -662,10 +663,10 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 // parses filters to generate query lines and arguments
 func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, nestingLevel int) (string, error) {
 
-	if !slices.Contains(types.QueryFilterConnectors, filter.Connector) {
+	if !slices.Contains(constants.QueryFilterConnectors, filter.Connector) {
 		return "", errors.New("bad filter connector")
 	}
-	if !slices.Contains(types.QueryFilterOperators, filter.Operator) {
+	if !slices.Contains(constants.QueryFilterOperators, filter.Operator) {
 		return "", errors.New("bad filter operator")
 	}
 

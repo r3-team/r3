@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/doc_border"
 	"r3/schema/doc_column"
 	"r3/schema/doc_set"
 	"r3/schema/query"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
@@ -203,7 +203,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, constants.DbDocField, constants.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -214,7 +214,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, constants.DbDocField, constants.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -222,7 +222,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if err != nil {
 				return nil, err
 			}
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
+			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, constants.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -233,7 +233,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, constants.DbDocField, constants.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -241,7 +241,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if err != nil {
 				return nil, err
 			}
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
+			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, constants.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -252,11 +252,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, constants.DbDocField, constants.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-			f.Query, err = query.Get_tx(ctx, tx, schema.DbDocField, f.Id, 0, 0, 0)
+			f.Query, err = query.Get_tx(ctx, tx, constants.DbDocField, f.Id, 0, 0, 0)
 			if err != nil {
 				return nil, err
 			}
@@ -264,15 +264,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if err != nil {
 				return nil, err
 			}
-			f.BodyBorder, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextBody)
+			f.BodyBorder, err = doc_border.Get_tx(ctx, tx, f.Id, constants.DbDocContextBody)
 			if err != nil {
 				return nil, err
 			}
-			f.FooterBorder, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextFooter)
+			f.FooterBorder, err = doc_border.Get_tx(ctx, tx, f.Id, constants.DbDocContextFooter)
 			if err != nil {
 				return nil, err
 			}
-			f.HeaderBorder, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextHeader)
+			f.HeaderBorder, err = doc_border.Get_tx(ctx, tx, f.Id, constants.DbDocContextHeader)
 			if err != nil {
 				return nil, err
 			}
@@ -283,11 +283,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, constants.DbDocField, constants.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-			f.Captions, err = caption.Get_tx(ctx, tx, schema.DbDocField, f.Id, []string{"docFieldText"})
+			f.Captions, err = caption.Get_tx(ctx, tx, constants.DbDocField, f.Id, []string{"docFieldText"})
 			if err != nil {
 				return nil, err
 			}
@@ -421,7 +421,7 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId
 	`, f.Id, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
 		return err
 	}
-	return doc_set.Set_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault, f.Sets)
+	return doc_set.Set_tx(ctx, tx, f.Id, constants.DbDocField, constants.DbDocContextDefault, f.Sets)
 }
 
 func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
@@ -443,7 +443,7 @@ func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.Doc
 	`, f.Id, f.Direction, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}, f.ShrinkY); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextDefault, f.Border); err != nil {
 		return err
 	}
 	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
@@ -458,7 +458,7 @@ func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.Doc
 	`, f.Id, f.ShrinkY, f.SizeSnap); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextDefault, f.Border); err != nil {
 		return err
 	}
 	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
@@ -484,16 +484,16 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldList) error {
 
 		return err
 	}
-	if err := query.Set_tx(ctx, tx, schema.DbDocField, f.Id, 0, 0, 0, f.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, constants.DbDocField, f.Id, 0, 0, 0, f.Query); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextBody, f.BodyBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextBody, f.BodyBorder); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextFooter, f.FooterBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextFooter, f.FooterBorder); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextHeader, f.HeaderBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextHeader, f.HeaderBorder); err != nil {
 		return err
 	}
 	return doc_column.Set_tx(ctx, tx, f.Id, f.Columns)

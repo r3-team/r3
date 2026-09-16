@@ -11,6 +11,7 @@ import (
 	"r3/log"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"runtime"
 
 	"github.com/gofrs/uuid/v5"
@@ -56,7 +57,7 @@ func CheckInNode() error {
 
 // events relevant to all cluster nodes
 func ClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64) error {
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
+	target := types.ClusterEventTarget{Address: address, Device: constants.WebsocketClientDeviceFatClient, LoginId: loginId}
 
 	if updateNodes {
 		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentClientEventsChanged, nil, target); err != nil {
@@ -87,7 +88,7 @@ func CollectionsUpdated(updates []types.ClusterEventCollectionUpdated) {
 			WebsocketClientEvents <- types.ClusterEvent{
 				Content: types.ClusterEventContentCollectionUpdated,
 				Payload: upd.CollectionId,
-				Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser},
+				Target:  types.ClusterEventTarget{Device: constants.WebsocketClientDeviceBrowser},
 			}
 		}
 	}
@@ -115,7 +116,7 @@ func CollectionsUpdated(updates []types.ClusterEventCollectionUpdated) {
 				WebsocketClientEvents <- types.ClusterEvent{
 					Content: types.ClusterEventContentCollectionUpdated,
 					Payload: upd.CollectionId,
-					Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser, LoginId: loginId},
+					Target:  types.ClusterEventTarget{Device: constants.WebsocketClientDeviceBrowser, LoginId: loginId},
 				}
 			}
 		}
@@ -156,7 +157,7 @@ func DbSyncChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 func FilesCopied_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64,
 	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
 
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
+	target := types.ClusterEventTarget{Address: address, Device: constants.WebsocketClientDeviceBrowser, LoginId: loginId}
 	payload := types.ClusterEventFilesCopied{
 		AttributeId: attributeId,
 		FileIds:     fileIds,
@@ -178,7 +179,7 @@ func FilesCopied_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address st
 func FileRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64, attributeId uuid.UUID,
 	fileId uuid.UUID, fileHash string, fileName string, chooseApp bool) error {
 
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
+	target := types.ClusterEventTarget{Address: address, Device: constants.WebsocketClientDeviceFatClient, LoginId: loginId}
 	payload := types.ClusterEventFileRequested{
 		AttributeId: attributeId,
 		ChooseApp:   chooseApp,
@@ -202,7 +203,7 @@ func FileRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address 
 func JsFunctionCalled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string,
 	loginId int64, moduleId uuid.UUID, jsFunctionId uuid.UUID, arguments []interface{}) error {
 
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId, PwaModuleIdPreferred: moduleId}
+	target := types.ClusterEventTarget{Address: address, Device: constants.WebsocketClientDeviceBrowser, LoginId: loginId, PwaModuleIdPreferred: moduleId}
 	payload := types.ClusterEventJsFunctionCalled{
 		ModuleId:     moduleId,
 		JsFunctionId: jsFunctionId,
@@ -222,7 +223,7 @@ func JsFunctionCalled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, addre
 	return nil
 }
 func KeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64, keystrokes string) error {
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
+	target := types.ClusterEventTarget{Address: address, Device: constants.WebsocketClientDeviceFatClient, LoginId: loginId}
 	if updateNodes {
 		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentKeystrokesRequested, keystrokes, target); err != nil {
 			return err
@@ -318,7 +319,7 @@ func ReposChanged(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	return cache.LoadRepos_tx(ctx, tx)
 }
 func SchemaChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, moduleIds []uuid.UUID) error {
-	target := types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser}
+	target := types.ClusterEventTarget{Device: constants.WebsocketClientDeviceBrowser}
 
 	if updateNodes {
 		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentSchemaChanged, moduleIds, target); err != nil {

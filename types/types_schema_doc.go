@@ -34,8 +34,8 @@ type DocBorder struct {
 	StyleJoin string      `json:"styleJoin"` // "bevel", "miter", "round"
 }
 type DocColumn struct {
-	Id      uuid.UUID `json:"id"`
-	Content string    `json:"content"` // content of column (attribute, query, fnc_scalar, fnc_pg)
+	Id      uuid.UUID                `json:"id"`
+	Content DbSchemaAppColumnContent `json:"content"` // content of column (attribute, query, fnc_scalar, fnc_pg)
 
 	// attribute expression
 	AttributeId    pgtype.UUID `json:"attributeId"`

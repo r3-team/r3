@@ -500,9 +500,13 @@ export default {
 		authenticateByReset(code) {
 			ws.send('auth', 'reset', code, true).then(
 				res => {
-					// clear token as reset is a single time auth
+					// clear token, otherwise it could be reused to authenticate without setting new pw
 					this.$store.commit('local/tokenKeep', false);
 					this.$store.commit('loginPwResetCode', code);
+					if (res.payload.mfaSetup) {
+						// MFA not setup but required, auth still goes through
+						this.$store.commit('loginMfaSetup', true);
+					}
 					this.authenticated(res.payload.id, res.payload.name, res.payload.token, res.payload.saltKdf, true);
 				},
 				err => this.handleError('authUser', err)

@@ -11,9 +11,8 @@ export default {
 					<div class="caption">{{ capApp.title }}</div>
 				</div>
 			</div>
-
 			<div class="content">
-				<my-pw-change />
+				<my-pw-change @changed="$emit('confirmed')" />
 			</div>
 		</div>
 	</div>`,

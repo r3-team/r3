@@ -4,20 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity schema.DbEntity, context schema.DbEntity) ([]types.DocSet, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity types.DbSchemaApp, context types.DbSchemaApp) ([]types.DocSet, error) {
 
-	if !slices.Contains(schema.DbDocContextsValid, context) {
+	if !slices.Contains(constants.DbDocContextsValid, context) {
 		return nil, fmt.Errorf("invalid document set context '%s'", context)
 	}
-	if !slices.Contains(schema.DbAssignedDocSet, entity) {
+	if !slices.Contains(constants.DbAssignedDocSet, entity) {
 		return nil, fmt.Errorf("invalid document set entity '%s'", entity)
 	}
 
@@ -44,12 +44,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity schema.DbEntity
 	return sets, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity schema.DbEntity, context schema.DbEntity, sets []types.DocSet) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity types.DbSchemaApp, context types.DbSchemaApp, sets []types.DocSet) error {
 
-	if !slices.Contains(schema.DbDocContextsValid, context) {
+	if !slices.Contains(constants.DbDocContextsValid, context) {
 		return fmt.Errorf("invalid document set context '%s'", context)
 	}
-	if !slices.Contains(schema.DbAssignedDocSet, entity) {
+	if !slices.Contains(constants.DbAssignedDocSet, entity) {
 		return fmt.Errorf("invalid document set entity '%s'", entity)
 	}
 

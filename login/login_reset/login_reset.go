@@ -96,7 +96,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, mailAccountId, mailTemplateId int32,
 		}
 
 		// placeholders in mail template
-		resetUrl := fmt.Sprintf("%s?reset=%s", config.GetString("publicHostName"), loginIdMapCodes[loginId])
+		resetUrl := fmt.Sprintf("%s/#/?reset=%s", config.GetString("publicHostName"), loginIdMapCodes[loginId])
 		replacer := strings.NewReplacer([]string{
 			"/{RESET_URL}", resetUrl,
 			"{RESET_URL}", resetUrl,

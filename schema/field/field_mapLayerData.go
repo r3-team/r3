@@ -2,11 +2,11 @@ package field
 
 import (
 	"context"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -37,15 +37,15 @@ func getLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID) ([]types
 	rows.Close()
 
 	for i, l := range layers {
-		l.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbFieldMapLayerData, l.Id, pgtype.Text{})
+		l.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbFieldMapLayerData, l.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
-		l.Query, err = query.Get_tx(ctx, tx, schema.DbFieldMapLayerData, l.Id, 0, 0, 0)
+		l.Query, err = query.Get_tx(ctx, tx, constants.DbFieldMapLayerData, l.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		l.Captions, err = caption.Get_tx(ctx, tx, schema.DbFieldMapLayerData, l.Id, []string{"fieldMapLayerDataTitle"})
+		l.Captions, err = caption.Get_tx(ctx, tx, constants.DbFieldMapLayerData, l.Id, []string{"fieldMapLayerDataTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -73,10 +73,10 @@ func setLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, layers [
 		}
 		idsKeep[i] = l.Id
 
-		if err := openForm.Set_tx(ctx, tx, schema.DbFieldMapLayerData, l.Id, l.OpenForm, pgtype.Text{}); err != nil {
+		if err := openForm.Set_tx(ctx, tx, constants.DbFieldMapLayerData, l.Id, l.OpenForm, pgtype.Text{}); err != nil {
 			return err
 		}
-		if err := query.Set_tx(ctx, tx, schema.DbFieldMapLayerData, l.Id, 0, 0, 0, l.Query); err != nil {
+		if err := query.Set_tx(ctx, tx, constants.DbFieldMapLayerData, l.Id, 0, 0, 0, l.Query); err != nil {
 			return err
 		}
 		if err := caption.Set_tx(ctx, tx, l.Id, l.Captions); err != nil {

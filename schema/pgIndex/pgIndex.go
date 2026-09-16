@@ -7,6 +7,7 @@ import (
 	"r3/schema"
 	"r3/schema/compatible"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
@@ -160,7 +161,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 		return errors.New("cannot create index without attributes")
 	}
 
-	known, err := schema.CheckId_tx(ctx, tx, pgi.Id, schema.DbPgIndex, "id")
+	known, err := schema.CheckId_tx(ctx, tx, pgi.Id, constants.DbPgIndex, "id")
 	if err != nil {
 		return err
 	}

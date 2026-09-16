@@ -11,6 +11,7 @@ import (
 	"r3/handler"
 	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"reflect"
 	"slices"
 	"sort"
@@ -56,7 +57,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 			// if no attributes are to be SET for an existing record, WRITE permission is not required
 			//  case: joined record is to be created but existing base record is untouched, SET still includes base relation (to resolve relationship)
-			if (isNewRecord || len(dataSet.Attributes) != 0) && !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
+			if (isNewRecord || len(dataSet.Attributes) != 0) && !authorizedRelation(loginId, dataSet.RelationId, constants.AccessWrite) {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
 
@@ -82,7 +83,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 					}
 				}
 			}
-			if !authorizedAttributes(loginId, attributeIdsWriteAccess, types.AccessWrite) {
+			if !authorizedAttributes(loginId, attributeIdsWriteAccess, constants.AccessWrite) {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
 		}

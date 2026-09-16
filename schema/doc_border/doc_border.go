@@ -3,18 +3,18 @@ package doc_border
 import (
 	"context"
 	"fmt"
-	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context schema.DbEntity) (types.DocBorder, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context types.DbSchemaApp) (types.DocBorder, error) {
 	var b types.DocBorder
 
-	if !slices.Contains(schema.DbDocContextsValid, context) {
+	if !slices.Contains(constants.DbDocContextsValid, context) {
 		return b, fmt.Errorf("invalid border context '%s'", context)
 	}
 
@@ -29,9 +29,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context schema
 	return b, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context schema.DbEntity, b types.DocBorder) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context types.DbSchemaApp, b types.DocBorder) error {
 
-	if !slices.Contains(schema.DbDocContextsValid, context) {
+	if !slices.Contains(constants.DbDocContextsValid, context) {
 		return fmt.Errorf("invalid border context '%s'", context)
 	}
 

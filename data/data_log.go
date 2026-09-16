@@ -9,6 +9,7 @@ import (
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -75,7 +76,7 @@ func DelLogsBackground() error {
 // get data change logs for specified record and attributes
 func GetLogs_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeIds []uuid.UUID, recordIds []int64, loginId int64) ([]types.DataLog, error) {
 
-	if !authorizedAttributes(loginId, attributeIds, types.AccessRead) {
+	if !authorizedAttributes(loginId, attributeIds, constants.AccessRead) {
 		return nil, errors.New(handler.ErrUnauthorized)
 	}
 

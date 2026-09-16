@@ -16,6 +16,7 @@ import (
 	"r3/schema/query"
 	"r3/schema/tab"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 	"sort"
 
@@ -415,15 +416,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posButtonLookup {
 		var field = fields[pos].(types.FieldButton)
 
-		field.OpenDoc, err = openDoc.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.OpenDoc, err = openDoc.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
-		field.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbField, field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbField, field.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -434,19 +435,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posCalendarLookup {
 		var field = fields[pos].(types.FieldCalendar)
 
-		field.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbField, field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbField, field.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
-		field.Query, err = query.Get_tx(ctx, tx, schema.DbField, field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, constants.DbField, field.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		field.Columns, err = column.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
-		field.Collections, err = consumer.Get_tx(ctx, tx, schema.DbField, field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get_tx(ctx, tx, constants.DbField, field.Id, "fieldFilterSelector")
 		if err != nil {
 			return nil, err
 		}
@@ -457,15 +458,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posChartLookup {
 		var field = fields[pos].(types.FieldChart)
 
-		field.Query, err = query.Get_tx(ctx, tx, schema.DbField, field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, constants.DbField, field.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		field.Columns, err = column.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -476,11 +477,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posDataLookup {
 		var field = fields[pos].(types.FieldData)
 
-		field.DefCollection, err = consumer.GetOne_tx(ctx, tx, schema.DbField, field.Id, "fieldDataDefault")
+		field.DefCollection, err = consumer.GetOne_tx(ctx, tx, constants.DbField, field.Id, "fieldDataDefault")
 		if err != nil {
 			return nil, err
 		}
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle", "fieldHelp"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return nil, err
 		}
@@ -491,23 +492,23 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posDataRelLookup {
 		var field = fields[pos].(types.FieldDataRelationship)
 
-		field.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbField, field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbField, field.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
-		field.Query, err = query.Get_tx(ctx, tx, schema.DbField, field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, constants.DbField, field.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		field.Columns, err = column.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
-		field.DefCollection, err = consumer.GetOne_tx(ctx, tx, schema.DbField, field.Id, "fieldDataDefault")
+		field.DefCollection, err = consumer.GetOne_tx(ctx, tx, constants.DbField, field.Id, "fieldDataDefault")
 		if err != nil {
 			return nil, err
 		}
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle", "fieldHelp"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return nil, err
 		}
@@ -518,7 +519,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posHeaderLookup {
 		var field = fields[pos].(types.FieldHeader)
 
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -529,19 +530,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posKanbanLookup {
 		var field = fields[pos].(types.FieldKanban)
 
-		field.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbField, field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbField, field.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
-		field.Query, err = query.Get_tx(ctx, tx, schema.DbField, field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, constants.DbField, field.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		field.Columns, err = column.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
-		field.Collections, err = consumer.Get_tx(ctx, tx, schema.DbField, field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get_tx(ctx, tx, constants.DbField, field.Id, "fieldFilterSelector")
 		if err != nil {
 			return nil, err
 		}
@@ -552,27 +553,27 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posListLookup {
 		var field = fields[pos].(types.FieldList)
 
-		field.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbField, field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbField, field.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
-		field.OpenFormBulk, err = openForm.Get_tx(ctx, tx, schema.DbField, field.Id, pgtype.Text{String: "bulk", Valid: true})
+		field.OpenFormBulk, err = openForm.Get_tx(ctx, tx, constants.DbField, field.Id, pgtype.Text{String: "bulk", Valid: true})
 		if err != nil {
 			return nil, err
 		}
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return nil, err
 		}
-		field.Query, err = query.Get_tx(ctx, tx, schema.DbField, field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, constants.DbField, field.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		field.Columns, err = column.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
-		field.Collections, err = consumer.Get_tx(ctx, tx, schema.DbField, field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get_tx(ctx, tx, constants.DbField, field.Id, "fieldFilterSelector")
 		if err != nil {
 			return nil, err
 		}
@@ -586,7 +587,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 		if err != nil {
 			return nil, err
 		}
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -596,11 +597,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	// lookup tabs fields: get tabs
 	for _, pos := range posTabsLookup {
 		var field = fields[pos].(types.FieldTabs)
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return nil, err
 		}
-		field.Tabs, err = tab.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.Tabs, err = tab.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -611,15 +612,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posVariableLookup {
 		var field = fields[pos].(types.FieldVariable)
 
-		field.Query, err = query.Get_tx(ctx, tx, schema.DbField, field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, constants.DbField, field.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		field.Columns, err = column.Get_tx(ctx, tx, schema.DbField, field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, constants.DbField, field.Id)
 		if err != nil {
 			return nil, err
 		}
-		field.Captions, err = caption.Get_tx(ctx, tx, schema.DbField, field.Id, []string{"fieldTitle", "fieldHelp"})
+		field.Captions, err = caption.Get_tx(ctx, tx, constants.DbField, field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return nil, err
 		}
@@ -691,19 +692,19 @@ func GetCalendar_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID) (types.Fi
 		return f, err
 	}
 
-	f.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbField, f.Id, pgtype.Text{})
+	f.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbField, f.Id, pgtype.Text{})
 	if err != nil {
 		return f, err
 	}
-	f.Query, err = query.Get_tx(ctx, tx, schema.DbField, f.Id, 0, 0, 0)
+	f.Query, err = query.Get_tx(ctx, tx, constants.DbField, f.Id, 0, 0, 0)
 	if err != nil {
 		return f, err
 	}
-	f.Columns, err = column.Get_tx(ctx, tx, schema.DbField, f.Id)
+	f.Columns, err = column.Get_tx(ctx, tx, constants.DbField, f.Id)
 	if err != nil {
 		return f, err
 	}
-	f.Collections, err = consumer.Get_tx(ctx, tx, schema.DbField, f.Id, "fieldFilterSelector")
+	f.Collections, err = consumer.Get_tx(ctx, tx, constants.DbField, f.Id, "fieldFilterSelector")
 	if err != nil {
 		return f, err
 	}
@@ -881,7 +882,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 			// insert/update/delete tabs
 			idsKeep := make([]uuid.UUID, 0)
 			for i, t := range f.Tabs {
-				if err := tab.Set_tx(ctx, tx, schema.DbField, f.Id, i, t); err != nil {
+				if err := tab.Set_tx(ctx, tx, constants.DbField, f.Id, i, t); err != nil {
 					return err
 				}
 
@@ -946,10 +947,10 @@ func setButton_tx(ctx context.Context, tx pgx.Tx, f types.FieldButton) error {
 	`, f.Id, f.JsFunctionId); err != nil {
 		return err
 	}
-	if err := openDoc.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenDoc); err != nil {
+	if err := openDoc.Set_tx(ctx, tx, constants.DbField, f.Id, f.OpenDoc); err != nil {
 		return err
 	}
-	return openForm.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenForm, pgtype.Text{})
+	return openForm.Set_tx(ctx, tx, constants.DbField, f.Id, f.OpenForm, pgtype.Text{})
 }
 func setCalendar_tx(ctx context.Context, tx pgx.Tx, f types.FieldCalendar) error {
 
@@ -976,13 +977,13 @@ func setCalendar_tx(ctx context.Context, tx pgx.Tx, f types.FieldCalendar) error
 
 		return err
 	}
-	if err := openForm.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, constants.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
-	if err := consumer.Set_tx(ctx, tx, schema.DbField, f.Id, "fieldFilterSelector", f.Collections); err != nil {
+	if err := consumer.Set_tx(ctx, tx, constants.DbField, f.Id, "fieldFilterSelector", f.Collections); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+	return column.Set_tx(ctx, tx, constants.DbField, f.Id, f.Columns)
 }
 func setChart_tx(ctx context.Context, tx pgx.Tx, f types.FieldChart) error {
 	if _, err := tx.Exec(ctx, `
@@ -993,7 +994,7 @@ func setChart_tx(ctx context.Context, tx pgx.Tx, f types.FieldChart) error {
 	`, f.Id, f.ChartOption); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+	return column.Set_tx(ctx, tx, constants.DbField, f.Id, f.Columns)
 }
 func setContainer_tx(ctx context.Context, tx pgx.Tx, f types.FieldContainer) error {
 	_, err := tx.Exec(ctx, `
@@ -1048,7 +1049,7 @@ func setData_tx(ctx context.Context, tx pgx.Tx, f types.FieldData) error {
 
 		return err
 	}
-	return consumer.Set_tx(ctx, tx, schema.DbField, f.Id, "fieldDataDefault", []types.CollectionConsumer{f.DefCollection})
+	return consumer.Set_tx(ctx, tx, constants.DbField, f.Id, "fieldDataDefault", []types.CollectionConsumer{f.DefCollection})
 }
 func setDataRelationship_tx(ctx context.Context, tx pgx.Tx, f types.FieldDataRelationship) error {
 
@@ -1078,10 +1079,10 @@ func setDataRelationship_tx(ctx context.Context, tx pgx.Tx, f types.FieldDataRel
 		}
 	}
 
-	if err := openForm.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, constants.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+	return column.Set_tx(ctx, tx, constants.DbField, f.Id, f.Columns)
 }
 func setHeader_tx(ctx context.Context, tx pgx.Tx, f types.FieldHeader) error {
 	_, err := tx.Exec(ctx, `
@@ -1114,13 +1115,13 @@ func setKanban_tx(ctx context.Context, tx pgx.Tx, f types.FieldKanban) error {
 	`, f.Id, f.RelationIndexData, f.RelationIndexAxisX, f.RelationIndexAxisY, f.AttributeIdSort); err != nil {
 		return err
 	}
-	if err := openForm.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, constants.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
-	if err := consumer.Set_tx(ctx, tx, schema.DbField, f.Id, "fieldFilterSelector", f.Collections); err != nil {
+	if err := consumer.Set_tx(ctx, tx, constants.DbField, f.Id, "fieldFilterSelector", f.Collections); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+	return column.Set_tx(ctx, tx, constants.DbField, f.Id, f.Columns)
 }
 func setList_tx(ctx context.Context, tx pgx.Tx, f types.FieldList) error {
 
@@ -1133,16 +1134,16 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.FieldList) error {
 	`, f.Id, f.AutoRenew, f.CsvExport, f.CsvImport, f.Layout, f.FilterQuick, f.ResultLimit); err != nil {
 		return err
 	}
-	if err := openForm.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, constants.DbField, f.Id, f.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
-	if err := openForm.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenFormBulk, pgtype.Text{String: "bulk", Valid: true}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, constants.DbField, f.Id, f.OpenFormBulk, pgtype.Text{String: "bulk", Valid: true}); err != nil {
 		return err
 	}
-	if err := consumer.Set_tx(ctx, tx, schema.DbField, f.Id, "fieldFilterSelector", f.Collections); err != nil {
+	if err := consumer.Set_tx(ctx, tx, constants.DbField, f.Id, "fieldFilterSelector", f.Collections); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+	return column.Set_tx(ctx, tx, constants.DbField, f.Id, f.Columns)
 }
 func setMap_tx(ctx context.Context, tx pgx.Tx, f types.FieldMap) error {
 	return setLayerData_tx(ctx, tx, f.Id, f.LayersData)
@@ -1166,5 +1167,5 @@ func setVariable_tx(ctx context.Context, tx pgx.Tx, f types.FieldVariable) error
 	`, f.Id, f.VariableId, f.JsFunctionId); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbField, f.Id, f.Columns)
+	return column.Set_tx(ctx, tx, constants.DbField, f.Id, f.Columns)
 }

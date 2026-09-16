@@ -2,11 +2,11 @@ package collection
 
 import (
 	"context"
-	"r3/schema"
 	"r3/schema/collection/consumer"
 	"r3/schema/column"
 	"r3/schema/query"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -43,15 +43,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collect
 	rows.Close()
 
 	for i, c := range collections {
-		c.Query, err = query.Get_tx(ctx, tx, schema.DbCollection, c.Id, 0, 0, 0)
+		c.Query, err = query.Get_tx(ctx, tx, constants.DbCollection, c.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		c.Columns, err = column.Get_tx(ctx, tx, schema.DbCollection, c.Id)
+		c.Columns, err = column.Get_tx(ctx, tx, constants.DbCollection, c.Id)
 		if err != nil {
 			return nil, err
 		}
-		c.InHeader, err = consumer.Get_tx(ctx, tx, schema.DbCollection, c.Id, "headerDisplay")
+		c.InHeader, err = consumer.Get_tx(ctx, tx, constants.DbCollection, c.Id, "headerDisplay")
 		if err != nil {
 			return nil, err
 		}
@@ -71,11 +71,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, ic
 	`, id, moduleId, iconId, name); err != nil {
 		return err
 	}
-	if err := query.Set_tx(ctx, tx, schema.DbCollection, id, 0, 0, 0, queryIn); err != nil {
+	if err := query.Set_tx(ctx, tx, constants.DbCollection, id, 0, 0, 0, queryIn); err != nil {
 		return err
 	}
-	if err := column.Set_tx(ctx, tx, schema.DbCollection, id, columns); err != nil {
+	if err := column.Set_tx(ctx, tx, constants.DbCollection, id, columns); err != nil {
 		return err
 	}
-	return consumer.Set_tx(ctx, tx, schema.DbCollection, id, "headerDisplay", inHeader)
+	return consumer.Set_tx(ctx, tx, constants.DbCollection, id, "headerDisplay", inHeader)
 }

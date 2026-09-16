@@ -7,14 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var (
-	QueryJoinConnectors   = []string{"INNER", "LEFT", "RIGHT", "FULL", "CROSS"}
-	QueryFilterConnectors = []string{"AND", "OR"}
-	QueryFilterOperators  = []string{"=", "<>", "<", ">", "<=", ">=", "IS NULL",
-		"IS NOT NULL", "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE", "= ANY",
-		"<> ALL", "@>", "<@", "&&", "@@", "~", "~*", "!~", "!~*"}
-)
-
 // a query starts at a relation to retrieve attribute values
 // it can join other relations via relationship attributes from both sides
 // each relation (original and joined) is referred via an unique index (simple counter)

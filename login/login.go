@@ -9,7 +9,6 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/login/login_check"
-	"r3/login/login_external"
 	"r3/login/login_meta"
 	"r3/login/login_role"
 	"r3/login/login_setting"
@@ -35,18 +34,14 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 }
 
 // delete all logins for external login provider
-func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) error {
-
-	if err := login_external.ValidateEntity(entity); err != nil {
-		return err
-	}
+func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32) error {
 
 	loginIds := make([]int64, 0)
 	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id
 		FROM instance.login
 		WHERE %s_id = $1
-	`, entity), entityId)
+	`, loginProvider), loginProviderId)
 	if err != nil {
 		return err
 	}

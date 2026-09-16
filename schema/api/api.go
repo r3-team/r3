@@ -9,6 +9,7 @@ import (
 	"r3/schema/column"
 	"r3/schema/query"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
@@ -101,11 +102,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([
 
 	// collect query and columns
 	for i, a := range apis {
-		a.Query, err = query.Get_tx(ctx, tx, schema.DbApi, a.Id, 0, 0, 0)
+		a.Query, err = query.Get_tx(ctx, tx, constants.DbApi, a.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		a.Columns, err = column.Get_tx(ctx, tx, schema.DbApi, a.Id)
+		a.Columns, err = column.Get_tx(ctx, tx, constants.DbApi, a.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -132,8 +133,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 
 		return err
 	}
-	if err := query.Set_tx(ctx, tx, schema.DbApi, api.Id, 0, 0, 0, api.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, constants.DbApi, api.Id, 0, 0, 0, api.Query); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbApi, api.Id, api.Columns)
+	return column.Set_tx(ctx, tx, constants.DbApi, api.Id, api.Columns)
 }

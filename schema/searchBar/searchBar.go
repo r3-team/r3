@@ -2,12 +2,12 @@ package searchBar
 
 import (
 	"context"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/column"
 	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -45,19 +45,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.SearchB
 	rows.Close()
 
 	for i, b := range bars {
-		b.Captions, err = caption.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, []string{"searchBarTitle"})
+		b.Captions, err = caption.Get_tx(ctx, tx, constants.DbSearchBar, b.Id, []string{"searchBarTitle"})
 		if err != nil {
 			return nil, err
 		}
-		b.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, pgtype.Text{})
+		b.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbSearchBar, b.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
-		b.Query, err = query.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, 0, 0, 0)
+		b.Query, err = query.Get_tx(ctx, tx, constants.DbSearchBar, b.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		b.Columns, err = column.Get_tx(ctx, tx, schema.DbSearchBar, b.Id)
+		b.Columns, err = column.Get_tx(ctx, tx, constants.DbSearchBar, b.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -80,11 +80,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, bar types.SearchBar) error {
 	if err := caption.Set_tx(ctx, tx, bar.Id, bar.Captions); err != nil {
 		return err
 	}
-	if err := openForm.Set_tx(ctx, tx, schema.DbSearchBar, bar.Id, bar.OpenForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, constants.DbSearchBar, bar.Id, bar.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
-	if err := query.Set_tx(ctx, tx, schema.DbSearchBar, bar.Id, 0, 0, 0, bar.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, constants.DbSearchBar, bar.Id, 0, 0, 0, bar.Query); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, schema.DbSearchBar, bar.Id, bar.Columns)
+	return column.Set_tx(ctx, tx, constants.DbSearchBar, bar.Id, bar.Columns)
 }

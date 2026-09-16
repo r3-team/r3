@@ -3,14 +3,14 @@ package caption
 import (
 	"context"
 	"fmt"
-	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, expectedContents []string) (types.CaptionMap, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UUID, expectedContents []string) (types.CaptionMap, error) {
 
 	caps := make(types.CaptionMap)
 	for _, content := range expectedContents {
@@ -178,78 +178,78 @@ func GetDefaultContent(entity string) types.CaptionMap {
 	}
 	return types.CaptionMap{}
 }
-func GetEntityName(content string) (schema.DbEntity, error) {
+func GetEntityName(content string) (types.DbSchemaApp, error) {
 
 	switch content {
 
 	case "articleTitle", "articleBody":
-		return schema.DbArticle, nil
+		return constants.DbArticle, nil
 
 	case "attributeTitle":
-		return schema.DbAttribute, nil
+		return constants.DbAttribute, nil
 
 	case "clientEventTitle":
-		return schema.DbClientEvent, nil
+		return constants.DbClientEvent, nil
 
 	case "columnTitle":
-		return schema.DbColumn, nil
+		return constants.DbColumn, nil
 
 	case "docTitle":
-		return schema.DbDoc, nil
+		return constants.DbDoc, nil
 
 	case "docColumnTitle":
-		return schema.DbDocColumn, nil
+		return constants.DbDocColumn, nil
 
 	case "docFieldText":
-		return schema.DbDocField, nil
+		return constants.DbDocField, nil
 
 	case "fieldTitle", "fieldHelp":
-		return schema.DbField, nil
+		return constants.DbField, nil
 
 	case "fieldMapLayerDataTitle":
-		return schema.DbFieldMapLayerData, nil
+		return constants.DbFieldMapLayerData, nil
 
 	case "formActionTitle":
-		return schema.DbFormAction, nil
+		return constants.DbFormAction, nil
 
 	case "formTitle", "formHelp":
-		return schema.DbForm, nil
+		return constants.DbForm, nil
 
 	case "jsFunctionTitle", "jsFunctionDesc":
-		return schema.DbJsFunction, nil
+		return constants.DbJsFunction, nil
 
 	case "loginFormTitle":
-		return schema.DbLoginForm, nil
+		return constants.DbLoginForm, nil
 
 	case "menuTitle":
-		return schema.DbMenu, nil
+		return constants.DbMenu, nil
 
 	case "menuTabTitle":
-		return schema.DbMenuTab, nil
+		return constants.DbMenuTab, nil
 
 	case "moduleTitle":
-		return schema.DbModule, nil
+		return constants.DbModule, nil
 
 	case "pgFunctionTitle", "pgFunctionDesc":
-		return schema.DbPgFunction, nil
+		return constants.DbPgFunction, nil
 
 	case "queryChoiceTitle":
-		return schema.DbQueryChoice, nil
+		return constants.DbQueryChoice, nil
 
 	case "relationTitle":
-		return schema.DbRelation, nil
+		return constants.DbRelation, nil
 
 	case "roleTitle", "roleDesc":
-		return schema.DbRole, nil
+		return constants.DbRole, nil
 
 	case "searchBarTitle":
-		return schema.DbSearchBar, nil
+		return constants.DbSearchBar, nil
 
 	case "tabTitle":
-		return schema.DbTab, nil
+		return constants.DbTab, nil
 
 	case "widgetTitle":
-		return schema.DbWidget, nil
+		return constants.DbWidget, nil
 	}
 	return "", fmt.Errorf("bad caption content name '%s'", content)
 }

@@ -7,6 +7,7 @@ import (
 	"r3/cache"
 	"r3/db"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/jackc/pgx/v5"
@@ -55,7 +56,7 @@ func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed s
 	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	l.Token, err = createToken(l.Id, l.Name, false, loginTypeFixed, pgtype.Int4{})
+	l.Token, err = createToken(l.Id, l.Name, false, constants.LoginTypeFixed, pgtype.Int4{})
 	if err != nil {
 		return types.LoginAuthResult{}, nil
 	}

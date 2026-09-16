@@ -13,6 +13,7 @@ import (
 	"r3/schema/query"
 	"r3/schema/tag"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
@@ -198,7 +199,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 
 	// collect sub entities
 	for i, form := range forms {
-		form.Query, err = query.Get_tx(ctx, tx, schema.DbForm, form.Id, 0, 0, 0)
+		form.Query, err = query.Get_tx(ctx, tx, constants.DbForm, form.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -218,7 +219,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 		if err != nil {
 			return nil, err
 		}
-		form.Captions, err = caption.Get_tx(ctx, tx, schema.DbForm, form.Id, []string{"formTitle"})
+		form.Captions, err = caption.Get_tx(ctx, tx, constants.DbForm, form.Id, []string{"formTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -244,7 +245,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 
 		return err
 	}
-	if err := query.Set_tx(ctx, tx, schema.DbForm, frm.Id, 0, 0, 0, frm.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, constants.DbForm, frm.Id, 0, 0, 0, frm.Query); err != nil {
 		return err
 	}
 
@@ -257,7 +258,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	// set field queries after fields themselves
 	// query filters can reference fields so they must all exist
 	for fieldId, queryIn := range fieldIdMapQuery {
-		if err := query.Set_tx(ctx, tx, schema.DbField, fieldId, 0, 0, 0, queryIn); err != nil {
+		if err := query.Set_tx(ctx, tx, constants.DbField, fieldId, 0, 0, 0, queryIn); err != nil {
 			return err
 		}
 	}
@@ -271,10 +272,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	if err := setStates_tx(ctx, tx, frm.Id, frm.States); err != nil {
 		return err
 	}
-	if err := article.Assign_tx(ctx, tx, schema.DbForm, frm.Id, frm.ArticleIdsHelp); err != nil {
+	if err := article.Assign_tx(ctx, tx, constants.DbForm, frm.Id, frm.ArticleIdsHelp); err != nil {
 		return err
 	}
-	if err := tag.SetAssign_tx(ctx, tx, schema.DbForm, frm.Id, frm.TagIds); err != nil {
+	if err := tag.SetAssign_tx(ctx, tx, constants.DbForm, frm.Id, frm.TagIds); err != nil {
 		return err
 	}
 
@@ -334,7 +335,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, constants.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -411,7 +412,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, constants.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -442,7 +443,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, constants.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -551,7 +552,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, constants.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -560,7 +561,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 			}
 		}
 		if field.VariableId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbVariable, field.VariableId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, constants.DbVariable, field.VariableId.Bytes)
 			if err != nil {
 				return nil, err
 			}

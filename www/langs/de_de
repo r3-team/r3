@@ -2174,7 +2174,14 @@
 			"004": "Das System konnte die Datensatzwerte nicht entschlüsseln. Bitte erneut versuchen.",
 			"005": "Das System konnte Entschlüsselungs-Codes für die ausgewählten Datensätze nicht laden.",
 			"006": "Nicht alle ausgewählten Benutzer haben Ende-Zu-Ende-Verschlüsselung aktiviert - diese sind: {NAMES}",
-			"007": "Ende-Zu-Ende-Verschlüsselung wartet auf Eingabe des persönlichen Verschlüsselungspassworts in den Benutzereinstellungen."
+			"007": "Ende-Zu-Ende-Verschlüsselung wartet auf Eingabe des persönlichen Verschlüsselungspassworts in den Benutzereinstellungen.",
+			"008": "Das gewählte Passwort ist zu kurz.",
+			"009": "Das gewählte Passwort muss eine Ziffer beinhalten.",
+			"010": "Das gewählte Passwort muss einen Kleinbuchstaben beinhalten.",
+			"011": "Das gewählte Passwort muss einen Großbuchstaben beinhalten.",
+			"012": "Das gewählte Passwort muss ein Sonderzeichen beinhalten.",
+			"013": "Das aktuelle Passwort ist inkorrekt. Bitte erneut versuchen.",
+			"014": "Der Code zum Zurücksetzen des Passworts ist unbekannt."
 		},
 		"TRF": {
 			"001": "Anwendung kann nicht im Repository veröffentlicht werden, Build-Nummer im Repository ({BUILD_REPO}) ist neuer oder gleich der lokalen Build-Nummer ({BUILD_LOCAL}).",

@@ -13,6 +13,7 @@ import (
 	"r3/login/login_clusterEvent"
 	"r3/login/login_metaMap"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 	"sort"
 
@@ -240,7 +241,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	}
 
 	// everything in order, auth successful
-	l.Token, err = createToken(l.Id, l.Name, l.Admin, loginTypeOauth, tokenExpiryHours)
+	l.Token, err = createToken(l.Id, l.Name, l.Admin, constants.LoginTypeOauth, tokenExpiryHours)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}

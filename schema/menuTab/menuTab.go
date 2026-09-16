@@ -3,10 +3,10 @@ package menuTab
 import (
 	"context"
 	"fmt"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/collection/consumer"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -51,7 +51,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.MenuTab
 		if err != nil {
 			return nil, err
 		}
-		mt.Captions, err = caption.Get_tx(ctx, tx, schema.DbMenuTab, mt.Id, []string{"menuTabTitle"})
+		mt.Captions, err = caption.Get_tx(ctx, tx, constants.DbMenuTab, mt.Id, []string{"menuTabTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -142,7 +142,7 @@ func setMenus_tx(ctx context.Context, tx pgx.Tx, menuTabId uuid.UUID, parentId p
 		if err := setMenus_tx(ctx, tx, menuTabId, pgtype.UUID{Bytes: m.Id, Valid: true}, m.Menus); err != nil {
 			return err
 		}
-		if err := consumer.Set_tx(ctx, tx, schema.DbMenu, m.Id, "menuDisplay", m.Collections); err != nil {
+		if err := consumer.Set_tx(ctx, tx, constants.DbMenu, m.Id, "menuDisplay", m.Collections); err != nil {
 			return err
 		}
 		if err := caption.Set_tx(ctx, tx, m.Id, m.Captions); err != nil {

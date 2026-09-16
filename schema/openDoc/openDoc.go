@@ -4,17 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID) (d types.OpenDoc, err error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UUID) (d types.OpenDoc, err error) {
 
-	if !slices.Contains(schema.DbAssignedOpenDoc, entity) {
+	if !slices.Contains(constants.DbAssignedOpenDoc, entity) {
 		return d, errors.New("invalid open doc entity")
 	}
 
@@ -31,9 +31,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID
 	return d, err
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, d types.OpenDoc) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UUID, d types.OpenDoc) error {
 
-	if !slices.Contains(schema.DbAssignedOpenDoc, entity) {
+	if !slices.Contains(constants.DbAssignedOpenDoc, entity) {
 		return errors.New("invalid open doc entity")
 	}
 

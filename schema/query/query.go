@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, filterIndex int, filterPosition int, filterSide int) (types.Query, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UUID, filterIndex int, filterPosition int, filterSide int) (types.Query, error) {
 
 	var q types.Query
 	q.Joins = make([]types.QueryJoin, 0)
@@ -23,7 +23,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID
 	q.Lookups = make([]types.QueryLookup, 0)
 	q.Choices = make([]types.QueryChoice, 0)
 
-	if !slices.Contains(schema.DbAssignedQuery, entity) {
+	if !slices.Contains(constants.DbAssignedQuery, entity) {
 		return q, fmt.Errorf("unknown query parent entity '%s'", entity)
 	}
 
@@ -160,10 +160,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID
 	return q, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, filterIndex int,
+func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, filterIndex int,
 	filterPosition int, filterSide int, query types.Query) error {
 
-	if !slices.Contains(schema.DbAssignedQuery, entity) {
+	if !slices.Contains(constants.DbAssignedQuery, entity) {
 		return fmt.Errorf("invalid query parent entity '%s'", entity)
 	}
 
@@ -238,7 +238,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 
 	for position, j := range query.Joins {
 
-		if !slices.Contains(types.QueryJoinConnectors, j.Connector) {
+		if !slices.Contains(constants.QueryJoinConnectors, j.Connector) {
 			return errors.New("invalid join connector")
 		}
 
@@ -423,11 +423,11 @@ func setFilters_tx(ctx context.Context, tx pgx.Tx, queryId uuid.UUID, queryChoic
 
 	for position, f := range filters {
 
-		if !slices.Contains(types.QueryFilterConnectors, f.Connector) {
+		if !slices.Contains(constants.QueryFilterConnectors, f.Connector) {
 			return errors.New("invalid filter connector")
 		}
 
-		if !slices.Contains(types.QueryFilterOperators, f.Operator) {
+		if !slices.Contains(constants.QueryFilterOperators, f.Operator) {
 			return errors.New("invalid filter operator")
 		}
 
@@ -469,7 +469,7 @@ func SetFilterSide_tx(ctx context.Context, tx pgx.Tx, queryId uuid.UUID, filterI
 	}
 
 	if s.Content == "subQuery" {
-		if err := Set_tx(ctx, tx, schema.DbQueryFilterQuery, queryId, filterIndex, filterPosition, side, s.Query); err != nil {
+		if err := Set_tx(ctx, tx, constants.DbQueryFilterQuery, queryId, filterIndex, filterPosition, side, s.Query); err != nil {
 			return err
 		}
 	}

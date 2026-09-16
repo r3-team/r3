@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -59,7 +59,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Role, e
 			return nil, err
 		}
 
-		r.Captions, err = caption.Get_tx(ctx, tx, schema.DbRole, r.Id, []string{"roleTitle", "roleDesc"})
+		r.Captions, err = caption.Get_tx(ctx, tx, constants.DbRole, r.Id, []string{"roleTitle", "roleDesc"})
 		if err != nil {
 			return nil, err
 		}
@@ -171,81 +171,81 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	}
 
 	for trgId, access := range role.AccessApis {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbApi, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbApi, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessAttributes {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbAttribute, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbAttribute, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessClientEvents {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbClientEvent, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbClientEvent, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessCollections {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbCollection, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbCollection, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessMenus {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbMenu, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbMenu, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessRelations {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbRelation, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbRelation, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessSearchBars {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbSearchBar, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbSearchBar, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessWidgets {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbWidget, access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbWidget, access); err != nil {
 			return err
 		}
 	}
 	return caption.Set_tx(ctx, tx, role.Id, role.Captions)
 }
 
-func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity schema.DbEntity, access types.Access) error {
+func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity types.DbSchemaApp, access types.Access) error {
 
 	// check valid access levels
 	switch entity {
-	case schema.DbApi: // 1 access API
+	case constants.DbApi: // 1 access API
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case schema.DbAttribute: // 1 read, 2 write attribute value
+	case constants.DbAttribute: // 1 read, 2 write attribute value
 		if access < -1 || access > 2 {
 			return errors.New("invalid access level")
 		}
-	case schema.DbClientEvent: // 1 access client event
+	case constants.DbClientEvent: // 1 access client event
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case schema.DbCollection: // 1 read collection
+	case constants.DbCollection: // 1 read collection
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case schema.DbMenu: // 1 read (e. g. see) menu
+	case constants.DbMenu: // 1 read (e. g. see) menu
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case schema.DbRelation: // 1 read, 2 write, 3 delete relation record
+	case constants.DbRelation: // 1 read, 2 write, 3 delete relation record
 		if access < -1 || access > 3 {
 			return errors.New("invalid access level")
 		}
-	case schema.DbSearchBar: // 1 access search bar
+	case constants.DbSearchBar: // 1 access search bar
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case schema.DbWidget: // 1 access widget
+	case constants.DbWidget: // 1 access widget
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}

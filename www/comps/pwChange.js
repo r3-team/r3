@@ -46,6 +46,7 @@ export default {
 		</div>
 		<div class="textError" v-if="message !== ''">{{ message }}</div>
 	</div>`,
+	emits: ['changed'],
 	data() {
 		return {
 			// states
@@ -173,7 +174,7 @@ export default {
 		set(newPrivateKeyEnc, newLoginKey) {
 			const requests = [
 				this.isReset
-					? ws.prepare('loginPassword', 'reset', { code: this.loginPwResetCode, pwNew: this.pwNew, })
+					? ws.prepare('loginPassword', 'reset', { code: this.loginPwResetCode, pwNew: this.pwNew0, })
 					: ws.prepare('loginPassword', 'set', { pwNew: this.pwNew0, pwOld: this.pwOld })
 			];
 
@@ -190,11 +191,14 @@ export default {
 					this.pwOld = '';
 					this.newInput = false;
 
-					if (res.length > 1)
-						this.aesGcmExportBase64(newLoginKey).then(keyBase64 => {
-							this.$store.commit('loginPrivateKeyEnc', newPrivateKeyEnc);
-							this.$store.commit('local/loginKeyAes', keyBase64);
-						});
+					if (res.length === 1)
+						return this.$emit('changed');
+
+					this.aesGcmExportBase64(newLoginKey).then(keyBase64 => {
+						this.$store.commit('loginPrivateKeyEnc', newPrivateKeyEnc);
+						this.$store.commit('local/loginKeyAes', keyBase64);
+						this.$emit('changed');
+					});
 				},
 				this.$root.genericError
 			);

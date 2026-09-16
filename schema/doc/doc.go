@@ -11,6 +11,7 @@ import (
 	"r3/schema/query"
 	"r3/schema/tag"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
@@ -52,7 +53,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 			if err != nil {
 				return nil, err
 			}
-			if columns[i].Content == schema.ColumnContentQuery {
+			if columns[i].Content == constants.DbColumnContentQuery {
 				columns[i].Query, err = schema.ReplaceQueryIds(columns[i].Query, idMapReplaced)
 				if err != nil {
 					return nil, err
@@ -255,11 +256,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	rows.Close()
 
 	for i, d := range docs {
-		docs[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbDoc, d.Id, []string{"docTitle"})
+		docs[i].Captions, err = caption.Get_tx(ctx, tx, constants.DbDoc, d.Id, []string{"docTitle"})
 		if err != nil {
 			return nil, err
 		}
-		docs[i].Query, err = query.Get_tx(ctx, tx, schema.DbDoc, d.Id, 0, 0, 0)
+		docs[i].Query, err = query.Get_tx(ctx, tx, constants.DbDoc, d.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -267,7 +268,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 		if err != nil {
 			return nil, err
 		}
-		docs[i].Sets, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault)
+		docs[i].Sets, err = doc_set.Get_tx(ctx, tx, d.Id, constants.DbDoc, constants.DbDocContextDefault)
 		if err != nil {
 			return nil, err
 		}
@@ -303,19 +304,19 @@ func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 		return err
 	}
 
-	if err := query.Set_tx(ctx, tx, schema.DbDoc, d.Id, 0, 0, 0, d.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, constants.DbDoc, d.Id, 0, 0, 0, d.Query); err != nil {
 		return err
 	}
 	if err := doc_page.Set_tx(ctx, tx, d.Id, d.Pages); err != nil {
 		return err
 	}
-	if err := doc_set.Set_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault, d.Sets); err != nil {
+	if err := doc_set.Set_tx(ctx, tx, d.Id, constants.DbDoc, constants.DbDocContextDefault, d.Sets); err != nil {
 		return err
 	}
 	if err := setStates_tx(ctx, tx, d.Id, d.States); err != nil {
 		return err
 	}
-	if err := tag.SetAssign_tx(ctx, tx, schema.DbDoc, d.Id, d.TagIds); err != nil {
+	if err := tag.SetAssign_tx(ctx, tx, constants.DbDoc, d.Id, d.TagIds); err != nil {
 		return err
 	}
 	return caption.Set_tx(ctx, tx, d.Id, d.Captions)

@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"r3/cache"
+	"r3/config"
 	"r3/db"
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -30,9 +32,11 @@ func Reset(ctx context.Context, code string) (types.LoginAuthResult, error) {
 	var limited bool
 	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
+	var mfaRequiredInstance = config.GetUint64("mfaRequired") == 1
+	var mfaRequiredLogin pgtype.Bool
 
 	if err := db.Pool.QueryRow(ctx, `
-		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.name, l.token_expiry_hours, lm.name_display
+		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.name, l.token_expiry_hours, l.mfa_required, lm.name_display
 		FROM       instance.login      AS l
 		INNER JOIN instance.login_reset AS lr ON lr.login_id = l.id
 		LEFT JOIN  instance.login_meta  AS lm ON lm.login_id = l.id
@@ -43,7 +47,7 @@ func Reset(ctx context.Context, code string) (types.LoginAuthResult, error) {
 		AND   lr.code_hash      = $1
 		AND   lr.date_expiry    > $2
 	`, tools.Hash(code), tools.GetTimeUnix()).Scan(
-		&l.Id, &l.SaltKdf, &l.Admin, &limited, &l.Name, &tokenExpiryHours, &nameDisplay); err != nil {
+		&l.Id, &l.SaltKdf, &l.Admin, &limited, &l.Name, &tokenExpiryHours, &mfaRequiredLogin, &nameDisplay); err != nil {
 
 		if err == pgx.ErrNoRows {
 			// login not found / inactive must result in same response as authentication failed
@@ -58,10 +62,15 @@ func Reset(ctx context.Context, code string) (types.LoginAuthResult, error) {
 	}
 
 	// only local accounts can be reset
-	l.Token, err = createToken(l.Id, l.Name, l.Admin, loginTypeLocal, tokenExpiryHours)
+	l.Token, err = createToken(l.Id, l.Name, l.Admin, constants.LoginTypeLocal, tokenExpiryHours)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
+
+	// inform about forced MFA setup
+	// pw reset skips MFA auth, but MFA setup (if required) must be completed after auth
+	l.MfaSetup = (mfaRequiredInstance && !mfaRequiredLogin.Valid) || mfaRequiredLogin.Bool
+
 	if err := cache.LoadAccessIfUnknown(l.Id); err != nil {
 		return types.LoginAuthResult{}, err
 	}

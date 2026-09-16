@@ -8,6 +8,7 @@ import (
 	"r3/handler"
 	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 	"strings"
 
@@ -215,7 +216,7 @@ func GetRecordTitles_tx(ctx context.Context, tx pgx.Tx, relationIdMapRecordIds m
 		if len(rel.AttributeIdsTitle) == 0 {
 			return nil, fmt.Errorf("record title is not defined for relation '%s'", rel.Name)
 		}
-		if !authorizedAttributes(loginId, rel.AttributeIdsTitle, types.AccessRead) {
+		if !authorizedAttributes(loginId, rel.AttributeIdsTitle, constants.AccessRead) {
 			return nil, errors.New(handler.ErrUnauthorized)
 		}
 

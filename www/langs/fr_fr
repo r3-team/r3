@@ -2174,7 +2174,14 @@
 			"004": "Le système a échoué à déchiffrer les valeurs de l'enregistrement. Veuillez réessayer.",
 			"005": "Le système a échoué à récupérer les clés de déchiffrement pour les enregistrements sélectionnés.",
 			"006": "Tous les utilisateurs sélectionnés n'ont pas activé le chiffrement de bout en bout - il s'agit de : {NAMES}",
-			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings.",
+			"008": "The chosen password is too short.",
+			"009": "The chosen password must include a digit.",
+			"010": "The chosen password must include a lower-case character.",
+			"011": "The chosen password must include an upper-case character.",
+			"012": "The chosen password must include a special character.",
+			"013": "The current password failed to validate. Please try again.",
+			"014": "The password reset code is unknown."
 		},
 		"TRF": {
 			"001": "Application cannot be committed to repository, build in repository ({BUILD_REPO}) is newer or equal to local build number ({BUILD_LOCAL}).",

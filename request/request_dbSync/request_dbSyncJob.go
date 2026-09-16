@@ -7,6 +7,7 @@ import (
 	"r3/cache/cache_dbSync"
 	"r3/spooler/db_sync"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -30,7 +31,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	}
 
 	// reset irrelevant inputs based on job type
-	if j.JobType != types.DbSyncJobTypeLoad {
+	if j.JobType != constants.DbSyncJobTypeLoad {
 		j.DeleteMissing = false
 		j.IntervalSeconds = 0
 		j.Lookups = make([]types.QueryLookup, 0)
@@ -41,7 +42,7 @@ func JobSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	if len(j.Joins) < 1 {
 		return fmt.Errorf("DB sync job requires at least one relation")
 	}
-	isSend := slices.Contains(types.DbSyncJobTypesSend, j.JobType)
+	isSend := slices.Contains(constants.DbSyncJobTypesSend, j.JobType)
 
 	// register trigger for SEND jobs for relation/job type combination
 	if j.Active && isSend {
@@ -163,7 +164,7 @@ func jobDeleteById(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
-	if slices.Contains(types.DbSyncJobTypesSend, jobType) {
+	if slices.Contains(constants.DbSyncJobTypesSend, jobType) {
 		if err := triggerSendRemoveIfNotNeeded(ctx, tx, relationId, jobType); err != nil {
 			return err
 		}

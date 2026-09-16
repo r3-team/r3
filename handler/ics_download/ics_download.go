@@ -13,9 +13,9 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/login/login_auth"
-	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"reflect"
 	"strings"
 	"time"
@@ -192,7 +192,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// add event summary expressions
 	for _, column := range f.Columns {
 
-		if column.Content == schema.ColumnContentAttribute {
+		if column.Content == constants.DbColumnContentAttribute {
 			if !column.AttributeId.Valid {
 				handler.AbortRequest(w, handler.ContextIcsDownload, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute), handler.ErrGeneral)
 				return

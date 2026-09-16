@@ -4,17 +4,16 @@ import (
 	"context"
 	"r3/cache"
 	"r3/login"
-	"r3/login/login_external"
 	"r3/login/login_metaMap"
 	"r3/login/login_roleAssign"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/jackc/pgx/v5"
 )
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id int32) error {
-
-	if err := login.DelByExternalProvider_tx(ctx, tx, login_external.EntityLdap, id); err != nil {
+	if err := login.DelByExternalProvider_tx(ctx, tx, constants.DbLoginProviderLdap, id); err != nil {
 		return err
 	}
 
@@ -26,7 +25,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int32) error {
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
-	ldaps := make([]types.Ldap, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT
@@ -63,10 +61,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 		ORDER BY l.name ASC
 	`)
 	if err != nil {
-		return ldaps, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	ldaps := make([]types.Ldap, 0)
 	for rows.Next() {
 		var l types.Ldap
 		var m types.LoginMeta
@@ -78,16 +77,16 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 			&m.NameSur, &m.Notes, &m.Organization, &m.PhoneFax, &m.PhoneLandline,
 			&m.PhoneMobile); err != nil {
 
-			return ldaps, err
+			return nil, err
 		}
 		l.LoginMetaMap = m
 		ldaps = append(ldaps, l)
 	}
 
 	for i, _ := range ldaps {
-		ldaps[i].LoginRolesAssign, err = login_roleAssign.Get_tx(ctx, tx, login_external.EntityLdap, ldaps[i].Id)
+		ldaps[i].LoginRolesAssign, err = login_roleAssign.Get_tx(ctx, tx, constants.DbLoginProviderLdap, ldaps[i].Id)
 		if err != nil {
-			return ldaps, err
+			return nil, err
 		}
 	}
 	return ldaps, nil
@@ -129,10 +128,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 		}
 	}
 
-	if err := login_metaMap.Set_tx(ctx, tx, login_external.EntityLdap, l.Id, l.LoginMetaMap); err != nil {
+	if err := login_metaMap.Set_tx(ctx, tx, constants.DbLoginProviderLdap, l.Id, l.LoginMetaMap); err != nil {
 		return err
 	}
-	if err := login_roleAssign.Set_tx(ctx, tx, login_external.EntityLdap, l.Id, l.LoginRolesAssign); err != nil {
+	if err := login_roleAssign.Set_tx(ctx, tx, constants.DbLoginProviderLdap, l.Id, l.LoginRolesAssign); err != nil {
 		return err
 	}
 	return nil

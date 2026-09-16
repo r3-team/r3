@@ -5,8 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 	"strings"
 
@@ -19,9 +19,9 @@ import (
 func FixMissingColumnContent(column types.Column) types.Column {
 	if column.Content == "" {
 		if column.SubQuery {
-			column.Content = schema.ColumnContentQuery
+			column.Content = constants.DbColumnContentQuery
 		} else {
-			column.Content = schema.ColumnContentAttribute
+			column.Content = constants.DbColumnContentAttribute
 		}
 	}
 	return column
@@ -29,9 +29,9 @@ func FixMissingColumnContent(column types.Column) types.Column {
 func FixMissingDocColumnContent(column types.DocColumn) types.DocColumn {
 	if column.Content == "" {
 		if column.SubQuery {
-			column.Content = schema.ColumnContentQuery
+			column.Content = constants.DbColumnContentQuery
 		} else {
-			column.Content = schema.ColumnContentAttribute
+			column.Content = constants.DbColumnContentAttribute
 		}
 	}
 	return column

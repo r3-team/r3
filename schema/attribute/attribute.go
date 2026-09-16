@@ -11,6 +11,7 @@ import (
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -96,7 +97,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 	rows.Close()
 
 	for i, atr := range attributes {
-		attributes[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbAttribute, atr.Id, []string{"attributeTitle"})
+		attributes[i].Captions, err = caption.Get_tx(ctx, tx, constants.DbAttribute, atr.Id, []string{"attributeTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -134,7 +135,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 
 	isRel := schema.IsContentRelationship(atr.Content)
 	isFiles := schema.IsContentFiles(atr.Content)
-	known, err := schema.CheckId_tx(ctx, tx, atr.Id, schema.DbAttribute, "id")
+	known, err := schema.CheckId_tx(ctx, tx, atr.Id, constants.DbAttribute, "id")
 	if err != nil {
 		return err
 	}
@@ -501,7 +502,7 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 		`, name, id); err != nil {
 			return err
 		}
-		if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, schema.DbAttribute, id); err != nil {
+		if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, constants.DbAttribute, id); err != nil {
 			return err
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -38,7 +39,7 @@ func GetJobsToRunLoad() []types.DbSyncJob {
 	defer access_mx.RUnlock()
 
 	for _, j := range jobIdMap {
-		if j.Active && j.JobType == types.DbSyncJobTypeLoad && (!j.DateAttempt.Valid || j.DateAttempt.Int64+j.IntervalSeconds < now) {
+		if j.Active && j.JobType == constants.DbSyncJobTypeLoad && (!j.DateAttempt.Valid || j.DateAttempt.Int64+j.IntervalSeconds < now) {
 			jobs = append(jobs, j)
 		}
 	}
@@ -52,7 +53,7 @@ func GetJobsToRunSend() []types.DbSyncJob {
 	defer access_mx.RUnlock()
 
 	for _, j := range jobIdMap {
-		if j.Active && slices.Contains(types.DbSyncJobTypesSend, j.JobType) {
+		if j.Active && slices.Contains(constants.DbSyncJobTypesSend, j.JobType) {
 			jobs = append(jobs, j)
 		}
 	}

@@ -10,6 +10,7 @@ import (
 	"r3/log"
 	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 	"strings"
 
@@ -75,7 +76,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, skipL
 	// parse all column values
 	for i, column := range columns {
 
-		if column.Content != schema.ColumnContentAttribute {
+		if column.Content != constants.DbColumnContentAttribute {
 			return nil, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnContentNoAtr)
 		}
 		if !column.AttributeId.Valid {

@@ -2,9 +2,9 @@ package clientEvent
 
 import (
 	"context"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -44,7 +44,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.ClientE
 	rows.Close()
 
 	for i, e := range clientEvents {
-		clientEvents[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbClientEvent, e.Id, []string{"clientEventTitle"})
+		clientEvents[i].Captions, err = caption.Get_tx(ctx, tx, constants.DbClientEvent, e.Id, []string{"clientEventTitle"})
 		if err != nil {
 			return nil, err
 		}

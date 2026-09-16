@@ -2,9 +2,9 @@ package loginForm
 
 import (
 	"context"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -40,7 +40,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.LoginFo
 	rows.Close()
 
 	for i, l := range loginForms {
-		loginForms[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbLoginForm, l.Id, []string{"loginFormTitle"})
+		loginForms[i].Captions, err = caption.Get_tx(ctx, tx, constants.DbLoginForm, l.Id, []string{"loginFormTitle"})
 		if err != nil {
 			return nil, err
 		}

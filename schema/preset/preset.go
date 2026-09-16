@@ -7,6 +7,7 @@ import (
 	"r3/schema"
 	"r3/schema/compatible"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
@@ -99,7 +100,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, preset types.Preset, onlySchema bool
 		return err
 	}
 
-	known, err := schema.CheckId_tx(ctx, tx, preset.Id, schema.DbPreset, "id")
+	known, err := schema.CheckId_tx(ctx, tx, preset.Id, constants.DbPreset, "id")
 	if err != nil {
 		return err
 	}

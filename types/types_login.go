@@ -109,6 +109,7 @@ type LoginTokenFixed struct {
 	Token      string `json:"token"`
 	DateCreate int64  `json:"dateCreate"`
 }
+type LoginType string
 type LoginWidgetGroupItem struct {
 	WidgetId pgtype.UUID `json:"widgetId"` // ID of a module widget, empty if system widget is used
 	ModuleId pgtype.UUID `json:"moduleId"` // ID of a module, if relevant for widget (systemModuleMenu)

@@ -9,6 +9,7 @@ import (
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -35,7 +36,7 @@ func Log(id uuid.UUID, loginId int64, address string, device types.WebsocketClie
 			DO UPDATE
 				SET date = $7
 				WHERE instance.login_session.id = $8
-	`, id, loginId, cache.GetNodeId(), address, types.WebsocketClientDeviceNames[device], now, now, id); err != nil {
+	`, id, loginId, cache.GetNodeId(), address, constants.WebsocketClientDeviceNames[device], now, now, id); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)

@@ -16,6 +16,7 @@ type Repo struct {
 	Url            string    `json:"url"`
 	Active         bool      `json:"active"`
 }
+
 type RepoFeedback struct {
 	Id   uuid.UUID `json:"id"`
 	Name string    `json:"name"`

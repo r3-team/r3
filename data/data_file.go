@@ -17,6 +17,7 @@ import (
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"strconv"
 	"strings"
@@ -42,7 +43,7 @@ func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
 	if !isFiles {
 		return errors.New("not a files attribute")
 	}
-	if !authorizedAttributes(loginId, []uuid.UUID{attributeId}, types.AccessRead) {
+	if !authorizedAttributes(loginId, []uuid.UUID{attributeId}, constants.AccessRead) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 	return nil
@@ -74,7 +75,7 @@ func SetFile(ctx context.Context, loginId int64, attributeId, fileId uuid.UUID, 
 	}
 
 	// check for access permissions, unless it´s a system task (login ID = -1)
-	if loginId != -1 && !authorizedAttributes(loginId, []uuid.UUID{attributeId}, types.AccessWrite) {
+	if loginId != -1 && !authorizedAttributes(loginId, []uuid.UUID{attributeId}, constants.AccessWrite) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 

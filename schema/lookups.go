@@ -3,6 +3,8 @@ package schema
 import (
 	"context"
 	"fmt"
+	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -171,9 +173,9 @@ func GetPgIndexNamesById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (strin
 	return moduleName, relationName, nil
 }
 
-func GetIsFormBound_tx(ctx context.Context, tx pgx.Tx, entity DbEntity, id uuid.UUID) (bool, error) {
+func GetIsFormBound_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UUID) (bool, error) {
 
-	if !slices.Contains(DbBoundForm, entity) {
+	if !slices.Contains(constants.DbBoundForm, entity) {
 		return false, fmt.Errorf("invalid entity '%s'", entity)
 	}
 

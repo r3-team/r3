@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
-	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"slices"
 	"strconv"
@@ -24,7 +24,7 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 	recordIdContext int64, getterKeyMapValue map[string]string) (types.DataGetExpression, error) {
 
 	switch column.Content {
-	case schema.ColumnContentAttribute:
+	case constants.DbColumnContentAttribute:
 		if !column.AttributeId.Valid {
 			return types.DataGetExpression{}, errors.New("column is missing an attribute")
 		}
@@ -35,7 +35,7 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 			Aggregator:  column.Aggregator,
 			Distincted:  column.Distincted,
 		}, nil
-	case schema.ColumnContentQuery:
+	case constants.DbColumnContentQuery:
 		if !column.AttributeId.Valid {
 			return types.DataGetExpression{}, errors.New("column is missing an attribute")
 		}
@@ -55,7 +55,7 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 				Limit:   column.Query.FixedLimit,
 			},
 		}, nil
-	case schema.ColumnContentFncPg:
+	case constants.DbColumnContentFncPg:
 		if !column.PgFunctionId.Valid {
 			return types.DataGetExpression{}, errors.New("column is missing a backend function")
 		}
@@ -66,7 +66,7 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 			Aggregator:   column.Aggregator,
 			Distincted:   column.Distincted,
 		}, nil
-	case schema.ColumnContentFncScalar:
+	case constants.DbColumnContentFncScalar:
 		if len(column.Arguments) == 0 {
 			return types.DataGetExpression{}, errors.New("multi-value column is missing arguments")
 		}
@@ -88,7 +88,7 @@ func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, la
 	recordIdContext int64) (types.DataGetExpression, error) {
 
 	switch column.Content {
-	case schema.ColumnContentAttribute:
+	case constants.DbColumnContentAttribute:
 		if !column.AttributeId.Valid {
 			return types.DataGetExpression{}, errors.New("column is missing an attribute")
 		}
@@ -99,7 +99,7 @@ func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, la
 			Aggregator:  column.Aggregator,
 			Distincted:  column.Distincted,
 		}, nil
-	case schema.ColumnContentQuery:
+	case constants.DbColumnContentQuery:
 		if !column.AttributeId.Valid {
 			return types.DataGetExpression{}, errors.New("column is missing an attribute")
 		}
@@ -119,7 +119,7 @@ func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, la
 				Limit:   column.Query.FixedLimit,
 			},
 		}, nil
-	case schema.ColumnContentFncPg:
+	case constants.DbColumnContentFncPg:
 		if !column.PgFunctionId.Valid {
 			return types.DataGetExpression{}, errors.New("column is missing a backend function")
 		}
@@ -130,7 +130,7 @@ func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, la
 			Aggregator:   column.Aggregator,
 			Distincted:   column.Distincted,
 		}, nil
-	case schema.ColumnContentFncScalar:
+	case constants.DbColumnContentFncScalar:
 		if len(column.Arguments) == 0 {
 			return types.DataGetExpression{}, errors.New("multi-value column is missing arguments")
 		}

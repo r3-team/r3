@@ -7,7 +7,7 @@ import (
 	"r3/cache"
 	"r3/handler"
 	"r3/schema"
-	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -21,7 +21,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordIds []in
 	}
 
 	// check for access permissions, unless it´s a system task (login ID = -1)
-	if loginId != -1 && !authorizedRelation(loginId, relationId, types.AccessDelete) {
+	if loginId != -1 && !authorizedRelation(loginId, relationId, constants.AccessDelete) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 

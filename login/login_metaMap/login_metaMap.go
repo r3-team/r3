@@ -3,20 +3,15 @@ package login_metaMap
 import (
 	"context"
 	"fmt"
-	"r3/login/login_external"
 	"r3/types"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) (types.LoginMeta, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32) (types.LoginMeta, error) {
 
 	var m types.LoginMeta
-	if err := login_external.ValidateEntity(entity); err != nil {
-		return m, err
-	}
-
 	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT
 			COALESCE(department, ''),
@@ -32,7 +27,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) (type
 			COALESCE(phone_mobile, '')
 		FROM instance.login_meta_map
 		WHERE %s_id = $1
-	`, entity), entityId).Scan(&m.Department, &m.Email, &m.Location, &m.NameDisplay, &m.NameFore,
+	`, loginProvider), loginProviderId).Scan(&m.Department, &m.Email, &m.Location, &m.NameDisplay, &m.NameFore,
 		&m.NameSur, &m.Notes, &m.Organization, &m.PhoneFax, &m.PhoneLandline, &m.PhoneMobile)
 
 	if err != nil && err != pgx.ErrNoRows {
@@ -41,11 +36,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) (type
 	return m, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32, m types.LoginMeta) error {
-
-	if err := login_external.ValidateEntity(entity); err != nil {
-		return err
-	}
+func Set_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32, m types.LoginMeta) error {
 
 	var exists bool
 	if err := tx.QueryRow(ctx, fmt.Sprintf(`
@@ -54,7 +45,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32, m typ
 			FROM instance.login_meta_map
 			WHERE %s_id = $1
 		)
-	`, entity), entityId).Scan(&exists); err != nil {
+	`, loginProvider), loginProviderId).Scan(&exists); err != nil {
 		return err
 	}
 
@@ -79,7 +70,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32, m typ
 				notes, organization, phone_fax, phone_landline, phone_mobile
 			)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-		`, entity), entityId, m.Department, m.Email, m.Location, m.NameDisplay,
+		`, loginProvider), loginProviderId, m.Department, m.Email, m.Location, m.NameDisplay,
 			m.NameFore, m.NameSur, m.Notes, m.Organization, m.PhoneFax,
 			m.PhoneLandline, m.PhoneMobile)
 	} else {
@@ -89,9 +80,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32, m typ
 				name_fore = $5, name_sur = $6, notes = $7, organization = $8,
 				phone_fax = $9, phone_landline = $10, phone_mobile = $11
 			WHERE %s_id = $12
-		`, entity), m.Department, m.Email, m.Location, m.NameDisplay, m.NameFore,
+		`, loginProvider), m.Department, m.Email, m.Location, m.NameDisplay, m.NameFore,
 			m.NameSur, m.Notes, m.Organization, m.PhoneFax, m.PhoneLandline,
-			m.PhoneMobile, entityId)
+			m.PhoneMobile, loginProviderId)
 	}
 	return err
 }

@@ -10,6 +10,7 @@ import (
 	"r3/schema/compatible"
 	"r3/schema/tag"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"slices"
 	"strings"
@@ -71,7 +72,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 		if err != nil {
 			return nil, err
 		}
-		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbPgFunction, f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, constants.DbPgFunction, f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +137,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		return errors.New("empty function body or missing returns")
 	}
 
-	known, err := schema.CheckId_tx(ctx, tx, fnc.Id, schema.DbPgFunction, "id")
+	known, err := schema.CheckId_tx(ctx, tx, fnc.Id, constants.DbPgFunction, "id")
 	if err != nil {
 		return err
 	}
@@ -163,7 +164,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		}
 
 		if fnc.Name != nameEx {
-			if err := RecreateAffectedBy_tx(ctx, tx, schema.DbPgFunction, fnc.Id); err != nil {
+			if err := RecreateAffectedBy_tx(ctx, tx, constants.DbPgFunction, fnc.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
@@ -203,7 +204,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	scheduleIds := make([]uuid.UUID, 0)
 	for _, s := range fnc.Schedules {
 
-		known, err = schema.CheckId_tx(ctx, tx, s.Id, schema.DbPgFunctionSchedule, "id")
+		known, err = schema.CheckId_tx(ctx, tx, s.Id, constants.DbPgFunctionSchedule, "id")
 		if err != nil {
 			return err
 		}
@@ -242,7 +243,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	`, fnc.Id, scheduleIds); err != nil {
 		return err
 	}
-	if err := tag.SetAssign_tx(ctx, tx, schema.DbPgFunction, fnc.Id, fnc.TagIds); err != nil {
+	if err := tag.SetAssign_tx(ctx, tx, constants.DbPgFunction, fnc.Id, fnc.TagIds); err != nil {
 		return err
 	}
 	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
@@ -264,11 +265,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
 // recreate all PG functions, affected by a changed entity for which a dependency exists
 // relevant entities: modules, relations, attributes, pg functions
-func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID) error {
+func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID) error {
 
 	pgFunctionIds := make([]uuid.UUID, 0)
 
-	if !slices.Contains(schema.DbDependsPgFunction, entity) {
+	if !slices.Contains(constants.DbDependsPgFunction, entity) {
 		return errors.New("unknown dependent on entity for pg function")
 	}
 
@@ -309,7 +310,7 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntit
 		if err != nil {
 			return err
 		}
-		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbPgFunction, f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, constants.DbPgFunction, f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
 		if err != nil {
 			return err
 		}

@@ -70,6 +70,14 @@ const (
 	ErrCodeSecUnauthorized          int = 1
 	ErrCodeSecDataKeysNotAvailable  int = 5
 	ErrCodeSecNoPublicKeys          int = 6
+	ErrCodeSecNoPersonalEncKey      int = 7
+	ErrCodeSecPwShort               int = 8
+	ErrCodeSecPwNoCharDigit         int = 9
+	ErrCodeSecPwNoCharLower         int = 10
+	ErrCodeSecPwNoCharUpper         int = 11
+	ErrCodeSecPwNoCharSpecial       int = 12
+	ErrCodeSecPwOldBad              int = 13
+	ErrCodeSecPwResetCodeUnknown    int = 14
 	ErrCodeTrfRepoCommitBuildOld    int = 1
 	ErrCodeTrfRepoCommitNoApp       int = 2
 	ErrCodeTrfRepoCommitTooManyApps int = 3

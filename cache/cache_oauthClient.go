@@ -3,18 +3,13 @@ package cache
 import (
 	"context"
 	"fmt"
-	"r3/login/login_external"
 	"r3/login/login_metaMap"
 	"r3/login/login_roleAssign"
 	"r3/types"
+	"r3/types/constants"
 	"sync"
 
 	"github.com/jackc/pgx/v5"
-)
-
-const (
-	oauthFlowClientCredentials string = "clientCreds"
-	oauthFlowAuthCodePkce      string = "authCodePkce"
 )
 
 var (
@@ -75,7 +70,7 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 		oauthClientIdMap[c.Id] = c
 
 		// store open ID clients in reference map
-		if c.Flow == oauthFlowAuthCodePkce {
+		if c.Flow == constants.OauthFlowAuthCodePkce {
 			oauthClientIdMapOpenId[c.Id] = types.OauthClientOpenId{
 				Id:          c.Id,
 				Name:        c.Name,
@@ -90,12 +85,12 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	// retrieve login meta mapping
 	for k, c := range oauthClientIdMap {
-		if c.Flow == oauthFlowAuthCodePkce {
-			c.LoginMetaMap, err = login_metaMap.Get_tx(ctx, tx, login_external.EntityOauthClient, c.Id)
+		if c.Flow == constants.OauthFlowAuthCodePkce {
+			c.LoginMetaMap, err = login_metaMap.Get_tx(ctx, tx, constants.DbLoginProviderOauth, c.Id)
 			if err != nil {
 				return err
 			}
-			c.LoginRolesAssign, err = login_roleAssign.Get_tx(ctx, tx, login_external.EntityOauthClient, c.Id)
+			c.LoginRolesAssign, err = login_roleAssign.Get_tx(ctx, tx, constants.DbLoginProviderOauth, c.Id)
 			if err != nil {
 				return err
 			}

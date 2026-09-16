@@ -2,8 +2,8 @@ package login_check
 
 import (
 	"context"
-	"fmt"
 	"r3/config"
+	"r3/handler"
 	"r3/tools"
 	"regexp"
 
@@ -23,7 +23,7 @@ func Password(ctx context.Context, tx pgx.Tx, loginId int64, pwOld string) error
 		return err
 	}
 	if hash != tools.Hash(salt+pwOld) {
-		return fmt.Errorf("PW_CURRENT_WRONG")
+		return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwOldBad)
 	}
 	return nil
 }
@@ -31,16 +31,15 @@ func Password(ctx context.Context, tx pgx.Tx, loginId int64, pwOld string) error
 func PasswordComplexity(pw string) error {
 
 	if len(pw) < int(config.GetUint64("pwLengthMin")) {
-		return fmt.Errorf("PW_TOO_SHORT")
+		return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwShort)
 	}
 	if config.GetUint64("pwForceDigit") == 1 {
 		match, err := regexp.MatchString(`\p{Nd}`, pw)
 		if err != nil {
 			return err
 		}
-
 		if !match {
-			return fmt.Errorf("PW_REQUIRES_DIGIT")
+			return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwNoCharDigit)
 		}
 	}
 	if config.GetUint64("pwForceLower") == 1 {
@@ -48,9 +47,8 @@ func PasswordComplexity(pw string) error {
 		if err != nil {
 			return err
 		}
-
 		if !match {
-			return fmt.Errorf("PW_REQUIRES_LOWER")
+			return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwNoCharLower)
 		}
 	}
 	if config.GetUint64("pwForceUpper") == 1 {
@@ -58,9 +56,8 @@ func PasswordComplexity(pw string) error {
 		if err != nil {
 			return err
 		}
-
 		if !match {
-			return fmt.Errorf("PW_REQUIRES_UPPER")
+			return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwNoCharUpper)
 		}
 	}
 	if config.GetUint64("pwForceSpecial") == 1 {
@@ -70,9 +67,8 @@ func PasswordComplexity(pw string) error {
 		if err != nil {
 			return err
 		}
-
 		if !match {
-			return fmt.Errorf("PW_REQUIRES_SPECIAL")
+			return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwNoCharSpecial)
 		}
 	}
 	return nil

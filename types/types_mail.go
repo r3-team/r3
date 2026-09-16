@@ -5,11 +5,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type MailTemplateContent string
-
-const MailTemplateContentLoginInvitation MailTemplateContent = "loginInvitation"
-const MailTemplateContentLoginPwReset MailTemplateContent = "loginPwReset"
-
 type Mail struct {
 	Id           int64       `json:"id"`
 	FromList     string      `json:"fromList"`
@@ -71,6 +66,7 @@ type MailTemplate struct {
 	Body    string              `json:"body"`
 	Subject string              `json:"subject"`
 }
+type MailTemplateContent string
 type MailTraffic struct {
 	FromList  string      `json:"fromList"`
 	ToList    string      `json:"toList"`

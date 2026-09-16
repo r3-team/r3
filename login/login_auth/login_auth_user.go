@@ -12,6 +12,7 @@ import (
 	"r3/ldap/ldap_auth"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
@@ -105,48 +106,30 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 
 			return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 		}
-
 	} else {
-
 		// no MFA token provided, check for active MFA
 		// if login uses MFA, we apply it regardless of MFA requirements
-		rows, err := db.Pool.Query(ctx, `
-			SELECT id, name
-			FROM instance.login_token_fixed
-			WHERE login_id = $1
-			AND   context  = 'totp'
-		`, l.Id)
+		mfaTokens, err := getMfaTokens(ctx, l.Id)
 		if err != nil {
 			return types.LoginAuthResult{}, err
 		}
-
-		mfaTokens := make([]types.LoginMfaToken, 0)
-		for rows.Next() {
-			var m types.LoginMfaToken
-			if err := rows.Scan(&m.Id, &m.Name); err != nil {
-				return types.LoginAuthResult{}, err
-			}
-			mfaTokens = append(mfaTokens, m)
-		}
-		rows.Close()
-
-		// if MFA tokens available, return with MFA token list for selection
 		if len(mfaTokens) != 0 {
+			// return with MFA token list for selection
 			return types.LoginAuthResult{MfaTokens: mfaTokens}, nil
 		}
 
 		// no MFA tokens available, check for MFA requirement
 		// either it´s required on the instance and not defined for login (ie. inherited) - or it is required for login directly
-		// even if required, allow authentication but inform endpoint that MFA needs to be setup
+		// even if required, allow authentication but inform endpoint that MFA setup is forced
 		l.MfaSetup = (mfaRequiredInstance && !mfaRequiredLogin.Valid) || mfaRequiredLogin.Bool
 	}
 
 	// everything in order, auth successful
-	loginType := loginTypeLocal
+	loginType := constants.LoginTypeLocal
 	if l.NoAuth {
-		loginType = loginTypeNoAuth
+		loginType = constants.LoginTypeNoAuth
 	} else if ldapId.Valid {
-		loginType = loginTypeLdap
+		loginType = constants.LoginTypeLdap
 	}
 
 	l.Token, err = createToken(l.Id, l.Name, l.Admin, loginType, tokenExpiryHours)

@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/schema"
 	"r3/schema/compatible"
 	"r3/schema/openForm"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -15,11 +15,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func GetOne_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, content string) (types.CollectionConsumer, error) {
+func GetOne_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, content string) (types.CollectionConsumer, error) {
 
 	var err error
 	var c types.CollectionConsumer
-	if !slices.Contains(schema.DbAssignedCollectionConsumers, entity) {
+	if !slices.Contains(constants.DbAssignedCollectionConsumers, entity) {
 		return c, errors.New("invalid collection consumer entity")
 	}
 
@@ -32,15 +32,15 @@ func GetOne_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId 
 		return c, err
 	}
 
-	c.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbCollectionConsumer, c.Id, pgtype.Text{})
+	c.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbCollectionConsumer, c.Id, pgtype.Text{})
 	if err != nil {
 		return c, err
 	}
 	return c, nil
 }
-func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, content string) ([]types.CollectionConsumer, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, content string) ([]types.CollectionConsumer, error) {
 
-	if !slices.Contains(schema.DbAssignedCollectionConsumers, entity) {
+	if !slices.Contains(constants.DbAssignedCollectionConsumers, entity) {
 		return nil, errors.New("invalid collection consumer entity")
 	}
 
@@ -66,16 +66,16 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	rows.Close()
 
 	for i, c := range consumers {
-		consumers[i].OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbCollectionConsumer, c.Id, pgtype.Text{})
+		consumers[i].OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbCollectionConsumer, c.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
 		}
 	}
 	return consumers, nil
 }
-func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, content string, consumers []types.CollectionConsumer) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, content string, consumers []types.CollectionConsumer) error {
 
-	if !slices.Contains(schema.DbAssignedCollectionConsumers, entity) {
+	if !slices.Contains(constants.DbAssignedCollectionConsumers, entity) {
 		return errors.New("invalid collection consumer entity")
 	}
 
@@ -110,7 +110,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 				return err
 			}
 		}
-		if err := openForm.Set_tx(ctx, tx, schema.DbCollectionConsumer, c.Id, c.OpenForm, pgtype.Text{}); err != nil {
+		if err := openForm.Set_tx(ctx, tx, constants.DbCollectionConsumer, c.Id, c.OpenForm, pgtype.Text{}); err != nil {
 			return err
 		}
 	}

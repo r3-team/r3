@@ -3,17 +3,17 @@ package article
 import (
 	"context"
 	"errors"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func Assign_tx(ctx context.Context, tx pgx.Tx, target schema.DbEntity, targetId uuid.UUID, articleIds []uuid.UUID) error {
+func Assign_tx(ctx context.Context, tx pgx.Tx, target types.DbSchemaApp, targetId uuid.UUID, articleIds []uuid.UUID) error {
 	switch target {
-	case schema.DbForm:
+	case constants.DbForm:
 		if _, err := tx.Exec(ctx, `
 			DELETE FROM app.article_form
 			WHERE form_id = $1
@@ -28,7 +28,7 @@ func Assign_tx(ctx context.Context, tx pgx.Tx, target schema.DbEntity, targetId 
 				return err
 			}
 		}
-	case schema.DbModule:
+	case constants.DbModule:
 		if _, err := tx.Exec(ctx, `
 			DELETE FROM app.article_help
 			WHERE module_id = $1
@@ -82,7 +82,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Article
 	rows.Close()
 
 	for i, a := range articles {
-		articles[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbArticle, a.Id, []string{"articleBody", "articleTitle"})
+		articles[i].Captions, err = caption.Get_tx(ctx, tx, constants.DbArticle, a.Id, []string{"articleBody", "articleTitle"})
 		if err != nil {
 			return nil, err
 		}

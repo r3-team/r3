@@ -2,10 +2,10 @@ package doc_page
 
 import (
 	"context"
-	"r3/schema"
 	"r3/schema/doc_field"
 	"r3/schema/doc_set"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -113,7 +113,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 		}
 
 		// get overwrites
-		pages[i].Sets, err = doc_set.Get_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault)
+		pages[i].Sets, err = doc_set.Get_tx(ctx, tx, p.Id, constants.DbDocPage, constants.DbDocContextDefault)
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +189,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 		}
 
 		// set overwrites
-		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Sets); err != nil {
+		if err := doc_set.Set_tx(ctx, tx, p.Id, constants.DbDocPage, constants.DbDocContextDefault, p.Sets); err != nil {
 			return err
 		}
 	}

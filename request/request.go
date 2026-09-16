@@ -18,6 +18,7 @@ import (
 	"r3/request/request_login"
 	"r3/request/request_mail"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -88,7 +89,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	}
 
 	// authorized requests: fat-client
-	if device == types.WebsocketClientDeviceFatClient {
+	if device == constants.WebsocketClientDeviceFatClient {
 		switch ressource {
 		case "clientApp":
 			switch action {

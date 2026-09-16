@@ -17,9 +17,9 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_auth"
-	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"strconv"
 	"strings"
 	"time"
@@ -241,7 +241,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 	for i, column := range columns {
 
 		// check for general errors: no attribute column, attribute not defined
-		if column.Content != schema.ColumnContentAttribute {
+		if column.Content != constants.DbColumnContentAttribute {
 			return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnContentNoAtr)
 		}
 		if !column.AttributeId.Valid {

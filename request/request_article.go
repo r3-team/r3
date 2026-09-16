@@ -3,7 +3,6 @@ package request
 import (
 	"context"
 	"encoding/json"
-	"r3/schema"
 	"r3/schema/article"
 	"r3/types"
 
@@ -13,9 +12,9 @@ import (
 
 func ArticleAssign_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
-		Target     schema.DbEntity `json:"target`
-		TargetId   uuid.UUID       `json:"targetId"`
-		ArticleIds []uuid.UUID     `json:"articleIds"`
+		Target     types.DbSchemaApp `json:"target`
+		TargetId   uuid.UUID         `json:"targetId"`
+		ArticleIds []uuid.UUID       `json:"articleIds"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err

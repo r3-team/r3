@@ -9,6 +9,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -39,7 +40,7 @@ func doSend(jobs []types.DbSyncJob, jobType types.DbSyncJobType, relationIdMapRe
 
 			// fetch local record data based on job type
 			var rows [][]any
-			if j.JobType == types.DbSyncJobTypeSendDelete {
+			if j.JobType == constants.DbSyncJobTypeSendDelete {
 				rows, err = doSendFetchDeleted(ctx, j, relationId, recordIds)
 			} else {
 				rows, err = doSendFetchActive(ctx, j, relationId, rel.AttributeIdPk, recordIds)
@@ -134,7 +135,7 @@ func doSendFetchDeleted(ctx context.Context, j types.DbSyncJob, relationId uuid.
 		WHERE job_type       = $1
 		AND   relation_id    = $2
 		AND   record_id_wofk = ANY($3)
-	`, types.DbSyncJobTypeSendDelete, relationId, recordIds)
+	`, constants.DbSyncJobTypeSendDelete, relationId, recordIds)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +202,7 @@ func doSendStore(ctx context.Context, j types.DbSyncJob, rows [][]any) error {
 		return err
 	}
 
-	if host.DbType == types.DbSyncDbTypeClickhouse {
+	if host.DbType == constants.DbSyncDbTypeClickhouse {
 		// clickhouse works differently to regular RDBMS - it´s more like a append-only system for larger sets
 		// SQL is supported, but it does not offer all features and execution differs, some aspects:
 		//  * prepared statements generally do not provide much of a benefit, UPDATES do not support them outright

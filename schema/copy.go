@@ -3,6 +3,7 @@ package schema
 import (
 	"errors"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 )
@@ -26,7 +27,7 @@ func ReplaceColumnIds(columns []types.Column, idMapReplaced map[uuid.UUID]uuid.U
 			return columns, err
 		}
 
-		if columns[i].Content == ColumnContentQuery {
+		if columns[i].Content == constants.DbColumnContentQuery {
 			columns[i].Query, err = ReplaceQueryIds(columns[i].Query, idMapReplaced)
 			if err != nil {
 				return columns, err

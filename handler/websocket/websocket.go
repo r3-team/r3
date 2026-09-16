@@ -17,6 +17,7 @@ import (
 	"r3/request"
 	"r3/request/request_login"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -114,7 +115,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		admin:       false,
 		ctx:         ctx,
 		ctxCancel:   ctxCancel,
-		device:      types.WebsocketClientDeviceBrowser,
+		device:      constants.WebsocketClientDeviceBrowser,
 		local:       host == "::1" || host == "127.0.0.1",
 		loginId:     0,
 		noAuth:      false,
@@ -124,7 +125,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Header.Get("User-Agent") == "r3-client-fat" {
-		client.device = types.WebsocketClientDeviceFatClient
+		client.device = constants.WebsocketClientDeviceFatClient
 	}
 
 	hub.clientAdd <- client
@@ -372,7 +373,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 		case "tokenFixed": // authentication via fixed token (fat-client only)
 			login, err = request_login.AuthTokenFixed(ctx, req.Payload)
-			client.device = types.WebsocketClientDeviceFatClient
+			client.device = constants.WebsocketClientDeviceFatClient
 
 		case "reset": // authentication via reset code
 			login, err = request_login.AuthReset(ctx, req.Payload)

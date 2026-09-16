@@ -3,10 +3,10 @@ package jsFunction
 import (
 	"context"
 	"fmt"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/tag"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"slices"
 	"strings"
@@ -56,7 +56,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunct
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
-		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbJsFunction, f.Id, []string{"jsFunctionTitle", "jsFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, constants.DbJsFunction, f.Id, []string{"jsFunctionTitle", "jsFunctionDesc"})
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +81,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
 	`, fnc.Id, fnc.ModuleId, fnc.FormId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec); err != nil {
 		return err
 	}
-	if err := tag.SetAssign_tx(ctx, tx, schema.DbJsFunction, fnc.Id, fnc.TagIds); err != nil {
+	if err := tag.SetAssign_tx(ctx, tx, constants.DbJsFunction, fnc.Id, fnc.TagIds); err != nil {
 		return err
 	}
 	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
@@ -95,33 +95,33 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
 	`, fnc.Id); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbCollection, fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbCollection, fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbField, fmt.Sprintf(`%s\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\('(%s)'`, rxPrefix, rxUuid), 3, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbField, fmt.Sprintf(`%s\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\('(%s)'`, rxPrefix, rxUuid), 3, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbForm, fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbForm, fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbJsFunction, fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbJsFunction, fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbPgFunction, fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbPgFunction, fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbRole, fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbRole, fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbVariable, fmt.Sprintf(`%s\.(get|set)_variable\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbVariable, fmt.Sprintf(`%s\.(get|set)_variable\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}
 	return nil
 }
 
-func storeDependencies_tx(ctx context.Context, tx pgx.Tx, functionId uuid.UUID, entity schema.DbEntity, regex string, submatchIndexId int, body string) error {
+func storeDependencies_tx(ctx context.Context, tx pgx.Tx, functionId uuid.UUID, entity types.DbSchemaApp, regex string, submatchIndexId int, body string) error {
 
-	if !slices.Contains(schema.DbDependsJsFunction, entity) {
+	if !slices.Contains(constants.DbDependsJsFunction, entity) {
 		return fmt.Errorf("unknown JS function dependency '%s'", entity)
 	}
 

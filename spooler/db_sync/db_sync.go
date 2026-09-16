@@ -9,6 +9,7 @@ import (
 	"r3/log"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 )
@@ -35,18 +36,18 @@ func DoAll() error {
 		if err != nil {
 			return err
 		}
-		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendInsert]; exists {
-			if err := doSend(jobs, types.DbSyncJobTypeSendInsert, m); err != nil {
+		if m, exists := jobTypeMapRelationIdMapRecordIds[constants.DbSyncJobTypeSendInsert]; exists {
+			if err := doSend(jobs, constants.DbSyncJobTypeSendInsert, m); err != nil {
 				log.Error(log.ContextDbSync, "failed to execute SEND INSERT jobs", err)
 			}
 		}
-		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendUpdate]; exists {
-			if err := doSend(jobs, types.DbSyncJobTypeSendUpdate, m); err != nil {
+		if m, exists := jobTypeMapRelationIdMapRecordIds[constants.DbSyncJobTypeSendUpdate]; exists {
+			if err := doSend(jobs, constants.DbSyncJobTypeSendUpdate, m); err != nil {
 				log.Error(log.ContextDbSync, "failed to execute SEND UPDATE jobs", err)
 			}
 		}
-		if m, exists := jobTypeMapRelationIdMapRecordIds[types.DbSyncJobTypeSendDelete]; exists {
-			if err := doSend(jobs, types.DbSyncJobTypeSendDelete, m); err != nil {
+		if m, exists := jobTypeMapRelationIdMapRecordIds[constants.DbSyncJobTypeSendDelete]; exists {
+			if err := doSend(jobs, constants.DbSyncJobTypeSendDelete, m); err != nil {
 				log.Error(log.ContextDbSync, "failed to execute SEND DELETE jobs", err)
 			}
 		}
@@ -62,15 +63,15 @@ func getExtCon(ctx context.Context, host types.DbSyncHost) (*sql.DB, error) {
 	var dbExt *sql.DB
 
 	switch host.DbType {
-	case types.DbSyncDbTypeClickhouse:
+	case constants.DbSyncDbTypeClickhouse:
 		dbExt, err = getDbConClickhouse(host)
-	case types.DbSyncDbTypeFirebird:
+	case constants.DbSyncDbTypeFirebird:
 		dbExt, err = getDbConFirebird(host)
-	case types.DbSyncDbTypeMssql:
+	case constants.DbSyncDbTypeMssql:
 		dbExt, err = getDbConMssql(host)
-	case types.DbSyncDbTypeMysql:
+	case constants.DbSyncDbTypeMysql:
 		dbExt, err = getDbConMysql(host)
-	case types.DbSyncDbTypePgsql:
+	case constants.DbSyncDbTypePgsql:
 		dbExt, err = getDbConPgsql(host)
 	default:
 		return nil, fmt.Errorf("unsupport database type '%s'", host.DbType)

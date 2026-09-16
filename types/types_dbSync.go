@@ -1,32 +1,12 @@
 package types
 
 import (
-	"errors"
-
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type DbSyncDbType string
 type DbSyncJobType string
-
-const (
-	DbSyncDbTypeClickhouse DbSyncDbType = "clickhouse"
-	DbSyncDbTypeFirebird   DbSyncDbType = "firebird"
-	DbSyncDbTypePgsql      DbSyncDbType = "pgsql"
-	DbSyncDbTypeMssql      DbSyncDbType = "mssql"
-	DbSyncDbTypeMysql      DbSyncDbType = "mysql"
-
-	DbSyncJobTypeLoad       DbSyncJobType = "LOAD"
-	DbSyncJobTypeSendDelete DbSyncJobType = "SEND_DELETE"
-	DbSyncJobTypeSendInsert DbSyncJobType = "SEND_INSERT"
-	DbSyncJobTypeSendUpdate DbSyncJobType = "SEND_UPDATE"
-)
-
-var (
-	DbSyncJobTypesSend       = []DbSyncJobType{DbSyncJobTypeSendDelete, DbSyncJobTypeSendInsert, DbSyncJobTypeSendUpdate}
-	ErrJobNoJoins      error = errors.New("job has no relation")
-)
 
 type DbSyncHost struct {
 	Id      uuid.UUID    `json:"id"`

@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
 	"r3/schema/query"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -21,9 +21,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID) ([]types.Column, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID) ([]types.Column, error) {
 
-	if !slices.Contains(schema.DbAssignedColumn, entity) {
+	if !slices.Contains(constants.DbAssignedColumn, entity) {
 		return nil, errors.New("bad entity")
 	}
 
@@ -53,8 +53,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	rows.Close()
 
 	for i, c := range columns {
-		if c.Content == schema.ColumnContentQuery {
-			c.Query, err = query.Get_tx(ctx, tx, schema.DbColumn, c.Id, 0, 0, 0)
+		if c.Content == constants.DbColumnContentQuery {
+			c.Query, err = query.Get_tx(ctx, tx, constants.DbColumn, c.Id, 0, 0, 0)
 			if err != nil {
 				return nil, err
 			}
@@ -62,7 +62,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 			c.Query.RelationId = pgtype.UUID{}
 		}
 
-		c.Captions, err = caption.Get_tx(ctx, tx, schema.DbColumn, c.Id, []string{"columnTitle"})
+		c.Captions, err = caption.Get_tx(ctx, tx, constants.DbColumn, c.Id, []string{"columnTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -80,9 +80,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	return columns, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, columns []types.Column) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, columns []types.Column) error {
 
-	if !slices.Contains(schema.DbAssignedColumn, entity) {
+	if !slices.Contains(constants.DbAssignedColumn, entity) {
 		return errors.New("bad entity")
 	}
 
@@ -134,11 +134,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 			return err
 		}
 		switch c.Content {
-		case schema.ColumnContentQuery:
-			if err := query.Set_tx(ctx, tx, schema.DbColumn, c.Id, 0, 0, 0, c.Query); err != nil {
+		case constants.DbColumnContentQuery:
+			if err := query.Set_tx(ctx, tx, constants.DbColumn, c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
-		case schema.ColumnContentFncPg, schema.ColumnContentFncScalar:
+		case constants.DbColumnContentFncPg, constants.DbColumnContentFncScalar:
 			if err := setArguments_tx(ctx, tx, c.Id, c.Arguments); err != nil {
 				return err
 			}

@@ -6,6 +6,7 @@ import (
 	"r3/cache"
 	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -38,13 +39,13 @@ func triggerSendCreateIfNeeded(ctx context.Context, tx pgx.Tx, relationId uuid.U
 	var triggerEvent string
 	var fncEventName string
 	switch jobType {
-	case types.DbSyncJobTypeSendDelete:
+	case constants.DbSyncJobTypeSendDelete:
 		triggerEvent = "DELETE"
 		fncEventName = "delete"
-	case types.DbSyncJobTypeSendInsert:
+	case constants.DbSyncJobTypeSendInsert:
 		triggerEvent = "INSERT"
 		fncEventName = "insert"
-	case types.DbSyncJobTypeSendUpdate:
+	case constants.DbSyncJobTypeSendUpdate:
 		triggerEvent = "UPDATE"
 		fncEventName = "update"
 	default:

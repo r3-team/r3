@@ -14,12 +14,11 @@ import (
 )
 
 func PasswortReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
-
 	var req struct {
 		Code  string `json:"code"`
 		PwNew string `json:"pwNew"`
 	}
-	if err := json.Unmarshal(reqJson, &req.PwNew); err != nil {
+	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
 	if req.PwNew == "" {
@@ -30,12 +29,12 @@ func PasswortReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, l
 		return err
 	}
 	if !exists {
-		return fmt.Errorf("RESET_CODE_UNKNOWN")
+		return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwResetCodeUnknown)
 	}
-	if err := login_reset.Del_tx(ctx, tx, loginId); err != nil {
+	if err := login.SetCredentials_tx(ctx, tx, loginId, req.PwNew); err != nil {
 		return err
 	}
-	return login.SetCredentials_tx(ctx, tx, loginId, req.PwNew)
+	return login_reset.Del_tx(ctx, tx, loginId)
 }
 
 func PasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isAdmin bool) error {

@@ -36,20 +36,20 @@ export default {
 
 		<my-dropdown />
 
-		<!-- MFA setup -->
-		<my-settings-mfa
-			v-if="appReady && loginMfaSetup"
-			@confirmed="$store.commit('loginMfaSetup', false)"
-			:forced="true"
-		/>
-
-		<!-- PW reset -->
+		<!-- PW reset (blocks forced MFA setup & app access) -->
 		<my-pw-reset
 			v-if="appReady && loginPwResetCode !== null"
 			@confirmed="$store.commit('loginPwResetCode', null)"
 		/>
 
-		<template v-if="appReady && !loginMfaSetup && loginPwResetCode === null">
+		<!-- Forced MFA setup (blocks app access) -->
+		<my-settings-mfa
+			v-if="appReady && loginPwResetCode === null && loginMfaSetup"
+			@confirmed="$store.commit('loginMfaSetup', false)"
+			:forced="true"
+		/>
+
+		<template v-if="appReady && loginPwResetCode === null && !loginMfaSetup">
 			<my-header
 				v-show="!loginSessionExpired"
 				v-if="!isWithoutMenuHeader"

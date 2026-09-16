@@ -13,6 +13,7 @@ import (
 	"r3/schema/pgFunction"
 	"r3/schema/relation"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 	"strings"
 
@@ -110,7 +111,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 		if err != nil {
 			return nil, err
 		}
-		mod.Captions, err = caption.Get_tx(ctx, tx, schema.DbModule, mod.Id, []string{"moduleTitle"})
+		mod.Captions, err = caption.Get_tx(ctx, tx, constants.DbModule, mod.Id, []string{"moduleTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -137,7 +138,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 		return mod.Id, errors.New("language code must have 5 characters, such as 'en_us' or 'de_de'")
 	}
 
-	known, err := schema.CheckId_tx(ctx, tx, mod.Id, schema.DbModule, "id")
+	known, err := schema.CheckId_tx(ctx, tx, mod.Id, constants.DbModule, "id")
 	if err != nil {
 		return mod.Id, err
 	}
@@ -177,7 +178,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 				return mod.Id, err
 			}
 
-			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, schema.DbModule, mod.Id); err != nil {
+			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, constants.DbModule, mod.Id); err != nil {
 				return mod.Id, fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
@@ -320,7 +321,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 	}
 
 	// set sub entities
-	if err := article.Assign_tx(ctx, tx, schema.DbModule, mod.Id, mod.ArticleIdsHelp); err != nil {
+	if err := article.Assign_tx(ctx, tx, constants.DbModule, mod.Id, mod.ArticleIdsHelp); err != nil {
 		return mod.Id, err
 	}
 	if err := setReleases_tx(ctx, tx, mod.Id, mod.Releases); err != nil {

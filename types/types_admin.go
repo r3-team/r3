@@ -83,7 +83,7 @@ type Ldap struct {
 type OauthClient struct {
 	Id           int32       `json:"id"`
 	Name         string      `json:"name"`         // reference name, also shown on login page if authCodePkce
-	Flow         string      `json:"flow"`         // clientCreds, authCodePkce
+	Flow         OauthFlow   `json:"flow"`         // clientCreds, authCodePkce
 	ClientId     string      `json:"clientId"`     // client ID, as registered at the identity provider
 	ClientSecret pgtype.Text `json:"clientSecret"` // client secret, as registered at the identity provider
 	DateExpiry   pgtype.Int8 `json:"dateExpiry"`   // for admin notification mails
@@ -113,4 +113,11 @@ type OauthClientOpenId struct {
 	ProviderUrl pgtype.Text `json:"providerUrl"`
 	RedirectUrl pgtype.Text `json:"redirectUrl"`
 	Scopes      []string    `json:"scopes"`
+}
+
+type SystemMsg struct {
+	Date0       uint64 `json:"date0"`
+	Date1       uint64 `json:"date1"`
+	Maintenance bool   `json:"maintenance"`
+	Text        string `json:"text"`
 }

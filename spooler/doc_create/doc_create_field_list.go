@@ -7,9 +7,9 @@ import (
 	"r3/data"
 	"r3/data/data_query"
 	"r3/db"
-	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -158,7 +158,7 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 
 		// figure out data content types
 		switch column.Content {
-		case schema.ColumnContentAttribute, schema.ColumnContentQuery:
+		case constants.DbColumnContentAttribute, constants.DbColumnContentQuery:
 
 			if !column.AttributeId.Valid {
 				return fmt.Errorf("no attribute defined in column")
@@ -171,13 +171,13 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			meta.contentUse = atr.ContentUse
 			meta.decCount = atr.LengthFract
 
-		case schema.ColumnContentFncPg:
+		case constants.DbColumnContentFncPg:
 			meta.content, meta.decCount, err = data_query.GetContentFromPgFunctionReturn(column.PgFunctionId)
 			if err != nil {
 				return err
 			}
 
-		case schema.ColumnContentFncScalar:
+		case constants.DbColumnContentFncScalar:
 			meta.content, meta.contentUse, meta.decCount, err = data_query.GetContentFromScalarArgs(column.Scalar.String, column.Arguments)
 			if err != nil {
 				return err

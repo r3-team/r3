@@ -2,12 +2,12 @@ package doc_column
 
 import (
 	"context"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
 	"r3/schema/doc_set"
 	"r3/schema/query"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -41,25 +41,25 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 
 	for i, c := range columns {
 
-		columns[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbDocColumn, c.Id, []string{"docColumnTitle"})
+		columns[i].Captions, err = caption.Get_tx(ctx, tx, constants.DbDocColumn, c.Id, []string{"docColumnTitle"})
 		if err != nil {
 			return nil, err
 		}
-		columns[i].SetsBody, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextBody)
+		columns[i].SetsBody, err = doc_set.Get_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextBody)
 		if err != nil {
 			return nil, err
 		}
-		columns[i].SetsFooter, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextFooter)
+		columns[i].SetsFooter, err = doc_set.Get_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextFooter)
 		if err != nil {
 			return nil, err
 		}
-		columns[i].SetsHeader, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextHeader)
+		columns[i].SetsHeader, err = doc_set.Get_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextHeader)
 		if err != nil {
 			return nil, err
 		}
 
-		if c.Content == schema.ColumnContentQuery {
-			columns[i].Query, err = query.Get_tx(ctx, tx, schema.DbDocColumn, c.Id, 0, 0, 0)
+		if c.Content == constants.DbColumnContentQuery {
+			columns[i].Query, err = query.Get_tx(ctx, tx, constants.DbDocColumn, c.Id, 0, 0, 0)
 			if err != nil {
 				return nil, err
 			}
@@ -104,22 +104,22 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
 			return err
 		}
-		if err := doc_set.Set_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextBody, c.SetsBody); err != nil {
+		if err := doc_set.Set_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextBody, c.SetsBody); err != nil {
 			return err
 		}
-		if err := doc_set.Set_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextFooter, c.SetsFooter); err != nil {
+		if err := doc_set.Set_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextFooter, c.SetsFooter); err != nil {
 			return err
 		}
-		if err := doc_set.Set_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextHeader, c.SetsHeader); err != nil {
+		if err := doc_set.Set_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextHeader, c.SetsHeader); err != nil {
 			return err
 		}
 
 		switch c.Content {
-		case schema.ColumnContentQuery:
-			if err := query.Set_tx(ctx, tx, schema.DbDocColumn, c.Id, 0, 0, 0, c.Query); err != nil {
+		case constants.DbColumnContentQuery:
+			if err := query.Set_tx(ctx, tx, constants.DbDocColumn, c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
-		case schema.ColumnContentFncPg, schema.ColumnContentFncScalar:
+		case constants.DbColumnContentFncPg, constants.DbColumnContentFncScalar:
 			if err := setArguments_tx(ctx, tx, c.Id, c.Arguments); err != nil {
 				return err
 			}

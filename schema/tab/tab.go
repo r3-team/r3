@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 
 	"github.com/gofrs/uuid/v5"
@@ -18,9 +18,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID) ([]types.Tab, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID) ([]types.Tab, error) {
 
-	if !slices.Contains(schema.DbAssignedTab, entity) {
+	if !slices.Contains(constants.DbAssignedTab, entity) {
 		return nil, errors.New("bad entity")
 	}
 
@@ -46,7 +46,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	rows.Close()
 
 	for i, tab := range tabs {
-		tabs[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbTab, tab.Id, []string{"tabTitle"})
+		tabs[i].Captions, err = caption.Get_tx(ctx, tx, constants.DbTab, tab.Id, []string{"tabTitle"})
 		if err != nil {
 			return nil, err
 		}
@@ -54,8 +54,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	return tabs, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, position int, tab types.Tab) error {
-	if !slices.Contains(schema.DbAssignedTab, entity) {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, position int, tab types.Tab) error {
+	if !slices.Contains(constants.DbAssignedTab, entity) {
 		return errors.New("bad entity")
 	}
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`

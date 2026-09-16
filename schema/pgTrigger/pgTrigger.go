@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"slices"
 	"strings"
 
@@ -73,7 +74,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, trg types.PgTrigger) error {
 		return err
 	}
 
-	known, err := schema.CheckId_tx(ctx, tx, trg.Id, schema.DbPgTrigger, "id")
+	known, err := schema.CheckId_tx(ctx, tx, trg.Id, constants.DbPgTrigger, "id")
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package db_sync
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"r3/cache"
 	"r3/cache/cache_dbSync"
@@ -12,6 +13,7 @@ import (
 	"r3/log"
 	"r3/schema"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 	"unicode/utf8"
 
@@ -58,7 +60,7 @@ func doLoad(j types.DbSyncJob) error {
 	for i, c := range j.Columns {
 		columns[i] = types.Column{
 			AttributeId: pgtype.UUID{Bytes: c.AttributeId, Valid: true},
-			Content:     schema.ColumnContentAttribute,
+			Content:     constants.DbColumnContentAttribute,
 			Index:       c.Index,
 		}
 	}
@@ -140,7 +142,7 @@ func doLoad(j types.DbSyncJob) error {
 func doLoadDelete(ctx context.Context, j types.DbSyncJob, recordIdsKeep []int64) error {
 
 	if len(j.Joins) == 0 {
-		return types.ErrJobNoJoins
+		return errors.New("job has no relation")
 	}
 
 	tx, err := db.Pool.Begin(ctx)
