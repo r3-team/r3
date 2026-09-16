@@ -273,6 +273,7 @@
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cet utilisateur?<br /><br />Cette action est irréversible.",
 				"notUniqueName": "The same username has already been assigned to a different user.",
+				"resetCodeSent": "Email with reset code has been added to the email spooler for delivery.",
 				"resetTotp": "Cela réinitialisera toutes les méthodes d'authentification multi-facteurs (MFA) pour cet utilisateur. L'accès au système sera ensuite possible uniquement avec le nom d'utilisateur et le mot de passe.<br /><br />La réinitialisation du MFA n'affecte pas le chiffrement de bout en bout.<br /><br />Voulez-vous continuer ?"
 			},
 			"error": {
@@ -2145,7 +2146,8 @@
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
 			"012": "A column does not include a valid backend function reference.",
 			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
-			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"015": "Password reset email cannot be sent to '{NAME}', email address '{MAIL}' is empty or invalid. Action was aborted."
 		},
 		"CSV": {
 			"001": "Numéro invalide '{VALUE}' (un entier était attendu).",
@@ -2599,6 +2601,7 @@
 		"every": "Every",
 		"everything": "Tout",
 		"expert": "Expert",
+		"expireAfter": "Expire after",
 		"expression": "Expression",
 		"favorites": "Favorites",
 		"favoritesEmpty": "No favorites saved",

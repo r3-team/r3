@@ -38,11 +38,10 @@ const MyStore = Vuex.createStore({
 		constants: {                    // constant variables, codes/messages/IDs
 			dragFieldContent: 'dragDropPrevField', // content name for drag&drop preview fields
 			ganttSteps: ['hours', 'days', 'months', 'quarters', 'half-years'], // Gantt steps in order
+			hotkeyMod: ['ALT', 'CMD', 'CTRL', 'SHIFT'], // modifier keys for hotkeys
 			kdfIterations: 10000,       // number of iterations for PBKDF2 key derivation function
 			keyLength: 64,              // length of new symmetric keys for data encryption
-			languageCodesOfficial: [    // officially supported language codes
-				'en_us', 'de_de'
-			],
+			languageCodesOfficial: ['en_us', 'de_de'], // officially supported language codes
 			loginLimitedFactor: 3,      // factor, how many limited logins are enabled for each full login
 			loginType: {                // all login types, as defined in the backend
 				fixed: 'fixed',         // fixed token login, only used for r3 client application
@@ -51,7 +50,15 @@ const MyStore = Vuex.createStore({
 				noAuth: 'noAuth',       // login via public access (username only)
 				oauth: 'oauth'          // login via external OAuth provider
 			},
-			hotkeyMod: ['ALT', 'CMD', 'CTRL', 'SHIFT'], // modifier keys for hotkeys
+			mailTemplateContent: {      // known content for mail templates
+				loginInvitation: 'loginInvitation',
+				loginPwReset: 'loginPwReset'
+			},
+			mailTemplateLoginPlaceholders: [ // placeholders for login mail templates
+				'{RESET_URL}', '{CODE_VALID_UNTIL}', '{USERNAME}', '{DISPLAYNAME}', '{FORENAME}', '{SURNAME}',
+				'{EMAIL}', '{DESCRIPTION}', '{ORGANIZATION}', '{LOCATION}', '{DEPARTMENT}', '{PHONE_FAX}',
+				'{PHONE_LANDLINE}', '{PHONE_MOBILE}'
+			],
 			scrollFormId: 'form-scroll' // ID of form page element (to recover scroll position during routing)
 		},
 		dialogCaptionTop: '',
@@ -413,7 +420,7 @@ const MyStore = Vuex.createStore({
 		mailTemplatesPwReset: s => {
 			const out = [];
 			for (const k in s.mailTemplateIdMap) {
-				if (s.mailTemplateIdMap[k].content === 'loginPwReset')
+				if (s.mailTemplateIdMap[k].content === s.constants.mailTemplateContent.loginPwReset)
 					out.push(s.mailTemplateIdMap[k]);
 			}
 			out.sort((a, b) => a.name < b.name ? -1 : 1);

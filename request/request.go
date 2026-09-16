@@ -503,6 +503,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return nil, request_login.RepoCredSet_tx(ctx, tx, reqJson, loginId)
 		}
+	case "loginReset":
+		switch action {
+		case "set":
+			return nil, request_login.Reset_tx(ctx, tx, reqJson)
+		}
 	case "loginSession":
 		switch action {
 		case "get":

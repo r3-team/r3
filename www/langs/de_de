@@ -273,6 +273,7 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Benutzer löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
 				"notUniqueName": "Der gleiche Benutzername wurde bereits einem anderen Benutzer zugewiesen.",
+				"resetCodeSent": "Eine E-Mail mit Einmallink zum Zurücksetzen des Passworts wurde der E-Mail-Warteschlange zur Auslieferung übergeben.",
 				"resetTotp": "Hiermit werden alle Multi-Faktor-Authentifizierungsmethoden (MFA) für diesen Benutzer zurückgesetzt. Systemzugriff ist dann mit nur Benutzername & Passwort möglich.<br /><br />Zurücksetzung der MFA hat keinen Einfluss auf die Ende-zu-Ende-Verschlüsselung.<br /><br />Möchten Sie fortfahren?"
 			},
 			"error": {
@@ -2145,7 +2146,8 @@
 			"011": "Eine Spalte hat entweder mehrere Werte oder ist eine Backend-Funktion bzw. Unterabfrage - diese werden für Datenimport nicht unterstützt.",
 			"012": "Einer Spalte fehlt eine valide Backend-Funktionreferenz.",
 			"013": "{CNT} eingehende E-Mails hängen in der Warteschlange länger als {SEC} Sekunden.",
-			"014": "{CNT} ausgehende E-Mails hängen in der Warteschlange länger als {SEC} Sekunden."
+			"014": "{CNT} ausgehende E-Mails hängen in der Warteschlange länger als {SEC} Sekunden.",
+			"015": "E-Mail für das Zurücksetzen des Passworts kann nicht an '{NAME}' gesendet werden, E-Mail-Adresse '{MAIL}' ist leer oder ungültig. Der Vorgang wurde abgebrochen."
 		},
 		"CSV": {
 			"001": "Ungültige Nummer '{VALUE}' (Integer wird erwartet).",
@@ -2599,6 +2601,7 @@
 		"every": "Alle",
 		"everything": "Alles",
 		"expert": "Expert",
+		"expireAfter": "Ablauf nach",
 		"expression": "Ausdruck",
 		"favorites": "Favoriten",
 		"favoritesEmpty": "Keine Favoriten gespeichert",

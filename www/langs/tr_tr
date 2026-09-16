@@ -273,6 +273,7 @@
 			"dialog": {
 				"delete": "Bu kullanıcıyı silmek istediğinizden emin misiniz?<br /><br />Bu işlem geri alınamaz.</b>",
 				"notUniqueName": "Aynı kullanıcı adı zaten farklı bir kullanıcıya atanmış.",
+				"resetCodeSent": "Email with reset code has been added to the email spooler for delivery.",
 				"resetTotp": "Bu, bu kullanıcı için tüm çok faktörlü kimlik doğrulama (MFA) yöntemlerini sıfırlayacaktır. Böylece sisteme erişim yalnızca kullanıcı adı ve parolayla mümkün olur.<br /><br />MFA'nın sıfırlanmasının uçtan uca şifreleme üzerinde hiçbir etkisi yoktur.<br /><br />Devam etmek istiyor musunuz?"
 			},
 			"error": {
@@ -2145,7 +2146,8 @@
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
 			"012": "A column does not include a valid backend function reference.",
 			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
-			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"015": "Password reset email cannot be sent to '{NAME}', email address '{MAIL}' is empty or invalid. Action was aborted."
 		},
 		"CSV": {
 			"001": "Geçersiz sayı '{VALUE}' (tamsayı bekleniyordu).",
@@ -2599,6 +2601,7 @@
 		"every": "Every",
 		"everything": "Her şey",
 		"expert": "Uzman",
+		"expireAfter": "Expire after",
 		"expression": "Expression",
 		"favorites": "Favoriler",
 		"favoritesEmpty": "Hiçbir favori kaydedilmedi",

@@ -273,6 +273,7 @@
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف تسجيل الدخول هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>",
 				"notUniqueName": "The same username has already been assigned to a different user.",
+				"resetCodeSent": "Email with reset code has been added to the email spooler for delivery.",
 				"resetTotp": "سيؤدي هذا إلى إعادة تعيين كافة أساليب المصادقة متعددة العوامل (MFA) لتسجيل الدخول هذا. <br /><br />ليس لإعادة ضبط MFA أي تأثير على التشفير الشامل.<br /><br />هل تريد الاستمرار؟"
 			},
 			"error": {
@@ -2145,7 +2146,8 @@
 			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data.",
 			"012": "A column does not include a valid backend function reference.",
 			"013": "{CNT} incoming emails are stuck in the email spooler for longer than {SEC} seconds.",
-			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds."
+			"014": "{CNT} outgoing emails are stuck in the email spooler for longer than {SEC} seconds.",
+			"015": "Password reset email cannot be sent to '{NAME}', email address '{MAIL}' is empty or invalid. Action was aborted."
 		},
 		"CSV": {
 			"001": "رقم غير صالح '{VALUE}' (من المتوقع أن يكون عددًا صحيحًا).",
@@ -2599,6 +2601,7 @@
 		"every": "Every",
 		"everything": "كل شئ",
 		"expert": "Expert",
+		"expireAfter": "Expire after",
 		"expression": "Expression",
 		"favorites": "Favorites",
 		"favoritesEmpty": "No favorites saved",

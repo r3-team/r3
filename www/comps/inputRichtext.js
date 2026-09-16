@@ -60,8 +60,8 @@ export default {
 		return {
 			debug: false,
 			editor: null,       // registered tinymce editor instance
-			isMounted: false,   // wait for mount as toolbar ref must exist for tinymce init object to target it
 			images: [],         // image links to offer in editor
+			isMounted: false,   // wait for mount as toolbar ref must exist for tinymce init object to target it
 			key: 0,             // forces recreation of the editor on init change, 0 = not yet initialized
 			wasfocussed: false, // user focussed editor input
 
@@ -89,7 +89,6 @@ export default {
 				paste_data_images: true,
 				plugins: 'code emoticons image link lists searchreplace table',
 				readonly: s.readonly,
-				relative_urls: false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
 				resize: false,
 				skin: s.settings.dark ? 'oxide-dark' : 'oxide',
 				toolbar: s.readonly ? false : `undo redo | bold italic | forecolor paragraphgroup | numlist bullist | alignleft aligncenter alignright alignjustify | outdent indent | insertgroup code | customPrint searchreplace`,
@@ -105,6 +104,15 @@ export default {
 				},
 				toolbar_mode: 'floating',
 				toolbar_persist: true,
+
+				// URL manipulation
+				// vue-router uses hash based navigation, hashes are not part of the URL path
+				// by default (convert_urls/relative_urls/remove_script_host = true), Tiny converts 'https://system/#/app/...' (contains base URL) to '#/app/...', which is invalid as URL
+				//  setting relative_urls to false, makes Tiny add a slash 'https://system/#/app/...' -> '/#/app/...', works for hash based navigation but is annoying for placeholders ('{URL}' -> '/{URL}')
+				//  we could set remove_script_host or convert_urls to false, removing the URL manipulation (for the base URL or completely); but it´s often useful and saves space; removing the slash (if there) in case of placeholders is often the smaller issue
+				convert_urls: true,
+				relative_urls: false,
+				remove_script_host: true,
 
 				// adds more elements that tiny does not convert (adds to default valid_elements)
 				// known issues: auto converts <b> to <strong>

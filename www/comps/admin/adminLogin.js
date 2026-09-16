@@ -396,10 +396,20 @@ export default {
 												<option value="0">- {{ capGen.mailTemplate }} -</option>
 												<option v-for="t in mailTemplatesPwReset" :value="t.id">{{ t.name }}</option>
 											</select>
+											<div class="row gap centered">
+												<span>{{ capGen.expireAfter }}</span>
+												<my-input-decimal class="short"
+													v-model="passResetExpire"
+													:allowNull="false"
+													:lengthFract="0"
+													:min="60"
+												/>
+												<span>{{ capGen.seconds }}</span>
+											</div>
 											<div class="row">
 												<my-button image="mail2.png"
 													@trigger="sendResetMail"
-													:active="mailAccountId !== 0 && mailTemplateId !== 0"
+													:active="mailAccountId !== 0 && mailTemplateId !== 0 && passResetExpire !== 0 && passResetExpire !== null"
 													:caption="capGen.button.send"
 												/>
 											</div>
@@ -479,7 +489,8 @@ export default {
 
 			// PW reset action
 			mailAccountId: 0,
-			mailTemplateId: 0
+			mailTemplateId: 0,
+			passResetExpire: 86400
 		};
 	},
 	computed: {
@@ -543,6 +554,7 @@ export default {
 		capApp: s => s.$store.getters.captions.admin.login,
 		capGen: s => s.$store.getters.captions.generic,
 		mailAccountsSmtp: s => s.$store.getters.mailAccountsSmtp,
+		mailTemplateContent: s => s.$store.getters.constants.mailTemplateContent,
 		mailTemplatesPwReset: s => s.$store.getters.mailTemplatesPwReset,
 		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta
 	},
@@ -817,7 +829,20 @@ export default {
 
 		// PW reset calls
 		sendResetMail() {
-
+			ws.send('loginReset', 'set', {
+				expireAfterSeconds: this.passResetExpire,
+				mailAccountId: this.mailAccountId,
+				mailTemplateId: this.mailTemplateId,
+				mailTemplateContent: this.mailTemplateContent.loginPwReset,
+				loginIdsReset: [this.loginId],
+			}, true).then(
+				() => {
+					this.$store.commit('dialog', { captionBody: this.capApp.dialog.resetCodeSent });
+					this.mailAccountId = 0;
+					this.mailTemplateId = 0;
+				},
+				this.$root.genericError
+			);
 		},
 
 		// MFA calls

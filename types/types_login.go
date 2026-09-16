@@ -118,3 +118,8 @@ type LoginWidgetGroup struct {
 	Title string                 `json:"title"`
 	Items []LoginWidgetGroupItem `json:"items"`
 }
+type LoginWithMeta struct {
+	Id   int64     `json:"id"`
+	Name string    `json:"name"`
+	Meta LoginMeta `json:"meta"`
+}

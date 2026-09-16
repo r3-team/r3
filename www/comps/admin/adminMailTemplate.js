@@ -57,8 +57,9 @@ export default {
 							<td>{{ capGen.usage }}</td>
 							<td>
 								<select v-model="template.content" :disabled="!isNew">
-									<option value="loginInvitation">{{ capGen.invitation }}</option>
-									<option value="loginPwReset">{{ capGen.passwordReset }}</option>
+									<option :value="c" v-for="c in mailTemplateContent">
+										{{ getContentTitle(c) }}
+									</option>
 								</select>
 							</td>
 							<td></td>
@@ -84,9 +85,9 @@ export default {
 							<td>
 								<table>
 									<tbody>
-										<tr>
-											<td class="minimum"><my-button image="copyClipboard.png" @trigger="toClipboard('')" /></td>
-											<td>TEST</td>
+										<tr v-for="p in mailTemplateLoginPlaceholders">
+											<td class="minimum"><my-button image="copyClipboard.png" @trigger="toClipboard(p)" /></td>
+											<td>{{ p }}</td>
 										</tr>
 									</tbody>
 								</table>
@@ -128,7 +129,9 @@ export default {
 
 		// stores
 		capApp: s => s.$store.getters.captions.admin.mailTemplate,
-		capGen: s => s.$store.getters.captions.generic
+		capGen: s => s.$store.getters.captions.generic,
+		mailTemplateContent: s => s.$store.getters.constants.mailTemplateContent,
+		mailTemplateLoginPlaceholders: s => s.$store.getters.constants.mailTemplateLoginPlaceholders
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
@@ -145,6 +148,15 @@ export default {
 		deepIsEqual,
 		dialogCloseAsk,
 		dialogDeleteAsk,
+
+		// presentation
+		getContentTitle(v) {
+			switch (v) {
+				case this.mailTemplateContent.loginInvitation: return this.capGen.invitation;
+				case this.mailTemplateContent.loginPwReset: return this.capGen.passwordReset;
+			}
+			return '';
+		},
 
 		// actions
 		closeAsk() {

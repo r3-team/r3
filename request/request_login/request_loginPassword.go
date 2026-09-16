@@ -23,7 +23,7 @@ func PasswortReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, l
 		return err
 	}
 	if req.PwNew == "" {
-		return fmt.Errorf("invalid input")
+		return fmt.Errorf(handler.ErrGeneral)
 	}
 	exists, err := login_reset.CheckExists_tx(ctx, tx, loginId, req.Code)
 	if err != nil {

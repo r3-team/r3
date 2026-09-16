@@ -59,6 +59,7 @@ export default {
 	computed: {
 		// stores
 		capGen: s => s.$store.getters.captions.generic,
+		mailTemplateContent: s => s.$store.getters.constants.mailTemplateContent,
 		mailTemplateIdMap: s => s.$store.getters.mailTemplateIdMap,
 		mailTemplatesSorted: s => s.$store.getters.mailTemplatesSorted
 	},
@@ -76,8 +77,8 @@ export default {
 		getTitle(template) {
 			let prefix = '';
 			switch (template.content) {
-				case 'loginInvitation': prefix = this.capGen.invitation; break;
-				case 'loginPwReset': prefix = this.capGen.passwordReset; break;
+				case this.mailTemplateContent.loginInvitation: prefix = this.capGen.invitation; break;
+				case this.mailTemplateContent.loginPwReset: prefix = this.capGen.passwordReset; break;
 			}
 			return `${prefix}: ${template.name}`;
 		},
@@ -88,7 +89,7 @@ export default {
 		},
 		open(id) {
 			this.templateOpen = id === null
-				? this.getTemplateMailTemplate()
+				? this.getTemplateMailTemplate(this.mailTemplateContent.loginPwReset)
 				: this.mailTemplateIdMap[id] ?? null;
 		},
 

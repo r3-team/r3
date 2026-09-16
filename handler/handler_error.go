@@ -48,6 +48,9 @@ const (
 	ErrCodeAppColumnNoAttribute     int = 10
 	ErrCodeAppColumnContentNoAtr    int = 11
 	ErrCodeAppColumnNoPgFunction    int = 12
+	ErrCodeAppMailSpoolerStuckIn    int = 13
+	ErrCodeAppMailSpoolerStuckOut   int = 14
+	ErrCodeAppMailResetBadReceiver  int = 15
 	ErrCodeCsvParseInt              int = 1
 	ErrCodeCsvParseFloat            int = 2
 	ErrCodeCsvParseDateTime         int = 3

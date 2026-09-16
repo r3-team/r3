@@ -93,11 +93,11 @@ export function getTemplateMailAccount() {
 		resendSeconds: 60
 	};
 };
-export function getTemplateMailTemplate() {
+export function getTemplateMailTemplate(content) {
 	return {
 		id: 0,
+		content,
 		name: '',
-		content: 'loginPwReset',
 		body: '',
 		subject: ''
 	};

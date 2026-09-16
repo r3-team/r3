@@ -34,11 +34,15 @@ func GetTimeUnix() int64 {
 func GetTimeUnixMilli() int64 {
 	return time.Now().UTC().UnixNano() / int64(time.Millisecond)
 }
-func GetTimeStringLocal() string {
+func GetTimeStringLocal(unixTime int64) string {
+	// 2006-01-02 15:04:05 has to be used to recognize format!
+	return time.Unix(unixTime, 0).Format("2006-01-02 15:04:05")
+}
+func GetTimeStringLocalNow() string {
 	// 2006-01-02 15:04:05 has to be used to recognize format!
 	return time.Now().Format("2006-01-02 15:04:05")
 }
-func GetTimeStringUtc() string {
+func GetTimeStringUtcNow() string {
 	// 2006-01-02 15:04:05 has to be used to recognize format!
 	return time.Now().UTC().Format("2006-01-02 15:04:05")
 }
