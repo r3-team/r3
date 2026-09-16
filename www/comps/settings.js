@@ -366,8 +366,8 @@ const MySettingsEncryption = {
 			promises.push(this.aesGcmDecryptBase64WithPhrase(this.loginPrivateKeyEncBackup, backupCode));
 
 			Promise.all(promises).then(
-				res => this.reencrypt(res[1]),
-				err => this.unlockError(err[1])
+				res => this.reencrypt(this.loginNoCred ? res[1] : res[0]),
+				this.unlockError
 			);
 		},
 		unlockWithPassphrase() {
