@@ -846,6 +846,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER INDEX fki_mail_traffic_mail_account_id_fkey RENAME TO fki_traffic_mail_account_id_fkey;
 			ALTER INDEX ind_mail_traffic_date                 RENAME TO ind_traffic_date;
 			ALTER INDEX ind_mail_traffic_outgoing             RENAME TO ind_traffic_outgoing;
+
+			-- default mail templates for PW reset
+			INSERT INTO instance_mail.template (content, name, subject, body)
+			VALUES (
+				'loginPwReset', 'Default EN', 'REI3 - Password reset',
+				'<p>Hello {DISPLAYNAME},</p><p>You are receiving this message, because an administrator has requested a password reset for your user ''<b>{USERNAME}</b>''.</p><p>To reset your password, please follow this <b><a href="/{RESET_URL}">link</a></b>.</p><p>This reset link will be valid until: <b>{CODE_VALID_UNTIL}</b></p>'
+			),(
+				'loginPwReset', 'Default DE', 'REI3 - Passwort zurücksetzen',
+				'<p>Hallo {DISPLAYNAME},</p><p>Sie erhalten diese Nachricht, weil ein Administrator für Ihren Benutzer "<b>{USERNAME}</b>" das Zurücksetzen vom Passwort gestartet hat.</p><p>Um Ihr Passwort zurückzusetzen, verwenden Sie bitte den folgenden <b><a href="/{RESET_URL}">Link</a></b>.</p><p>Dieser Link wird gültig sein bis: <b>{CODE_VALID_UNTIL}</b></p>'
+			);
 		`)
 		return "3.13", err
 	},
