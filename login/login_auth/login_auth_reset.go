@@ -67,9 +67,16 @@ func Reset(ctx context.Context, code string) (types.LoginAuthResult, error) {
 		return types.LoginAuthResult{}, err
 	}
 
-	// inform about forced MFA setup
-	// pw reset skips MFA auth, but MFA setup (if required) must be completed after auth
-	l.MfaSetup = (mfaRequiredInstance && !mfaRequiredLogin.Valid) || mfaRequiredLogin.Bool
+	// check if MFA setup is required
+	// PW reset auth skips MFA, but MFA setup (if required) must be completed afterwards
+	if (mfaRequiredInstance && !mfaRequiredLogin.Valid) || mfaRequiredLogin.Bool {
+		mfaTokens, err := getMfaTokens(ctx, l.Id)
+		if err != nil {
+			return types.LoginAuthResult{}, err
+		}
+		// MFA setup is required if no MFA tokens already exist
+		l.MfaSetup = len(mfaTokens) == 0
+	}
 
 	if err := cache.LoadAccessIfUnknown(l.Id); err != nil {
 		return types.LoginAuthResult{}, err
