@@ -1122,7 +1122,7 @@ export default {
 					<h1>{{ capApp.titleAccount }}</h1>
 				</div>
 
-				<my-pw-change />
+				<my-pw-change :showTitle="true" />
 
 				<div class="settings-account-actions">
 					<h2>{{ capGen.actions }}</h2>

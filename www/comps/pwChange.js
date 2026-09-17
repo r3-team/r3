@@ -14,7 +14,7 @@ export default {
 				</tr>
 				<template v-if="isAllowedPwChange">
 					<tr><td colspan="2"><hr /></td></tr>
-					<tr><td colspan="2"><b>{{ capApp.title }}</b></td></tr>
+					<tr><td colspan="2" v-if="showTitle"><b>{{ capApp.title }}</b></td></tr>
 					<tr v-if="!isReset">
 						<td>{{ capApp.old }}</td>
 						<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
@@ -47,6 +47,9 @@ export default {
 		<div class="textError" v-if="message !== ''">{{ message }}</div>
 	</div>`,
 	emits: ['changed'],
+	props: {
+		showTitle: { type: Boolean, required: false, default: false }
+	},
 	data() {
 		return {
 			// states
@@ -143,7 +146,10 @@ export default {
 
 		// actions
 		setCheck() {
-			if (this.e2eeInactive)
+			// PW change & reset work differently in regards to E2EE
+			// PW change can decrypt private key (with login key based on old PW) and re-encrypt it (with login key based on new PW)
+			// PW reset cannot decrypt private key (no old PW for login key), it can only set new PW (requires regaining access to private key later)
+			if (this.e2eeInactive || this.isReset)
 				return this.set(null, null);
 
 			this.aesGcmImportBase64(this.loginKeyAes).then(
@@ -178,27 +184,48 @@ export default {
 					: ws.prepare('loginPassword', 'set', { pwNew: this.pwNew0, pwOld: this.pwOld })
 			];
 
-			// update encrypted private key if given
+			// use same request/transaction to update password & new encrypted private key (one must not change without the other)
 			if (newPrivateKeyEnc !== null)
 				requests.push(ws.prepare('loginKeys', 'storePrivate', { privateKeyEnc: newPrivateKeyEnc }));
 
-			// use same request/transaction to update password & encrypted private key
-			// one must not change without the other
 			ws.sendMultiple(requests, true).then(
 				res => {
+					const pwNew = this.pwNew0;
 					this.pwNew0 = '';
 					this.pwNew1 = '';
 					this.pwOld = '';
 					this.newInput = false;
 
-					if (res.length === 1)
-						return this.$emit('changed');
+					// PW change
+					if (!this.isReset) {
+						if (newPrivateKeyEnc === null)
+							return this.$emit('changed');
 
-					this.aesGcmExportBase64(newLoginKey).then(keyBase64 => {
-						this.$store.commit('loginPrivateKeyEnc', newPrivateKeyEnc);
-						this.$store.commit('local/loginKeyAes', keyBase64);
-						this.$emit('changed');
-					});
+						this.aesGcmExportBase64(newLoginKey).then(keyBase64 => {
+							this.$store.commit('loginPrivateKeyEnc', newPrivateKeyEnc);
+							this.$store.commit('local/loginKeyAes', keyBase64);
+							this.$emit('changed');
+						});
+					}
+
+					// PW reset
+					if (this.isReset) {
+						// PW reset generates login key from new PW
+						// 'loginNoCred' is set to false, as login key is now available
+						this.pbkdf2PassToAesGcmKey(pwNew, this.loginKeySalt, this.kdfIterations, true).then(
+							key => {
+								this.aesGcmExportBase64(key).then(
+									keyBase64 => {
+										this.$store.commit('local/loginNoCred', false);
+										this.$store.commit('local/loginKeyAes', keyBase64);
+										this.$emit('changed');
+									},
+									this.$root.genericError
+								);
+							},
+							this.$root.genericError
+						);
+					}
 				},
 				this.$root.genericError
 			);

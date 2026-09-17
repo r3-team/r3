@@ -39,7 +39,7 @@ export default {
 		<!-- PW reset (blocks forced MFA setup & app access) -->
 		<my-pw-reset
 			v-if="appReady && loginPwResetCode !== null"
-			@confirmed="$store.commit('loginPwResetCode', null)"
+			@confirmed="initAfterReset"
 		/>
 
 		<!-- Forced MFA setup (blocks app access) -->
@@ -811,7 +811,13 @@ export default {
 					);
 				},
 				this.setInitErr
-			)
+			);
+		},
+		initAfterReset() {
+			// PW reset auth works without credentials (just reset code)
+			// after PW reset, we create new login key with newly chosen PW and then repeat app init to decrypt existing E2EE private key
+			this.$store.commit('loginPwResetCode', null);
+			this.initApp();
 		},
 
 		// hotkeys
