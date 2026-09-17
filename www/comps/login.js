@@ -5,7 +5,7 @@ import { getLineBreaksParsedToHtml, openLink } from './shared/generic.js';
 
 export default {
 	name: 'my-login',
-	template: `<div class="login" :class="{ badAuth:badAuth }">
+	template: `<div class="login" :class="{ badAuth:isBadAuth }">
 
 		<!-- busy overlay -->
 		<div class="input-block-overlay-bg" :class="{ show:loading }">
@@ -53,9 +53,15 @@ export default {
 			</div>
 
 			<!-- unexpected error message -->
-			<div class="message warning" v-if="appInitErr">
+			<div class="message warning" v-if="isAppInitErr">
 				<img src="images/warning.png" />
-				<span>{{ message.error[language] }}</span>
+				<span>{{ message.error.general[language] }}</span>
+			</div>
+
+			<!-- reset code error message -->
+			<div class="message warning" v-if="isResetCodeErr">
+				<img src="images/warning.png" />
+				<span>{{ message.error.reset[language] }}</span>
 			</div>
 
 			<!-- license error message -->
@@ -85,15 +91,14 @@ export default {
 					<span>{{ message.authInt[language] }}</span>
 				</div>
 				<input autocomplete="username" class="placeholder-bright" type="text" spellcheck="false"
-					@keyup="badAuth = false"
+					@keyup="isBadAuth = false"
 					@keyup.enter="authenticateByCred"
 					v-model="username"
 					v-focus
 					:placeholder="message.username[language]"
 				/>
-
 				<input autocomplete="current-password" class="placeholder-bright" type="password"
-					@keyup="badAuth = false"
+					@keyup="isBadAuth = false"
 					@keyup.enter="authenticateByCred"
 					v-model="password"
 					:placeholder="message.password[language]"
@@ -109,7 +114,7 @@ export default {
 					</option>
 				</select>
 				<input autocomplete="one-time-code" class="placeholder-bright" type="text" maxlength="6"
-					@keyup="badAuth = false"
+					@keyup="isBadAuth = false"
 					@keyup.enter="authenticateByCred"
 					v-model="mfaTokenPin"
 					v-focus
@@ -171,9 +176,10 @@ export default {
 			username: '',
 
 			// states
-			appInitErr: false,    // application failed to initialize
-			badAuth: false,       // authentication failed
-			licenseErrCode: null, // error with system license
+			isAppInitErr: false,   // application failed to initialize
+			isBadAuth: false,      // authentication failed
+			isResetCodeErr: false, // reset code failed
+			licenseErrCode: null,  // error with system license
 			loading: false,
 			showError: false,
 
@@ -194,8 +200,14 @@ export default {
 					en_US: 'Connected with: '
 				},
 				error: {
-					de: 'Ein Fehler ist aufgetreten - bitte erneut versuchen',
-					en_US: 'An error occurred - please try again'
+					general: {
+						de: 'Ein Fehler ist aufgetreten - bitte erneut versuchen',
+						en_US: 'An error occurred - please try again'
+					},
+					reset: {
+						de: 'Code ist abgelaufen - bitte den Systemadministrator kontaktieren',
+						en_US: 'Code is expired - please contact your system administrator'
+					}
 				},
 				httpMode: {
 					de: 'Verbindung ist nicht verschlüsselt',
@@ -268,9 +280,9 @@ export default {
 		`,
 		isValid: s => {
 			if (!s.showMfa)
-				return !s.badAuth && s.username !== '' && s.password !== '';
+				return !s.isBadAuth && s.username !== '' && s.password !== '';
 
-			return !s.badAuth && s.mfaTokenId !== null && s.mfaTokenPin !== null;
+			return !s.isBadAuth && s.mfaTokenId !== null && s.mfaTokenPin !== null;
 		},
 		hasOpenIdClients: s => Object.keys(s.oauthClientIdMapOpenId).length !== 0,
 		showCustom: s => s.activated && (s.companyName !== '' || s.companyWelcome !== ''),
@@ -374,17 +386,18 @@ export default {
 		handleError(action, msg) {
 			this.licenseErrCode = msg.startsWith('{ERR_LIC') ? msg : null;
 			switch (action) {
-				case 'aesExport': break;                      // very unexpected, should not happen
-				case 'authToken': break;                      // token auth failed, to be expected, can expire
-				case 'authUser': this.badAuth = true; break; // user authorization failed, mark inputs invalid
-				case 'kdfCreate': break;                      // very unexpected, should not happen
+				case 'aesExport': break; // very unexpected, should not happen
+				case 'authToken': break; // token auth failed, to be expected, can expire
+				case 'authReset': this.isResetCodeErr = true; break; // reset code auth failed, to be expected, already used or expired
+				case 'authUser': this.isBadAuth = true; break; // user authorization failed, mark inputs invalid
+				case 'kdfCreate': break; // very unexpected, should not happen
 			}
 			this.loading = false;
 		},
 		parentError() {
 			// stop loading, when parent caught error
 			this.loading = false;
-			this.appInitErr = true;
+			this.isAppInitErr = true;
 		},
 
 		// authentication against external identity provider
@@ -509,7 +522,7 @@ export default {
 					}
 					this.authenticated(res.payload.id, res.payload.name, res.payload.token, res.payload.saltKdf, true);
 				},
-				err => this.handleError('authUser', err)
+				err => this.handleError('authReset', err)
 			);
 			this.loading = true;
 		},
