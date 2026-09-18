@@ -28,6 +28,19 @@
 	border-radius: 2px;
 }
 
+/* user invitation */
+.admin-invitation-preview-table {
+	width: 100%;
+	padding: 6px;
+	background-color: var(--color-input);
+	border: var(--border-input);
+	border-radius: var(--border-input-radius);
+}
+.admin-invitation-preview-table th {
+	text-decoration: underline;
+	text-wrap: nowrap;
+}
+
 /* DB sync */
 .admin-db-sync-host {
 	min-width: 600px;

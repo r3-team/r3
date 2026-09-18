@@ -1,71 +1,62 @@
-import MyStore          from '../../stores/store.js';
-import {formOpen}       from './form.js';
-import {generatePdf}    from './pdf.js';
-import {openLink}       from './generic.js';
-import {resolveErrCode} from './error.js';
-import {
-	getCollectionMultiValues,
-	updateCollections
-} from './collection.js';
-import {
-	aesGcmDecryptBase64WithPhrase,
-	rsaDecrypt
-} from './crypto.js';
-import {
-	variableValueGet,
-	variableValueSet
-} from './variable.js';
+import MyStore from '../../stores/store.js';
+import { getCollectionMultiValues, updateCollections } from './collection.js';
+import { aesGcmDecryptBase64WithPhrase, rsaDecrypt } from './crypto.js';
+import { resolveErrCode } from './error.js';
+import { formOpen } from './form.js';
+import { openLink } from './generic.js';
+import { generatePdf } from './pdf.js';
+import { variableValueGet, variableValueSet } from './variable.js';
 
 const errFnc = () => console.warn('Function is not available in this context.');
 
 // these functions are available by default globally
 const exposedFunctionsGlobal = {
-	get_preset_record_id:(v) => typeof MyStore.getters['schema/presetIdMapRecordId'][v] !== 'undefined'
+	get_preset_record_id: (v) => typeof MyStore.getters['schema/presetIdMapRecordId'][v] !== 'undefined'
 		? MyStore.getters['schema/presetIdMapRecordId'][v] : null,
-	get_url_query_string:() => {
+	get_url_query_string: () => {
 		const pos = window.location.hash.indexOf('?');
-		return pos === -1 ? '' : window.location.hash.substring(pos+1);
+		return pos === -1 ? '' : window.location.hash.substring(pos + 1);
 	},
 
 	// simple
-	copy_to_clipboard:(v) => navigator.clipboard.writeText(v),
-	get_language_code:()  => MyStore.getters.settings.languageCode,
-	get_user_id:      ()  => MyStore.getters.loginId,
-	get_role_ids:     ()  => MyStore.getters.access.roleIds,
-	go_back:          ()  => window.history.back(),
-	has_role:         (v) => MyStore.getters.access.roleIds.includes(v),
-	logoff:           ()  => MyStore.getters.appFunctions.sessionInvalid(false,true),
+	copy_to_clipboard: (v) => navigator.clipboard.writeText(v),
+	get_language_code: () => MyStore.getters.settings.languageCode,
+	get_user_id: () => MyStore.getters.loginId,
+	get_role_ids: () => MyStore.getters.access.roleIds,
+	go_back: () => window.history.back(),
+	has_role: (v) => MyStore.getters.access.roleIds.includes(v),
+	logoff: () => MyStore.getters.appFunctions.sessionInvalid(false, true),
 
 	// URL open functions
-	url_open_as_tab:(url) => openLink(url,true),
-	url_open_as_window:(url,width,height,top,left) => {
-		if(width  === undefined || isNaN(parseInt(width)))  width  = 800;
-		if(height === undefined || isNaN(parseInt(height))) height = 600;
+	url_open_as_tab: (url) => openLink(url, true),
+	url_open_as_window: (url, width, height, top, left) => {
+		if (width === undefined || isNaN(parseInt(width, 10))) width = 800;
+		if (height === undefined || isNaN(parseInt(height, 10))) height = 600;
 
-		let opts = ['noopener','noreferrer','resizable=yes','scrollbars=yes','titlebar=yes',`width=${width}`,`height=${height}`];
-		if(top  !== undefined && !isNaN(parseInt(top)))  opts.push(`top=${top}`);
-		if(left !== undefined && !isNaN(parseInt(left))) opts.push(`left=${left}`);
+		const opts = ['noopener', 'noreferrer', 'resizable=yes', 'scrollbars=yes', 'titlebar=yes', `width=${width}`, `height=${height}`];
+		if (top !== undefined && !isNaN(parseInt(top, 10))) opts.push(`top=${top}`);
+		if (left !== undefined && !isNaN(parseInt(left, 10))) opts.push(`left=${left}`);
 
-		window.open(url,'_blank',opts.join(','));
+		window.open(url, '_blank', opts.join(','));
 	},
 
 	// global search
-	global_search_start:(input) => {
-		if(MyStore.getters.searchModuleIds.length === 0)
+	global_search_start: (input) => {
+		if (MyStore.getters.searchModuleIds.length === 0)
 			return console.warn('cannot start global search, no search bars available');
 
-		MyStore.commit('globalSearchInput',input !== undefined ? input : window.getSelection().toString());
+		MyStore.commit('globalSearchInput', input !== undefined ? input : window.getSelection().toString());
 	},
 
 	// collection functions
-	collection_read:getCollectionMultiValues,
-	collection_update:updateCollections,
-	
+	collection_read: getCollectionMultiValues,
+	collection_update: updateCollections,
+
 	// call functions
-	call_frontend:(id,...args) => jsFunctionRun(id,args,{}),
-	call_backend: (id,...args) => {
-		return new Promise((resolve,reject) => {
-			ws.send('pgFunction','exec',{id:id,args:args}).then(
+	call_frontend: (id, ...args) => jsFunctionRun(id, args, {}),
+	call_backend: (id, ...args) => {
+		return new Promise((resolve, reject) => {
+			ws.send('pgFunction', 'exec', { id: id, args: args }).then(
 				res => resolve(res.payload),
 				err => reject(resolveErrCode(err))
 			);
@@ -73,109 +64,109 @@ const exposedFunctionsGlobal = {
 	},
 
 	// variables (without form context, eg. global)
-	get_variable:(k)   => variableValueGet(k),
-	set_variable:(k,v) => variableValueSet(k,v),
-	
+	get_variable: (k) => variableValueGet(k),
+	set_variable: (k, v) => variableValueSet(k, v),
+
 	// e2e encryption
-	get_e2ee_data_key:  (dataKeyEnc)    => rsaDecrypt(MyStore.getters.loginPrivateKey,dataKeyEnc),
-	get_e2ee_data_value:(dataKey,value) => aesGcmDecryptBase64WithPhrase(value,dataKey),
+	get_e2ee_data_key: (dataKeyEnc) => rsaDecrypt(MyStore.getters.loginPrivateKey, dataKeyEnc),
+	get_e2ee_data_value: (dataKey, value) => aesGcmDecryptBase64WithPhrase(value, dataKey),
 
 	// fat client functions
-	client_execute_keystrokes:(keystrokes) => ws.send('event','keystrokesRequested',keystrokes),
+	client_execute_keystrokes: (keystrokes) => ws.send('event', 'keystrokesRequested', keystrokes),
 
 	// form open (simple global version)
-	form_open:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
+	form_open: (formId, recordId, newTab, popUp, maxY, maxX, replace) => {
 		formOpen({
-			formIdOpen:formId, popUpType:popUp ? 'float' : null,
-			maxHeight:maxY, maxWidth:maxX
-		},newTab,replace);
+			formIdOpen: formId, popUpType: popUp ? 'float' : null,
+			maxHeight: maxY, maxWidth: maxX
+		}, newTab, replace);
 	},
-				
+
 	// PDF functions
-	pdf_create:(filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId) => {
-		return generatePdf('transliterate',filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId);
+	pdf_create: (filename, format, orientation, marginX, marginY, header, body, footer, css, attributeId, recordId) => {
+		return generatePdf('transliterate', filename, format, orientation, marginX, marginY, header, body, footer, css, attributeId, recordId);
 	},
-	pdf_create_utf8:(utf8_mode,filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId) => {
-		return generatePdf(utf8_mode,filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId);
+	pdf_create_utf8: (utf8_mode, filename, format, orientation, marginX, marginY, header, body, footer, css, attributeId, recordId) => {
+		return generatePdf(utf8_mode, filename, format, orientation, marginX, marginY, header, body, footer, css, attributeId, recordId);
 	},
 
 	// dialog functions
-	dialog_show:(title,body,buttons) => {
-		return new Promise((resolve,reject) => {
-			if(title === undefined)     title   = '';
-			if(body  === undefined)     body    = '';
-			if(!Array.isArray(buttons)) buttons = [];
+	dialog_show: (title, body, buttons) => {
+		return new Promise((resolve, reject) => {
+			if (title === undefined) title = '';
+			if (body === undefined) body = '';
+			if (!Array.isArray(buttons)) buttons = [];
 
-			let btns = [];
-			for(let i = 0, j = buttons.length; i < j; i++) {
-				if(typeof buttons[i] === 'string')
+			const btns = [];
+			for (let i = 0, j = buttons.length; i < j; i++) {
+				if (typeof buttons[i] === 'string')
 					btns.push({
-						caption:buttons[i],
-						exec:() => resolve(i)
+						caption: buttons[i],
+						exec: () => resolve(i)
 					});
 			}
 
-			if(btns.length === 0)
+			if (btns.length === 0)
 				btns.push({
-					caption:MyStore.getters.captions.generic.button.ok,
-					exec:() => resolve(-1),
-					image:'ok.png'
+					caption: MyStore.getters.captions.generic.button.ok,
+					exec: () => resolve(-1),
+					image: 'ok.png'
 				});
 
-			MyStore.commit('dialog',{
-				captionBody:body,
-				captionTop:title,
-				buttons:btns
+			MyStore.commit('dialog', {
+				captionBody: body,
+				captionTop: title,
+				buttons: btns
 			});
 		});
 	},
 
 	// deprecated but valid
-	get_login_id:() => MyStore.getters.loginId,
+	get_login_id: () => MyStore.getters.loginId,
 
 	// not available as default
-	block_inputs:                     errFnc,
-	form_close:                       errFnc,
-	form_parent_refresh:              errFnc,
-	form_set_title:                   errFnc,
-	form_show_message:                errFnc,
-	get_field_file_links:             errFnc,
-	get_field_value:                  errFnc,
-	get_field_value_changed:          errFnc,
-	get_record_id:                    errFnc,
-	record_delete:                    errFnc,
-	record_new:                       errFnc,
-	record_reload:                    errFnc,
-	record_save:                      errFnc,
-	record_save_new:                  errFnc,
-	set_e2ee_by_user_ids:             errFnc,
-	set_e2ee_by_user_ids_and_relation:errFnc,
-	set_field_caption:                errFnc,
-	set_field_chart:                  errFnc,
-	set_field_error:                  errFnc,
-	set_field_focus:                  errFnc,
-	set_field_order:                  errFnc,
-	set_field_value:                  errFnc,
-	timer_clear:                      errFnc,
-	timer_set:                        errFnc,
+	block_inputs: errFnc,
+	form_close: errFnc,
+	form_parent_refresh: errFnc,
+	form_set_title: errFnc,
+	form_show_message: errFnc,
+	get_field_file_links: errFnc,
+	get_field_value: errFnc,
+	get_field_value_changed: errFnc,
+	get_record_id: errFnc,
+	record_delete: errFnc,
+	record_new: errFnc,
+	record_reload: errFnc,
+	record_save: errFnc,
+	record_save_new: errFnc,
+	set_e2ee_by_user_ids: errFnc,
+	set_e2ee_by_user_ids_and_relation: errFnc,
+	set_field_caption: errFnc,
+	set_field_chart: errFnc,
+	set_field_error: errFnc,
+	set_field_focus: errFnc,
+	set_field_order: errFnc,
+	set_field_value: errFnc,
+	timer_clear: errFnc,
+	timer_set: errFnc,
 
 	// not available as default and deprecated
-	open_form:                         errFnc,
-	set_e2ee_by_login_ids:             errFnc,
-	set_e2ee_by_login_ids_and_relation:errFnc,
-	show_form_message:                 errFnc,
-	update_collection:                 errFnc
+	open_form: errFnc,
+	set_e2ee_by_login_ids: errFnc,
+	set_e2ee_by_login_ids_and_relation: errFnc,
+	show_form_message: errFnc,
+	update_collection: errFnc
 };
 
-export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
+export function jsFunctionRun(jsFunctionId, args, exposedFunctionsContext) {
 	const fnc = MyStore.getters['schema/jsFunctionIdMap'][jsFunctionId];
-	if(fnc === undefined)
+	if (fnc === undefined)
 		return console.warn(`Failed to start frontend function '${jsFunctionId}', function not known.`);
-	
+
 	// first argument is exposed application functions object 'app'
 	// additional arguments are defined by function
 	const argNames = fnc.codeArgs === '' ? 'app' : `app,${fnc.codeArgs}`;
-	
+
 	// limit function code access
 	// strict mode does not allow overwriting already defined variables
 	// also blocked, restoration of access to window: let win = (function() {return this;}())
@@ -191,48 +182,48 @@ export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 		let WebSocket      = {};
 		let window         = {};
 		${fnc.codeFunction}`;
-	
+
 	// exposed functions, running in the context of the function module
 	const exposedFunctionsModule = {
 		// session timers
-		timer_clear_global:(name) => {
-			MyStore.commit('sessionTimerStoreClear',{
-				moduleId:fnc.moduleId,
-				name:name
+		timer_clear_global: (name) => {
+			MyStore.commit('sessionTimerStoreClear', {
+				moduleId: fnc.moduleId,
+				name: name
 			});
 		},
-		timer_set_global:(name,isInterval,fncCall,milliseconds) => {
-			MyStore.commit('sessionTimerStoreClear',{
-				moduleId:fnc.moduleId,
-				name:name
+		timer_set_global: (name, isInterval, fncCall, milliseconds) => {
+			MyStore.commit('sessionTimerStoreClear', {
+				moduleId: fnc.moduleId,
+				name: name
 			});
-			MyStore.commit('sessionTimerStore',{
-				fnc:fncCall,
-				isInterval:isInterval,
-				milliseconds:milliseconds,
-				moduleId:fnc.moduleId,
-				name:name
+			MyStore.commit('sessionTimerStore', {
+				fnc: fncCall,
+				isInterval: isInterval,
+				milliseconds: milliseconds,
+				moduleId: fnc.moduleId,
+				name: name
 			});
 		},
 
 		// session value store
 		// DEPRECATED as of R3.9, replaced by global variables
-		value_store_get:(k) => typeof MyStore.getters.sessionValueStore[fnc.moduleId] !== 'undefined'
+		value_store_get: (k) => typeof MyStore.getters.sessionValueStore[fnc.moduleId] !== 'undefined'
 			&& typeof MyStore.getters.sessionValueStore[fnc.moduleId][k] !== 'undefined'
-				? MyStore.getters.sessionValueStore[fnc.moduleId][k]
-				: undefined,
-		value_store_set:(k,v) => MyStore.commit('sessionValueStore',{
-			moduleId:fnc.moduleId,key:k,value:v
+			? MyStore.getters.sessionValueStore[fnc.moduleId][k]
+			: undefined,
+		value_store_set: (k, v) => MyStore.commit('sessionValueStore', {
+			moduleId: fnc.moduleId, key: k, value: v
 		})
 	};
 
 	try {
-		return Function(argNames,code)({
+		return Function(argNames, code)({
 			...exposedFunctionsGlobal, // globally available functions
 			...exposedFunctionsModule, // functions available for module of running function
 			...exposedFunctionsContext // functions available in calling context
 		}, ...args);
-	} catch(err) {
+	} catch (err) {
 		console.error(`frontend function '${fnc.name}()' failed to execute,`, err)
 		return null;
 	}

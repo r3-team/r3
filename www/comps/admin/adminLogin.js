@@ -10,6 +10,8 @@ import srcBase64Icon from '../shared/image.js';
 import { getCaption } from '../shared/language.js';
 
 import MyAdminLoginMeta from './adminLoginMeta.js';
+import MyAdminMailAccountInput from './adminMailAccountInput.js';
+import MyAdminMailTemplateInput from './adminMailTemplateInput.js';
 
 const MyAdminLoginRole = {
 	name: 'my-admin-login-role',
@@ -40,7 +42,10 @@ const MyAdminLoginRole = {
 
 export default {
 	name: 'my-admin-login',
-	components: { MyAdminLoginMeta, MyAdminLoginRole, MyForm, MyInputDecimal, MyInputSelect },
+	components: {
+		MyAdminLoginMeta, MyAdminLoginRole, MyAdminMailAccountInput,
+		MyAdminMailTemplateInput, MyForm, MyInputDecimal, MyInputSelect
+	},
 	template: `<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 
 		<!-- login record form -->
@@ -380,22 +385,16 @@ export default {
 								<tr>
 									<td class="default-inputs">
 										<div class="column gap">
-											<select
-												@input="mailAccountId = parseInt($event.target.value)"
-												:disabled="!isAuthLocalPw"
-												:value="String(mailAccountId)"
-											>
-												<option value="0">- {{ capGen.mailAccount }} -</option>
-												<option v-for="a in mailAccountsSmtp" :value="a.id">{{ a.name }}</option>
-											</select>
-											<select
-												@input="mailTemplateId = parseInt($event.target.value)"
-												:disabled="!isAuthLocalPw"
-												:value="String(mailTemplateId)"
-											>
-												<option value="0">- {{ capGen.mailTemplate }} -</option>
-												<option v-for="t in mailTemplatesPwReset" :value="t.id">{{ t.name }}</option>
-											</select>
+											<my-admin-mail-account-input
+												v-model="mailAccountId"
+												:onlySend="true"
+												:readonly="!isAuthLocalPw"
+											/>
+											<my-admin-mail-template-input
+												v-model="mailTemplateId"
+												:onlyPwReset="true"
+												:readonly="!isAuthLocalPw"
+											/>
 											<div class="row gap centered">
 												<span>{{ capGen.expireAfter }}</span>
 												<my-input-decimal class="short"
@@ -403,6 +402,7 @@ export default {
 													:allowNull="false"
 													:lengthFract="0"
 													:min="60"
+													:readonly="!isAuthLocalPw"
 												/>
 												<span>{{ capGen.seconds }}</span>
 											</div>
@@ -553,9 +553,7 @@ export default {
 		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
 		capApp: s => s.$store.getters.captions.admin.login,
 		capGen: s => s.$store.getters.captions.generic,
-		mailAccountsSmtp: s => s.$store.getters.mailAccountsSmtp,
 		mailTemplateContent: s => s.$store.getters.constants.mailTemplateContent,
-		mailTemplatesPwReset: s => s.$store.getters.mailTemplatesPwReset,
 		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta
 	},
 	mounted() {
@@ -570,18 +568,6 @@ export default {
 			for (const lf of this.loginForms) {
 				this.inputs.records.push({ id: null, label: '' });
 			}
-		}
-		if (this.mailAccountsSmtp.length === 0) {
-			ws.send('mailAccount', 'get', {}, true).then(
-				res => this.$store.commit('mailAccountIdMap', res.payload),
-				this.$root.genericError
-			);
-		}
-		if (this.mailTemplatesPwReset.length === 0) {
-			ws.send('mailTemplate', 'get', {}, true).then(
-				res => this.$store.commit('mailTemplateIdMap', res.payload),
-				this.$root.genericError
-			);
 		}
 	},
 	unmounted() {

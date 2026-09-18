@@ -112,13 +112,13 @@ export function getBuildFromVersion(fullVersion) {
 	if (m.length !== 2)
 		return false;
 
-	return parseInt(m[1]);
+	return parseInt(m[1], 10);
 };
 
 export function getLinkMeta(display, value) {
 	switch (display) {
-		case 'email': return { image: 'mail.png', blank: false, href: 'mailto:' + value };
-		case 'phone': return { image: 'phone.png', blank: false, href: 'tel:' + value };
+		case 'email': return { image: 'mail.png', blank: false, href: `mailto:${value}` };
+		case 'phone': return { image: 'phone.png', blank: false, href: `tel:${value}` };
 		case 'url': return { image: 'link.png', blank: true, href: value };
 	}
 	return false;
@@ -166,15 +166,15 @@ export function getSizeReadable(size) {
 		return '<1 Kb';
 
 	if (size < 1024)
-		return size + ' Kb';
+		return `${size} Kb`;
 
 	if (size < 1048576)
-		return (size / 1024).toFixed(2) + ' Mb';
+		return `${(size / 1024).toFixed(2)} Mb`;
 
 	if (size < 1073741824)
-		return (size / 1048576).toFixed(2) + ' Gb';
+		return `${(size / 1048576).toFixed(2)} Gb`;
 
-	return (size / 1073741824).toFixed(2) + ' Tb';
+	return `${(size / 1073741824).toFixed(2)} Tb`;
 };
 
 export function getLineBreaksParsedToHtml(input) {
@@ -182,7 +182,7 @@ export function getLineBreaksParsedToHtml(input) {
 };
 
 export function getHtmlStripped(input) {
-	let d = new DOMParser().parseFromString(input, 'text/html');
+	const d = new DOMParser().parseFromString(input, 'text/html');
 	return d.body.textContent || '';
 };
 
@@ -230,8 +230,8 @@ export function openLink(href, blank) {
 	document.body.removeChild(link);
 };
 export function openLinkNoCache(href, blank) {
-	if (href.includes('?')) href += `&date=${Math.floor(new Date().getTime() / 1000)}`;
-	else href += `?date=${Math.floor(new Date().getTime() / 1000)}`;
+	if (href.includes('?')) href += `&date=${Math.floor(Date.now() / 1000)}`;
+	else href += `?date=${Math.floor(Date.now() / 1000)}`;
 	return openLink(href, blank);
 };
 

@@ -1,14 +1,11 @@
-import MyInputOffset  from '../inputOffset.js';
-import MyAdminLogin   from './adminLogin.js';
-import {getLoginIcon} from '../shared/admin.js';
+import MyInputOffset from '../inputOffset.js';
+import { getLoginIcon } from '../shared/admin.js';
+import MyAdminLogin from './adminLogin.js';
 
 export default {
-	name:'my-admin-logins',
-	components:{
-		MyAdminLogin,
-		MyInputOffset
-	},
-	template:`<div class="admin-logins contentBox grow">
+	name: 'my-admin-logins',
+	components: { MyAdminLogin, MyInputOffset },
+	template: `<div class="admin-logins contentBox grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/person.png" />
@@ -53,7 +50,7 @@ export default {
 				</select>
 			</div>
 		</div>
-		
+
 		<div class="content grow no-padding">
 			<table class="generic-table sticky-top bright admin-logins-list">
 				<thead>
@@ -93,7 +90,7 @@ export default {
 					</tr>
 				</tbody>
 			</table>
-			
+
 			<!-- login -->
 			<my-admin-login
 				v-if="loginIdOpen !== null"
@@ -107,67 +104,67 @@ export default {
 			/>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
 	data() {
 		return {
 			// data
-			ldaps:[],
-			logins:[],
-			oauthClientIdMap:{},
-			
+			ldaps: [],
+			logins: [],
+			oauthClientIdMap: {},
+
 			// state
-			byString:'',
-			limit:50,
-			loginIdOpen:null,
-			offset:0,
-			orderAsc:true,
-			orderBy:'name',
-			total:0,
-			titles:['name','admin','ldap','oauth','noAuth','limited','active']
+			byString: '',
+			limit: 50,
+			loginIdOpen: null,
+			offset: 0,
+			orderAsc: true,
+			orderBy: 'name',
+			total: 0,
+			titles: ['name', 'admin', 'ldap', 'oauth', 'noAuth', 'limited', 'active']
 		};
 	},
-	computed:{
-		oauthClients:(s) => {
-			let out = [];
-			for(const k in s.oauthClientIdMap) {
+	computed: {
+		oauthClients: s => {
+			const out = [];
+			for (const k in s.oauthClientIdMap) {
 				out.push(s.oauthClientIdMap[k]);
 			}
 			return out;
 		},
-		loginForms:(s) => {
-			let out = [];
-			for(let m of s.modules) {
-				for(let lf of m.loginForms) {
+		loginForms: s => {
+			const out = [];
+			for (const m of s.modules) {
+				for (const lf of m.loginForms) {
 					out.push(lf);
 				}
 			}
 			return out;
 		},
-		loginFormLookups:(s) => {
-			let out = [];
-			for(let lf of s.loginForms) {
+		loginFormLookups: s => {
+			const out = [];
+			for (const lf of s.loginForms) {
 				out.push({
-					attributeIdLogin:lf.attributeIdLogin,
-					attributeIdLookup:lf.attributeIdLookup
+					attributeIdLogin: lf.attributeIdLogin,
+					attributeIdLookup: lf.attributeIdLookup
 				});
 			}
 			return out;
 		},
-		
+
 		// stores
-		modules:(s) => s.$store.getters['schema/modules'],
-		capApp: (s) => s.$store.getters.captions.admin.login,
-		capGen: (s) => s.$store.getters.captions.generic
+		modules: s => s.$store.getters['schema/modules'],
+		capApp: s => s.$store.getters.captions.admin.login,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.get();
 		this.getLdaps();
 		this.getOauthClients();
-		this.$store.commit('pageTitle',this.menuTitle);
+		this.$store.commit('pageTitle', this.menuTitle);
 	},
-	methods:{
+	methods: {
 		// externals
 		getLoginIcon,
 
@@ -177,7 +174,7 @@ export default {
 			this.get();
 		},
 		limitSet(newLimit) {
-			this.limit  = parseInt(newLimit);
+			this.limit = parseInt(newLimit, 10);
 			this.offset = 0;
 			this.get();
 		},
@@ -186,47 +183,47 @@ export default {
 			this.get();
 		},
 		orderBySet(newOrderBy) {
-			if(newOrderBy === 'roles')
+			if (newOrderBy === 'roles')
 				return;
 
-			if(this.orderBy === newOrderBy) {
+			if (this.orderBy === newOrderBy) {
 				this.orderAsc = !this.orderAsc;
 			}
 			else {
-				this.orderBy  = newOrderBy;
+				this.orderBy = newOrderBy;
 				this.orderAsc = true;
 			}
 			this.get();
 		},
-		
+
 		// backend calls
 		get() {
-			ws.send('login','get',{
-				byId:0,
-				byString:this.byString,
-				limit:this.limit,
-				offset:this.offset,
-				orderAsc:['active','admin','limited','noAuth'].includes(this.orderBy) ? !this.orderAsc : this.orderAsc,
-				orderBy:this.orderBy,
-				meta:false,
-				roles:false,
-				recordRequests:this.loginFormLookups
-			},true).then(
+			ws.send('login', 'get', {
+				byId: 0,
+				byString: this.byString,
+				limit: this.limit,
+				offset: this.offset,
+				orderAsc: ['active', 'admin', 'limited', 'noAuth'].includes(this.orderBy) ? !this.orderAsc : this.orderAsc,
+				orderBy: this.orderBy,
+				meta: false,
+				roles: false,
+				recordRequests: this.loginFormLookups
+			}, true).then(
 				res => {
 					this.logins = res.payload.logins;
-					this.total  = res.payload.total;
+					this.total = res.payload.total;
 				},
 				this.$root.genericError
 			);
 		},
 		getLdaps() {
-			ws.send('ldap','get',{},true).then(
+			ws.send('ldap', 'get', {}, true).then(
 				res => this.ldaps = res.payload,
 				this.$root.genericError
 			);
 		},
 		getOauthClients() {
-			ws.send('oauthClient','get',{},true).then(
+			ws.send('oauthClient', 'get', {}, true).then(
 				res => this.oauthClientIdMap = res.payload,
 				this.$root.genericError
 			);

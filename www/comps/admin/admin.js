@@ -131,16 +131,22 @@ export default {
 				<span>{{ capApp.navigationActivation }}</span>
 			</router-link>
 
-			<!-- system message -->
-			<router-link class="entry clickable" tag="div" to="/admin/system-msg" :class="{ inactive:!activated }">
-				<img src="images/warning.png" />
-				<span>{{ capApp.navigationSystemMsg }}</span>
-			</router-link>
-
 			<!-- customizing -->
 			<router-link class="entry clickable" tag="div" to="/admin/custom" :class="{ inactive:!activated }">
 				<img src="images/colors.png" />
 				<span>{{ capApp.navigationCustom }}</span>
+			</router-link>
+
+			<!-- invitation -->
+			<router-link class="entry clickable" tag="div" to="/admin/invitation" :class="{ inactive:!activated }">
+				<img src="images/mailPerson.png" />
+				<span>{{ capApp.navigationInvitation }}</span>
+			</router-link>
+
+			<!-- system message -->
+			<router-link class="entry clickable" tag="div" to="/admin/system-msg" :class="{ inactive:!activated }">
+				<img src="images/warning.png" />
+				<span>{{ capApp.navigationSystemMsg }}</span>
 			</router-link>
 
 			<!-- LDAP -->
@@ -216,6 +222,7 @@ export default {
 			if (s.$route.path.includes('files')) return s.capApp.navigationFiles;
 			if (s.$route.path.includes('geo-fields-assign')) return s.capApp.navigationGeoFieldsAssign;
 			if (s.$route.path.includes('geo-layers-base')) return s.capApp.navigationGeoLayersBase;
+			if (s.$route.path.includes('invitation')) return s.capApp.navigationInvitation;
 			if (s.$route.path.includes('license')) return s.capApp.navigationActivation;
 			if (s.$route.path.includes('logins')) return s.capApp.navigationLogins;
 			if (s.$route.path.includes('login-sessions')) return s.capApp.navigationLoginSessions;

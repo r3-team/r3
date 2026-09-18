@@ -50,7 +50,11 @@ const MyStore = Vuex.createStore({
 				noAuth: 'noAuth',       // login via public access (username only)
 				oauth: 'oauth'          // login via external OAuth provider
 			},
-			mailTemplateContent: {      // known content for mail templates
+			mailAccountMode: {          // known modes for mail accounts
+				imap: 'imap',
+				smtp: 'smtp'
+			},
+			mailTemplateContent: {       // known content for mail templates
 				loginInvitation: 'loginInvitation',
 				loginPwReset: 'loginPwReset'
 			},
@@ -408,21 +412,8 @@ const MyStore = Vuex.createStore({
 			const seconds = s.license.validUntil - Date.now() / 1000;
 			return Math.round(seconds / 60 / 60 / 24);
 		},
-		mailAccountsSmtp: s => {
-			const out = [];
-			for (const k in s.mailAccountIdMap) {
-				if (s.mailAccountIdMap[k].mode === 'smtp')
-					out.push(s.mailAccountIdMap[k]);
-			}
-			out.sort((a, b) => a.name < b.name ? -1 : 1);
-			return out;
-		},
-		mailTemplatesPwReset: s => {
-			const out = [];
-			for (const k in s.mailTemplateIdMap) {
-				if (s.mailTemplateIdMap[k].content === s.constants.mailTemplateContent.loginPwReset)
-					out.push(s.mailTemplateIdMap[k]);
-			}
+		mailAccountsSorted: s => {
+			const out = Object.values(s.mailAccountIdMap);
 			out.sort((a, b) => a.name < b.name ? -1 : 1);
 			return out;
 		},

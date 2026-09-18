@@ -203,6 +203,23 @@
 			"title": "Basisebene \"{NAME}\"",
 			"titleNew": "Neue Basisebene"
 		},
+		"invitation": {
+			"button": {
+				"exec": "Benutzer anlegen & Einladungen versenden"
+			},
+			"csvUpload": "CSV-Datei hochladen",
+			"error": {
+				"csvBadColumnCount": "Spaltenanzahl ist falsch für Zeile {ROW}, Spalten vorhanden: {CNT} ({EXP} erwartet)",
+				"csvMissingMail": "Zeile {ROW} fehlt die E-Mail-Adresse",
+				"csvMissingUser": "Zeile {ROW} fehlt der Benutzername"
+			},
+			"intro": [
+				"Dieses Werkzeug unterstützt bei der Masseneinladung von Benutzern. Benutzerkonten werden von Daten aus einer hochgeladenen CSV-Datei erstellt. Danach werden Einladungs-E-Mails für jeden Benutzer generiert.",
+				"Einladungs-E-Mails werden aus der gewählten E-Mail-Vorlage erzeugt. Um das erstmalige Einrichten eines Passworts zu ermöglichen, sollte der Platzhalter \"{RESET_URL}\" in der E-Mail-Vorlage genutzt werden.",
+				"Falls Multi-Faktor-Authentifizierung (MFA) aktiviert ist, werden Benutzer zum Einrichten von MFA gezwungen, nachdem sie ein Passwort gewählt haben.",
+				"Dieses Werkzeug unterstützt nur das Anlegen von Benutzern im lokalen Benutzer-Backend. Falls externe Backends genutzt werden, wie LDAP oder OpenID-Anbieter, müssen Benutzer dort angelegt werden."
+			]
+		},
 		"ldaps": {
 			"assignRoles": "Rollen nach Gruppenmitgliedschaft setzen<br />(deaktiviert manuelle Rollenzuweisung)",
 			"bindUserDn": "Benutzer-DN für Verbindung",
@@ -520,6 +537,7 @@
 		"navigationFiles": "Dateien",
 		"navigationGeoFieldsAssign": "Geodaten: Karten konfigurieren",
 		"navigationGeoLayersBase": "Geodaten: Basisebenen",
+		"navigationInvitation": "Massenbenutzereinladung",
 		"navigationLdaps": "LDAP-Konnektoren",
 		"navigationLicense": "Professional",
 		"navigationLoginSessions": "Benutzersitzungen",

@@ -1,8 +1,6 @@
-export {MyAdminLoginMeta as default};
-
-let MyAdminLoginMeta = {
-	name:'my-admin-login-meta',
-	template:`<table class="generic-table-vertical default-inputs noRowBorders admin-login-meta">
+export default {
+	name: 'my-admin-login-meta',
+	template: `<table class="generic-table-vertical default-inputs noRowBorders admin-login-meta">
 		<tbody>
 			<tr>
 				<td class="minimum">
@@ -128,26 +126,26 @@ let MyAdminLoginMeta = {
 			</tr>
 		</tbody>
 	</table>`,
-	props:{
-		isMapper:      { type:Boolean, required:false, default:false },
-		modelValue:    { type:Object,  required:true },
-		notUniqueEmail:{ type:Boolean, required:false, default:false },
-		readonly:      { type:Boolean, required:true }
+	props: {
+		isMapper: { type: Boolean, required: false, default: false },
+		modelValue: { type: Object, required: true },
+		notUniqueEmail: { type: Boolean, required: false, default: false },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['input-in-unique-field','update:modelValue'],
+	emits: ['input-in-unique-field', 'update:modelValue'],
 	data() {
 		return {
-			inputKeys:[
-				'department','email','location','nameDisplay','nameFore','nameSur',
-				'notes','organization','phoneFax','phoneLandline','phoneMobile'
+			inputKeys: [
+				'department', 'email', 'location', 'nameDisplay', 'nameFore', 'nameSur',
+				'notes', 'organization', 'phoneFax', 'phoneLandline', 'phoneMobile'
 			]
 		};
 	},
-	computed:{
-		inputs:{
+	computed: {
+		inputs: {
 			get() {
-				let obj = {};
-				for(const k of this.inputKeys) {
+				const obj = {};
+				for (const k of this.inputKeys) {
 					obj[k] = this.modelValue[k] !== undefined ? this.modelValue[k] : '';
 				}
 				return obj;
@@ -155,14 +153,14 @@ let MyAdminLoginMeta = {
 		},
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.admin.loginMeta,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.admin.loginMeta,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
-		set(name,value) {
+	methods: {
+		set(name, value) {
 			const v = JSON.parse(JSON.stringify(this.inputs));
 			v[name] = value;
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		}
 	}
 };

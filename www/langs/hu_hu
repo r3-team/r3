@@ -203,6 +203,23 @@
 			"title": "Base layer '{NAME}'",
 			"titleNew": "New base layer"
 		},
+		"invitation": {
+			"button": {
+				"exec": "Create users & send invites"
+			},
+			"csvUpload": "Upload CSV data",
+			"error": {
+				"csvBadColumnCount": "Column count for row {ROW} is wrong, columns found: {CNT} ({EXP} expected)",
+				"csvMissingMail": "Row {ROW} is missing email address",
+				"csvMissingUser": "Row {ROW} is missing username"
+			},
+			"intro": [
+				"This tool supports mass invitation of new users. By providing a CSV file with user data, accounts will be created in the local user backend. Afterwards, invitation emails are generated for each user.",
+				"Invitation emails are generated from the chosen email template. To allow for initial password setup, make sure the placeholder '{RESET_URL}' is included in the email template.",
+				"If multi-factor authentication (MFA) is enabled, users will be forced to setup MFA after setting a password.",
+				"This tool only supports user creation in the local user backend. If external user backends are used, like LDAP or an OpenID provider, users must be created there instead."
+			]
+		},
 		"ldaps": {
 			"assignRoles": "Szerepek hozzárendelése csoporttagság alapján<br />(letiltja a kézi szerephozzárendelést)",
 			"bindUserDn": "Felhasználó DN kötéshez",
@@ -520,6 +537,7 @@
 		"navigationFiles": "Fájlok",
 		"navigationGeoFieldsAssign": "Geo data: Configure maps",
 		"navigationGeoLayersBase": "Geo data: Base layers",
+		"navigationInvitation": "Mass user invitation",
 		"navigationLdaps": "LDAP-Connectors",
 		"navigationLicense": "Professional",
 		"navigationLoginSessions": "User sessions",
