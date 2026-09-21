@@ -847,7 +847,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER INDEX ind_mail_traffic_date                 RENAME TO ind_traffic_date;
 			ALTER INDEX ind_mail_traffic_outgoing             RENAME TO ind_traffic_outgoing;
 
-			-- default mail templates for PW reset
+			-- default mail templates for login PW reset & invitation
 			INSERT INTO instance_mail.template (content, name, subject, body)
 			VALUES (
 				'loginPwReset', 'Default EN', 'REI3 - Password reset',
@@ -855,6 +855,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			),(
 				'loginPwReset', 'Default DE', 'REI3 - Passwort zurücksetzen',
 				'<p>Hallo {DISPLAYNAME},</p><p>Sie erhalten diese Nachricht, weil ein Administrator für Ihren Benutzer "<b>{USERNAME}</b>" das Zurücksetzen vom Passwort gestartet hat.</p><p>Um Ihr Passwort zurückzusetzen, verwenden Sie bitte den folgenden <b><a href="/{RESET_URL}">Link</a></b>.</p><p>Dieser Link wird gültig sein bis: <b>{CODE_VALID_UNTIL}</b></p>'
+			);
+
+			INSERT INTO instance_mail.template (content, name, subject, body)
+			VALUES (
+				'loginInvitation', 'Default EN', 'REI3 - Your new user',
+				'<p>Hello {DISPLAYNAME},</p><p>You are receiving this message, because the user ''<b>{USERNAME}</b>'' was created for you.</p><p>Please use this <a href="/{RESET_URL}">link</a> to choose your credentials.</p><p>This reset link will be valid until: <b>{CODE_VALID_UNTIL}</b></p>'
+			),(
+				'loginInvitation', 'Default DE', 'REI3 - Ihr neuer Benutzer',
+				'<p>Hallo {DISPLAYNAME},</p><p>Sie erhalten diese Nachricht, weil für Sie der Benutzer "<b>{USERNAME}</b>" angelegt worden ist.</p><p>Bitte verwenden Sie diesen <a href="/{RESET_URL}">Link</a>, um Ihre Zugangsdaten zu wählen.</p><p>Dieser Link wird gültig sein bis: <b>{CODE_VALID_UNTIL}</b></p>'
 			);
 		`)
 		return "3.13", err
