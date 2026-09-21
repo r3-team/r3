@@ -108,6 +108,7 @@ const MyStore = Vuex.createStore({
 		loginPwResetCode: null,         // user login PW reset code, if not null, PW reset is requred
 		loginSessionExpired: false,     // set to true, when session expires
 		loginSessionExpires: null,      // unix timestamp of session expiration date
+		loginTemplates: [],             // login templates (admin only)
 		loginType: null,                // user login type (local, oauth, ldap, noAuth, fixed)
 		loginWidgetGroups: [],          // user widgets, starting with widget groups
 		mailAccountIdMap: {},           // map of mail accounts by ID (admin only)
@@ -326,6 +327,7 @@ const MyStore = Vuex.createStore({
 		loginPublicKey: (s, p) => s.loginPublicKey = p,
 		loginSessionExpired: (s, p) => s.loginSessionExpired = p,
 		loginSessionExpires: (s, p) => s.loginSessionExpires = p,
+		loginTemplates: (s, p) => s.loginTemplates = p,
 		loginWidgetGroups: (s, p) => s.loginWidgetGroups = p,
 		mailAccountIdMap: (s, p) => s.mailAccountIdMap = p,
 		mailSpoolerStuckIn: (s, p) => s.mailSpoolerStuckIn = p,
@@ -532,6 +534,7 @@ const MyStore = Vuex.createStore({
 		loginPublicKey: s => s.loginPublicKey,
 		loginSessionExpired: s => s.loginSessionExpired,
 		loginSessionExpires: s => s.loginSessionExpires,
+		loginTemplates: s => s.loginTemplates,
 		loginWidgetGroups: s => s.loginWidgetGroups,
 		mailAccountIdMap: s => s.mailAccountIdMap,
 		mailSpoolerStuckIn: s => s.mailSpoolerStuckIn,

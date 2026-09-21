@@ -27,7 +27,6 @@ export default {
 		constants: s => s.$store.getters.constants.mailAccountMode,
 	},
 	mounted() {
-		console.log();
 		if (this.accounts.length === 0) {
 			ws.send('mailAccount', 'get', {}, true).then(
 				res => this.$store.commit('mailAccountIdMap', res.payload),

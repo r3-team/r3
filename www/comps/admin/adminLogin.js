@@ -10,6 +10,7 @@ import srcBase64Icon from '../shared/image.js';
 import { getCaption } from '../shared/language.js';
 
 import MyAdminLoginMeta from './adminLoginMeta.js';
+import MyAdminLoginTemplateInput from './adminLoginTemplateInput.js';
 import MyAdminMailAccountInput from './adminMailAccountInput.js';
 import MyAdminMailTemplateInput from './adminMailTemplateInput.js';
 
@@ -43,7 +44,7 @@ const MyAdminLoginRole = {
 export default {
 	name: 'my-admin-login',
 	components: {
-		MyAdminLoginMeta, MyAdminLoginRole, MyAdminMailAccountInput,
+		MyAdminLoginMeta, MyAdminLoginRole, MyAdminLoginTemplateInput, MyAdminMailAccountInput,
 		MyAdminMailTemplateInput, MyForm, MyInputDecimal, MyInputSelect
 	},
 	template: `<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
@@ -138,11 +139,7 @@ export default {
 									</div>
 								</td>
 								<td class="default-inputs">
-									<select v-model="templateId">
-										<option v-for="t in templates" :title="t.comment" :value="t.id">
-											{{ t.name }}
-										</option>
-									</select>
+									<my-admin-login-template-input v-model="templateId" />
 								</td>
 								<td>{{ capGen.loginTemplateHint }}</td>
 							</tr>
@@ -475,8 +472,7 @@ export default {
 			recordList: [],     // record lookup dropdown values
 			roleFilter: '',     // filter for role selection
 			tabTarget: 'meta',
-			templates: [],      // login templates
-			templateId: null,   // login template, selected
+			templateId: null,   // login template for new login
 			timerNotUniqueCheck: null,
 
 			// login form
@@ -643,7 +639,6 @@ export default {
 			this.notUniqueEmail = false;
 			this.notUniqueName = false;
 			this.ready = true;
-			this.getTemplates();
 		},
 		toggleRoleId(roleId) {
 			const pos = this.inputs.roleIds.indexOf(roleId);
@@ -751,18 +746,6 @@ export default {
 					}
 					if (res.payload.length === 1)
 						this.inputs.records[loginFormIndex].label = res.payload[0].name;
-				},
-				this.$root.genericError
-			);
-		},
-		getTemplates() {
-			ws.send('loginTemplate', 'get', { byId: 0 }, true).then(
-				res => {
-					this.templates = res.payload;
-
-					// apply global template if empty
-					if (this.templateId === null && this.templates.length > 0)
-						this.templateId = this.templates[0].id;
 				},
 				this.$root.genericError
 			);

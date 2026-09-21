@@ -1,14 +1,11 @@
 import MyInputColorWrap from '../inputColorWrap.js';
-import MyInputDecimal   from '../inputDecimal.js';
-import {
-	dialogCloseAsk,
-	dialogDeleteAsk
-} from '../shared/dialog.js';
+import MyInputDecimal from '../inputDecimal.js';
+import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
 
 export default {
-	name:'my-admin-login-template',
-	components:{ MyInputColorWrap, MyInputDecimal },
-	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
+	name: 'my-admin-login-template',
+	components: { MyInputColorWrap, MyInputDecimal },
+	template: `<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 
 		<div class="contentBox admin-login-template float" v-if="inputsReady">
 			<div class="top">
@@ -294,40 +291,40 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		templateId:{ type:Number, required:true }
+	props: {
+		templateId: { type: Number, required: true }
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
 			// inputs
-			id:0,
-			name:'',
-			comment:'',
-			settings:{},
+			id: 0,
+			name: '',
+			comment: '',
+			settings: {},
 
 			// states
-			inputKeys:['name','comment','settings'],
-			inputsOrg:{},     // map of original input values, key = input key
-			inputsReady:false // inputs have been loaded
+			inputKeys: ['name', 'comment', 'settings'],
+			inputsOrg: {},     // map of original input values, key = input key
+			inputsReady: false // inputs have been loaded
 		};
 	},
-	computed:{
-		hasChanges:s => {
-			if(!s.inputsReady)
+	computed: {
+		hasChanges: s => {
+			if (!s.inputsReady)
 				return false;
 
-			for(let k of s.inputKeys) {
-				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s[k]))
+			for (const k of s.inputKeys) {
+				if (JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s[k]))
 					return true;
 			}
 			return false;
 		},
-		languageCodesModulesAndCustom:s => {
-			let langs = s.languageCodesModules;
-			for(const k in s.moduleIdMapMeta) {
-				for(const l of s.moduleIdMapMeta[k].languagesCustom) {
-					if(!langs.includes(l) && !s.languageCodesOfficial.includes(l))
+		languageCodesModulesAndCustom: s => {
+			const langs = s.languageCodesModules;
+			for (const k in s.moduleIdMapMeta) {
+				for (const l of s.moduleIdMapMeta[k].languagesCustom) {
+					if (!langs.includes(l) && !s.languageCodesOfficial.includes(l))
 						langs.push(l);
 				}
 			}
@@ -336,81 +333,81 @@ export default {
 
 		// simple states
 		canSave: s => s.hasChanges && s.name !== '',
-		isGlobal:s => s.name === 'GLOBAL',
-		isNew:   s => s.id === 0,
+		isGlobal: s => s.name === 'GLOBAL',
+		isNew: s => s.id === 0,
 
 		// stores
-		languageCodes:        s => s.$store.getters['schema/languageCodes'],
+		languageCodes: s => s.$store.getters['schema/languageCodes'],
 		languageCodesModules: s => s.$store.getters['schema/languageCodesModules'],
-		capApp:               s => s.$store.getters.captions.admin.loginTemplate,
-		capAppSet:            s => s.$store.getters.captions.settings,
-		capGen:               s => s.$store.getters.captions.generic,
-		languageCodesOfficial:s => s.$store.getters.constants.languageCodesOfficial,
-		moduleIdMapMeta:      s => s.$store.getters.moduleIdMapMeta,
+		capApp: s => s.$store.getters.captions.admin.loginTemplate,
+		capAppSet: s => s.$store.getters.captions.settings,
+		capGen: s => s.$store.getters.captions.generic,
+		languageCodesOfficial: s => s.$store.getters.constants.languageCodesOfficial,
+		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta,
 	},
 	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 		this.id = this.templateId;
 
-		if(this.id !== 0)
+		if (this.id !== 0)
 			return this.get();
 
 		// new template, apply defaults
 		this.settings = {
-			boolAsIcon:true,
-			boolAsToggle:true,
+			boolAsIcon: true,
+			boolAsToggle: true,
 			bordersSquared: false,
 			collapseRemember: true,
-			colorClassicMode:false,
-			colorHeader:null,
-			colorHeaderSingle:false,
-			colorMenu:null,
-			dark:false,
-			dateFormat:'Y-m-d',
-			fontFamily:'helvetica',
-			fontSize:100,
-			formActionsAlign:'center',
-			headerModules:true,
-			headerCaptions:true,
-			hintUpdateVersion:0,
-			languageCode:'en_us',
-			listColored:false,
+			colorClassicMode: false,
+			colorHeader: null,
+			colorHeaderSingle: false,
+			colorMenu: null,
+			dark: false,
+			dateFormat: 'Y-m-d',
+			fontFamily: 'helvetica',
+			fontSize: 100,
+			formActionsAlign: 'center',
+			headerModules: true,
+			headerCaptions: true,
+			hintUpdateVersion: 0,
+			languageCode: 'en_us',
+			listColored: false,
 			listSpaced: true,
 			mailSpoolerStuckSec: 3600,
-			mobileScrollForm:true,
-			numberSepDecimal:'.',
-			numberSepThousand:',',
-			pattern:'bubbles',
-			shadowsInputs:false,
-			spacing:3,
-			sundayFirstDow:true,
-			tabRemember:true,
-			warnUnsaved:true
+			mobileScrollForm: true,
+			numberSepDecimal: '.',
+			numberSepThousand: ',',
+			pattern: 'bubbles',
+			shadowsInputs: false,
+			spacing: 3,
+			sundayFirstDow: true,
+			tabRemember: true,
+			warnUnsaved: true
 		};
 		this.inputsLoaded();
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		dialogCloseAsk,
 		dialogDeleteAsk,
 
 		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's') {
-				if(this.canSave)
+			if (e.ctrlKey && e.key === 's') {
+				if (this.canSave)
 					this.set();
 
 				e.preventDefault();
 			}
-			if(e.key === 'Escape') {
+			if (e.key === 'Escape') {
 				this.closeAsk();
 				e.preventDefault();
 			}
 		},
 		inputsLoaded() {
-			for(let k of this.inputKeys) {
+			for (const k of this.inputKeys) {
 				this.inputsOrg[k] = JSON.parse(JSON.stringify(this[k]));
 			}
 			this.inputsReady = true;
@@ -418,7 +415,7 @@ export default {
 
 		// actions
 		closeAsk() {
-			this.dialogCloseAsk(this.close,this.hasChanges);
+			this.dialogCloseAsk(this.close, this.hasChanges);
 		},
 		close() {
 			this.$emit('close');
@@ -426,18 +423,18 @@ export default {
 
 		// backend calls
 		del() {
-			ws.send('loginTemplate','del',{id:this.id},true).then(
+			ws.send('loginTemplate', 'del', { id: this.id }, true).then(
 				() => this.$emit('close'), this.$root.genericError
 			);
 		},
 		get() {
-			ws.send('loginTemplate','get',{byId:this.id},true).then(
+			ws.send('loginTemplate', 'get', { byId: this.id }, true).then(
 				res => {
-					if(res.payload.length !== 1) return;
+					if (res.payload.length !== 1) return;
 
-					let template = res.payload[0];
-					this.name     = template.name;
-					this.comment  = template.comment;
+					const template = res.payload[0];
+					this.name = template.name;
+					this.comment = template.comment;
 					this.settings = template.settings;
 					this.inputsLoaded();
 				},
@@ -445,14 +442,14 @@ export default {
 			);
 		},
 		set() {
-			ws.send('loginTemplate','set',{
-				id:this.id,
-				name:this.name,
-				comment:this.comment === '' ? null : this.comment,
-				settings:this.settings
-			},true).then(
+			ws.send('loginTemplate', 'set', {
+				id: this.id,
+				name: this.name,
+				comment: this.comment === '' ? null : this.comment,
+				settings: this.settings
+			}, true).then(
 				res => {
-					if(this.isNew)
+					if (this.isNew)
 						this.id = res.payload;
 
 					this.get();

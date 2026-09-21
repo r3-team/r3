@@ -1,10 +1,12 @@
+import MyInputDecimal from '../inputDecimal.js';
 import { jsLibraryLoadNoCache } from '../shared/jsLibrary.js';
+import MyAdminLoginTemplateInput from './adminLoginTemplateInput.js';
 import MyAdminMailAccountInput from './adminMailAccountInput.js';
 import MyAdminMailTemplateInput from './adminMailTemplateInput.js';
 
 export default {
 	name: 'my-admin-invitation',
-	components: { MyAdminMailAccountInput, MyAdminMailTemplateInput },
+	components: { MyAdminLoginTemplateInput, MyAdminMailAccountInput, MyAdminMailTemplateInput, MyInputDecimal },
 	template: `<div class="admin-invitation contentBox grow">
 		<div class="top">
 			<div class="area">
@@ -26,7 +28,7 @@ export default {
 					<tr>
 						<td>
 							<div class="column gap">
-								<my-label :caption="capApp.csvUpload" />
+								<my-label :caption="capApp.csvUpload" image="upload.png" />
 								<input type="file"
 									@change="fileUploaded"
 									:disabled="!activated"
@@ -37,7 +39,7 @@ export default {
 					<tr v-if="csvRowsPreview.length !== 0">
 						<td>
 							<div class="column gap">
-								<my-label :caption="capGen.preview" />
+								<my-label :caption="capGen.preview" image="visible1.png" />
 								<table class="admin-invitation-preview-table">
 									<thead>
 										<tr>
@@ -60,25 +62,45 @@ export default {
 					</tr>
 					<tr>
 						<td>
-							<div class="row gap centered">
-								<my-label :caption="capGen.mailTemplate" />
-								<my-admin-mail-template-input
-									v-model="mailTemplateId"
-									:onlyInvitation="true"
-									:readonly="!activated"
-								/>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<div class="row gap centered">
-								<my-label :caption="capGen.mailAccount" />
-								<my-admin-mail-account-input
-									v-model="mailAccountId"
-									:onlySend="true"
-									:readonly="!activated"
-								/>
+							<div class="column gap">
+								<my-label :caption="capGen.settings" image="cog.png" />
+								<table>
+									<tbody>
+										<tr>
+											<td>{{ capGen.loginTemplate }}</td>
+											<td><my-admin-login-template-input v-model="loginTemplateId" :readonly="!activated" /></td>
+										</tr>
+										<tr>
+											<td>{{ capGen.mailTemplate }}</td>
+											<td>
+												<my-admin-mail-template-input
+													v-model="mailTemplateId"
+													:onlyInvitation="true"
+													:readonly="!activated"
+												/>
+											</td>
+										</tr>
+										<tr>
+											<td>{{ capGen.mailAccount }}</td>
+											<td>
+												<my-admin-mail-account-input
+													v-model="mailAccountId"
+													:onlySend="true"
+													:readonly="!activated"
+												/>
+											</td>
+										</tr>
+										<tr>
+											<td>{{ capGen.expireAfter }}</td>
+											<td>
+												<div class="row gap centered">
+													<my-input-decimal class="short" v-model="expireAfterSeconds" :min="0" :allowNull="false" :lengthFract="0" />
+													<my-label :caption="capGen.seconds" />
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
 							</div>
 						</td>
 					</tr>
@@ -128,7 +150,7 @@ export default {
 			}
 			return out;
 		},
-		isReadyToExec: s => s.mailAccountId !== 0 && s.mailTemplateId !== 0
+		isReadyToExec: s => s.loginTemplateId !== null && s.mailAccountId !== 0 && s.mailTemplateId !== 0
 			&& s.csvRows.length !== 0 && s.errorMessages.length === 0,
 
 		// stores
@@ -143,8 +165,12 @@ export default {
 			csvRows: [],
 
 			// inputs
+			expireAfterSeconds: 86400,
+			loginTemplateId: null,
 			mailAccountId: 0,
 			mailTemplateId: 0,
+			mfaRequired: null,
+			roleIds: [],
 
 			// states
 			isReady: false
@@ -185,6 +211,43 @@ export default {
 		},
 		showHelp(msg) {
 			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });
+		},
+
+		// backend calls
+		invite() {
+			const logins = [];
+			for (const r of this.csvRows) {
+				logins.push({
+					name: r[0],
+					meta: {
+						email: r[1],
+						nameFore: r[2],
+						nameSur: r[3],
+						nameDisplay: r[4],
+						organization: r[5],
+						location: r[6],
+						department: r[7],
+						phoneMobile: r[8],
+						phoneLandline: r[9],
+						phoneFax: r[10],
+						notes: r[11],
+					}
+				});
+			}
+
+			ws.send('loginInvitation', 'set', {
+				expireAfterSeconds: this.expireAfterSeconds,
+				logins,
+				loginTemplateId: this.loginTemplateId,
+				mailAccountId: this.mailAccountId,
+				mailTemplateId: this.mailTemplateId,
+				mfaRequired: this.mfaRequired,
+				roleIds: this.roleIds
+			}, true).then(
+				res => {
+				},
+				this.$root.genericError
+			);
 		}
 	}
 };

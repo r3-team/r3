@@ -495,6 +495,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return nil, request_login.FormSet_tx(ctx, tx, reqJson)
 		}
+	case "loginInvitation":
+		switch action {
+		case "set":
+			return request_login.SetWithIntivation_tx(ctx, tx, reqJson)
+		}
 	case "loginRepoCred":
 		switch action {
 		case "del":
