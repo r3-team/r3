@@ -1,13 +1,17 @@
 import MyInputDecimal from '../inputDecimal.js';
 import { openTextFile } from '../shared/generic.js';
 import { jsLibraryLoadNoCache } from '../shared/jsLibrary.js';
+import MyAdminLoginRoles from './adminLoginRoles.js';
 import MyAdminLoginTemplateInput from './adminLoginTemplateInput.js';
 import MyAdminMailAccountInput from './adminMailAccountInput.js';
 import MyAdminMailTemplateInput from './adminMailTemplateInput.js';
 
 export default {
 	name: 'my-admin-invitation',
-	components: { MyAdminLoginTemplateInput, MyAdminMailAccountInput, MyAdminMailTemplateInput, MyInputDecimal },
+	components: {
+		MyAdminLoginRoles, MyAdminLoginTemplateInput, MyAdminMailAccountInput,
+		MyAdminMailTemplateInput, MyInputDecimal
+	},
 	template: `<div class="admin-invitation contentBox grow">
 		<div class="top">
 			<div class="area">
@@ -120,6 +124,22 @@ export default {
 										</tr>
 									</tbody>
 								</table>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="column gap">
+								<my-label :caption="capGen.roles + ' (' + roleIds.length + ')'" image="admin.png" />
+								<div class="admin-invitation-roles-table">
+									<my-admin-login-roles
+										v-model="roleIds"
+										:isExtRole="false"
+										:isLdapAssignedRoles="false"
+										:isOauthClientAssignedRoles="false"
+										:readonly="!activated"
+									/>
+								</div>
 							</div>
 						</td>
 					</tr>

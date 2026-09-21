@@ -10,41 +10,15 @@ import srcBase64Icon from '../shared/image.js';
 import { getCaption } from '../shared/language.js';
 
 import MyAdminLoginMeta from './adminLoginMeta.js';
+import MyAdminLoginRoles from './adminLoginRoles.js';
 import MyAdminLoginTemplateInput from './adminLoginTemplateInput.js';
 import MyAdminMailAccountInput from './adminMailAccountInput.js';
 import MyAdminMailTemplateInput from './adminMailTemplateInput.js';
 
-const MyAdminLoginRole = {
-	name: 'my-admin-login-role',
-	template: `<td class="minimum role-content">
-		<div class="row wrap gap">
-			<my-button
-				v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
-				@trigger="$emit('toggle',r.id)"
-				:active="!readonly"
-				:caption="getCaption('roleTitle',module.id,r.id,r.captions,r.name)"
-				:captionTitle="getCaption('roleDesc',module.id,r.id,r.captions)"
-				:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
-				:naked="true"
-			/>
-		</div>
-	</td>`,
-	props: {
-		content: { type: String, required: true }, // role content to filter by
-		module: { type: Object, required: true }, // current module
-		readonly: { type: Boolean, required: true },
-		roleIds: { type: Array, required: true }  // already enabled roles by ID
-	},
-	emits: ['toggle'],
-	methods: {
-		getCaption
-	}
-};
-
 export default {
 	name: 'my-admin-login',
 	components: {
-		MyAdminLoginMeta, MyAdminLoginRole, MyAdminLoginTemplateInput, MyAdminMailAccountInput,
+		MyAdminLoginMeta, MyAdminLoginRoles, MyAdminLoginTemplateInput, MyAdminMailAccountInput,
 		MyAdminMailTemplateInput, MyForm, MyInputDecimal, MyInputSelect
 	},
 	template: `<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
@@ -205,51 +179,13 @@ export default {
 						</template>
 
 						<!-- roles -->
-						<table class="generic-table sticky-top bright" v-if="tabTarget === 'roles'">
-							<thead>
-								<tr v-if="isLdapAssignedRoles">
-									<th colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
-								</tr>
-								<tr v-if="isOauthClientAssignedRoles">
-									<th colspan="4"><b>{{ capApp.oauthAssignActive }}</b></th>
-								</tr>
-								<tr>
-									<th class="minimum">
-										<div class="row centered gap space-between default-inputs">
-											<span>{{ capGen.application }}</span>
-											<input class="short" placeholder="..." v-model="roleFilter" :title="capGen.button.filter" />
-										</div>
-									</th>
-									<th><my-button image="ok.png" @trigger="toggleRolesByContent('admin')" :active="!isExtRole" :caption="capApp.roleContentAdmin" :naked="true" /></th>
-									<th><my-button image="ok.png" @trigger="toggleRolesByContent('user')"  :active="!isExtRole" :caption="capApp.roleContentUser"  :naked="true" /></th>
-									<th><my-button image="ok.png" @trigger="toggleRolesByContent('other')" :active="!isExtRole" :caption="capApp.roleContentOther" :naked="true" /></th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr
-									v-for="m in modulesFiltered"
-									:class="{ grouping:m.parentId === null }"
-									:key="m.id"
-								>
-									<td class="minimum">
-										<div class="row centered">
-											<my-button image="dash.png"
-												v-if="m.parentId !== null"
-												:active="false"
-												:naked="true"
-											/>
-											<img class="module-icon" :src="srcBase64Icon(m.iconId,'images/module.png')" />
-											<span>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
-										</div>
-									</td>
-
-									<!-- roles to toggle -->
-									<my-admin-login-role content="admin" @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="inputs.roleIds" />
-									<my-admin-login-role content="user"  @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="inputs.roleIds" />
-									<my-admin-login-role content="other" @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="inputs.roleIds" />
-								</tr>
-							</tbody>
-						</table>
+						<my-admin-login-roles
+							v-if="tabTarget === 'roles'"
+							v-model="inputs.roleIds"
+							:isExtRole
+							:isLdapAssignedRoles
+							:isOauthClientAssignedRoles
+						/>
 
 						<!-- properties -->
 						<table class="generic-table-vertical w1200" v-if="tabTarget === 'properties'">
@@ -470,7 +406,6 @@ export default {
 			ready: false,
 			recordInput: '',    // record lookup input
 			recordList: [],     // record lookup dropdown values
-			roleFilter: '',     // filter for role selection
 			tabTarget: 'meta',
 			templateId: null,   // login template for new login
 			timerNotUniqueCheck: null,
@@ -490,8 +425,6 @@ export default {
 		};
 	},
 	computed: {
-		modulesFiltered: s => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
-			(s.roleFilter === '' || s.getCaption('moduleTitle', v.id, v.id, v.captions, v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		roleTotalNonHidden: s => {
 			let cnt = 0;
 			for (const roleId of s.inputs.roleIds) {
@@ -639,36 +572,6 @@ export default {
 			this.notUniqueEmail = false;
 			this.notUniqueName = false;
 			this.ready = true;
-		},
-		toggleRoleId(roleId) {
-			const pos = this.inputs.roleIds.indexOf(roleId);
-			if (pos === -1) this.inputs.roleIds.push(roleId);
-			else this.inputs.roleIds.splice(pos, 1);
-		},
-		toggleRolesByContent(content) {
-			const roleIdsByContent = [];
-			for (let i = 0, j = this.modules.length; i < j; i++) {
-				for (let x = 0, y = this.modules[i].roles.length; x < y; x++) {
-					const r = this.modules[i].roles[x];
-
-					if (r.assignable && r.content === content)
-						roleIdsByContent.push(r.id);
-				}
-			}
-
-			// has all roles, remove all
-			if (roleIdsByContent.length === this.inputs.roleIds.filter(v => roleIdsByContent.includes(v)).length) {
-				for (let i = 0, j = roleIdsByContent.length; i < j; i++) {
-					this.inputs.roleIds.splice(this.inputs.roleIds.indexOf(roleIdsByContent[i]), 1);
-				}
-				return;
-			}
-
-			// does not have all roles, add missing
-			for (let i = 0, j = roleIdsByContent.length; i < j; i++) {
-				if (!this.inputs.roleIds.includes(roleIdsByContent[i]))
-					this.inputs.roleIds.push(roleIdsByContent[i]);
-			}
 		},
 		typedUniqueField(content, value) {
 			clearInterval(this.timerNotUniqueCheck);

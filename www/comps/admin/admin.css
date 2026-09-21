@@ -40,6 +40,14 @@
 	text-decoration: underline;
 	text-wrap: nowrap;
 }
+.admin-invitation-roles-table {
+	width: 100%;
+	max-height: 500px;
+	overflow: auto;
+	background-color: var(--color-input);
+	border: var(--border-input);
+	border-radius: var(--border-input-radius);
+}
 
 /* DB sync */
 .admin-db-sync-host {

@@ -1,10 +1,9 @@
-import {hasAnyAssignableRole} from '../shared/access.js';
-import {getCaption}           from '../shared/language.js';
-export {MyAdminLoginRolesAssign as default};
+import { hasAnyAssignableRole } from '../shared/access.js';
+import { getCaption } from '../shared/language.js';
 
-const MyAdminLoginRolesAssign = {
-	name:'my-admin-login-roles-assign',
-	template:`<div class="column gap">
+export default {
+	name: 'my-admin-login-roles-assign',
+	template: `<div class="column gap">
 		<table v-if="modelValue.length !== 0">
 			<thead>
 				<tr>
@@ -59,37 +58,37 @@ const MyAdminLoginRolesAssign = {
 			/>
 		</div>
 	</div>`,
-	props:{
-		modelValue: { type:Array,   required:true },
-		placeholder:{ type:String,  required:false, default:'' },
-		readonly:   { type:Boolean, required:true }
+	props: {
+		modelValue: { type: Array, required: true },
+		placeholder: { type: String, required: false, default: '' },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
+	emits: ['update:modelValue'],
+	computed: {
 		// stores
-		modules:(s) => s.$store.getters['schema/modules'],
-		capGen: (s) => s.$store.getters.captions.generic
+		modules: s => s.$store.getters['schema/modules'],
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
 		hasAnyAssignableRole,
 
 		// actions
 		add() {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
-			v.push({roleId:null,searchString:''});
-			this.$emit('update:modelValue',v);
+			const v = JSON.parse(JSON.stringify(this.modelValue));
+			v.push({ roleId: null, searchString: '' });
+			this.$emit('update:modelValue', v);
 		},
 		remove(i) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
-			v.splice(i,1);
-			this.$emit('update:modelValue',v);
+			const v = JSON.parse(JSON.stringify(this.modelValue));
+			v.splice(i, 1);
+			this.$emit('update:modelValue', v);
 		},
-		set(i,name,id) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+		set(i, name, id) {
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v[i][name] = id;
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		}
 	}
 };
