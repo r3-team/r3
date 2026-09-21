@@ -1,4 +1,5 @@
 import MyInputDecimal from '../inputDecimal.js';
+import { openTextFile } from '../shared/generic.js';
 import { jsLibraryLoadNoCache } from '../shared/jsLibrary.js';
 import MyAdminLoginTemplateInput from './adminLoginTemplateInput.js';
 import MyAdminMailAccountInput from './adminMailAccountInput.js';
@@ -16,6 +17,10 @@ export default {
 		</div>
 		<div class="top lower">
 			<div class="area">
+				<my-button image="download.png"
+					@trigger="fileTemplateLoad"
+					:caption="capGen.template"
+				/>
 				<my-button image="question.png"
 					@trigger="showHelp('<p>' + capApp.intro.join('</p><p>') + '</p>')"
 					:caption="capGen.information"
@@ -109,6 +114,10 @@ export default {
 												</select>
 											</td>
 										</tr>
+										<tr>
+											<td>{{ capGen.separator }}</td>
+											<td><input class="short" maxlength="1" v-model="csvSeparator" :disabled="!activated" /></td>
+										</tr>
 									</tbody>
 								</table>
 							</div>
@@ -181,6 +190,7 @@ export default {
 			csvRows: [],
 
 			// inputs
+			csvSeparator: ',',
 			expireAfterSeconds: 86400,
 			loginTemplateId: null,
 			mailAccountId: 0,
@@ -201,6 +211,12 @@ export default {
 	},
 	methods: {
 		// actions
+		fileTemplateLoad() {
+			const header = this.csvHeaders.join(this.csvSeparator);
+			const line1 = ['h.testuser', 'h-testuser@testorg.com', 'Hans', 'Testuser', 'Hans Testuser', 'Testorg Inc.', 'Headerquarters', 'Sales', '+49 172 390 7321', '', '', ''].join(this.csvSeparator);
+			const line2 = ['m.otheruser', 'm-otheruser@testorg.com', 'Maria', 'Otheruser', 'Maria Otheruser', 'Testorg Inc.', 'Headerquarters', 'Quality Assurance', '', '+49 89 231 3392', '', 'Test user'].join(this.csvSeparator);
+			openTextFile(`${header}\n${line1}\n${line2}\n`, 'user_invitation_example.csv');
+		},
 		fileUploaded(e) {
 			if (e.target.files.length !== 1)
 				return;
@@ -211,14 +227,18 @@ export default {
 			file.text().then(
 				csvContent => {
 					const parsed = Papa.parse(csvContent, {
-						delimiter: "",	// auto-detect
-						newline: "",	// auto-detect
+						delimiter: this.csvSeparator,
+						escapeChar: '"',
+						newline: '', // auto-detect
 						quoteChar: '"',
-						escapeChar: '"'
+						skipEmptyLines: true // CSV files should contain empty line at the end
 					});
 
 					if (parsed.errors.length !== 0)
 						console.error(`errors occurred during CSV parsing, ${parsed.errors}`);
+
+					// remove header line
+					parsed.data.shift();
 
 					this.csvRows = parsed.data;
 				},

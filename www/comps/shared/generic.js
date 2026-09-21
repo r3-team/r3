@@ -234,7 +234,16 @@ export function openLinkNoCache(href, blank) {
 	else href += `?date=${Math.floor(Date.now() / 1000)}`;
 	return openLink(href, blank);
 };
-
+export function openTextFile(content, name) {
+	const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement('a');
+	link.href = url;
+	link.download = name;
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+};
 export function openDataImageAsNewTag(data) {
 	if (data === '')
 		return;
