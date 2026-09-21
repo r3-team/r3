@@ -94,9 +94,19 @@ export default {
 											<td>{{ capGen.expireAfter }}</td>
 											<td>
 												<div class="row gap centered">
-													<my-input-decimal class="short" v-model="expireAfterSeconds" :min="0" :allowNull="false" :lengthFract="0" />
+													<my-input-decimal class="short" v-model="expireAfterSeconds" :min="0" :allowNull="false" :lengthFract="0" :readonly="!activated" />
 													<my-label :caption="capGen.seconds" />
 												</div>
+											</td>
+										</tr>
+										<tr>
+											<td>{{ capGen.mfa }}</td>
+											<td>
+												<select v-model="mfaRequiredSelect" :disabled="!activated">
+													<option value="">{{ capGen.systemDefault }}</option>
+													<option value="1">{{ capGen.required }}</option>
+													<option value="0">{{ capGen.optional }}</option>
+												</select>
 											</td>
 										</tr>
 									</tbody>
@@ -107,7 +117,7 @@ export default {
 					<tr>
 						<td>
 							<my-button image="cogMultiple.png"
-								@trigger=""
+								@trigger="invite"
 								:active="isReadyToExec"
 								:caption="capApp.button.exec"
 							/>
@@ -152,6 +162,12 @@ export default {
 		},
 		isReadyToExec: s => s.loginTemplateId !== null && s.mailAccountId !== 0 && s.mailTemplateId !== 0
 			&& s.csvRows.length !== 0 && s.errorMessages.length === 0,
+
+		// inputs
+		mfaRequiredSelect: {
+			get() { return this.mfaRequired === null ? '' : (this.mfaRequired ? '1' : '0'); },
+			set(v) { this.mfaRequired = v === '' ? null : v === '1'; }
+		},
 
 		// stores
 		activated: s => s.$store.getters['local/activated'],
@@ -244,7 +260,10 @@ export default {
 				mfaRequired: this.mfaRequired,
 				roleIds: this.roleIds
 			}, true).then(
-				res => {
+				() => {
+					const msg = this.capApp.dialog.success.replace('{CNT}', logins.length);
+					this.$store.commit('dialog', { captionBody: msg });
+					this.csvRows = [];
 				},
 				this.$root.genericError
 			);

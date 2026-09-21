@@ -207,6 +207,9 @@
 			"button": {
 				"exec": "Create users & send invites"
 			},
+			"dialog": {
+				"success": "{CNT} users were created and invitation emails were placed in the email spooler for delivery."
+			},
 			"error": {
 				"csvBadColumnCount": "Column count for row {ROW} is wrong, columns found: {CNT} ({EXP} expected)",
 				"csvMissingMail": "Row {ROW} is missing email address",

@@ -208,6 +208,9 @@
 				"exec": "Benutzer anlegen & Einladungen versenden"
 			},
 			"csvUpload": "CSV-Datei hochladen",
+			"dialog": {
+				"success": "{CNT} Benutzer wurden erstellt und Einladungs-E-Mails an die E-Mail-Warteschlange zur Auslieferung übergeben."
+			},
 			"error": {
 				"csvBadColumnCount": "Spaltenanzahl ist falsch für Zeile {ROW}, Spalten vorhanden: {CNT} ({EXP} erwartet)",
 				"csvMissingMail": "Zeile {ROW} fehlt die E-Mail-Adresse",

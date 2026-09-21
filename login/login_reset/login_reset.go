@@ -96,7 +96,18 @@ func Set_tx(ctx context.Context, tx pgx.Tx, mailAccountId, mailTemplateId int32,
 		}
 
 		// placeholders in mail template
-		resetUrl := fmt.Sprintf("%s/#/?reset=%s", config.GetString("publicHostName"), loginIdMapCodes[loginId])
+		resetUrl := fmt.Sprintf("%s/#/?reset=%s", strings.TrimSpace(config.GetString("publicHostName")), loginIdMapCodes[loginId])
+
+		// public hostname should not contain protocol, but it may be misconfigured
+		// check if protocol (http(s)) is set, add protocol if not
+		if !strings.HasPrefix(resetUrl, "http") {
+			if config.GetHttpMode() {
+				resetUrl = fmt.Sprintf("http://%s", resetUrl)
+			} else {
+				resetUrl = fmt.Sprintf("https://%s", resetUrl)
+			}
+		}
+
 		replacer := strings.NewReplacer([]string{
 			"/{RESET_URL}", resetUrl,
 			"{RESET_URL}", resetUrl,

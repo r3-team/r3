@@ -230,6 +230,9 @@ func main() {
 		return
 	}
 
+	// set HTTP mode
+	config.SetHttpMode(cli.http)
+
 	// other cli arguments
 	if cli.serviceInstall {
 		if err := svc.Install(); err != nil {

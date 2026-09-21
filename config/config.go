@@ -37,6 +37,7 @@ var (
 
 	// operation data
 	hostname    string
+	httpMode    bool
 	license     = types.License{}
 	tokenSecret *jwt.HMACSHA
 
@@ -74,6 +75,11 @@ func GetHostname() string {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
 	return hostname
+}
+func GetHttpMode() bool {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return httpMode
 }
 func GetLicense() types.License {
 	access_mx.RLock()
@@ -148,6 +154,11 @@ func SetHostnameFromOs() error {
 	var err error
 	hostname, err = os.Hostname()
 	return err
+}
+func SetHttpMode(v bool) {
+	access_mx.Lock()
+	defer access_mx.Unlock()
+	httpMode = v
 }
 func SetLicense(l types.License) {
 	access_mx.Lock()
