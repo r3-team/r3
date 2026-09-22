@@ -1715,6 +1715,7 @@
 		},
 		"module": {
 			"button": {
+				"dependencyRemove": "Remove dependency",
 				"graph": "Grafico delle dipendenze",
 				"keyCreate": "Genera",
 				"loginSyncCreate": "New user sync function",
@@ -1752,6 +1753,9 @@
 			"positionHint": "Position of the application in the header (smaller ones first). Can be overwritten by system administrators.",
 			"pwa": "Progressive web app (PWA)",
 			"pwaHint": "REI3 applications can be installed on desktop computers and mobile devices as progressive web apps (PWA) from inside modern browsers. They are then listed as installed applications, get their own icons and shortcuts and behave similar to native applications.",
+			"referenceCheck": "Dependency checker",
+			"referencesFound": "Reference found",
+			"referencesNone": "No references found",
 			"release": "Deployment",
 			"releaseDate": "Data rilascio",
 			"releaseLogCategories": "Version history categories",
@@ -2554,6 +2558,7 @@
 		"certificate": "Certificate",
 		"changeLogs": "Change logs",
 		"changedBy": "Changed by",
+		"checking": "Checking",
 		"circle": "Circle",
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",

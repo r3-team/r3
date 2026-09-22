@@ -75,11 +75,9 @@ const MyBuilderRelationsItemPolicy = {
 	computed: {
 		filterFunctions() {
 			// limit to integer array returns, as in: INTEGER[], bigint[], INT [] or integer ARRAY
-			let pat = /^(integer|bigint|int)(\s?\[\]|\sarray)$/i;
-			let out = [];
-			for (let i = 0, j = this.module.pgFunctions.length; i < j; i++) {
-				let f = this.module.pgFunctions[i];
-
+			const pat = /^(integer|bigint|int)(\s?\[\]|\sarray)$/i;
+			const out = [];
+			for (const f of this.module.pgFunctions) {
 				if (pat.test(f.codeReturns))
 					out.push(f);
 			}
@@ -121,9 +119,8 @@ const MyBuilderRelationsItemPolicy = {
 		getDependentModules,
 
 		update(name, value) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
-
 			this.$emit('update:modelValue', v);
 		}
 	}
@@ -132,18 +129,9 @@ const MyBuilderRelationsItemPolicy = {
 export default {
 	name: 'my-builder-relation',
 	components: {
-		MyBuilderAttribute,
-		MyBuilderCaption,
-		MyBuilderPreset,
-		MyBuilderPgIndex,
-		MyBuilderPgTriggers,
-		MyBuilderPresets,
-		MyBuilderRelationsItemPolicy,
-		MyBuilderTagInput,
-		MyBuilderSchemaLookup,
-		MyBuilderWizardEnum,
-		MyInputDecimal,
-		MyInputOffset,
+		MyBuilderAttribute, MyBuilderCaption, MyBuilderPreset, MyBuilderPgIndex,
+		MyBuilderPgTriggers, MyBuilderPresets, MyBuilderRelationsItemPolicy, MyBuilderTagInput,
+		MyBuilderSchemaLookup, MyBuilderWizardEnum, MyInputDecimal, MyInputOffset,
 		echarts: Vue.defineAsyncComponent(async () => {
 			await jsLibrariesLoadNoCache(['externals/echarts.js', 'externals/vue-echarts.js',]);
 			return VueECharts;
@@ -475,7 +463,6 @@ export default {
 				v-if="showLookup"
 				@close="showLookup = false"
 				:entityId="id"
-				:entityName="relation.name"
 				:module
 				:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
 			/>
@@ -609,8 +596,8 @@ export default {
 			handler() { this.reset(false); },
 			immediate: true
 		},
-		tabTarget(vNew, vOld) {
-			if (vNew === 'data')
+		tabTarget(v) {
+			if (v === 'data')
 				this.getPreview();
 		}
 	},
@@ -647,7 +634,7 @@ export default {
 	},
 	computed: {
 		attributesRecordTitleCandidates: s => {
-			let out = [];
+			const out = [];
 			for (const a of s.relation.attributes) {
 				if (!s.relation.attributeIdsTitle.includes(a.id) && a.contentUse === 'default' && (
 					s.isAttributeString(a.content) || s.isAttributeDecimal(a.content) ||
@@ -678,8 +665,8 @@ export default {
 
 		// relationship graph
 		graphOption: s => {
-			let edges = [];
-			let nodes = [{ // base relation
+			const edges = [];
+			const nodes = [{ // base relation
 				id: s.relation.id,
 				name: s.relation.name,
 				category: 0,
@@ -698,15 +685,15 @@ export default {
 				if (a.relationshipId !== s.relation.id && a.relationId !== s.relation.id)
 					continue;
 
-				let relIn = a.relationshipId === s.relation.id;
-				let rSource = relIn ? s.relationIdMap[a.relationshipId] : s.relationIdMap[a.relationId];
-				let rTarget = relIn ? s.relationIdMap[a.relationId] : s.relationIdMap[a.relationshipId];
+				const relIn = a.relationshipId === s.relation.id;
+				const rSource = relIn ? s.relationIdMap[a.relationshipId] : s.relationIdMap[a.relationId];
+				const rTarget = relIn ? s.relationIdMap[a.relationId] : s.relationIdMap[a.relationshipId];
 
 				let category = 1;
 				if (!s.isAttributeRelationship11(a.content))
 					category = relIn ? 3 : 2;
 
-				let external = rTarget.moduleId !== s.relation.moduleId;
+				const external = rTarget.moduleId !== s.relation.moduleId;
 
 				nodes.push({
 					id: relIn ? `${rTarget.id}.${a.id}` : `${rSource.id}.${a.id}`,
@@ -722,7 +709,7 @@ export default {
 					'target': relIn ? `${rSource.id}` : `${rSource.id}.${a.id}`
 				});
 			}
-			let categories = [
+			const categories = [
 				{ name: s.capApp.graphBase },
 				{ name: '1:1' },
 				{ name: 'n:1' },
@@ -798,14 +785,14 @@ export default {
 		// presentation
 		displayDataValue(v) {
 			return typeof v !== 'string' || v.length < this.previewValueLength
-				? v : v.substring(0, this.previewValueLength - 3) + '...';
+				? v : `${v.substring(0, this.previewValueLength - 3)}...`;
 		},
 		displayIndexName(ind) {
 			if (ind.method === 'GIN')
 				return `${this.attributeIdMap[ind.attributes[0].attributeId].name}`;
 
-			let atrs = [];
-			for (let indAtr of ind.attributes) {
+			const atrs = [];
+			for (const indAtr of ind.attributes) {
 				atrs.push(`${this.attributeIdMap[indAtr.attributeId].name} (${indAtr.orderAsc ? 'ASC' : 'DESC'})`);
 			}
 			return atrs.join(', ');
@@ -817,7 +804,7 @@ export default {
 		},
 		graphClicked(ev) {
 			if (typeof ev.data.r3.relationId !== 'undefined' && ev.data.r3.relationId !== null)
-				this.$router.push('/builder/relation/' + ev.data.r3.relationId);
+				this.$router.push(`/builder/relation/${ev.data.r3.relationId}`);
 		},
 		previewReload() {
 			this.previewOffset = 0;
@@ -851,17 +838,18 @@ export default {
 
 		// backend calls
 		delCheck() {
-			this.hasReferences = this.getHasAnyReferences(this.module, 'relation', this.id);
-			if (this.hasReferences)
-				return this.showLookup = true;
-
+			this.hasReferences = this.getHasAnyReferences(this.module, 'relation', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
 			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
 		},
 		del() {
 			ws.send('relation', 'del', this.relation.id, true).then(
 				() => {
 					this.$root.schemaReload(this.relation.moduleId);
-					this.$router.push('/builder/relations/' + this.relation.moduleId);
+					this.$router.push(`/builder/relations/${this.relation.moduleId}`);
 				},
 				this.$root.genericError
 			);

@@ -652,7 +652,6 @@ export default {
 			v-if="showLookup"
 			@close="showLookup = false"
 			:entityId="id"
-			:entityName="fnc.name"
 			:module
 			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
 		/>
@@ -960,7 +959,7 @@ export default {
 			return body;
 		},
 		placeholdersUnset(body, previewMode) {
-			let dbChars = this.getValidDbCharsForRx();
+			const dbChars = this.getValidDbCharsForRx();
 
 			// attributes
 			let pat = /\(([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\)/g;
@@ -1066,11 +1065,11 @@ export default {
 			body = body.replace(pat, (match, modName, relName, presetName) => {
 				const mod = this.moduleNameMap[modName];
 				if (mod !== undefined) {
-					for (let r of mod.relations) {
+					for (const r of mod.relations) {
 						if (r.name !== relName)
 							continue;
 
-						for (let p of r.presets) {
+						for (const p of r.presets) {
 							if (p.name === presetName)
 								return `instance\.get_preset_record_id('${p.id}')`;
 						}
@@ -1084,7 +1083,7 @@ export default {
 			body = body.replace(pat, (match, mode, modName, docName) => {
 				const mod = this.moduleNameMap[modName];
 				if (mod !== undefined) {
-					for (let d of mod.docs) {
+					for (const d of mod.docs) {
 						if (d.name === docName)
 							return `instance.pdf_create_${mode.toLowerCase()}('${d.id}',`;
 					}
@@ -1096,7 +1095,7 @@ export default {
 
 		// backend calls
 		delCheck() {
-			this.hasReferences = this.getHasAnyReferences(this.module, 'pgFunction', this.id);
+			this.hasReferences = this.getHasAnyReferences(this.module, 'pgFunction', this.id, false);
 			if (this.hasReferences) {
 				this.showLookup = true;
 				return;
@@ -1114,7 +1113,7 @@ export default {
 		},
 		exec() {
 			// convert to NULL if inputs are empty
-			let args = JSON.parse(JSON.stringify(this.execArgs));
+			const args = JSON.parse(JSON.stringify(this.execArgs));
 			for (let i = 0, j = args.length; i < j; i++) {
 				if (args[i] === '')
 					args[i] = null

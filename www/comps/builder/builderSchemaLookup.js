@@ -1,15 +1,14 @@
-import {getItemTitle}  from '../shared/builder.js';
-import {getFieldIcon}  from '../shared/field.js';
-import {getFieldMap}   from '../shared/form.js';
-import {openLink}      from '../shared/generic.js';
-import {getCaption}    from '../shared/language.js';
-import {getReferences} from '../shared/schemaLookup.js';
-import srcBase64Icon   from '../shared/image.js';
+import { getItemTitle } from '../shared/builder.js';
+import { getFieldIcon } from '../shared/field.js';
+import { getFieldMap } from '../shared/form.js';
+import { openLink } from '../shared/generic.js';
+import srcBase64Icon from '../shared/image.js';
+import { getCaption } from '../shared/language.js';
+import { getReferences } from '../shared/schemaLookup.js';
 
 const MyBuilderSchemaLookupModule = {
-	name:'my-builder-schema-lookup-module',
-	components:{},
-	template:`<div class="builder-schema-lookup-module column">
+	name: 'my-builder-schema-lookup-module',
+	template: `<div class="builder-schema-lookup-module column">
 		<div class="row centered gap">
 			<my-label :imageBase64="srcBase64Icon(module.iconId,'images/module.png')" :large="true" />
 			<my-button
@@ -246,52 +245,52 @@ const MyBuilderSchemaLookupModule = {
 			</table>
 		</div>
 	</div>`,
-	props:{
-		moduleId:         { type:String,  required:true },
-		lookups:          { type:Object,  required:true },
-		showApis:         { type:Boolean, required:true },
-		showCollections:  { type:Boolean, required:true },
-		showDocs:         { type:Boolean, required:true },
-		showFields:       { type:Boolean, required:true },
-		showForms:        { type:Boolean, required:true },
-		showFunctions:    { type:Boolean, required:true },
-		showPgIndex:      { type:Boolean, required:true },
-		showPgTriggers:   { type:Boolean, required:true },
-		showPolicies:     { type:Boolean, required:true },
-		showRelationships:{ type:Boolean, required:true },
-		showSearchBars:   { type:Boolean, required:true }
+	props: {
+		moduleId: { type: String, required: true },
+		lookups: { type: Object, required: true },
+		showApis: { type: Boolean, required: true },
+		showCollections: { type: Boolean, required: true },
+		showDocs: { type: Boolean, required: true },
+		showFields: { type: Boolean, required: true },
+		showForms: { type: Boolean, required: true },
+		showFunctions: { type: Boolean, required: true },
+		showPgIndex: { type: Boolean, required: true },
+		showPgTriggers: { type: Boolean, required: true },
+		showPolicies: { type: Boolean, required: true },
+		showRelationships: { type: Boolean, required: true },
+		showSearchBars: { type: Boolean, required: true }
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
-			show:true
+			show: true
 		};
 	},
-	computed:{
-		fieldIdMap:s => {
+	computed: {
+		fieldIdMap: s => {
 			let out = {};
-			for(const formId in s.lookups.formIdMapFieldIds) {
-				out = { ...out, ...s.getFieldMap(s.formIdMap[formId].fields)};
+			for (const formId in s.lookups.formIdMapFieldIds) {
+				out = { ...out, ...s.getFieldMap(s.formIdMap[formId].fields) };
 			}
 			return out;
 		},
-		module:s => s.moduleIdMap[s.moduleId],
+		module: s => s.moduleIdMap[s.moduleId],
 
 		// stores
-		apiIdMap:       s => s.$store.getters['schema/apiIdMap'],
-		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
-		docIdMap:       s => s.$store.getters['schema/docIdMap'],
-		formIdMap:      s => s.$store.getters['schema/formIdMap'],
-		indexIdMap:     s => s.$store.getters['schema/indexIdMap'],
-		jsFunctionIdMap:s => s.$store.getters['schema/jsFunctionIdMap'],
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
+		apiIdMap: s => s.$store.getters['schema/apiIdMap'],
+		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
+		docIdMap: s => s.$store.getters['schema/docIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		indexIdMap: s => s.$store.getters['schema/indexIdMap'],
+		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
 		pgTriggerIdMap: s => s.$store.getters['schema/pgTriggerIdMap'],
-		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
-		capGen:         s => s.$store.getters.captions.generic
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
 		getFieldIcon,
@@ -307,30 +306,30 @@ const MyBuilderSchemaLookupModule = {
 		},
 		getFieldLabel(fieldId) {
 			const field = this.fieldIdMap[fieldId];
-			if(field === undefined)
+			if (field === undefined)
 				return '';
 
-			return field.content !== 'data' ? field.content : this.getItemTitle(field.attributeId,field.index,false,field.attribute_id_nm);
+			return field.content !== 'data' ? field.content : this.getItemTitle(field.attributeId, field.index, false, field.attribute_id_nm);
 		},
 
 		// actions
-		open(entity,entityId,entityIdSub,middle) {
+		open(entity, entityId, entityIdSub, middle) {
 			let url = '';
-			switch(entity) {
-				case 'api':        url = `/builder/api/${entityId}`; break;
+			switch (entity) {
+				case 'api': url = `/builder/api/${entityId}`; break;
 				case 'collection': url = `/builder/collection/${entityId}`; break;
-				case 'doc':        url = `/builder/doc/${entityId}`; break;
-				case 'form':       url = `/builder/form/${entityId}`; break;
-				case 'field':      url = `/builder/form/${entityId}?fieldIdShow=${entityIdSub}`; break;
+				case 'doc': url = `/builder/doc/${entityId}`; break;
+				case 'form': url = `/builder/form/${entityId}`; break;
+				case 'field': url = `/builder/form/${entityId}?fieldIdShow=${entityIdSub}`; break;
 				case 'jsFunction': url = `/builder/js-function/${entityId}`; break;
-				case 'module':     url = `/builder/module/${entityId}`; break;
+				case 'module': url = `/builder/module/${entityId}`; break;
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
-				case 'relation':   url = `/builder/relation/${entityId}`; break;
-				case 'searchBar':  url = `/builder/search-bar/${entityId}`; break;
+				case 'relation': url = `/builder/relation/${entityId}`; break;
+				case 'searchBar': url = `/builder/search-bar/${entityId}`; break;
 			}
-			if(middle)
-				return this.openLink('#'+url,true);
-			
+			if (middle)
+				return this.openLink(`#${url}`, true);
+
 			this.$router.push(url);
 			this.$emit('close');
 		}
@@ -338,9 +337,9 @@ const MyBuilderSchemaLookupModule = {
 };
 
 export default {
-	name:'my-builder-schema-lookup',
-	components:{ MyBuilderSchemaLookupModule },
-	template:`<div class="app-sub-window under-header" @mousedown.self="close">
+	name: 'my-builder-schema-lookup',
+	components: { MyBuilderSchemaLookupModule },
+	template: `<div class="app-sub-window under-header" @mousedown.self="close">
 		<div class="contentBox builder-schema-lookup float" :class="{ fullscreen }">
 			<div class="top lower">
 				<div class="area nowrap">
@@ -397,8 +396,8 @@ export default {
 					<my-builder-schema-lookup-module
 						v-for="(v,k) in moduleIdMapLookups"
 						@close="close"
-						:moduleId="k"
 						:lookups="v"
+						:moduleId="k"
 						:showApis
 						:showCollections
 						:showDocs
@@ -418,70 +417,84 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		entity:    { type:String,        required:true },
-		entityId:  { type:String,        required:true },
-		entityName:{ type:String,        required:true },
-		module:    { type:Object,        required:true },
-		warningMsg:{ type:[String,null], required:true }
+	props: {
+		entity: { type: String, required: true }, // entity for lookup (relation, attribute, jsFunction, ...)
+		entityId: { type: String, required: true },
+		module: { type: Object, required: true },
+		noDependencies: { type: Boolean, required: false, default: false },
+		warningMsg: { type: [String, null], required: true }
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
-			fullscreen:false,
-			moduleIdMapLookups:{},
-			ready:false,
-			showApis:true,
-			showCollections:true,
-			showDocs:true,
-			showFields:true,
-			showForms:true,
-			showFunctions:true,
-			showPgIndex:true,
-			showPgTriggers:true,
-			showPolicies:true,
-			showRelationships:true,
-			showSearchBars:true
+			fullscreen: false,
+			moduleIdMapLookups: {},
+			ready: false,
+			showApis: true,
+			showCollections: true,
+			showDocs: true,
+			showFields: true,
+			showForms: true,
+			showFunctions: true,
+			showPgIndex: true,
+			showPgTriggers: true,
+			showPolicies: true,
+			showRelationships: true,
+			showSearchBars: true
 		};
 	},
-	computed:{
-		noResults:s => Object.keys(s.moduleIdMapLookups).length === 0,
-		title:s => {
+	computed: {
+		noResults: s => Object.keys(s.moduleIdMapLookups).length === 0,
+		title: s => {
 			let contentName = '';
-			switch(s.entity) {
-				case 'attribute':  contentName = s.capGen.attribute;        break;
-				case 'jsFunction': contentName = s.capGen.functionFrontend; break;
-				case 'pgFunction': contentName = s.capGen.functionBackend;  break;
-				case 'relation':   contentName = s.capGen.relation;         break;
+			let entityName = '';
+			switch (s.entity) {
+				case 'attribute':
+					contentName = s.capGen.attribute;
+					entityName = s.attributeIdMap[s.entityId].name;
+					break;
+				case 'jsFunction':
+					contentName = s.capGen.functionFrontend;
+					entityName = s.jsFunctionIdMap[s.entityId].name;
+					break;
+				case 'pgFunction':
+					contentName = s.capGen.functionBackend;
+					entityName = s.pgFunctionIdMap[s.entityId].name;
+					break;
+				case 'relation':
+					contentName = s.capGen.relation;
+					entityName = s.relationIdMap[s.entityId].name;
+					break;
 			}
-			return `${s.capApp.title.replace('{NAME}',contentName)} '${s.entityName}'`;
+			return `${s.capApp.title.replace('{NAME}', contentName)} '${entityName}'`;
 		},
-		
+
 		// stores
-		capApp:s => s.$store.getters.captions.builder.schemaLookup,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.builder.schemaLookup,
+		capGen: s => s.$store.getters.captions.generic,
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 	},
 	mounted() {
 		this.refresh();
-		
+
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.close, key: 'Escape' });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerDel', this.close);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	methods:{
-		// externals
-		getReferences,
-
+	methods: {
 		// actions
 		close() {
 			this.$emit('close');
 		},
 		refresh() {
 			this.ready = false;
-			this.moduleIdMapLookups = this.getReferences(this.module,this.entity,this.entityId);
+			this.moduleIdMapLookups = getReferences(this.module, this.entity, this.entityId, this.noDependencies);
 			this.ready = true;
 		}
 	}

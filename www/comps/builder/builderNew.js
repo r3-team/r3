@@ -1,26 +1,18 @@
-import {getDependentModules} from '../shared/builder.js';
-import MyBuilderFormInput from './builderFormInput.js';
-import MyBuilderTagInput from './builderTagInput.js';
+import { getDependentModules } from '../shared/builder.js';
 import {
-	getTemplateApi,
-	getTemplateCollection,
-	getTemplateDoc,
-	getTemplateForm,
-	getTemplateJsFunction,
-	getTemplateModule,
-	getTemplatePgFunction,
-	getTemplateRelation,
-	getTemplateRole,
-	getTemplateSearchBar,
-	getTemplateTag,
-	getTemplateVariable,
-	getTemplateWidget
+	getTemplateApi, getTemplateCollection, getTemplateDoc, getTemplateForm,
+	getTemplateJsFunction, getTemplateModule, getTemplatePgFunction,
+	getTemplateRelation, getTemplateRole, getTemplateSearchBar,
+	getTemplateTag, getTemplateVariable, getTemplateWidget
 } from '../shared/builderTemplate.js';
 
+import MyBuilderFormInput from './builderFormInput.js';
+import MyBuilderTagInput from './builderTagInput.js';
+
 export default {
-	name:'my-builder-new',
-	components:{ MyBuilderFormInput, MyBuilderTagInput },
-	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+	name: 'my-builder-new',
+	components: { MyBuilderFormInput, MyBuilderTagInput },
+	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-new float">
 			<div class="top lower">
 				<div class="area nowrap">
@@ -158,16 +150,16 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String, required:true },
-		entity:         { type:String, required:true },
-		moduleId:       { type:String, required:true },
-		presets:        { type:Object, required:true } // preset values for inputs
+	props: {
+		builderLanguage: { type: String, required: true },
+		entity: { type: String, required: true },
+		moduleId: { type: String, required: true },
+		presets: { type: Object, required: true } // preset values for inputs
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
-			inputs:{
+			inputs: {
 				// all
 				name: '',
 				// many
@@ -175,139 +167,139 @@ export default {
 				// doc
 				docIdDuplicate: '',
 				// form
-				formIdDuplicate:null,
+				formIdDuplicate: null,
 				// JS function
-				formId:null,
+				formId: null,
 				// PG function
-				isTrigger:false,
-				template:'',
+				isTrigger: false,
+				template: '',
 				// relation
-				encryption:false
+				encryption: false
 			}
 		};
 	},
-	computed:{
-		nameMaxLength:s => {
-			switch(s.entity) {
-				case 'api':        return 60; break;
-				case 'collection': return 64; break;
-				case 'doc':        return 64; break;
-				case 'form':       return 64; break;
-				case 'jsFunction': return 64; break;
-				case 'module':     return 60; break;
-				case 'pgFunction': return 60; break;
-				case 'relation':   return 60; break;
-				case 'role':       return 64; break;
-				case 'searchBar':  return 64; break;
-				case 'tag':        return 64; break;
-				case 'variable':   return 64; break;
-				case 'widget':     return 64; break;
+	computed: {
+		nameMaxLength: s => {
+			switch (s.entity) {
+				case 'api': return 60;
+				case 'collection': return 64;
+				case 'doc': return 64;
+				case 'form': return 64;
+				case 'jsFunction': return 64;
+				case 'module': return 60;
+				case 'pgFunction': return 60;
+				case 'relation': return 60;
+				case 'role': return 64;
+				case 'searchBar': return 64;
+				case 'tag': return 64;
+				case 'variable': return 64;
+				case 'widget': return 64;
 			}
 			return 0;
 		},
-		nameTaken:s => {
-			if(s.inputs.name === '')
+		nameTaken: s => {
+			if (s.inputs.name === '')
 				return false;
 
 			let searchList;
-			switch(s.entity) {
-				case 'module':     searchList = s.modules;            break;
-				case 'api':        searchList = s.module.apis;        break;
+			switch (s.entity) {
+				case 'module': searchList = s.modules; break;
+				case 'api': searchList = s.module.apis; break;
 				case 'collection': searchList = s.module.collections; break;
-				case 'doc':        searchList = s.module.docs;        break;
-				case 'form':       searchList = s.module.forms;       break;
+				case 'doc': searchList = s.module.docs; break;
+				case 'form': searchList = s.module.forms; break;
 				case 'jsFunction': searchList = s.module.jsFunctions; break;
 				case 'pgFunction': searchList = s.module.pgFunctions; break;
-				case 'relation':   searchList = s.module.relations;   break;
-				case 'role':       searchList = s.module.roles;       break;
-				case 'searchBar':  searchList = s.module.searchBars;  break;
-				case 'tag':        searchList = s.module.tags;        break;
-				case 'variable':   searchList = s.module.variables;   break;
-				case 'widget':     searchList = s.module.widgets;     break;
+				case 'relation': searchList = s.module.relations; break;
+				case 'role': searchList = s.module.roles; break;
+				case 'searchBar': searchList = s.module.searchBars; break;
+				case 'tag': searchList = s.module.tags; break;
+				case 'variable': searchList = s.module.variables; break;
+				case 'widget': searchList = s.module.widgets; break;
 			}
-			for(let e of searchList) {
+			for (const e of searchList) {
 				// only compare names of functions within the same scope (global or form)
-				if(s.entity === 'jsFunction' && e.formId !== s.inputs.formId)
+				if (s.entity === 'jsFunction' && e.formId !== s.inputs.formId)
 					continue;
 
 				// only compare names of variables within the same scope (global or form)
-				if(s.entity === 'variable' && e.formId !== s.inputs.formId)
+				if (s.entity === 'variable' && e.formId !== s.inputs.formId)
 					continue;
 
-				if(e.name === s.inputs.name)
+				if (e.name === s.inputs.name)
 					return true;
 			}
 			return false;
 		},
 
 		// presentation
-		title:s => {
-			switch(s.entity) {
-				case 'api':        return s.capApp.api;        break;
-				case 'collection': return s.capApp.collection; break;
-				case 'doc':        return s.capApp.doc;        break;
-				case 'form':       return s.capApp.form;       break;
-				case 'jsFunction': return s.capApp.jsFunction; break;
-				case 'module':     return s.capApp.module;     break;
-				case 'pgFunction': return s.capApp.pgFunction; break;
-				case 'relation':   return s.capApp.relation;   break;
-				case 'role':       return s.capApp.role;       break;
-				case 'searchBar':  return s.capApp.searchBar;  break;
-				case 'tag':        return s.capApp.tag;        break;
-				case 'variable':   return s.capApp.variable;   break;
-				case 'widget':     return s.capApp.widget;     break;
+		title: s => {
+			switch (s.entity) {
+				case 'api': return s.capApp.api;
+				case 'collection': return s.capApp.collection;
+				case 'doc': return s.capApp.doc;
+				case 'form': return s.capApp.form;
+				case 'jsFunction': return s.capApp.jsFunction;
+				case 'module': return s.capApp.module;
+				case 'pgFunction': return s.capApp.pgFunction;
+				case 'relation': return s.capApp.relation;
+				case 'role': return s.capApp.role;
+				case 'searchBar': return s.capApp.searchBar;
+				case 'tag': return s.capApp.tag;
+				case 'variable': return s.capApp.variable;
+				case 'widget': return s.capApp.widget;
 			}
 			return '';
 		},
-		titleImgSrc:s => {
-			switch(s.entity) {
-				case 'api':        return 'images/api.png';            break;
-				case 'collection': return 'images/tray.png';           break;
-				case 'doc':        return 'images/document.png';       break;
-				case 'form':       return 'images/fileText.png';       break;
-				case 'jsFunction': return 'images/codeScreen.png';     break;
-				case 'module':     return 'images/module.png';         break;
-				case 'pgFunction': return 'images/codeDatabase.png';   break;
-				case 'relation':   return 'images/database.png';       break;
-				case 'role':       return 'images/personMultiple.png'; break;
-				case 'searchBar':  return 'images/search.png';         break;
-				case 'tag':        return 'images/tag.png';            break;
-				case 'variable':   return 'images/variable.png';       break;
-				case 'widget':     return 'images/tiles.png';          break;
+		titleImgSrc: s => {
+			switch (s.entity) {
+				case 'api': return 'images/api.png';
+				case 'collection': return 'images/tray.png';
+				case 'doc': return 'images/document.png';
+				case 'form': return 'images/fileText.png';
+				case 'jsFunction': return 'images/codeScreen.png';
+				case 'module': return 'images/module.png';
+				case 'pgFunction': return 'images/codeDatabase.png';
+				case 'relation': return 'images/database.png';
+				case 'role': return 'images/personMultiple.png';
+				case 'searchBar': return 'images/search.png';
+				case 'tag': return 'images/tag.png';
+				case 'variable': return 'images/variable.png';
+				case 'widget': return 'images/tiles.png';
 			}
 			return '';
 		},
 
 		// simple
-		canSave:     s => s.inputs.name !== '' && !s.nameTaken && !s.nameTooLong,
+		canSave: s => s.inputs.name !== '' && !s.nameTaken && !s.nameTooLong,
 		nameTooLong: s => s.inputs.name !== '' && s.inputs.name.length > s.nameMaxLength,
 		showOptions: s => ['doc', 'form', 'jsFunction', 'pgFunction', 'relation', 'variable'].includes(s.entity),
-		showTags:    s => ['doc', 'form', 'jsFunction', 'pgFunction', 'relation'].includes(s.entity),
+		showTags: s => ['doc', 'form', 'jsFunction', 'pgFunction', 'relation'].includes(s.entity),
 
 		// stores
-		module:     s => s.moduleIdMap[s.moduleId],
-		modules:    s => s.$store.getters['schema/modules'],
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.new,
-		capGen:     s => s.$store.getters.captions.generic
+		module: s => s.moduleIdMap[s.moduleId],
+		modules: s => s.$store.getters['schema/modules'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.new,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		// apply preset input values
-		for(let k in this.inputs) {
-			if(typeof this.presets[k] !== 'undefined')
+		for (const k in this.inputs) {
+			if (typeof this.presets[k] !== 'undefined')
 				this.inputs[k] = this.presets[k];
 		}
 
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.close, key: 'Escape' });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
-		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerDel', this.set);
+		this.$store.commit('keyDownHandlerDel', this.close);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	methods:{
+	methods: {
 		// externals
 		getDependentModules,
 		getTemplateApi,
@@ -329,61 +321,61 @@ export default {
 
 		// backend calls
 		set() {
-			if(!this.canSave) return;
+			if (!this.canSave) return;
 
 			let action = 'set';
 			let request;
 			let dependencyCheck = false;
-			switch(this.entity) {
-				case 'api':	       request = this.getTemplateApi(this.module.id,this.inputs.name); break;
-				case 'collection': request = this.getTemplateCollection(this.module.id,this.inputs.name); break;
-				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId,this.inputs.formId,this.inputs.name,this.inputs.tagIds); break;
-				case 'module':     request = this.getTemplateModule(this.inputs.name); break;
-				case 'pgFunction': request = this.getTemplatePgFunction(this.moduleId,this.inputs.name,this.inputs.tagIds,this.inputs.template,this.inputs.isTrigger); break;
-				case 'relation':   request = this.getTemplateRelation(this.module.id,this.inputs.name,this.inputs.tagIds,this.inputs.encryption); break;
-				case 'role':       request = this.getTemplateRole(this.moduleId,this.inputs.name); break;
-				case 'searchBar':  request = this.getTemplateSearchBar(this.moduleId,this.inputs.name); break;
-				case 'variable':   request = this.getTemplateVariable(this.moduleId,this.inputs.formId,this.inputs.name); break;
-				case 'widget':     request = this.getTemplateWidget(this.moduleId,this.inputs.name); break;
+			switch (this.entity) {
+				case 'api': request = this.getTemplateApi(this.module.id, this.inputs.name); break;
+				case 'collection': request = this.getTemplateCollection(this.module.id, this.inputs.name); break;
+				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId, this.inputs.formId, this.inputs.name, this.inputs.tagIds); break;
+				case 'module': request = this.getTemplateModule(this.inputs.name); break;
+				case 'pgFunction': request = this.getTemplatePgFunction(this.moduleId, this.inputs.name, this.inputs.tagIds, this.inputs.template, this.inputs.isTrigger); break;
+				case 'relation': request = this.getTemplateRelation(this.module.id, this.inputs.name, this.inputs.tagIds, this.inputs.encryption); break;
+				case 'role': request = this.getTemplateRole(this.moduleId, this.inputs.name); break;
+				case 'searchBar': request = this.getTemplateSearchBar(this.moduleId, this.inputs.name); break;
+				case 'variable': request = this.getTemplateVariable(this.moduleId, this.inputs.formId, this.inputs.name); break;
+				case 'widget': request = this.getTemplateWidget(this.moduleId, this.inputs.name); break;
 				case 'doc':
-					if(this.inputs.docIdDuplicate !== '') {
+					if (this.inputs.docIdDuplicate !== '') {
 						action = 'copy';
 						request = {
-							id:this.inputs.docIdDuplicate,
-							moduleId:this.moduleId,
-							newName:this.inputs.name
+							id: this.inputs.docIdDuplicate,
+							moduleId: this.moduleId,
+							newName: this.inputs.name
 						};
 						dependencyCheck = true;
 					} else {
-						request = this.getTemplateDoc(this.module.id,this.builderLanguage,this.inputs.name,this.inputs.tagIds);
+						request = this.getTemplateDoc(this.module.id, this.builderLanguage, this.inputs.name, this.inputs.tagIds);
 					}
-				break;
+					break;
 				case 'form':
-					if(this.inputs.formIdDuplicate !== null) {
+					if (this.inputs.formIdDuplicate !== null) {
 						action = 'copy';
 						request = {
-							id:this.inputs.formIdDuplicate,
-							moduleId:this.moduleId,
-							newName:this.inputs.name
+							id: this.inputs.formIdDuplicate,
+							moduleId: this.moduleId,
+							newName: this.inputs.name
 						};
 						dependencyCheck = true;
 					} else {
-						request = this.getTemplateForm(this.moduleId,this.inputs.name,this.inputs.tagIds);
+						request = this.getTemplateForm(this.moduleId, this.inputs.name, this.inputs.tagIds);
 					}
-				break;
-				case 'tag': request = { moduleId:this.moduleId, tag:this.getTemplateTag(this.inputs.name) }; break;
-				default: return; break;
+					break;
+				case 'tag': request = { moduleId: this.moduleId, tag: this.getTemplateTag(this.inputs.name) }; break;
+				default: return;
 			}
 
-			let requests = [ws.prepare(this.entity,action,request)];
+			const requests = [ws.prepare(this.entity, action, request)];
 
-			if(dependencyCheck)
-				requests.push(ws.prepare('schema','check',{moduleId:this.moduleId}));
+			if (dependencyCheck)
+				requests.push(ws.prepare('schema', 'check', { moduleId: this.moduleId }));
 
-			ws.sendMultiple(requests,true).then(
+			ws.sendMultiple(requests, true).then(
 				res => {
-					if(this.entity === 'module') this.$root.schemaReload(res[0].payload);
-					else                         this.$root.schemaReload(this.moduleId);
+					if (this.entity === 'module') this.$root.schemaReload(res[0].payload);
+					else this.$root.schemaReload(this.moduleId);
 
 					this.$emit('close');
 				},

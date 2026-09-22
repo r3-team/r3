@@ -1,23 +1,22 @@
-import MyBuilderCaption        from './builderCaption.js';
-import MyBuilderClientEvent    from './builderClientEvent.js';
-import MyBuilderIconInput      from './builderIconInput.js';
-import MyBuilderSelectForm     from './builderSelectForm.js';
-import srcBase64Icon           from '../shared/image.js';
-import {getDependentModules}   from '../shared/builder.js';
-import {getTemplatePgFunction} from '../shared/builderTemplate.js';
-import {deepIsEqual}           from '../shared/generic.js';
-import {getUnixFormat}         from '../shared/time.js';
-import {MyModuleSelect}        from '../input.js';
-import MyInputColorWrap        from '../inputColorWrap.js';
-import {
-	copyValueDialog,
-	getRandomInt
-} from '../shared/generic.js';
+
+import { MyModuleSelect } from '../input.js';
+import MyInputColorWrap from '../inputColorWrap.js';
+import { getDependentModules } from '../shared/builder.js';
+import { getTemplatePgFunction } from '../shared/builderTemplate.js';
+import { copyValueDialog, deepIsEqual, getRandomInt } from '../shared/generic.js';
+import srcBase64Icon from '../shared/image.js';
+import { getUnixFormat } from '../shared/time.js';
+
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderClientEvent from './builderClientEvent.js';
+import MyBuilderIconInput from './builderIconInput.js';
+import MyBuilderModuleDepCheck from './builderModuleDepCheck.js';
+import MyBuilderSelectForm from './builderSelectForm.js';
 
 const MyBuilderModuleStartForm = {
-	name:'my-builder-module-start-form',
-	components:{ MyBuilderSelectForm },
-	template:`<div class="row gap centered">
+	name: 'my-builder-module-start-form',
+	components: { MyBuilderSelectForm },
+	template: `<div class="row gap centered">
 		<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 		<select v-model="roleId" :disabled="readonly">
 			<option :value="null">[{{ capGen.role }}]</option>
@@ -38,48 +37,42 @@ const MyBuilderModuleStartForm = {
 			:cancel="true"
 		/>
 	</div>`,
-	props:{
-		modelValue:{ type:Object,  required:true },
-		module:    { type:Object,  required:true },
-		readonly:  { type:Boolean, required:true }
+	props: {
+		modelValue: { type: Object, required: true },
+		module: { type: Object, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['remove','update:modelValue'],
-	computed:{
-		formId:{
-			get()  { return this.modelValue.formId; },
-			set(v) { this.update('formId',v); }
+	emits: ['remove', 'update:modelValue'],
+	computed: {
+		formId: {
+			get() { return this.modelValue.formId; },
+			set(v) { this.update('formId', v); }
 		},
-		roleId:{
-			get()  { return this.modelValue.roleId; },
-			set(v) { this.update('roleId',v); }
+		roleId: {
+			get() { return this.modelValue.roleId; },
+			set(v) { this.update('roleId', v); }
 		},
 
 		// stores
-		capApp:s => s.$store.getters.captions.builder.module,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.builder.module,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
-		update(name,value) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+	methods: {
+		update(name, value) {
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
-
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		}
 	}
 };
 
 export default {
-	name:'my-builder-module',
-	components:{
-		MyBuilderCaption,
-		MyBuilderClientEvent,
-		MyBuilderIconInput,
-		MyBuilderModuleStartForm,
-		MyBuilderSelectForm,
-		MyInputColorWrap,
-		MyModuleSelect
+	name: 'my-builder-module',
+	components: {
+		MyBuilderCaption, MyBuilderClientEvent, MyBuilderIconInput, MyBuilderModuleDepCheck,
+		MyBuilderModuleStartForm, MyBuilderSelectForm, MyInputColorWrap, MyModuleSelect
 	},
-	template:`<div class="builder-module contentBox grow" v-if="isReady">
+	template: `<div class="builder-module contentBox grow" v-if="isReady">
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/module.png" />
@@ -133,15 +126,15 @@ export default {
 							<div class="builder-module-depends-list">
 								<my-button image="delete.png"
 									v-for="m in modules.filter(v => v.id !== id && inputs.dependsOn.includes(v.id))"
-									@trigger="toggleDependsOn(m.id,false)"
-									:active="!readonly"
+									@trigger="dependsOnRemoveCheck(m.id)"
+									:active="!readonly && inputs.parentId !== m.id"
 									:caption="m.name"
 									:naked="true"
 								/>
 							</div>
 							<my-module-select
 								v-if="!readonly"
-								@update:modelValue="toggleDependsOn($event,true)"
+								@update:modelValue="dependsOnAdd($event)"
 								:moduleIdsFilter="inputs.dependsOn.concat([id])"
 								:modelValue="moduleIdDependsOnInput"
 								:preSelectOne="false"
@@ -461,56 +454,65 @@ export default {
 				</tbody>
 			</table>
 		</div>
+
+		<my-builder-module-dep-check
+			v-if="moduleIdCheckParent !== null"
+			@close="moduleIdCheckParent = null"
+			@confirm="dependsOnRemove"
+			:moduleIdParent="moduleIdCheckParent"
+			:moduleIdSource="id"
+		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
 	data() {
 		return {
-			inputs:{},
-			inputsCopy:{}, // copy of inputs, to be compared against schema on change
-			isReady:false,
+			inputs: {},
+			inputsCopy: {}, // copy of inputs, to be compared against schema on change
+			isReady: false,
 
 			// states
-			clientEventIdEdit:false,
-			moduleIdDependsOnInput:null,
-			showDependencies:false,
-			showLanguages:false,
-			showStartForms:false
+			clientEventIdEdit: false,
+			moduleIdDependsOnInput: null,
+			moduleIdCheckParent: null,
+			showDependencies: false,
+			showLanguages: false,
+			showStartForms: false
 		};
 	},
-	computed:{
+	computed: {
 		// simple
-		displayReleaseDate:s => s.moduleSchema.releaseDate === 0 ? '-' : s.getUnixFormat(s.moduleSchema.releaseDate,'Y-m-d H:i'),
-		isChanged:         s => !s.deepIsEqual(s.inputs,s.inputsCopy),
-		moduleSchema:      s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		displayReleaseDate: s => s.moduleSchema.releaseDate === 0 ? '-' : s.getUnixFormat(s.moduleSchema.releaseDate, 'Y-m-d H:i'),
+		isChanged: s => !s.deepIsEqual(s.inputs, s.inputsCopy),
+		moduleSchema: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		attributeIdMap:   s => s.$store.getters['schema/attributeIdMap'],
-		jsFunctionIdMap:  s => s.$store.getters['schema/jsFunctionIdMap'],
-		modules:          s => s.$store.getters['schema/modules'],
-		moduleIdMap:      s => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:  s => s.$store.getters['schema/pgFunctionIdMap'],
-		relationIdMap:    s => s.$store.getters['schema/relationIdMap'],
-		capApp:           s => s.$store.getters.captions.builder.module,
-		capAppClientEvent:s => s.$store.getters.captions.builder.clientEvent,
-		capGen:           s => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
+		modules: s => s.$store.getters['schema/modules'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		capApp: s => s.$store.getters.captions.builder.module,
+		capAppClientEvent: s => s.$store.getters.captions.builder.clientEvent,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	watch:{
-		moduleSchema:{
+	watch: {
+		moduleSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
@@ -521,69 +523,81 @@ export default {
 		srcBase64Icon,
 
 		reset(manuelReset) {
-			if(this.moduleSchema === false)
+			if (this.moduleSchema === false)
 				return;
 
 			const inputsSchema = this.cloneInputs(this.moduleSchema);
-			if(manuelReset || !this.deepIsEqual(this.inputsCopy,inputsSchema)) {
-				this.inputs     = this.cloneInputs(inputsSchema);
+			if (manuelReset || !this.deepIsEqual(this.inputsCopy, inputsSchema)) {
+				this.inputs = this.cloneInputs(inputsSchema);
 				this.inputsCopy = this.cloneInputs(inputsSchema);
-				this.isReady    = true;
+				this.isReady = true;
 			}
 		},
 
 		// actions
 		addStartForm() {
 			this.inputs.startForms.push({
-				position:this.inputs.startForms.length,
-				formId:null,
-				roleId:null
+				position: this.inputs.startForms.length,
+				formId: null,
+				roleId: null
 			});
 		},
-		applyNullString(key,value) {
+		applyNullString(key, value) {
 			this.inputs[key] = value === '' ? null : value;
 		},
 		cloneInputs(src) {
 			return {
-				id:src.id,
-				name:src.name,
-				iconId:src.iconId,
-				color1:src.color1,
-				parentId:src.parentId,
-				position:src.position,
-				formId:src.formId,
-				namePwa:src.namePwa,
-				namePwaShort:src.namePwaShort,
-				iconIdPwa1:src.iconIdPwa1,
-				iconIdPwa2:src.iconIdPwa2,
-				languageMain:src.languageMain,
-				jsFunctionIdOnLogin:src.jsFunctionIdOnLogin,
-				pgFunctionIdLoginSync:src.pgFunctionIdLoginSync,
-				articleIdsHelp:JSON.parse(JSON.stringify(src.articleIdsHelp)),
-				captions:JSON.parse(JSON.stringify(src.captions)),
-				dependsOn:JSON.parse(JSON.stringify(src.dependsOn)),
-				startForms:JSON.parse(JSON.stringify(src.startForms)),
-				languages:JSON.parse(JSON.stringify(src.languages)),
-				clientEvents:JSON.parse(JSON.stringify(src.clientEvents)),
-				releaseBuild:src.releaseBuild,
-				releaseBuildApp:src.releaseBuildApp,
-				releaseDate:src.releaseDate,
-				releases:JSON.parse(JSON.stringify(src.releases)),
-				releaseLogCategories:JSON.parse(JSON.stringify(src.releaseLogCategories))
+				id: src.id,
+				name: src.name,
+				iconId: src.iconId,
+				color1: src.color1,
+				parentId: src.parentId,
+				position: src.position,
+				formId: src.formId,
+				namePwa: src.namePwa,
+				namePwaShort: src.namePwaShort,
+				iconIdPwa1: src.iconIdPwa1,
+				iconIdPwa2: src.iconIdPwa2,
+				languageMain: src.languageMain,
+				jsFunctionIdOnLogin: src.jsFunctionIdOnLogin,
+				pgFunctionIdLoginSync: src.pgFunctionIdLoginSync,
+				articleIdsHelp: JSON.parse(JSON.stringify(src.articleIdsHelp)),
+				captions: JSON.parse(JSON.stringify(src.captions)),
+				dependsOn: JSON.parse(JSON.stringify(src.dependsOn)),
+				startForms: JSON.parse(JSON.stringify(src.startForms)),
+				languages: JSON.parse(JSON.stringify(src.languages)),
+				clientEvents: JSON.parse(JSON.stringify(src.clientEvents)),
+				releaseBuild: src.releaseBuild,
+				releaseBuildApp: src.releaseBuildApp,
+				releaseDate: src.releaseDate,
+				releases: JSON.parse(JSON.stringify(src.releases)),
+				releaseLogCategories: JSON.parse(JSON.stringify(src.releaseLogCategories))
 			};
 		},
-		toggleDependsOn(moduleId,state) {
-			const pos = this.inputs.dependsOn.indexOf(moduleId);
-			if     (pos === -1 && state)  this.inputs.dependsOn.push(moduleId);
-			else if(pos !== -1 && !state) this.inputs.dependsOn.splice(pos,1);
+		dependsOnAdd(moduleId) {
+			if (!this.inputs.dependsOn.includes(moduleId))
+				this.inputs.dependsOn.push(moduleId);
+		},
+		dependsOnRemove() {
+			const pos = this.inputs.dependsOn.indexOf(this.moduleIdCheckParent);
+			if (pos !== -1)
+				this.inputs.dependsOn.splice(pos, 1);
+
+			this.moduleIdCheckParent = null;
+		},
+		dependsOnRemoveCheck(moduleId) {
+			this.moduleIdCheckParent = moduleId;
+
+			// TEMP, skip to removal until dependency checker is ready
+			this.dependsOnRemove();
 		},
 
 		// presentation
 		clientEventSubtitle(clientEvent) {
-			if(clientEvent.action === 'callJsFunction')
+			if (clientEvent.action === 'callJsFunction')
 				return `${this.capAppClientEvent.action.callJsFunction}: ${this.jsFunctionIdMap[clientEvent.jsFunctionId].name}()`;
 
-			if(clientEvent.action === 'callPgFunction')
+			if (clientEvent.action === 'callPgFunction')
 				return `${this.capAppClientEvent.action.callPgFunction}: ${this.pgFunctionIdMap[clientEvent.pgFunctionId].name}()`;
 
 			return '-';
@@ -595,25 +609,25 @@ export default {
 			this.inputs.languages.sort();
 
 			ws.sendMultiple([
-				ws.prepare('module','set',this.inputs),
-				ws.prepare('schema','check',{moduleId:this.id})
-			],true).then(
+				ws.prepare('module', 'set', this.inputs),
+				ws.prepare('schema', 'check', { moduleId: this.id })
+			], true).then(
 				() => this.$root.schemaReload(this.id),
 				this.$root.genericError
 			);
 		},
 		setNewLoginSync() {
 			let fncName = 'user_sync';
-			for(let fnc of this.moduleSchema.pgFunctions) {
-				if(fnc.name === fncName) {
-					fncName = `user_sync_${this.getRandomInt(100000,200000)}`;
+			for (const fnc of this.moduleSchema.pgFunctions) {
+				if (fnc.name === fncName) {
+					fncName = `user_sync_${this.getRandomInt(100000, 200000)}`;
 					break;
 				}
 			}
 			ws.sendMultiple([
-				ws.prepare('pgFunction','set',this.getTemplatePgFunction(this.id,fncName,[],'loginSync',false)),
-				ws.prepare('schema','check',{moduleId:this.id})
-			],true).then(
+				ws.prepare('pgFunction', 'set', this.getTemplatePgFunction(this.id, fncName, [], 'loginSync', false)),
+				ws.prepare('schema', 'check', { moduleId: this.id })
+			], true).then(
 				() => this.$root.schemaReload(this.id),
 				this.$root.genericError
 			);

@@ -1715,6 +1715,7 @@
 		},
 		"module": {
 			"button": {
+				"dependencyRemove": "Remove dependency",
 				"graph": "依赖图",
 				"keyCreate": "生成密钥",
 				"loginSyncCreate": "New user sync function",
@@ -1752,6 +1753,9 @@
 			"positionHint": "应用程序在标题中的位置（较小的优先级更高）。可被系统管理员覆盖。",
 			"pwa": "渐进式 Web 应用程序（PWA）",
 			"pwaHint": "REI3 应用程序可以在现代浏览器内部作为渐进式 Web 应用程序（PWA）安装到台式计算机和移动设备上。然后它们将列为已安装的应用程序，获得自己的图标和快捷方式，并且行为类似于本机应用程序。",
+			"referenceCheck": "Dependency checker",
+			"referencesFound": "Reference found",
+			"referencesNone": "No references found",
 			"release": "部署",
 			"releaseDate": "发布日期",
 			"releaseLogCategories": "Version history categories",
@@ -2554,6 +2558,7 @@
 		"certificate": "Certificate",
 		"changeLogs": "Change logs",
 		"changedBy": "Changed by",
+		"checking": "Checking",
 		"circle": "Circle",
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",

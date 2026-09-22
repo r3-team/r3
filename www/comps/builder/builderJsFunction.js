@@ -1,42 +1,27 @@
-import MyBuilderCaption      from './builderCaption.js';
-import MyBuilderQuery        from './builderQuery.js';
-import MyBuilderSchemaLookup from './builderSchemaLookup.js';
-import MyBuilderTagInput     from './builderTagInput.js';
-import MyCodeEditor          from '../codeEditor.js';
-import {dialogDeleteAsk}     from '../shared/dialog.js';
-import {getFieldMap}         from '../shared/form.js';
-import {getHasAnyReferences} from '../shared/schemaLookup.js';
+import MyCodeEditor from '../codeEditor.js';
+import { getAttributeIcon, isAttributeFiles } from '../shared/attribute.js';
 import {
-	getAttributeIcon,
-	isAttributeFiles
-} from '../shared/attribute.js';
-import {
-	getDependentModules,
-	getFormEntityMapRef,
-	getFunctionHelp,
-	getItemTitle,
-	getItemTitlePath,
-	getValidDbCharsForRx
+	getDependentModules, getFormEntityMapRef, getFunctionHelp,
+	getItemTitle, getItemTitlePath, getValidDbCharsForRx
 } from '../shared/builder.js';
-import {
-	getFieldIcon,
-	getFieldTitle
-} from '../shared/field.js';
-import {
-	copyValueDialog,
-	deepIsEqual
-} from '../shared/generic.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { getFieldIcon, getFieldTitle } from '../shared/field.js';
+import { getFieldMap } from '../shared/form.js';
+import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderQuery from './builderQuery.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
+import MyBuilderTagInput from './builderTagInput.js';
 
 export default {
-	name:'my-builder-js-function',
-	components:{
-		MyBuilderCaption,
-		MyBuilderQuery,
-		MyBuilderSchemaLookup,
-		MyBuilderTagInput,
-		MyCodeEditor
+	name: 'my-builder-js-function',
+	components: {
+		MyBuilderCaption, MyBuilderQuery, MyBuilderSchemaLookup,
+		MyBuilderTagInput, MyCodeEditor
 	},
-	template:`<div class="builder-function" v-if="fnc !== false">
+	template: `<div class="builder-function" v-if="fnc !== false">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
@@ -606,249 +591,250 @@ export default {
 			v-if="showLookup"
 			@close="showLookup = false"
 			:entityId="id"
-			:entityName="fnc.name"
 			:module
 			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
 		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	watch:{
-		fncSchema:{
+	watch: {
+		fncSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		}
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 
 		// set defaults
-		this.holderCollectionModuleId  = this.module.id;
-		this.holderFncBackendModuleId  = this.module.id;
+		this.holderCollectionModuleId = this.module.id;
+		this.holderFncBackendModuleId = this.module.id;
 		this.holderFncFrontendModuleId = this.module.id;
-		this.holderPresetModuleId      = this.module.id;
+		this.holderPresetModuleId = this.module.id;
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
 	data() {
 		return {
 			// inputs
-			fnc:false,  // function being edited in this component
-			fncCopy:{}, // copy of function from schema when component last reset
+			fnc: false,  // function being edited in this component
+			fncCopy: {}, // copy of function from schema when component last reset
 
 			// states
-			appFunctions:[
-				'block_inputs','client_execute_keystrokes','copy_to_clipboard','dialog_show',
-				'form_close','form_parent_refresh','form_open','form_set_title','form_show_message',
-				'get_e2ee_data_key','get_e2ee_data_value','get_language_code','get_record_id',
-				'get_role_ids','get_url_query_string','get_user_id','global_search_start','go_back',
-				'has_role','logoff','pdf_create','pdf_create_utf8','record_delete','record_new',
-				'record_reload','record_save','record_save_new','set_e2ee_by_user_ids',
-				'set_e2ee_by_user_ids_and_relation','timer_clear','timer_clear_global','timer_set',
-				'timer_set_global','url_open_as_tab','url_open_as_window'
+			appFunctions: [
+				'block_inputs', 'client_execute_keystrokes', 'copy_to_clipboard', 'dialog_show',
+				'form_close', 'form_parent_refresh', 'form_open', 'form_set_title', 'form_show_message',
+				'get_e2ee_data_key', 'get_e2ee_data_value', 'get_language_code', 'get_record_id',
+				'get_role_ids', 'get_url_query_string', 'get_user_id', 'global_search_start', 'go_back',
+				'has_role', 'logoff', 'pdf_create', 'pdf_create_utf8', 'record_delete', 'record_new',
+				'record_reload', 'record_save', 'record_save_new', 'set_e2ee_by_user_ids',
+				'set_e2ee_by_user_ids_and_relation', 'timer_clear', 'timer_clear_global', 'timer_set',
+				'timer_set_global', 'url_open_as_tab', 'url_open_as_window'
 			],
-			appFunctionsAsync:[
-				'dialog_show','get_e2ee_data_key','get_e2ee_data_value','pdf_create','pdf_create_utf8'
+			appFunctionsAsync: [
+				'dialog_show', 'get_e2ee_data_key', 'get_e2ee_data_value', 'pdf_create', 'pdf_create_utf8'
 			],
-			appFunctionsClientEvent:[
-				'client_execute_keystrokes','copy_to_clipboard','form_open',
-				'get_url_query_string','get_language_code','get_role_ids','get_user_id',
-				'go_back','has_role','pdf_create','pdf_create_utf8','timer_clear_global',
+			appFunctionsClientEvent: [
+				'client_execute_keystrokes', 'copy_to_clipboard', 'form_open',
+				'get_url_query_string', 'get_language_code', 'get_role_ids', 'get_user_id',
+				'go_back', 'has_role', 'pdf_create', 'pdf_create_utf8', 'timer_clear_global',
 				'timer_set_global'
 			],
-			entity:'', // selected placeholder entity
-			entityId:null,
-			entityJsModuleId:null,
-			entityPgModuleId:null,
-			hasReferences:false,
-			holderCollectionFilter:'',
-			holderCollectionIdsOpen:[],
-			holderCollectionModuleId:null,
-			holderFieldFilter:'',
-			holderFieldIdsOpen:[],
-			holderFieldOnlyData:true,
-			holderPresetFilter:'',
-			holderPresetModuleId:null,
-			holderFncBackendFilter:'',
-			holderFncBackendModuleId:null,
-			holderFncFrontendFilter:'',
-			holderFncFrontendModuleId:null,
-			holderRelationIdsOpen:[],
-			holderVariableFilter:'',
-			holderVariableIdsOpen:[],
-			showHolderCollection:false,
-			showHolderFields:false,
-			showHolderFncBackend:false,
-			showHolderFncFrontend:false,
-			showHolderFncInstance:false,
-			showHolderPreset:false,
-			showHolderVariable:false,
-			showLookup:false,
-			showPreview:false,
-			showSidebar:true,
-			tabTarget:'content'
+			entity: '', // selected placeholder entity
+			entityId: null,
+			entityJsModuleId: null,
+			entityPgModuleId: null,
+			hasReferences: false,
+			holderCollectionFilter: '',
+			holderCollectionIdsOpen: [],
+			holderCollectionModuleId: null,
+			holderFieldFilter: '',
+			holderFieldIdsOpen: [],
+			holderFieldOnlyData: true,
+			holderPresetFilter: '',
+			holderPresetModuleId: null,
+			holderFncBackendFilter: '',
+			holderFncBackendModuleId: null,
+			holderFncFrontendFilter: '',
+			holderFncFrontendModuleId: null,
+			holderRelationIdsOpen: [],
+			holderVariableFilter: '',
+			holderVariableIdsOpen: [],
+			showHolderCollection: false,
+			showHolderFields: false,
+			showHolderFncBackend: false,
+			showHolderFncFrontend: false,
+			showHolderFncInstance: false,
+			showHolderPreset: false,
+			showHolderVariable: false,
+			showLookup: false,
+			showPreview: false,
+			showSidebar: true,
+			tabTarget: 'content'
 		};
 	},
-	computed:{
-		fieldsSorted:s => {
-			let out = [];
-			for(let id in s.entityIdMapRef.field) {
+	computed: {
+		fieldsSorted: s => {
+			const out = [];
+			for (const id in s.entityIdMapRef.field) {
 				const f = s.fieldIdMap[id];
 				out.push({
-					icon:s.getFieldIcon(f),
-					id:id,
-					isChart:f.content === 'chart',
-					isData:f.content === 'data',
-					isDataFile:f.content === 'data' && s.isAttributeFiles(s.attributeIdMap[f.attributeId].content),
-					isVariable:f.content === 'variable',
-					name:s.displayFieldName(id),
-					ref:s.entityIdMapRef.field[id]
+					icon: s.getFieldIcon(f),
+					id: id,
+					isChart: f.content === 'chart',
+					isData: f.content === 'data',
+					isDataFile: f.content === 'data' && s.isAttributeFiles(s.attributeIdMap[f.attributeId].content),
+					isVariable: f.content === 'variable',
+					name: s.displayFieldName(id),
+					ref: s.entityIdMapRef.field[id]
 				});
 			}
 			return out.sort((a, b) => a.ref - b.ref);
 		},
-		variablesSorted:s => {
-			let out = [];
+		variablesSorted: s => {
+			const out = [];
 			const addVariable = v => {
-				v.icon = getAttributeIcon(v.content,v.contentUse,false,false);
+				v.icon = getAttributeIcon(v.content, v.contentUse, false, false);
 				out.push(v);
 			};
 
 			// form assigned variables
-			for(const v of s.moduleIdMap[s.module.id].variables) {
-				if(v.formId === s.fnc.formId && s.fnc.formId !== null)
+			for (const v of s.moduleIdMap[s.module.id].variables) {
+				if (v.formId === s.fnc.formId && s.fnc.formId !== null)
 					addVariable(v);
 			}
 			// global variables
-			for(const v of s.moduleIdMap[s.module.id].variables) {
-				if(v.formId === null)
+			for (const v of s.moduleIdMap[s.module.id].variables) {
+				if (v.formId === null)
 					addVariable(v);
 			}
 			return out;
 		},
-		insertEntity:s => {
-			if(s.entityId === null)
+		insertEntity: s => {
+			if (s.entityId === null)
 				return null;
 
-			let text    = '';
-			let prefix  = 'app';
+			let text = '';
 			let postfix = '';
-			let postfixAsync = '.then('
+			const prefix = 'app';
+			const postfixAsync = '.then('
 				+ '\n\tres => { }, // if success: return value in \'res\''
 				+ '\n\terr => { }  // if error: error message in \'err\'\n)'
-			;
+				;
 			let mod, rel, col, fnc, frm, opt, args, prs, pat;
 
 			// build unique placeholder name
-			switch(s.entity) {
+			switch (s.entity) {
 				case 'appFunction':
-					opt     = s.capApp.helpJsArgs[s.entityId] !== undefined ? s.capApp.helpJsArgs[s.entityId].join(', ') : '';
+					opt = s.capApp.helpJsArgs[s.entityId] !== undefined ? s.capApp.helpJsArgs[s.entityId].join(', ') : '';
 					postfix = s.appFunctionsAsync.includes(s.entityId) ? postfixAsync : '';
-					text    = `${prefix}.${s.entityId}(${opt})${postfix}`;
-				break;
+					text = `${prefix}.${s.entityId}(${opt})${postfix}`;
+					break;
 				case 'collection_read': // fallthrough
 				case 'collection_update':
 					col = s.collectionIdMap[s.entityId];
 					mod = s.moduleIdMap[col.moduleId];
 					let columns = [];
-					for(let i = 0, j = col.columns.length; i < j; i++) {
+					for (let i = 0, j = col.columns.length; i < j; i++) {
 						columns.push(`{column:${i}}`);
 					}
-					switch(s.entity) {
-						case 'collection_read':   text = `${prefix}.collection_read({${mod.name}.${col.name}},[${columns.join(',')}])`; break;
+					switch (s.entity) {
+						case 'collection_read': text = `${prefix}.collection_read({${mod.name}.${col.name}},[${columns.join(',')}])`; break;
 						case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
 					}
-				break;
-				case 'field_id_get':               text = `${prefix}.get_field_id({${s.displayFieldName(s.entityId)}})`; break;
-				case 'field_value_get':            text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`; break;
-				case 'field_value_get_changed':    text = `${prefix}.get_field_value_changed({${s.displayFieldName(s.entityId)}})`; break;
+					break;
+				case 'field_id_get': text = `${prefix}.get_field_id({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_value_get': text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_value_get_changed': text = `${prefix}.get_field_value_changed({${s.displayFieldName(s.entityId)}})`; break;
 				case 'field_value_get_file_links': text = `${prefix}.get_field_file_links({${s.displayFieldName(s.entityId)}})`; break;
-				case 'field_value_set':            text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value}, ${s.capApp.valueInit})`; break;
-				case 'field_caption_set':          text = `${prefix}.set_field_caption({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
-				case 'field_chart_set':            text = `${prefix}.set_field_chart({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
-				case 'field_error_set':            text = `${prefix}.set_field_error({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
-				case 'field_focus_set':            text = `${prefix}.set_field_focus({${s.displayFieldName(s.entityId)}})`; break;
-				case 'field_order_set':            text = `${prefix}.set_field_order({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_value_set': text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value}, ${s.capApp.valueInit})`; break;
+				case 'field_caption_set': text = `${prefix}.set_field_caption({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_chart_set': text = `${prefix}.set_field_chart({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_error_set': text = `${prefix}.set_field_error({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_focus_set': text = `${prefix}.set_field_focus({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_order_set': text = `${prefix}.set_field_order({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
 				case 'form':
-					frm  = s.formIdMap[s.entityId];
-					mod  = s.moduleIdMap[frm.moduleId];
+					frm = s.formIdMap[s.entityId];
+					mod = s.moduleIdMap[frm.moduleId];
 					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false)`;
-				break;
+					break;
 				case 'jsFunction':
-					fnc  = s.jsFunctionIdMap[s.entityId];
-					mod  = s.moduleIdMap[fnc.moduleId];
-					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs;
+					fnc = s.jsFunctionIdMap[s.entityId];
+					mod = s.moduleIdMap[fnc.moduleId];
+					args = fnc.codeArgs === '' ? '' : `, ${fnc.codeArgs}`;
 					text = fnc.formId === null
 						? `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`
 						: `${prefix}.call_frontend({${mod.name}.${s.formIdMap[fnc.formId].name}.${fnc.name}}${args})`;
-				break;
+					break;
 				case 'pgFunction':
-					fnc  = s.pgFunctionIdMap[s.entityId];
-					mod  = s.moduleIdMap[fnc.moduleId];
-					args = fnc.codeArgs === '' ? '' : ', ' + fnc.codeArgs;
+					fnc = s.pgFunctionIdMap[s.entityId];
+					mod = s.moduleIdMap[fnc.moduleId];
+					args = fnc.codeArgs === '' ? '' : `, ${fnc.codeArgs}`;
 					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${args})${postfixAsync}`;
-				break;
+					break;
 				case 'preset':
-					prs  = s.presetIdMap[s.entityId];
-					rel  = s.relationIdMap[prs.relationId];
-					mod  = s.moduleIdMap[rel.moduleId];
-					pat = new RegExp(`[\{\}]`,'g');
+					prs = s.presetIdMap[s.entityId];
+					rel = s.relationIdMap[prs.relationId];
+					mod = s.moduleIdMap[rel.moduleId];
+					pat = new RegExp(`[\{\}]`, 'g');
 
 					text = !pat.test(prs.name)
 						? `${prefix}.get_preset_record_id({${mod.name}.${rel.name}.${prs.name}})`
 						: `${prefix}.get_preset_record_id('${s.entityId}')`;
-				break;
+					break;
 				case 'variable_get': // fallthrough
 				case 'variable_set':
-					const va     = s.variableIdMap[s.entityId];
-					const frmOpt = va.formId === null ? '' : `.${s.formIdMap[va.formId].name}`;
-					const mode   = s.entity  === 'variable_get' ? 'get' : 'set';
-					const value  = s.entity  === 'variable_get' ? '' : `, ${s.capApp.value}`;
-					text         = `${prefix}.${mode}_variable({${s.module.name}${frmOpt}.${va.name}}${value})`;
-				break;
+					{
+						const va = s.variableIdMap[s.entityId];
+						const frmOpt = va.formId === null ? '' : `.${s.formIdMap[va.formId].name}`;
+						const mode = s.entity === 'variable_get' ? 'get' : 'set';
+						const value = s.entity === 'variable_get' ? '' : `, ${s.capApp.value}`;
+						text = `${prefix}.${mode}_variable({${s.module.name}${frmOpt}.${va.name}}${value})`;
+						break;
+					}
 			}
 			return text;
 		},
-		jsFunctionsSorted:s => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.fnc.formId && s.fnc.formId !== null).concat(
+		jsFunctionsSorted: s => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.fnc.formId && s.fnc.formId !== null).concat(
 			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null)),
 
 		// inputs
-		fncBody:{
-			get()  { return this.placeholdersSet(this.fnc.codeFunction); },
+		fncBody: {
+			get() { return this.placeholdersSet(this.fnc.codeFunction); },
 			set(v) { this.fnc.codeFunction = this.placeholdersUnset(v); }
 		},
 
 		// simple
-		entityIdMapRef:    s => s.fnc.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),
-		fieldIdMap:        s => s.fnc.formId === null ? {} : s.getFieldMap(s.formIdMap[s.fnc.formId].fields),
-		fncSchema:         s => s.jsFunctionIdMap[s.id] === undefined ? false : s.jsFunctionIdMap[s.id],
-		form:              s => s.fnc.formId === null ? false : s.formIdMap[s.fnc.formId],
-		isChanged:         s => !s.deepIsEqual(s.fnc,s.fncSchema),
-		module:            s => s.fnc === false ? false : s.moduleIdMap[s.fnc.moduleId],
-		modulesData:       s => s.getDependentModules(s.module).filter(v => v.relations.length !== 0),
+		entityIdMapRef: s => s.fnc.formId === null ? {} : s.getFormEntityMapRef(s.form.fields, s.form.actions),
+		fieldIdMap: s => s.fnc.formId === null ? {} : s.getFieldMap(s.formIdMap[s.fnc.formId].fields),
+		fncSchema: s => s.jsFunctionIdMap[s.id] === undefined ? false : s.jsFunctionIdMap[s.id],
+		form: s => s.fnc.formId === null ? false : s.formIdMap[s.fnc.formId],
+		isChanged: s => !s.deepIsEqual(s.fnc, s.fncSchema),
+		module: s => s.fnc === false ? false : s.moduleIdMap[s.fnc.moduleId],
+		modulesData: s => s.getDependentModules(s.module).filter(v => v.relations.length !== 0),
 		modulesFncBackend: s => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.pgFunctions.filter(v => v.isFrontendExec).length !== 0),
-		modulesFncFrontend:s => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.jsFunctions.length !== 0),
-		preview:           s => !s.showPreview ? '' : s.placeholdersUnset(s.fncBody),
+		modulesFncFrontend: s => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.jsFunctions.length !== 0),
+		preview: s => !s.showPreview ? '' : s.placeholdersUnset(s.fncBody),
 
 		// stores
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
-		moduleNameMap:  s => s.$store.getters['schema/moduleNameMap'],
-		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
-		presetIdMap:    s => s.$store.getters['schema/presetIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		moduleNameMap: s => s.$store.getters['schema/moduleNameMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		presetIdMap: s => s.$store.getters['schema/presetIdMap'],
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:      s => s.$store.getters['schema/formIdMap'],
-		jsFunctionIdMap:s => s.$store.getters['schema/jsFunctionIdMap'],
-		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
-		variableIdMap:  s => s.$store.getters['schema/variableIdMap'],
-		capApp:         s => s.$store.getters.captions.builder.function,
-		capGen:         s => s.$store.getters.captions.generic
+		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		variableIdMap: s => s.$store.getters['schema/variableIdMap'],
+		capApp: s => s.$store.getters.captions.builder.function,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
@@ -871,89 +857,90 @@ export default {
 			const f = this.fieldIdMap[fieldId];
 			return f === undefined ? '-' : `F${this.entityIdMapRef.field[f.id]}::${this.getFieldTitle(f)}`;
 		},
-		radioIcon(entity,id) {
+		radioIcon(entity, id) {
 			return this.entity === entity && this.entityId === id ? 'radio1.png' : 'radio0.png';
 		},
 
 		// actions
 		openForm() {
-			this.$router.push('/builder/form/'+this.fnc.formId);
+			this.$router.push(`/builder/form/${this.fnc.formId}`);
 		},
 		reset(manuelReset) {
-			if(this.fncSchema !== false && (manuelReset || !this.deepIsEqual(this.fncCopy,this.fncSchema))) {
-				this.fnc     = JSON.parse(JSON.stringify(this.fncSchema));
+			if (this.fncSchema !== false && (manuelReset || !this.deepIsEqual(this.fncCopy, this.fncSchema))) {
+				this.fnc = JSON.parse(JSON.stringify(this.fncSchema));
 				this.fncCopy = JSON.parse(JSON.stringify(this.fncSchema));
 			}
 		},
-		selectEntity(entity,id) {
-			if(entity === this.entity && id === this.entityId)
-				return this.entityId = null;
-
-			this.entity   = entity;
+		selectEntity(entity, id) {
+			if (entity === this.entity && id === this.entityId) {
+				this.entityId = null;
+				return;
+			}
+			this.entity = entity;
 			this.entityId = id;
 		},
 		toggleCollectionShow(id) {
 			const pos = this.holderCollectionIdsOpen.indexOf(id);
-			if(pos === -1) this.holderCollectionIdsOpen.push(id);
-			else           this.holderCollectionIdsOpen.splice(pos,1);
+			if (pos === -1) this.holderCollectionIdsOpen.push(id);
+			else this.holderCollectionIdsOpen.splice(pos, 1);
 		},
 		toggleFieldShow(id) {
 			const pos = this.holderFieldIdsOpen.indexOf(id);
-			if(pos === -1) this.holderFieldIdsOpen.push(id);
-			else           this.holderFieldIdsOpen.splice(pos,1);
+			if (pos === -1) this.holderFieldIdsOpen.push(id);
+			else this.holderFieldIdsOpen.splice(pos, 1);
 		},
 		toggleRelationShow(id) {
 			const pos = this.holderRelationIdsOpen.indexOf(id);
-			if(pos === -1) this.holderRelationIdsOpen.push(id);
-			else           this.holderRelationIdsOpen.splice(pos,1);
+			if (pos === -1) this.holderRelationIdsOpen.push(id);
+			else this.holderRelationIdsOpen.splice(pos, 1);
 		},
 		toggleVariableShow(id) {
 			const pos = this.holderVariableIdsOpen.indexOf(id);
-			if(pos === -1) this.holderVariableIdsOpen.push(id);
-			else           this.holderVariableIdsOpen.splice(pos,1);
+			if (pos === -1) this.holderVariableIdsOpen.push(id);
+			else this.holderVariableIdsOpen.splice(pos, 1);
 		},
-		toggleEntity(entityName,id) {
-			if(this.entity === entityName && this.entityId === id) {
-				this.entity   = '';
+		toggleEntity(entityName, id) {
+			if (this.entity === entityName && this.entityId === id) {
+				this.entity = '';
 				this.entityId = null;
 				return;
 			}
-			this.entity   = entityName;
+			this.entity = entityName;
 			this.entityId = id;
 		},
-		showHelp(top,text,args) {
-			if(args !== undefined)
-				text = text.replace('{ARGS}',`<blockquote>${args.join(',<br />')}</blockquote>`);
+		showHelp(top, text, args) {
+			if (args !== undefined)
+				text = text.replace('{ARGS}', `<blockquote>${args.join(',<br />')}</blockquote>`);
 
-			this.$store.commit('dialog',{
-				captionTop:top,
-				captionBody:text
+			this.$store.commit('dialog', {
+				captionTop: top,
+				captionBody: text
 			});
 		},
 
 		// placeholders are used for storing entities via ID instead of name (which can change)
 		placeholdersSet(body) {
-			let uuid   = '[a-z0-9\-]{36}';
-			let prefix = 'app';
+			const uuid = '[a-z0-9\-]{36}';
+			const prefix = 'app';
 			let pat;
 
 			// replace collection & column IDs with placeholders
-			pat = new RegExp(`${prefix}\.collection_(read|update)\\('(${uuid})'(,\\[([a-z0-9\\-\\s,']*)\\])?`,'g');
-			body = body.replace(pat,(match,mode,collectionId,optional,columnArray) => {
-				if(this.collectionIdMap[collectionId] === 'undefined')
+			pat = new RegExp(`${prefix}\.collection_(read|update)\\('(${uuid})'(,\\[([a-z0-9\\-\\s,']*)\\])?`, 'g');
+			body = body.replace(pat, (match, mode, collectionId, optional, columnArray) => {
+				if (this.collectionIdMap[collectionId] === 'undefined')
 					return match;
 
-				let collection = this.collectionIdMap[collectionId];
-				let module     = this.moduleIdMap[collection.moduleId];
+				const collection = this.collectionIdMap[collectionId];
+				const module = this.moduleIdMap[collection.moduleId];
 
-				if(mode === 'update')
+				if (mode === 'update')
 					return `${prefix}.collection_update({${module.name}.${collection.name}}`;
 
-				let columns = [];
-				let matches = columnArray.match(new RegExp(`${uuid}`,'g'));
-				for(let i = 0, j = matches.length; i < j; i++) {
-					for(let x = 0, y = collection.columns.length; x < y; x++) {
-						if(collection.columns[x].id === matches[i])
+				const columns = [];
+				const matches = columnArray.match(new RegExp(`${uuid}`, 'g'));
+				for (let i = 0, j = matches.length; i < j; i++) {
+					for (let x = 0, y = collection.columns.length; x < y; x++) {
+						if (collection.columns[x].id === matches[i])
 							columns.push(`{column:${x}}`);
 					}
 				}
@@ -961,25 +948,25 @@ export default {
 			});
 
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links|id)\\('(${uuid})'`,'g');
-			body = body.replace(pat,(match,mode,part,id) => this.fieldIdMap[id] !== undefined
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links|id)\\('(${uuid})'`, 'g');
+			body = body.replace(pat, (match, mode, part, id) => this.fieldIdMap[id] !== undefined
 				? `${prefix}.${mode}_field_${part}({${this.displayFieldName(id)}}` : match
 			);
 
 			// replace function IDs with placeholders
-			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\('(${uuid})'`,'g');
-			body = body.replace(pat,(match,fncMode,id) => {
+			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\('(${uuid})'`, 'g');
+			body = body.replace(pat, (match, fncMode, id) => {
 
-				if(fncMode === 'backend' && this.pgFunctionIdMap[id] !== 'undefined') {
+				if (fncMode === 'backend' && this.pgFunctionIdMap[id] !== 'undefined') {
 					const fnc = this.pgFunctionIdMap[id];
 					const mod = this.moduleIdMap[fnc.moduleId];
 					return `${prefix}.call_backend({${mod.name}.${fnc.name}}`;
 				}
-				else if(fncMode === 'frontend' && this.jsFunctionIdMap[id] !== 'undefined') {
+				else if (fncMode === 'frontend' && this.jsFunctionIdMap[id] !== 'undefined') {
 					const fnc = this.jsFunctionIdMap[id];
 					const mod = this.moduleIdMap[fnc.moduleId];
 
-					if(fnc.formId === null)
+					if (fnc.formId === null)
 						return `${prefix}.call_frontend({${mod.name}.${fnc.name}}`;
 
 					const form = this.formIdMap[fnc.formId];
@@ -989,28 +976,28 @@ export default {
 			});
 
 			// replace variable IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_variable\\('(${uuid})'`,'g');
-			body = body.replace(pat,(match,mode,variableId) => {
-				if(this.variableIdMap[variableId] === 'undefined')
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\('(${uuid})'`, 'g');
+			body = body.replace(pat, (match, mode, variableId) => {
+				if (this.variableIdMap[variableId] === 'undefined')
 					return match;
 
 				const variable = this.variableIdMap[variableId];
-				const module   = this.moduleIdMap[variable.moduleId];
-				const frmOpt   = variable.formId === null ? '' : `.${this.formIdMap[variable.formId].name}`;
+				const module = this.moduleIdMap[variable.moduleId];
+				const frmOpt = variable.formId === null ? '' : `.${this.formIdMap[variable.formId].name}`;
 
 				return `${prefix}.${mode}_variable({${module.name}${frmOpt}.${variable.name}}`;
 			});
 
 			// replace presets with placeholders
 			// preset name may not include closed curly bracket '}'
-			pat = new RegExp(`${prefix}\\.get_preset_record_id\\(\\'([a-z0-9\\-]{36})\\'\\)`,'g');
-			body = body.replace(pat,(match,presetId) => {
+			pat = new RegExp(`${prefix}\\.get_preset_record_id\\(\\'([a-z0-9\\-]{36})\\'\\)`, 'g');
+			body = body.replace(pat, (match, presetId) => {
 				const prs = this.presetIdMap[presetId];
 				const rel = this.relationIdMap[prs.relationId];
 				const mod = this.moduleIdMap[rel.moduleId];
-				const pat = new RegExp(`[\{\}]`,'g');
+				const pat = new RegExp(`[\{\}]`, 'g');
 
-				if(prs !== undefined && !pat.test(prs.name))
+				if (prs !== undefined && !pat.test(prs.name))
 					return `${prefix}.get_preset_record_id({${mod.name}.${rel.name}.${prs.name}})`;
 
 				return match;
@@ -1018,37 +1005,37 @@ export default {
 			return body;
 		},
 		placeholdersUnset(body) {
-			let dbChars = this.getValidDbCharsForRx();
-			let prefix  = 'app';
+			const dbChars = this.getValidDbCharsForRx();
+			const prefix = 'app';
 			let pat;
 
 			// replace collection & column placeholders
 			// stored as: app.collection_read({module.collection},[column1,column2,...])
-			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbChars})\.(${dbChars})\}(,\\[(.*)\\])?`,'g');
-			body = body.replace(pat,(match,mode,modName,colName,optional,columnArray) => {
-				if(this.moduleNameMap[modName] === undefined)
+			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbChars})\.(${dbChars})\}(,\\[(.*)\\])?`, 'g');
+			body = body.replace(pat, (match, mode, modName, colName, optional, columnArray) => {
+				if (this.moduleNameMap[modName] === undefined)
 					return match;
 
-				let mod = this.moduleNameMap[modName];
+				const mod = this.moduleNameMap[modName];
 				let col = false;
 
-				for(let k in this.collectionIdMap) {
-					if(this.collectionIdMap[k].moduleId === mod.id && this.collectionIdMap[k].name === colName)
+				for (const k in this.collectionIdMap) {
+					if (this.collectionIdMap[k].moduleId === mod.id && this.collectionIdMap[k].name === colName)
 						col = this.collectionIdMap[k];
 				}
-				if(col === false)
+				if (col === false)
 					return false;
 
-				if(mode === 'update')
+				if (mode === 'update')
 					return `${prefix}\.collection_update('${col.id}'`;
 
-				let columnIds = [];
-				let columns   = columnArray.split(',');
+				const columnIds = [];
+				const columns = columnArray.split(',');
 
-				for(let c of columns) {
-					let columnIndex = parseInt(c.replace('{column:','').replace('}',''));
+				for (const c of columns) {
+					const columnIndex = parseInt(c.replace('{column:', '').replace('}', ''), 10);
 
-					if(col.columns.length <= columnIndex)
+					if (col.columns.length <= columnIndex)
 						return match;
 
 					columnIds.push(`'${col.columns[columnIndex].id}'`);
@@ -1058,10 +1045,10 @@ export default {
 
 			// replace field get/set value/caption/error/focus/etc. placeholders
 			// stored as: app.get_field_value({F12::0 display_name... or app.get_field_value({F13::Container...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links|id)\\(\{F(\\d+)\\:\\:.*?\}`,'g');
-			body = body.replace(pat,(match,mode,part,ref) => {
-				for(let fieldId in this.entityIdMapRef.field) {
-					if(this.entityIdMapRef.field[fieldId] === parseInt(ref))
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links|id)\\(\{F(\\d+)\\:\\:.*?\}`, 'g');
+			body = body.replace(pat, (match, mode, part, ref) => {
+				for (const fieldId in this.entityIdMapRef.field) {
+					if (this.entityIdMapRef.field[fieldId] === parseInt(ref, 10))
 						return `${prefix}\.${mode}_field_${part}('${fieldId}'`;
 				}
 				return match;
@@ -1069,23 +1056,23 @@ export default {
 
 			// replace backend function placeholders
 			// stored as: app.call_backend({module.function},12...
-			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbChars})\.(${dbChars})\}`,'g');
-			body = body.replace(pat,(match,modName,fncName) => {
-				if(this.moduleNameMap[modName] === undefined)
+			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbChars})\.(${dbChars})\}`, 'g');
+			body = body.replace(pat, (match, modName, fncName) => {
+				if (this.moduleNameMap[modName] === undefined)
 					return match;
 
-				let mod = this.moduleNameMap[modName];
+				const mod = this.moduleNameMap[modName];
 				let fnc = false;
 
-				for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
-					if(mod.pgFunctions[i].name !== fncName)
+				for (let i = 0, j = mod.pgFunctions.length; i < j; i++) {
+					if (mod.pgFunctions[i].name !== fncName)
 						continue;
 
 					fnc = mod.pgFunctions[i];
 					break;
 				}
 
-				if(fnc === false)
+				if (fnc === false)
 					return match;
 
 				return `${prefix}\.call_backend('${fnc.id}'`;
@@ -1093,15 +1080,15 @@ export default {
 
 			// replace global frontend function placeholders
 			// stored as: app.call_frontend({module.function},12...
-			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
-			body = body.replace(pat,(match,modName,fncName) => {
-				if(this.moduleNameMap[modName] === undefined)
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\}`, 'g');
+			body = body.replace(pat, (match, modName, fncName) => {
+				if (this.moduleNameMap[modName] === undefined)
 					return match;
 
 				const mod = this.moduleNameMap[modName];
 
-				for(let f of mod.jsFunctions) {
-					if(f.formId === null && f.name === fncName)
+				for (const f of mod.jsFunctions) {
+					if (f.formId === null && f.name === fncName)
 						return `${prefix}\.call_frontend('${f.id}'`;
 				}
 				return match;
@@ -1109,15 +1096,15 @@ export default {
 
 			// replace form assigned frontend function placeholders
 			// stored as: app.call_frontend({module.form.function},12...
-			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
-			body = body.replace(pat,(match,modName,frmName,fncName) => {
-				if(this.form === false || this.moduleNameMap[modName] === undefined)
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`, 'g');
+			body = body.replace(pat, (match, modName, frmName, fncName) => {
+				if (this.form === false || this.moduleNameMap[modName] === undefined)
 					return match;
 
 				const mod = this.moduleNameMap[modName];
 
-				for(let f of mod.jsFunctions) {
-					if(f.formId !== null && f.formId === this.form.id && frmName === this.form.name && f.name === fncName)
+				for (const f of mod.jsFunctions) {
+					if (f.formId !== null && f.formId === this.form.id && frmName === this.form.name && f.name === fncName)
 						return `${prefix}\.call_frontend('${f.id}'`;
 				}
 				return match;
@@ -1125,12 +1112,12 @@ export default {
 
 			// replace global variable placeholders
 			// stored as: app.get_variable({module.variable})
-			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
-			body = body.replace(pat,(match,mode,modName,vaName) => {
-				if(this.moduleNameMap[modName] !== undefined) {
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\}`, 'g');
+			body = body.replace(pat, (match, mode, modName, vaName) => {
+				if (this.moduleNameMap[modName] !== undefined) {
 					const mod = this.moduleNameMap[modName];
-					for(let k in this.variableIdMap) {
-						if(this.variableIdMap[k].moduleId === mod.id && this.variableIdMap[k].name === vaName) {
+					for (const k in this.variableIdMap) {
+						if (this.variableIdMap[k].moduleId === mod.id && this.variableIdMap[k].name === vaName) {
 							return `${prefix}\.${mode}_variable('${k}'`;
 						}
 					}
@@ -1140,13 +1127,13 @@ export default {
 
 			// replace form assigned variable placeholders
 			// stored as: app.get_variable({module.form.variable})
-			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
-			body = body.replace(pat,(match,mode,modName,frmName,vaName) => {
-				if(this.form !== false && this.moduleNameMap[modName] !== undefined) {
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`, 'g');
+			body = body.replace(pat, (match, mode, modName, frmName, vaName) => {
+				if (this.form !== false && this.moduleNameMap[modName] !== undefined) {
 					const mod = this.moduleNameMap[modName];
-					for(let k in this.variableIdMap) {
+					for (const k in this.variableIdMap) {
 						const va = this.variableIdMap[k];
-						if(va.formId !== null && va.formId === this.form.id && frmName === this.form.name && va.moduleId === mod.id && va.name === vaName) {
+						if (va.formId !== null && va.formId === this.form.id && frmName === this.form.name && va.moduleId === mod.id && va.name === vaName) {
 							return `${prefix}\.${mode}_variable('${k}'`;
 						}
 					}
@@ -1156,16 +1143,16 @@ export default {
 
 			// replace preset placeholders
 			// stored as: app.get_preset_record_id({MOD_NAME.REL_NAME.PRESET_NAME})
-			pat = new RegExp(`${prefix}\.get_preset_record_id\\(\\{(${dbChars})\\.(${dbChars})\\.([^\}]*)\\}\\)`,'g');
-			body = body.replace(pat,(match,modName,relName,presetName) => {
+			pat = new RegExp(`${prefix}\.get_preset_record_id\\(\\{(${dbChars})\\.(${dbChars})\\.([^\}]*)\\}\\)`, 'g');
+			body = body.replace(pat, (match, modName, relName, presetName) => {
 				const mod = this.moduleNameMap[modName];
-				if(mod !== undefined) {
-					for(let r of mod.relations) {
-						if(r.name !== relName)
+				if (mod !== undefined) {
+					for (const r of mod.relations) {
+						if (r.name !== relName)
 							continue;
 
-						for(let p of r.presets) {
-							if(p.name === presetName)
+						for (const p of r.presets) {
+							if (p.name === presetName)
 								return `${prefix}\.get_preset_record_id('${p.id}')`;
 						}
 					}
@@ -1177,26 +1164,27 @@ export default {
 
 		// backend calls
 		delCheck() {
-			this.hasReferences = this.getHasAnyReferences(this.module,'jsFunction',this.id);
-			if(this.hasReferences)
-				return this.showLookup = true;
-
-			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
+			this.hasReferences = this.getHasAnyReferences(this.module, 'jsFunction', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
 		},
 		del() {
-			ws.send('jsFunction','del',this.fnc.id,true).then(
+			ws.send('jsFunction', 'del', this.fnc.id, true).then(
 				() => {
 					this.$root.schemaReload(this.fnc.moduleId);
-					this.$router.push('/builder/js-functions/'+this.fnc.moduleId);
+					this.$router.push(`/builder/js-functions/${this.fnc.moduleId}`);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('jsFunction','set',this.fnc),
-				ws.prepare('schema','check',{moduleId:this.module.id})
-			],true).then(
+				ws.prepare('jsFunction', 'set', this.fnc),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

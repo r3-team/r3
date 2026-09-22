@@ -328,7 +328,6 @@ export default {
 			v-if="showLookup"
 			@close="showLookup = false"
 			:entityId="attributeId"
-			:entityName="values.name"
 			:module
 			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
 		/>
@@ -629,7 +628,7 @@ export default {
 
 		// backend calls
 		delCheck() {
-			this.hasReferences = this.getHasAnyReferences(this.module, 'attribute', this.attributeId);
+			this.hasReferences = this.getHasAnyReferences(this.module, 'attribute', this.attributeId, false);
 			if (this.hasReferences) {
 				this.showLookup = true;
 				return;

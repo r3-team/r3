@@ -1715,6 +1715,7 @@
 		},
 		"module": {
 			"button": {
+				"dependencyRemove": "Remove dependency",
 				"graph": "Függőségi diagram",
 				"keyCreate": "Létrehozás",
 				"loginSyncCreate": "New user sync function",
@@ -1752,6 +1753,9 @@
 			"positionHint": "Az alkalmazás pozíciója a fejlécben (a kisebb először). Rendszergazdák által felülírható.",
 			"pwa": "Progresszív webalkalmazás (PWA)",
 			"pwaHint": "Az REI3 alkalmazások progresszív webalkalmazásként (PWA) is telepíthetők asztali számítógépeken és mobil eszközökön a modern böngészők segítségével. Megjelennek a telepített alkalmazások között, saját ikonokkal és hivatkozásokkal rendelkeznek, és hasonlóan viselkednek a natív alkalmazásokhoz.",
+			"referenceCheck": "Dependency checker",
+			"referencesFound": "Reference found",
+			"referencesNone": "No references found",
 			"release": "Kiadás",
 			"releaseDate": "Kiadás dátuma",
 			"releaseLogCategories": "Version history categories",
@@ -2554,6 +2558,7 @@
 		"certificate": "Certificate",
 		"changeLogs": "Change logs",
 		"changedBy": "Changed by",
+		"checking": "Checking",
 		"circle": "Circle",
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",

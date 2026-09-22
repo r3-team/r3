@@ -1715,6 +1715,7 @@
 		},
 		"module": {
 			"button": {
+				"dependencyRemove": "Remove dependency",
 				"graph": "Bağımlılık grafiği",
 				"keyCreate": "Oluştur",
 				"loginSyncCreate": "Yeni kullanıcı senkronizasyon işlevi",
@@ -1752,6 +1753,9 @@
 			"positionHint": "Uygulamanın başlıktaki konumu (önce küçük olanlar). Sistem yöneticileri tarafından üzerine yazılabilir.",
 			"pwa": "Aşamalı web uygulaması (PWA)",
 			"pwaHint": "REI3 uygulamaları, modern tarayıcıların içinden aşamalı web uygulamaları (PWA) olarak masaüstü bilgisayarlara ve mobil cihazlara kurulabilir. Daha sonra yüklü uygulamalar olarak listelenirler, kendi simgelerini ve kısayollarını alırlar ve yerel uygulamalara benzer şekilde davranırlar.",
+			"referenceCheck": "Dependency checker",
+			"referencesFound": "Reference found",
+			"referencesNone": "No references found",
 			"release": "Dağıtım",
 			"releaseDate": "Yayın tarihi",
 			"releaseLogCategories": "Sürüm geçmişi kategorileri",
@@ -2554,6 +2558,7 @@
 		"certificate": "Sertifika",
 		"changeLogs": "Change logs",
 		"changedBy": "Değiştiren:",
+		"checking": "Checking",
 		"circle": "Circle",
 		"clientEvent": "Müşteri etkinliği",
 		"clientEvents": "Müşteri etkinlikleri",

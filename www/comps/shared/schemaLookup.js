@@ -2,22 +2,23 @@ import { getDependentOnModules } from './builder.js';
 
 const entities = ['attribute', 'jsFunction', 'pgFunction', 'relation'];
 
-export function getHasAnyReferences(moduleSource, entity, entityId) {
-	const o = getReferences(moduleSource, entity, entityId);
+export function getHasAnyReferences(moduleSource, entity, entityId, noDependencies) {
+	const o = getReferences(moduleSource, entity, entityId, noDependencies);
 	return Object.keys(o).length !== 0;
 };
 
 // goes through the given module and its dependencies
 // finds all references for chosen entity
 // returns object with lookup results
-export function getReferences(moduleSource, entity, entityId) {
+export function getReferences(moduleSource, entity, entityId, noDependencies) {
 	if (!entities.includes(entity)) {
 		console.warn(`invalid entity for schema lookup: '${entity}'`);
 		return [];
 	}
 
 	const moduleIdMapLookups = {};
-	for (const mod of getDependentOnModules(moduleSource)) {
+	const modulesCheck = noDependencies ? [moduleSource] : getDependentOnModules(moduleSource);
+	for (const mod of modulesCheck) {
 
 		const lookups = {
 			anyResults: false,

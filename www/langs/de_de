@@ -1715,6 +1715,7 @@
 		},
 		"module": {
 			"button": {
+				"dependencyRemove": "Abhängigkeit entfernen",
 				"graph": "Abhängigkeitsdiagramm",
 				"keyCreate": "Erzeugen",
 				"loginSyncCreate": "Neue Benutzer-Sync-Funktion",
@@ -1752,6 +1753,9 @@
 			"positionHint": "Position der Anwendung in der Kopfzeile (kleinere zuerst). Kann von Systemadministratoren überschrieben werden.",
 			"pwa": "Progressive Web App (PWA)",
 			"pwaHint": "REI3-Anwendungen können auf Desktop-Computern sowie auf mobilen Geräten als Progressive Web Apps (PWA) über moderne Browser installiert werden. Sie werden bei den installierten Anwendungen aufgeführt, haben eigene Icons sowie Verknüpfungen und verhalten sich ähnlich zu nativen Anwendungen.",
+			"referenceCheck": "Abhängigkeitsprüfung",
+			"referencesFound": "Referenz gefunden",
+			"referencesNone": "Keine Referenz gefunden",
 			"release": "Veröffentlichung",
 			"releaseDate": "Veröffentlichungsdatum",
 			"releaseLogCategories": "Versions-Historie-Kategorien",
@@ -2554,6 +2558,7 @@
 		"certificate": "Zertifikat",
 		"changeLogs": "Änderungshistorien",
 		"changedBy": "Geändert von",
+		"checking": "Prüfe",
 		"circle": "Kreis",
 		"clientEvent": "Client-Ereignis",
 		"clientEvents": "Client-Ereignisse",

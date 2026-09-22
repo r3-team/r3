@@ -1715,6 +1715,7 @@
 		},
 		"module": {
 			"button": {
+				"dependencyRemove": "Remove dependency",
 				"graph": "الرسم البياني للتبعية",
 				"keyCreate": "يولد",
 				"loginSyncCreate": "New user sync function",
@@ -1752,6 +1753,9 @@
 			"positionHint": "موضع التطبيق في الرأس (الأصغر منها أولاً). ",
 			"pwa": "تطبيق الويب التقدمي (PWA)",
 			"pwaHint": "يمكن تثبيت تطبيقات REI3 على أجهزة الكمبيوتر المكتبية والأجهزة المحمولة كتطبيقات ويب تقدمية (PWA) من داخل المتصفحات الحديثة. ",
+			"referenceCheck": "Dependency checker",
+			"referencesFound": "Reference found",
+			"referencesNone": "No references found",
 			"release": "النشر",
 			"releaseDate": "تاريخ الافراج عنه",
 			"releaseLogCategories": "Version history categories",
@@ -2554,6 +2558,7 @@
 		"certificate": "Certificate",
 		"changeLogs": "Change logs",
 		"changedBy": "Changed by",
+		"checking": "Checking",
 		"circle": "Circle",
 		"clientEvent": "حدث العميل",
 		"clientEvents": "أحداث العميل",
