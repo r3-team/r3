@@ -1,17 +1,16 @@
-import MyBuilderCaption         from './builderCaption.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog } from '../shared/generic.js';
+
+import MyBuilderCaption from './builderCaption.js';
 import MyBuilderCollectionInput from './builderCollectionInput.js';
-import MyBuilderFormInput       from './builderFormInput.js';
-import {dialogDeleteAsk}        from '../shared/dialog.js';
-import {copyValueDialog}        from '../shared/generic.js';
+import MyBuilderFormInput from './builderFormInput.js';
 
 export default {
-	name:'my-builder-widget',
-	components:{
-		MyBuilderCaption,
-		MyBuilderCollectionInput,
-		MyBuilderFormInput
+	name: 'my-builder-widget',
+	components: {
+		MyBuilderCaption, MyBuilderCollectionInput, MyBuilderFormInput
 	},
-	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-widget float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
@@ -128,57 +127,57 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		module:         { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true },
-		widgetId:       { required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		module: { type: Object, required: true },
+		readonly: { type: Boolean, required: true },
+		widgetId: { required: true }
 	},
-	emits:['close','next-language'],
+	emits: ['close', 'next-language'],
 	data() {
 		return {
-			values:null,
-			valuesOrg:null
+			values: null,
+			valuesOrg: null
 		};
 	},
-	computed:{
-		nameTaken:s => {
-			for(let w of s.module.widgets) {
-				if(w.id !== s.widgetId && w.name === s.values.name)
+	computed: {
+		nameTaken: s => {
+			for (const w of s.module.widgets) {
+				if (w.id !== s.widgetId && w.name === s.values.name)
 					return true;
 			}
 			return false;
 		},
 
 		// simple
-		canSave:   s => !s.readonly && s.hasChanges && !s.nameTaken,
-		hasChanges:s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		title:     s => s.capApp.edit.replace('{NAME}',s.values.name),
+		canSave: s => !s.readonly && s.hasChanges && !s.nameTaken,
+		hasChanges: s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		title: s => s.capApp.edit.replace('{NAME}', s.values.name),
 
 		// stores
-		widgetIdMap:s => s.$store.getters['schema/widgetIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.widget,
-		capGen:     s => s.$store.getters.captions.generic
+		widgetIdMap: s => s.$store.getters['schema/widgetIdMap'],
+		capApp: s => s.$store.getters.captions.builder.widget,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// external
 		copyValueDialog,
 		dialogDeleteAsk,
 
 		// actions
 		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's' && this.canSave) {
+			if (e.ctrlKey && e.key === 's' && this.canSave) {
 				this.set();
 				e.preventDefault();
 			}
-			if(e.key === 'Escape') {
+			if (e.key === 'Escape') {
 				this.$emit('close');
 				e.preventDefault();
 			}
@@ -187,13 +186,13 @@ export default {
 			this.values = this.widgetId !== null
 				? JSON.parse(JSON.stringify(this.widgetIdMap[this.widgetId]))
 				: {
-					id:null,
-					moduleId:this.module.id,
-					formId:null,
-					name:'',
-					size:1,
-					captions:{
-						widgetTitle:{}
+					id: null,
+					moduleId: this.module.id,
+					formId: null,
+					name: '',
+					size: 1,
+					captions: {
+						widgetTitle: {}
 					}
 				};
 
@@ -205,7 +204,7 @@ export default {
 
 		// backend calls
 		del() {
-			ws.send('widget','del',this.widgetId,true).then(
+			ws.send('widget', 'del', this.widgetId, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');
@@ -215,9 +214,9 @@ export default {
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('widget','set',this.values),
-				ws.prepare('schema','check',{ moduleId:this.module.id })
-			],true).then(
+				ws.prepare('widget', 'set', this.values),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');

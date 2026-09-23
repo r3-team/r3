@@ -1,10 +1,11 @@
-import MyBuilderWidget    from './builderWidget.js';
-import {routeParseParams} from '../shared/router.js';
+import { routeParseParams } from '../shared/router.js';
+
+import MyBuilderWidget from './builderWidget.js';
 
 export default {
-	name:'my-builder-widgets',
-	components:{ MyBuilderWidget },
-	template:`<div class="builder-widgets contentBox grow">
+	name: 'my-builder-widgets',
+	components: { MyBuilderWidget },
+	template: `<div class="builder-widgets contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/tiles.png" />
@@ -73,33 +74,33 @@ export default {
 			:widgetId="widgetIdEdit"
 		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			filter:'',
-			widgetIdEdit:false
+			filter: '',
+			widgetIdEdit: false
 		};
 	},
-	computed:{
-		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+	computed: {
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.widget,
-		capGen:     s => s.$store.getters.captions.generic
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.widget,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
-		let params = { widgetIdEdit:{ parse:'string', value:null } };
+		const params = { widgetIdEdit: { parse: 'string', value: null } };
 		this.routeParseParams(params);
 
-		if(params.widgetIdEdit.value !== null)
+		if (params.widgetIdEdit.value !== null)
 			this.widgetIdEdit = params.widgetIdEdit.value;
 	},
-	methods:{
+	methods: {
 		// external
 		routeParseParams
 	}

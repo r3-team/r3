@@ -266,6 +266,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showWidgets && lookups.widgetIds.length !== 0">
+						<td class="minimum"><my-label image="tiles.png" :caption="capGen.widgets" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.widgetIds"
+									@trigger="open('widget',moduleId,id,false)"
+									@trigger-middle="open('widget',moduleId,id,true)"
+									:caption="widgetIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
@@ -287,7 +300,8 @@ const MyBuilderSchemaLookupModule = {
 		showPgTriggers: { type: Boolean, required: true },
 		showPolicies: { type: Boolean, required: true },
 		showRelationships: { type: Boolean, required: true },
-		showSearchBars: { type: Boolean, required: true }
+		showSearchBars: { type: Boolean, required: true },
+		showWidgets: { type: Boolean, required: true },
 	},
 	emits: ['close'],
 	data() {
@@ -317,7 +331,8 @@ const MyBuilderSchemaLookupModule = {
 		pgTriggerIdMap: s => s.$store.getters['schema/pgTriggerIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
-		capGen: s => s.$store.getters.captions.generic
+		widgetIdMap: s => s.$store.getters['schema/widgetIdMap'],
+		capGen: s => s.$store.getters.captions.generic,
 	},
 	methods: {
 		// externals
@@ -356,6 +371,7 @@ const MyBuilderSchemaLookupModule = {
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
 				case 'relation': url = `/builder/relation/${entityId}`; break;
 				case 'searchBar': url = `/builder/search-bar/${entityId}`; break;
+				case 'widget': url = `/builder/widgets/${entityId}?widgetIdEdit=${entityIdSub}`; break;
 			}
 			if (middle)
 				return this.openLink(`#${url}`, true);
@@ -407,7 +423,8 @@ export default {
 				<my-button-check v-if="isAnyPgTriggers" v-model="showPgTriggers" :caption="capGen.triggers" />
 				<my-button-check v-if="isAnyRelationPolicies" v-model="showPolicies" :caption="capGen.policies" />
 				<my-button-check v-if="isAnyRelationships" v-model="showRelationships" :caption="capGen.relationships" />
-				<my-button-check v-if="isAnySearchBars" v-model="showSearchBars"    :caption="capGen.searchBars" />
+				<my-button-check v-if="isAnySearchBars" v-model="showSearchBars" :caption="capGen.searchBars" />
+				<my-button-check v-if="isAnyWidgets" v-model="showWidgets" :caption="capGen.widgets" />
 			</div>
 			<div class="content column scroll grow default-inputs">
 				<my-label image="load.gif"
@@ -447,6 +464,7 @@ export default {
 						:showPolicies
 						:showRelationships
 						:showSearchBars
+						:showWidgets
 					/>
 				</template>
 			</div>
@@ -482,7 +500,8 @@ export default {
 			showPgTriggers: true,
 			showPolicies: true,
 			showRelationships: true,
-			showSearchBars: true
+			showSearchBars: true,
+			showWidgets: true,
 		};
 	},
 	computed: {
@@ -539,6 +558,7 @@ export default {
 		isAnyRelationPolicies: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsPolicies.length !== 0),
 		isAnyRelationships: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsShips.length !== 0),
 		isAnySearchBars: s => Object.values(s.moduleIdMapLookups).some(v => v.searchBarIds.length !== 0),
+		isAnyWidgets: s => Object.values(s.moduleIdMapLookups).some(v => v.widgetIds.length !== 0),
 		noResults: s => Object.keys(s.moduleIdMapLookups).length === 0,
 
 		// stores

@@ -38,6 +38,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			pgIndexIds: [],
 			pgTriggerIds: [],
 			searchBarIds: [],
+			widgetIds: [],
 
 			// relations matched in policies/relationships
 			relationIdsPolicies: [],
@@ -139,6 +140,12 @@ function getReferencesCollection(mod, collectionId, lookups) {
 	if (mod.menuTabs.some(t => t.menus.some(m => m.collections.some(c => c.collectionId === collectionId)))) {
 		lookups.moduleMenus = true;
 		lookups.anyResults = true;
+	}
+	for (const w of mod.widgets) {
+		if (w.collection !== null && w.collection.collectionId === collectionId) {
+			lookups.widgetIds.push(w.id);
+			lookups.anyResults = true;
+		}
 	}
 };
 
