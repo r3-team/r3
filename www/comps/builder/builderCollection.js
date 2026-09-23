@@ -1,33 +1,23 @@
-import MyBuilderQuery           from './builderQuery.js';
+import { getItemTitleColumn } from '../shared/builder.js';
+import { getTemplateCollectionConsumer, getTemplateQuery } from '../shared/builderTemplate.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
 import MyBuilderCollectionInput from './builderCollectionInput.js';
-import MyBuilderColumnOptions   from './builderColumnOptions.js';
-import MyBuilderIconInput       from './builderIconInput.js';
-import {getItemTitleColumn}     from '../shared/builder.js';
-import {dialogDeleteAsk}        from '../shared/dialog.js';
-import {
-	MyBuilderColumns,
-	MyBuilderColumnTemplates
-} from './builderColumns.js';
-import {
-	getTemplateCollectionConsumer,
-	getTemplateQuery
-} from '../shared/builderTemplate.js';
-import {
-	copyValueDialog,
-	deepIsEqual
-} from '../shared/generic.js';
+import MyBuilderColumnOptions from './builderColumnOptions.js';
+import { MyBuilderColumns, MyBuilderColumnTemplates } from './builderColumns.js';
+import MyBuilderIconInput from './builderIconInput.js';
+import MyBuilderQuery from './builderQuery.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 export default {
-	name:'my-builder-collection',
-	components:{
-		MyBuilderColumnOptions,
-		MyBuilderCollectionInput,
-		MyBuilderColumns,
-		MyBuilderColumnTemplates,
-		MyBuilderIconInput,
-		MyBuilderQuery
+	name: 'my-builder-collection',
+	components: {
+		MyBuilderColumnOptions, MyBuilderCollectionInput, MyBuilderColumns,
+		MyBuilderColumnTemplates, MyBuilderIconInput, MyBuilderQuery, MyBuilderSchemaLookup
 	},
-	template:`<div class="builder-collection" v-if="collection !== false">
+	template: `<div class="builder-collection" v-if="collection !== false">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
@@ -66,8 +56,12 @@ export default {
 						@trigger="copyValueDialog(collection.name,id,id)"
 						:caption="capGen.id"
 					/>
+					<my-button image="builderLookup.png"
+						@trigger="showLookup = true"
+						:caption="capGen.references"
+					/>
 					<my-button image="delete.png"
-						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+						@trigger="delCheck"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -230,78 +224,89 @@ export default {
 				:readonly
 			/>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="collection"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:false, default:'' },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: false, default: '' },
+		readonly: { type: Boolean, required: true }
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
 	data() {
 		return {
 			// inputs
-			collection:false,  // collection being edited in this component
-			collectionCopy:{}, // copy of collection from schema when component last reset
+			collection: false,  // collection being edited in this component
+			collectionCopy: {}, // copy of collection from schema when component last reset
 
 			// state
-			columnIdShow:null,
-			filtersDisable:[
-				'collection','field','fieldChanged','fieldValid','formChanged',
-				'formState','getter','globalSearch','javascript','record','recordMayCreate',
-				'recordMayDelete','recordMayUpdate','recordNew','variable'
+			columnIdShow: null,
+			filtersDisable: [
+				'collection', 'field', 'fieldChanged', 'fieldValid', 'formChanged',
+				'formState', 'getter', 'globalSearch', 'javascript', 'record', 'recordMayCreate',
+				'recordMayDelete', 'recordMayUpdate', 'recordNew', 'variable'
 			],
-			showPreview:false,
-			showSidebar:true,
-			tabTarget:'content'
+			hasReferences: false,
+			showLookup: false,
+			showPreview: false,
+			showSidebar: true,
+			tabTarget: 'content'
 		};
 	},
-	computed:{
-		collectionRows:s => {
+	computed: {
+		collectionRows: s => {
 			const col = s.$store.getters.collectionIdMap[s.collection.id];
-			if(col === undefined)
+			if (col === undefined)
 				return [];
 
-			let out = [];
-			for(const r of col) {
+			const out = [];
+			for (const r of col) {
 				out.push(r.values);
 			}
 			return out;
 		},
-		columnShow:s => {
-			if(s.columnIdShow === null) return false;
+		columnShow: s => {
+			if (s.columnIdShow === null) return false;
 
-			for(let i = 0, j = s.collection.columns.length; i < j; i++) {
-				if(s.collection.columns[i].id === s.columnIdShow)
+			for (let i = 0, j = s.collection.columns.length; i < j; i++) {
+				if (s.collection.columns[i].id === s.columnIdShow)
 					return s.collection.columns[i];
 			}
 			return false;
 		},
 
 		// simple
-		collectionSchema:s => s.collectionIdMap[s.id] === undefined ? false : s.collectionIdMap[s.id],
-		hasChanges:      s => !s.deepIsEqual(s.collection,s.collectionSchema),
-		module:          s => s.moduleIdMap[s.collection.moduleId],
-		query:           s => s.collection.query !== null ? s.collection.query : s.getTemplateQuery(),
+		collectionSchema: s => s.collectionIdMap[s.id] === undefined ? false : s.collectionIdMap[s.id],
+		hasChanges: s => !s.deepIsEqual(s.collection, s.collectionSchema),
+		module: s => s.moduleIdMap[s.collection.moduleId],
+		query: s => s.collection.query !== null ? s.collection.query : s.getTemplateQuery(),
 
 		// stores
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
-		capApp:         s => s.$store.getters.captions.builder.collection,
-		capGen:         s => s.$store.getters.captions.generic
+		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
+		capApp: s => s.$store.getters.captions.builder.collection,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	watch:{
-		collectionSchema:{
+	watch: {
+		collectionSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
@@ -312,32 +317,32 @@ export default {
 
 		// actions
 		collectionAdd() {
-			let v = JSON.parse(JSON.stringify(this.collection.inHeader));
-			let c = this.getTemplateCollectionConsumer();
+			const v = JSON.parse(JSON.stringify(this.collection.inHeader));
+			const c = this.getTemplateCollectionConsumer();
 			c.collectionId = this.collection.id;
 			v.push(c);
 			this.collection.inHeader = v;
 		},
 		collectionRemove(i) {
-			this.collection.inHeader.splice(i,1);
+			this.collection.inHeader.splice(i, 1);
 		},
-		collectionSet(i,value) {
+		collectionSet(i, value) {
 			this.collection.inHeader[i] = value;
 		},
-		columnSet(name,value) {
+		columnSet(name, value) {
 			this.columnShow[name] = value;
 		},
 		removeIndex(index) {
-			for(let i = 0, j = this.collection.columns.length; i < j; i++) {
-				if(this.collection.columns[i].content === 'attribute' && this.collection.columns[i].index === index) {
-					this.collection.columns.splice(i,1);
+			for (let i = 0, j = this.collection.columns.length; i < j; i++) {
+				if (this.collection.columns[i].content === 'attribute' && this.collection.columns[i].index === index) {
+					this.collection.columns.splice(i, 1);
 					i--; j--;
 				}
 			}
 		},
 		reset(manuelReset) {
-			if(this.collectionSchema !== false && (manuelReset || !this.deepIsEqual(this.collectionCopy,this.collectionSchema))) {
-				this.collection     = JSON.parse(JSON.stringify(this.collectionSchema));
+			if (this.collectionSchema !== false && (manuelReset || !this.deepIsEqual(this.collectionCopy, this.collectionSchema))) {
+				this.collection = JSON.parse(JSON.stringify(this.collectionSchema));
 				this.collectionCopy = JSON.parse(JSON.stringify(this.collectionSchema));
 
 				this.columnIdShow = null;
@@ -346,25 +351,33 @@ export default {
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
 
-			if(this.columnIdShow !== null)
+			if (this.columnIdShow !== null)
 				this.tabTarget = 'content';
 		},
 
 		// backend calls
+		delCheck() {
+			this.hasReferences = getHasAnyReferences(this.module, 'collection', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
 		del() {
-			ws.send('collection','del',this.collection.id,true).then(
+			ws.send('collection', 'del', this.collection.id, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					this.$router.push('/builder/collections/'+this.collection.moduleId);
+					this.$router.push(`/builder/collections/${this.collection.moduleId}`);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('collection','set',this.collection),
-				ws.prepare('schema','check',{moduleId:this.module.id})
-			],true).then(
+				ws.prepare('collection', 'set', this.collection),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

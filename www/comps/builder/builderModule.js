@@ -143,6 +143,21 @@ export default {
 						<td>{{ capApp.dependsOnHint }}</td>
 					</tr>
 					<tr>
+						<td>{{ capApp.parent }}</td>
+						<td>
+							<select v-model="inputs.parentId" :disabled="readonly">
+								<option :value="null">-</option>
+								<option
+									v-for="mod in getDependentModules(moduleSchema).filter(v => v.id !== id && v.parentId === null)"
+									:value="mod.id"
+								>
+									{{ mod.name }}
+								</option>
+							</select>
+						</td>
+						<td>{{ capApp.parentHint }}</td>
+					</tr>
+					<tr>
 						<td>{{ capGen.icon }}</td>
 						<td>
 							<my-builder-icon-input
@@ -157,21 +172,6 @@ export default {
 						<td>{{ capApp.color }}</td>
 						<td><my-input-color-wrap v-model="inputs.color1" :allowNull="true" :readonly /></td>
 						<td>{{ capApp.colorHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.parent }}</td>
-						<td>
-							<select v-model="inputs.parentId" :disabled="readonly">
-								<option :value="null">-</option>
-								<option
-									v-for="mod in getDependentModules(moduleSchema).filter(v => v.id !== id && v.parentId === null)"
-									:value="mod.id"
-								>
-									{{ mod.name }}
-								</option>
-							</select>
-						</td>
-						<td>{{ capApp.parentHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.position }}</td>

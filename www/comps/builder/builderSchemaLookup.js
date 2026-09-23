@@ -58,6 +58,18 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="lookups.moduleMenus">
+						<td class="minimum"><my-label image="menu.png" :caption="capGen.menus" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									@trigger="open('menu',moduleId,null,false)"
+									@trigger-middle="open('menu',moduleId,null,true)"
+									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showRelationships && lookups.relationIdsShips.length !== 0">
 						<td class="minimum"><my-label image="database.png" :caption="capGen.relationships" /></td>
 						<td>
@@ -241,6 +253,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showFormStates && lookups.formIdsStates.length !== 0">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formStates" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.formIdsStates"
+									@trigger="open('form',id,null,false)"
+									@trigger-middle="open('form',id,null,true)"
+									:caption="formIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
@@ -255,6 +280,7 @@ const MyBuilderSchemaLookupModule = {
 		showFormFields: { type: Boolean, required: true },
 		showFormFunctions: { type: Boolean, required: true },
 		showFormQueries: { type: Boolean, required: true },
+		showFormStates: { type: Boolean, required: true },
 		showJsFunctions: { type: Boolean, required: true },
 		showPgFunctions: { type: Boolean, required: true },
 		showPgIndex: { type: Boolean, required: true },
@@ -325,6 +351,7 @@ const MyBuilderSchemaLookupModule = {
 				case 'form': url = `/builder/form/${entityId}`; break;
 				case 'field': url = `/builder/form/${entityId}?fieldIdShow=${entityIdSub}`; break;
 				case 'jsFunction': url = `/builder/js-function/${entityId}`; break;
+				case 'menu': url = `/builder/menu/${entityId}`; break;
 				case 'module': url = `/builder/module/${entityId}`; break;
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
 				case 'relation': url = `/builder/relation/${entityId}`; break;
@@ -373,6 +400,7 @@ export default {
 				<my-button-check v-if="isAnyFormFields" v-model="showFormFields" :caption="capGen.formFields" />
 				<my-button-check v-if="isAnyFormFunctions" v-model="showFormFunctions" :caption="capGen.formEvents" />
 				<my-button-check v-if="isAnyFormQueries" v-model="showFormQueries" :caption="capGen.formQueries" />
+				<my-button-check v-if="isAnyFormStates" v-model="showFormStates" :caption="capGen.formStates" />
 				<my-button-check v-if="isAnyJsFunctions" v-model="showJsFunctions" :caption="capGen.functionsFrontend" />
 				<my-button-check v-if="isAnyPgFunctions" v-model="showPgFunctions" :caption="capGen.functionsBackend" />
 				<my-button-check v-if="isAnyPgIndexes" v-model="showPgIndex" :caption="capGen.indexes" />
@@ -411,6 +439,7 @@ export default {
 						:showFormFields
 						:showFormFunctions
 						:showFormQueries
+						:showFormStates
 						:showJsFunctions
 						:showPgFunctions
 						:showPgIndex
@@ -446,6 +475,7 @@ export default {
 			showFormFields: true,
 			showFormFunctions: true,
 			showFormQueries: true,
+			showFormStates: true,
 			showJsFunctions: true,
 			showPgFunctions: true,
 			showPgIndex: true,
@@ -463,6 +493,10 @@ export default {
 				case 'attribute':
 					contentName = s.capGen.attribute;
 					entityName = s.attributeIdMap[s.entityId].name;
+					break;
+				case 'collection':
+					contentName = s.capGen.collection;
+					entityName = s.collectionIdMap[s.entityId].name;
 					break;
 				case 'doc':
 					contentName = s.capGen.document;
@@ -497,6 +531,7 @@ export default {
 		isAnyFormFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsFunctions.length !== 0),
 		isAnyFormQueries: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsQuery.length !== 0),
 		isAnyFormFields: s => Object.values(s.moduleIdMapLookups).some(v => Object.keys(v.formIdMapFieldIds).length !== 0),
+		isAnyFormStates: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsStates.length !== 0),
 		isAnyJsFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.jsFunctionIds.length !== 0),
 		isAnyPgFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.pgFunctionIds.length !== 0),
 		isAnyPgIndexes: s => Object.values(s.moduleIdMapLookups).some(v => v.pgIndexIds.length !== 0),
@@ -510,6 +545,7 @@ export default {
 		capApp: s => s.$store.getters.captions.builder.schemaLookup,
 		capGen: s => s.$store.getters.captions.generic,
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
 		docIdMap: s => s.$store.getters['schema/docIdMap'],
 		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
 		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],

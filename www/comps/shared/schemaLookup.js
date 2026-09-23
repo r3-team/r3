@@ -1,6 +1,6 @@
 import { getDependentOnModules } from './builder.js';
 
-const entities = ['attribute', 'doc', 'jsFunction', 'pgFunction', 'pgIndex', 'relation'];
+const entities = ['attribute', 'collection', 'doc', 'jsFunction', 'pgFunction', 'pgIndex', 'relation'];
 
 export function getHasAnyReferences(moduleSource, entity, entityId, noDependencies) {
 	const o = getReferences(moduleSource, entity, entityId, noDependencies);
@@ -27,6 +27,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			moduleClientEvents: false,
 			moduleFncLoginSync: false,
 			moduleFncOnLogin: false,
+			moduleMenus: false,
 
 			// main elements
 			apiIds: [],
@@ -46,6 +47,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			formIdsActions: [],
 			formIdsFunctions: [],
 			formIdsQuery: [],
+			formIdsStates: [],
 
 			// sub elements in forms
 			formIdMapFieldIds: {}
@@ -53,6 +55,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 
 		switch (entity) {
 			case 'attribute': getReferencesAttribut(mod, entityId, lookups); break;
+			case 'collection': getReferencesCollection(mod, entityId, lookups); break;
 			case 'doc': getReferencesDoc(mod, entityId, lookups); break;
 			case 'jsFunction': getReferencesJsFunction(mod, entityId, lookups); break;
 			case 'pgFunction': getReferencesPgFunction(mod, entityId, lookups); break;
@@ -66,6 +69,77 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 		}
 	}
 	return moduleIdMapLookups;
+};
+
+function getReferencesCollection(mod, collectionId, lookups) {
+	const isInQuery = query => query !== null && isInFilters(query.filters);
+	const isInColumns = columns => columns.some(v => v.content === 'query' && isInQuery(v.query));
+	const isInFilters = filters => filters.some(v =>
+		isInQuery(v.side0.query) ||
+		isInQuery(v.side1.query) ||
+		v.side0.collectionId === collectionId ||
+		v.side1.collectionId === collectionId);
+
+	const lookupInFields = (formId, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+
+		for (const f of fields) {
+			switch (f.content) {
+				case 'calendar': // fallthrough
+				case 'chart':    // fallthrough
+				case 'kanban':   // fallthrough
+				case 'list':     // fallthrough
+				case 'variable':
+					if (isInQuery(f.query) || isInColumns(f.columns))
+						add(f.id);
+					break;
+				case 'data':
+					if (f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))
+						add(f.id);
+					break;
+				case 'container':
+					lookupInFields(formId, f.fields);
+					break;
+				case 'map':
+					for (const l of f.layersData) {
+						if (isInQuery(l.query)) {
+							add(f.id);
+							break;
+						}
+					}
+					break;
+				case 'tabs':
+					for (const t of f.tabs) {
+						lookupInFields(formId, t.fields);
+					}
+					break;
+			}
+		}
+	};
+	for (const f of mod.forms) {
+		if (isInQuery(f.query)) {
+			lookups.formIdsQuery.push(f.id);
+			lookups.anyResults = true;
+		}
+		if (f.states.some(v => v.conditions.some(c =>
+			c.side0.collectionId === collectionId ||
+			c.side1.collectionId === collectionId))) {
+
+			lookups.formIdsStates.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
+	if (mod.menuTabs.some(t => t.menus.some(m => m.collections.some(c => c.collectionId === collectionId)))) {
+		lookups.moduleMenus = true;
+		lookups.anyResults = true;
+	}
 };
 
 function getReferencesDoc(mod, docId, lookups) {
