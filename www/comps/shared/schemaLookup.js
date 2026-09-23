@@ -102,7 +102,7 @@ function getReferencesDoc(mod, docId, lookups) {
 		lookupInFields(f.id, f.fields);
 	}
 	for (const f of mod.pgFunctions) {
-		if (f.codeFunction.includes(`.pdf_create_attach('${docId}'`)) {
+		if (f.codeFunction.includes(`.pdf_create_attach('${docId}'`) || f.codeFunction.includes(`.pdf_create_export('${docId}'`)) {
 			lookups.pgFunctionIds.push(f.id);
 			lookups.anyResults = true;
 		}
