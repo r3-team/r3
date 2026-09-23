@@ -79,7 +79,9 @@ export default {
 			entityCheck: null, // entity being checked ('relation', 'attribute', ...)
 			entityTitle: '', // name of entity being checked
 			entityList: [], // list of entity elements in parent module (relations, attributes, ...)
-			entitiesCheck: ['relation', 'attribute'], // list of entities to be checked in order
+			entitiesCheck: [  // list of entities to be checked in order
+				'relation', 'attribute', 'pgFunction', 'jsFunction', 'doc'
+			],
 
 			// progress
 			countChecked: 0,
@@ -121,6 +123,18 @@ export default {
 						for (const r of this.moduleParent.relations) {
 							this.entityList = this.entityList.concat(r.attributes);
 						}
+						break;
+					case 'doc':
+						this.entityTitle = this.capGen.document;
+						this.entityList = this.moduleParent.docs;
+						break;
+					case 'jsFunction':
+						this.entityTitle = this.capGen.functionFrontend;
+						this.entityList = this.moduleParent.jsFunctions;
+						break;
+					case 'pgFunction':
+						this.entityTitle = this.capGen.functionBackend;
+						this.entityList = this.moduleParent.pgFunctions;
 						break;
 					case 'relation':
 						this.entityTitle = this.capGen.relation;

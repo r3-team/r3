@@ -1,40 +1,31 @@
-import MyBuilderCaption          from './builderCaption.js';
-import MyBuilderDocFont          from './builderDocFont.js';
-import MyBuilderDocPage          from './builderDocPage.js';
-import MyBuilderDocSets          from './builderDocSets.js';
-import MyBuilderDocStates        from './builderDocStates.js';
-import MyBuilderQuery            from './builderQuery.js';
-import MyBuilderTagInput         from './builderTagInput.js';
-import MyInputDecimal            from '../inputDecimal.js';
-import {isAttributeRelationship} from '../shared/attribute.js';
-import {getUuidV4}               from '../shared/crypto.js';
-import {dialogDeleteAsk}         from '../shared/dialog.js';
-import {deepIsEqual}             from '../shared/generic.js';
-import {getJoinsIndexMap}        from '../shared/query.js';
-import {
-	getDocEntityMapRef,
-	getDocFieldIcon,
-	getDocFieldTitle
-} from '../shared/builderDoc.js';
-import {
-	getTemplateDocField,
-	getTemplateDocPage,
-	getTemplateQuery
-} from '../shared/builderTemplate.js';
+
+import MyInputDecimal from '../inputDecimal.js';
+import { isAttributeRelationship } from '../shared/attribute.js';
+import { getDocEntityMapRef, getDocFieldIcon, getDocFieldTitle } from '../shared/builderDoc.js';
+import { getTemplateDocField, getTemplateDocPage, getTemplateQuery } from '../shared/builderTemplate.js';
+import { getUuidV4 } from '../shared/crypto.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { deepIsEqual } from '../shared/generic.js';
+import { getJoinsIndexMap } from '../shared/query.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderDocFont from './builderDocFont.js';
+import MyBuilderDocPage from './builderDocPage.js';
+import MyBuilderDocSets from './builderDocSets.js';
+import MyBuilderDocStates from './builderDocStates.js';
+import MyBuilderQuery from './builderQuery.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
+import MyBuilderTagInput from './builderTagInput.js';
 
 export default {
-	name:'my-builder-doc',
-	components:{
-		MyBuilderCaption,
-		MyBuilderDocFont,
-		MyBuilderDocPage,
-		MyBuilderDocSets,
-		MyBuilderDocStates,
-		MyBuilderQuery,
-		MyBuilderTagInput,
+	name: 'my-builder-doc',
+	components: {
+		MyBuilderCaption, MyBuilderDocFont, MyBuilderDocPage, MyBuilderDocSets,
+		MyBuilderDocStates, MyBuilderQuery, MyBuilderSchemaLookup, MyBuilderTagInput,
 		MyInputDecimal
 	},
-	template:`<div class="builder-doc" v-if="doc !== false">
+	template: `<div class="builder-doc" v-if="doc !== false">
 		<div class="contentBox grow scroll">
 			<div class="top">
 				<div class="area nowrap">
@@ -85,8 +76,12 @@ export default {
 					/>
 				</div>
 				<div class="area nowrap">
+					<my-button image="builderLookup.png"
+						@trigger="showLookup = true"
+						:caption="capGen.references"
+					/>
 					<my-button image="delete.png"
-						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+						@trigger="delCheck"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -269,123 +264,134 @@ export default {
 			<!-- field options -->
 			<div class="content grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="doc"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:false, default:'' },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: false, default: '' },
+		readonly: { type: Boolean, required: true }
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.cacheDenialTimestamp = setInterval(this.setCacheDenialTimestamp,1000);
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
+		this.cacheDenialTimestamp = setInterval(this.setCacheDenialTimestamp, 1000);
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 		clearInterval(this.setCacheDenialTimestamp);
 	},
 	data() {
 		return {
-			cacheDenialTimestamp:0,
-			filtersDisable:[
-				'collection','field','fieldChanged','fieldValid','formChanged',
-				'formState','getter','globalSearch','javascript','record','recordMayCreate',
-				'recordMayDelete','recordMayUpdate','recordNew','variable'
+			cacheDenialTimestamp: 0,
+			filtersDisable: [
+				'collection', 'field', 'fieldChanged', 'fieldValid', 'formChanged',
+				'formState', 'getter', 'globalSearch', 'javascript', 'record', 'recordMayCreate',
+				'recordMayDelete', 'recordMayUpdate', 'recordNew', 'variable'
 			],
 
 			// inputs
-			doc:false,  // document being edited in this component
-			docCopy:{}, // copy of document from schema when component last reset
-			recordId:null,
-			zoom:1,
-			zoomOrg:1,
+			doc: false,  // document being edited in this component
+			docCopy: {}, // copy of document from schema when component last reset
+			recordId: null,
+			zoom: 1,
+			zoomOrg: 1,
 
 			// state
-			pageOptions:null,
-			sideFieldIdShow:null,
-			showSidebar:true,
-			tabPageIdShow:0,
-			tabTarget:'content'
+			hasReferences: false,
+			pageOptions: null,
+			sideFieldIdShow: null,
+			showLookup: false,
+			showSidebar: true,
+			tabPageIdShow: 0,
+			tabTarget: 'content'
 		};
 	},
-	watch:{
-		docSchema:{
+	watch: {
+		docSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		}
 	},
-	computed:{
-		fieldsTemplate:s => {
-			let out = [
+	computed: {
+		fieldsTemplate: s => {
+			const out = [
 				s.getTemplateDocField('flow'),
 				s.getTemplateDocField('grid'),
 				s.getTemplateDocField('list'),
 				s.getTemplateDocField('text')
 			];
-			for(const j of s.query.joins) {
+			for (const j of s.query.joins) {
 				const r = s.relationIdMap[j.relationId];
 
-				for(const a of r.attributes) {
-					if(s.isAttributeRelationship(a.content))
+				for (const a of r.attributes) {
+					if (s.isAttributeRelationship(a.content))
 						continue;
 
-					out.push(s.getTemplateDocField('data',j.index,a.id));
+					out.push(s.getTemplateDocField('data', j.index, a.id));
 				}
 			}
 			return out;
 		},
-		pageIdMapIndex:s => {
-			let out = {};
-			for(let i = 0, j = s.doc.pages.length; i < j; i++) {
+		pageIdMapIndex: s => {
+			const out = {};
+			for (let i = 0, j = s.doc.pages.length; i < j; i++) {
 				out[s.doc.pages[i].id] = i;
 			}
 			return out;
 		},
-		tabsPages:s => {
-			let pageIndexes = [];
-			let icons   = [];
-			let texts   = [];
+		tabsPages: s => {
+			const pageIndexes = [];
+			const icons = [];
+			const texts = [];
 			const titleShort = s.doc.pages.length > 3;
-			for(let i = 0, j = s.doc.pages.length; i < j; i++) {
+			for (let i = 0, j = s.doc.pages.length; i < j; i++) {
 				const p = s.doc.pages[i];
 				pageIndexes.push(p.id);
 				icons.push(p.state ? null : 'images/visible0.png');
-				texts.push(titleShort ? `P${i+1}` : `${s.capGen.page} ${i+1}`);
+				texts.push(titleShort ? `P${i + 1}` : `${s.capGen.page} ${i + 1}`);
 			}
 			return {
-				entries:pageIndexes,
-				entriesIcon:icons,
-				entriesText:texts
+				entries: pageIndexes,
+				entriesIcon: icons,
+				entriesText: texts
 			};
 		},
 
 		// inputs
-		pageActive:{
-			get()  { return this.doc.pages[this.pageIndexActive]; },
+		pageActive: {
+			get() { return this.doc.pages[this.pageIndexActive]; },
 			set(v) { this.doc.pages[this.pageIndexActive] = v; }
 		},
 
 		// simple
-		docSchema:      s => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
+		docSchema: s => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
 		entityIdMapRef: s => s.getDocEntityMapRef(s.doc),
-		hasChanges:     s => !s.deepIsEqual(s.doc, s.docSchema),
-		hasQuery:       s => s.doc.query !== null,
-		module:         s => s.moduleIdMap[s.doc.moduleId],
-		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
+		hasChanges: s => !s.deepIsEqual(s.doc, s.docSchema),
+		hasQuery: s => s.doc.query !== null,
+		module: s => s.moduleIdMap[s.doc.moduleId],
+		pageIndexActive: s => s.pageIdMapIndex[s.tabPageIdShow],
 		previewUrl: s => (s.recordId !== null || !s.hasQuery) && !s.hasChanges
 			? `/doc/download/file.pdf?doc_id=${s.id}&record_id=${s.recordId !== null ? s.recordId : 0}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
-		query:          s => s.doc.query !== null ? s.doc.query : s.getTemplateQuery(),
-		sideDocShow:    s => !s.sideFieldShow,
-		sideFieldShow:  s => s.sideFieldIdShow !== null,
+		query: s => s.doc.query !== null ? s.doc.query : s.getTemplateQuery(),
+		sideDocShow: s => !s.sideFieldShow,
+		sideFieldShow: s => s.sideFieldIdShow !== null,
 
 		// stores
-		docIdMap:     s => s.$store.getters['schema/docIdMap'],
-		moduleIdMap:  s => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap:s => s.$store.getters['schema/relationIdMap'],
-		token:        s => s.$store.getters['local/token'],
-		capApp:       s => s.$store.getters.captions.builder.doc,
-		capGen:       s => s.$store.getters.captions.generic
+		docIdMap: s => s.$store.getters['schema/docIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		token: s => s.$store.getters['local/token'],
+		capApp: s => s.$store.getters.captions.builder.doc,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		deepIsEqual,
 		dialogDeleteAsk,
@@ -406,16 +412,16 @@ export default {
 
 		// system
 		setCacheDenialTimestamp() {
-			this.cacheDenialTimestamp = Math.floor(new Date().getTime() / 1000);
+			this.cacheDenialTimestamp = Math.floor(Date.now() / 1000);
 		},
 
 		// actions
-		fieldDragStart(e,field) {
-			let f = JSON.parse(JSON.stringify(field));
+		fieldDragStart(e, field) {
+			const f = JSON.parse(JSON.stringify(field));
 			f.id = this.getUuidV4();
-			e.dataTransfer.setData('application/json',JSON.stringify(f));
-			e.dataTransfer.setData('doc-field','');
-			e.dataTransfer.setDragImage(e.srcElement,0,0);
+			e.dataTransfer.setData('application/json', JSON.stringify(f));
+			e.dataTransfer.setData('doc-field', '');
+			e.dataTransfer.setDragImage(e.srcElement, 0, 0);
 		},
 		pageAdd() {
 			const p = this.getTemplateDocPage();
@@ -424,26 +430,26 @@ export default {
 		},
 		pageDel(id) {
 			const i = this.pageIdMapIndex[id];
-			this.doc.pages.splice(i,1);
+			this.doc.pages.splice(i, 1);
 			this.resetPageTab();
 		},
 		pageMove(forward) {
-			if(forward && this.pageIndexActive < this.doc.pages.length-1)
-				this.doc.pages.splice(this.pageIndexActive+1,0,this.doc.pages.splice(this.pageIndexActive,1)[0]);
+			if (forward && this.pageIndexActive < this.doc.pages.length - 1)
+				this.doc.pages.splice(this.pageIndexActive + 1, 0, this.doc.pages.splice(this.pageIndexActive, 1)[0]);
 
-			if(!forward && this.pageIndexActive > 0)
-				this.doc.pages.splice(this.pageIndexActive-1,0,this.doc.pages.splice(this.pageIndexActive,1)[0]);
+			if (!forward && this.pageIndexActive > 0)
+				this.doc.pages.splice(this.pageIndexActive - 1, 0, this.doc.pages.splice(this.pageIndexActive, 1)[0]);
 		},
 		removeIndex(index) {
 			const clear = f => {
-				for(let i = 0, j = f.fields.length; i < j; i++) {
-					switch(f.fields[i].content) {
+				for (let i = 0, j = f.fields.length; i < j; i++) {
+					switch (f.fields[i].content) {
 						case 'data':
-							if(f.fields[i].attributeIndex === index) {
-								f.fields.splice(i,1);
+							if (f.fields[i].attributeIndex === index) {
+								f.fields.splice(i, 1);
 								i--; j--;
 							}
-						break;
+							break;
 						case 'flow': f.fields[i] = clear(f.fields[i]); break;
 						case 'grid': f.fields[i] = clear(f.fields[i]); break;
 					}
@@ -451,24 +457,24 @@ export default {
 				return f;
 			};
 
-			for(let i = 0, j = this.doc.pages.length; i < j; i++) {
+			for (let i = 0, j = this.doc.pages.length; i < j; i++) {
 				this.doc.pages[i].fieldFlow = clear(this.doc.pages[i].fieldFlow);
 
-				if(this.doc.pages[i].header.fieldGrid !== null)
+				if (this.doc.pages[i].header.fieldGrid !== null)
 					this.doc.pages[i].header.fieldGrid = clear(this.doc.pages[i].header.fieldGrid);
 
-				if(this.doc.pages[i].footer.fieldGrid !== null)
+				if (this.doc.pages[i].footer.fieldGrid !== null)
 					this.doc.pages[i].footer.fieldGrid = clear(this.doc.pages[i].footer.fieldGrid);
 			}
 		},
 		reset(manuelReset) {
-			if(this.docSchema !== false && (manuelReset || !this.deepIsEqual(this.docCopy,this.docSchema))) {
-				this.doc     = JSON.parse(JSON.stringify(this.docSchema));
+			if (this.docSchema !== false && (manuelReset || !this.deepIsEqual(this.docCopy, this.docSchema))) {
+				this.doc = JSON.parse(JSON.stringify(this.docSchema));
 				this.docCopy = JSON.parse(JSON.stringify(this.docSchema));
 
 				this.sideFieldIdShow = null;
 
-				if(this.doc.pages.findIndex(v => v.id === this.tabPageIdShow) === -1)
+				if (this.doc.pages.findIndex(v => v.id === this.tabPageIdShow) === -1)
 					this.resetPageTab();
 			}
 		},
@@ -477,20 +483,28 @@ export default {
 		},
 
 		// backend calls
+		delCheck() {
+			this.hasReferences = getHasAnyReferences(this.module, 'doc', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
 		del() {
-			ws.send('doc','del',this.doc.id,true).then(
+			ws.send('doc', 'del', this.doc.id, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					this.$router.push('/builder/docs/'+this.module.id);
+					this.$router.push(`/builder/docs/${this.module.id}`);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('doc','set',this.doc),
-				ws.prepare('schema','check',{moduleId:this.module.id})
-			],true).then(
+				ws.prepare('doc', 'set', this.doc),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

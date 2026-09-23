@@ -1,6 +1,6 @@
 import { getDependentOnModules } from './builder.js';
 
-const entities = ['attribute', 'jsFunction', 'pgFunction', 'relation'];
+const entities = ['attribute', 'doc', 'jsFunction', 'pgFunction', 'relation'];
 
 export function getHasAnyReferences(moduleSource, entity, entityId, noDependencies) {
 	const o = getReferences(moduleSource, entity, entityId, noDependencies);
@@ -53,6 +53,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 
 		switch (entity) {
 			case 'attribute': getReferencesAttribut(mod, entityId, lookups); break;
+			case 'doc': getReferencesDoc(mod, entityId, lookups); break;
 			case 'jsFunction': getReferencesJsFunction(mod, entityId, lookups); break;
 			case 'pgFunction': getReferencesPgFunction(mod, entityId, lookups); break;
 			case 'relation': getReferencesRelation(mod, entityId, lookups); break;
@@ -64,6 +65,41 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 		}
 	}
 	return moduleIdMapLookups;
+};
+
+function getReferencesDoc(mod, docId, lookups) {
+	const lookupInFields = (formId, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+		for (const f of fields) {
+			switch (f.content) {
+				case 'button':
+					if (f.openDoc.docIdOpen === docId)
+						add(f.id);
+					break;
+				case 'container':
+					lookupInFields(formId, f.fields);
+					break;
+				case 'tabs':
+					for (const t of f.tabs) {
+						lookupInFields(formId, t.fields);
+					}
+					break;
+			}
+		}
+	};
+	for (const f of mod.forms) {
+		if (f.actions.some(v => v.openDoc !== null && v.openDoc.docIdOpen === docId)) {
+			lookups.formIdsActions.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
 };
 
 function getReferencesRelation(mod, relId, lookups) {
