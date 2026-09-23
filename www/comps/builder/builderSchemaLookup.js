@@ -453,6 +453,10 @@ export default {
 					contentName = s.capGen.attribute;
 					entityName = s.attributeIdMap[s.entityId].name;
 					break;
+				case 'doc':
+					contentName = s.capGen.document;
+					entityName = s.docIdMap[s.entityId].name;
+					break;
 				case 'jsFunction':
 					contentName = s.capGen.functionFrontend;
 					entityName = s.jsFunctionIdMap[s.entityId].name;
@@ -473,6 +477,7 @@ export default {
 		capApp: s => s.$store.getters.captions.builder.schemaLookup,
 		capGen: s => s.$store.getters.captions.generic,
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		docIdMap: s => s.$store.getters['schema/docIdMap'],
 		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
 		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
