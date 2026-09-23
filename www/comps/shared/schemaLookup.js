@@ -92,17 +92,23 @@ function getReferencesCollection(mod, collectionId, lookups) {
 
 		for (const f of fields) {
 			switch (f.content) {
-				case 'calendar': // fallthrough
 				case 'chart':    // fallthrough
-				case 'kanban':   // fallthrough
-				case 'list':     // fallthrough
 				case 'variable':
 					if (isInQuery(f.query) || isInColumns(f.columns))
 						add(f.id);
 					break;
-				case 'data':
-					if (f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))
+				case 'calendar': // fallthrough
+				case 'kanban':   // fallthrough
+				case 'list':
+					if (isInQuery(f.query) || isInColumns(f.columns) || f.collections.some(c => c.collectionId === collectionId))
 						add(f.id);
+					break;
+				case 'data':
+					if ((f.defCollection !== null && f.defCollection.collectionId === collectionId) ||
+						(f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))) {
+
+						add(f.id);
+					}
 					break;
 				case 'container':
 					lookupInFields(formId, f.fields);

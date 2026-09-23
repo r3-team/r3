@@ -75,12 +75,12 @@ export default {
 	emits: ['close', 'confirm'],
 	data() {
 		return {
-			entityIdFinding: null, // ID of entity found to still have dependency
 			entityCheck: null, // entity being checked ('relation', 'attribute', ...)
-			entityTitle: '', // name of entity being checked
+			entityIdFinding: null, // ID of entity found to still have references
+			entityTitle: '', // title of entity being checked
 			entityList: [], // list of entity elements in parent module (relations, attributes, ...)
 			entitiesCheck: [  // list of entities to be checked in order
-				'relation', 'attribute', 'pgFunction', 'pgIndex', 'jsFunction', 'doc'
+				'relation', 'attribute', 'pgFunction', 'pgIndex', 'jsFunction', 'doc', 'collection'
 			],
 
 			// progress
@@ -123,6 +123,10 @@ export default {
 						for (const r of this.moduleParent.relations) {
 							this.entityList = this.entityList.concat(r.attributes);
 						}
+						break;
+					case 'collection':
+						this.entityTitle = this.capGen.collection;
+						this.entityList = this.moduleParent.collections;
 						break;
 					case 'doc':
 						this.entityTitle = this.capGen.document;
