@@ -110,7 +110,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showFunctions && lookups.jsFunctionIds.length !== 0">
+					<tr v-if="showJsFunctions && lookups.jsFunctionIds.length !== 0">
 						<td class="minimum"><my-label image="codeScreen.png" :caption="capGen.functionsFrontend" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -123,7 +123,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showFunctions && lookups.pgFunctionIds.length !== 0">
+					<tr v-if="showPgFunctions && lookups.pgFunctionIds.length !== 0">
 						<td class="minimum"><my-label image="codeDatabase.png" :caption="capGen.functionsBackend" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -188,7 +188,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showForms && lookups.formIdsQuery.length !== 0">
+					<tr v-if="showFormQueries && lookups.formIdsQuery.length !== 0">
 						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formQueries" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -201,7 +201,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showForms && lookups.formIdsActions.length !== 0">
+					<tr v-if="showFormActions && lookups.formIdsActions.length !== 0">
 						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formActions" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -214,7 +214,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showForms && lookups.formIdsFunctions.length !== 0">
+					<tr v-if="showFormFunctions && lookups.formIdsFunctions.length !== 0">
 						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formEvents" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -227,7 +227,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showFields" v-for="(fieldIds,formId) in lookups.formIdMapFieldIds">
+					<tr v-if="showFormFields" v-for="(fieldIds,formId) in lookups.formIdMapFieldIds">
 						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formFields + ': ' + formIdMap[formId].name" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -251,9 +251,12 @@ const MyBuilderSchemaLookupModule = {
 		showApis: { type: Boolean, required: true },
 		showCollections: { type: Boolean, required: true },
 		showDocs: { type: Boolean, required: true },
-		showFields: { type: Boolean, required: true },
-		showForms: { type: Boolean, required: true },
-		showFunctions: { type: Boolean, required: true },
+		showFormActions: { type: Boolean, required: true },
+		showFormFields: { type: Boolean, required: true },
+		showFormFunctions: { type: Boolean, required: true },
+		showFormQueries: { type: Boolean, required: true },
+		showJsFunctions: { type: Boolean, required: true },
+		showPgFunctions: { type: Boolean, required: true },
 		showPgIndex: { type: Boolean, required: true },
 		showPgTriggers: { type: Boolean, required: true },
 		showPolicies: { type: Boolean, required: true },
@@ -363,17 +366,20 @@ export default {
 				</div>
 			</div>
 			<div class="contentBarTop row wrap gap-large justify-end">
-				<my-button-check v-model="showApis"          :caption="capGen.apis" />
-				<my-button-check v-model="showCollections"   :caption="capGen.collections" />
-				<my-button-check v-model="showDocs"          :caption="capGen.pdfs" />
-				<my-button-check v-model="showForms"         :caption="capGen.forms" />
-				<my-button-check v-model="showFields"        :caption="capGen.formFields" />
-				<my-button-check v-model="showFunctions"     :caption="capGen.functions" />
-				<my-button-check v-model="showPgIndex"       :caption="capGen.indexes" />
-				<my-button-check v-model="showPgTriggers"    :caption="capGen.triggers" />
-				<my-button-check v-model="showPolicies"      :caption="capGen.policies" />
-				<my-button-check v-model="showRelationships" :caption="capGen.relationships" />
-				<my-button-check v-model="showSearchBars"    :caption="capGen.searchBars" />
+				<my-button-check v-if="isAnyApis" v-model="showApis" :caption="capGen.apis" />
+				<my-button-check v-if="isAnyCollections" v-model="showCollections" :caption="capGen.collections" />
+				<my-button-check v-if="isAnyDocs" v-model="showDocs" :caption="capGen.pdfs" />
+				<my-button-check v-if="isAnyFormActions" v-model="showFormActions" :caption="capGen.formActions" />
+				<my-button-check v-if="isAnyFormFields" v-model="showFormFields" :caption="capGen.formFields" />
+				<my-button-check v-if="isAnyFormFunctions" v-model="showFormFunctions" :caption="capGen.formEvents" />
+				<my-button-check v-if="isAnyFormQueries" v-model="showFormQueries" :caption="capGen.formQueries" />
+				<my-button-check v-if="isAnyJsFunctions" v-model="showJsFunctions" :caption="capGen.functionsFrontend" />
+				<my-button-check v-if="isAnyPgFunctions" v-model="showPgFunctions" :caption="capGen.functionsBackend" />
+				<my-button-check v-if="isAnyPgIndexes" v-model="showPgIndex" :caption="capGen.indexes" />
+				<my-button-check v-if="isAnyPgTriggers" v-model="showPgTriggers" :caption="capGen.triggers" />
+				<my-button-check v-if="isAnyRelationPolicies" v-model="showPolicies" :caption="capGen.policies" />
+				<my-button-check v-if="isAnyRelationships" v-model="showRelationships" :caption="capGen.relationships" />
+				<my-button-check v-if="isAnySearchBars" v-model="showSearchBars"    :caption="capGen.searchBars" />
 			</div>
 			<div class="content column scroll grow default-inputs">
 				<my-label image="load.gif"
@@ -401,9 +407,12 @@ export default {
 						:showApis
 						:showCollections
 						:showDocs
-						:showFields
-						:showForms
-						:showFunctions
+						:showFormActions
+						:showFormFields
+						:showFormFunctions
+						:showFormQueries
+						:showJsFunctions
+						:showPgFunctions
 						:showPgIndex
 						:showPgTriggers
 						:showPolicies
@@ -433,9 +442,12 @@ export default {
 			showApis: true,
 			showCollections: true,
 			showDocs: true,
-			showFields: true,
-			showForms: true,
-			showFunctions: true,
+			showFormActions: true,
+			showFormFields: true,
+			showFormFunctions: true,
+			showFormQueries: true,
+			showJsFunctions: true,
+			showPgFunctions: true,
 			showPgIndex: true,
 			showPgTriggers: true,
 			showPolicies: true,
@@ -444,7 +456,6 @@ export default {
 		};
 	},
 	computed: {
-		noResults: s => Object.keys(s.moduleIdMapLookups).length === 0,
 		title: s => {
 			let contentName = '';
 			let entityName = null;
@@ -477,6 +488,23 @@ export default {
 				? `${s.capApp.title.replace('{NAME}', contentName)}`
 				: `${s.capApp.title.replace('{NAME}', contentName)} '${entityName}'`;
 		},
+
+		// simple
+		isAnyApis: s => Object.values(s.moduleIdMapLookups).some(v => v.apiIds.length !== 0),
+		isAnyCollections: s => Object.values(s.moduleIdMapLookups).some(v => v.collectionIds.length !== 0),
+		isAnyDocs: s => Object.values(s.moduleIdMapLookups).some(v => v.docIds.length !== 0),
+		isAnyFormActions: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsActions.length !== 0),
+		isAnyFormFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsFunctions.length !== 0),
+		isAnyFormQueries: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsQuery.length !== 0),
+		isAnyFormFields: s => Object.values(s.moduleIdMapLookups).some(v => Object.keys(v.formIdMapFieldIds).length !== 0),
+		isAnyJsFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.jsFunctionIds.length !== 0),
+		isAnyPgFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.pgFunctionIds.length !== 0),
+		isAnyPgIndexes: s => Object.values(s.moduleIdMapLookups).some(v => v.pgIndexIds.length !== 0),
+		isAnyPgTriggers: s => Object.values(s.moduleIdMapLookups).some(v => v.pgTriggerIds.length !== 0),
+		isAnyRelationPolicies: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsPolicies.length !== 0),
+		isAnyRelationships: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsShips.length !== 0),
+		isAnySearchBars: s => Object.values(s.moduleIdMapLookups).some(v => v.searchBarIds.length !== 0),
+		noResults: s => Object.keys(s.moduleIdMapLookups).length === 0,
 
 		// stores
 		capApp: s => s.$store.getters.captions.builder.schemaLookup,
