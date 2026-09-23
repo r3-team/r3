@@ -101,6 +101,12 @@ function getReferencesDoc(mod, docId, lookups) {
 		}
 		lookupInFields(f.id, f.fields);
 	}
+	for (const f of mod.pgFunctions) {
+		if (f.codeFunction.includes(`.pdf_create_attach('${docId}'`)) {
+			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
 };
 
 function getReferencesPgIndex(mod, pgIndexId, lookups) {
