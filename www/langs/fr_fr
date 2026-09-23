@@ -755,21 +755,11 @@
 			},
 			"warnings": "Avertissements"
 		},
-		"articles": {
-			"addArticle": "Ajouter un article",
-			"assignTo": "Assigner à",
-			"body": "Contenu",
+		"article": {
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cet article ?"
 			},
-			"new": "Nouvel article",
-			"option": {
-				"assignForm": "Aide contextuelle du formulaire",
-				"assignModule": "Page d'aide de l'application"
-			},
-			"title": "Articles d'aide",
-			"titleAssign": "Assigner des articles",
-			"titleAssigned": "Assignés"
+			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
 			"barcodes": "Barcodes/QR codes",
@@ -1772,6 +1762,7 @@
 		"navigationStart": "Premiers pas",
 		"new": {
 			"api": "Nouvelle API",
+			"article": "Nouvel article",
 			"collection": "Nouvelle collection",
 			"doc": "New PDF",
 			"docIdDuplicate": "Copy PDF",
@@ -2669,6 +2660,7 @@
 		"groupBy": "Regrouper par",
 		"header": "Header",
 		"help": "Aide",
+		"helpArticles": "Articles d'aide",
 		"hidden": "Caché",
 		"home": "Accueil",
 		"homepage": "Page d'accueil",

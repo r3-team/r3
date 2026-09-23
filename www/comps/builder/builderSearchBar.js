@@ -1,39 +1,23 @@
-import MyBuilderCaption       from './builderCaption.js';
+import { getItemTitleColumn, getSqlPreview } from '../shared/builder.js';
+import { getTemplateQuery } from '../shared/builderTemplate.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
+import { getIsContentInAnyFilter, getJoinsIndexMap } from '../shared/query.js';
+
+import MyBuilderCaption from './builderCaption.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
-import MyBuilderIconInput     from './builderIconInput.js';
-import MyBuilderOpenForm      from './builderOpenForm.js';
-import MyBuilderQuery         from './builderQuery.js';
-import {getTemplateQuery}     from '../shared/builderTemplate.js';
-import {dialogDeleteAsk}      from '../shared/dialog.js';
-import {
-	getItemTitleColumn,
-	getSqlPreview
-} from '../shared/builder.js';
-import {
-	MyBuilderColumns,
-	MyBuilderColumnTemplates
-} from './builderColumns.js';
-import {
-	copyValueDialog,
-	deepIsEqual
-} from '../shared/generic.js';
-import {
-	getIsContentInAnyFilter,
-	getJoinsIndexMap
-} from '../shared/query.js';
+import { MyBuilderColumns, MyBuilderColumnTemplates } from './builderColumns.js';
+import MyBuilderIconInput from './builderIconInput.js';
+import MyBuilderOpenForm from './builderOpenForm.js';
+import MyBuilderQuery from './builderQuery.js';
 
 export default {
-	name:'my-builder-search-bar',
-	components:{
-		MyBuilderCaption,
-		MyBuilderColumnOptions,
-		MyBuilderColumns,
-		MyBuilderColumnTemplates,
-		MyBuilderIconInput,
-		MyBuilderOpenForm,
-		MyBuilderQuery
+	name: 'my-builder-search-bar',
+	components: {
+		MyBuilderCaption, MyBuilderColumnOptions, MyBuilderColumns, MyBuilderColumnTemplates,
+		MyBuilderIconInput, MyBuilderOpenForm, MyBuilderQuery
 	},
-	template:`<div class="builder-search-bar" v-if="searchBar">
+	template: `<div class="builder-search-bar" v-if="searchBar">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
@@ -229,66 +213,66 @@ export default {
 			/>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:false, default:'' },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: false, default: '' },
+		readonly: { type: Boolean, required: true }
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
 	data() {
 		return {
 			// inputs
-			searchBar:false,
-			searchBarCopy:{},
+			searchBar: false,
+			searchBarCopy: {},
 
 			// state
-			columnIdShow:null,
-			filtersDisable:[
-				'field','fieldChanged','fieldValid','formChanged','formState','getter','javascript',
-				'record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'
+			columnIdShow: null,
+			filtersDisable: [
+				'field', 'fieldChanged', 'fieldValid', 'formChanged', 'formState', 'getter', 'javascript',
+				'record', 'recordMayCreate', 'recordMayDelete', 'recordMayUpdate', 'recordNew'
 			],
-			showSidebar:true,
-			tabTarget:'content'
+			showSidebar: true,
+			tabTarget: 'content'
 		};
 	},
-	computed:{
-		columnShow:s => {
-			if(s.columnIdShow === null) return false;
+	computed: {
+		columnShow: s => {
+			if (s.columnIdShow === null) return false;
 
-			for(let i = 0, j = s.searchBar.columns.length; i < j; i++) {
-				if(s.searchBar.columns[i].id === s.columnIdShow)
+			for (let i = 0, j = s.searchBar.columns.length; i < j; i++) {
+				if (s.searchBar.columns[i].id === s.columnIdShow)
 					return s.searchBar.columns[i];
 			}
 			return false;
 		},
 
 		// simple
-		anySearchInput: s => s.getIsContentInAnyFilter(s.query.filters,s.searchBar.columns,'globalSearch'),
-		hasChanges:     s => !s.deepIsEqual(s.searchBar,s.searchBarSchema),
-		joinIndexMap:   s => s.getJoinsIndexMap(s.query.joins),
-		module:         s => s.moduleIdMap[s.searchBar.moduleId],
-		query:          s => s.searchBar.query !== null ? s.searchBar.query : s.getTemplateQuery(),
-		queryActive:    s => s.searchBar.query !== null && s.searchBar.query.relationId !== null,
-		searchBarSchema:s => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
+		anySearchInput: s => s.getIsContentInAnyFilter(s.query.filters, s.searchBar.columns, 'globalSearch'),
+		hasChanges: s => !s.deepIsEqual(s.searchBar, s.searchBarSchema),
+		joinIndexMap: s => s.getJoinsIndexMap(s.query.joins),
+		module: s => s.moduleIdMap[s.searchBar.moduleId],
+		query: s => s.searchBar.query !== null ? s.searchBar.query : s.getTemplateQuery(),
+		queryActive: s => s.searchBar.query !== null && s.searchBar.query.relationId !== null,
+		searchBarSchema: s => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
 
 		// stores
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
-		capApp:         s => s.$store.getters.captions.builder.searchBar,
-		capGen:         s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.builder.searchBar,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	watch:{
-		searchBarSchema:{
+	watch: {
+		searchBarSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
@@ -300,46 +284,46 @@ export default {
 		getTemplateQuery,
 
 		// actions
-		columnSet(name,value) {
+		columnSet(name, value) {
 			this.columnShow[name] = value;
 		},
 		removeIndex(index) {
-			for(let i = 0, j = this.searchBar.columns.length; i < j; i++) {
-				if(this.searchBar.columns[i].content === 'attribute' && this.searchBar.columns[i].index === index) {
-					this.searchBar.columns.splice(i,1);
+			for (let i = 0, j = this.searchBar.columns.length; i < j; i++) {
+				if (this.searchBar.columns[i].content === 'attribute' && this.searchBar.columns[i].index === index) {
+					this.searchBar.columns.splice(i, 1);
 					i--; j--;
 				}
 			}
 		},
 		reset(manuelReset) {
-			if(this.searchBarSchema !== false && (manuelReset || !this.deepIsEqual(this.searchBarCopy,this.searchBarSchema))) {
-				this.searchBar     = JSON.parse(JSON.stringify(this.searchBarSchema));
+			if (this.searchBarSchema !== false && (manuelReset || !this.deepIsEqual(this.searchBarCopy, this.searchBarSchema))) {
+				this.searchBar = JSON.parse(JSON.stringify(this.searchBarSchema));
 				this.searchBarCopy = JSON.parse(JSON.stringify(this.searchBarSchema));
-				this.columnIdShow  = null;
+				this.columnIdShow = null;
 			}
 		},
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
 
-			if(this.columnIdShow !== null)
+			if (this.columnIdShow !== null)
 				this.tabTarget = 'content';
 		},
 
 		// backend calls
 		del() {
-			ws.send('searchBar','del',this.searchBar.id,true).then(
+			ws.send('searchBar', 'del', this.searchBar.id, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					this.$router.push('/builder/search-bars/'+this.searchBar.moduleId);
+					this.$router.push(`/builder/search-bars/${this.searchBar.moduleId}`);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('searchBar','set',this.searchBar),
-				ws.prepare('schema','check',{moduleId:this.module.id})
-			],true).then(
+				ws.prepare('searchBar', 'set', this.searchBar),
+				ws.prepare('schema', 'check', { moduleId: this.module.id })
+			], true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

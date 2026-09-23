@@ -755,21 +755,11 @@
 			},
 			"warnings": "Brīdinājumi"
 		},
-		"articles": {
-			"addArticle": "Pievienot rakstu",
-			"assignTo": "Piesaistīt",
-			"body": "Saturs",
+		"article": {
 			"dialog": {
 				"delete": "Vai tiešām vēlaties dzēst šo rakstu?"
 			},
-			"new": "Jauns raksts",
-			"option": {
-				"assignForm": "Formas konteksta palīdzība",
-				"assignModule": "Pieteikuma palīdzības lapa"
-			},
-			"title": "Palīdzības raksti",
-			"titleAssign": "Piesaistīt rakstus",
-			"titleAssigned": "Piesaistītie"
+			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
 			"barcodes": "Barcodes/QR codes",
@@ -1772,6 +1762,7 @@
 		"navigationStart": "First steps",
 		"new": {
 			"api": "New API",
+			"article": "Jauns raksts",
 			"collection": "New collection",
 			"doc": "New PDF",
 			"docIdDuplicate": "Copy PDF",
@@ -2669,6 +2660,7 @@
 		"groupBy": "Group by",
 		"header": "Header",
 		"help": "Palīdzība",
+		"helpArticles": "Palīdzības raksti",
 		"hidden": "Hidden",
 		"home": "Mājas",
 		"homepage": "Home page",

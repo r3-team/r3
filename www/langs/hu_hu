@@ -755,21 +755,11 @@
 			},
 			"warnings": "Figyelmeztetések"
 		},
-		"articles": {
-			"addArticle": "Cikk hozzáadása",
-			"assignTo": "Hozzárendelés",
-			"body": "Tartalom",
+		"article": {
 			"dialog": {
 				"delete": "Biztosan törölni szeretnéd ezt a cikket?"
 			},
-			"new": "Új cikk",
-			"option": {
-				"assignForm": "Űrlap kontextus súgó",
-				"assignModule": "Alkalmazás súgó"
-			},
-			"title": "Súgó cikk",
-			"titleAssign": "Cikk hozzárendelése",
-			"titleAssigned": "Hozzárendelt"
+			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
 			"barcodes": "Barcodes/QR codes",
@@ -1772,6 +1762,7 @@
 		"navigationStart": "Első lépések",
 		"new": {
 			"api": "Új API",
+			"article": "Új cikk",
 			"collection": "Új gyűjtemény",
 			"doc": "New PDF",
 			"docIdDuplicate": "Copy PDF",
@@ -2669,6 +2660,7 @@
 		"groupBy": "Csoportosítás",
 		"header": "Header",
 		"help": "Segítség",
+		"helpArticles": "Súgó cikk",
 		"hidden": "Rejtett",
 		"home": "Kezdőlap",
 		"homepage": "Kezdőlap",

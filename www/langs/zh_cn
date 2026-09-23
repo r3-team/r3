@@ -755,21 +755,11 @@
 			},
 			"warnings": "警告"
 		},
-		"articles": {
-			"addArticle": "添加文章",
-			"assignTo": "分配给",
-			"body": "内容",
+		"article": {
 			"dialog": {
 				"delete": "您确定要删除这篇文章吗？"
 			},
-			"new": "新文章",
-			"option": {
-				"assignForm": "表单上下文帮助",
-				"assignModule": "应用程序帮助页面"
-			},
-			"title": "帮助文章",
-			"titleAssign": "分配文章",
-			"titleAssigned": "已分配"
+			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
 			"barcodes": "Barcodes/QR codes",
@@ -1772,6 +1762,7 @@
 		"navigationStart": "首步",
 		"new": {
 			"api": "新API",
+			"article": "新文章",
 			"collection": "新集合",
 			"doc": "New PDF",
 			"docIdDuplicate": "Copy PDF",
@@ -2669,6 +2660,7 @@
 		"groupBy": "按...分组",
 		"header": "Header",
 		"help": "帮助",
+		"helpArticles": "帮助文章",
 		"hidden": "隐藏",
 		"home": "主页",
 		"homepage": "主页",

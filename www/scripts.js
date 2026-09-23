@@ -33,6 +33,7 @@ import MyApp from './comps/app.js';
 import MyBuilder from './comps/builder/builder.js';
 import MyBuilderApi from './comps/builder/builderApi.js';
 import MyBuilderApis from './comps/builder/builderApis.js';
+import MyBuilderArticle from './comps/builder/builderArticle.js';
 import MyBuilderArticles from './comps/builder/builderArticles.js';
 import MyBuilderCaptionMap from './comps/builder/builderCaptionMap.js';
 import MyBuilderCollection from './comps/builder/builderCollection.js';
@@ -245,6 +246,11 @@ const MyRouter = VueRouter.createRouter({
 				path: 'articles/:id',
 				meta: { nav: 'articles', target: 'module' },
 				component: MyBuilderArticles,
+				props: true
+			}, {
+				path: 'article/:id',
+				meta: { nav: 'articles', target: 'article' },
+				component: MyBuilderArticle,
 				props: true
 			}, {
 				path: 'docs/:id/:filter?',

@@ -755,21 +755,11 @@
 			},
 			"warnings": "Warnings"
 		},
-		"articles": {
-			"addArticle": "Add article",
-			"assignTo": "Assign to",
-			"body": "Content",
+		"article": {
 			"dialog": {
 				"delete": "Are you sure you want to delete this article?"
 			},
-			"new": "New article",
-			"option": {
-				"assignForm": "Form context help",
-				"assignModule": "Application help page"
-			},
-			"title": "Help articles",
-			"titleAssign": "Assign articles",
-			"titleAssigned": "Assigned"
+			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
 			"barcodes": "Barcodes/QR codes",
@@ -1772,6 +1762,7 @@
 		"navigationStart": "First steps",
 		"new": {
 			"api": "New API",
+			"article": "New article",
 			"collection": "New collection",
 			"doc": "New PDF",
 			"docIdDuplicate": "Copy PDF",
@@ -2669,6 +2660,7 @@
 		"groupBy": "Group by",
 		"header": "Header",
 		"help": "Help",
+		"helpArticles": "Help articles",
 		"hidden": "Hidden",
 		"home": "Home",
 		"homepage": "Home page",

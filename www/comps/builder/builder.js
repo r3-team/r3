@@ -1,18 +1,15 @@
-import MyBuilderHelp             from './builderHelp.js';
-import MyBuilderNew              from './builderNew.js';
-import {getJsFunctionsProcessed} from '../shared/builder.js';
-import srcBase64Icon             from '../shared/image.js';
-import {getCaptionForLang}       from '../shared/language.js';
-import {MyModuleSelect}          from '../input.js';
+import { MyModuleSelect } from '../input.js';
+import { getJsFunctionsProcessed } from '../shared/builder.js';
+import srcBase64Icon from '../shared/image.js';
+import { getCaptionForLang } from '../shared/language.js';
+
+import MyBuilderHelp from './builderHelp.js';
+import MyBuilderNew from './builderNew.js';
 
 export default {
-	name:'my-builder',
-	components:{
-		MyBuilderHelp,
-		MyBuilderNew,
-		MyModuleSelect
-	},
-	template:`<div class="builder equal-width">
+	name: 'my-builder',
+	components: { MyBuilderHelp, MyBuilderNew, MyModuleSelect },
+	template: `<div class="builder equal-width">
 		<div class="navigation" v-if="module" :class="{ isDark:colorMenu.isDark() }" :style="bgStyle">
 			<div class="navigation-header">
 				<div class="row gap centered">
@@ -196,6 +193,13 @@ export default {
 					<span>{{ capGen.relations }}</span>
 				</router-link>
 				<router-link class="entry isTitle grow clickable"
+					v-if="navigation === 'articles'"
+					:to="'/builder/articles/'+module.id"
+				>
+					<img src="images/question.png" />
+					<span>{{ capGen.articles }}</span>
+				</router-link>
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'collections'"
 					:to="'/builder/collections/'+module.id"
 				>
@@ -280,6 +284,15 @@ export default {
 						:key="rol.id"
 						:to="'/builder/role/'+rol.id"
 					>{{ rol.name }}</router-link>
+				</template>
+
+				<!-- articles -->
+				<template v-if="navigation === 'articles'">
+					<router-link class="entry clickable"
+						v-for="a in module.articles.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="a.id"
+						:to="'/builder/article/'+a.id"
+					>{{ a.name }}</router-link>
 				</template>
 
 				<!-- collections -->
@@ -385,37 +398,37 @@ export default {
 	</div>`,
 	data() {
 		return {
-			builderLanguage:'',   // selected language for translations
-			createNewEntity:null, // entity to create (module, relation, ...)
-			createNewPresets:{},  // preset inputs for new entity (to provide defaults)
-			filter:'',            // simple text filter for menu
-			isReady:false,        // ready to show content
-			moduleId:'',          // selected module ID
-			navigation:'module',
-			showHelp:false
+			builderLanguage: '',   // selected language for translations
+			createNewEntity: null, // entity to create (module, relation, ...)
+			createNewPresets: {},  // preset inputs for new entity (to provide defaults)
+			filter: '',            // simple text filter for menu
+			isReady: false,        // ready to show content
+			moduleId: '',          // selected module ID
+			navigation: 'module',
+			showHelp: false
 		};
 	},
-	watch:{
-		$route:{
+	watch: {
+		$route: {
 			handler(val) {
-				if(val.hash === '')
+				if (val.hash === '')
 					this.showHelp = false;
 
-				if(!this.isSecureContext) {
-					this.$store.commit('dialog',{
-						captionBody:this.capGen.error.noSecureContext,
-						captionTop:this.capGen.errorTitle,
-						image:'lockOpen.png'
+				if (!this.isSecureContext) {
+					this.$store.commit('dialog', {
+						captionBody: this.capGen.error.noSecureContext,
+						captionTop: this.capGen.errorTitle,
+						image: 'lockOpen.png'
 					});
 					return this.$router.push('/');
 				}
 
-				if(!this.builderEnabled)
+				if (!this.builderEnabled)
 					return this.$router.push('/');
 
-				if(typeof val.meta.nav === 'undefined') {
+				if (typeof val.meta.nav === 'undefined') {
 					this.moduleId = '';
-					this.isReady  = true;
+					this.isReady = true;
 					return;
 				}
 
@@ -423,35 +436,36 @@ export default {
 				this.navigation = val.meta.nav;
 
 				// ascertain module ID to be loaded
-				const isModule    = ['module','start'].includes(val.meta.target);
-				let   targetIdMap = this.moduleIdMap;
+				const isModule = ['module', 'start'].includes(val.meta.target);
+				let targetIdMap = this.moduleIdMap;
 
-				if(!isModule) {
-					switch(val.meta.target) {
-						case 'api':         targetIdMap = this.apiIdMap;        break;
-						case 'collection':  targetIdMap = this.collectionIdMap; break;
-						case 'doc':         targetIdMap = this.docIdMap;        break;
-						case 'form':        targetIdMap = this.formIdMap;       break;
+				if (!isModule) {
+					switch (val.meta.target) {
+						case 'api': targetIdMap = this.apiIdMap; break;
+						case 'article': targetIdMap = this.articleIdMap; break;
+						case 'collection': targetIdMap = this.collectionIdMap; break;
+						case 'doc': targetIdMap = this.docIdMap; break;
+						case 'form': targetIdMap = this.formIdMap; break;
 						case 'js-function': targetIdMap = this.jsFunctionIdMap; break;
-						case 'relation':    targetIdMap = this.relationIdMap;   break;
-						case 'role':        targetIdMap = this.roleIdMap;       break;
+						case 'relation': targetIdMap = this.relationIdMap; break;
+						case 'role': targetIdMap = this.roleIdMap; break;
 						case 'pg-function': targetIdMap = this.pgFunctionIdMap; break;
-						case 'search-bar':  targetIdMap = this.searchBarIdMap;  break;
-						case 'variable':    targetIdMap = this.variableIdMap;   break;
-						case 'widget':      targetIdMap = this.widgetIdMap;     break;
+						case 'search-bar': targetIdMap = this.searchBarIdMap; break;
+						case 'variable': targetIdMap = this.variableIdMap; break;
+						case 'widget': targetIdMap = this.widgetIdMap; break;
 					}
 				}
 
 				// reroute if invalid target (usually navigating back to deleted entity)
-				if(targetIdMap[val.params.id] === undefined) {
+				if (targetIdMap[val.params.id] === undefined) {
 					this.$router.replace('/builder/modules');
 					this.isReady = false;
 					return;
 				}
 
 				// close global search if routed to anywhere in the Builder
-				if(this.globalSearchInput !== null)
-					this.$store.commit('globalSearchInput',null);
+				if (this.globalSearchInput !== null)
+					this.$store.commit('globalSearchInput', null);
 
 				// apply module ID from target
 				this.moduleId = isModule ? val.params.id : targetIdMap[val.params.id].moduleId;
@@ -459,31 +473,32 @@ export default {
 				// set module translation language
 				const mod = this.moduleIdMap[this.moduleId];
 
-				if(mod.languages.indexOf(this.settings.languageCode) !== -1)
+				if (mod.languages.indexOf(this.settings.languageCode) !== -1)
 					this.builderLanguage = this.settings.languageCode;
-				else if(mod.languages.length !== 0)
+				else if (mod.languages.length !== 0)
 					this.builderLanguage = mod.languages[0];
 
 				this.isReady = true;
 			},
-			immediate:true
+			immediate: true
 		}
 	},
-	computed:{
-		subMenu:s =>
-			s.navigation === 'relations'    && s.module.relations.length   !== 0 ||
-			s.navigation === 'forms'        && s.module.forms.length       !== 0 ||
-			s.navigation === 'roles'        && s.module.roles.length       !== 0 ||
-			s.navigation === 'collections'  && s.module.collections.length !== 0 ||
-			s.navigation === 'search-bars'  && s.module.searchBars.length  !== 0 ||
-			s.navigation === 'apis'         && s.module.apis.length        !== 0 ||
-			s.navigation === 'docs'         && s.module.docs.length        !== 0 ||
+	computed: {
+		subMenu: s =>
+			s.navigation === 'relations' && s.module.relations.length !== 0 ||
+			s.navigation === 'forms' && s.module.forms.length !== 0 ||
+			s.navigation === 'roles' && s.module.roles.length !== 0 ||
+			s.navigation === 'articles' && s.module.articles.length !== 0 ||
+			s.navigation === 'collections' && s.module.collections.length !== 0 ||
+			s.navigation === 'search-bars' && s.module.searchBars.length !== 0 ||
+			s.navigation === 'apis' && s.module.apis.length !== 0 ||
+			s.navigation === 'docs' && s.module.docs.length !== 0 ||
 			s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0 ||
 			s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
 
 		// inputs
-		moduleIdInput:{
-			get()  { return !this.module ? null : this.module.id; },
+		moduleIdInput: {
+			get() { return !this.module ? null : this.module.id; },
 			set(v) {
 				if (v === '')
 					return this.$router.push(`/builder/modules`);
@@ -496,48 +511,49 @@ export default {
 		},
 
 		// simple
-		createNewOpen:s => s.createNewEntity !== null,
-		hasLoginForms:s => !s.isNew && s.module.loginForms.length !== 0,
-		isNew:        s => s.moduleId === '',
-		jsFunctions:  s => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
-		module:       s => s.isNew ? false : s.moduleIdMap[s.moduleId],
-		moduleOwner:  s => s.isNew ? true  : s.moduleIdMapMeta[s.moduleId].owner,
+		createNewOpen: s => s.createNewEntity !== null,
+		hasLoginForms: s => !s.isNew && s.module.loginForms.length !== 0,
+		isNew: s => s.moduleId === '',
+		jsFunctions: s => s.getJsFunctionsProcessed(s.module.jsFunctions, s.filter),
+		module: s => s.isNew ? false : s.moduleIdMap[s.moduleId],
+		moduleOwner: s => s.isNew ? true : s.moduleIdMapMeta[s.moduleId].owner,
 
 		// stores
-		apiIdMap:         s => s.$store.getters['schema/apiIdMap'],
-		attributeIdMap:   s => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:  s => s.$store.getters['schema/collectionIdMap'],
-		docIdMap:         s => s.$store.getters['schema/docIdMap'],
-		formIdMap:        s => s.$store.getters['schema/formIdMap'],
-		iconIdMap:        s => s.$store.getters['schema/iconIdMap'],
-		jsFunctionIdMap:  s => s.$store.getters['schema/jsFunctionIdMap'],
-		moduleIdMap:      s => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:  s => s.$store.getters['schema/pgFunctionIdMap'],
-		relationIdMap:    s => s.$store.getters['schema/relationIdMap'],
-		roleIdMap:        s => s.$store.getters['schema/roleIdMap'],
-		searchBarIdMap:   s => s.$store.getters['schema/searchBarIdMap'],
-		variableIdMap:    s => s.$store.getters['schema/variableIdMap'],
-		widgetIdMap:      s => s.$store.getters['schema/widgetIdMap'],
-		bgStyle:          s => s.$store.getters.colorMenuStyle,
-		builderEnabled:   s => s.$store.getters.builderEnabled,
-		capApp:           s => s.$store.getters.captions.builder,
-		capGen:           s => s.$store.getters.captions.generic,
-		colorMenu:        s => s.$store.getters.colorMenu,
-		globalSearchInput:s => s.$store.getters.globalSearchInput,
-		isSecureContext:  s => s.$store.getters.isSecureContext,
-		moduleIdMapMeta:  s => s.$store.getters.moduleIdMapMeta,
-		settings:         s => s.$store.getters.settings
+		apiIdMap: s => s.$store.getters['schema/apiIdMap'],
+		articleIdMap: s => s.$store.getters['schema/articleIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
+		docIdMap: s => s.$store.getters['schema/docIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
+		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
+		variableIdMap: s => s.$store.getters['schema/variableIdMap'],
+		widgetIdMap: s => s.$store.getters['schema/widgetIdMap'],
+		bgStyle: s => s.$store.getters.colorMenuStyle,
+		builderEnabled: s => s.$store.getters.builderEnabled,
+		capApp: s => s.$store.getters.captions.builder,
+		capGen: s => s.$store.getters.captions.generic,
+		colorMenu: s => s.$store.getters.colorMenu,
+		globalSearchInput: s => s.$store.getters.globalSearchInput,
+		isSecureContext: s => s.$store.getters.isSecureContext,
+		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta,
+		settings: s => s.$store.getters.settings
 	},
 	created() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.nextLanguage,key:'q',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.nextLanguage, key: 'q', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.nextLanguage);
+		this.$store.commit('keyDownHandlerDel', this.nextLanguage);
 	},
 	mounted() {
-		this.$store.commit('pageTitle',this.capApp.pageTitle);
+		this.$store.commit('pageTitle', this.capApp.pageTitle);
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaptionForLang,
 		getJsFunctionsProcessed,
@@ -546,34 +562,34 @@ export default {
 		// actions
 		add() {
 			let entity;
-			switch(this.navigation) {
-				case 'apis':         entity = 'api';        break;
-				case 'collections':  entity = 'collection'; break;
-				case 'docs':         entity = 'doc';        break;
-				case 'forms':        entity = 'form';       break;
+			switch (this.navigation) {
+				case 'apis': entity = 'api'; break;
+				case 'articles': entity = 'article'; break;
+				case 'collections': entity = 'collection'; break;
+				case 'docs': entity = 'doc'; break;
+				case 'forms': entity = 'form'; break;
 				case 'js-functions': entity = 'jsFunction'; break;
 				case 'pg-functions': entity = 'pgFunction'; break;
-				case 'relations':    entity = 'relation';   break;
-				case 'roles':        entity = 'role';       break;
-				case 'search-bars':  entity = 'searchBar';  break;
-				case 'tags':         entity = 'tag';        break;
-				case 'variables':    entity = 'variable';   break;
-				case 'widgets':      entity = 'widget';     break;
+				case 'relations': entity = 'relation'; break;
+				case 'roles': entity = 'role'; break;
+				case 'search-bars': entity = 'searchBar'; break;
+				case 'tags': entity = 'tag'; break;
+				case 'variables': entity = 'variable'; break;
+				case 'widgets': entity = 'widget'; break;
 			}
-			this.createNew(entity,{name:this.filter});
+			this.createNew(entity, { name: this.filter });
 		},
-		createNew(entity,presets) {
-			this.createNewEntity  = entity;
+		createNew(entity, presets) {
+			this.createNewEntity = entity;
 			this.createNewPresets = presets !== undefined ? presets : {};
 		},
 		nextLanguage() {
-			if(this.createNewOpen) return;
+			if (this.createNewOpen) return;
 
 			const pos = this.module.languages.indexOf(this.builderLanguage);
-			if(pos === -1 || pos >= this.module.languages.length - 1)
-				return this.builderLanguage = this.module.languages[0];
-
-			return this.builderLanguage = this.module.languages[pos+1];
+			this.builderLanguage = pos === -1 || pos >= this.module.languages.length - 1
+				? this.module.languages[0]
+				: this.module.languages[pos + 1];
 		}
 	}
 };

@@ -1,7 +1,7 @@
 import { getDependentModules } from '../shared/builder.js';
 import {
-	getTemplateApi, getTemplateCollection, getTemplateDoc, getTemplateForm,
-	getTemplateJsFunction, getTemplateModule, getTemplatePgFunction,
+	getTemplateApi, getTemplateArticle, getTemplateCollection, getTemplateDoc,
+	getTemplateForm, getTemplateJsFunction, getTemplateModule, getTemplatePgFunction,
 	getTemplateRelation, getTemplateRole, getTemplateSearchBar,
 	getTemplateTag, getTemplateVariable, getTemplateWidget
 } from '../shared/builderTemplate.js';
@@ -182,6 +182,7 @@ export default {
 		nameMaxLength: s => {
 			switch (s.entity) {
 				case 'api': return 60;
+				case 'article': return 64;
 				case 'collection': return 64;
 				case 'doc': return 64;
 				case 'form': return 64;
@@ -205,6 +206,7 @@ export default {
 			switch (s.entity) {
 				case 'module': searchList = s.modules; break;
 				case 'api': searchList = s.module.apis; break;
+				case 'article': searchList = s.module.articles; break;
 				case 'collection': searchList = s.module.collections; break;
 				case 'doc': searchList = s.module.docs; break;
 				case 'form': searchList = s.module.forms; break;
@@ -236,6 +238,7 @@ export default {
 		title: s => {
 			switch (s.entity) {
 				case 'api': return s.capApp.api;
+				case 'article': return s.capApp.article;
 				case 'collection': return s.capApp.collection;
 				case 'doc': return s.capApp.doc;
 				case 'form': return s.capApp.form;
@@ -254,6 +257,7 @@ export default {
 		titleImgSrc: s => {
 			switch (s.entity) {
 				case 'api': return 'images/api.png';
+				case 'article': return 'images/question.png';
 				case 'collection': return 'images/tray.png';
 				case 'doc': return 'images/document.png';
 				case 'form': return 'images/fileText.png';
@@ -303,6 +307,7 @@ export default {
 		// externals
 		getDependentModules,
 		getTemplateApi,
+		getTemplateArticle,
 		getTemplateCollection,
 		getTemplateDoc,
 		getTemplateForm,
@@ -328,6 +333,7 @@ export default {
 			let dependencyCheck = false;
 			switch (this.entity) {
 				case 'api': request = this.getTemplateApi(this.module.id, this.inputs.name); break;
+				case 'article': request = this.getTemplateArticle(this.module.id, this.inputs.name); break;
 				case 'collection': request = this.getTemplateCollection(this.module.id, this.inputs.name); break;
 				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId, this.inputs.formId, this.inputs.name, this.inputs.tagIds); break;
 				case 'module': request = this.getTemplateModule(this.inputs.name); break;

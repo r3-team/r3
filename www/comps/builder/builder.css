@@ -77,6 +77,29 @@
 	color: var(--color-error);
 }
 
+/* articles */
+.builder-article-body {
+	flex: 1 1 auto;
+	display: flex;
+	background-color: var(--color-input);
+}
+.builder-article-lines {
+	max-width: 600px;
+}
+.builder-article-line {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	justify-content: space-between;
+	padding: 2px 9px;
+	margin: 2px 0px;
+	gap: 12px;
+	background-color: var(--color-input);
+	border: var(--border-input);
+	border-radius: var(--border-input-radius);
+	box-shadow: var(--shadow-input);
+}
+
 /* tag input */
 .builder-tag-input {
 	display: flex;
@@ -613,68 +636,6 @@
 .builder-api-column-templates {
 	flex: 1 3 auto;
 	overflow: auto;
-}
-
-/* articles */
-.builder-articles-wrap {
-	display: flex;
-	flex-flow: row wrap;
-	overflow: auto;
-}
-.builder-articles-edit {
-	flex: 1 1 auto;
-}
-.builder-articles-assign {
-	display: flex;
-	flex-flow: column nowrap;
-	border-left: 1px solid var(--color-border);
-	border-bottom: 1px solid var(--color-border);
-	border-radius: 0px 0px 0px 5px;
-	background-color: var(--color-bg);
-}
-.builder-articles-assign .actions {
-	display: flex;
-	justify-content: space-between;
-	margin: 10px 0px 15px;
-}
-.builder-article-line {
-	display: flex;
-	flex-flow: row nowrap;
-	align-items: center;
-	justify-content: space-between;
-	padding: 2px 9px;
-	margin: 2px 0px;
-	gap: 12px;
-	background-color: var(--color-input);
-	border: var(--border-input);
-	border-radius: var(--border-input-radius);
-	box-shadow: var(--shadow-input);
-}
-.builder-articles-body {
-	width: 100%;
-	max-width: 1400px;
-	height: 90vh;
-	display: flex;
-	flex-flow: column nowrap;
-	border: 1px solid var(--color-border);
-	border-radius: 8px;
-	overflow: hidden;
-}
-.builder-articles-body-richtext {
-	display: flex;
-	background-color: var(--color-bg);
-}
-.builder-articles-preview {
-	width: 100%;
-	max-width: 1200px;
-	height: 90vh;
-	display: flex;
-	flex-flow: column nowrap;
-	border: 1px solid var(--color-border);
-	overflow: hidden;
-}
-.builder-articles-preview.large {
-	max-width: 1600px;
 }
 
 /* columns */

@@ -755,21 +755,11 @@
 			},
 			"warnings": "تحذيرات"
 		},
-		"articles": {
-			"addArticle": "أضف مقالة",
-			"assignTo": "تعيين ل",
-			"body": "محتوى",
+		"article": {
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف هذه المقالة؟"
 			},
-			"new": "مقالة جديدة",
-			"option": {
-				"assignForm": "مساعدة في سياق النموذج",
-				"assignModule": "صفحة مساعدة التطبيق"
-			},
-			"title": "مقالات مساعدة",
-			"titleAssign": "تعيين المقالات",
-			"titleAssigned": "مُكَلَّف"
+			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
 			"barcodes": "Barcodes/QR codes",
@@ -1772,6 +1762,7 @@
 		"navigationStart": "الخطوات الأولى",
 		"new": {
 			"api": "واجهة برمجة التطبيقات الجديدة",
+			"article": "مقالة جديدة",
 			"collection": "مجموعة جديدة",
 			"doc": "New PDF",
 			"docIdDuplicate": "Copy PDF",
@@ -2669,6 +2660,7 @@
 		"groupBy": "تجميع حسب",
 		"header": "Header",
 		"help": "يساعد",
+		"helpArticles": "مقالات مساعدة",
 		"hidden": "مختفي",
 		"home": "بيت",
 		"homepage": "الصفحة الرئيسية",

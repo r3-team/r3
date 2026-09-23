@@ -19,11 +19,11 @@ export function getTemplateApi(moduleId, name) {
 		version: 1
 	};
 };
-export function getTemplateArticle(moduleId) {
+export function getTemplateArticle(moduleId, name) {
 	return {
 		id: getUuidV4(),
 		moduleId,
-		name: '',
+		name,
 		captions: {
 			articleTitle: {},
 			articleBody: {}

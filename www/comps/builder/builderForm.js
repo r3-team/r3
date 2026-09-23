@@ -13,6 +13,7 @@ import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
 import { getJoinsIndexMap } from '../shared/query.js';
 import { routeParseParams } from '../shared/router.js';
 
+import MyBuilderArticlesInput from './builderArticlesInput.js';
 import MyBuilderCaption from './builderCaption.js';
 import MyBuilderFields from './builderFields.js';
 import MyBuilderFormActions from './builderFormActions.js';
@@ -25,14 +26,9 @@ import MyBuilderTagInput from './builderTagInput.js';
 export default {
 	name: 'my-builder-form',
 	components: {
-		MyBuilderCaption,
-		MyBuilderFields,
-		MyBuilderFormActions,
-		MyBuilderFormFunctions,
-		MyBuilderFormStates,
-		MyBuilderIconInput,
-		MyBuilderQuery,
-		MyBuilderTagInput
+		MyBuilderArticlesInput, MyBuilderCaption, MyBuilderFields,
+		MyBuilderFormActions, MyBuilderFormFunctions, MyBuilderFormStates,
+		MyBuilderIconInput, MyBuilderQuery, MyBuilderTagInput
 	},
 	template: `<div class="builder-form" v-if="form !== false">
 		<div class="contentBox builder-form-main">
@@ -363,6 +359,16 @@ export default {
 											>F{{ ref }}</option>
 										</template>
 									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.helpArticles }}</td>
+								<td colspan="2">
+									<my-builder-articles-input
+										v-model="form.articleIdsHelp"
+										:module
+										:readonly
+									/>
 								</td>
 							</tr>
 							<tr>

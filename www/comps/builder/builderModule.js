@@ -7,6 +7,7 @@ import { copyValueDialog, deepIsEqual, getRandomInt } from '../shared/generic.js
 import srcBase64Icon from '../shared/image.js';
 import { getUnixFormat } from '../shared/time.js';
 
+import MyBuilderArticlesInput from './builderArticlesInput.js';
 import MyBuilderCaption from './builderCaption.js';
 import MyBuilderClientEvent from './builderClientEvent.js';
 import MyBuilderIconInput from './builderIconInput.js';
@@ -69,8 +70,9 @@ const MyBuilderModuleStartForm = {
 export default {
 	name: 'my-builder-module',
 	components: {
-		MyBuilderCaption, MyBuilderClientEvent, MyBuilderIconInput, MyBuilderModuleDepCheck,
-		MyBuilderModuleStartForm, MyBuilderSelectForm, MyInputColorWrap, MyModuleSelect
+		MyBuilderArticlesInput, MyBuilderCaption, MyBuilderClientEvent,
+		MyBuilderIconInput, MyBuilderModuleDepCheck, MyBuilderModuleStartForm,
+		MyBuilderSelectForm, MyInputColorWrap, MyModuleSelect
 	},
 	template: `<div class="builder-module contentBox grow" v-if="isReady">
 		<div class="top">
@@ -306,6 +308,19 @@ export default {
 							</div>
 						</td>
 						<td>{{ capApp.iconPwaHint }}</td>
+					</tr>
+
+					<tr>
+						<td colspan="3"><b>{{ capGen.helpArticles }}</b></td>
+					</tr>
+					<tr>
+						<td colspan="3">
+							<my-builder-articles-input
+								v-model="inputs.articleIdsHelp"
+								:module="moduleSchema"
+								:readonly
+							/>
+						</td>
 					</tr>
 
 					<tr>

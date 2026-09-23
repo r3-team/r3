@@ -10,18 +10,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ArticleAssign_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
-	var req struct {
-		Target     types.DbSchemaApp `json:"target`
-		TargetId   uuid.UUID         `json:"targetId"`
-		ArticleIds []uuid.UUID       `json:"articleIds"`
-	}
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return err
-	}
-	return article.Assign_tx(ctx, tx, req.Target, req.TargetId, req.ArticleIds)
-}
-
 func ArticleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {

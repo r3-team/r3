@@ -755,21 +755,11 @@
 			},
 			"warnings": "Uyarılar"
 		},
-		"articles": {
-			"addArticle": "Makale ekle",
-			"assignTo": "Ata",
-			"body": "İçerik",
+		"article": {
 			"dialog": {
 				"delete": "Bu makaleyi silmek istediğinizden emin misiniz?"
 			},
-			"new": "Yeni makale",
-			"option": {
-				"assignForm": "Form bağlamı yardımı",
-				"assignModule": "Uygulama yardım sayfası"
-			},
-			"title": "Yardım makaleleri",
-			"titleAssign": "Makaleleri atayın",
-			"titleAssigned": "Atandı"
+			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
 			"barcodes": "Barcodes/QR codes",
@@ -1772,6 +1762,7 @@
 		"navigationStart": "İlk adımlar",
 		"new": {
 			"api": "Yeni API",
+			"article": "Yeni makale",
 			"collection": "Yeni koleksiyon",
 			"doc": "Yeni PDF",
 			"docIdDuplicate": "PDF'yi kopyala",
@@ -2669,6 +2660,7 @@
 		"groupBy": "Gruplandırma ölçütü",
 		"header": "Başlık",
 		"help": "Yardım",
+		"helpArticles": "Yardım makaleleri",
 		"hidden": "Gizlenmiş",
 		"home": "Ev",
 		"homepage": "Ana sayfa",
