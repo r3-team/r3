@@ -1,6 +1,6 @@
 import { getDependentOnModules } from './builder.js';
 
-const entities = ['attribute', 'doc', 'jsFunction', 'pgFunction', 'relation'];
+const entities = ['attribute', 'doc', 'jsFunction', 'pgFunction', 'pgIndex', 'relation'];
 
 export function getHasAnyReferences(moduleSource, entity, entityId, noDependencies) {
 	const o = getReferences(moduleSource, entity, entityId, noDependencies);
@@ -56,6 +56,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			case 'doc': getReferencesDoc(mod, entityId, lookups); break;
 			case 'jsFunction': getReferencesJsFunction(mod, entityId, lookups); break;
 			case 'pgFunction': getReferencesPgFunction(mod, entityId, lookups); break;
+			case 'pgIndex': getReferencesPgIndex(mod, entityId, lookups); break;
 			case 'relation': getReferencesRelation(mod, entityId, lookups); break;
 		}
 
@@ -96,6 +97,48 @@ function getReferencesDoc(mod, docId, lookups) {
 	for (const f of mod.forms) {
 		if (f.actions.some(v => v.openDoc !== null && v.openDoc.docIdOpen === docId)) {
 			lookups.formIdsActions.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
+};
+
+function getReferencesPgIndex(mod, pgIndexId, lookups) {
+	const isInQuery = query => query !== null && query.lookups.some(v => v.pgIndexId === pgIndexId);
+	const lookupInFields = (formId, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+		for (const f of fields) {
+			switch (f.content) {
+				case 'list':
+					if (isInQuery(f.query))
+						add(f.id);
+					break;
+				case 'container':
+					lookupInFields(formId, f.fields);
+					break;
+				case 'tabs':
+					for (const t of f.tabs) {
+						lookupInFields(formId, t.fields);
+					}
+					break;
+			}
+		}
+	};
+	for (const a of mod.apis) {
+		if (isInQuery(a.query)) {
+			lookups.apiIds.push(a.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const f of mod.forms) {
+		if (isInQuery(f.query)) {
+			lookups.formIdsQuery.push(f.id);
 			lookups.anyResults = true;
 		}
 		lookupInFields(f.id, f.fields);

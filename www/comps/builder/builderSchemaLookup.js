@@ -447,7 +447,7 @@ export default {
 		noResults: s => Object.keys(s.moduleIdMapLookups).length === 0,
 		title: s => {
 			let contentName = '';
-			let entityName = '';
+			let entityName = null;
 			switch (s.entity) {
 				case 'attribute':
 					contentName = s.capGen.attribute;
@@ -465,12 +465,17 @@ export default {
 					contentName = s.capGen.functionBackend;
 					entityName = s.pgFunctionIdMap[s.entityId].name;
 					break;
+				case 'pgIndex':
+					contentName = s.capGen.index;
+					break;
 				case 'relation':
 					contentName = s.capGen.relation;
 					entityName = s.relationIdMap[s.entityId].name;
 					break;
 			}
-			return `${s.capApp.title.replace('{NAME}', contentName)} '${entityName}'`;
+			return entityName === null
+				? `${s.capApp.title.replace('{NAME}', contentName)}`
+				: `${s.capApp.title.replace('{NAME}', contentName)} '${entityName}'`;
 		},
 
 		// stores

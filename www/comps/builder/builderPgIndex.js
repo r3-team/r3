@@ -1,12 +1,13 @@
+import { getTemplatePgIndex, getTemplatePgIndexAttribute } from '../shared/builderTemplate.js';
 import { dialogDeleteAsk } from '../shared/dialog.js';
-import {
-	getTemplatePgIndex,
-	getTemplatePgIndexAttribute
-} from '../shared/builderTemplate.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 export default {
-	name:'my-builder-pg-index',
-	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+	name: 'my-builder-pg-index',
+	components: { MyBuilderSchemaLookup },
+	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-pg-index float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
@@ -34,8 +35,12 @@ export default {
 					/>
 				</div>
 				<div class="area">
+					<my-button image="builderLookup.png"
+						@trigger="showLookup = true"
+						:caption="capGen.references"
+					/>
 					<my-button image="delete.png"
-						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+						@trigger="delCheck"
 						:active="!isNew && !isSystem && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -111,77 +116,90 @@ export default {
 				</table>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="pgIndex"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="pgIndexId"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
-	props:{
-		pgIndexId:      { required:true },
-		builderLanguage:{ type:String,  required:true },
-		readonly:       { type:Boolean, required:true },
-		relation:       { type:Object,  required:true }
+	props: {
+		pgIndexId: { required: true },
+		builderLanguage: { type: String, required: true },
+		readonly: { type: Boolean, required: true },
+		relation: { type: Object, required: true }
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
-			attributeInput:'',
-			values:null,
-			valuesOrg:null
+			attributeInput: '',
+			hasReferences: false,
+			showLookup: false,
+			values: null,
+			valuesOrg: null
 		};
 	},
-	computed:{
-		attributeIdsUsed:s => {
-			let ids = [];
-			for(let indAtr of s.values.attributes) {
+	computed: {
+		attributeIdsUsed: s => {
+			const ids = [];
+			for (const indAtr of s.values.attributes) {
 				ids.push(indAtr.attributeId);
 			}
 			return ids;
 		},
 
 		// simple
-		canSave:   s => s.values !== null && s.isNew && !s.isSystem && s.hasChanges && s.values.attributes.length !== 0,
-		hasChanges:s => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		isBtree:   s => s.values.method === 'BTREE',
-		isGin:     s => s.values.method === 'GIN',
-		isNew:     s => s.pgIndexId === null,
-		isSystem:  s => s.values.primaryKey || s.values.autoFki,
+		canSave: s => s.values !== null && s.isNew && !s.isSystem && s.hasChanges && s.values.attributes.length !== 0,
+		hasChanges: s => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		isBtree: s => s.values.method === 'BTREE',
+		isGin: s => s.values.method === 'GIN',
+		isNew: s => s.pgIndexId === null,
+		isSystem: s => s.values.primaryKey || s.values.autoFki,
+		module: s => s.moduleIdMap[s.relation.moduleId],
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		indexIdMap:    s => s.$store.getters['schema/indexIdMap'],
-		capApp:        s => s.$store.getters.captions.builder.pgIndex,
-		capGen:        s => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		indexIdMap: s => s.$store.getters['schema/indexIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.pgIndex,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		dialogDeleteAsk,
 		getTemplatePgIndex,
 		getTemplatePgIndexAttribute,
 
 		// display
-		getAttributeCaption(attributeId,orderAsc) {
-			let order = this.isBtree ? ` (${orderAsc ? 'ASC' : 'DESC'})` : '';
+		getAttributeCaption(attributeId, orderAsc) {
+			const order = this.isBtree ? ` (${orderAsc ? 'ASC' : 'DESC'})` : '';
 			return `${this.attributeIdMap[attributeId].name}${order}`;
 		},
 
 		// actions
 		addAttribute() {
-			if(this.attributeInput === '') return;
+			if (this.attributeInput === '') return;
 
 			const s = this.attributeInput.split('_');
-			this.values.attributes.push(this.getTemplatePgIndexAttribute(s[0],s[1] === 'ASC'));
+			this.values.attributes.push(this.getTemplatePgIndexAttribute(s[0], s[1] === 'ASC'));
 			this.attributeInput = '';
 		},
 		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's' && this.canSave) {
+			if (e.ctrlKey && e.key === 's' && this.canSave) {
 				this.set();
 				e.preventDefault();
 			}
-			if(e.key === 'Escape') {
+			if (e.key === 'Escape') {
 				this.$emit('close');
 				e.preventDefault();
 			}
@@ -195,8 +213,16 @@ export default {
 		},
 
 		// backend calls
+		delCheck() {
+			this.hasReferences = getHasAnyReferences(this.module, 'pgIndex', this.pgIndexId, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
 		del() {
-			ws.send('pgIndex','del',this.pgIndexId,true).then(
+			ws.send('pgIndex', 'del', this.pgIndexId, true).then(
 				() => {
 					this.$root.schemaReload(this.relation.moduleId);
 					this.$emit('close');
@@ -205,7 +231,7 @@ export default {
 			);
 		},
 		set() {
-			ws.send('pgIndex','set',this.values,true).then(
+			ws.send('pgIndex', 'set', this.values, true).then(
 				() => {
 					this.$root.schemaReload(this.relation.moduleId);
 					this.$emit('close');
