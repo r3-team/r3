@@ -153,6 +153,12 @@ function getReferencesCollection(mod, collectionId, lookups) {
 			lookups.anyResults = true;
 		}
 	}
+	for (const f of mod.jsFunctions) {
+		if (f.codeFunction.includes(`.collection_read('${collectionId}'`) || f.codeFunction.includes(`.collection_update('${collectionId}'`)) {
+			lookups.jsFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
 };
 
 function getReferencesDoc(mod, docId, lookups) {
