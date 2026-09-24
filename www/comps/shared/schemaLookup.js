@@ -1,7 +1,5 @@
 import { getDependentOnModules } from './builder.js';
 
-const entities = ['attribute', 'collection', 'doc', 'jsFunction', 'pgFunction', 'pgIndex', 'relation'];
-
 export function getHasAnyReferences(moduleSource, entity, entityId, noDependencies) {
 	const o = getReferences(moduleSource, entity, entityId, noDependencies);
 	return Object.keys(o).length !== 0;
@@ -11,11 +9,6 @@ export function getHasAnyReferences(moduleSource, entity, entityId, noDependenci
 // finds all references for chosen entity
 // returns object with lookup results
 export function getReferences(moduleSource, entity, entityId, noDependencies) {
-	if (!entities.includes(entity)) {
-		console.warn(`invalid entity for schema lookup: '${entity}'`);
-		return [];
-	}
-
 	const moduleIdMapLookups = {};
 	const modulesCheck = noDependencies ? [moduleSource] : getDependentOnModules(moduleSource);
 	for (const mod of modulesCheck) {
@@ -27,12 +20,14 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			moduleClientEvents: false,
 			moduleFncLoginSync: false,
 			moduleFncOnLogin: false,
+			moduleHelpArticles: false,
 			moduleMenus: false,
 
 			// main elements
 			apiIds: [],
 			collectionIds: [],
 			docIds: [],
+			formIds: [],
 			jsFunctionIds: [],
 			pgFunctionIds: [],
 			pgIndexIds: [],
@@ -55,6 +50,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 		};
 
 		switch (entity) {
+			case 'article': getReferencesArticle(mod, entityId, lookups); break;
 			case 'attribute': getReferencesAttribut(mod, entityId, lookups); break;
 			case 'collection': getReferencesCollection(mod, entityId, lookups); break;
 			case 'doc': getReferencesDoc(mod, entityId, lookups); break;
@@ -62,6 +58,9 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			case 'pgFunction': getReferencesPgFunction(mod, entityId, lookups); break;
 			case 'pgIndex': getReferencesPgIndex(mod, entityId, lookups); break;
 			case 'relation': getReferencesRelation(mod, entityId, lookups); break;
+			default:
+				console.warn(`invalid entity for schema lookup: '${entity}'`);
+				return {};
 		}
 
 		if (lookups.anyResults) {
@@ -70,6 +69,19 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 		}
 	}
 	return moduleIdMapLookups;
+};
+
+function getReferencesArticle(mod, articleId, lookups) {
+	if (mod.articleIdsHelp.includes(articleId)) {
+		lookups.moduleHelpArticles = true;
+		lookups.anyResults = true;
+	}
+	for (const f of mod.forms) {
+		if (f.articleIdsHelp.includes(articleId)) {
+			lookups.formIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
 };
 
 function getReferencesCollection(mod, collectionId, lookups) {

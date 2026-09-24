@@ -2665,6 +2665,7 @@
 		"groupBy": "Gruplandırma ölçütü",
 		"header": "Başlık",
 		"help": "Yardım",
+		"helpArticle": "Help article",
 		"helpArticles": "Yardım makaleleri",
 		"hidden": "Gizlenmiş",
 		"home": "Ev",

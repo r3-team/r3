@@ -80,7 +80,7 @@ export default {
 			entityTitle: '', // title of entity being checked
 			entityList: [], // list of entity elements in parent module (relations, attributes, ...)
 			entitiesCheck: [  // list of entities to be checked in order
-				'relation', 'attribute', 'pgFunction', 'pgIndex', 'jsFunction', 'doc', 'collection'
+				'relation', 'attribute', 'pgFunction', 'pgIndex', 'jsFunction', 'doc', 'collection', 'article'
 			],
 
 			// progress
@@ -117,6 +117,10 @@ export default {
 				this.countChecked = 0;
 
 				switch (entity) {
+					case 'article':
+						this.entityTitle = this.capGen.helpArticle;
+						this.entityList = this.moduleParent.articles;
+						break;
 					case 'attribute':
 						this.entityTitle = this.capGen.attribute;
 						this.entityList = [];

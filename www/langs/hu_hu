@@ -2665,6 +2665,7 @@
 		"groupBy": "Csoportosítás",
 		"header": "Header",
 		"help": "Segítség",
+		"helpArticle": "Help article",
 		"helpArticles": "Súgó cikk",
 		"hidden": "Rejtett",
 		"home": "Kezdőlap",

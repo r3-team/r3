@@ -58,6 +58,18 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="lookups.moduleHelpArticles">
+						<td class="minimum"><my-label image="question.png" :caption="capGen.helpArticles" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									@trigger="open('module',moduleId,null,false)"
+									@trigger-middle="open('module',moduleId,null,true)"
+									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="lookups.moduleMenus">
 						<td class="minimum"><my-label image="menu.png" :caption="capGen.menus" /></td>
 						<td>
@@ -200,6 +212,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showForms && lookups.formIds.length !== 0">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.forms" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.formIds"
+									@trigger="open('form',id,null,false)"
+									@trigger-middle="open('form',id,null,true)"
+									:caption="formIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showFormQueries && lookups.formIdsQuery.length !== 0">
 						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formQueries" /></td>
 						<td>
@@ -289,6 +314,7 @@ const MyBuilderSchemaLookupModule = {
 		showApis: { type: Boolean, required: true },
 		showCollections: { type: Boolean, required: true },
 		showDocs: { type: Boolean, required: true },
+		showForms: { type: Boolean, required: true },
 		showFormActions: { type: Boolean, required: true },
 		showFormFields: { type: Boolean, required: true },
 		showFormFunctions: { type: Boolean, required: true },
@@ -412,6 +438,7 @@ export default {
 				<my-button-check v-if="isAnyApis" v-model="showApis" :caption="capGen.apis" />
 				<my-button-check v-if="isAnyCollections" v-model="showCollections" :caption="capGen.collections" />
 				<my-button-check v-if="isAnyDocs" v-model="showDocs" :caption="capGen.pdfs" />
+				<my-button-check v-if="isAnyForms" v-model="showForms" :caption="capGen.forms" />
 				<my-button-check v-if="isAnyFormActions" v-model="showFormActions" :caption="capGen.formActions" />
 				<my-button-check v-if="isAnyFormFields" v-model="showFormFields" :caption="capGen.formFields" />
 				<my-button-check v-if="isAnyFormFunctions" v-model="showFormFunctions" :caption="capGen.formEvents" />
@@ -452,6 +479,7 @@ export default {
 						:showApis
 						:showCollections
 						:showDocs
+						:showForms
 						:showFormActions
 						:showFormFields
 						:showFormFunctions
@@ -489,6 +517,7 @@ export default {
 			showApis: true,
 			showCollections: true,
 			showDocs: true,
+			showForms: true,
 			showFormActions: true,
 			showFormFields: true,
 			showFormFunctions: true,
@@ -509,6 +538,10 @@ export default {
 			let contentName = '';
 			let entityName = null;
 			switch (s.entity) {
+				case 'article':
+					contentName = s.capGen.helpArticle;
+					entityName = s.articleIdMap[s.entityId].name;
+					break;
 				case 'attribute':
 					contentName = s.capGen.attribute;
 					entityName = s.attributeIdMap[s.entityId].name;
@@ -546,6 +579,7 @@ export default {
 		isAnyApis: s => Object.values(s.moduleIdMapLookups).some(v => v.apiIds.length !== 0),
 		isAnyCollections: s => Object.values(s.moduleIdMapLookups).some(v => v.collectionIds.length !== 0),
 		isAnyDocs: s => Object.values(s.moduleIdMapLookups).some(v => v.docIds.length !== 0),
+		isAnyForms: s => Object.values(s.moduleIdMapLookups).some(v => v.formIds.length !== 0),
 		isAnyFormActions: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsActions.length !== 0),
 		isAnyFormFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsFunctions.length !== 0),
 		isAnyFormQueries: s => Object.values(s.moduleIdMapLookups).some(v => v.formIdsQuery.length !== 0),
@@ -564,6 +598,7 @@ export default {
 		// stores
 		capApp: s => s.$store.getters.captions.builder.schemaLookup,
 		capGen: s => s.$store.getters.captions.generic,
+		articleIdMap: s => s.$store.getters['schema/articleIdMap'],
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
 		docIdMap: s => s.$store.getters['schema/docIdMap'],

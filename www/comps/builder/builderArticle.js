@@ -1,11 +1,13 @@
 import { dialogDeleteAsk } from '../shared/dialog.js';
 import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
 
 import MyBuilderCaption from './builderCaption.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 export default {
 	name: 'my-builder-article',
-	components: { MyBuilderCaption },
+	components: { MyBuilderCaption, MyBuilderSchemaLookup },
 	template: `<div class="contentBox grow" v-if="article">
 		<div class="top">
 			<div class="area nowrap default-inputs">
@@ -33,8 +35,12 @@ export default {
 					@trigger="copyValueDialog(article.name,id,id)"
 					:caption="capGen.id"
 				/>
+				<my-button image="builderLookup.png"
+					@trigger="showLookup = true"
+					:caption="capGen.references"
+				/>
 				<my-button image="delete.png"
-					@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+					@trigger="delCheck"
 					:active="!readonly"
 					:cancel="true"
 					:caption="capGen.button.delete"
@@ -95,6 +101,15 @@ export default {
 				</div>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="article"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
 	props: {
 		builderLanguage: { type: String, required: true },
@@ -109,6 +124,9 @@ export default {
 	},
 	data() {
 		return {
+			hasReferences: false,
+			showLookup: false,
+
 			// inputs
 			article: false,
 			articleCopy: {},
@@ -150,6 +168,14 @@ export default {
 		},
 
 		// backend calls
+		delCheck() {
+			this.hasReferences = getHasAnyReferences(this.module, 'article', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
 		del() {
 			ws.send('article', 'del', this.article.id, true).then(
 				() => {

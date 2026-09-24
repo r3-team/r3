@@ -2665,6 +2665,7 @@
 		"groupBy": "Gruppieren",
 		"header": "Kopfzeile",
 		"help": "Hilfe",
+		"helpArticle": "Hilfe-Artikel",
 		"helpArticles": "Hilfe-Artikel",
 		"hidden": "Versteckt",
 		"home": "Start",
