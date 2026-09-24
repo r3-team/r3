@@ -1,4 +1,5 @@
 import MyInputColorWrap from '../inputColorWrap.js';
+import { getTemplateQuery } from '../shared/builderTemplate.js';
 import { getJoinsIndexMap } from '../shared/query.js';
 
 import MyBuilderCaption from './builderCaption.js';
@@ -17,7 +18,7 @@ export default {
 			<tr>
 				<td colspan="2">
 					<my-builder-query
-						v-model="layer.query"
+						@update:modelValue="layer.query = $event"
 						:allowChoices="false"
 						:allowFixedLimit="false"
 						:builderLanguage
@@ -26,6 +27,7 @@ export default {
 						:filtersDisable="['formState','getter','globalSearch']"
 						:formId
 						:moduleId
+						:modelValue="query"
 						:readonly
 					/>
 				</td>
@@ -120,6 +122,7 @@ export default {
 		},
 
 		// simple
+		query: s => s.layer.query !== null ? s.layer.query : s.getTemplateQuery(),
 		joinsIndexMapField: s => s.layer.query !== null ? s.getJoinsIndexMap(s.layer.query.joins) : {},
 		module: s => s.moduleIdMap[s.moduleId],
 
@@ -130,6 +133,7 @@ export default {
 	},
 	methods: {
 		// externals
-		getJoinsIndexMap
+		getJoinsIndexMap,
+		getTemplateQuery,
 	}
 };

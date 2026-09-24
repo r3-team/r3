@@ -548,6 +548,9 @@ export function getTemplateFieldMap() {
 		flags: [],
 		onMobile: true,
 		layersData: [],
+		captions: {
+			fieldTitle: {}
+		},
 	};
 };
 export function getTemplateFieldMapLayerData() {

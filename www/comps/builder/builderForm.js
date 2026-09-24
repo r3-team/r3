@@ -12,6 +12,7 @@ import { getDataFields, getFormRoute } from '../shared/form.js';
 import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
 import { getJoinsIndexMap } from '../shared/query.js';
 import { routeParseParams } from '../shared/router.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
 
 import MyBuilderArticlesInput from './builderArticlesInput.js';
 import MyBuilderCaption from './builderCaption.js';
@@ -21,6 +22,7 @@ import MyBuilderFormFunctions from './builderFormFunctions.js';
 import MyBuilderFormStates from './builderFormStates.js';
 import MyBuilderIconInput from './builderIconInput.js';
 import MyBuilderQuery from './builderQuery.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 import MyBuilderTagInput from './builderTagInput.js';
 
 export default {
@@ -28,7 +30,7 @@ export default {
 	components: {
 		MyBuilderArticlesInput, MyBuilderCaption, MyBuilderFields,
 		MyBuilderFormActions, MyBuilderFormFunctions, MyBuilderFormStates,
-		MyBuilderIconInput, MyBuilderQuery, MyBuilderTagInput
+		MyBuilderIconInput, MyBuilderQuery, MyBuilderSchemaLookup, MyBuilderTagInput
 	},
 	template: `<div class="builder-form" v-if="form !== false">
 		<div class="contentBox builder-form-main">
@@ -99,8 +101,12 @@ export default {
 							@trigger="copyValueDialog(form.name,form.id,form.id)"
 							:caption="capGen.id"
 						/>
+						<my-button image="builderLookup.png"
+							@trigger="showLookup = true"
+							:caption="capGen.references"
+						/>
 						<my-button image="delete.png"
-							@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+							@trigger="delCheck"
 							:active="!readonly"
 							:cancel="true"
 							:caption="capGen.button.delete"
@@ -387,6 +393,15 @@ export default {
 			<!-- field options -->
 			<div class="content flex column grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="form"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
 	emits: ['createNew'],
 	props: {
@@ -412,6 +427,8 @@ export default {
 			fieldIdShow: null,     // field ID which is shown in sidebar to be edited
 			fieldMoveList: null,   // fields list from which to move field (move by click)
 			fieldMoveIndex: 0,     // index of field which to move (move by click)
+			hasReferences: false,
+			showLookup: false,
 			showSidebar: true,     // show form Builder sidebar
 			showTemplate1n: false, // show templates for 1:n relationship input fields
 			showTemplateN1: true,  // show templates for n:1 relationship input fields
@@ -749,6 +766,14 @@ export default {
 		},
 
 		// backend calls
+		delCheck() {
+			this.hasReferences = getHasAnyReferences(this.module, 'form', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
 		del() {
 			ws.send('form', 'del', this.form.id, true).then(
 				() => {

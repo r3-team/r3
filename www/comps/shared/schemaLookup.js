@@ -22,6 +22,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			moduleFncOnLogin: false,
 			moduleHelpArticles: false,
 			moduleMenus: false,
+			moduleStartForms: false,
 
 			// main elements
 			apiIds: [],
@@ -54,6 +55,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			case 'attribute': getReferencesAttribut(mod, entityId, lookups); break;
 			case 'collection': getReferencesCollection(mod, entityId, lookups); break;
 			case 'doc': getReferencesDoc(mod, entityId, lookups); break;
+			case 'form': getReferencesForm(mod, entityId, lookups); break;
 			case 'jsFunction': getReferencesJsFunction(mod, entityId, lookups); break;
 			case 'pgFunction': getReferencesPgFunction(mod, entityId, lookups); break;
 			case 'pgIndex': getReferencesPgIndex(mod, entityId, lookups); break;
@@ -85,6 +87,7 @@ function getReferencesArticle(mod, articleId, lookups) {
 };
 
 function getReferencesCollection(mod, collectionId, lookups) {
+	const isInMenus = menus => menus.some(m => m.collections.some(c => c.collectionId === collectionId) || isInMenus(m.menus));
 	const isInQuery = query => query !== null && isInFilters(query.filters);
 	const isInColumns = columns => columns.some(v => v.content === 'query' && isInQuery(v.query));
 	const isInFilters = filters => filters.some(v =>
@@ -155,7 +158,7 @@ function getReferencesCollection(mod, collectionId, lookups) {
 		}
 		lookupInFields(f.id, f.fields);
 	}
-	if (mod.menuTabs.some(t => t.menus.some(m => m.collections.some(c => c.collectionId === collectionId)))) {
+	if (mod.menuTabs.some(t => isInMenus(t.menus))) {
 		lookups.moduleMenus = true;
 		lookups.anyResults = true;
 	}
@@ -185,7 +188,7 @@ function getReferencesDoc(mod, docId, lookups) {
 		for (const f of fields) {
 			switch (f.content) {
 				case 'button':
-					if (f.openDoc.docIdOpen === docId)
+					if (f.openDoc !== null && f.openDoc.docIdOpen === docId)
 						add(f.id);
 					break;
 				case 'container':
@@ -209,6 +212,93 @@ function getReferencesDoc(mod, docId, lookups) {
 	for (const f of mod.pgFunctions) {
 		if (f.codeFunction.includes(`.pdf_create_attach('${docId}'`) || f.codeFunction.includes(`.pdf_create_export('${docId}'`)) {
 			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+};
+
+function getReferencesForm(mod, formId, lookups) {
+	const isInMenus = menus => menus.some(m => m.formId === formId || isInMenus(m.menus));
+	const lookupInFields = (formIdParent, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formIdParent] === undefined)
+				lookups.formIdMapFieldIds[formIdParent] = [];
+
+			lookups.formIdMapFieldIds[formIdParent].push(fieldId);
+			lookups.anyResults = true;
+		};
+		for (const f of fields) {
+			switch (f.content) {
+				case 'button':   // fallthrough
+				case 'calendar': // fallthrough
+				case 'kanban':
+					if (f.openForm !== null && f.openForm.formIdOpen === formId)
+						add(f.id);
+					break;
+				case 'list':
+					if ((f.openForm !== null && f.openForm.formIdOpen === formId) || (f.openFormBulk !== null && f.openFormBulk.formIdOpen === formId))
+						add(f.id);
+					break;
+				case 'data':
+					if (f.outsideIn !== undefined && f.openForm !== null && f.openForm.formIdOpen === formId)
+						add(f.id);
+					break;
+				case 'map':
+					for (const l of f.layersData) {
+						if (l.openForm !== null && l.openForm.formIdOpen === formId) {
+							add(f.id);
+							break;
+						}
+					}
+					break;
+				case 'container':
+					lookupInFields(formIdParent, f.fields);
+					break;
+				case 'tabs':
+					for (const t of f.tabs) {
+						lookupInFields(formIdParent, t.fields);
+					}
+					break;
+			}
+		}
+	};
+
+	if (mod.formId === formId || mod.startForms.some(v => v.formId === formId)) {
+		lookups.moduleStartForms = true;
+		lookups.anyResults = true;
+	}
+	if (mod.menuTabs.some(t => isInMenus(t.menus))) {
+		lookups.moduleMenus = true;
+		lookups.anyResults = true;
+	}
+	for (const c of mod.collections) {
+		if (c.inHeader.some(h => h.openForm !== null && h.openForm.formIdOpen === formId)) {
+			lookups.collectionIds.push(c.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const f of mod.forms) {
+		if (f.actions.some(a => a.openForm !== null && a.openForm.formIdOpen === formId)) {
+			lookups.formIdsActions.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
+	for (const f of mod.jsFunctions) {
+		if (f.codeFunction.includes(`.form_open('${formId}'`)) {
+			lookups.jsFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const s of mod.searchBars) {
+		if (s.openForm !== null && s.openForm.formIdOpen === formId) {
+			lookups.searchBarIds.push(s.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const w of mod.widgets) {
+		if (w.formId === formId || (w.collection !== null && w.collection.openForm !== null && w.collection.openForm.formIdOpen === formId)) {
+			lookups.widgetIds.push(w.id);
 			lookups.anyResults = true;
 		}
 	}

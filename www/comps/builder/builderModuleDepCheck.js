@@ -80,7 +80,7 @@ export default {
 			entityTitle: '', // title of entity being checked
 			entityList: [], // list of entity elements in parent module (relations, attributes, ...)
 			entitiesCheck: [  // list of entities to be checked in order
-				'relation', 'attribute', 'pgFunction', 'pgIndex', 'jsFunction', 'doc', 'collection', 'article'
+				'relation', 'attribute', 'form', 'pgFunction', 'pgIndex', 'jsFunction', 'doc', 'collection', 'article'
 			],
 
 			// progress
@@ -135,6 +135,10 @@ export default {
 					case 'doc':
 						this.entityTitle = this.capGen.document;
 						this.entityList = this.moduleParent.docs;
+						break;
+					case 'form':
+						this.entityTitle = this.capGen.form;
+						this.entityList = this.moduleParent.forms;
 						break;
 					case 'jsFunction':
 						this.entityTitle = this.capGen.functionFrontend;

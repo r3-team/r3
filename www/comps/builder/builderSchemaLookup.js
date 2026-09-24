@@ -70,6 +70,18 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="lookups.moduleStartForms">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formsStart" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									@trigger="open('module',moduleId,null,false)"
+									@trigger-middle="open('module',moduleId,null,true)"
+									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="lookups.moduleMenus">
 						<td class="minimum"><my-label image="menu.png" :caption="capGen.menus" /></td>
 						<td>
@@ -554,6 +566,10 @@ export default {
 					contentName = s.capGen.document;
 					entityName = s.docIdMap[s.entityId].name;
 					break;
+				case 'form':
+					contentName = s.capGen.form;
+					entityName = s.formIdMap[s.entityId].name;
+					break;
 				case 'jsFunction':
 					contentName = s.capGen.functionFrontend;
 					entityName = s.jsFunctionIdMap[s.entityId].name;
@@ -602,6 +618,7 @@ export default {
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
 		docIdMap: s => s.$store.getters['schema/docIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
 		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
 		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
