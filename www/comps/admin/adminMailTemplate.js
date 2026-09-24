@@ -83,14 +83,12 @@ export default {
 						<tr>
 							<td>{{ capGen.placeholders }}</td>
 							<td>
-								<table>
-									<tbody>
-										<tr v-for="p in mailTemplateLoginPlaceholders">
-											<td class="minimum"><my-button image="copyClipboard.png" @trigger="toClipboard(p)" /></td>
-											<td>{{ p }}</td>
-										</tr>
-									</tbody>
-								</table>
+								<div class="admin-mail-template-placeholders">
+									<div class="row gap centered" v-for="p in mailTemplateLoginPlaceholders">
+										<my-button image="copyClipboard.png" @trigger="toClipboard(p)" />
+										<span>{{ p }}</span>
+									</div>
+								</div>
 							</td>
 						</tr>
 					</tbody>

@@ -353,6 +353,12 @@
 	box-shadow: var(--shadow-input);
 	background-color: var(--color-input);
 }
+.admin-mail-template-placeholders {
+	gap: calc(var(--spacing) / 1.2);
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+}
 
 /* customizing */
 .admin-custom .cssInput {
