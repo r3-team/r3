@@ -248,7 +248,7 @@ export default {
 						:title="capApp.navigationFilterHint"
 					/>
 					<my-button image="add.png"
-						v-if="['apis','collections','docs','forms','js-functions','pg-functions','relations','roles','search-bars'].includes(navigation)"
+						v-if="['apis','articles','collections','docs','forms','js-functions','pg-functions','relations','roles','search-bars'].includes(navigation)"
 						@trigger="add"
 						:active="moduleOwner"
 						:captionTitle="capGen.button.add"
