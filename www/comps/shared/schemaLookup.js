@@ -86,6 +86,183 @@ function getReferencesArticle(mod, articleId, lookups) {
 	}
 };
 
+function getReferencesAttribut(mod, atrId, lookups) {
+	const isInColumns = columns => columns.some(v => v.attributeId === atrId
+		|| (v.content === 'query' && isInQuery(v.query))
+		|| (v.content === 'fnc_pg' && v.arguments.some(a => a.attributeId === atrId))
+		|| (v.content === 'fnc_scalar' && v.arguments.some(a => a.attributeId === atrId))
+	);
+	const isInFilters = filters =>
+		filters.some(v =>
+			v.side0.attributeId === atrId ||
+			v.side1.attributeId === atrId ||
+			isInQuery(v.side0.query) ||
+			isInQuery(v.side1.query)
+		);
+
+	const isInQuery = query =>
+		query !== null && (
+			isInFilters(query.filters) ||
+			query.choices.some(v => isInFilters(v.filters)) ||
+			query.joins.some(v => v.attributeId === atrId) ||
+			query.orders.some(v => v.attributeId === atrId)
+		);
+
+	const lookupInFields = (formId, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+
+		for (const f of fields) {
+			switch (f.content) {
+				case 'button':
+					if (f.openForm !== null && f.openForm.attributeIdApply === atrId)
+						add(f.id);
+					break;
+				case 'calendar':
+					if (f.attributeIdDate0 === atrId || f.attributeIdDate1 === atrId ||
+						f.attributeIdColor === atrId || isInQuery(f.query) || isInColumns(f.columns) ||
+						(f.openForm !== null && f.openForm.attributeIdApply === atrId)
+					) {
+						add(f.id);
+					}
+					break;
+				case 'chart':
+					if (isInQuery(f.query) || isInColumns(f.columns))
+						add(f.id);
+					break;
+				case 'data':
+					if (f.attributeId === atrId || f.attributeIdAlt === atrId) {
+						add(f.id);
+					} else if (f.outsideIn !== undefined && (
+						f.attributeIdNm === atrId || isInQuery(f.query) || isInColumns(f.columns) ||
+						(f.openForm !== null && f.openForm.attributeIdApply === atrId)
+					)) {
+						add(f.id);
+					}
+					break;
+				case 'kanban':
+					if (f.attributeIdSort === atrId || isInQuery(f.query) || isInColumns(f.columns) || (f.openForm !== null && f.openForm.attributeIdApply === atrId))
+						add(f.id);
+					break;
+				case 'list':
+					if (isInQuery(f.query) || isInColumns(f.columns) || (f.openForm !== null && f.openForm.attributeIdApply === atrId))
+						add(f.id);
+					break;
+				case 'map':
+					if (f.layersData.some(l => l.attributeIdData === atrId || l.attributeIdDataColor === atrId || isInQuery(l.query) ||
+						(l.openForm !== null && l.openForm.attributeIdApply === atrId))
+					) {
+						add(f.id)
+					}
+					break;
+				case 'container':
+					lookupInFields(formId, f.fields);
+					break;
+				case 'tabs':
+					for (const t of f.tabs) {
+						lookupInFields(formId, t.fields);
+					}
+					break;
+			}
+		}
+	};
+
+	const isInDocColumns = columns => columns.some(v => v.attributeId === atrId
+		|| (v.content === 'query' && isInQuery(v.query))
+		|| (v.content === 'fnc_pg' && v.arguments.some(a => a.attributeId === atrId))
+		|| (v.content === 'fnc_scalar' && v.arguments.some(a => a.attributeId === atrId))
+		|| v.setsBody.some(s => s.attributeId === atrId)
+		|| v.setsFooter.some(s => s.attributeId === atrId)
+		|| v.setsHeader.some(s => s.attributeId === atrId)
+	);
+
+	const isInDocField = field => {
+		if (field.sets.some(v => v.attributeId === atrId))
+			return true;
+
+		switch (field.content) {
+			case 'data': return field.attributeId === atrId;
+			case 'list': return isInDocColumns(field.columns) || isInQuery(field.query);
+			case 'grid':       // fallthrough
+			case 'gridFooter': // fallthrough
+			case 'gridHeader': // fallthrough
+			case 'flowBody':   // fallthrough
+			case 'flow':
+				for (const f of field.fields) {
+					if (isInDocField(f))
+						return true;
+				}
+				break;
+		}
+		return false;
+	};
+
+	// go through main entities
+	for (const a of mod.apis) {
+		if (isInQuery(a.query) || isInColumns(a.columns)) {
+			lookups.apiIds.push(a.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const c of mod.collections) {
+		if (isInQuery(c.query) || isInColumns(c.columns)) {
+			lookups.collectionIds.push(c.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const f of mod.pgFunctions) {
+		if (f.codeFunction.includes(`(${atrId})`)) {
+			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const s of mod.searchBars) {
+		if (isInQuery(s.query) || isInColumns(s.columns)) {
+			lookups.searchBarIds.push(s.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const r of mod.relations) {
+		for (const pgi of r.indexes) {
+			if (!pgi.autoFki && !pgi.primaryKey && pgi.attributes.some(v => v.attributeId === atrId)) {
+				lookups.pgIndexIds.push(pgi.id);
+				lookups.anyResults = true;
+			}
+		}
+	}
+	for (const f of mod.forms) {
+		if (isInQuery(f.query)) {
+			lookups.formIdsQuery.push(f.id);
+			lookups.anyResults = true;
+		}
+		if (f.actions.some(a => a.openForm !== null && a.openForm.attributeIdApply === atrId)) {
+			lookups.formIdsActions.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
+	for (const d of mod.docs) {
+		if (isInQuery(d.query) ||
+			d.sets.some(v => v.attributeId === atrId) ||
+			d.states.some(v => v.conditions.some(c => c.side0.attributeId === atrId || c.side1.attributeId === atrId)) ||
+			d.pages.some(v =>
+				v.sets.some(s => s.attributeId === atrId) ||
+				isInDocField(v.fieldFlow) ||
+				(v.header.active && v.header.fieldGrid !== null && isInDocField(v.header.fieldGrid)) ||
+				(v.footer.active && v.footer.fieldGrid !== null && isInDocField(v.footer.fieldGrid))
+			)
+		) {
+			lookups.docIds.push(d.id);
+			lookups.anyResults = true;
+		}
+	}
+};
+
 function getReferencesCollection(mod, collectionId, lookups) {
 	const isInMenus = menus => menus.some(m => m.collections.some(c => c.collectionId === collectionId) || isInMenus(m.menus));
 	const isInQuery = query => query !== null && isInFilters(query.filters);
@@ -125,16 +302,12 @@ function getReferencesCollection(mod, collectionId, lookups) {
 						add(f.id);
 					}
 					break;
+				case 'map':
+					if (f.layersData.some(l => isInQuery(l.query)))
+						add(f.id);
+					break;
 				case 'container':
 					lookupInFields(formId, f.fields);
-					break;
-				case 'map':
-					for (const l of f.layersData) {
-						if (isInQuery(l.query)) {
-							add(f.id);
-							break;
-						}
-					}
 					break;
 				case 'tabs':
 					for (const t of f.tabs) {
@@ -244,12 +417,8 @@ function getReferencesForm(mod, formId, lookups) {
 						add(f.id);
 					break;
 				case 'map':
-					for (const l of f.layersData) {
-						if (l.openForm !== null && l.openForm.formIdOpen === formId) {
-							add(f.id);
-							break;
-						}
-					}
+					if (f.layersData.some(l => l.openForm !== null && l.openForm.formIdOpen === formId))
+						add(f.id);
 					break;
 				case 'container':
 					lookupInFields(formIdParent, f.fields);
@@ -380,16 +549,12 @@ function getReferencesRelation(mod, relId, lookups) {
 					if (f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))
 						add(f.id);
 					break;
+				case 'map':
+					if (f.layersData.some(l => isInQuery(l.query)))
+						add(f.id);
+					break;
 				case 'container':
 					lookupInFields(formId, f.fields);
-					break;
-				case 'map':
-					for (const l of f.layersData) {
-						if (isInQuery(l.query)) {
-							add(f.id);
-							break;
-						}
-					}
 					break;
 				case 'tabs':
 					for (const t of f.tabs) {
@@ -613,169 +778,5 @@ function getReferencesPgFunction(mod, fncId, lookups) {
 	}
 	for (const f of mod.forms) {
 		lookupInFields(f.id, f.fields);
-	}
-};
-
-function getReferencesAttribut(mod, atrId, lookups) {
-	const isInColumns = columns => columns.some(v => v.attributeId === atrId
-		|| (v.content === 'query' && isInQuery(v.query))
-		|| (v.content === 'fnc_pg' && v.arguments.some(a => a.attributeId === atrId))
-		|| (v.content === 'fnc_scalar' && v.arguments.some(a => a.attributeId === atrId))
-	);
-	const isInFilters = filters =>
-		filters.some(v =>
-			v.side0.attributeId === atrId ||
-			v.side1.attributeId === atrId ||
-			isInQuery(v.side0.query) ||
-			isInQuery(v.side1.query)
-		);
-
-	const isInQuery = query =>
-		query !== null && (
-			isInFilters(query.filters) ||
-			query.choices.some(v => isInFilters(v.filters)) ||
-			query.joins.some(v => v.attributeId === atrId) ||
-			query.orders.some(v => v.attributeId === atrId)
-		);
-
-	const lookupInFields = (formId, fields) => {
-		const add = fieldId => {
-			if (lookups.formIdMapFieldIds[formId] === undefined)
-				lookups.formIdMapFieldIds[formId] = [];
-
-			lookups.formIdMapFieldIds[formId].push(fieldId);
-			lookups.anyResults = true;
-		};
-
-		for (const f of fields) {
-			switch (f.content) {
-				case 'calendar':
-					if (f.attributeIdDate0 === atrId || f.attributeIdDate1 === atrId || f.attributeIdColor === atrId || isInQuery(f.query) || isInColumns(f.columns))
-						add(f.id);
-					break;
-				case 'chart':
-					if (isInQuery(f.query) || isInColumns(f.columns))
-						add(f.id);
-					break;
-				case 'container':
-					lookupInFields(formId, f.fields);
-					break;
-				case 'data':
-					if (f.attributeId === atrId || f.attributeIdAlt === atrId)
-						add(f.id);
-
-					if (f.outsideIn !== undefined && (f.attributeIdNm === atrId || isInQuery(f.query) || isInColumns(f.columns)))
-						add(f.id);
-					break;
-				case 'kanban':
-					if (f.attributeIdSort === atrId || isInQuery(f.query) || isInColumns(f.columns))
-						add(f.id);
-					break;
-				case 'list':
-					if (isInQuery(f.query) || isInColumns(f.columns))
-						add(f.id);
-					break;
-				case 'map':
-					for (const l of f.layersData) {
-						if (l.attributeIdData === atrId || l.attributeIdDataColor === atrId || isInQuery(l.query)) {
-							add(f.id)
-							break;
-						}
-					}
-					break;
-				case 'tabs':
-					for (const t of f.tabs) {
-						lookupInFields(formId, t.fields);
-					}
-					break;
-			}
-		}
-	};
-
-	const isInDocColumns = columns => columns.some(v => v.attributeId === atrId
-		|| (v.content === 'query' && isInQuery(v.query))
-		|| (v.content === 'fnc_pg' && v.arguments.some(a => a.attributeId === atrId))
-		|| (v.content === 'fnc_scalar' && v.arguments.some(a => a.attributeId === atrId))
-		|| v.setsBody.some(s => s.attributeId === atrId)
-		|| v.setsFooter.some(s => s.attributeId === atrId)
-		|| v.setsHeader.some(s => s.attributeId === atrId)
-	);
-
-	const isInDocField = field => {
-		if (field.sets.some(v => v.attributeId === atrId))
-			return true;
-
-		switch (field.content) {
-			case 'data': return field.attributeId === atrId;
-			case 'list': return isInDocColumns(field.columns) || isInQuery(field.query);
-			case 'grid':       // fallthrough
-			case 'gridFooter': // fallthrough
-			case 'gridHeader': // fallthrough
-			case 'flowBody':   // fallthrough
-			case 'flow':
-				for (const f of field.fields) {
-					if (isInDocField(f))
-						return true;
-				}
-				break;
-		}
-		return false;
-	};
-
-	// go through main entities
-	for (const a of mod.apis) {
-		if (isInQuery(a.query) || isInColumns(a.columns)) {
-			lookups.apiIds.push(a.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const c of mod.collections) {
-		if (isInQuery(c.query) || isInColumns(c.columns)) {
-			lookups.collectionIds.push(c.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const f of mod.pgFunctions) {
-		if (f.codeFunction.includes(`(${atrId})`)) {
-			lookups.pgFunctionIds.push(f.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const s of mod.searchBars) {
-		if (isInQuery(s.query) || isInColumns(s.columns)) {
-			lookups.searchBarIds.push(s.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const r of mod.relations) {
-		for (const pgi of r.indexes) {
-			if (!pgi.autoFki && !pgi.primaryKey && pgi.attributes.some(v => v.attributeId === atrId)) {
-				lookups.pgIndexIds.push(pgi.id);
-				lookups.anyResults = true;
-			}
-		}
-	}
-	for (const f of mod.forms) {
-		if (isInQuery(f.query)) {
-			lookups.formIdsQuery.push(f.id);
-			lookups.anyResults = true;
-		}
-		lookupInFields(f.id, f.fields);
-	}
-	for (const d of mod.docs) {
-		if
-			(isInQuery(d.query) ||
-			d.sets.some(v => v.attributeId === atrId) ||
-			d.states.some(v => v.conditions.some(c => c.side0.attributeId === atrId || c.side1.attributeId === atrId)) ||
-			d.pages.some(v =>
-				v.sets.some(s => s.attributeId === atrId) ||
-				isInDocField(v.fieldFlow) ||
-				(v.header.active && v.header.fieldGrid !== null && isInDocField(v.header.fieldGrid)) ||
-				(v.footer.active && v.footer.fieldGrid !== null && isInDocField(v.footer.fieldGrid))
-			)
-		) {
-			lookups.docIds.push(d.id);
-			lookups.anyResults = true;
-		}
 	}
 };
