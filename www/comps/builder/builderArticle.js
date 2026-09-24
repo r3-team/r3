@@ -80,6 +80,16 @@ export default {
 									/>
 								</td>
 							</tr>
+							<tr>
+								<td colspan="2">
+									<div class="row">
+										<my-button image="question.png"
+											@trigger="showHelp('<p>' + capApp.intro.join('</p><p>') + '</p>')"
+											:caption="capGen.information"
+										/>
+									</div>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -134,6 +144,9 @@ export default {
 				this.article = JSON.parse(JSON.stringify(this.articleSchema));
 				this.articleCopy = JSON.parse(JSON.stringify(this.articleSchema));
 			}
+		},
+		showHelp(msg) {
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });
 		},
 
 		// backend calls

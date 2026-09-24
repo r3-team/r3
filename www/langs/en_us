@@ -759,6 +759,11 @@
 			"dialog": {
 				"delete": "Are you sure you want to delete this article?"
 			},
+			"intro": [
+				"Help articles serve to explain the application to users. They can be assigned to the application itself or to individual forms.",
+				"If the help is opened on a specific form, its help articles are shown first; application help articles are offered in addition, regardless of which form the help was opened on.",
+				"Help articles can be assigned in multiple places - useful if multiple forms belong to or touch a shared part of the application."
+			],
 			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {

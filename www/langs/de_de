@@ -759,6 +759,11 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Artikel löschen möchtest?"
 			},
+			"intro": [
+				"Hilfe-Artikel unterstützen dabei, die Anwendung Benutzern zu erklären. Sie können der Anwendung selbst oder einzelnen Formularen zugewiesen werden.",
+				"Wenn die Hilfe auf einem konkreten Formular geöffnet wird, werden dessen Hilfe-Artikel zuerst angezeigt; Hilfe-Artikel der Anwendung werden zusätzlich angeboten, unabhängig davon, auf welchem Formular die Hilfe geöffnet worden ist.",
+				"Hilfe-Artikel können in mehreren Orten parallel zugewiesen werden - nützlich wenn mehrere Formulare zu einem gemeinsamen Anwendungsbereich gehören."
+			],
 			"titleOne": "Hilfe-Artikel \"{NAME}\""
 		},
 		"attribute": {

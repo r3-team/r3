@@ -4,6 +4,7 @@ export default {
 	name: 'my-builder-articles-input',
 	template: `<div class="column gap">
 		<draggable handle=".dragAnchor" group="articles" itemKey="id" animation="100" class="builder-article-lines"
+			@change="update"
 			:fallbackOnBody="true"
 			:list="articleIds"
 		>
@@ -52,10 +53,6 @@ export default {
 		};
 	},
 	watch: {
-		articleIds(vNew, vOld) {
-			if (JSON.stringify(vNew) !== JSON.stringify(vOld))
-				this.$emit('update:modelValue', vNew);
-		},
 		modelValue: {
 			handler() { this.reset(); },
 			immediate: true
@@ -74,19 +71,27 @@ export default {
 		// actions
 		add(id) {
 			const pos = this.articleIds.indexOf(id);
-			if (pos === -1)
+			if (pos === -1) {
 				this.articleIds.push(id);
-
+				this.update();
+			}
 			this.articleIdAdd = '';
 		},
 		remove(id) {
 			const pos = this.articleIds.indexOf(id);
-			if (pos !== -1)
+			if (pos !== -1) {
 				this.articleIds.splice(pos, 1);
+				this.update();
+			}
 		},
 		reset() {
 			if (JSON.stringify(this.articleIds) !== JSON.stringify(this.modelValue))
 				this.articleIds = JSON.parse(JSON.stringify(this.modelValue));
+		},
+
+		// update
+		update() {
+			this.$emit('update:modelValue', this.articleIds);
 		}
 	}
 };

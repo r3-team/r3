@@ -113,7 +113,7 @@ export default {
 			}
 		},
 		showHelp(msg) {
-			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.warning });
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });
 		},
 
 		// backend calls
