@@ -515,98 +515,6 @@ function getReferencesPgIndex(mod, pgIndexId, lookups) {
 	}
 };
 
-function getReferencesRelation(mod, relId, lookups) {
-	const isInQuery = query =>
-		query !== null && (
-			query.relationId === relId ||
-			isInFilters(query.filters) ||
-			query.joins.some(v => v.relationId === relId) ||
-			query.choices.some(v => isInFilters(v.filters))
-		);
-	const isInColumns = columns => columns.some(v => v.content === 'query' && isInQuery(v.query));
-	const isInFilters = filters => filters.some(v => isInQuery(v.side0.query) || isInQuery(v.side1.query));
-
-	const lookupInFields = (formId, fields) => {
-		const add = fieldId => {
-			if (lookups.formIdMapFieldIds[formId] === undefined)
-				lookups.formIdMapFieldIds[formId] = [];
-
-			lookups.formIdMapFieldIds[formId].push(fieldId);
-			lookups.anyResults = true;
-		};
-
-		for (const f of fields) {
-			switch (f.content) {
-				case 'calendar': // fallthrough
-				case 'chart':    // fallthrough
-				case 'kanban':   // fallthrough
-				case 'list':     // fallthrough
-				case 'variable':
-					if (isInQuery(f.query) || isInColumns(f.columns))
-						add(f.id);
-					break;
-				case 'data':
-					if (f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))
-						add(f.id);
-					break;
-				case 'map':
-					if (f.layersData.some(l => isInQuery(l.query)))
-						add(f.id);
-					break;
-				case 'container':
-					lookupInFields(formId, f.fields);
-					break;
-				case 'tabs':
-					for (const t of f.tabs) {
-						lookupInFields(formId, t.fields);
-					}
-					break;
-			}
-		}
-	};
-
-	// triggers, indexes & presets cascade with relation deletion
-	// checking for these references is as easy as clicking on the trigger/index/preset tab
-
-	for (const a of mod.apis) {
-		if (isInQuery(a.query) || isInColumns(a.columns)) {
-			lookups.apiIds.push(a.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const r of mod.relations) {
-		if (r.attributes.some(v => v.relationshipId === relId && v.relationId !== relId)) {
-			lookups.relationIdsShips.push(r.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const c of mod.collections) {
-		if (isInQuery(c.query) || isInColumns(c.columns)) {
-			lookups.collectionIds.push(c.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const f of mod.forms) {
-		if (isInQuery(f.query)) {
-			lookups.formIdsQuery.push(f.id);
-			lookups.anyResults = true;
-		}
-		lookupInFields(f.id, f.fields);
-	}
-	for (const f of mod.pgFunctions) {
-		if (f.codeFunction.includes(`}.[${relId}]`)) {
-			lookups.pgFunctionIds.push(f.id);
-			lookups.anyResults = true;
-		}
-	}
-	for (const s of mod.searchBars) {
-		if (isInQuery(s.query) || isInColumns(s.columns)) {
-			lookups.searchBarIds.push(s.id);
-			lookups.anyResults = true;
-		}
-	}
-};
-
 function getReferencesJsFunction(mod, fncId, lookups) {
 
 	const lookupInFields = (formId, fields) => {
@@ -778,5 +686,127 @@ function getReferencesPgFunction(mod, fncId, lookups) {
 	}
 	for (const f of mod.forms) {
 		lookupInFields(f.id, f.fields);
+	}
+};
+
+function getReferencesRelation(mod, relId, lookups) {
+	const isInQuery = query =>
+		query !== null && (
+			query.relationId === relId ||
+			isInFilters(query.filters) ||
+			query.joins.some(v => v.relationId === relId) ||
+			query.choices.some(v => isInFilters(v.filters))
+		);
+	const isInColumns = columns => columns.some(v => v.content === 'query' && isInQuery(v.query));
+	const isInFilters = filters => filters.some(v => isInQuery(v.side0.query) || isInQuery(v.side1.query));
+
+	const isInDocColumns = columns => columns.some(c => c.content === 'query' && isInQuery(c.query));
+	const isInDocField = field => {
+		switch (field.content) {
+			case 'list': return isInDocColumns(field.columns) || isInQuery(field.query);
+			case 'grid':       // fallthrough
+			case 'gridFooter': // fallthrough
+			case 'gridHeader': // fallthrough
+			case 'flowBody':   // fallthrough
+			case 'flow':
+				for (const f of field.fields) {
+					if (isInDocField(f))
+						return true;
+				}
+				break;
+		}
+		return false;
+	};
+
+	const lookupInFields = (formId, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+
+		for (const f of fields) {
+			switch (f.content) {
+				case 'calendar': // fallthrough
+				case 'chart':    // fallthrough
+				case 'kanban':   // fallthrough
+				case 'list':     // fallthrough
+				case 'variable':
+					if (isInQuery(f.query) || isInColumns(f.columns))
+						add(f.id);
+					break;
+				case 'data':
+					if (f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))
+						add(f.id);
+					break;
+				case 'map':
+					if (f.layersData.some(l => isInQuery(l.query)))
+						add(f.id);
+					break;
+				case 'container':
+					lookupInFields(formId, f.fields);
+					break;
+				case 'tabs':
+					for (const t of f.tabs) {
+						lookupInFields(formId, t.fields);
+					}
+					break;
+			}
+		}
+	};
+
+	// triggers, indexes & presets cascade with relation deletion
+	// checking for these references is as easy as clicking on the trigger/index/preset tab
+
+	for (const a of mod.apis) {
+		if (isInQuery(a.query) || isInColumns(a.columns)) {
+			lookups.apiIds.push(a.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const d of mod.docs) {
+		if (isInQuery(d.query) ||
+			d.pages.some(v =>
+				isInDocField(v.fieldFlow) ||
+				(v.header.active && v.header.fieldGrid !== null && isInDocField(v.header.fieldGrid)) ||
+				(v.footer.active && v.footer.fieldGrid !== null && isInDocField(v.footer.fieldGrid))
+			)
+		) {
+			lookups.docIds.push(d.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const r of mod.relations) {
+		if (r.attributes.some(v => v.relationshipId === relId && v.relationId !== relId)) {
+			lookups.relationIdsShips.push(r.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const c of mod.collections) {
+		if (isInQuery(c.query) || isInColumns(c.columns)) {
+			lookups.collectionIds.push(c.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const f of mod.forms) {
+		if (isInQuery(f.query)) {
+			lookups.formIdsQuery.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
+	for (const f of mod.pgFunctions) {
+		if (f.codeFunction.includes(`}.[${relId}]`)) {
+			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const s of mod.searchBars) {
+		if (isInQuery(s.query) || isInColumns(s.columns)) {
+			lookups.searchBarIds.push(s.id);
+			lookups.anyResults = true;
+		}
 	}
 };

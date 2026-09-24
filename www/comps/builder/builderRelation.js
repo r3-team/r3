@@ -171,6 +171,11 @@ export default {
 					/>
 				</div>
 				<div class="area">
+					<my-button image="dropdown.png"
+						@trigger="showEnumWizard = true"
+						:active="!readonly"
+						:caption="capApp.wizardEnum.title"
+					/>
 					<my-button image="visible1.png"
 						@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
 						:caption="capGen.id"
@@ -178,11 +183,6 @@ export default {
 					<my-button image="builderLookup.png"
 						@trigger="showLookup = true"
 						:caption="capGen.references"
-					/>
-					<my-button image="dropdown.png"
-						@trigger="showEnumWizard = true"
-						:active="!readonly"
-						:caption="capApp.wizardEnum.title"
 					/>
 					<my-button image="delete.png"
 						@trigger="delCheck"
