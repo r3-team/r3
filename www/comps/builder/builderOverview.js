@@ -143,7 +143,7 @@ export default {
 		</div>
 	</div>`,
 	props: {
-		directOpen: { type: String, required: true }, // overview is opened directly, skips forward if overview is not used by default
+		directOpen: { type: String, required: false, default: '' }, // overview is opened directly, skips forward if overview is not used by default
 		id: { type: String, required: true },
 		readonly: { type: Boolean, required: true }
 	},
