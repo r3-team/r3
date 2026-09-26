@@ -94,8 +94,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.column     ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
-		ALTER TABLE app.doc_column ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
+		ALTER TABLE app.column             ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
+		ALTER TABLE app.doc_column         ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
+		ALTER TABLE instance_mail.template ALTER COLUMN content TYPE instance_mail.template_content USING content::TEXT::instance_mail.template_content;
 	*/
 
 	"3.12": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -827,7 +828,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE instance_mail.template_content AS ENUM('loginInvitation','loginPwReset');
 			CREATE TABLE IF NOT EXISTS instance_mail.template (
 				id SERIAL NOT NULL,
-				content instance_mail.template_content NOT NULL,
+				content TEXT NOT NULL,
 				name CHARACTER VARYING(128) NOT NULL,
 				body TEXT NOT NULL,
 				subject TEXT NOT NULL,
@@ -843,9 +844,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE instance_mail.traffic RENAME CONSTRAINT mail_traffic_mail_account_fkey TO traffic_mail_account_fkey;
 
-			ALTER INDEX fki_mail_traffic_mail_account_id_fkey RENAME TO fki_traffic_mail_account_id_fkey;
-			ALTER INDEX ind_mail_traffic_date                 RENAME TO ind_traffic_date;
-			ALTER INDEX ind_mail_traffic_outgoing             RENAME TO ind_traffic_outgoing;
+			ALTER INDEX instance_mail.fki_mail_traffic_mail_account_id_fkey RENAME TO fki_traffic_mail_account_id_fkey;
+			ALTER INDEX instance_mail.ind_mail_traffic_date                 RENAME TO ind_traffic_date;
+			ALTER INDEX instance_mail.ind_mail_traffic_outgoing             RENAME TO ind_traffic_outgoing;
 
 			-- default mail templates for login PW reset & invitation
 			INSERT INTO instance_mail.template (content, name, subject, body)

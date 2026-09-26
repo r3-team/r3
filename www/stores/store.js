@@ -84,7 +84,7 @@ const MyStore = Vuex.createStore({
 		isAtFavorites: false,           // is the favorites menu entry active?
 		isAtFavoritesEdit: false,       // is the favorites menu entry active and in edit mode?
 		isAtFeedback: false,            // app shows feedback dialog
-		isGeoEnabled: true,            // are geo data features enabled
+		isGeoEnabled: false,            // are geo data features enabled
 		isAtHistoryEnd: false,          // current page is at browser history end
 		isAtHistoryStart: false,        // current page is at browser history start
 		isAtMenu: false,                // user navigated to menu (only relevant if isMobile)
