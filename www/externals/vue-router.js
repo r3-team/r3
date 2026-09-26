@@ -1,17 +1,23 @@
 /*!
- * vue-router v5.0.4
- * (c) 2026 Eduardo San Martin Morote
- * @license MIT
- */
+* vue-router v5.3.1
+* (c) 2026 Eduardo San Martin Morote
+* @license MIT
+*/
 var VueRouter = (function(exports, vue) {
-
-
-//#region src/utils/env.ts
+	Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+	//#region src/utils/env.ts
 	const isBrowser = typeof document !== "undefined";
-
-//#endregion
-//#region src/utils/index.ts
-/**
+	//#endregion
+	//#region src/utils/index.ts
+	/**
+	* Checks if a path is absolute, meaning it starts with a `/`.
+	*
+	* @param path - path to check
+	*
+	* @internal
+	*/
+	const isAbsolutePath = (path) => path.startsWith("/");
+	/**
 	* Allows differentiating lazy components from functional components and vue-class-component
 	* @internal
 	*
@@ -45,17 +51,476 @@ var VueRouter = (function(exports, vue) {
 		for (const key in defaults) options[key] = key in partialOptions ? partialOptions[key] : defaults[key];
 		return options;
 	}
-
-//#endregion
-//#region src/warning.ts
-	function warn(msg) {
-		const args = Array.from(arguments).slice(1);
-		console.warn.apply(console, ["[Vue Router warn]: " + msg].concat(args));
+	//#endregion
+	//#region ../../node_modules/.pnpm/nostics@1.2.0/node_modules/nostics/dist/index.mjs
+	/**
+	* Renders a diagnostic into a multi-line, unicode-decorated string suitable
+	* for terminal output. The first line is `[<name>] <message>`; optional
+	* details (`fix`, `sources`, `docs`) follow with `├▶`/`╰▶` connectors.
+	*/
+	function formatDiagnostic(diagnostic) {
+		const header = `[${diagnostic.name}] ${diagnostic.message}`;
+		const details = [];
+		if (diagnostic.fix) details.push(`fix: ${diagnostic.fix}`);
+		if (diagnostic.sources?.length) details.push(`sources: ${diagnostic.sources.join(", ")}`);
+		if (diagnostic.docs) details.push(`see: ${diagnostic.docs}`);
+		if (details.length === 0) return header;
+		return [header, ...details.map((detail, i) => {
+			return `${i < details.length - 1 ? "├▶" : "╰▶"} ${detail}`;
+		})].join("\n");
 	}
-
-//#endregion
-//#region src/encoding.ts
-/**
+	/**
+	* Transforms a value or a function that returns a value to a value.
+	*
+	* @param valFn either a value or a function that returns a value
+	* @param args  arguments to pass to the function if `valFn` is a function
+	*
+	* @internal
+	*/
+	function toValueWithArgs(valFn, ...args) {
+		return typeof valFn === "function" ? valFn(...args) : valFn;
+	}
+	/**
+	* Creates a console reporter that renders each diagnostic with `formatter` and
+	* prints the result via `console[method]`. Both default sensibly (`'warn'` and
+	* {@link formatDiagnostic}); `method` can also be overridden per call through
+	* the reporter options.
+	*/
+	/* @__NO_SIDE_EFFECTS__ */
+	function createConsoleReporter({ method: defaultMethod = "warn", formatter = formatDiagnostic } = {}) {
+		return (diagnostic, { method = defaultMethod } = {}) => {
+			console[method](formatter(diagnostic));
+		};
+	}
+	const captureStackTrace = Error.captureStackTrace;
+	var Diagnostic = class Diagnostic extends Error {
+		name;
+		/**
+		* The diagnostic code, e.g. `MATH_E001`.
+		* Also appears as the `name` property.
+		*/
+		code;
+		/**
+		* URL to extended documentation for this diagnostic code.
+		* Auto-generated from {@link DefineDiagnosticsOptions.docsBase}.
+		*/
+		docs;
+		/**
+		* Optional actionable instructions on how to resolve the problem.
+		*/
+		fix;
+		/**
+		* Locations in user code that contributed to this diagnostic, in
+		* `file:line:column` format. Relevant when the stack trace doesn't reflect
+		* the user's source (e.g. compilers, bundlers), otherwise redundant with the
+		* stack and should be omitted.
+		*/
+		sources;
+		/**
+		* Alias for {@link Error.message}: the reason this diagnostic was raised.
+		*/
+		get why() {
+			return this.message;
+		}
+		/**
+		* @param init        structured initializer; `why` is required
+		* @param captureFrom V8 stack-cutoff frame. Defaults to {@link Diagnostic}
+		* so the top of the trace is the `new Diagnostic(...)` call site.
+		* `defineDiagnostics` passes its action method to strip its own frames too.
+		* Ignored on engines without `Error.captureStackTrace`.
+		*/
+		constructor(init, captureFrom = Diagnostic) {
+			super(init.why, { cause: init.cause });
+			this.code = this.name = init.code;
+			this.fix = init.fix;
+			this.docs = init.docs;
+			this.sources = init.sources;
+			captureStackTrace?.(this, captureFrom);
+		}
+		/**
+		* Converts the diagnostic into a serializable structured object.
+		*/
+		toJSON() {
+			return {
+				name: this.name,
+				why: this.why,
+				fix: this.fix,
+				docs: this.docs,
+				sources: this.sources,
+				cause: this.cause,
+				stack: this.stack
+			};
+		}
+	};
+	/**
+	* Resolves the docs URL for a code from a `docsBase` (string template or
+	* resolver function). Shared by {@link defineDiagnostics} and
+	* {@link defineProdDiagnostics}. Per-code `docs` overrides are handled by the
+	* caller; this only covers the `docsBase`-derived case.
+	*
+	* @internal
+	*/
+	function deriveDocs(docsBase, code) {
+		return typeof docsBase === "string" ? `${docsBase}/${code.toLowerCase()}` : docsBase?.(code);
+	}
+	/**
+	* Creates a typed diagnostics object from a set of code definitions. Each
+	* code becomes a callable {@link DiagnosticHandle}: invoke to report, or
+	* `throw` the result to raise. No `new` required, no proxy.
+	*/
+	/* @__NO_SIDE_EFFECTS__ */
+	function defineDiagnostics(options) {
+		const reporters = options.reporters ?? [];
+		const result = {};
+		const { docsBase } = options;
+		for (const code of Object.keys(options.codes)) {
+			const def = options.codes[code];
+			const docs = def.docs === false ? void 0 : def.docs || deriveDocs(docsBase, code);
+			const handle = (params = {}, reporterOptions = {}) => {
+				const diagnostic = new Diagnostic({
+					code,
+					why: toValueWithArgs(def.why, params),
+					fix: toValueWithArgs(def.fix, params),
+					docs,
+					cause: params.cause,
+					sources: params.sources
+				}, handle);
+				for (const reporter of reporters) reporter(diagnostic, reporterOptions);
+				return diagnostic;
+			};
+			result[code] = handle;
+		}
+		return result;
+	}
+	//#endregion
+	//#region src/errors.ts
+	const NavigationFailureSymbol = Symbol("navigation failure");
+	/**
+	* Enumeration with all possible types for navigation failures. Can be passed to
+	* {@link isNavigationFailure} to check for specific failures.
+	*/
+	let NavigationFailureType = /* @__PURE__ */ function(NavigationFailureType) {
+		/**
+		* An aborted navigation is a navigation that failed because a navigation
+		* guard returned `false` or called `next(false)`
+		*/
+		NavigationFailureType[NavigationFailureType["aborted"] = 4] = "aborted";
+		/**
+		* A cancelled navigation is a navigation that failed because a more recent
+		* navigation finished started (not necessarily finished).
+		*/
+		NavigationFailureType[NavigationFailureType["cancelled"] = 8] = "cancelled";
+		/**
+		* A duplicated navigation is a navigation that failed because it was
+		* initiated while already being at the exact same location.
+		*/
+		NavigationFailureType[NavigationFailureType["duplicated"] = 16] = "duplicated";
+		return NavigationFailureType;
+	}({});
+	const ErrorTypeMessages = {
+		[1]({ location, currentLocation }) {
+			return `No match for\n ${JSON.stringify(location)}${currentLocation ? "\nwhile being at\n" + JSON.stringify(currentLocation) : ""}`;
+		},
+		[2]({ from, to }) {
+			return `Redirected from "${from.fullPath}" to "${stringifyRoute(to)}" via a navigation guard.`;
+		},
+		[4]({ from, to }) {
+			return `Navigation aborted from "${from.fullPath}" to "${to.fullPath}" via a navigation guard.`;
+		},
+		[8]({ from, to }) {
+			return `Navigation cancelled from "${from.fullPath}" to "${to.fullPath}" with a new navigation.`;
+		},
+		[16]({ from, to: _to }) {
+			return `Avoided redundant navigation to current location: "${from.fullPath}".`;
+		}
+	};
+	/**
+	* Creates a typed NavigationFailure object.
+	* @internal
+	* @param type - NavigationFailureType
+	* @param params - { from, to }
+	*/
+	function createRouterError(type, params) {
+		return assign(new Error(ErrorTypeMessages[type](params)), {
+			type,
+			[NavigationFailureSymbol]: true
+		}, params);
+	}
+	function isNavigationFailure(error, type) {
+		return error instanceof Error && NavigationFailureSymbol in error && (type == null || !!(error.type & type));
+	}
+	const propertiesToLog = [
+		"params",
+		"query",
+		"hash"
+	];
+	/**
+	* Stringifies a raw location for display in dev warnings.
+	*
+	* @internal
+	*/
+	function stringifyRoute(to) {
+		if (!to || typeof to === "string") return to;
+		if (to.path != null) return to.path;
+		const location = {};
+		for (const key of propertiesToLog) if (key in to) location[key] = to[key];
+		return JSON.stringify(location, null, 2);
+	}
+	//#endregion
+	//#region src/diagnostics.ts
+	/**
+	* Runtime diagnostics catalog for Vue Router.
+	*
+	* Every entry has a stable `VUE_ROUTER_R####` code, a `why` that states the problem
+	* (the diagnosis only, never the remedy) and a `fix` that states the remedy
+	* (only, never the diagnosis). They are complementary: the reporter prints
+	* both, so neither repeats the other. The diagnosis substrings asserted by the
+	* warning tests stay in `why`. All call sites stay behind the existing `__DEV__` (or
+	* `process.env.NODE_ENV !== 'production'`) guards and remain bare expression
+	* statements so they tree-shake out of production builds.
+	*
+	* Codes are permanent: never rename or reuse one.
+	* - `VUE_ROUTER_R0###` core runtime warnings
+	* - `VUE_ROUTER_R1###` experimental data-loaders
+	*/
+	const diagnostics = /*#__PURE__*/ defineDiagnostics({
+		reporters: [/*#__PURE__*/ createConsoleReporter()],
+		codes: {
+			VUE_ROUTER_R0001: {
+				why: (p) => `Parent route "${p.name}" not found when adding child route`,
+				fix: "Add the parent route before its children, or check the parent name for typos.",
+				docs: "https://router.vuejs.org/guide/advanced/dynamic-routing.html#Adding-nested-routes"
+			},
+			VUE_ROUTER_R0002: {
+				why: (p) => `Cannot remove non-existent route "${p.name}"`,
+				fix: "Check the route name; it may already have been removed or was never added.",
+				docs: "https://router.vuejs.org/guide/advanced/dynamic-routing.html#Removing-routes"
+			},
+			VUE_ROUTER_R0003: {
+				why: (p) => `Location "${stringifyRoute(p.location)}" resolved to "${p.href}". A resolved location cannot start with multiple slashes.`,
+				fix: "Remove the leading slashes from the location or fix the route configuration."
+			},
+			VUE_ROUTER_R0004: {
+				why: (p) => `No match found for location with path "${stringifyRoute(p.path)}"`,
+				fix: "Add a route matching this path or check for typos in the location.",
+				docs: "https://router.vuejs.org/guide/essentials/dynamic-matching.html#Catch-all-404-Not-found-Route"
+			},
+			VUE_ROUTER_R0005: {
+				why: (p) => `router.resolve() was passed an invalid location. This will fail in production.\nLocation: ${stringifyRoute(p.rawLocation)}`,
+				fix: "Pass a valid route location: a string path or an object with `path` or `name`."
+			},
+			VUE_ROUTER_R0006: {
+				why: (p) => `Path "${p.path}" was passed with params but they will be ignored because a "path" was passed.`,
+				fix: "Use a named route `{ name, params }` instead of `{ path, params }`.",
+				docs: "https://router.vuejs.org/guide/essentials/navigation.html#Navigate-to-a-different-location"
+			},
+			VUE_ROUTER_R0007: {
+				why: (p) => `A \`hash\` should always start with the character "#" but received "${p.hash}".`,
+				fix: (p) => `Prepend "#" to the hash in your route location: use "#${p.hash}".`
+			},
+			VUE_ROUTER_R0008: {
+				why: (p) => `Invalid redirect found:\n${p.target}\n when navigating to "${p.to}".\nThis will break in production.`,
+				fix: "A redirect must resolve to a location with a `name` or `path`; return one of those (or a string path) from `redirect`.",
+				docs: "https://router.vuejs.org/guide/essentials/redirect-and-alias.html#Redirect"
+			},
+			VUE_ROUTER_R0009: {
+				why: (p) => `Detected a possibly infinite redirection in a navigation guard when going from "${p.from}" to "${p.to}". Aborting to avoid a Stack Overflow. This might break in production if not fixed.`,
+				fix: "A guard is returning a new location on every call; make that return conditional so it only redirects when actually needed.",
+				docs: "https://router.vuejs.org/guide/advanced/navigation-guards.html#Global-Before-Guards"
+			},
+			VUE_ROUTER_R0010: {
+				why: "Uncaught error during route navigation",
+				fix: "Register an error handler with `router.onError()` to handle navigation errors."
+			},
+			VUE_ROUTER_R0011: {
+				why: "Unexpected error when starting the router:",
+				fix: "Inspect the actual cause; a navigation guard or async component likely threw during the initial navigation."
+			},
+			VUE_ROUTER_R0020: {
+				why: (p) => `No active route record was found when calling \`${p.fn}()\`. Maybe you called it inside of App.vue?`,
+				fix: "Call it from a component rendered inside <router-view> (a page component or one of its children), not from App.vue.",
+				docs: "https://router.vuejs.org/guide/advanced/composition-api.html#Navigation-Guards"
+			},
+			VUE_ROUTER_R0021: {
+				why: "No active route record was found when reactivating component with navigation guard. This is likely a bug in vue-router.",
+				fix: "Report with a minimal reproduction at https://github.com/vuejs/router/issues/new/choose."
+			},
+			VUE_ROUTER_R0022: {
+				why: (p) => `${p.fn}() was called outside of component setup but it must be called at the top of a setup function`,
+				fix: "Call it synchronously at the top of `setup()`, before any `await`.",
+				docs: "https://router.vuejs.org/guide/advanced/composition-api.html#Navigation-Guards"
+			},
+			VUE_ROUTER_R0023: {
+				why: (p) => `The "next" callback was never called inside of ${p.name ? `"${p.name}"` : ""}:\n${p.guard}`,
+				fix: "Make sure `next()` runs on every branch, including early returns and async paths, or drop the `next` parameter and return the value instead.",
+				docs: "https://router.vuejs.org/guide/advanced/navigation-guards.html#Optional-third-argument-next"
+			},
+			VUE_ROUTER_R0024: {
+				why: (p) => `The "next" callback was called more than once in one navigation guard when going from "${p.from}" to "${p.to}". This will fail in production.`,
+				fix: "Call `next()` exactly once per guard: remove the extra call, or migrate to returning the value you passed to `next()`.",
+				docs: "https://router.vuejs.org/guide/advanced/navigation-guards.html#Optional-third-argument-next"
+			},
+			VUE_ROUTER_R0025: {
+				why: "The `next()` callback in navigation guards is deprecated.",
+				fix: "Return the value instead: `next()` becomes `return`, `next(false)` becomes `return false`, `next(\"/path\")` becomes `return \"/path\"`.",
+				docs: "https://router.vuejs.org/guide/advanced/navigation-guards.html#Optional-third-argument-next"
+			},
+			VUE_ROUTER_R0026: {
+				why: (p) => `Record with path "${p.path}" is either missing a "component(s)" or "children" property.`,
+				fix: "Add a `component`, `components`, or `children` to the route record.",
+				docs: "https://router.vuejs.org/guide/essentials/nested-routes.html"
+			},
+			VUE_ROUTER_R0027: {
+				why: (p) => `Component "${p.name}" in record with path "${p.path}" is not a valid component. Received "${p.received}".`,
+				fix: "Pass a component or a function returning a Promise that resolves to one."
+			},
+			VUE_ROUTER_R0028: {
+				why: (p) => `Component "${p.name}" in record with path "${p.path}" is a Promise instead of a function that returns a Promise. This will break in production if not fixed.`,
+				fix: `Defer the import in an arrow function so it loads lazily: write "() => import('./MyPage.vue')", not "import('./MyPage.vue')".`,
+				docs: "https://router.vuejs.org/guide/advanced/lazy-loading.html"
+			},
+			VUE_ROUTER_R0029: {
+				why: (p) => `Component "${p.name}" in record with path "${p.path}" is defined using "defineAsyncComponent()".`,
+				fix: `Drop the wrapper and pass "() => import('./MyPage.vue')" directly; the router handles lazy components itself.`,
+				docs: "https://router.vuejs.org/guide/advanced/lazy-loading.html#Relationship-to-async-components"
+			},
+			VUE_ROUTER_R0030: {
+				why: (p) => `Component "${p.name}" in record with path "${p.path}" is a function that does not return a Promise. This will break in production if not fixed.`,
+				fix: "Return a dynamic import (`() => import(\"./MyPage.vue\")`) from the function, or add a `displayName` if it is a functional component.",
+				docs: "https://router.vuejs.org/guide/advanced/lazy-loading.html"
+			},
+			VUE_ROUTER_R0040: {
+				why: (p) => `Because "${p.el}" starts with "#", scrollBehavior resolves it as an element id via document.getElementById("${p.el.slice(1)}"), not as a CSS selector. No element has that id, but "${p.el}" does match an element with document.querySelector().`,
+				fix: (p) => `Resolve the element yourself and return the node: el: document.querySelector('${p.el}').`,
+				docs: "https://router.vuejs.org/guide/advanced/scroll-behavior.html"
+			},
+			VUE_ROUTER_R0041: {
+				why: (p) => `The selector "${p.el}" is invalid. See https://mathiasbynens.be/notes/css-escapes or CSS.escape (https://developer.mozilla.org/en-US/docs/Web/API/CSS/escape) for the escaping rules.`,
+				fix: "Build an id selector as `#${CSS.escape(id)}` so special characters in the id are escaped.",
+				docs: "https://router.vuejs.org/guide/advanced/scroll-behavior.html"
+			},
+			VUE_ROUTER_R0042: {
+				why: (p) => `Couldn't find element using selector "${p.el}" returned by scrollBehavior.`,
+				fix: "Return a selector that matches an existing element, or guard against missing elements.",
+				docs: "https://router.vuejs.org/guide/advanced/scroll-behavior.html"
+			},
+			VUE_ROUTER_R0050: {
+				why: (p) => {
+					let to;
+					try {
+						to = p.to === void 0 ? "undefined" : JSON.stringify(p.to);
+					} catch {
+						to = String(p.to);
+					}
+					return `Invalid value for prop "to" in useLink()\n- to: ${to}`;
+				},
+				fix: "Pass a valid route location (a string path or an object) to the \"to\" prop."
+			},
+			VUE_ROUTER_R0060: {
+				why: (p) => `<router-view> can no longer be used directly inside <${p.comp}>.`,
+				fix: (p) => `Wrap the slot's resolved component with <${p.comp}> instead of nesting <router-view> in it:\n\n<router-view v-slot="{ Component }">\n  <${p.comp}>\n    <component :is="Component" />\n  </${p.comp}>\n</router-view>`,
+				docs: "https://router.vuejs.org/guide/advanced/router-view-slot.html#KeepAlive-Transition"
+			},
+			VUE_ROUTER_R0070: {
+				why: (p) => `Cannot resolve a relative location without an absolute path. Trying to resolve "${p.to}" from "${p.from}".`,
+				fix: (p) => `Resolve from an absolute \`from\` path that starts with "/", e.g. "/${p.from}".`
+			},
+			VUE_ROUTER_R0080: {
+				why: (p) => `Error decoding "${p.text}". Using original value`,
+				fix: "Ensure the value is correctly percent-encoded."
+			},
+			VUE_ROUTER_R0090: {
+				why: (p) => `Found duplicated params with name "${p.name}" for path "${p.path}". Only the last one will be available on "$route.params".`,
+				fix: "Give each param a unique name within the path.",
+				docs: "https://router.vuejs.org/guide/essentials/route-matching-syntax.html"
+			},
+			VUE_ROUTER_R0100: {
+				why: (p) => `Discarded invalid param(s) "${p.params}" when navigating.` + p.inherited + ` See https://github.com/vuejs/router/commit/e887570 for more details.`,
+				fix: "Only pass params that exist on the target route."
+			},
+			VUE_ROUTER_R0101: {
+				why: (p) => `The Matcher cannot resolve relative paths but received "${p.path}". Unless you directly called \`matcher.resolve("${p.path}")\`, this is probably a bug in vue-router. Please open an issue at https://github.com/vuejs/router/issues/new/choose.`,
+				fix: "Pass an absolute path (starting with \"/\") to the matcher."
+			},
+			VUE_ROUTER_R0102: {
+				why: (p) => `Alias "${p.alias}" and the original record: "${p.original}" must have the exact same param named "${p.name}"`,
+				fix: "Use the same param names in the alias as in the original route.",
+				docs: "https://router.vuejs.org/guide/essentials/redirect-and-alias.html#Alias"
+			},
+			VUE_ROUTER_R0103: {
+				why: (p) => `The route named "${p.name}" has a child without a name, an empty path, and no children. Using that name won't render the empty path child, so this is probably a mistake.`,
+				fix: "Move the `name` onto the empty-path child; or, if intentional, give the child its own name to silence this.",
+				docs: "https://router.vuejs.org/guide/essentials/nested-routes.html#Nested-Named-Routes"
+			},
+			VUE_ROUTER_R0104: {
+				why: (p) => `Absolute path "${p.path}" must have the exact same param named "${p.name}" as its parent "${p.parent}".`,
+				fix: "Include the parent route params in the absolute child path.",
+				docs: "https://router.vuejs.org/guide/essentials/nested-routes.html"
+			},
+			VUE_ROUTER_R0105: {
+				why: (p) => `Finding ancestor route "${p.ancestor}" failed for "${p.record}"`,
+				fix: "Report a reproduction at https://github.com/vuejs/router/issues/new/choose."
+			},
+			VUE_ROUTER_R0110: {
+				why: `A hash base must end with a "#"`,
+				fix: (p) => `Append "#" to the "base" argument passed to "createWebHashHistory()": "${p.base}" should be "${p.suggestion}".`
+			},
+			VUE_ROUTER_R0120: {
+				why: "Error with push/replace State",
+				fix: "The browser rejected the history API call; check for cross-origin or rate-limit issues."
+			},
+			VUE_ROUTER_R0121: {
+				why: "history.state seems to have been manually replaced without preserving the necessary values.\nYou can find more information at https://router.vuejs.org/guide/migration/#Usage-of-history-state",
+				fix: "Merge the router's state into your own when calling it manually: `history.replaceState({ ...history.state, ...yourState }, '', url)`.",
+				docs: "https://router.vuejs.org/guide/migration.html#Usage-of-history-state"
+			},
+			VUE_ROUTER_R1001: {
+				why: (p) => `Data loader "${String(p.key)}" has a different parent than the current context. This shouldn't be happening.`,
+				fix: "Report a bug with a minimal reproduction at https://github.com/vuejs/router/."
+			},
+			VUE_ROUTER_R1002: {
+				why: "Returning a NavigationResult is deprecated.",
+				fix: "Replace `return new NavigationResult(to)` with `reroute(to)`, which throws internally to reroute.",
+				docs: "https://router.vuejs.org/data-loaders/navigation-aware.html#Controlling-the-navigation-with-reroute-"
+			},
+			VUE_ROUTER_R1003: {
+				why: (p) => `Loader "${p.key}"'s "commit()" was called but there is no staged data.`,
+				fix: "Ensure the loader resolved before calling `commit()`.",
+				docs: "https://router.vuejs.org/data-loaders/defining-loaders.html#Delaying-data-updates-with-commit"
+			},
+			VUE_ROUTER_R1004: {
+				why: (p) => "A loader returned a NavigationResult but is not registered on the route." + p.key,
+				fix: "Export the loader from the page component so it gets registered, e.g. `export const useUserData = defineLoader(...)`.",
+				docs: "https://router.vuejs.org/data-loaders/organization.html"
+			},
+			VUE_ROUTER_R1005: {
+				why: (p) => `Data loader "${p.key}" has itself as parent. This shouldn't be happening.`,
+				fix: "Report a bug with a minimal reproduction at https://github.com/vuejs/router/."
+			},
+			VUE_ROUTER_R1006: {
+				why: (p) => `A query was defined with the same key as the loader "[${p.key}]".\nSee https://pinia-colada.esm.dev/#TODO`,
+				fix: "If the key is meant to match, use the data loader directly; otherwise rename the `useQuery()` key so it no longer collides.",
+				docs: "https://router.vuejs.org/data-loaders/colada.html"
+			},
+			VUE_ROUTER_R1007: {
+				why: "Data Loader was setup twice.",
+				fix: "Register `DataLoaderPlugin` a single time via `app.use()`.",
+				docs: "https://router.vuejs.org/data-loaders.html#Installation"
+			},
+			VUE_ROUTER_R1008: {
+				why: "Data Loader is experimental and subject to breaking changes in the future.",
+				docs: "https://router.vuejs.org/data-loaders.html"
+			},
+			VUE_ROUTER_R1009: {
+				why: "Returning a NavigationResult from a loader is deprecated.",
+				fix: "Call `reroute(to)` inside the loader instead of returning `new NavigationResult(to)`; it throws internally to reroute.",
+				docs: "https://router.vuejs.org/data-loaders/navigation-aware.html#Controlling-the-navigation-with-reroute-"
+			}
+		}
+	});
+	//#endregion
+	//#region src/encoding.ts
+	/**
 	* Encoding Rules (␣ = Space)
 	* - Path: ␣ " < > # ? { }
 	* - Query: ␣ " < > # & =
@@ -163,14 +628,13 @@ var VueRouter = (function(exports, vue) {
 		if (text == null) return null;
 		try {
 			return decodeURIComponent("" + text);
-		} catch (err) {
-			warn(`Error decoding "${text}". Using original value`);
+		} catch {
+			diagnostics.VUE_ROUTER_R0080({ text: "" + text });
 		}
 		return "" + text;
 	}
-
-//#endregion
-//#region src/location.ts
+	//#endregion
+	//#region src/location.ts
 	const TRAILING_SLASH_RE = /\/$/;
 	const removeTrailingSlash = (path) => path.replace(TRAILING_SLASH_RE, "");
 	/**
@@ -273,9 +737,12 @@ var VueRouter = (function(exports, vue) {
 	* @param from - currentLocation.path, should start with `/`
 	*/
 	function resolveRelativePath(to, from) {
-		if (to.startsWith("/")) return to;
-		if (!from.startsWith("/")) {
-			warn(`Cannot resolve a relative location without an absolute path. Trying to resolve "${to}" from "${from}". It should look like "/${from}".`);
+		if (isAbsolutePath(to)) return to;
+		if (!isAbsolutePath(from)) {
+			diagnostics.VUE_ROUTER_R0070({
+				to,
+				from
+			});
 			return to;
 		}
 		if (!to) return from;
@@ -321,24 +788,8 @@ var VueRouter = (function(exports, vue) {
 		meta: {},
 		redirectedFrom: void 0
 	};
-
-//#endregion
-//#region src/history/common.ts
-	let NavigationType = /* @__PURE__ */ function(NavigationType) {
-		NavigationType["pop"] = "pop";
-		NavigationType["push"] = "push";
-		return NavigationType;
-	}({});
-	let NavigationDirection = /* @__PURE__ */ function(NavigationDirection) {
-		NavigationDirection["back"] = "back";
-		NavigationDirection["forward"] = "forward";
-		NavigationDirection["unknown"] = "";
-		return NavigationDirection;
-	}({});
-	/**
-	* Starting location for Histories
-	*/
-	const START = "";
+	//#endregion
+	//#region src/history/common.ts
 	/**
 	* Normalizes a base by removing any trailing slash and reading the base tag if
 	* present.
@@ -346,11 +797,13 @@ var VueRouter = (function(exports, vue) {
 	* @param base - base to normalize
 	*/
 	function normalizeBase(base) {
-		if (!base) if (isBrowser) {
-			const baseEl = document.querySelector("base");
-			base = baseEl && baseEl.getAttribute("href") || "/";
-			base = base.replace(/^\w+:\/\/[^\/]+/, "");
-		} else base = "/";
+		if (!base) {
+			if (isBrowser) {
+				const baseEl = document.querySelector("base");
+				base = baseEl && baseEl.getAttribute("href") || "/";
+				base = base.replace(/^\w+:\/\/[^/]+/, "");
+			} else base = "/";
+		}
 		if (base[0] !== "/" && base[0] !== "#") base = "/" + base;
 		return removeTrailingSlash(base);
 	}
@@ -358,9 +811,8 @@ var VueRouter = (function(exports, vue) {
 	function createHref(base, location) {
 		return base.replace(BEFORE_HASH_RE, "#") + location;
 	}
-
-//#endregion
-//#region src/scrollBehavior.ts
+	//#endregion
+	//#region src/scrollBehavior.ts
 	function getElementPosition(el, offset) {
 		const docRect = document.documentElement.getBoundingClientRect();
 		const elRect = el.getBoundingClientRect();
@@ -370,10 +822,10 @@ var VueRouter = (function(exports, vue) {
 			top: elRect.top - docRect.top - (offset.top || 0)
 		};
 	}
-	const computeScrollPosition = () => ({
+	const computeScrollPosition = () => history.scrollRestoration === "manual" ? {
 		left: window.scrollX,
 		top: window.scrollY
-	});
+	} : null;
 	function scrollToPosition(position) {
 		let scrollToOptions;
 		if ("el" in position) {
@@ -404,17 +856,17 @@ var VueRouter = (function(exports, vue) {
 				if (!isIdSelector || !document.getElementById(position.el.slice(1))) try {
 					const foundEl = document.querySelector(position.el);
 					if (isIdSelector && foundEl) {
-						warn(`The selector "${position.el}" should be passed as "el: document.querySelector('${position.el}')" because it starts with "#".`);
+						diagnostics.VUE_ROUTER_R0040({ el: position.el });
 						return;
 					}
-				} catch (err) {
-					warn(`The selector "${position.el}" is invalid. If you are using an id selector, make sure to escape it. You can find more information about escaping characters in selectors at https://mathiasbynens.be/notes/css-escapes or use CSS.escape (https://developer.mozilla.org/en-US/docs/Web/API/CSS/escape).`);
+				} catch {
+					diagnostics.VUE_ROUTER_R0041({ el: position.el });
 					return;
 				}
 			}
 			const el = typeof positionEl === "string" ? isIdSelector ? document.getElementById(positionEl.slice(1)) : document.querySelector(positionEl) : positionEl;
 			if (!el) {
-				warn(`Couldn't find element using selector "${position.el}" returned by scrollBehavior.`);
+				diagnostics.VUE_ROUTER_R0042({ el: position.el });
 				return;
 			}
 			scrollToOptions = getElementPosition(el, position);
@@ -426,8 +878,8 @@ var VueRouter = (function(exports, vue) {
 		return (history.state ? history.state.position - delta : -1) + path;
 	}
 	const scrollPositions = /* @__PURE__ */ new Map();
-	function saveScrollPosition(key, scrollPosition) {
-		scrollPositions.set(key, scrollPosition);
+	function saveScrollPosition(key) {
+		scrollPositions.set(key, computeScrollPosition());
 	}
 	function getSavedScrollPosition(key) {
 		const scroll = scrollPositions.get(key);
@@ -438,9 +890,8 @@ var VueRouter = (function(exports, vue) {
 	* ScrollBehavior instance used by the router to compute and restore the scroll
 	* position when navigating.
 	*/
-
-//#endregion
-//#region src/history/html5.ts
+	//#endregion
+	//#region src/history/html5.ts
 	let createBaseLocation = () => location.protocol + "//" + location.host;
 	/**
 	* Creates a normalized history location from a window.location object
@@ -479,8 +930,8 @@ var VueRouter = (function(exports, vue) {
 			listeners.forEach((listener) => {
 				listener(currentLocation.value, from, {
 					delta,
-					type: NavigationType.pop,
-					direction: delta ? delta > 0 ? NavigationDirection.forward : NavigationDirection.back : NavigationDirection.unknown
+					type: "pop",
+					direction: delta ? delta > 0 ? "forward" : "back" : ""
 				});
 			});
 		};
@@ -497,22 +948,18 @@ var VueRouter = (function(exports, vue) {
 			return teardown;
 		}
 		function beforeUnloadListener() {
-			if (document.visibilityState === "hidden") {
-				const { history } = window;
-				if (!history.state) return;
-				history.replaceState(assign({}, history.state, { scroll: computeScrollPosition() }), "");
-			}
+			const { history } = window;
+			if (!history.state) return;
+			history.replaceState(assign({}, history.state, { scroll: computeScrollPosition() }), "");
 		}
 		function destroy() {
 			for (const teardown of teardowns) teardown();
 			teardowns = [];
 			window.removeEventListener("popstate", popStateHandler);
 			window.removeEventListener("pagehide", beforeUnloadListener);
-			document.removeEventListener("visibilitychange", beforeUnloadListener);
 		}
 		window.addEventListener("popstate", popStateHandler);
 		window.addEventListener("pagehide", beforeUnloadListener);
-		document.addEventListener("visibilitychange", beforeUnloadListener);
 		return {
 			pauseListeners,
 			listen,
@@ -522,14 +969,14 @@ var VueRouter = (function(exports, vue) {
 	/**
 	* Creates a state object
 	*/
-	function buildState(back, current, forward, replaced = false, computeScroll = false) {
+	function buildState(back, current, forward, replaced = false) {
 		return {
 			back,
 			current,
 			forward,
 			replaced,
 			position: window.history.length,
-			scroll: computeScroll ? computeScrollPosition() : null
+			scroll: null
 		};
 	}
 	function useHistoryStateNavigation(base) {
@@ -560,7 +1007,7 @@ var VueRouter = (function(exports, vue) {
 				history[replace ? "replaceState" : "pushState"](state, "", url);
 				historyState.value = state;
 			} catch (err) {
-				warn("Error with push/replace State", err);
+				diagnostics.VUE_ROUTER_R0120({ cause: err });
 				location[replace ? "replace" : "assign"](url);
 			}
 		}
@@ -573,7 +1020,7 @@ var VueRouter = (function(exports, vue) {
 				forward: to,
 				scroll: computeScrollPosition()
 			});
-			if (!history.state) warn("history.state seems to have been manually replaced without preserving the necessary values. Make sure to preserve existing history state if you are manually calling history.replaceState:\n\nhistory.replaceState(history.state, '', url)\n\nYou can find more information at https://router.vuejs.org/guide/migration/#Usage-of-history-state");
+			if (!history.state) diagnostics.VUE_ROUTER_R0121();
 			changeLocation(currentState.current, currentState, true);
 			changeLocation(to, assign({}, buildState(currentLocation.value, to, null), { position: currentState.position + 1 }, data), false);
 			currentLocation.value = to;
@@ -614,82 +1061,9 @@ var VueRouter = (function(exports, vue) {
 		});
 		return routerHistory;
 	}
-
-//#endregion
-//#region src/history/memory.ts
-/**
-	* Creates an in-memory based history. The main purpose of this history is to handle SSR. It starts in a special location that is nowhere.
-	* It's up to the user to replace that location with the starter location by either calling `router.push` or `router.replace`.
-	*
-	* @param base - Base applied to all urls, defaults to '/'
-	* @returns a history object that can be passed to the router constructor
-	*/
-	function createMemoryHistory(base = "") {
-		let listeners = [];
-		let queue = [[START, {}]];
-		let position = 0;
-		base = normalizeBase(base);
-		function setLocation(location, state = {}) {
-			position++;
-			if (position !== queue.length) queue.splice(position);
-			queue.push([location, state]);
-		}
-		function triggerListeners(to, from, { direction, delta }) {
-			const info = {
-				direction,
-				delta,
-				type: NavigationType.pop
-			};
-			for (const callback of listeners) callback(to, from, info);
-		}
-		const routerHistory = {
-			location: START,
-			state: {},
-			base,
-			createHref: createHref.bind(null, base),
-			replace(to, state) {
-				queue.splice(position--, 1);
-				setLocation(to, state);
-			},
-			push(to, state) {
-				setLocation(to, state);
-			},
-			listen(callback) {
-				listeners.push(callback);
-				return () => {
-					const index = listeners.indexOf(callback);
-					if (index > -1) listeners.splice(index, 1);
-				};
-			},
-			destroy() {
-				listeners = [];
-				queue = [[START, {}]];
-				position = 0;
-			},
-			go(delta, shouldTrigger = true) {
-				const from = this.location;
-				const direction = delta < 0 ? NavigationDirection.back : NavigationDirection.forward;
-				position = Math.max(0, Math.min(position + delta, queue.length - 1));
-				if (shouldTrigger) triggerListeners(this.location, from, {
-					direction,
-					delta
-				});
-			}
-		};
-		Object.defineProperty(routerHistory, "location", {
-			enumerable: true,
-			get: () => queue[position][0]
-		});
-		Object.defineProperty(routerHistory, "state", {
-			enumerable: true,
-			get: () => queue[position][1]
-		});
-		return routerHistory;
-	}
-
-//#endregion
-//#region src/history/hash.ts
-/**
+	//#endregion
+	//#region src/history/hash.ts
+	/**
 	* Creates a hash history. Useful for web applications with no host (e.g. `file://`) or when configuring a server to
 	* handle any URL is not possible.
 	*
@@ -716,132 +1090,106 @@ var VueRouter = (function(exports, vue) {
 	function createWebHashHistory(base) {
 		base = location.host ? base || location.pathname + location.search : "";
 		if (!base.includes("#")) base += "#";
-		if (!base.endsWith("#/") && !base.endsWith("#")) warn(`A hash base must end with a "#":\n"${base}" should be "${base.replace(/#.*$/, "#")}".`);
+		if (!base.endsWith("#/") && !base.endsWith("#")) diagnostics.VUE_ROUTER_R0110({
+			base,
+			suggestion: base.replace(/#.*$/, "#")
+		});
 		return createWebHistory(base);
 	}
-
-//#endregion
-//#region src/types/typeGuards.ts
+	//#endregion
+	//#region src/history/memory.ts
+	/**
+	* Creates an in-memory based history. The main purpose of this history is to handle SSR. It starts in a special location that is nowhere.
+	* It's up to the user to replace that location with the starter location by either calling `router.push` or `router.replace`.
+	*
+	* @param base - Base applied to all urls, defaults to '/'
+	* @returns a history object that can be passed to the router constructor
+	*/
+	function createMemoryHistory(base = "") {
+		let listeners = [];
+		let queue = [["", {}]];
+		let position = 0;
+		base = normalizeBase(base);
+		function setLocation(location, state = {}) {
+			position++;
+			if (position !== queue.length) queue.splice(position);
+			queue.push([location, state]);
+		}
+		function triggerListeners(to, from, { direction, delta }) {
+			const info = {
+				direction,
+				delta,
+				type: "pop"
+			};
+			for (const callback of listeners) callback(to, from, info);
+		}
+		const routerHistory = {
+			location: "",
+			state: {},
+			base,
+			createHref: createHref.bind(null, base),
+			replace(to, state) {
+				queue.splice(position--, 1);
+				setLocation(to, state);
+			},
+			push(to, state) {
+				setLocation(to, state);
+			},
+			listen(callback) {
+				listeners.push(callback);
+				return () => {
+					const index = listeners.indexOf(callback);
+					if (index > -1) listeners.splice(index, 1);
+				};
+			},
+			destroy() {
+				listeners = [];
+				queue = [["", {}]];
+				position = 0;
+			},
+			go(delta, shouldTrigger = true) {
+				const from = this.location;
+				const direction = delta < 0 ? "back" : "forward";
+				position = Math.max(0, Math.min(position + delta, queue.length - 1));
+				if (shouldTrigger) triggerListeners(this.location, from, {
+					direction,
+					delta
+				});
+			}
+		};
+		Object.defineProperty(routerHistory, "location", {
+			enumerable: true,
+			get: () => queue[position][0]
+		});
+		Object.defineProperty(routerHistory, "state", {
+			enumerable: true,
+			get: () => queue[position][1]
+		});
+		return routerHistory;
+	}
+	//#endregion
+	//#region src/types/typeGuards.ts
 	function isRouteLocation(route) {
 		return typeof route === "string" || route && typeof route === "object";
 	}
 	function isRouteName(name) {
 		return typeof name === "string" || typeof name === "symbol";
 	}
-
-//#endregion
-//#region src/errors.ts
-/**
-	* Flags so we can combine them when checking for multiple errors. This is the internal version of
-	* {@link NavigationFailureType}.
-	*
-	* @internal
-	*/
-	let ErrorTypes = /* @__PURE__ */ function(ErrorTypes) {
-		ErrorTypes[ErrorTypes["MATCHER_NOT_FOUND"] = 1] = "MATCHER_NOT_FOUND";
-		ErrorTypes[ErrorTypes["NAVIGATION_GUARD_REDIRECT"] = 2] = "NAVIGATION_GUARD_REDIRECT";
-		ErrorTypes[ErrorTypes["NAVIGATION_ABORTED"] = 4] = "NAVIGATION_ABORTED";
-		ErrorTypes[ErrorTypes["NAVIGATION_CANCELLED"] = 8] = "NAVIGATION_CANCELLED";
-		ErrorTypes[ErrorTypes["NAVIGATION_DUPLICATED"] = 16] = "NAVIGATION_DUPLICATED";
-		return ErrorTypes;
-	}({});
-	const NavigationFailureSymbol = Symbol("navigation failure");
-	/**
-	* Enumeration with all possible types for navigation failures. Can be passed to
-	* {@link isNavigationFailure} to check for specific failures.
-	*/
-	let NavigationFailureType = /* @__PURE__ */ function(NavigationFailureType) {
-		/**
-		* An aborted navigation is a navigation that failed because a navigation
-		* guard returned `false` or called `next(false)`
-		*/
-		NavigationFailureType[NavigationFailureType["aborted"] = 4] = "aborted";
-		/**
-		* A cancelled navigation is a navigation that failed because a more recent
-		* navigation finished started (not necessarily finished).
-		*/
-		NavigationFailureType[NavigationFailureType["cancelled"] = 8] = "cancelled";
-		/**
-		* A duplicated navigation is a navigation that failed because it was
-		* initiated while already being at the exact same location.
-		*/
-		NavigationFailureType[NavigationFailureType["duplicated"] = 16] = "duplicated";
-		return NavigationFailureType;
-	}({});
-	const ErrorTypeMessages = {
-		[ErrorTypes.MATCHER_NOT_FOUND]({ location, currentLocation }) {
-			return `No match for\n ${JSON.stringify(location)}${currentLocation ? "\nwhile being at\n" + JSON.stringify(currentLocation) : ""}`;
-		},
-		[ErrorTypes.NAVIGATION_GUARD_REDIRECT]({ from, to }) {
-			return `Redirected from "${from.fullPath}" to "${stringifyRoute(to)}" via a navigation guard.`;
-		},
-		[ErrorTypes.NAVIGATION_ABORTED]({ from, to }) {
-			return `Navigation aborted from "${from.fullPath}" to "${to.fullPath}" via a navigation guard.`;
-		},
-		[ErrorTypes.NAVIGATION_CANCELLED]({ from, to }) {
-			return `Navigation cancelled from "${from.fullPath}" to "${to.fullPath}" with a new navigation.`;
-		},
-		[ErrorTypes.NAVIGATION_DUPLICATED]({ from, to }) {
-			return `Avoided redundant navigation to current location: "${from.fullPath}".`;
-		}
-	};
-	/**
-	* Creates a typed NavigationFailure object.
-	* @internal
-	* @param type - NavigationFailureType
-	* @param params - { from, to }
-	*/
-	function createRouterError(type, params) {
-		return assign(new Error(ErrorTypeMessages[type](params)), {
-			type,
-			[NavigationFailureSymbol]: true
-		}, params);
-	}
-	function isNavigationFailure(error, type) {
-		return error instanceof Error && NavigationFailureSymbol in error && (type == null || !!(error.type & type));
-	}
-	const propertiesToLog = [
-		"params",
-		"query",
-		"hash"
-	];
-	function stringifyRoute(to) {
-		if (typeof to === "string") return to;
-		if (to.path != null) return to.path;
-		const location = {};
-		for (const key of propertiesToLog) if (key in to) location[key] = to[key];
-		return JSON.stringify(location, null, 2);
-	}
-
-//#endregion
-//#region src/matcher/pathTokenizer.ts
-	let TokenType = /* @__PURE__ */ function(TokenType) {
-		TokenType[TokenType["Static"] = 0] = "Static";
-		TokenType[TokenType["Param"] = 1] = "Param";
-		TokenType[TokenType["Group"] = 2] = "Group";
-		return TokenType;
-	}({});
-	var TokenizerState = /* @__PURE__ */ function(TokenizerState) {
-		TokenizerState[TokenizerState["Static"] = 0] = "Static";
-		TokenizerState[TokenizerState["Param"] = 1] = "Param";
-		TokenizerState[TokenizerState["ParamRegExp"] = 2] = "ParamRegExp";
-		TokenizerState[TokenizerState["ParamRegExpEnd"] = 3] = "ParamRegExpEnd";
-		TokenizerState[TokenizerState["EscapeNext"] = 4] = "EscapeNext";
-		return TokenizerState;
-	}(TokenizerState || {});
+	//#endregion
+	//#region src/matcher/pathTokenizer.ts
 	const ROOT_TOKEN = {
-		type: TokenType.Static,
+		type: 0,
 		value: ""
 	};
 	const VALID_PARAM_RE = /[a-zA-Z0-9_]/;
 	function tokenizePath(path) {
 		if (!path) return [[]];
 		if (path === "/") return [[ROOT_TOKEN]];
-		if (!path.startsWith("/")) throw new Error(`Route paths should start with a "/": "${path}" should be "/${path}".`);
+		if (!isAbsolutePath(path)) throw new Error(`Route paths should start with a "/": "${path}" should be "/${path}".`);
 		function crash(message) {
 			throw new Error(`ERR (${state})/"${buffer}": ${message}`);
 		}
-		let state = TokenizerState.Static;
+		let state = 0;
 		let previousState = state;
 		const tokens = [];
 		let segment;
@@ -855,14 +1203,14 @@ var VueRouter = (function(exports, vue) {
 		let customRe = "";
 		function consumeBuffer() {
 			if (!buffer) return;
-			if (state === TokenizerState.Static) segment.push({
-				type: TokenType.Static,
+			if (state === 0) segment.push({
+				type: 0,
 				value: buffer
 			});
-			else if (state === TokenizerState.Param || state === TokenizerState.ParamRegExp || state === TokenizerState.ParamRegExpEnd) {
+			else if (state === 1 || state === 2 || state === 3) {
 				if (segment.length > 1 && (char === "*" || char === "+")) crash(`A repeatable param (${buffer}) must be alone in its segment. eg: '/:ids+.`);
 				segment.push({
-					type: TokenType.Param,
+					type: 1,
 					value: buffer,
 					regexp: customRe,
 					repeatable: char === "*" || char === "+",
@@ -876,58 +1224,54 @@ var VueRouter = (function(exports, vue) {
 		}
 		while (i < path.length) {
 			char = path[i++];
-			if (char === "\\" && state !== TokenizerState.ParamRegExp) {
-				previousState = state;
-				state = TokenizerState.EscapeNext;
-				continue;
-			}
 			switch (state) {
-				case TokenizerState.Static:
-					if (char === "/") {
+				case 0:
+					if (char === "\\") {
+						previousState = state;
+						state = 4;
+					} else if (char === "/") {
 						if (buffer) consumeBuffer();
 						finalizeSegment();
 					} else if (char === ":") {
 						consumeBuffer();
-						state = TokenizerState.Param;
+						state = 1;
 					} else addCharToBuffer();
 					break;
-				case TokenizerState.EscapeNext:
+				case 4:
 					addCharToBuffer();
 					state = previousState;
 					break;
-				case TokenizerState.Param:
-					if (char === "(") state = TokenizerState.ParamRegExp;
+				case 1:
+					if (char === "(") state = 2;
 					else if (VALID_PARAM_RE.test(char)) addCharToBuffer();
 					else {
 						consumeBuffer();
-						state = TokenizerState.Static;
+						state = 0;
 						if (char !== "*" && char !== "?" && char !== "+") i--;
 					}
 					break;
-				case TokenizerState.ParamRegExp:
-					if (char === ")") if (customRe[customRe.length - 1] == "\\") customRe = customRe.slice(0, -1) + char;
-					else state = TokenizerState.ParamRegExpEnd;
-					else customRe += char;
+				case 2:
+					if (char === ")") {
+						if (customRe[customRe.length - 1] == "\\") customRe = customRe.slice(0, -1) + char;
+						else state = 3;
+					} else customRe += char;
 					break;
-				case TokenizerState.ParamRegExpEnd:
+				case 3:
 					consumeBuffer();
-					state = TokenizerState.Static;
+					state = 0;
 					if (char !== "*" && char !== "?" && char !== "+") i--;
 					customRe = "";
 					break;
-				default:
-					crash("Unknown state");
-					break;
+				default: crash("Unknown state");
 			}
 		}
-		if (state === TokenizerState.ParamRegExp) crash(`Unfinished custom RegExp for param "${buffer}"`);
+		if (state === 2) crash(`Unfinished custom RegExp for param "${buffer}"`);
 		consumeBuffer();
 		finalizeSegment();
 		return tokens;
 	}
-
-//#endregion
-//#region src/matcher/pathParserRanker.ts
+	//#endregion
+	//#region src/matcher/pathParserRanker.ts
 	const BASE_PARAM_PATTERN = "[^/]+?";
 	const BASE_PATH_PARSER_OPTIONS = {
 		sensitive: false,
@@ -935,21 +1279,6 @@ var VueRouter = (function(exports, vue) {
 		start: true,
 		end: true
 	};
-	var PathScore = /* @__PURE__ */ function(PathScore) {
-		PathScore[PathScore["_multiplier"] = 10] = "_multiplier";
-		PathScore[PathScore["Root"] = 90] = "Root";
-		PathScore[PathScore["Segment"] = 40] = "Segment";
-		PathScore[PathScore["SubSegment"] = 30] = "SubSegment";
-		PathScore[PathScore["Static"] = 40] = "Static";
-		PathScore[PathScore["Dynamic"] = 20] = "Dynamic";
-		PathScore[PathScore["BonusCustomRegExp"] = 10] = "BonusCustomRegExp";
-		PathScore[PathScore["BonusWildcard"] = -50] = "BonusWildcard";
-		PathScore[PathScore["BonusRepeatable"] = -20] = "BonusRepeatable";
-		PathScore[PathScore["BonusOptional"] = -8] = "BonusOptional";
-		PathScore[PathScore["BonusStrict"] = .7000000000000001] = "BonusStrict";
-		PathScore[PathScore["BonusCaseSensitive"] = .25] = "BonusCaseSensitive";
-		return PathScore;
-	}(PathScore || {});
 	const REGEX_CHARS_RE = /[.+*?^${}()[\]/\\]/g;
 	/**
 	* Creates a path parser from an array of Segments (a segment is an array of Tokens)
@@ -964,16 +1293,16 @@ var VueRouter = (function(exports, vue) {
 		let pattern = options.start ? "^" : "";
 		const keys = [];
 		for (const segment of segments) {
-			const segmentScores = segment.length ? [] : [PathScore.Root];
+			const segmentScores = segment.length ? [] : [90];
 			if (options.strict && !segment.length) pattern += "/";
 			for (let tokenIndex = 0; tokenIndex < segment.length; tokenIndex++) {
 				const token = segment[tokenIndex];
-				let subSegmentScore = PathScore.Segment + (options.sensitive ? PathScore.BonusCaseSensitive : 0);
-				if (token.type === TokenType.Static) {
+				let subSegmentScore = 40 + (options.sensitive ? .25 : 0);
+				if (token.type === 0) {
 					if (!tokenIndex) pattern += "/";
 					pattern += token.value.replace(REGEX_CHARS_RE, "\\$&");
-					subSegmentScore += PathScore.Static;
-				} else if (token.type === TokenType.Param) {
+					subSegmentScore += 40;
+				} else if (token.type === 1) {
 					const { value, repeatable, optional, regexp } = token;
 					keys.push({
 						name: value,
@@ -982,7 +1311,7 @@ var VueRouter = (function(exports, vue) {
 					});
 					const re = regexp ? regexp : BASE_PARAM_PATTERN;
 					if (re !== BASE_PARAM_PATTERN) {
-						subSegmentScore += PathScore.BonusCustomRegExp;
+						subSegmentScore += 10;
 						try {
 							new RegExp(`(${re})`);
 						} catch (err) {
@@ -993,10 +1322,10 @@ var VueRouter = (function(exports, vue) {
 					if (!tokenIndex) subPattern = optional && segment.length < 2 ? `(?:/${subPattern})` : "/" + subPattern;
 					if (optional) subPattern += "?";
 					pattern += subPattern;
-					subSegmentScore += PathScore.Dynamic;
-					if (optional) subSegmentScore += PathScore.BonusOptional;
-					if (repeatable) subSegmentScore += PathScore.BonusRepeatable;
-					if (re === ".*") subSegmentScore += PathScore.BonusWildcard;
+					subSegmentScore += 20;
+					if (optional) subSegmentScore += -8;
+					if (repeatable) subSegmentScore += -20;
+					if (re === ".*") subSegmentScore += -50;
 				}
 				segmentScores.push(subSegmentScore);
 			}
@@ -1004,7 +1333,7 @@ var VueRouter = (function(exports, vue) {
 		}
 		if (options.strict && options.end) {
 			const i = score.length - 1;
-			score[i][score[i].length - 1] += PathScore.BonusStrict;
+			score[i][score[i].length - 1] += .7000000000000001;
 		}
 		if (!options.strict) pattern += "/?";
 		if (options.end) pattern += "$";
@@ -1027,16 +1356,20 @@ var VueRouter = (function(exports, vue) {
 			for (const segment of segments) {
 				if (!avoidDuplicatedSlash || !path.endsWith("/")) path += "/";
 				avoidDuplicatedSlash = false;
-				for (const token of segment) if (token.type === TokenType.Static) path += token.value;
-				else if (token.type === TokenType.Param) {
+				for (const token of segment) if (token.type === 0) path += token.value;
+				else if (token.type === 1) {
 					const { value, repeatable, optional } = token;
 					const param = value in params ? params[value] : "";
 					if (isArray(param) && !repeatable) throw new Error(`Provided param "${value}" is an array but it is not repeatable (* or + modifiers)`);
 					const text = isArray(param) ? param.join("/") : param;
-					if (!text) if (optional) {
-						if (segment.length < 2) if (path.endsWith("/")) path = path.slice(0, -1);
-						else avoidDuplicatedSlash = true;
-					} else throw new Error(`Missing required param "${value}"`);
+					if (!text) {
+						if (optional) {
+							if (segment.length < 2) {
+								if (path.endsWith("/")) path = path.slice(0, -1);
+								else avoidDuplicatedSlash = true;
+							}
+						} else throw new Error(`Missing required param "${value}"`);
+					}
 					path += text;
 				}
 			}
@@ -1066,8 +1399,8 @@ var VueRouter = (function(exports, vue) {
 			if (diff) return diff;
 			i++;
 		}
-		if (a.length < b.length) return a.length === 1 && a[0] === PathScore.Static + PathScore.Segment ? -1 : 1;
-		else if (a.length > b.length) return b.length === 1 && b[0] === PathScore.Static + PathScore.Segment ? 1 : -1;
+		if (a.length < b.length) return a.length === 1 && a[0] === 80 ? -1 : 1;
+		else if (a.length > b.length) return b.length === 1 && b[0] === 80 ? 1 : -1;
 		return 0;
 	}
 	/**
@@ -1107,15 +1440,17 @@ var VueRouter = (function(exports, vue) {
 		end: true,
 		sensitive: false
 	};
-
-//#endregion
-//#region src/matcher/pathMatcher.ts
+	//#endregion
+	//#region src/matcher/pathMatcher.ts
 	function createRouteRecordMatcher(record, parent, options) {
 		const parser = tokensToParser(tokenizePath(record.path), options);
 		{
 			const existingKeys = /* @__PURE__ */ new Set();
 			for (const key of parser.keys) {
-				if (existingKeys.has(key.name)) warn(`Found duplicated params with name "${key.name}" for path "${record.path}". Only the last one will be available on "$route.params".`);
+				if (existingKeys.has(key.name)) diagnostics.VUE_ROUTER_R0090({
+					name: key.name,
+					path: record.path
+				});
 				existingKeys.add(key.name);
 			}
 		}
@@ -1130,10 +1465,9 @@ var VueRouter = (function(exports, vue) {
 		}
 		return matcher;
 	}
-
-//#endregion
-//#region src/matcher/index.ts
-/**
+	//#endregion
+	//#region src/matcher/index.ts
+	/**
 	* Creates a Router Matcher.
 	*
 	* @internal
@@ -1166,14 +1500,14 @@ var VueRouter = (function(exports, vue) {
 			let originalMatcher;
 			for (const normalizedRecord of normalizedRecords) {
 				const { path } = normalizedRecord;
-				if (parent && path[0] !== "/") {
+				if (parent && !isAbsolutePath(path)) {
 					const parentPath = parent.record.path;
 					const connectingSlash = parentPath[parentPath.length - 1] === "/" ? "" : "/";
 					normalizedRecord.path = parent.record.path + (path && connectingSlash + path);
 				}
 				if (normalizedRecord.path === "*") throw new Error("Catch all routes (\"*\") must now be defined using a param with a custom regexp.\nSee more at https://router.vuejs.org/guide/migration/#Removed-star-or-catch-all-routes.");
 				matcher = createRouteRecordMatcher(normalizedRecord, parent, options);
-				if (parent && path[0] === "/") checkMissingParamsInAbsolutePath(matcher, parent);
+				if (parent && isAbsolutePath(path)) checkMissingParamsInAbsolutePath(matcher, parent);
 				if (originalRecord) {
 					originalRecord.alias.push(matcher);
 					checkSameParams(originalRecord, matcher);
@@ -1230,25 +1564,34 @@ var VueRouter = (function(exports, vue) {
 			let name;
 			if ("name" in location && location.name) {
 				matcher = matcherMap.get(location.name);
-				if (!matcher) throw createRouterError(ErrorTypes.MATCHER_NOT_FOUND, { location });
+				if (!matcher) throw createRouterError(1, { location });
 				{
 					const invalidParams = Object.keys(location.params || {}).filter((paramName) => !matcher.keys.find((k) => k.name === paramName));
-					if (invalidParams.length) warn(`Discarded invalid param(s) "${invalidParams.join("\", \"")}" when navigating. See https://github.com/vuejs/router/blob/main/packages/router/CHANGELOG.md#414-2022-08-22 for more details.`);
+					if (invalidParams.length) {
+						const isInherited = !matcher.keys.length && invalidParams.some((name) => name in currentLocation.params);
+						diagnostics.VUE_ROUTER_R0100({
+							params: invalidParams.join("\", \""),
+							inherited: isInherited ? ` If you are using a catch-all route with a named redirect, pass an empty \`params\` object: \`redirect: { name: '...', params: {} }\`.` : ""
+						});
+					}
 				}
 				name = matcher.record.name;
 				params = assign(pickParams(currentLocation.params, matcher.keys.filter((k) => !k.optional).concat(matcher.parent ? matcher.parent.keys.filter((k) => k.optional) : []).map((k) => k.name)), location.params && pickParams(location.params, matcher.keys.map((k) => k.name)));
 				path = matcher.stringify(params);
 			} else if (location.path != null) {
 				path = location.path;
-				if (!path.startsWith("/")) warn(`The Matcher cannot resolve relative paths but received "${path}". Unless you directly called \`matcher.resolve("${path}")\`, this is probably a bug in vue-router. Please open an issue at https://github.com/vuejs/router/issues/new/choose.`);
+				if (!isAbsolutePath(path)) diagnostics.VUE_ROUTER_R0101({ path });
 				matcher = matchers.find((m) => m.re.test(path));
 				if (matcher) {
 					params = matcher.parse(path);
 					name = matcher.record.name;
+					matcher.keys.forEach((key) => {
+						if (key.optional && !params[key.name]) delete params[key.name];
+					});
 				}
 			} else {
 				matcher = currentLocation.name ? matcherMap.get(currentLocation.name) : matchers.find((m) => m.re.test(currentLocation.path));
-				if (!matcher) throw createRouterError(ErrorTypes.MATCHER_NOT_FOUND, {
+				if (!matcher) throw createRouterError(1, {
 					location,
 					currentLocation
 				});
@@ -1361,8 +1704,22 @@ var VueRouter = (function(exports, vue) {
 	* @param b - alias record
 	*/
 	function checkSameParams(a, b) {
-		for (const key of a.keys) if (!key.optional && !b.keys.find(isSameParam.bind(null, key))) return warn(`Alias "${b.record.path}" and the original record: "${a.record.path}" must have the exact same param named "${key.name}"`);
-		for (const key of b.keys) if (!key.optional && !a.keys.find(isSameParam.bind(null, key))) return warn(`Alias "${b.record.path}" and the original record: "${a.record.path}" must have the exact same param named "${key.name}"`);
+		for (const key of a.keys) if (!key.optional && !b.keys.find(isSameParam.bind(null, key))) {
+			diagnostics.VUE_ROUTER_R0102({
+				alias: b.record.path,
+				original: a.record.path,
+				name: key.name
+			});
+			return;
+		}
+		for (const key of b.keys) if (!key.optional && !a.keys.find(isSameParam.bind(null, key))) {
+			diagnostics.VUE_ROUTER_R0102({
+				alias: b.record.path,
+				original: a.record.path,
+				name: key.name
+			});
+			return;
+		}
 	}
 	/**
 	* A route with a name and a child with an empty path without a name should warn when adding the route
@@ -1371,13 +1728,20 @@ var VueRouter = (function(exports, vue) {
 	* @param parent - RouteRecordMatcher
 	*/
 	function checkChildMissingNameWithEmptyPath(mainNormalizedRecord, parent) {
-		if (parent && parent.record.name && !mainNormalizedRecord.name && !mainNormalizedRecord.path && mainNormalizedRecord.children.length === 0) warn(`The route named "${String(parent.record.name)}" has a child without a name, an empty path, and no children. This is probably a mistake: using that name won't render the empty path child so you probably want to move the name to the child instead. If this is intentional, add a name to the child route to silence the warning.`);
+		if (parent && parent.record.name && !mainNormalizedRecord.name && !mainNormalizedRecord.path && mainNormalizedRecord.children.length === 0) diagnostics.VUE_ROUTER_R0103({ name: String(parent.record.name) });
 	}
 	function checkSameNameAsAncestor(record, parent) {
 		for (let ancestor = parent; ancestor; ancestor = ancestor.parent) if (ancestor.record.name === record.name) throw new Error(`A route named "${String(record.name)}" has been added as a ${parent === ancestor ? "child" : "descendant"} of a route with the same name. Route names must be unique and a nested route cannot use the same name as an ancestor.`);
 	}
 	function checkMissingParamsInAbsolutePath(record, parent) {
-		for (const key of parent.keys) if (!record.keys.find(isSameParam.bind(null, key))) return warn(`Absolute path "${record.record.path}" must have the exact same param named "${key.name}" as its parent "${parent.record.path}".`);
+		for (const key of parent.keys) if (!record.keys.find(isSameParam.bind(null, key))) {
+			diagnostics.VUE_ROUTER_R0104({
+				path: record.record.path,
+				name: key.name,
+				parent: parent.record.path
+			});
+			return;
+		}
 	}
 	/**
 	* Performs a binary search to find the correct insertion index for a new matcher.
@@ -1399,7 +1763,10 @@ var VueRouter = (function(exports, vue) {
 		const insertionAncestor = getInsertionAncestor(matcher);
 		if (insertionAncestor) {
 			upper = matchers.lastIndexOf(insertionAncestor, upper - 1);
-			if (upper < 0) warn(`Finding ancestor route "${insertionAncestor.record.path}" failed for "${matcher.record.path}"`);
+			if (upper < 0) diagnostics.VUE_ROUTER_R0105({
+				ancestor: insertionAncestor.record.path,
+				record: matcher.record.path
+			});
 		}
 		return upper;
 	}
@@ -1417,10 +1784,9 @@ var VueRouter = (function(exports, vue) {
 	function isMatchable({ record }) {
 		return !!(record.name || record.components && Object.keys(record.components).length || record.redirect);
 	}
-
-//#endregion
-//#region src/query.ts
-/**
+	//#endregion
+	//#region src/query.ts
+	/**
 	* Transforms a queryString into a {@link LocationQuery} object. Accept both, a
 	* version with the leading `?` and without Should work as URLSearchParams
 	
@@ -1489,10 +1855,9 @@ var VueRouter = (function(exports, vue) {
 		}
 		return normalizedQuery;
 	}
-
-//#endregion
-//#region src/injectionSymbols.ts
-/**
+	//#endregion
+	//#region src/injectionSymbols.ts
+	/**
 	* RouteRecord being rendered by the closest ancestor Router View. Used for
 	* `onBeforeRouteUpdate` and `onBeforeRouteLeave`. rvlm stands for Router View
 	* Location Matched
@@ -1528,10 +1893,9 @@ var VueRouter = (function(exports, vue) {
 	* @internal
 	*/
 	const routerViewLocationKey = Symbol("router view location");
-
-//#endregion
-//#region src/utils/callbacks.ts
-/**
+	//#endregion
+	//#region src/utils/callbacks.ts
+	/**
 	* Create a list of callbacks that can be reset. Used to create before and after navigation guards list
 	*/
 	function useCallbacks() {
@@ -1552,13 +1916,15 @@ var VueRouter = (function(exports, vue) {
 			reset
 		};
 	}
-
-//#endregion
-//#region src/navigationGuards.ts
+	//#endregion
+	//#region src/navigationGuards.ts
 	function registerGuard(activeRecordRef, name, guard) {
 		const record = activeRecordRef.value;
 		if (!record) {
-			warn(`No active route record was found when calling \`${name === "updateGuards" ? "onBeforeRouteUpdate" : "onBeforeRouteLeave"}()\`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?`);
+			{
+				const fnName = name === "updateGuards" ? "onBeforeRouteUpdate" : "onBeforeRouteLeave";
+				diagnostics.VUE_ROUTER_R0020({ fn: fnName });
+			}
 			return;
 		}
 		let currentRecord = record;
@@ -1569,7 +1935,7 @@ var VueRouter = (function(exports, vue) {
 		(0, vue.onDeactivated)(removeFromList);
 		(0, vue.onActivated)(() => {
 			const newRecord = activeRecordRef.value;
-			if (!newRecord) warn("No active route record was found when reactivating component with navigation guard. This is likely a bug in vue-router. Please report it.");
+			if (!newRecord) diagnostics.VUE_ROUTER_R0021();
 			if (newRecord) currentRecord = newRecord;
 			currentRecord[name].add(guard);
 		});
@@ -1584,7 +1950,7 @@ var VueRouter = (function(exports, vue) {
 	*/
 	function onBeforeRouteLeave(leaveGuard) {
 		if (!(0, vue.getCurrentInstance)()) {
-			warn("getCurrentInstance() returned null. onBeforeRouteLeave() must be called at the top of a setup function");
+			diagnostics.VUE_ROUTER_R0022({ fn: "onBeforeRouteLeave" });
 			return;
 		}
 		registerGuard((0, vue.inject)(matchedRouteKey, {}), "leaveGuards", leaveGuard);
@@ -1598,7 +1964,7 @@ var VueRouter = (function(exports, vue) {
 	*/
 	function onBeforeRouteUpdate(updateGuard) {
 		if (!(0, vue.getCurrentInstance)()) {
-			warn("getCurrentInstance() returned null. onBeforeRouteUpdate() must be called at the top of a setup function");
+			diagnostics.VUE_ROUTER_R0022({ fn: "onBeforeRouteUpdate" });
 			return;
 		}
 		registerGuard((0, vue.inject)(matchedRouteKey, {}), "updateGuards", updateGuard);
@@ -1607,12 +1973,12 @@ var VueRouter = (function(exports, vue) {
 		const enterCallbackArray = record && (record.enterCallbacks[name] = record.enterCallbacks[name] || []);
 		return () => new Promise((resolve, reject) => {
 			const next = (valid) => {
-				if (valid === false) reject(createRouterError(ErrorTypes.NAVIGATION_ABORTED, {
+				if (valid === false) reject(createRouterError(4, {
 					from,
 					to
 				}));
 				else if (valid instanceof Error) reject(valid);
-				else if (isRouteLocation(valid)) reject(createRouterError(ErrorTypes.NAVIGATION_GUARD_REDIRECT, {
+				else if (isRouteLocation(valid)) reject(createRouterError(2, {
 					from: to,
 					to: valid
 				}));
@@ -1625,17 +1991,20 @@ var VueRouter = (function(exports, vue) {
 			let guardCall = Promise.resolve(guardReturn);
 			if (guard.length < 3) guardCall = guardCall.then(next);
 			if (guard.length > 2) {
-				const message = `The "next" callback was never called inside of ${guard.name ? "\"" + guard.name + "\"" : ""}:\n${guard.toString()}\n. If you are returning a value instead of calling "next", make sure to remove the "next" parameter from your function.`;
+				const guardInfo = {
+					name: guard.name,
+					guard: guard.toString()
+				};
 				if (typeof guardReturn === "object" && "then" in guardReturn) guardCall = guardCall.then((resolvedValue) => {
 					if (!next._called) {
-						warn(message);
+						diagnostics.VUE_ROUTER_R0023(guardInfo);
 						return Promise.reject(/* @__PURE__ */ new Error("Invalid navigation guard"));
 					}
 					return resolvedValue;
 				});
 				else if (guardReturn !== void 0) {
 					if (!next._called) {
-						warn(message);
+						diagnostics.VUE_ROUTER_R0023(guardInfo);
 						reject(/* @__PURE__ */ new Error("Invalid navigation guard"));
 						return;
 					}
@@ -1656,7 +2025,7 @@ var VueRouter = (function(exports, vue) {
 		return function() {
 			if (!warned) {
 				warned = true;
-				warn("The `next()` callback in navigation guards is deprecated. Return the value instead of calling `next(value)`.");
+				diagnostics.VUE_ROUTER_R0025();
 			}
 			return next.apply(this, arguments);
 		};
@@ -1664,7 +2033,10 @@ var VueRouter = (function(exports, vue) {
 	function canOnlyBeCalledOnce(next, to, from) {
 		let called = 0;
 		return function() {
-			if (called++ === 1) warn(`The "next" callback was called more than once in one navigation guard when going from "${from.fullPath}" to "${to.fullPath}". It should be called exactly one time in each navigation guard. This will fail in production.`);
+			if (called++ === 1) diagnostics.VUE_ROUTER_R0024({
+				from: from.fullPath,
+				to: to.fullPath
+			});
 			next._called = true;
 			if (called === 1) next.apply(null, arguments);
 		};
@@ -1672,19 +2044,29 @@ var VueRouter = (function(exports, vue) {
 	function extractComponentsGuards(matched, guardType, to, from, runWithContext = (fn) => fn()) {
 		const guards = [];
 		for (const record of matched) {
-			if (!record.components && record.children && !record.children.length) warn(`Record with path "${record.path}" is either missing a "component(s)" or "children" property.`);
+			if (!record.components && record.children && !record.children.length) diagnostics.VUE_ROUTER_R0026({ path: record.path });
 			for (const name in record.components) {
 				let rawComponent = record.components[name];
 				if (!rawComponent || typeof rawComponent !== "object" && typeof rawComponent !== "function") {
-					warn(`Component "${name}" in record with path "${record.path}" is not a valid component. Received "${String(rawComponent)}".`);
+					diagnostics.VUE_ROUTER_R0027({
+						name,
+						path: record.path,
+						received: String(rawComponent)
+					});
 					throw new Error("Invalid route component");
 				} else if ("then" in rawComponent) {
-					warn(`Component "${name}" in record with path "${record.path}" is a Promise instead of a function that returns a Promise. Did you write "import('./MyPage.vue')" instead of "() => import('./MyPage.vue')" ? This will break in production if not fixed.`);
+					diagnostics.VUE_ROUTER_R0028({
+						name,
+						path: record.path
+					});
 					const promise = rawComponent;
 					rawComponent = () => promise;
 				} else if (rawComponent.__asyncLoader && !rawComponent.__warnedDefineAsync) {
 					rawComponent.__warnedDefineAsync = true;
-					warn(`Component "${name}" in record with path "${record.path}" is defined using "defineAsyncComponent()". Write "() => import('./MyPage.vue')" instead of "defineAsyncComponent(() => import('./MyPage.vue'))".`);
+					diagnostics.VUE_ROUTER_R0029({
+						name,
+						path: record.path
+					});
 				}
 				if (guardType !== "beforeRouteEnter" && !record.instances[name]) continue;
 				if (isRouteComponent(rawComponent)) {
@@ -1693,7 +2075,10 @@ var VueRouter = (function(exports, vue) {
 				} else {
 					let componentPromise = rawComponent();
 					if (!("catch" in componentPromise)) {
-						warn(`Component "${name}" in record with path "${record.path}" is a function that does not return a Promise. If you were passing a functional component, make sure to add a "displayName" to the component. This will break in production if not fixed.`);
+						diagnostics.VUE_ROUTER_R0030({
+							name,
+							path: record.path
+						});
 						componentPromise = Promise.resolve(componentPromise);
 					}
 					guards.push(() => componentPromise.then((resolved) => {
@@ -1740,8 +2125,10 @@ var VueRouter = (function(exports, vue) {
 		const len = Math.max(from.matched.length, to.matched.length);
 		for (let i = 0; i < len; i++) {
 			const recordFrom = from.matched[i];
-			if (recordFrom) if (to.matched.find((record) => isSameRouteRecord(record, recordFrom))) updatingRecords.push(recordFrom);
-			else leavingRecords.push(recordFrom);
+			if (recordFrom) {
+				if (to.matched.find((record) => isSameRouteRecord(record, recordFrom))) updatingRecords.push(recordFrom);
+				else leavingRecords.push(recordFrom);
+			}
 			const recordTo = to.matched[i];
 			if (recordTo) {
 				if (!from.matched.find((record) => isSameRouteRecord(record, recordTo))) enteringRecords.push(recordTo);
@@ -1753,10 +2140,9 @@ var VueRouter = (function(exports, vue) {
 			enteringRecords
 		];
 	}
-
-//#endregion
-//#region src/RouterLink.ts
-/**
+	//#endregion
+	//#region src/RouterLink.ts
+	/**
 	* Returns the internal behavior of a {@link RouterLink} without the rendering part.
 	*
 	* @param props - a `to` location and an optional `replace` flag
@@ -1769,8 +2155,7 @@ var VueRouter = (function(exports, vue) {
 		const route = (0, vue.computed)(() => {
 			const to = (0, vue.unref)(props.to);
 			if (!hasPrevious || to !== previousTo) {
-				if (!isRouteLocation(to)) if (hasPrevious) warn(`Invalid value for prop "to" in useLink()\n- to:`, to, `\n- previous to:`, previousTo, `\n- props:`, props);
-				else warn(`Invalid value for prop "to" in useLink()\n- to:`, to, `\n- props:`, props);
+				if (!isRouteLocation(to)) diagnostics.VUE_ROUTER_R0050({ to });
 				previousTo = to;
 				hasPrevious = true;
 			}
@@ -1830,7 +2215,10 @@ var VueRouter = (function(exports, vue) {
 	function preferSingleVNode(vnodes) {
 		return vnodes.length === 1 ? vnodes[0] : vnodes;
 	}
-	const RouterLinkImpl = /* @__PURE__ */ (0, vue.defineComponent)({
+	/**
+	* Component to render a link that triggers a navigation on click.
+	*/
+	const RouterLink = /* @__PURE__ */ (0, vue.defineComponent)({
 		name: "RouterLink",
 		compatConfig: { MODE: 3 },
 		props: {
@@ -1867,10 +2255,6 @@ var VueRouter = (function(exports, vue) {
 			};
 		}
 	});
-	/**
-	* Component to render a link that triggers a navigation on click.
-	*/
-	const RouterLink = RouterLinkImpl;
 	function guardEvent(e) {
 		if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) return;
 		if (e.defaultPrevented) return;
@@ -1886,9 +2270,9 @@ var VueRouter = (function(exports, vue) {
 		for (const key in inner) {
 			const innerValue = inner[key];
 			const outerValue = outer[key];
-			if (typeof innerValue === "string") {
-				if (innerValue !== outerValue) return false;
-			} else if (!isArray(outerValue) || outerValue.length !== innerValue.length || innerValue.some((value, i) => value.valueOf() !== outerValue[i].valueOf())) return false;
+			if (isArray(innerValue)) {
+				if (!isArray(outerValue) || outerValue.length !== innerValue.length || innerValue.some((value, i) => value.valueOf() !== outerValue[i].valueOf())) return false;
+			} else if (innerValue !== outerValue) return false;
 		}
 		return true;
 	}
@@ -1906,10 +2290,9 @@ var VueRouter = (function(exports, vue) {
 	* @param defaultClass
 	*/
 	const getLinkClass = (propClass, globalClass, defaultClass) => propClass != null ? propClass : globalClass != null ? globalClass : defaultClass;
-
-//#endregion
-//#region src/RouterView.ts
-	const RouterViewImpl = /* @__PURE__ */ (0, vue.defineComponent)({
+	//#endregion
+	//#region src/RouterView.ts
+	const RouterViewImpl = /*#__PURE__*/ (0, vue.defineComponent)({
 		name: "RouterView",
 		inheritAttrs: false,
 		props: {
@@ -1941,7 +2324,7 @@ var VueRouter = (function(exports, vue) {
 				viewRef.value,
 				matchedRouteRef.value,
 				props.name
-			], ([instance, to, name], [oldInstance, from, oldName]) => {
+			], ([instance, to, name], [oldInstance, from, _oldName]) => {
 				if (to) {
 					to.instances[name] = instance;
 					if (from && from !== to && instance && instance === oldInstance) {
@@ -1977,7 +2360,7 @@ var VueRouter = (function(exports, vue) {
 						meta: matchedRoute.meta
 					};
 					(isArray(component.ref) ? component.ref.map((r) => r.i) : [component.ref.i]).forEach((instance) => {
-						instance.__vrv_devtools = info;
+						if (instance) instance.__vrv_devtools = info;
 					});
 				}
 				return normalizeSlot(slots.default, {
@@ -2002,17 +2385,12 @@ var VueRouter = (function(exports, vue) {
 		const parentSubTreeType = instance.parent && instance.parent.subTree && instance.parent.subTree.type;
 		if (parentName && (parentName === "KeepAlive" || parentName.includes("Transition")) && typeof parentSubTreeType === "object" && parentSubTreeType.name === "RouterView") {
 			const comp = parentName === "KeepAlive" ? "keep-alive" : "transition";
-			warn(`<router-view> can no longer be used directly inside <transition> or <keep-alive>.
-Use slot props instead:
-
-<router-view v-slot="{ Component }">
-  <${comp}>\n    <component :is="Component" />\n  </${comp}>\n</router-view>`);
+			diagnostics.VUE_ROUTER_R0060({ comp });
 		}
 	}
-
-//#endregion
-//#region src/router.ts
-/**
+	//#endregion
+	//#region src/router.ts
+	/**
 	* Creates a Router instance that can be used by a Vue app.
 	*
 	* @param options - {@link RouterOptions}
@@ -2027,6 +2405,7 @@ Use slot props instead:
 		const beforeResolveGuards = useCallbacks();
 		const afterGuards = useCallbacks();
 		const currentRoute = (0, vue.shallowRef)(START_LOCATION_NORMALIZED);
+		const routesVersion = (0, vue.shallowRef)(0);
 		let pendingLocation = START_LOCATION_NORMALIZED;
 		if (isBrowser && options.scrollBehavior && "scrollRestoration" in history) history.scrollRestoration = "manual";
 		const normalizeParams = applyToParams.bind(null, (paramValue) => "" + paramValue);
@@ -2037,15 +2416,26 @@ Use slot props instead:
 			let record;
 			if (isRouteName(parentOrRoute)) {
 				parent = matcher.getRecordMatcher(parentOrRoute);
-				if (!parent) warn(`Parent route "${String(parentOrRoute)}" not found when adding child route`, route);
+				if (!parent) diagnostics.VUE_ROUTER_R0001({ name: String(parentOrRoute) });
 				record = route;
 			} else record = parentOrRoute;
-			return matcher.addRoute(record, parent);
+			const removeRoute = matcher.addRoute(record, parent);
+			routesVersion.value++;
+			return () => {
+				removeRoute();
+				routesVersion.value++;
+			};
 		}
 		function removeRoute(name) {
 			const recordMatcher = matcher.getRecordMatcher(name);
-			if (recordMatcher) matcher.removeRoute(recordMatcher);
-			else warn(`Cannot remove non-existent route "${String(name)}"`);
+			if (recordMatcher) {
+				matcher.removeRoute(recordMatcher);
+				routesVersion.value++;
+			} else diagnostics.VUE_ROUTER_R0002({ name: String(name) });
+		}
+		function clearRoutes() {
+			matcher.clearRoutes();
+			routesVersion.value++;
 		}
 		function getRoutes() {
 			return matcher.getRoutes().map((routeMatcher) => routeMatcher.record);
@@ -2054,27 +2444,31 @@ Use slot props instead:
 			return !!matcher.getRecordMatcher(name);
 		}
 		function resolve(rawLocation, currentLocation) {
-			currentLocation = assign({}, currentLocation || currentRoute.value);
+			routesVersion.value;
 			if (typeof rawLocation === "string") {
+				currentLocation = currentLocation || (rawLocation.startsWith("/") ? START_LOCATION_NORMALIZED : currentRoute.value);
 				const locationNormalized = parseURL(parseQuery$1, rawLocation, currentLocation.path);
 				const matchedRoute = matcher.resolve({ path: locationNormalized.path }, currentLocation);
 				const href = routerHistory.createHref(locationNormalized.fullPath);
-				if (href.startsWith("//")) warn(`Location "${rawLocation}" resolved to "${href}". A resolved location cannot start with multiple slashes.`);
-				else if (!matchedRoute.matched.length) warn(`No match found for location with path "${rawLocation}"`);
+				if (href.startsWith("//")) diagnostics.VUE_ROUTER_R0003({
+					location: rawLocation,
+					href
+				});
+				else if (!matchedRoute.matched.length) diagnostics.VUE_ROUTER_R0004({ path: rawLocation });
 				return assign(locationNormalized, matchedRoute, {
 					params: decodeParams(matchedRoute.params),
-					hash: decode(locationNormalized.hash),
 					redirectedFrom: void 0,
 					href
 				});
 			}
 			if (!isRouteLocation(rawLocation)) {
-				warn(`router.resolve() was passed an invalid location. This will fail in production.\n- Location:`, rawLocation);
+				diagnostics.VUE_ROUTER_R0005({ rawLocation });
 				return resolve({});
 			}
+			currentLocation = assign({}, currentLocation || (rawLocation.path != null && rawLocation.path.startsWith("/") && !("name" in rawLocation && rawLocation.name) ? START_LOCATION_NORMALIZED : currentRoute.value));
 			let matcherLocation;
 			if (rawLocation.path != null) {
-				if ("params" in rawLocation && !("name" in rawLocation) && Object.keys(rawLocation.params).length) warn(`Path "${rawLocation.path}" was passed with params but they will be ignored. Use a named route alongside params instead.`);
+				if ("params" in rawLocation && !("name" in rawLocation) && Object.keys(rawLocation.params).length) diagnostics.VUE_ROUTER_R0006({ path: rawLocation.path });
 				matcherLocation = assign({}, rawLocation, { path: parseURL(parseQuery$1, rawLocation.path, currentLocation.path).path });
 			} else {
 				const targetParams = assign({}, rawLocation.params);
@@ -2084,15 +2478,18 @@ Use slot props instead:
 			}
 			const matchedRoute = matcher.resolve(matcherLocation, currentLocation);
 			const hash = rawLocation.hash || "";
-			if (hash && !hash.startsWith("#")) warn(`A \`hash\` should always start with the character "#". Replace "${hash}" with "#${hash}".`);
+			if (hash && !hash.startsWith("#")) diagnostics.VUE_ROUTER_R0007({ hash });
 			matchedRoute.params = normalizeParams(decodeParams(matchedRoute.params));
 			const fullPath = stringifyURL(stringifyQuery$1, assign({}, rawLocation, {
 				hash: encodeHash(hash),
 				path: matchedRoute.path
 			}));
 			const href = routerHistory.createHref(fullPath);
-			if (href.startsWith("//")) warn(`Location "${rawLocation}" resolved to "${href}". A resolved location cannot start with multiple slashes.`);
-			else if (!matchedRoute.matched.length) warn(`No match found for location with path "${rawLocation.path != null ? rawLocation.path : rawLocation}"`);
+			if (href.startsWith("//")) diagnostics.VUE_ROUTER_R0003({
+				location: rawLocation,
+				href
+			});
+			else if (!matchedRoute.matched.length) diagnostics.VUE_ROUTER_R0004({ path: rawLocation.path != null ? rawLocation.path : rawLocation });
 			return assign({
 				fullPath,
 				hash,
@@ -2106,7 +2503,7 @@ Use slot props instead:
 			return typeof to === "string" ? parseURL(parseQuery$1, to, currentRoute.value.path) : assign({}, to);
 		}
 		function checkCanceledNavigation(to, from) {
-			if (pendingLocation !== to) return createRouterError(ErrorTypes.NAVIGATION_CANCELLED, {
+			if (pendingLocation !== to) return createRouterError(8, {
 				from,
 				to
 			});
@@ -2127,7 +2524,10 @@ Use slot props instead:
 					newTargetLocation.params = {};
 				}
 				if (newTargetLocation.path == null && !("name" in newTargetLocation)) {
-					warn(`Invalid redirect found:\n${JSON.stringify(newTargetLocation, null, 2)}\n when navigating to "${to.fullPath}". A redirect must contain a name or path. This will break in production.`);
+					diagnostics.VUE_ROUTER_R0008({
+						target: JSON.stringify(newTargetLocation, null, 2),
+						to: to.fullPath
+					});
 					throw new Error("Invalid redirect");
 				}
 				return assign({
@@ -2153,17 +2553,20 @@ Use slot props instead:
 			toLocation.redirectedFrom = redirectedFrom;
 			let failure;
 			if (!force && isSameRouteLocation(stringifyQuery$1, from, targetLocation)) {
-				failure = createRouterError(ErrorTypes.NAVIGATION_DUPLICATED, {
+				failure = createRouterError(16, {
 					to: toLocation,
 					from
 				});
 				handleScroll(from, from, true, false);
 			}
-			return (failure ? Promise.resolve(failure) : navigate(toLocation, from)).catch((error) => isNavigationFailure(error) ? isNavigationFailure(error, ErrorTypes.NAVIGATION_GUARD_REDIRECT) ? error : markAsReady(error) : triggerError(error, toLocation, from)).then((failure) => {
+			return (failure ? Promise.resolve(failure) : navigate(toLocation, from)).catch((error) => isNavigationFailure(error) ? isNavigationFailure(error, 2) ? error : markAsReady(error) : triggerError(error, toLocation, from)).then((failure) => {
 				if (failure) {
-					if (isNavigationFailure(failure, ErrorTypes.NAVIGATION_GUARD_REDIRECT)) {
+					if (isNavigationFailure(failure, 2)) {
 						if (isSameRouteLocation(stringifyQuery$1, resolve(failure.to), toLocation) && redirectedFrom && (redirectedFrom._count = redirectedFrom._count ? redirectedFrom._count + 1 : 1) > 30) {
-							warn(`Detected a possibly infinite redirection in a navigation guard when going from "${from.fullPath}" to "${toLocation.fullPath}". Aborting to avoid a Stack Overflow.\n Are you always returning a new location within a navigation guard? That would lead to this error. Only return when redirecting or aborting, that should fix this. This might break in production if not fixed.`);
+							diagnostics.VUE_ROUTER_R0009({
+								from: from.fullPath,
+								to: toLocation.fullPath
+							});
 							return Promise.reject(/* @__PURE__ */ new Error("Infinite redirect in navigation guard"));
 						}
 						return pushWithRedirect(assign({ replace }, locationAsObject(failure.to), {
@@ -2212,8 +2615,10 @@ Use slot props instead:
 				return runGuardQueue(guards);
 			}).then(() => {
 				guards = [];
-				for (const record of enteringRecords) if (record.beforeEnter) if (isArray(record.beforeEnter)) for (const beforeEnter of record.beforeEnter) guards.push(guardToPromiseFn(beforeEnter, to, from));
-				else guards.push(guardToPromiseFn(record.beforeEnter, to, from));
+				for (const record of enteringRecords) if (record.beforeEnter) {
+					if (isArray(record.beforeEnter)) for (const beforeEnter of record.beforeEnter) guards.push(guardToPromiseFn(beforeEnter, to, from));
+					else guards.push(guardToPromiseFn(record.beforeEnter, to, from));
+				}
 				guards.push(canceledNavigationCheck);
 				return runGuardQueue(guards);
 			}).then(() => {
@@ -2226,7 +2631,7 @@ Use slot props instead:
 				for (const guard of beforeResolveGuards.list()) guards.push(guardToPromiseFn(guard, to, from));
 				guards.push(canceledNavigationCheck);
 				return runGuardQueue(guards);
-			}).catch((err) => isNavigationFailure(err, ErrorTypes.NAVIGATION_CANCELLED) ? err : Promise.reject(err));
+			}).catch((err) => isNavigationFailure(err, 8) ? err : Promise.reject(err));
 		}
 		function triggerAfterEach(to, from, failure) {
 			afterGuards.list().forEach((guard) => runWithContext(() => guard(to, from, failure)));
@@ -2241,8 +2646,10 @@ Use slot props instead:
 			if (error) return error;
 			const isFirstNavigation = from === START_LOCATION_NORMALIZED;
 			const state = !isBrowser ? {} : history.state;
-			if (isPush) if (replace || isFirstNavigation) routerHistory.replace(toLocation.fullPath, assign({ scroll: isFirstNavigation && state && state.scroll }, data));
-			else routerHistory.push(toLocation.fullPath, data);
+			if (isPush) {
+				if (replace || isFirstNavigation) routerHistory.replace(toLocation.fullPath, assign({ scroll: isFirstNavigation && state && state.scroll }, data));
+				else routerHistory.push(toLocation.fullPath, data);
+			}
 			currentRoute.value = toLocation;
 			handleScroll(toLocation, from, isPush, isFirstNavigation);
 			markAsReady();
@@ -2263,12 +2670,12 @@ Use slot props instead:
 				}
 				pendingLocation = toLocation;
 				const from = currentRoute.value;
-				if (isBrowser) saveScrollPosition(getScrollKey(from.fullPath, info.delta), computeScrollPosition());
+				if (isBrowser && info.delta) saveScrollPosition(getScrollKey(from.fullPath, info.delta));
 				navigate(toLocation, from).catch((error) => {
-					if (isNavigationFailure(error, ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_CANCELLED)) return error;
-					if (isNavigationFailure(error, ErrorTypes.NAVIGATION_GUARD_REDIRECT)) {
+					if (isNavigationFailure(error, 12)) return error;
+					if (isNavigationFailure(error, 2)) {
 						pushWithRedirect(assign(locationAsObject(error.to), { force: true }), toLocation).then((failure) => {
-							if (isNavigationFailure(failure, ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_DUPLICATED) && !info.delta && info.type === NavigationType.pop) routerHistory.go(-1, false);
+							if (isNavigationFailure(failure, 20) && !info.delta && info.type === "pop") routerHistory.go(-1, false);
 						}).catch(noop);
 						return Promise.reject();
 					}
@@ -2277,8 +2684,8 @@ Use slot props instead:
 				}).then((failure) => {
 					failure = failure || finalizeNavigation(toLocation, from, false);
 					if (failure) {
-						if (info.delta && !isNavigationFailure(failure, ErrorTypes.NAVIGATION_CANCELLED)) routerHistory.go(-info.delta, false);
-						else if (info.type === NavigationType.pop && isNavigationFailure(failure, ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_DUPLICATED)) routerHistory.go(-1, false);
+						if (info.delta && !isNavigationFailure(failure, 8)) routerHistory.go(-info.delta, false);
+						else if (info.type === "pop" && isNavigationFailure(failure, 20)) routerHistory.go(-1, false);
 					}
 					triggerAfterEach(toLocation, from, failure);
 				}).catch(noop);
@@ -2300,7 +2707,7 @@ Use slot props instead:
 			const list = errorListeners.list();
 			if (list.length) list.forEach((handler) => handler(error, to, from));
 			else {
-				warn("uncaught error during route navigation:");
+				diagnostics.VUE_ROUTER_R0010();
 				console.error(error);
 			}
 			return Promise.reject(error);
@@ -2324,7 +2731,7 @@ Use slot props instead:
 			const { scrollBehavior } = options;
 			if (!isBrowser || !scrollBehavior) return Promise.resolve();
 			const scrollPosition = !isPush && getSavedScrollPosition(getScrollKey(to.fullPath, 0)) || (isFirstNavigation || !isPush) && history.state && history.state.scroll || null;
-			return (0, vue.nextTick)().then(() => scrollBehavior(to, from, scrollPosition)).then((position) => position && scrollToPosition(position)).catch((err) => triggerError(err, to, from));
+			return (0, vue.nextTick)().then(() => scrollBehavior(to, from, scrollPosition)).then((position) => to === currentRoute.value && position && scrollToPosition(position)).catch((err) => to === currentRoute.value && triggerError(err, to, from));
 		}
 		const go = (delta) => routerHistory.go(delta);
 		let started;
@@ -2334,7 +2741,7 @@ Use slot props instead:
 			listening: true,
 			addRoute,
 			removeRoute,
-			clearRoutes: matcher.clearRoutes,
+			clearRoutes,
 			hasRoute,
 			getRoutes,
 			resolve,
@@ -2360,7 +2767,7 @@ Use slot props instead:
 				if (isBrowser && !started && currentRoute.value === START_LOCATION_NORMALIZED) {
 					started = true;
 					push(routerHistory.location).catch((err) => {
-						warn("Unexpected error when starting the router:", err);
+						diagnostics.VUE_ROUTER_R0011({ cause: err });
 					});
 				}
 				const reactiveRoute = {};
@@ -2392,10 +2799,9 @@ Use slot props instead:
 		}
 		return router;
 	}
-
-//#endregion
-//#region src/useApi.ts
-/**
+	//#endregion
+	//#region src/useApi.ts
+	/**
 	* Returns the router instance. Equivalent to using `$router` inside
 	* templates.
 	*/
@@ -2409,30 +2815,29 @@ Use slot props instead:
 	function useRoute(_name) {
 		return (0, vue.inject)(routeLocationKey);
 	}
-
-//#endregion
-exports.NavigationFailureType = NavigationFailureType;
-exports.RouterLink = RouterLink;
-exports.RouterView = RouterView;
-exports.START_LOCATION = START_LOCATION_NORMALIZED;
-exports.createMemoryHistory = createMemoryHistory;
-exports.createRouter = createRouter;
-exports.createRouterMatcher = createRouterMatcher;
-exports.createWebHashHistory = createWebHashHistory;
-exports.createWebHistory = createWebHistory;
-exports.isNavigationFailure = isNavigationFailure;
-exports.loadRouteLocation = loadRouteLocation;
-exports.matchedRouteKey = matchedRouteKey;
-exports.onBeforeRouteLeave = onBeforeRouteLeave;
-exports.onBeforeRouteUpdate = onBeforeRouteUpdate;
-exports.parseQuery = parseQuery;
-exports.routeLocationKey = routeLocationKey;
-exports.routerKey = routerKey;
-exports.routerViewLocationKey = routerViewLocationKey;
-exports.stringifyQuery = stringifyQuery;
-exports.useLink = useLink;
-exports.useRoute = useRoute;
-exports.useRouter = useRouter;
-exports.viewDepthKey = viewDepthKey;
-return exports;
+	//#endregion
+	exports.NavigationFailureType = NavigationFailureType;
+	exports.RouterLink = RouterLink;
+	exports.RouterView = RouterView;
+	exports.START_LOCATION = START_LOCATION_NORMALIZED;
+	exports.createMemoryHistory = createMemoryHistory;
+	exports.createRouter = createRouter;
+	exports.createRouterMatcher = createRouterMatcher;
+	exports.createWebHashHistory = createWebHashHistory;
+	exports.createWebHistory = createWebHistory;
+	exports.isNavigationFailure = isNavigationFailure;
+	exports.loadRouteLocation = loadRouteLocation;
+	exports.matchedRouteKey = matchedRouteKey;
+	exports.onBeforeRouteLeave = onBeforeRouteLeave;
+	exports.onBeforeRouteUpdate = onBeforeRouteUpdate;
+	exports.parseQuery = parseQuery;
+	exports.routeLocationKey = routeLocationKey;
+	exports.routerKey = routerKey;
+	exports.routerViewLocationKey = routerViewLocationKey;
+	exports.stringifyQuery = stringifyQuery;
+	exports.useLink = useLink;
+	exports.useRoute = useRoute;
+	exports.useRouter = useRouter;
+	exports.viewDepthKey = viewDepthKey;
+	return exports;
 })({}, Vue);
