@@ -154,7 +154,7 @@ export default {
 	emits: ['createNew'],
 	props: {
 		builderLanguage: { type: String, required: true },
-		filter: { type: String, required: true },
+		filter: { type: String, required: false, default: '' },
 		id: { type: String, required: true },
 		readonly: { type: Boolean, required: true }
 	},
