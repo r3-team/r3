@@ -173,7 +173,7 @@ func storeAsFilesAttribute(ctx context.Context, attributeId uuid.UUID, recordId 
 		return err
 	}
 
-	if err := data.SetFile(ctx, -1, attributeId, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, true); err != nil {
+	if err := data.SetFile(ctx, -1, attributeId, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, nil, true); err != nil {
 		return err
 	}
 

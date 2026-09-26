@@ -706,8 +706,8 @@ export default {
 			holderRelationText: '',       // text filter for module relations
 			instanceFunctionIds: [
 				'abort_show_message', 'barcode_generate', 'clean_up_e2ee_keys', 'data_log_comment_create', 'data_log_delete',
-				'file_export', 'file_export_text', 'file_import', 'file_import_text', 'file_link', 'file_text_read',
-				'file_text_read_cb', 'file_text_write', 'file_unlink', 'files_get', 'get_e2ee_data_key_enc',
+				'file_create', 'file_create_text', 'file_export', 'file_export_text', 'file_import', 'file_import_text',
+				'file_link', 'file_text_read', 'file_text_read_cb', 'file_unlink', 'files_get', 'get_e2ee_data_key_enc',
 				'get_language_code', 'get_name', 'get_public_hostname', 'get_role_ids', 'get_user_id', 'has_role',
 				'has_role_any', 'log_error', 'log_info', 'log_warning', 'mail_delete', 'mail_delete_after_attach',
 				'mail_get_next', 'mail_send', 'qrcode_generate', 'rest_call', 'rest_get_placeholder_file_base64',
@@ -866,7 +866,7 @@ export default {
 			this.execArgs = [];
 			this.execResponse = '';
 
-			for (let a of this.execArgInputs) {
+			for (const a of this.execArgInputs) {
 				this.execArgs.push(null);
 			}
 		},
@@ -888,7 +888,7 @@ export default {
 				image: 'question.png'
 			});
 		},
-		showHelpVolatility(top, text, args) {
+		showHelpVolatility() {
 			this.$store.commit('dialog', {
 				captionTop: this.capApp.volatility,
 				captionBody: this.capApp.volatilityHelp,

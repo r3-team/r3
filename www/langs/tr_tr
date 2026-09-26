@@ -1388,6 +1388,8 @@
 				"clean_up_e2ee_keys": "example.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Kullanıcının artık erişemediği kayıtlar için uçtan uca şifreleme veri anahtarlarını siler. Bu, kullanıcı için şifre çözmeyi imkansız hale getirir.",
 				"data_log_comment_create": "example.data_log_comment_create({ARGS}) => VOID<br /><br />Seçilen ilişkide verilen kayıt için değişiklik günlüğü geçmişinde bir yorum oluşturur. Bir yorum, basit HTML dahil herhangi bir metin değeri olabilir.<br /><br />Yorumlar, tüm değişiklik günlükleri günlük tutma ayarları karşılandığında kaldırıldığından.<br /><br />Bir yorumun belirli bir kullanıcıdan geldiğini tanımlamak için bir kullanıcı kimliği sağlanabilir; Kullanıcı ID'si NULL ise yorumun sistemden geldiği tanımlanır.",
 				"data_log_delete": "example.data_log_delete({ARGS}) => VOID<br /><br />Seçilen ilişkide verilen kayıt için değişiklik günlüğü geçmişini siler.",
+				"file_create": "instance.file_create({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_content: File content as BYTEA</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the file has been created; it must have two parameters: file_id UUID, callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the file has been created.</li></ul>",
+				"file_create_text": "instance.file_create_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new UTF8 text file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_text_content: UTF8 text content</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the file has been created; it must have two parameters: file_id UUID, callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the file has been created.</li></ul>",
 				"file_export": "example.file_export({ARGS}) => INTEGER<br /><br />Belirli bir dosyayı diske aktarmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>file_id: Dışa aktarılacak dosya, dosya kimliği example.files_get() aracılığıyla alınabilir </li><li>file_path: Dosyanın nereye aktarılacağı (bir dosya adı ile bitmelidir)</li><li>file_version: Dışa aktarılacak dosyanın sürümü (NULL = en son) sürüm)</li><li>üzerine yaz: Tanımlanan dosya yolunda zaten mevcutsa dosyanın üzerine yaz</li></ul><p>Dosya yolu her zaman sunucu yapılandırma dosyasında tanımlanan dışa aktarma yoluna göredir. Güvenlik nedeniyle mutlak yollar desteklenmez.</p>",
 				"file_export_text": "example.file_export_text({ARGS}) => INTEGER<br /><br />Belirli bir metni UTF8 metin dosyası olarak diske aktarmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>dosya_yolu: Dosyanın dışa aktarılacağı yer (bir dosya adıyla bitmelidir)</li><li>dosya_metin_içeriği: UTF8 metin içeriği</li><li>üzerine yaz: Tanımlanan konumda zaten varsa dosyanın üzerine yaz dosyayolu</li></ul><p>Dosya yolu her zaman sunucu yapılandırma dosyasında tanımlanan dışa aktarma yoluna göredir. Güvenlik nedeniyle mutlak yollar desteklenmez.</p>",
 				"file_import": "example.file_import({ARGS}) => INTEGER<br /><br />Diskten bir dosyayı içe aktarmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>file_path: Dosyanın nereden içe aktarılacağı (bir dosya adıyla bitmelidir)</li><li>attribute_id: dosyayı alan dosya özniteliğinin kimliği</li><li>record_id: Dosya öznitelik değerini güncellemek için kaydın kimliği (NULL = yeni) kayıt)</li></ul><p>İçe aktarma başarılı olursa kaynak dosya silinir.</p><p>Dosya yolu her zaman sunucu yapılandırma dosyasında tanımlanan içe aktarma yoluna görelidir. Güvenlik nedeniyle mutlak yollar desteklenmez.</p>",
@@ -1395,7 +1397,6 @@
 				"file_link": "example.file_link({ARGS}) => VOID<br /><br />Mevcut bir dosyayı başka bir kayda bağlar (seçilen dosya niteliğine eklenir). Bu bağlantı bir sabit bağlantıdır, yani aynı dosyaya erişilmektedir.<br /><br />Dosyayı yeniden adlandırırken veya silerken, değişiklik yalnızca dosya bağlantısını etkiler. Silme işlemine bakılmaksızın, gerçek dosya, bir dosya bağlantısı olduğu sürece saklanır.",
 				"file_text_read": "example.file_text_read({ARGS}) => INTEGER<br /><br />UTF8 metin dosyasının içeriğini geri çağırma metni değerine sahip bir geri çağırma işlevine göndermek için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>callback_function_id: Çağrılan arka uç fonksiyonunun kimliği, bir parametreye sahip olmalıdır: file_content TEXT</li><li>file_id: İçeriği okunacak dosya, dosya kimliği example.files_get() aracılığıyla alınabilir.</li><li>file_version: Okunacak dosyanın sürümü (NULL = en son) versiyon)</li></ul>",
 				"file_text_read_cb": "example.file_text_read_cb({ARGS}) => INTEGER<br /><br />UTF8 metin dosyasının içeriğini bir geri çağırma işlevine göndermek için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>callback_function_id: Çağrılan arka uç fonksiyonunun kimliği, iki parametreye sahip olmalıdır: file_content TEXT, callback_value TEXT</li><li>callback_value: Dosya okunduktan sonra işlenmek üzere geri çağırma fonksiyonuna gönderilecek metin değeri.</li><li>file_id: Okunacak dosya içerik, dosya kimliği example.files_get()</li><li>file_version aracılığıyla alınabilir: Okunacak dosyanın sürümü (NULL = en son sürüm)</li></ul>",
-				"file_text_write": "example.file_text_write({ARGS}) => INTEGER<br /><br />Yeni bir UTF8 metin dosyası oluşturmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>file_name: Oluşturulacak dosyanın adı</li><li>file_text_content: UTF8 metin içeriği</li><li>attribute_id: dosyayı alan dosya özniteliğinin kimliği</li><li>record_id: Dosyaları güncellemek için kaydın kimliği (NULL = yeni kayıt)</li></ul> özellik değeri",
 				"file_unlink": "example.file_unlink({ARGS}) => VOID<br /><br />Belirtilen bir kaydın files özelliğinden mevcut bir dosyanın bağlantısını kaldırır. Kaldırılan bağlantı bir sabit bağlantıdır; yani asıl dosya, en az bir başka kayıt dosyası niteliğine hâlâ bağlı olduğu sürece tutulur.",
 				"files_get": "example.files_get({ARGS}) => example.file_meta[]<br /><br />Seçilen dosya özelliğinden ve kayıttan dosyalar için meta verileri döndürür (isteğe bağlı olarak silinmiş dosyaları içerebilir).<br /><br />Döndürülen 'instance.file_meta' türü şunlardan oluşur:<blockquote>id UUID,<br />user_id_creator TAM SAYI,<br />hash METİN,<br />adı METİN,<br />size_kb TAM SAYI,<br />version TAM SAYI,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "example.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Verilen ilişki kaydı ve seçilen kullanıcı için şifrelenmiş veri anahtarını döndürür. Veri anahtarları, ona erişimi olan her kullanıcı için ayrı kayıtlar için mevcuttur. İlgili kullanıcı özel anahtarıyla ön uçta şifreleri çözülebilir.",
@@ -1451,6 +1452,22 @@
 					"ilişki_id UUID",
 					"Record_id BIGINT"
 				],
+				"file_create": [
+					"file_name TEXT",
+					"file_content BYTEA",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"file_create_text": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
 				"file_export": [
 					"dosya_id UUID",
 					"dosya_yolu METİN",
@@ -1487,12 +1504,6 @@
 					"callback_value TEXT",
 					"dosya_id UUID",
 					"file_version INTEGER DEFAULT NULL"
-				],
-				"file_text_write": [
-					"dosya_adı TEXT",
-					"file_text_content METİN",
-					"özellik_kimliği UUID",
-					"Record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"dosya_id UUID",

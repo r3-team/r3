@@ -59,7 +59,7 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId pgtype.Int8)
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
-	if err := data.SetFile(ctx, -1, attributeIdFiles, fileId, nil, pgtype.Text{String: filePathSource, Valid: true}, pgtype.Text{}, true); err != nil {
+	if err := data.SetFile(ctx, -1, attributeIdFiles, fileId, nil, pgtype.Text{String: filePathSource, Valid: true}, pgtype.Text{}, nil, true); err != nil {
 		return err
 	}
 	return applyFileToRecord(ctx, recordId, modName, relName, attributeIdFiles, fileId, filepath.Base(filePathSource))

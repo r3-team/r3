@@ -64,7 +64,7 @@ func GetFilePathVersion(fileId uuid.UUID, version int64) string {
 
 // attempts to store file upload
 func SetFile(ctx context.Context, loginId int64, attributeId, fileId uuid.UUID, fileSourcePart *multipart.Part,
-	fileSourcePath, fileSourceString pgtype.Text, isNewFile bool) error {
+	fileSourcePath, fileSourceString pgtype.Text, fileSourceRaw []byte, isNewFile bool) error {
 
 	attribute, err := cache.GetAttributeById(attributeId)
 	if err != nil {
@@ -155,6 +155,12 @@ func SetFile(ctx context.Context, loginId int64, attributeId, fileId uuid.UUID, 
 			return err
 		}
 		if err := file.Close(); err != nil {
+			return err
+		}
+	} else if fileSourceRaw != nil {
+
+		// write file from raw bytes
+		if err := os.WriteFile(filePath, fileSourceRaw, 0644); err != nil {
 			return err
 		}
 	} else {

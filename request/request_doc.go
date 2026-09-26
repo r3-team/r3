@@ -55,7 +55,7 @@ func DocCreate(ctx context.Context, reqJson json.RawMessage, loginId int64) (any
 	}
 	fileSizeKb := int64(fileInfo.Size() / 1024)
 
-	if err := data.SetFile(ctx, loginId, req.AttributeIdTarget, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, true); err != nil {
+	if err := data.SetFile(ctx, loginId, req.AttributeIdTarget, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, nil, true); err != nil {
 		return nil, err
 	}
 	return types.DataGetValueFile{

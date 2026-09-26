@@ -865,6 +865,106 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'loginInvitation', 'Default DE', 'REI3 - Ihr neuer Benutzer',
 				'<p>Hallo {DISPLAYNAME},</p><p>Sie erhalten diese Nachricht, weil für Sie der Benutzer "<b>{USERNAME}</b>" angelegt worden ist.</p><p>Bitte verwenden Sie diesen <a href="/{RESET_URL}">Link</a>, um Ihre Zugangsdaten zu wählen.</p><p>Dieser Link wird gültig sein bis: <b>{CODE_VALID_UNTIL}</b></p>'
 			);
+
+			-- raw file processing
+			-- add two new functions 'create'/'create_text', redirect legacy 'file_text_write' to 'create_text'
+			ALTER TABLE instance.file_spool ADD COLUMN file_content BYTEA;
+			ALTER TYPE  instance.file_spool_content ADD VALUE 'create';
+			ALTER TYPE  instance.file_spool_content ADD VALUE 'createText';
+
+			CREATE OR REPLACE FUNCTION instance.file_create(
+				file_name text,
+				file_content bytea,
+				attribute_id uuid,
+				record_id bigint DEFAULT NULL,
+				pg_function_id uuid DEFAULT NULL,
+				callback_value text DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						file_content,
+						attribute_id,
+						record_id_wofk,
+						pg_function_id,
+						callback_value
+					)
+					VALUES(
+						'create',
+						EXTRACT(EPOCH FROM NOW()),
+						file_name,
+						file_content,
+						attribute_id,
+						record_id,
+						pg_function_id,
+						callback_value
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.file_create_text(
+				file_name text,
+				file_text_content text,
+				attribute_id uuid,
+				record_id bigint DEFAULT NULL,
+				pg_function_id uuid DEFAULT NULL,
+				callback_value text DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						file_text_content,
+						attribute_id,
+						record_id_wofk,
+						pg_function_id,
+						callback_value
+					)
+					VALUES(
+						'createText',
+						EXTRACT(EPOCH FROM NOW()),
+						file_name,
+						file_text_content,
+						attribute_id,
+						record_id,
+						pg_function_id,
+						callback_value
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.file_text_write(
+				file_name text,
+				file_text_content text,
+				attribute_id uuid,
+				record_id bigint DEFAULT NULL::bigint)
+			    RETURNS integer
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+				BEGIN
+					-- redirect to newer call
+					RETURN instance.file_create_text(
+						file_name,
+						file_text_content,
+						attribute_id,
+						record_id
+					);
+				END;
+			$BODY$;
 		`)
 		return "3.13", err
 	},

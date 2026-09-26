@@ -36,6 +36,7 @@ type run struct {
 	Content         string
 	FilePath        pgtype.Text
 	FileVersion     pgtype.Int8
+	FileContent     []byte
 	FileTextContent pgtype.Text
 	Overwrite       pgtype.Bool
 	CallbackValue   pgtype.Text
@@ -44,7 +45,7 @@ type run struct {
 func DoAll() error {
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, attribute_id, file_id, pg_function_id, record_id_wofk, content,
-			file_path, file_text_content, file_version, overwrite, callback_value
+			file_path, file_content, file_text_content, file_version, overwrite, callback_value
 		FROM instance.file_spool
 		ORDER BY date DESC
 	`)
@@ -56,8 +57,9 @@ func DoAll() error {
 	runs := make([]run, 0)
 	for rows.Next() {
 		var r run
-		if err := rows.Scan(&r.Id, &r.AttributeId, &r.FileId, &r.PgFunctionId, &r.RecordIdWofk, &r.Content,
-			&r.FilePath, &r.FileTextContent, &r.FileVersion, &r.Overwrite, &r.CallbackValue); err != nil {
+		if err := rows.Scan(&r.Id, &r.AttributeId, &r.FileId, &r.PgFunctionId, &r.RecordIdWofk,
+			&r.Content, &r.FilePath, &r.FileContent, &r.FileTextContent, &r.FileVersion,
+			&r.Overwrite, &r.CallbackValue); err != nil {
 
 			return err
 		}
@@ -70,6 +72,10 @@ func DoAll() error {
 
 		var runErr error
 		switch r.Content {
+		case "create": // bytea -> attribute (any file)
+			runErr = doCreate(r.FilePath.String, r.FileContent, r.AttributeId.Bytes, r.RecordIdWofk, r.PgFunctionId, r.CallbackValue)
+		case "createText": // string -> attribute (text file)
+			runErr = doCreateText(r.FilePath.String, r.FileTextContent.String, r.AttributeId.Bytes, r.RecordIdWofk, true, r.PgFunctionId, r.CallbackValue)
 		case "export": // attribute (any file) -> disk (any file)
 			runErr = doExport(r.FilePath.String, r.FileId.Bytes, r.FileVersion, r.Overwrite.Bool)
 		case "exportText": // string -> disk (text file)
@@ -82,8 +88,10 @@ func DoAll() error {
 			runErr = doTextRead(r.FileId.Bytes, r.FileVersion, r.PgFunctionId.Bytes, false, pgtype.Text{})
 		case "textReadCb": // attribute (text file) -> string
 			runErr = doTextRead(r.FileId.Bytes, r.FileVersion, r.PgFunctionId.Bytes, true, r.CallbackValue)
+
+		// legacy, does not support callbacks, replaced by 'createText'
 		case "textWrite": // string -> attribute (text file)
-			runErr = doTextWrite(r.FilePath.String, r.FileTextContent.String, r.AttributeId.Bytes, r.RecordIdWofk)
+			runErr = doCreateText(r.FilePath.String, r.FileTextContent.String, r.AttributeId.Bytes, r.RecordIdWofk, false, pgtype.UUID{}, pgtype.Text{})
 		}
 
 		if runErr != nil {

@@ -1388,6 +1388,8 @@
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID\n\nSupprime les clés de chiffrement de bout en bout pour les enregistrements auxquels un utilisateur n'a plus accès. Cela rend le déchiffrement impossible pour l'utilisateur.",
 				"data_log_comment_create": "instance.data_log_comment_create({ARGS}) => VOID<br /><br />Crée un commentaire dans l'historique des modifications pour l'enregistrement spécifié au sein de la relation choisie. Un commentaire peut être n'importe quelle chaîne de texte, y compris du code HTML simple.<br /><br />Les commentaires, tout comme les autres entrées de l'historique, sont supprimés une fois les critères de rétention des journaux remplis.<br /><br />Il est possible d'indiquer qu'un commentaire provient d'un utilisateur spécifique en fournissant son identifiant ; si cet identifiant est NULL, le commentaire est considéré comme provenant du système.",
 				"data_log_delete": "instance.data_log_delete({ARGS}) => VOID<br /><br />Supprime l'historique du journal des modifications pour l'enregistrement donné dans la relation choisie.",
+				"file_create": "instance.file_create({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_content: File content as BYTEA</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the file has been created; it must have two parameters: file_id UUID, callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the file has been created.</li></ul>",
+				"file_create_text": "instance.file_create_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new UTF8 text file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_text_content: UTF8 text content</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>Optional parameters:<ul><li>callback_function_id: ID of backend function that is called after the file has been created; it must have two parameters: file_id UUID, callback TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the file has been created.</li></ul>",
 				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Crée une tâche de traitement de fichier pour exporter un fichier donné vers le disque. Paramètres pertinents :<ul><li>file_id : fichier à exporter ; l'ID du fichier peut être récupéré via instance.files_get()</li><li>file_path : emplacement d'exportation du fichier (doit se terminer par un nom de fichier)</li><li>file_version : version du fichier à exporter (NULL = dernière version)</li><li>overwrite : écraser le fichier s'il en existe déjà un à l'emplacement spécifié</li></ul><p>Le chemin du fichier est toujours relatif au chemin d'exportation défini dans le fichier de configuration du serveur. Pour des raisons de sécurité, les chemins absolus ne sont pas pris en charge.</p>",
 				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Crée une tâche de traitement de fichier pour exporter un texte donné au format UTF-8 vers le disque. Paramètres pertinents : <ul><li>file_path : Chemin d'exportation du fichier (doit se terminer par un nom de fichier)</li><li>file_text_content : Contenu du texte au format UTF-8</li><li>overwrite : Écrase le fichier s'il existe déjà à l'emplacement indiqué</li></ul><p>Le chemin d'exportation est toujours relatif au chemin défini dans le fichier de configuration du serveur. Pour des raisons de sécurité, les chemins absolus ne sont pas pris en charge.</p>",
 				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Crée une tâche de traitement de fichier pour importer un fichier depuis le disque. Paramètres pertinents :<ul><li>file_path : emplacement source du fichier (doit se terminer par le nom du fichier)</li><li>attribute_id : ID de l'attribut de fichier destiné à recevoir le fichier</li><li>record_id : ID de l'enregistrement dont la valeur de l'attribut de fichier doit être mise à jour (NULL = nouvel enregistrement)</li></ul><p>Le fichier source est supprimé si l'importation réussit.</p><p>Le chemin du fichier est toujours relatif au chemin d'importation défini dans le fichier de configuration du serveur. Pour des raisons de sécurité, les chemins absolus ne sont pas pris en charge.</p>",
@@ -1395,7 +1397,6 @@
 				"file_link": "instance.file_link({ARGS}) => VOID\n\nLie un fichier existant à un autre enregistrement (ajouté à l'attribut de fichier choisi). Ce lien est un lien dur, ce qui signifie que le même fichier est utilisé.\n\nLors du renommage ou de la suppression du fichier, le changement n'affecte que le lien vers le fichier. Indépendamment de la suppression, le fichier réel est conservé tant qu'il existe un lien vers le fichier.",
 				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Creates a file processing job to send the content of a UTF8 text file to a callback function. Relevant parameters:<ul><li>callback_function_id: ID of backend function that is called, it must have one parameter: file_content TEXT</li><li>file_id: File to read content from, file ID can be retrieved via instance.files_get()</li><li>file_version: Version of the file to read from (NULL = latest version)</li></ul>",
 				"file_text_read_cb": "instance.file_text_read_cb({ARGS}) => INTEGER<br /><br />Crée une tâche de traitement de fichier pour transmettre le contenu d'un fichier texte UTF-8 à une fonction de rappel. Paramètres pertinents :<ul><li>callback_function_id : ID de la fonction backend appelée ; elle doit accepter deux paramètres : file_content TEXT et callback_value TEXT</li><li>callback_value : valeur textuelle à transmettre à la fonction de rappel pour traitement une fois le fichier lu.</li><li>file_id : fichier dont le contenu doit être lu ; l'ID du fichier peut être obtenu via instance.files_get()</li><li>file_version : version du fichier à lire (NULL = dernière version)</li></ul>",
-				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Crée une tâche de traitement de fichier pour créer un nouveau fichier texte UTF8. Paramètres pertinents :<ul><li>file_name : Nom du fichier à créer</li><li>file_text_content : Contenu texte UTF8</li><li>attribute_id : ID de l'attribut des fichiers qui reçoit le fichier</li><li>record_id : ID de l'enregistrement pour mettre à jour la valeur de l'attribut des fichiers de (NULL = nouvel enregistrement)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Supprime le lien entre un fichier existant et l'attribut « files » d'un enregistrement spécifié. Le lien supprimé est un lien physique (hard link), ce qui signifie que le fichier lui-même est conservé tant qu'il reste lié à l'attribut « files » d'au moins un autre enregistrement.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]\n\nRetourne les métadonnées des fichiers de l'attribut de fichier et de l'enregistrement choisis (peut inclure éventuellement des fichiers supprimés).\n\nLe type retourné 'instance.file_meta' se compose de :\n{id UUID, user_id_creator INTEGER, hash TEXT, name TEXT, size_kb INTEGER, version INTEGER, date_change BIGINT, date_delete BIGINT}",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Renvoie la clé de données chiffrée pour l'enregistrement de relation donné et l'utilisateur choisi. Des clés de données existent pour chaque enregistrement individuel et pour chaque utilisateur y ayant accès. Elles peuvent être déchiffrées côté client à l'aide de la clé privée associée à l'utilisateur.",
@@ -1451,6 +1452,22 @@
 					"relation_id UUID",
 					"record_id BIGINT"
 				],
+				"file_create": [
+					"file_name TEXT",
+					"file_content BYTEA",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"file_create_text": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
 				"file_export": [
 					"file_id UUID",
 					"file_path TEXT",
@@ -1487,12 +1504,6 @@
 					"callback_value TEXT",
 					"file_id UUID",
 					"file_version INTEGER DEFAULT NULL"
-				],
-				"file_text_write": [
-					"file_name TEXT",
-					"file_text_content TEXT",
-					"attribute_id UUID",
-					"record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"file_id UUID",

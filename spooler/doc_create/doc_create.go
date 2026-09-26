@@ -182,7 +182,7 @@ func do(j docJob) error {
 		if err != nil {
 			return err
 		}
-		if err := data.SetFile(ctx, -1, j.AttributeIdAttach.Bytes, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, true); err != nil {
+		if err := data.SetFile(ctx, -1, j.AttributeIdAttach.Bytes, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, nil, true); err != nil {
 			return err
 		}
 
