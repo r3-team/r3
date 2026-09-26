@@ -1,17 +1,14 @@
-import {dialogDeleteAsk} from '../shared/dialog.js';
-import {copyValueDialog} from '../shared/generic.js';
-import {
-	isAttributeFiles,
-	isAttributeRelationship
-} from '../shared/attribute.js';
-import {
-	getTemplatePreset,
-	getTemplatePresetValue
-} from '../shared/builderTemplate.js';
+import { isAttributeFiles, isAttributeRelationship } from '../shared/attribute.js';
+import { getTemplatePreset, getTemplatePresetValue } from '../shared/builderTemplate.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog } from '../shared/generic.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 const MyBuilderPresetValue = {
-	name:'my-builder-preset-value',
-	template:`<tr>
+	name: 'my-builder-preset-value',
+	template: `<tr>
 		<td>{{ attribute.name + (attribute.nullable ? '' : '*') }}</td>
 		<td v-if="exists">
 			<div class="row gap centered">
@@ -53,46 +50,46 @@ const MyBuilderPresetValue = {
 			/>
 		</td>
 	</tr>`,
-	props:{
-		attribute:    { type:Object,  required:true },
-		exists:       { type:Boolean, required:true }, // preset value is not yet set
-		presetIdRefer:{ required:true },
-		protected:    { type:Boolean, required:true },
-		readonly:     { type:Boolean, required:true },
-		value:        { required:true }
+	props: {
+		attribute: { type: Object, required: true },
+		exists: { type: Boolean, required: true }, // preset value is not yet set
+		presetIdRefer: { required: true },
+		protected: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: true },
+		value: { required: true }
 	},
-	emits:['del','set'],
-	computed:{
-		isRelationship:(s) => s.isAttributeRelationship(s.attribute.content),
-		relationship:  (s) => !s.isRelationship ? false : s.relationIdMap[s.attribute.relationshipId],
+	emits: ['del', 'set'],
+	computed: {
+		isRelationship: s => s.isAttributeRelationship(s.attribute.content),
+		relationship: s => !s.isRelationship ? false : s.relationIdMap[s.attribute.relationshipId],
 
 		// inputs
-		presetIdReferInput:{
-			get()  { return this.presetIdRefer; },
-			set(v) { return this.$emit('set',v,this.protected,this.value); }
+		presetIdReferInput: {
+			get() { return this.presetIdRefer; },
+			set(v) { return this.$emit('set', v, this.protected, this.value); }
 		},
-		protectedInput:{
-			get()  { return this.protected; },
-			set(v) { return this.$emit('set',this.presetIdRefer,v,this.value); }
+		protectedInput: {
+			get() { return this.protected; },
+			set(v) { return this.$emit('set', this.presetIdRefer, v, this.value); }
 		},
-		valueInput:{
-			get()  { return this.value === null ? '' : this.value; },
-			set(v) { return this.$emit('set',this.presetIdRefer,this.protected,v); }
+		valueInput: {
+			get() { return this.value === null ? '' : this.value; },
+			set(v) { return this.$emit('set', this.presetIdRefer, this.protected, v); }
 		},
 
 		// stores
-		relationIdMap:(s) => s.$store.getters['schema/relationIdMap'],
-		capApp:       (s) => s.$store.getters.captions.builder.preset
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		capApp: s => s.$store.getters.captions.builder.preset
 	},
-	methods:{
+	methods: {
 		isAttributeRelationship
 	}
 };
 
 export default {
-	name:'my-builder-preset',
-	components:{ MyBuilderPresetValue },
-	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+	name: 'my-builder-preset',
+	components: { MyBuilderPresetValue, MyBuilderSchemaLookup },
+	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox scroll float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
@@ -126,8 +123,12 @@ export default {
 						:active="!isNew"
 						:caption="capGen.id"
 					/>
+					<my-button image="builderLookup.png"
+						@trigger="showLookup = true"
+						:caption="capGen.references"
+					/>
 					<my-button image="delete.png"
-						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+						@trigger="delCheck"
 						:active="!isNew && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -191,47 +192,59 @@ export default {
 				</table>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="preset"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
-	props:{
-		id:      { required:true },
-		readonly:{ type:Boolean, required:true },
-		relation:{ type:Object,  required:true }
+	props: {
+		id: { required: true },
+		module: { type: Object, required: true },
+		readonly: { type: Boolean, required: true },
+		relation: { type: Object, required: true },
 	},
-	emits:['close'],
+	emits: ['close'],
 	data() {
 		return {
-			values:null,
-			valuesOrg:null
+			hasReferences: false,
+			showLookup: false,
+			values: null,
+			valuesOrg: null
 		};
 	},
-	computed:{
-		attributeIdMapValue:(s) => {
-			let map = {};
-			for(let v of s.values.values) {
+	computed: {
+		attributeIdMapValue: s => {
+			const map = {};
+			for (const v of s.values.values) {
 				map[v.attributeId] = v;
 			}
 			return map;
 		},
 
 		// simple
-		attributesValid:(s) => s.relation.attributes.filter(v => v.name !== 'id' && !s.isAttributeFiles(v.content)),
-		canSave:        (s) => s.values !== null && s.values.name !== '' && s.hasChanges,
-		hasChanges:     (s) => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		isNew:          (s) => s.id === null,
+		attributesValid: s => s.relation.attributes.filter(v => v.name !== 'id' && !s.isAttributeFiles(v.content)),
+		canSave: s => s.values !== null && s.values.name !== '' && s.hasChanges,
+		hasChanges: s => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		isNew: s => s.id === null,
 
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.preset,
-		capGen:        (s) => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.builder.preset,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		dialogDeleteAsk,
@@ -242,61 +255,59 @@ export default {
 
 		// actions
 		childAllAddMissing() {
-			for(const atr of this.attributesValid) {
-				if(this.attributeIdMapValue[atr.id] === undefined)
-					this.childSet(atr.id,null,false,null);
+			for (const atr of this.attributesValid) {
+				if (this.attributeIdMapValue[atr.id] === undefined)
+					this.childSet(atr.id, null, false, null);
 			}
 		},
 		childAllToggleProtected() {
 			let anyNotProtected = false;
-			for(const atr of this.attributesValid) {
-				if(this.childGet(atr.id,'protected') === false) {
+			for (const atr of this.attributesValid) {
+				if (this.childGet(atr.id, 'protected') === false) {
 					anyNotProtected = true;
 					break;
 				}
 			}
-			for(const atr of this.attributesValid) {
-				if(this.attributeIdMapValue[atr.id] !== undefined)
+			for (const atr of this.attributesValid) {
+				if (this.attributeIdMapValue[atr.id] !== undefined)
 					this.childSet(atr.id,
-						this.childGet(atr.id,'presetIdRefer'),
+						this.childGet(atr.id, 'presetIdRefer'),
 						anyNotProtected,
-						this.childGet(atr.id,'value')
+						this.childGet(atr.id, 'value')
 					);
 			}
 		},
-		childGet(atrId,mode) {
+		childGet(atrId, mode) {
 			const exists = this.attributeIdMapValue[atrId] !== undefined;
-			switch(mode) {
-				case 'presetIdRefer': return exists ? this.attributeIdMapValue[atrId].presetIdRefer : null; break;
-				case 'protected':     return exists ? this.attributeIdMapValue[atrId].protected     : true; break;
-				case 'value':         return exists ? this.attributeIdMapValue[atrId].value         : '';   break;
+			switch (mode) {
+				case 'presetIdRefer': return exists ? this.attributeIdMapValue[atrId].presetIdRefer : null;
+				case 'protected': return exists ? this.attributeIdMapValue[atrId].protected : true;
+				case 'value': return exists ? this.attributeIdMapValue[atrId].value : '';
 			}
 			return false;
 		},
 		childDel(atrId) {
-			for(let i = 0, j = this.values.values.length; i < j; i++) {
-				if(this.values.values[i].attributeId === atrId)
-					return this.values.values.splice(i,1);
+			for (let i = 0, j = this.values.values.length; i < j; i++) {
+				if (this.values.values[i].attributeId === atrId)
+					return this.values.values.splice(i, 1);
 			}
 		},
-		childSet(atrId,presetIdRefer,protec,value) {
-			const atr = this.attributeIdMap[atrId];
-
+		childSet(atrId, presetIdRefer, protec, value) {
 			// no preset value yet for attribute, create one
-			if(this.attributeIdMapValue[atrId] === undefined)
-				return this.values.values.push(this.getTemplatePresetValue(atrId,presetIdRefer,protec,value));
+			if (this.attributeIdMapValue[atrId] === undefined)
+				return this.values.values.push(this.getTemplatePresetValue(atrId, presetIdRefer, protec, value));
 
 			// update existing preset value
-			for(let i = 0, j = this.values.values.length; i < j; i++) {
-				if(this.values.values[i].attributeId !== atrId)
+			for (let i = 0, j = this.values.values.length; i < j; i++) {
+				if (this.values.values[i].attributeId !== atrId)
 					continue;
 
-				if(value === '')
+				if (value === '')
 					value = null;
 
 				this.values.values[i].presetIdRefer = presetIdRefer;
-				this.values.values[i].protected     = protec;
-				this.values.values[i].value         = value;
+				this.values.values[i].protected = protec;
+				this.values.values[i].value = value;
 				break;
 			}
 		},
@@ -305,22 +316,22 @@ export default {
 			this.$emit('close');
 		},
 		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's' && this.canSave) {
+			if (e.ctrlKey && e.key === 's' && this.canSave) {
 				this.set();
 				e.preventDefault();
 			}
-			if(e.key === 'Escape') {
+			if (e.key === 'Escape') {
 				this.$emit('close');
 				e.preventDefault();
 			}
 		},
 		reset() {
-			if(this.id === null) {
-				this.values = this.getTemplatePreset(this.relation.id,'');
+			if (this.id === null) {
+				this.values = this.getTemplatePreset(this.relation.id, '');
 			}
 			else {
-				for(const p of this.relation.presets) {
-					if(p.id === this.id) {
+				for (const p of this.relation.presets) {
+					if (p.id === this.id) {
 						this.values = JSON.parse(JSON.stringify(p));
 						break;
 					}
@@ -330,14 +341,22 @@ export default {
 		},
 
 		// backend calls
+		delCheck() {
+			this.hasReferences = getHasAnyReferences(this.module, 'preset', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
 		del() {
-			ws.send('preset','del',this.id,true).then(
+			ws.send('preset', 'del', this.id, true).then(
 				this.closeReload,
 				this.$root.genericError
 			);
 		},
 		set() {
-			ws.send('preset','set',this.values,true).then(
+			ws.send('preset', 'set', this.values, true).then(
 				this.closeReload,
 				this.$root.genericError
 			);

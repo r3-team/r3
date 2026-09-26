@@ -1,9 +1,11 @@
+import { routeParseParams } from '../shared/router.js';
+
 import MyBuilderPreset from './builderPreset.js';
 
 export default {
-	name:'my-builder-presets',
-	components:{MyBuilderPreset},
-	template:`<div class="generic-entry-list">
+	name: 'my-builder-presets',
+	components: { MyBuilderPreset },
+	template: `<div class="generic-entry-list">
 		<div class="entry"
 			v-if="!readonly"
 			@click="idEdit = null"
@@ -34,33 +36,47 @@ export default {
 			v-if="idEdit !== false"
 			@close="idEdit = false"
 			:id="idEdit"
+			:key="idEdit"
+			:module
 			:readonly="readonly"
 			:relation="relation"
 		/>
 	</div>`,
-	props:{
-		filter:  { type:String,  required:true },
-		readonly:{ type:Boolean, required:true },
-		relation:{ type:Object,  required:true }
+	props: {
+		filter: { type: String, required: false, default: '' },
+		module: { type: Object, required: true },
+		readonly: { type: Boolean, required: true },
+		relation: { type: Object, required: true },
 	},
 	data() {
 		return {
-			idEdit:false
+			idEdit: false
 		};
 	},
-	computed:{
-		capApp:s => s.$store.getters.captions.builder.preset,
-		capGen:s => s.$store.getters.captions.generic
+	computed: {
+		capApp: s => s.$store.getters.captions.builder.preset,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	mounted() {
+		const params = { presetIdShow: { parse: 'string', value: null } };
+		this.routeParseParams(params);
+
+		if (params.presetIdShow.value !== null)
+			this.idEdit = params.presetIdShow.value;
+	},
+	methods: {
+		// externals
+		routeParseParams,
+
+		// presentation
 		getPreview(preset) {
-			let items = [];
-			for(let v of preset.values) {
-				if(v.value !== null && v.value !== '')
+			const items = [];
+			for (const v of preset.values) {
+				if (v.value !== null && v.value !== '')
 					items.push(v.protected ? `[${v.value}]` : v.value);
 			}
 			const line = items.join(', ');
-			return line.length < 50 ? line : `${line.substring(0,50)}...`;
+			return line.length < 50 ? line : `${line.substring(0, 50)}...`;
 		}
 	}
 };

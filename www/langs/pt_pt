@@ -2814,6 +2814,7 @@
 		"polygon": "Polygon",
 		"postfix": "Sufixo",
 		"prefix": "Prefixo",
+		"preset": "Preset",
 		"presets": "Presets",
 		"preview": "Pré-visualização",
 		"properties": "Propriedades",

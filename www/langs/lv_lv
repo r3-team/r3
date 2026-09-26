@@ -2814,6 +2814,7 @@
 		"polygon": "Polygon",
 		"postfix": "Postfix",
 		"prefix": "Prefix",
+		"preset": "Preset",
 		"presets": "Presets",
 		"preview": "Priekšskatījums",
 		"properties": "Īpašības",

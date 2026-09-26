@@ -12,6 +12,7 @@ import { dialogDeleteAsk } from '../shared/dialog.js';
 import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
 import { srcBase64 } from '../shared/image.js';
 import { jsLibrariesLoadNoCache } from '../shared/jsLibrary.js';
+import { routeParseParams } from '../shared/router.js';
 import { getHasAnyReferences } from '../shared/schemaLookup.js';
 
 import MyBuilderAttribute from './builderAttribute.js';
@@ -353,7 +354,7 @@ export default {
 
 				<!-- presets -->
 				<div class="tab-content" v-if="tabTarget === 'presets'">
-					<my-builder-presets :filter="nameFilter" :relation :readonly />
+					<my-builder-presets :filter="nameFilter" :key="id" :module :relation :readonly />
 				</div>
 
 				<!-- policies -->
@@ -627,6 +628,12 @@ export default {
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
 		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
+
+		const params = { presetIdShow: { parse: 'string', value: null } };
+		this.routeParseParams(params);
+
+		if (params.presetIdShow.value !== null)
+			this.tabTarget = 'presets';
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel', this.set);
@@ -780,6 +787,7 @@ export default {
 		isAttributeString,
 		isAttributeUuid,
 		isAttributeWithLength,
+		routeParseParams,
 		srcBase64,
 
 		// presentation

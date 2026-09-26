@@ -1,15 +1,13 @@
-import MyBuilderTagInput from './builderTagInput.js';
-import MyBuilderFilterPairInput from './builderFilterPairInput.js';
+import { builderOptionGet, builderOptionSet } from '../shared/builder.js';
 import { srcBase64 } from '../shared/image.js';
-import {
-	builderOptionGet,
-	builderOptionSet
-} from '../shared/builder.js';
+
+import MyBuilderFilterPairInput from './builderFilterPairInput.js';
+import MyBuilderTagInput from './builderTagInput.js';
 
 export default {
 	name: 'my-builder-forms',
 	components: { MyBuilderFilterPairInput, MyBuilderTagInput },
-	template:`<div class="row grow nowrap builder-forms" v-if="module">
+	template: `<div class="row grow nowrap builder-forms" v-if="module">
 		<div class="contentBox grow">
 			<div class="top lower">
 				<div class="area nowrap">
@@ -113,11 +111,11 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		filter:         { type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		filter: { type: String, required: false, default: '' },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
@@ -132,10 +130,10 @@ export default {
 			showSidebar: true
 		};
 	},
-	computed:{
+	computed: {
 		idsShow: s => {
 			const filterName = s.filterText.toLowerCase();
-			let out = [];
+			const out = [];
 			for (const f of s.module.forms) {
 				const listFullpage = f.fields.length === 1 && f.fields[0].content === 'list';
 
@@ -158,22 +156,22 @@ export default {
 
 		// inputs
 		filterTagsAnd: {
-			get()  { return this.builderOptionGet('overviewFilterTagsAnd', true); },
+			get() { return this.builderOptionGet('overviewFilterTagsAnd', true); },
 			set(v) { this.builderOptionSet('overviewFilterTagsAnd', v); }
 		},
 
 		// simple
-		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		formIdMap:   s => s.$store.getters['schema/formIdMap'],
-		iconIdMap:   s => s.$store.getters['schema/iconIdMap'],
-		modules:     s => s.$store.getters['schema/modules'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		modules: s => s.$store.getters['schema/modules'],
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
-		tagIdMap:    s => s.$store.getters['schema/tagIdMap'],
-		capApp:      s => s.$store.getters.captions.builder.form,
-		capAppFilter:s => s.$store.getters.captions.filter,
-		capGen:      s => s.$store.getters.captions.generic
+		tagIdMap: s => s.$store.getters['schema/tagIdMap'],
+		capApp: s => s.$store.getters.captions.builder.form,
+		capAppFilter: s => s.$store.getters.captions.filter,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		if (this.filter !== '') {
@@ -182,15 +180,15 @@ export default {
 				if (filterLine.includes(a)) this.filters[a] = true;
 			}
 
-			let tagIds = [];
-			for (const m of filterLine.matchAll(/t\-([0-9a-f\-]{36})/g)) {
+			const tagIds = [];
+			for (const m of filterLine.matchAll(/t-([0-9a-f-]{36})/g)) {
 				if (this.tagIdMap[m[1]] !== undefined)
 					tagIds.push(m[1]);
 			}
 			this.filterTagIds = tagIds;
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		builderOptionGet,
 		builderOptionSet,
@@ -198,9 +196,9 @@ export default {
 
 		// actions
 		updateFilterArgs() {
-			let parts = [];
+			const parts = [];
 			for (const a of Object.keys(this.filters)) {
-				if(this.filters[a])
+				if (this.filters[a])
 					parts.push(a);
 			}
 			for (const tagId of this.filterTagIds) {

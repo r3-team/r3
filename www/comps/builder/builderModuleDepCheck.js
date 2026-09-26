@@ -80,7 +80,8 @@ export default {
 			entityTitle: '', // title of entity being checked
 			entityList: [], // list of entity elements in parent module (relations, attributes, ...)
 			entitiesCheck: [  // list of entities to be checked in order
-				'relation', 'attribute', 'form', 'pgFunction', 'pgIndex', 'jsFunction', 'doc', 'collection', 'article'
+				'relation', 'attribute', 'preset', 'form', 'pgFunction', 'pgIndex',
+				'jsFunction', 'doc', 'collection', 'article'
 			],
 
 			// progress
@@ -153,6 +154,13 @@ export default {
 						this.entityList = [];
 						for (const r of this.moduleParent.relations) {
 							this.entityList = this.entityList.concat(r.indexes);
+						}
+						break;
+					case 'preset':
+						this.entityTitle = this.capGen.preset;
+						this.entityList = [];
+						for (const r of this.moduleParent.relations) {
+							this.entityList = this.entityList.concat(r.presets);
 						}
 						break;
 					case 'relation':

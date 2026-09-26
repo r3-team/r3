@@ -2814,6 +2814,7 @@
 		"polygon": "Polygon",
 		"postfix": "Postfix",
 		"prefix": "Prefix",
+		"preset": "Vordefinierter Datensatz",
 		"presets": "Vordefinierte Datensätze",
 		"preview": "Vorschau",
 		"properties": "Eigenschaften",

@@ -303,6 +303,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showPresets && lookups.presetIds.length !== 0">
+						<td class="minimum"><my-label image="databaseCircle.png" :caption="capGen.presets" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.presetIds"
+									@trigger="open('preset',presetIdMap[id].relationId,id,false)"
+									@trigger-middle="open('preset',presetIdMap[id].relationId,id,true)"
+									:caption="presetIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showWidgets && lookups.widgetIds.length !== 0">
 						<td class="minimum"><my-label image="tiles.png" :caption="capGen.widgets" /></td>
 						<td>
@@ -337,6 +350,7 @@ const MyBuilderSchemaLookupModule = {
 		showPgIndex: { type: Boolean, required: true },
 		showPgTriggers: { type: Boolean, required: true },
 		showPolicies: { type: Boolean, required: true },
+		showPresets: { type: Boolean, required: true },
 		showRelationships: { type: Boolean, required: true },
 		showSearchBars: { type: Boolean, required: true },
 		showWidgets: { type: Boolean, required: true },
@@ -367,6 +381,7 @@ const MyBuilderSchemaLookupModule = {
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
 		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
 		pgTriggerIdMap: s => s.$store.getters['schema/pgTriggerIdMap'],
+		presetIdMap: s => s.$store.getters['schema/presetIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
 		widgetIdMap: s => s.$store.getters['schema/widgetIdMap'],
@@ -407,6 +422,7 @@ const MyBuilderSchemaLookupModule = {
 				case 'menu': url = `/builder/menu/${entityId}`; break;
 				case 'module': url = `/builder/module/${entityId}`; break;
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
+				case 'preset': url = `/builder/relation/${entityId}?presetIdShow=${entityIdSub}`; break;
 				case 'relation': url = `/builder/relation/${entityId}`; break;
 				case 'searchBar': url = `/builder/search-bar/${entityId}`; break;
 				case 'widget': url = `/builder/widgets/${entityId}?widgetIdEdit=${entityIdSub}`; break;
@@ -461,6 +477,7 @@ export default {
 				<my-button-check v-if="isAnyPgIndexes" v-model="showPgIndex" :caption="capGen.indexes" />
 				<my-button-check v-if="isAnyPgTriggers" v-model="showPgTriggers" :caption="capGen.triggers" />
 				<my-button-check v-if="isAnyRelationPolicies" v-model="showPolicies" :caption="capGen.policies" />
+				<my-button-check v-if="isAnyPresets" v-model="showPresets" :caption="capGen.presets" />
 				<my-button-check v-if="isAnyRelationships" v-model="showRelationships" :caption="capGen.relationships" />
 				<my-button-check v-if="isAnySearchBars" v-model="showSearchBars" :caption="capGen.searchBars" />
 				<my-button-check v-if="isAnyWidgets" v-model="showWidgets" :caption="capGen.widgets" />
@@ -502,6 +519,7 @@ export default {
 						:showPgIndex
 						:showPgTriggers
 						:showPolicies
+						:showPresets
 						:showRelationships
 						:showSearchBars
 						:showWidgets
@@ -540,6 +558,7 @@ export default {
 			showPgIndex: true,
 			showPgTriggers: true,
 			showPolicies: true,
+			showPresets: true,
 			showRelationships: true,
 			showSearchBars: true,
 			showWidgets: true,
@@ -581,6 +600,10 @@ export default {
 				case 'pgIndex':
 					contentName = s.capGen.index;
 					break;
+				case 'preset':
+					contentName = s.capGen.preset;
+					entityName = s.presetIdMap[s.entityId].name;
+					break;
 				case 'relation':
 					contentName = s.capGen.relation;
 					entityName = s.relationIdMap[s.entityId].name;
@@ -605,6 +628,7 @@ export default {
 		isAnyPgFunctions: s => Object.values(s.moduleIdMapLookups).some(v => v.pgFunctionIds.length !== 0),
 		isAnyPgIndexes: s => Object.values(s.moduleIdMapLookups).some(v => v.pgIndexIds.length !== 0),
 		isAnyPgTriggers: s => Object.values(s.moduleIdMapLookups).some(v => v.pgTriggerIds.length !== 0),
+		isAnyPresets: s => Object.values(s.moduleIdMapLookups).some(v => v.presetIds.length !== 0),
 		isAnyRelationPolicies: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsPolicies.length !== 0),
 		isAnyRelationships: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsShips.length !== 0),
 		isAnySearchBars: s => Object.values(s.moduleIdMapLookups).some(v => v.searchBarIds.length !== 0),
@@ -621,6 +645,7 @@ export default {
 		formIdMap: s => s.$store.getters['schema/formIdMap'],
 		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
 		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		presetIdMap: s => s.$store.getters['schema/presetIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 	},
 	mounted() {
