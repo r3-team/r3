@@ -45,6 +45,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	switch requestedOs {
 	case "amd64_windows":

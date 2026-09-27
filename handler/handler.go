@@ -125,6 +125,7 @@ func AbortRequestWithCode(w http.ResponseWriter, context handlerContext, httpCod
 	log.Error(log.ContextServer, fmt.Sprintf("aborted %s request", ContextNameMap[context]), errToLog)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(httpCode)
 
 	json, _ := json.Marshal(struct {
@@ -136,6 +137,7 @@ func AbortRequestWithCode(w http.ResponseWriter, context handlerContext, httpCod
 
 func AbortRequestNoLog(w http.ResponseWriter, errMessageUser string) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusBadRequest)
 
 	json, _ := json.Marshal(struct {
@@ -147,6 +149,31 @@ func AbortRequestNoLog(w http.ResponseWriter, errMessageUser string) {
 
 func ServeErrorPage(w http.ResponseWriter, code int, err error) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
 	fmt.Fprintf(w, errHtml, code, err.Error())
+}
+
+func WithSecurityHeaders(n http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// # scripts
+		// * inline execution
+		//   * required for vue templates, executed at runtime
+		// * eval execution
+		//   * required for frontend functions, loaded from application authors - might be addressable by JS functions being served by webserver via custom handler
+		//   * required for ECharts at least in one context
+		// # images
+		// * data
+		//   * required for icons loaded as base64 encoded text values
+		// # styles
+		// * inline styles
+		//   * required for HTML PDF generation, with styles loaded from application data
+		//   * required for vue-color library - probably possible to replace
+		// # frame ancestors
+		// * we generally allow r3 to be loaded as iframe, for accessing forms in other apps or in itself - if relevant, could be defined by instance config
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; ; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors *")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		n.ServeHTTP(w, r)
+	})
 }

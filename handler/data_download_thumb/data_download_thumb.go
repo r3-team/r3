@@ -92,5 +92,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	http.ServeFile(w, r, filePath)
 }

@@ -124,7 +124,7 @@ const exposedFunctionsGlobal = {
 	// deprecated but valid
 	get_login_id: () => MyStore.getters.loginId,
 
-	// not available as default
+	// not available globally
 	block_inputs: errFnc,
 	form_close: errFnc,
 	form_parent_refresh: errFnc,
@@ -150,7 +150,7 @@ const exposedFunctionsGlobal = {
 	timer_clear: errFnc,
 	timer_set: errFnc,
 
-	// not available as default and deprecated
+	// not available globally and deprecated
 	open_form: errFnc,
 	set_e2ee_by_login_ids: errFnc,
 	set_e2ee_by_login_ids_and_relation: errFnc,
@@ -218,8 +218,9 @@ export function jsFunctionRun(jsFunctionId, args, exposedFunctionsContext) {
 	};
 
 	try {
+		// first arg is always 'app' object (contains global, module and context specific function calls), additional args are defined by frontend function
 		return Function(argNames, code)({
-			...exposedFunctionsGlobal, // globally available functions
+			...exposedFunctionsGlobal, // functions available globally
 			...exposedFunctionsModule, // functions available for module of running function
 			...exposedFunctionsContext // functions available in calling context
 		}, ...args);

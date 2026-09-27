@@ -17,16 +17,16 @@ import (
 	"r3/transfer"
 )
 
-func Handler(res http.ResponseWriter, req *http.Request) {
-
-	res.Header().Set("Content-Type", "application/json")
+func Handler(w http.ResponseWriter, r *http.Request) {
 
 	finishRequest := func(err error) {
 
 		if err != nil {
-			res.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			log.Error(log.ContextServer, "could not finish module import", err)
 		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 
 		var response struct {
 			Success bool `json:"success"`
@@ -36,14 +36,14 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 		responseJson, err := json.Marshal(response)
 		if err != nil {
 			log.Error(log.ContextServer, "could not finish module import", err)
-			res.Write([]byte{})
+			w.Write([]byte{})
 			return
 		}
-		res.Write(responseJson)
+		w.Write(responseJson)
 		return
 	}
 
-	reader, err := req.MultipartReader()
+	reader, err := r.MultipartReader()
 	if err != nil {
 		finishRequest(err)
 		return

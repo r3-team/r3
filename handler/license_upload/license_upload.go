@@ -22,8 +22,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
 	reader, err := r.MultipartReader()
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextLicenseUpload, err, handler.ErrGeneral)
@@ -99,5 +97,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Write([]byte(`{"error": ""}`))
 }

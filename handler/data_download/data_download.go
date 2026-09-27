@@ -79,5 +79,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if ctype != "" {
 		w.Header().Set("Content-Type", ctype)
 	}
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	http.ServeFile(w, r, data.GetFilePathVersion(fileId, version))
 }

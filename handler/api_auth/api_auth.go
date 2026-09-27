@@ -23,6 +23,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	if r.Method != "POST" {
 		handler.AbortRequestWithCode(w, handler.ContextApiAuth, http.StatusBadRequest,

@@ -48,6 +48,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequestWithCode(w, handler.ContextApi, httpCode, errToLog, errMsgUser)
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	var isDelete, isGet, isPost bool
 	switch r.Method {

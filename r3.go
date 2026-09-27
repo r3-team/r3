@@ -411,10 +411,12 @@ func (prg *program) execute(svc service.Service) {
 	// start scheduler (must start after module cache)
 	go scheduler.Start()
 
-	// start web server
+	// start background tasks (starts before web services come up)
 	go websocket.StartBackgroundTasks()
 
+	// start web server
 	mux := http.NewServeMux()
+	var wwwHandler http.Handler
 
 	if cli.wwwPath == "" {
 		fsStaticWww, err := fs.Sub(fs.FS(fsStatic), "www")
@@ -422,9 +424,9 @@ func (prg *program) execute(svc service.Service) {
 			prg.executeAborted(svc, fmt.Errorf("failed to access embedded web file directory, %v", err))
 			return
 		}
-		mux.Handle("/", http.FileServer(http.FS(fsStaticWww)))
+		wwwHandler = handler.WithSecurityHeaders(http.FileServer(http.FS(fsStaticWww)))
 	} else {
-		mux.Handle("/", http.FileServer(http.Dir(cli.wwwPath)))
+		wwwHandler = handler.WithSecurityHeaders(http.FileServer(http.Dir(cli.wwwPath)))
 	}
 
 	fsStaticFont, err := fs.Sub(fs.FS(fsStatic), "www/font")
@@ -436,6 +438,7 @@ func (prg *program) execute(svc service.Service) {
 	handler.SetNoImage(fsStaticNoPic)
 	doc_create.SetFontFs(fsStaticFont)
 
+	mux.Handle("/", wwwHandler)
 	mux.HandleFunc("/api/", api.Handler)
 	mux.HandleFunc("/api/auth", api_auth.Handler)
 	mux.HandleFunc("/cache/download/", cache_download.Handler)

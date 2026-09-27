@@ -64,6 +64,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/pdf")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s", filename))
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	http.ServeFile(w, r, filePath)
 	if err := os.Remove(filePath); err != nil {
