@@ -2480,6 +2480,7 @@
 		"appName": "REI3",
 		"appWebsite": "https://rei3.de",
 		"application": "Application",
+		"applicationIcons": "Application icons",
 		"applications": "Applications",
 		"arguments": "Arguments",
 		"articles": "Articles d'aide",

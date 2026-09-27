@@ -21,11 +21,13 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			moduleFncLoginSync: false,
 			moduleFncOnLogin: false,
 			moduleHelpArticles: false,
+			moduleIcons: false,
 			moduleMenus: false,
 			moduleStartForms: false,
 
 			// main elements
 			apiIds: [],
+			attributeIds: [],
 			collectionIds: [],
 			docIds: [],
 			formIds: [],
@@ -36,6 +38,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			presetIds: [],
 			roleIds: [],
 			searchBarIds: [],
+			tagIds: [],
 			widgetIds: [],
 
 			// relations matched in policies/relationships
@@ -58,6 +61,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			case 'collection': getReferencesCollection(mod, entityId, lookups); break;
 			case 'doc': getReferencesDoc(mod, entityId, lookups); break;
 			case 'form': getReferencesForm(mod, entityId, lookups); break;
+			case 'icon': getReferencesIcon(mod, entityId, lookups); break;
 			case 'jsFunction': getReferencesJsFunction(mod, entityId, lookups); break;
 			case 'pgFunction': getReferencesPgFunction(mod, entityId, lookups); break;
 			case 'pgIndex': getReferencesPgIndex(mod, entityId, lookups); break;
@@ -472,6 +476,84 @@ function getReferencesForm(mod, formId, lookups) {
 	for (const w of mod.widgets) {
 		if (w.formId === formId || (w.collection !== null && w.collection.openForm !== null && w.collection.openForm.formIdOpen === formId)) {
 			lookups.widgetIds.push(w.id);
+			lookups.anyResults = true;
+		}
+	}
+};
+
+function getReferencesIcon(mod, iconId, lookups) {
+	const isInMenus = menus => menus.some(m => m.iconId === iconId || isInMenus(m.menus));
+	const lookupInFields = (formId, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+		for (const f of fields) {
+			switch (f.content) {
+				case 'container':
+					lookupInFields(formId, f.fields);
+					break;
+				case 'tabs':
+					if (f.tabs.some(t => t.iconId === iconId))
+						add(f.id);
+
+					for (const t of f.tabs) {
+						lookupInFields(formId, t.fields);
+					}
+					break;
+				default:
+					if (f.iconId === iconId)
+						add(f.id);
+					break;
+			}
+		}
+	};
+
+	if (mod.iconId === iconId || mod.iconIdPwa1 === iconId || mod.iconIdPwa2 === iconId) {
+		lookups.moduleIcons = true;
+		lookups.anyResults = true;
+	}
+	if (mod.menuTabs.some(t => t.iconId === iconId || isInMenus(t.menus))) {
+		lookups.moduleMenus = true;
+		lookups.anyResults = true;
+	}
+	for (const c of mod.collections) {
+		if (c.iconId === iconId) {
+			lookups.collectionIds.push(c.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const f of mod.forms) {
+		if (f.iconId === iconId) {
+			lookups.formIds.push(f.id);
+			lookups.anyResults = true;
+		}
+		if (f.actions.some(v => v.iconId === iconId)) {
+			lookups.formIdsActions.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
+	for (const r of mod.relations) {
+		for (const a of r.attributes) {
+			if (a.iconId === iconId) {
+				lookups.attributeIds.push(a.id);
+				lookups.anyResults = true;
+			}
+		}
+	}
+	for (const s of mod.searchBars) {
+		if (s.iconId === iconId) {
+			lookups.searchBarIds.push(s.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const t of mod.tags) {
+		if (t.iconId === iconId) {
+			lookups.tagIds.push(t.id);
 			lookups.anyResults = true;
 		}
 	}

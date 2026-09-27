@@ -1,9 +1,13 @@
-import {getUuidV4} from '../shared/crypto.js';
-import {srcBase64} from '../shared/image.js';
+import { getUuidV4 } from '../shared/crypto.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { srcBase64 } from '../shared/image.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 const MyBuilderIcon = {
-	name:'my-builder-icon',
-	template:`<div class="icon">
+	name: 'my-builder-icon',
+	template: `<div class="icon">
 		<my-button
 			v-if="!readonly"
 			@trigger="$emit('toggle')"
@@ -20,33 +24,33 @@ const MyBuilderIcon = {
 			:active="hasChanges"
 		/>
 	</div>`,
-	props:{
-		icon:    { type:Object,  required:true },
-		readonly:{ type:Boolean, required:true },
-		selected:{ type:Boolean, required:true }
+	props: {
+		icon: { type: Object, required: true },
+		readonly: { type: Boolean, required: true },
+		selected: { type: Boolean, required: true }
 	},
-	emits:['toggle'],
-	data:function() {
+	emits: ['toggle'],
+	data: function () {
 		return {
-			name:this.icon.name
+			name: this.icon.name
 		};
 	},
-	computed:{
-		hasChanges:(s) => s.icon.name !== s.name,
-		
+	computed: {
+		hasChanges: s => s.icon.name !== s.name,
+
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.icon
+		capApp: s => s.$store.getters.captions.builder.icon
 	},
-	methods:{
+	methods: {
 		// external
 		srcBase64,
-		
+
 		set() {
-			ws.send('icon','setName',{
-				id:this.icon.id,
-				moduleId:this.icon.moduleId,
-				name:this.name
-			},true).then(
+			ws.send('icon', 'setName', {
+				id: this.icon.id,
+				moduleId: this.icon.moduleId,
+				name: this.name
+			}, true).then(
 				this.$root.schemaReload(this.icon.moduleId),
 				this.$root.genericError
 			);
@@ -55,9 +59,9 @@ const MyBuilderIcon = {
 };
 
 export default {
-	name:'my-builder-icons',
-	components:{ MyBuilderIcon },
-	template:`<div class="contentBox grow">
+	name: 'my-builder-icons',
+	components: { MyBuilderIcon, MyBuilderSchemaLookup },
+	template: `<div class="contentBox grow">
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/fileImage.png" />
@@ -66,16 +70,21 @@ export default {
 		</div>
 		<div class="top lower">
 			<div class="area nowrap">
+				<my-button image="builderLookup.png"
+					@trigger="iconIdLookup = iconIdsSelected[0]"
+					:active="iconIdsSelected.length === 1"
+					:caption="capGen.references"
+				/>
 				<my-button image="delete.png" class="deleteAction"
 					v-if="module.icons.length !== 0"
-					@trigger="del"
+					@trigger="delCheck"
 					:active="iconIdsSelected.length !== 0 && !readonly"
 					:cancel="true"
 					:caption="capGen.button.deleteSelected"
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content builder-icons" v-if="module">
 			<div class="icons">
 				<my-builder-icon v-for="icon in module.icons"
@@ -86,10 +95,10 @@ export default {
 					:selected="iconIdsSelected.includes(icon.id)"
 				/>
 			</div>
-			
+
 			<div v-if="iconIdsSelected.length < 2 && !readonly" class="builder-icons-add">
 				<h2>{{ capApp.add }}</h2>
-				
+
 				<div>
 					<span v-if="iconIdUpdate === -1">{{ capGen.button.add }}: </span>
 					<span v-if="iconIdUpdate !== -1">{{ capGen.button.edit }}: </span>
@@ -98,47 +107,74 @@ export default {
 				<p>{{ capApp.addHelp }}</p>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="icon"
+			v-if="iconIdLookup !== null"
+			@close="iconIdLookup = null"
+			:entityId="iconIdLookup"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
-	props:{
-		id:      { type:String,  required:true },
-		readonly:{ type:Boolean, required:true }
+	props: {
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	data:function() {
+	watch: {
+		id() {
+			this.iconIdsSelected = [];
+		}
+	},
+	data() {
 		return {
-			iconIdsSelected:[]
+			iconIdLookup: null,
+			iconIdsSelected: [],
+			hasReferences: false,
 		};
 	},
-	computed:{
+	computed: {
 		// if single icon is selected, it can be updated
-		iconIdUpdate:(s) => s.iconIdsSelected.length !== 1 ? -1 : s.iconIdsSelected[0],
-		module:      (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		
+		iconIdUpdate: s => s.iconIdsSelected.length !== 1 ? -1 : s.iconIdsSelected[0],
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+
 		// stores
-		token:      (s) => s.$store.getters['local/token'],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.icon,
-		capGen:     (s) => s.$store.getters.captions.generic
+		token: s => s.$store.getters['local/token'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.icon,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
+		dialogDeleteAsk,
+		getHasAnyReferences,
 		getUuidV4,
-		
+
 		// actions
 		toggleSelect(id) {
-			let pos = this.iconIdsSelected.indexOf(id);
-			
-			if(pos === -1) this.iconIdsSelected.push(id);
-			else           this.iconIdsSelected.splice(pos,1);
+			const pos = this.iconIdsSelected.indexOf(id);
+
+			if (pos === -1) this.iconIdsSelected.push(id);
+			else this.iconIdsSelected.splice(pos, 1);
 		},
-		
+
 		// backend calls
-		del() {
-			let requests = [];
-			for(let i = 0, j = this.iconIdsSelected.length; i < j; i++) {
-				requests.push(ws.prepare('icon','del',this.iconIdsSelected[i]));
+		delCheck() {
+			for (const id of this.iconIdsSelected) {
+				this.hasReferences = getHasAnyReferences(this.module, 'icon', id, false);
+				if (this.hasReferences) {
+					this.iconIdLookup = id;
+					return;
+				}
 			}
-			
-			ws.sendMultiple(requests,true).then(
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
+		del() {
+			const requests = [];
+			for (const id of this.iconIdsSelected) {
+				requests.push(ws.prepare('icon', 'del', id));
+			}
+			ws.sendMultiple(requests, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.iconIdsSelected = [];
@@ -147,39 +183,33 @@ export default {
 			);
 		},
 		add(evt) {
-			let that        = this;
-			let formData    = new FormData();
-			let httpRequest = new XMLHttpRequest();
-			
-			httpRequest.upload.onprogress = function(event) {
-				if(event.lengthComputable) {}
-			}
-			httpRequest.onload = function(event) {
-				let res = JSON.parse(httpRequest.response);
-				
-				if(res.error === '')
-					that.$root.schemaReload(that.module.id);
-				else
-					that.$root.genericError('icon upload failed');
-			}
-			
-			let file = evt.target.files[0];
-			
-			if(file.type !== "image/png") {
+			const formData = new FormData();
+			const httpRequest = new XMLHttpRequest();
+
+			httpRequest.upload.onprogress = event => {
+				if (event.lengthComputable) { }
+			};
+			httpRequest.onload = event => {
+				const res = JSON.parse(httpRequest.response);
+
+				if (res.error === '') this.$root.schemaReload(this.module.id);
+				else this.$root.genericError('icon upload failed');
+			};
+
+			const file = evt.target.files[0];
+			if (file.type !== "image/png") {
 				this.$root.genericError('only PNG files are supported');
 				return;
 			}
-			
-			if(Math.round(file.size / 1024) > 64) {
+			if (Math.round(file.size / 1024) > 64) {
 				this.$root.genericError('max. icon size is 64kb');
 				return;
 			}
-			
-			formData.append('token',this.token);
-			formData.append('moduleId',this.module.id);
-			formData.append('iconId',this.iconIdUpdate !== -1 ? this.iconIdUpdate : this.getUuidV4());
-			formData.append('file',file);
-			httpRequest.open('POST','icon/upload',true);
+			formData.append('token', this.token);
+			formData.append('moduleId', this.module.id);
+			formData.append('iconId', this.iconIdUpdate !== -1 ? this.iconIdUpdate : this.getUuidV4());
+			formData.append('file', file);
+			httpRequest.open('POST', 'icon/upload', true);
 			httpRequest.send(formData);
 		}
 	}

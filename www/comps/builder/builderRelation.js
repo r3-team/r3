@@ -215,7 +215,7 @@ export default {
 				<div class="generic-entry-list tab-content" v-if="tabTarget === 'attributes'">
 					<div class="entry"
 						v-if="!readonly"
-						@click="attributeIdEdit = null"
+						@click="attributeIdShow = null"
 						:class="{ clickable:!readonly }"
 					>
 						<div class="row gap centered">
@@ -225,7 +225,7 @@ export default {
 					</div>
 
 					<div class="entry clickable"
-						@click="attributeIdEdit = atr.id"
+						@click="attributeIdShow = atr.id"
 						v-for="atr in relation.attributes.filter(v => nameFilter === '' || v.name.includes(nameFilter.toLowerCase()))"
 					>
 						<my-button
@@ -270,11 +270,11 @@ export default {
 
 					<!-- attribute dialog -->
 					<my-builder-attribute
-						v-if="attributeIdEdit !== false"
-						@close="attributeIdEdit = false"
+						v-if="attributeIdShow !== false"
+						@close="attributeIdShow = false"
 						@nextLanguage="$emit('nextLanguage')"
-						@new-record="attributeIdEdit = null"
-						:attributeId="attributeIdEdit"
+						@new-record="attributeIdShow = null"
+						:attributeId="attributeIdShow"
 						:builderLanguage
 						:readonly
 						:relation
@@ -609,7 +609,7 @@ export default {
 			relationCopy: {}, // copy of relation from schema when component last reset
 
 			// states
-			attributeIdEdit: false,
+			attributeIdShow: false,
 			hasReferences: false,
 			indexIdEdit: false,
 			nameFilter: '',
@@ -629,11 +629,18 @@ export default {
 		this.$store.commit('keyDownHandlerSleep');
 		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 
-		const params = { presetIdShow: { parse: 'string', value: null } };
+		const params = {
+			attributeIdShow: { parse: 'string', value: null },
+			presetIdShow: { parse: 'string', value: null },
+		};
 		this.routeParseParams(params);
 
-		if (params.presetIdShow.value !== null)
+		if (params.presetIdShow.value !== null) {
 			this.tabTarget = 'presets';
+		} else if (params.attributeIdShow.value !== null) {
+			this.tabTarget = 'attributes';
+			this.attributeIdShow = params.attributeIdShow.value;
+		}
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel', this.set);

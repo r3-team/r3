@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Add/edit icon file",
 			"addHelp": "Only PNG files with max. 64kb are supported. Icons should always be squared.",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "Optional icon name",
 			"title": "Icons"
 		},
@@ -2481,6 +2484,7 @@
 		"appWebsite": "https://rei3.de",
 		"application": "Application",
 		"applications": "Applications",
+		"applicationIcons": "Application icons",
 		"arguments": "Arguments",
 		"articles": "Help articles",
 		"attribute": "Attribute",

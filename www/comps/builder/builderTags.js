@@ -1,10 +1,12 @@
+import { srcBase64 } from '../shared/image.js';
+import { routeParseParams } from '../shared/router.js';
+
 import MyBuilderTag from './builderTag.js';
-import {srcBase64}  from '../shared/image.js';
 
 export default {
 	name: 'my-builder-tags',
-	components:{ MyBuilderTag },
-	template:`<div class="builder-tags contentBox grow">
+	components: { MyBuilderTag },
+	template: `<div class="builder-tags contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/tag.png" />
@@ -32,7 +34,7 @@ export default {
 				<div class="entry clickable"
 					v-for="t in module.tags.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					:key="t.id"
-					@click="tagIdEdit = t.id"
+					@click="tagIdShow = t.id"
 				>
 					<div class="lines">
 						<span>{{ t.name }}</span>
@@ -52,34 +54,42 @@ export default {
 
 		<!-- tag dialog -->
 		<my-builder-tag
-			v-if="module && tagIdEdit !== null"
-			@close="tagIdEdit = null"
-			:id="tagIdEdit"
+			v-if="module && tagIdShow !== null"
+			@close="tagIdShow = null"
+			:id="tagIdShow"
 			:module
 			:readonly
 		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			filter:'',
-			tagIdEdit:null
+			filter: '',
+			tagIdShow: null
 		};
 	},
-	computed:{
-		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+	computed: {
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		iconIdMap:  s => s.$store.getters['schema/iconIdMap'],
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
-		capGen:     s => s.$store.getters.captions.generic
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
-		srcBase64
+		routeParseParams,
+		srcBase64,
+	},
+	mounted() {
+		const params = { tagIdShow: { parse: 'string', value: null } };
+		this.routeParseParams(params);
+
+		if (params.tagIdShow.value !== null)
+			this.tagIdShow = params.tagIdShow.value;
 	}
 };

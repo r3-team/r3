@@ -1,8 +1,9 @@
+import { getAttributeIcon } from '../shared/attribute.js';
 import { getItemTitle } from '../shared/builder.js';
 import { getFieldIcon } from '../shared/field.js';
 import { getFieldMap } from '../shared/form.js';
 import { openLink } from '../shared/generic.js';
-import srcBase64Icon from '../shared/image.js';
+import srcBase64Icon, { srcBase64 } from '../shared/image.js';
 import { getCaption } from '../shared/language.js';
 import { getReferences } from '../shared/schemaLookup.js';
 
@@ -23,7 +24,7 @@ const MyBuilderSchemaLookupModule = {
 			<table class="generic-table bright">
 				<tbody>
 					<tr v-if="lookups.moduleClientEvents">
-						<td class="minimum"><my-label image="screen.png" :caption="capGen.clientEvents" /></td>
+						<td class="minimum"><my-label image="module.png" :caption="capGen.clientEvents" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -35,7 +36,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="lookups.moduleFncOnLogin">
-						<td class="minimum"><my-label image="person.png" :caption="capGen.sessionStart" /></td>
+						<td class="minimum"><my-label image="module.png" :caption="capGen.sessionStart" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -47,7 +48,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="lookups.moduleFncLoginSync">
-						<td class="minimum"><my-label image="personArrow.png" :caption="capGen.userSync" /></td>
+						<td class="minimum"><my-label image="module.png" :caption="capGen.userSync" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -59,7 +60,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="lookups.moduleHelpArticles">
-						<td class="minimum"><my-label image="question.png" :caption="capGen.helpArticles" /></td>
+						<td class="minimum"><my-label image="module.png" :caption="capGen.helpArticles" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -71,7 +72,19 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="lookups.moduleStartForms">
-						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formsStart" /></td>
+						<td class="minimum"><my-label image="module.png" :caption="capGen.formsStart" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									@trigger="open('module',moduleId,null,false)"
+									@trigger-middle="open('module',moduleId,null,true)"
+									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="lookups.moduleIcons">
+						<td class="minimum"><my-label image="module.png" :caption="capGen.applicationIcons" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -90,6 +103,20 @@ const MyBuilderSchemaLookupModule = {
 									@trigger="open('menu',moduleId,null,false)"
 									@trigger-middle="open('menu',moduleId,null,true)"
 									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showAttributes && lookups.attributeIds.length !== 0">
+						<td class="minimum"><my-label image="database.png" :caption="capGen.attributes" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.attributeIds"
+									@trigger="open('attribute',attributeIdMap[id].relationId,id,false)"
+									@trigger-middle="open('attribute',attributeIdMap[id].relationId,id,true)"
+									:caption="attributeIdMap[id].name"
+									:image="getAttributeIcon(attributeIdMap[id].content,attributeIdMap[id].contentUse,false,false)"
 								/>
 							</div>
 						</td>
@@ -329,6 +356,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showTags && lookups.tagIds.length !== 0">
+						<td class="minimum"><my-label image="tag.png" :caption="capGen.tags" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.tagIds"
+									@trigger="open('tag',moduleId,id,false)"
+									@trigger-middle="open('tag',moduleId,id,true)"
+									:caption="tagIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showWidgets && lookups.widgetIds.length !== 0">
 						<td class="minimum"><my-label image="tiles.png" :caption="capGen.widgets" /></td>
 						<td>
@@ -350,6 +390,7 @@ const MyBuilderSchemaLookupModule = {
 		moduleId: { type: String, required: true },
 		lookups: { type: Object, required: true },
 		showApis: { type: Boolean, required: true },
+		showAttributes: { type: Boolean, required: true },
 		showCollections: { type: Boolean, required: true },
 		showDocs: { type: Boolean, required: true },
 		showForms: { type: Boolean, required: true },
@@ -367,6 +408,7 @@ const MyBuilderSchemaLookupModule = {
 		showRelationships: { type: Boolean, required: true },
 		showRoles: { type: Boolean, required: true },
 		showSearchBars: { type: Boolean, required: true },
+		showTags: { type: Boolean, required: true },
 		showWidgets: { type: Boolean, required: true },
 	},
 	emits: ['close'],
@@ -387,6 +429,7 @@ const MyBuilderSchemaLookupModule = {
 
 		// stores
 		apiIdMap: s => s.$store.getters['schema/apiIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
 		docIdMap: s => s.$store.getters['schema/docIdMap'],
 		formIdMap: s => s.$store.getters['schema/formIdMap'],
@@ -399,11 +442,13 @@ const MyBuilderSchemaLookupModule = {
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
+		tagIdMap: s => s.$store.getters['schema/tagIdMap'],
 		widgetIdMap: s => s.$store.getters['schema/widgetIdMap'],
 		capGen: s => s.$store.getters.captions.generic,
 	},
 	methods: {
 		// externals
+		getAttributeIcon,
 		getCaption,
 		getFieldIcon,
 		getFieldMap,
@@ -429,6 +474,7 @@ const MyBuilderSchemaLookupModule = {
 			let url = '';
 			switch (entity) {
 				case 'api': url = `/builder/api/${entityId}`; break;
+				case 'attribute': url = `/builder/relation/${entityId}?attributeIdShow=${entityIdSub}`; break;
 				case 'collection': url = `/builder/collection/${entityId}`; break;
 				case 'doc': url = `/builder/doc/${entityId}`; break;
 				case 'form': url = `/builder/form/${entityId}`; break;
@@ -441,6 +487,7 @@ const MyBuilderSchemaLookupModule = {
 				case 'relation': url = `/builder/relation/${entityId}`; break;
 				case 'role': url = `/builder/role/${entityId}`; break;
 				case 'searchBar': url = `/builder/search-bar/${entityId}`; break;
+				case 'tag': url = `/builder/tags/${entityId}?tagIdShow=${entityIdSub}`; break;
 				case 'widget': url = `/builder/widgets/${entityId}?widgetIdEdit=${entityIdSub}`; break;
 			}
 			if (middle)
@@ -460,7 +507,8 @@ export default {
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/builderLookup.png" />
-					<h1 class="title">{{ title }}</h1>
+					<h1>{{ title }}</h1>
+					<my-label v-if="isIcon" :imageBase64="srcBase64(iconIdMap[entityId].file)" />
 				</div>
 				<div class="area">
 					<my-button image="refresh.png"
@@ -480,6 +528,7 @@ export default {
 			</div>
 			<div class="contentBarTop row wrap gap-large justify-end">
 				<my-button-check v-if="isAnyApis" v-model="showApis" :caption="capGen.apis" />
+				<my-button-check v-if="isAnyAttributes" v-model="showAttributes" :caption="capGen.attributes" />
 				<my-button-check v-if="isAnyCollections" v-model="showCollections" :caption="capGen.collections" />
 				<my-button-check v-if="isAnyDocs" v-model="showDocs" :caption="capGen.pdfs" />
 				<my-button-check v-if="isAnyForms" v-model="showForms" :caption="capGen.forms" />
@@ -497,6 +546,7 @@ export default {
 				<my-button-check v-if="isAnyRelationships" v-model="showRelationships" :caption="capGen.relationships" />
 				<my-button-check v-if="isAnyRoles" v-model="showRoles" :caption="capGen.roles" />
 				<my-button-check v-if="isAnySearchBars" v-model="showSearchBars" :caption="capGen.searchBars" />
+				<my-button-check v-if="isAnyTags" v-model="showTags" :caption="capGen.tags" />
 				<my-button-check v-if="isAnyWidgets" v-model="showWidgets" :caption="capGen.widgets" />
 			</div>
 			<div class="content column scroll grow default-inputs">
@@ -523,6 +573,7 @@ export default {
 						:lookups="v"
 						:moduleId="k"
 						:showApis
+						:showAttributes
 						:showCollections
 						:showDocs
 						:showForms
@@ -540,6 +591,7 @@ export default {
 						:showRelationships
 						:showRoles
 						:showSearchBars
+						:showTags
 						:showWidgets
 					/>
 				</template>
@@ -563,6 +615,7 @@ export default {
 			moduleIdMapLookups: {},
 			ready: false,
 			showApis: true,
+			showAttributes: true,
 			showCollections: true,
 			showDocs: true,
 			showForms: true,
@@ -580,6 +633,7 @@ export default {
 			showRelationships: true,
 			showRoles: true,
 			showSearchBars: true,
+			showTags: true,
 			showWidgets: true,
 		};
 	},
@@ -607,6 +661,12 @@ export default {
 				case 'form':
 					contentName = s.capGen.form;
 					entityName = s.formIdMap[s.entityId].name;
+					break;
+				case 'icon':
+					contentName = s.capGen.icon;
+					entityName = s.iconIdMap[s.entityId].name;
+					if (entityName === '')
+						entityName = null;
 					break;
 				case 'jsFunction':
 					contentName = s.capGen.functionFrontend;
@@ -639,6 +699,7 @@ export default {
 
 		// simple
 		isAnyApis: s => Object.values(s.moduleIdMapLookups).some(v => v.apiIds.length !== 0),
+		isAnyAttributes: s => Object.values(s.moduleIdMapLookups).some(v => v.attributeIds.length !== 0),
 		isAnyCollections: s => Object.values(s.moduleIdMapLookups).some(v => v.collectionIds.length !== 0),
 		isAnyDocs: s => Object.values(s.moduleIdMapLookups).some(v => v.docIds.length !== 0),
 		isAnyForms: s => Object.values(s.moduleIdMapLookups).some(v => v.formIds.length !== 0),
@@ -656,7 +717,9 @@ export default {
 		isAnyRelationships: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsShips.length !== 0),
 		isAnyRoles: s => Object.values(s.moduleIdMapLookups).some(v => v.roleIds.length !== 0),
 		isAnySearchBars: s => Object.values(s.moduleIdMapLookups).some(v => v.searchBarIds.length !== 0),
+		isAnyTags: s => Object.values(s.moduleIdMapLookups).some(v => v.tagIds.length !== 0),
 		isAnyWidgets: s => Object.values(s.moduleIdMapLookups).some(v => v.widgetIds.length !== 0),
+		isIcon: s => s.entity === 'icon',
 		noResults: s => Object.keys(s.moduleIdMapLookups).length === 0,
 
 		// stores
@@ -667,6 +730,7 @@ export default {
 		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
 		docIdMap: s => s.$store.getters['schema/docIdMap'],
 		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
 		jsFunctionIdMap: s => s.$store.getters['schema/jsFunctionIdMap'],
 		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
 		presetIdMap: s => s.$store.getters['schema/presetIdMap'],
@@ -684,6 +748,9 @@ export default {
 		this.$store.commit('keyDownHandlerWake');
 	},
 	methods: {
+		// externals
+		srcBase64,
+
 		// actions
 		close() {
 			this.$emit('close');
