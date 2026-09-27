@@ -559,23 +559,6 @@ type OpenForm struct {
 	RelationIndex int  `json:"relationIndex"` // replaced by relationIndexApply
 	PopUp         bool `json:"popUp"`         // replaced by popUpType
 }
-type Role struct {
-	Id                 uuid.UUID            `json:"id"`
-	ModuleId           uuid.UUID            `json:"moduleId"`
-	ChildrenIds        []uuid.UUID          `json:"childrenIds"`
-	Name               string               `json:"name"`
-	Content            string               `json:"content"`
-	Assignable         bool                 `json:"assignable"`
-	AccessApis         map[uuid.UUID]Access `json:"accessApis"`
-	AccessAttributes   map[uuid.UUID]Access `json:"accessAttributes"`
-	AccessClientEvents map[uuid.UUID]Access `json:"accessClientEvents"`
-	AccessCollections  map[uuid.UUID]Access `json:"accessCollections"`
-	AccessMenus        map[uuid.UUID]Access `json:"accessMenus"`
-	AccessRelations    map[uuid.UUID]Access `json:"accessRelations"`
-	AccessSearchBars   map[uuid.UUID]Access `json:"accessSearchBars"`
-	AccessWidgets      map[uuid.UUID]Access `json:"accessWidgets"`
-	Captions           CaptionMap           `json:"captions"`
-}
 type PgFunction struct {
 	Id             uuid.UUID            `json:"id"`
 	ModuleId       uuid.UUID            `json:"moduleId"`
@@ -683,6 +666,23 @@ type Release struct {
 type ReleaseLog struct {
 	Category int    `json:"category"` // index of module release log categories
 	Content  string `json:"content"`  // content of log, simple text
+}
+type Role struct {
+	Id                 uuid.UUID            `json:"id"`
+	ModuleId           uuid.UUID            `json:"moduleId"`
+	ChildrenIds        []uuid.UUID          `json:"childrenIds"`
+	Name               string               `json:"name"`
+	Content            string               `json:"content"`
+	Assignable         bool                 `json:"assignable"`
+	AccessApis         map[uuid.UUID]Access `json:"accessApis"`
+	AccessAttributes   map[uuid.UUID]Access `json:"accessAttributes"`
+	AccessClientEvents map[uuid.UUID]Access `json:"accessClientEvents"`
+	AccessCollections  map[uuid.UUID]Access `json:"accessCollections"`
+	AccessMenus        map[uuid.UUID]Access `json:"accessMenus"`
+	AccessRelations    map[uuid.UUID]Access `json:"accessRelations"`
+	AccessSearchBars   map[uuid.UUID]Access `json:"accessSearchBars"`
+	AccessWidgets      map[uuid.UUID]Access `json:"accessWidgets"`
+	Captions           CaptionMap           `json:"captions"`
 }
 type SearchBar struct {
 	Id       uuid.UUID   `json:"id"`

@@ -1,12 +1,15 @@
-import MyBuilderCaption       from './builderCaption.js';
+import { getDependentModules } from '../shared/builder.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog } from '../shared/generic.js';
+import { getHasAnyReferences } from '../shared/schemaLookup.js';
+
+import MyBuilderCaption from './builderCaption.js';
 import MyBuilderMenuTabSelect from './builderMenuTabSelect.js';
-import {getDependentModules}  from '../shared/builder.js';
-import {dialogDeleteAsk}      from '../shared/dialog.js';
-import {copyValueDialog}      from '../shared/generic.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 const MyBuilderRoleAccessMenu = {
-	name:'my-builder-role-access-menu',
-	template:`<tr class="entry">
+	name: 'my-builder-role-access-menu',
+	template: `<tr class="entry">
 		<td>
 			<span class="builder-role-td-name" :style="style">{{ title }}</span>
 		</td>
@@ -43,48 +46,48 @@ const MyBuilderRoleAccessMenu = {
 		:readonly
 		:role
 	/>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		depth:          { type:Number,  required:true },
-		idMapAccess:    { type:Object,  required:true },
-		menu:           { type:Object,  required:true },
-		menuIdsShow:    { type:Array,   required:true },
-		readonly:       { type:Boolean, required:true },
-		role:           { type:Object,  required:true },
+	props: {
+		builderLanguage: { type: String, required: true },
+		depth: { type: Number, required: true },
+		idMapAccess: { type: Object, required: true },
+		menu: { type: Object, required: true },
+		menuIdsShow: { type: Array, required: true },
+		readonly: { type: Boolean, required: true },
+		role: { type: Object, required: true },
 	},
-	emits:['apply','toggle'],
+	emits: ['apply', 'toggle'],
 	data() {
-		return { showSubs:false };
+		return { showSubs: false };
 	},
-	computed:{
-		access:   s => typeof s.idMapAccess[s.menu.id] === 'undefined' ? -1 : s.idMapAccess[s.menu.id],
-		style:    s => `margin-left:${s.depth * 30}px;`,
-		subsExist:s => s.menu.menus.length !== 0,
+	computed: {
+		access: s => typeof s.idMapAccess[s.menu.id] === 'undefined' ? -1 : s.idMapAccess[s.menu.id],
+		style: s => `margin-left:${s.depth * 30}px;`,
+		subsExist: s => s.menu.menus.length !== 0,
 		subsShow: s => s.menuIdsShow.includes(s.menu.id),
-		title:    s => {
+		title: s => {
 			// 1st preference: proper menu title
-			if(typeof s.menu.captions.menuTitle[s.builderLanguage] !== 'undefined')
+			if (typeof s.menu.captions.menuTitle[s.builderLanguage] !== 'undefined')
 				return s.menu.captions.menuTitle[s.builderLanguage];
 
 			// 2nd preference (if form is referenced): form title
-			if(s.menu.formId !== null) {
-				let form = s.formIdMap[s.menu.formId];
+			if (s.menu.formId !== null) {
+				const form = s.formIdMap[s.menu.formId];
 
-				if(typeof form.captions.formTitle[s.builderLanguage] !== 'undefined')
+				if (typeof form.captions.formTitle[s.builderLanguage] !== 'undefined')
 					return form.captions.formTitle[s.builderLanguage];
 			}
 			return s.capGen.missingCaption;
 		},
 
 		// stores
-		formIdMap:s => s.$store.getters['schema/formIdMap'],
-		capGen:   s => s.$store.getters.captions.generic
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		capGen: s => s.$store.getters.captions.generic
 	}
 };
 
 const MyBuilderRoleAccessRelation = {
-	name:'my-builder-role-access-relation',
-	template:`<tr>
+	name: 'my-builder-role-access-relation',
+	template: `<tr>
 		<td>
 			<span class="builder-role-td-name">{{ relation.name + (brokenInheritance ? '*' : '') }}</span>
 		</td>
@@ -155,22 +158,22 @@ const MyBuilderRoleAccessRelation = {
 		<td></td>
 		<td class="maximum"></td>
 	</tr>`,
-	props:{
-		readonly:            { type:Boolean, required:true },
-		relation:            { type:Object,  required:true },
-		role:                { type:Object,  required:true },
-		showEntries:         { type:Boolean, required:true },
-		relationIdMapAccess: { type:Object,  required:true },
-		attributeIdMapAccess:{ type:Object,  required:true }
+	props: {
+		readonly: { type: Boolean, required: true },
+		relation: { type: Object, required: true },
+		role: { type: Object, required: true },
+		showEntries: { type: Boolean, required: true },
+		relationIdMapAccess: { type: Object, required: true },
+		attributeIdMapAccess: { type: Object, required: true }
 	},
-	emits:['apply-attribute','apply-relation','relation-selected'],
-	computed:{
-		access:s => s.relationIdMapAccess[s.relation.id] === undefined
+	emits: ['apply-attribute', 'apply-relation', 'relation-selected'],
+	computed: {
+		access: s => s.relationIdMapAccess[s.relation.id] === undefined
 			? -1 : s.relationIdMapAccess[s.relation.id],
-		attributeIdMapAccessParsed:s => {
-			let out = {};
-			for(let a of s.relation.attributes) {
-				if(typeof s.attributeIdMapAccess[a.id] === 'undefined') {
+		attributeIdMapAccessParsed: s => {
+			const out = {};
+			for (const a of s.relation.attributes) {
+				if (typeof s.attributeIdMapAccess[a.id] === 'undefined') {
 					out[a.id] = -1;
 					continue;
 				}
@@ -178,9 +181,9 @@ const MyBuilderRoleAccessRelation = {
 			}
 			return out;
 		},
-		brokenInheritance:s => {
-			for(let key in s.attributeIdMapAccessParsed) {
-				if(s.attributeIdMapAccessParsed[key] !== -1)
+		brokenInheritance: s => {
+			for (const key in s.attributeIdMapAccessParsed) {
+				if (s.attributeIdMapAccessParsed[key] !== -1)
 					return true;
 			}
 			return false;
@@ -188,23 +191,23 @@ const MyBuilderRoleAccessRelation = {
 
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capApp:        s => s.$store.getters.captions.builder.role
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.builder.role
 	},
-	methods:{
-		setAttribute(access,attributeId) {
-			this.$emit('apply-attribute',attributeId,this.attributeIdMapAccessParsed[attributeId] >= access ? access - 1 : access);
+	methods: {
+		setAttribute(access, attributeId) {
+			this.$emit('apply-attribute', attributeId, this.attributeIdMapAccessParsed[attributeId] >= access ? access - 1 : access);
 		},
 		setRelation(access) {
 			const n = access <= this.access ? access - 1 : access;
-			this.$emit('apply-relation',this.relation.id, n !== 0 ? n : -1);
+			this.$emit('apply-relation', this.relation.id, n !== 0 ? n : -1);
 		}
 	}
 };
 
 const MyBuilderRoleAccessSimple = {
-	name:'my-builder-role-access-simple',
-	template:`<tr class="entry">
+	name: 'my-builder-role-access-simple',
+	template: `<tr class="entry">
 		<td><span class="builder-role-td-name">{{ caption }}</span></td>
 		<td>
 			<my-bool
@@ -215,34 +218,31 @@ const MyBuilderRoleAccessSimple = {
 		</td>
 		<td class="maximum"></td>
 	</tr>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		captions:       { type:Object,  required:false, default:() => { return {}; } },
-		captionTitle:   { type:String,  required:false, default: '' },
-		name:           { type:String,  required:false, default: '' },
-		id:             { type:String,  required:true },
-		idMapAccess:    { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		captions: { type: Object, required: false, default: () => { return {}; } },
+		captionTitle: { type: String, required: false, default: '' },
+		name: { type: String, required: false, default: '' },
+		id: { type: String, required: true },
+		idMapAccess: { type: Object, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['apply'],
-	computed:{
+	emits: ['apply'],
+	computed: {
 		access: s => s.idMapAccess[s.id] === undefined ? -1 : s.idMapAccess[s.id],
-		caption:s => s.captionTitle !== '' && s.captions[s.captionTitle][s.builderLanguage] !== undefined
+		caption: s => s.captionTitle !== '' && s.captions[s.captionTitle][s.builderLanguage] !== undefined
 			? s.captions[s.captionTitle][s.builderLanguage]
 			: s.name
 	}
 };
 
 export default {
-	name:'my-builder-role',
-	components:{
-		MyBuilderCaption,
-		MyBuilderMenuTabSelect,
-		MyBuilderRoleAccessMenu,
-		MyBuilderRoleAccessRelation,
-		MyBuilderRoleAccessSimple
+	name: 'my-builder-role',
+	components: {
+		MyBuilderCaption, MyBuilderMenuTabSelect, MyBuilderRoleAccessMenu,
+		MyBuilderRoleAccessRelation, MyBuilderRoleAccessSimple, MyBuilderSchemaLookup
 	},
-	template:`<div class="builder-role contentBox grow" v-if="ready">
+	template: `<div class="builder-role contentBox grow" v-if="ready">
 
 		<div class="top">
 			<div class="area nowrap">
@@ -278,8 +278,12 @@ export default {
 					@trigger="copyValueDialog(name,id,id)"
 					:caption="capGen.id"
 				/>
+				<my-button image="builderLookup.png"
+					@trigger="showLookup = true"
+					:caption="capGen.references"
+				/>
 				<my-button image="delete.png"
-					@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+					@trigger="delCheck"
 					:active="!readonly && !isEveryone"
 					:cancel="true"
 					:caption="capGen.button.delete"
@@ -601,81 +605,92 @@ export default {
 				</div>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="role"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	watch:{
-		role:{
-			handler(v) { if(v !== false) this.reset(); },
-			immediate:true
+	watch: {
+		role: {
+			handler(v) { if (v !== false) this.reset(); },
+			immediate: true
 		}
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
 	data() {
 		return {
 			// inputs
-			accessApis:{},
-			accessAttributes:{},
-			accessClientEvents:{},
-			accessCollections:{},
-			accessMenus:{},
-			accessRelations:{},
-			accessSearchBars:{},
-			accessWidgets:{},
-			assignable:true,
-			captions:{},
-			childrenIds:[],
-			content:'user',
-			name:'',
+			accessApis: {},
+			accessAttributes: {},
+			accessClientEvents: {},
+			accessCollections: {},
+			accessMenus: {},
+			accessRelations: {},
+			accessSearchBars: {},
+			accessWidgets: {},
+			assignable: true,
+			captions: {},
+			childrenIds: [],
+			content: 'user',
+			name: '',
 
 			// states
-			menuIdsShow:[],
-			menuTabsIndexShown:0,
-			ready:false,
-			relationIdsShown:[],
-			tabTarget:'data'
+			hasReferences: false,
+			menuIdsShow: [],
+			menuTabsIndexShown: 0,
+			ready: false,
+			relationIdsShown: [],
+			showLookup: false,
+			tabTarget: 'data'
 		};
 	},
-	computed:{
-		hasChanges:s =>
-			s.name          !== s.role.name
-			|| s.content    !== s.role.content
+	computed: {
+		hasChanges: s =>
+			s.name !== s.role.name
+			|| s.content !== s.role.content
 			|| s.assignable !== s.role.assignable
-			|| JSON.stringify(s.childrenIds)        !== JSON.stringify(s.role.childrenIds)
-			|| JSON.stringify(s.accessApis)         !== JSON.stringify(s.role.accessApis)
-			|| JSON.stringify(s.accessAttributes)   !== JSON.stringify(s.role.accessAttributes)
+			|| JSON.stringify(s.childrenIds) !== JSON.stringify(s.role.childrenIds)
+			|| JSON.stringify(s.accessApis) !== JSON.stringify(s.role.accessApis)
+			|| JSON.stringify(s.accessAttributes) !== JSON.stringify(s.role.accessAttributes)
 			|| JSON.stringify(s.accessClientEvents) !== JSON.stringify(s.role.accessClientEvents)
-			|| JSON.stringify(s.accessCollections)  !== JSON.stringify(s.role.accessCollections)
-			|| JSON.stringify(s.accessMenus)        !== JSON.stringify(s.role.accessMenus)
-			|| JSON.stringify(s.accessRelations)    !== JSON.stringify(s.role.accessRelations)
-			|| JSON.stringify(s.accessSearchBars)   !== JSON.stringify(s.role.accessSearchBars)
-			|| JSON.stringify(s.accessWidgets)      !== JSON.stringify(s.role.accessWidgets)
-			|| JSON.stringify(s.captions)           !== JSON.stringify(s.role.captions),
-		menuIdsAll:s => {
-			let out = [];
-			const getChildren = function(menus) {
-				for(const m of menus) {
-					if(m.menus.length === 0)
+			|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
+			|| JSON.stringify(s.accessMenus) !== JSON.stringify(s.role.accessMenus)
+			|| JSON.stringify(s.accessRelations) !== JSON.stringify(s.role.accessRelations)
+			|| JSON.stringify(s.accessSearchBars) !== JSON.stringify(s.role.accessSearchBars)
+			|| JSON.stringify(s.accessWidgets) !== JSON.stringify(s.role.accessWidgets)
+			|| JSON.stringify(s.captions) !== JSON.stringify(s.role.captions),
+		menuIdsAll: s => {
+			const out = [];
+			const getChildren = menus => {
+				for (const m of menus) {
+					if (m.menus.length === 0)
 						continue;
 
 					out.push(m.id);
 					getChildren(m.menus);
 				}
 			};
-			for(const mt of s.module.menuTabs) {
+			for (const mt of s.module.menuTabs) {
 				getChildren(mt.menus);
 			}
 			return out;
 		},
-		tabCaptions:s => {
+		tabCaptions: s => {
 			return [
 				`${s.capGen.data} (${s.module.relations.length})`,
 				`${s.capGen.menus} (${s.module.menuTabs.length})`,
@@ -688,123 +703,133 @@ export default {
 		},
 
 		// simple
-		canSave:   s => s.hasChanges && !s.readonly,
-		isEveryone:s => s.role.name === 'everyone',
-		module:    s => s.role === false ? false : s.moduleIdMap[s.role.moduleId],
-		role:      s => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
+		canSave: s => s.hasChanges && !s.readonly,
+		isEveryone: s => s.role.name === 'everyone',
+		module: s => s.role === false ? false : s.moduleIdMap[s.role.moduleId],
+		role: s => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
 
 		// stores
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
-		roleIdMap:   s => s.$store.getters['schema/roleIdMap'],
-		appFunctions:s => s.$store.getters.appFunctions,
-		capApp:      s => s.$store.getters.captions.builder.role,
-		capGen:      s => s.$store.getters.captions.generic
+		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
+		appFunctions: s => s.$store.getters.appFunctions,
+		capApp: s => s.$store.getters.captions.builder.role,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		dialogDeleteAsk,
 		getDependentModules,
 
 		// actions
-		apply(type,id,access) {
-			switch(type) {
-				case 'api':         this.accessApis[id]         = access; break;
-				case 'attribute':   this.accessAttributes[id]   = access; break;
+		apply(type, id, access) {
+			switch (type) {
+				case 'api': this.accessApis[id] = access; break;
+				case 'attribute': this.accessAttributes[id] = access; break;
 				case 'clientEvent': this.accessClientEvents[id] = access; break;
-				case 'collection':  this.accessCollections[id]  = access; break;
-				case 'menu':        this.accessMenus[id]        = access; break;
-				case 'relation':    this.accessRelations[id]    = access; break;
-				case 'searchBar':   this.accessSearchBars[id]   = access; break;
-				case 'widget':      this.accessWidgets[id]      = access; break;
+				case 'collection': this.accessCollections[id] = access; break;
+				case 'menu': this.accessMenus[id] = access; break;
+				case 'relation': this.accessRelations[id] = access; break;
+				case 'searchBar': this.accessSearchBars[id] = access; break;
+				case 'widget': this.accessWidgets[id] = access; break;
 			}
 		},
 		childAdd(id) {
 			this.childrenIds.push(id);
 		},
 		childRemove(id) {
-			let pos = this.childrenIds.indexOf(id);
-			if(pos !== -1)
-				this.childrenIds.splice(pos,1);
+			const pos = this.childrenIds.indexOf(id);
+			if (pos !== -1)
+				this.childrenIds.splice(pos, 1);
 		},
 		reset() {
-			this.name               = this.role.name;
-			this.content            = this.role.content;
-			this.assignable         = this.role.assignable;
-			this.childrenIds        = JSON.parse(JSON.stringify(this.role.childrenIds)),
-			this.accessApis         = JSON.parse(JSON.stringify(this.role.accessApis));
-			this.accessAttributes   = JSON.parse(JSON.stringify(this.role.accessAttributes));
+			this.name = this.role.name;
+			this.content = this.role.content;
+			this.assignable = this.role.assignable;
+			this.childrenIds = JSON.parse(JSON.stringify(this.role.childrenIds));
+			this.accessApis = JSON.parse(JSON.stringify(this.role.accessApis));
+			this.accessAttributes = JSON.parse(JSON.stringify(this.role.accessAttributes));
 			this.accessClientEvents = JSON.parse(JSON.stringify(this.role.accessClientEvents));
-			this.accessCollections  = JSON.parse(JSON.stringify(this.role.accessCollections));
-			this.accessMenus        = JSON.parse(JSON.stringify(this.role.accessMenus));
-			this.accessRelations    = JSON.parse(JSON.stringify(this.role.accessRelations));
-			this.accessSearchBars   = JSON.parse(JSON.stringify(this.role.accessSearchBars));
-			this.accessWidgets      = JSON.parse(JSON.stringify(this.role.accessWidgets));
-			this.captions           = JSON.parse(JSON.stringify(this.role.captions));
+			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
+			this.accessMenus = JSON.parse(JSON.stringify(this.role.accessMenus));
+			this.accessRelations = JSON.parse(JSON.stringify(this.role.accessRelations));
+			this.accessSearchBars = JSON.parse(JSON.stringify(this.role.accessSearchBars));
+			this.accessWidgets = JSON.parse(JSON.stringify(this.role.accessWidgets));
+			this.captions = JSON.parse(JSON.stringify(this.role.captions));
 
-			if(this.menuTabsIndexShown > this.module.menuTabs.length - 1)
+			if (this.menuTabsIndexShown > this.module.menuTabs.length - 1)
 				this.menuTabsIndexShown = 0;
 
 			this.ready = true;
 		},
 		toggleMenu(id) {
 			const pos = this.menuIdsShow.indexOf(id);
-			if(pos !== -1) this.menuIdsShow.splice(pos,1);
-			else           this.menuIdsShow.push(id);
+			if (pos !== -1) this.menuIdsShow.splice(pos, 1);
+			else this.menuIdsShow.push(id);
 		},
 		toggleMenusAll() {
-			if(this.menuIdsShow.length === this.menuIdsAll.length)
-				return this.menuIdsShow = [];
-
+			if (this.menuIdsShow.length === this.menuIdsAll.length) {
+				this.menuIdsShow = [];
+				return;
+			}
 			this.menuIdsShow = JSON.parse(JSON.stringify(this.menuIdsAll));
 		},
 		toggleRelation(id) {
-			let pos = this.relationIdsShown.indexOf(id);
+			const pos = this.relationIdsShown.indexOf(id);
 
-			if(pos === -1) this.relationIdsShown.push(id);
-			else           this.relationIdsShown.splice(pos,1);
+			if (pos === -1) this.relationIdsShown.push(id);
+			else this.relationIdsShown.splice(pos, 1);
 		},
 		toggleRelationsAll() {
-			if(this.relationIdsShown.length === this.module.relations.length)
-				return this.relationIdsShown = [];
-
-			let out = [];
-			for(const rel of this.module.relations) {
+			if (this.relationIdsShown.length === this.module.relations.length) {
+				this.relationIdsShown = [];
+				return;
+			}
+			const out = [];
+			for (const rel of this.module.relations) {
 				out.push(rel.id);
 			}
 			this.relationIdsShown = out;
 		},
 
 		// backend calls
+		delCheck() {
+			this.hasReferences = getHasAnyReferences(this.module, 'role', this.id, false);
+			if (this.hasReferences) {
+				this.showLookup = true;
+				return;
+			}
+			this.dialogDeleteAsk(this.del, this.capApp.dialog.delete);
+		},
 		del() {
-			ws.send('role','del',this.role.id,true).then(
+			ws.send('role', 'del', this.role.id, true).then(
 				() => {
 					this.$root.schemaReload(this.role.moduleId);
 					this.appFunctions.loginReauthAll(false);
-					this.$router.push('/builder/roles/'+this.role.moduleId);
+					this.$router.push(`/builder/roles/${this.role.moduleId}`);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
-			if(!this.canSave) return;
+			if (!this.canSave) return;
 
-			ws.send('role','set',{
-				id:this.role.id,
-				name:this.name,
-				content:this.content,
-				assignable:this.assignable,
-				childrenIds:this.childrenIds,
-				accessApis:this.accessApis,
-				accessAttributes:this.accessAttributes,
-				accessClientEvents:this.accessClientEvents,
-				accessCollections:this.accessCollections,
-				accessMenus:this.accessMenus,
-				accessRelations:this.accessRelations,
-				accessSearchBars:this.accessSearchBars,
-				accessWidgets:this.accessWidgets,
-				captions:this.captions
-			},true).then(
+			ws.send('role', 'set', {
+				id: this.role.id,
+				name: this.name,
+				content: this.content,
+				assignable: this.assignable,
+				childrenIds: this.childrenIds,
+				accessApis: this.accessApis,
+				accessAttributes: this.accessAttributes,
+				accessClientEvents: this.accessClientEvents,
+				accessCollections: this.accessCollections,
+				accessMenus: this.accessMenus,
+				accessRelations: this.accessRelations,
+				accessSearchBars: this.accessSearchBars,
+				accessWidgets: this.accessWidgets,
+				captions: this.captions
+			}, true).then(
 				() => {
 					this.$root.schemaReload(this.role.moduleId);
 					this.appFunctions.loginReauthAll(false);

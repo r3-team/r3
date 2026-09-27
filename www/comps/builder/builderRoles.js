@@ -1,6 +1,6 @@
 export default {
-	name:'my-builder-roles',
-	template:`<div class="builder-roles contentBox grow">
+	name: 'my-builder-roles',
+	template: `<div class="builder-roles contentBox grow">
 
 		<div class="top lower">
 			<div class="area nowrap">
@@ -57,22 +57,22 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			filter:'',
+			filter: '',
 		};
 	},
-	computed:{
-		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+	computed: {
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.role,
-		capGen:     s => s.$store.getters.captions.generic
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.role,
+		capGen: s => s.$store.getters.captions.generic
 	}
 };

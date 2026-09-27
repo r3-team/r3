@@ -303,6 +303,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showRoles && lookups.roleIds.length !== 0">
+						<td class="minimum"><my-label image="personMultiple.png" :caption="capGen.roles" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.roleIds"
+									@trigger="open('role',id,null,false)"
+									@trigger-middle="open('role',id,null,true)"
+									:caption="roleIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showPresets && lookups.presetIds.length !== 0">
 						<td class="minimum"><my-label image="databaseCircle.png" :caption="capGen.presets" /></td>
 						<td>
@@ -352,6 +365,7 @@ const MyBuilderSchemaLookupModule = {
 		showPolicies: { type: Boolean, required: true },
 		showPresets: { type: Boolean, required: true },
 		showRelationships: { type: Boolean, required: true },
+		showRoles: { type: Boolean, required: true },
 		showSearchBars: { type: Boolean, required: true },
 		showWidgets: { type: Boolean, required: true },
 	},
@@ -383,6 +397,7 @@ const MyBuilderSchemaLookupModule = {
 		pgTriggerIdMap: s => s.$store.getters['schema/pgTriggerIdMap'],
 		presetIdMap: s => s.$store.getters['schema/presetIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
 		widgetIdMap: s => s.$store.getters['schema/widgetIdMap'],
 		capGen: s => s.$store.getters.captions.generic,
@@ -424,6 +439,7 @@ const MyBuilderSchemaLookupModule = {
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
 				case 'preset': url = `/builder/relation/${entityId}?presetIdShow=${entityIdSub}`; break;
 				case 'relation': url = `/builder/relation/${entityId}`; break;
+				case 'role': url = `/builder/role/${entityId}`; break;
 				case 'searchBar': url = `/builder/search-bar/${entityId}`; break;
 				case 'widget': url = `/builder/widgets/${entityId}?widgetIdEdit=${entityIdSub}`; break;
 			}
@@ -479,6 +495,7 @@ export default {
 				<my-button-check v-if="isAnyRelationPolicies" v-model="showPolicies" :caption="capGen.policies" />
 				<my-button-check v-if="isAnyPresets" v-model="showPresets" :caption="capGen.presets" />
 				<my-button-check v-if="isAnyRelationships" v-model="showRelationships" :caption="capGen.relationships" />
+				<my-button-check v-if="isAnyRoles" v-model="showRoles" :caption="capGen.roles" />
 				<my-button-check v-if="isAnySearchBars" v-model="showSearchBars" :caption="capGen.searchBars" />
 				<my-button-check v-if="isAnyWidgets" v-model="showWidgets" :caption="capGen.widgets" />
 			</div>
@@ -521,6 +538,7 @@ export default {
 						:showPolicies
 						:showPresets
 						:showRelationships
+						:showRoles
 						:showSearchBars
 						:showWidgets
 					/>
@@ -560,6 +578,7 @@ export default {
 			showPolicies: true,
 			showPresets: true,
 			showRelationships: true,
+			showRoles: true,
 			showSearchBars: true,
 			showWidgets: true,
 		};
@@ -608,6 +627,10 @@ export default {
 					contentName = s.capGen.relation;
 					entityName = s.relationIdMap[s.entityId].name;
 					break;
+				case 'role':
+					contentName = s.capGen.role;
+					entityName = s.roleIdMap[s.entityId].name;
+					break;
 			}
 			return entityName === null
 				? `${s.capApp.title.replace('{NAME}', contentName)}`
@@ -631,6 +654,7 @@ export default {
 		isAnyPresets: s => Object.values(s.moduleIdMapLookups).some(v => v.presetIds.length !== 0),
 		isAnyRelationPolicies: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsPolicies.length !== 0),
 		isAnyRelationships: s => Object.values(s.moduleIdMapLookups).some(v => v.relationIdsShips.length !== 0),
+		isAnyRoles: s => Object.values(s.moduleIdMapLookups).some(v => v.roleIds.length !== 0),
 		isAnySearchBars: s => Object.values(s.moduleIdMapLookups).some(v => v.searchBarIds.length !== 0),
 		isAnyWidgets: s => Object.values(s.moduleIdMapLookups).some(v => v.widgetIds.length !== 0),
 		noResults: s => Object.keys(s.moduleIdMapLookups).length === 0,
@@ -647,6 +671,7 @@ export default {
 		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
 		presetIdMap: s => s.$store.getters['schema/presetIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
 	},
 	mounted() {
 		this.refresh();

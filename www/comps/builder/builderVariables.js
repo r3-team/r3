@@ -1,11 +1,12 @@
-import MyBuilderVariable  from './builderVariable.js';
-import {getAttributeIcon} from '../shared/attribute.js';
-import {routeParseParams} from '../shared/router.js';
+import { getAttributeIcon } from '../shared/attribute.js';
+import { routeParseParams } from '../shared/router.js';
+
+import MyBuilderVariable from './builderVariable.js';
 
 export default {
-	name:'my-builder-variables',
-	components:{MyBuilderVariable},
-	template:`<div class="contentBox grow builder-variables">
+	name: 'my-builder-variables',
+	components: { MyBuilderVariable },
+	template: `<div class="contentBox grow builder-variables">
 
 		<div class="top lower">
 			<div class="area nowrap">
@@ -62,33 +63,33 @@ export default {
 			:variableId="variableIdEdit"
 		/>
 	</div>`,
-	emits:['createNew'],
-	props:{
-		id:      { type:String,  required:true },
-		readonly:{ type:Boolean, required:true }
+	emits: ['createNew'],
+	props: {
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			filter:'',
-			variableIdEdit:false
+			filter: '',
+			variableIdEdit: false
 		};
 	},
 	mounted() {
-		let params = { variableIdEdit:{ parse:'string', value:null } };
+		const params = { variableIdEdit: { parse: 'string', value: null } };
 		this.routeParseParams(params);
 
-		if(params.variableIdEdit.value !== null)
+		if (params.variableIdEdit.value !== null)
 			this.variableIdEdit = params.variableIdEdit.value;
 	},
-	computed:{
+	computed: {
 		// stores
-		module:     s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:  s => s.$store.getters['schema/formIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.variable,
-		capGen:     s => s.$store.getters.captions.generic
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		capApp: s => s.$store.getters.captions.builder.variable,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getAttributeIcon,
 		routeParseParams

@@ -34,6 +34,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			pgIndexIds: [],
 			pgTriggerIds: [],
 			presetIds: [],
+			roleIds: [],
 			searchBarIds: [],
 			widgetIds: [],
 
@@ -62,6 +63,7 @@ export function getReferences(moduleSource, entity, entityId, noDependencies) {
 			case 'pgIndex': getReferencesPgIndex(mod, entityId, lookups); break;
 			case 'preset': getReferencesPreset(mod, entityId, lookups); break;
 			case 'relation': getReferencesRelation(mod, entityId, lookups); break;
+			case 'role': getReferencesRole(mod, entityId, lookups); break;
 			default:
 				console.warn(`invalid entity for schema lookup: '${entity}'`);
 				return {};
@@ -924,6 +926,102 @@ function getReferencesRelation(mod, relId, lookups) {
 	for (const f of mod.pgFunctions) {
 		if (f.codeFunction.includes(`}.[${relId}]`)) {
 			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const s of mod.searchBars) {
+		if (isInQuery(s.query) || isInColumns(s.columns)) {
+			lookups.searchBarIds.push(s.id);
+			lookups.anyResults = true;
+		}
+	}
+};
+
+
+function getReferencesRole(mod, roleId, lookups) {
+	const isInQuery = query => query !== null && isInFilters(query.filters);
+	const isInColumns = columns => columns.some(v => v.content === 'query' && isInQuery(v.query));
+	const isInFilters = filters => filters.some(v =>
+		isInQuery(v.side0.query) ||
+		isInQuery(v.side1.query) ||
+		v.side0.roleId === roleId ||
+		v.side1.roleId === roleId);
+
+	const lookupInFields = (formId, fields) => {
+		const add = fieldId => {
+			if (lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+
+		for (const f of fields) {
+			switch (f.content) {
+				case 'chart':    // fallthrough
+				case 'calendar': // fallthrough
+				case 'kanban':   // fallthrough
+				case 'list':     // fallthrough
+				case 'variable':
+					if (isInQuery(f.query) || isInColumns(f.columns))
+						add(f.id);
+					break;
+				case 'data':
+					if (f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns))) {
+						add(f.id);
+					}
+					break;
+				case 'map':
+					if (f.layersData.some(l => isInQuery(l.query)))
+						add(f.id);
+					break;
+				case 'container':
+					lookupInFields(formId, f.fields);
+					break;
+				case 'tabs':
+					for (const t of f.tabs) {
+						lookupInFields(formId, t.fields);
+					}
+					break;
+			}
+		}
+	};
+	if (mod.startForms.some(v => v.roleId === roleId)) {
+		lookups.moduleStartForms = true;
+		lookups.anyResults = true;
+	}
+	for (const a of mod.apis) {
+		if (isInQuery(a.query) || isInColumns(a.columns)) {
+			lookups.apiIds.push(a.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const c of mod.collections) {
+		if (isInQuery(c.query) || isInColumns(c.columns)) {
+			lookups.collectionIds.push(c.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const f of mod.forms) {
+		if (isInQuery(f.query)) {
+			lookups.formIdsQuery.push(f.id);
+			lookups.anyResults = true;
+		}
+		if (f.states.some(v => v.conditions.some(c => c.side0.roleId === roleId || c.side1.roleId === roleId))) {
+			lookups.formIdsStates.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id, f.fields);
+	}
+	for (const r of mod.relations) {
+		if (r.policies.some(v => roleId === v.roleId || roleId === v.roleId)) {
+			lookups.relationIdsPolicies.push(r.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const r of mod.roles) {
+		if (r.childrenIds.includes(roleId)) {
+			lookups.roleIds.push(r.id);
 			lookups.anyResults = true;
 		}
 	}

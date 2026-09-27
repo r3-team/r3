@@ -80,7 +80,7 @@ export default {
 			entityTitle: '', // title of entity being checked
 			entityList: [], // list of entity elements in parent module (relations, attributes, ...)
 			entitiesCheck: [  // list of entities to be checked in order
-				'relation', 'attribute', 'preset', 'form', 'pgFunction', 'pgIndex',
+				'relation', 'attribute', 'preset', 'form', 'role', 'pgFunction', 'pgIndex',
 				'jsFunction', 'doc', 'collection', 'article'
 			],
 
@@ -166,6 +166,10 @@ export default {
 					case 'relation':
 						this.entityTitle = this.capGen.relation;
 						this.entityList = this.moduleParent.relations;
+						break;
+					case 'role':
+						this.entityTitle = this.capGen.role;
+						this.entityList = this.moduleParent.roles;
 						break;
 				}
 				for (const l of this.entityList) {
