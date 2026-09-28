@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Simge dosyası ekle/düzenle",
 			"addHelp": "Yalnızca maksimum PNG dosyaları. 64kb desteklenmektedir. Simgeler her zaman kare şeklinde olmalıdır.",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "İsteğe bağlı simge adı",
 			"title": "Simgeler"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Mobil: Formun tamamını kaydır",
 		"nodeName": "Bağlantılı olduğu yer: {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "Ayarlar",
 		"pattern": "Arka plan deseni",
 		"spacing": "Aralık",

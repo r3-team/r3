@@ -331,6 +331,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_setting ALTER COLUMN bool_as_toggle DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD   COLUMN mail_spooler_stuck_sec INTEGER NOT NULL DEFAULT 3600;
 			ALTER TABLE instance.login_setting ALTER COLUMN mail_spooler_stuck_sec DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD   COLUMN offset_page_no BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login_setting ALTER COLUMN offset_page_no DROP DEFAULT;
 
 			-- single type qr/barcode attribute use
 			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode_codabar';

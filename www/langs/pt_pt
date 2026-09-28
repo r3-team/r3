@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Adicionar/editar ficheiro de ícone",
 			"addHelp": "Apenas ficheiros PNG com máx. 64kb são suportados. Os ícones devem ser sempre quadrados.",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "Nome opcional do ícone",
 			"title": "Ícones"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Móvel: Deslocar todo o formulário",
 		"nodeName": "Ligado a: {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "Configurações",
 		"pattern": "Padrão de fundo",
 		"spacing": "Espaçamento",

@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Icon-Datei hinzufügen/bearbeiten",
 			"addHelp": "Es werden nur PNG-Dateien mit bis zu 64kb unterstützt. Icons sollten immer quadratisch sein.",
+			"dialog": {
+				"delete": "Bist du sicher, dass du diese Icons löschen möchtest?"
+			},
 			"nameHint": "Optionaler Icon-Name",
 			"title": "Icons"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Mobil: Gesamtes Formular scrollen",
 		"nodeName": "Verbunden mit: {NAME}",
+		"offsetPageNo": "Mit Seitenzahl navigieren",
 		"pageTitle": "Einstellungen",
 		"pattern": "Hintergrundmuster",
 		"spacing": "Abstände",

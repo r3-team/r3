@@ -12,6 +12,7 @@ export default {
 		:class="{ 'input-decimal-embedded':embedded }"
 		:disabled="readonly"
 		:placeholder="placeholderTxt"
+		:size="size === 0 ? '' : size"
 	/>`,
 	data() {
 		return {
@@ -27,7 +28,8 @@ export default {
 		min: { type: [Number, null], required: false, default: null },
 		modelValue: { type: [Number, null], required: true },
 		placeholder: { type: [String, null], required: false, default: null },
-		readonly: { type: Boolean, required: false, default: false }
+		readonly: { type: Boolean, required: false, default: false },
+		size: { type: Number, required: false, default: 0 }, // size in characters
 	},
 	computed: {
 		// simple

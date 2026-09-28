@@ -329,7 +329,7 @@ export default {
 				</div>
 
 				<!-- text input -->
-				<input class="input" data-is-input="1"
+				<input class="field-input" data-is-input="1"
 					v-if="isLineInput"
 					v-model="value"
 					:class="{ invalid:showInvalid }"
@@ -436,7 +436,7 @@ export default {
 				/>
 
 				<!-- textarea input -->
-				<textarea class="input textarea" data-is-input="1"
+				<textarea class="field-input textarea" data-is-input="1"
 					v-if="isTextarea"
 					v-model="value"
 					:class="{ invalid:showInvalid }"

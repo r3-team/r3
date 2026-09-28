@@ -405,6 +405,7 @@
 
 /* color input */
 .input-color {
+	width: 100%;
 	flex: 1 1 auto;
 	color: var(--color-font);
 	display: flex;
@@ -426,7 +427,6 @@
 }
 .input-color-text {
 	width: 100%;
-	flex: 2 2 auto;
 	color: inherit;
 	outline: none !important;
 	border: none !important;

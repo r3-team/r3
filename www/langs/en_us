@@ -3194,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Mobile: Scroll entire form",
 		"nodeName": "Connected with: {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "Settings",
 		"pattern": "Background pattern",
 		"spacing": "Spacing",

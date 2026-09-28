@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Add/edit icon file",
 			"addHelp": "Only PNG files with max. 64kb are supported. Icons should always be squared.",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "Optional icon name",
 			"title": "Icons"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Móvil: Desplazar todo el formulario",
 		"nodeName": "Conectado con: {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "Configuraciones",
 		"pattern": "Patrón de fondo",
 		"spacing": "Espaciado",

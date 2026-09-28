@@ -1,58 +1,37 @@
-import MyFilters                   from './filters.js';
-import MyForm                      from './form.js';
-import MyInputCollection           from './inputCollection.js';
-import MyInputOffset               from './inputOffset.js';
-import MyListAggregate             from './listAggregate.js';
-import MyListColumnBatch           from './listColumnBatch.js';
-import MyListCsv                   from './listCsv.js';
-import MyListFilters               from './listFilters.js';
-import MyListInputFlow             from './listInputFlow.js';
-import MyListInputRows             from './listInputRows.js';
-import MyListInputRowsEmpty        from './listInputRowsEmpty.js';
-import MyListOptions               from './listOptions.js';
-import {consoleError}              from './shared/error.js';
-import {getRowsDecrypted}          from './shared/form.js';
-import {getCaption}                from './shared/language.js';
-import {layoutSettleSpace}         from './shared/layout.js';
-import {isAttributeTextSearchable} from './shared/attribute.js';
+import MyFilters from './filters.js';
+import MyForm from './form.js';
+import MyInputCollection from './inputCollection.js';
+import MyInputOffset from './inputOffset.js';
+import MyListAggregate from './listAggregate.js';
+import MyListColumnBatch from './listColumnBatch.js';
+import MyListCsv from './listCsv.js';
+import MyListFilters from './listFilters.js';
+import MyListInputFlow from './listInputFlow.js';
+import MyListInputRows from './listInputRows.js';
+import MyListInputRowsEmpty from './listInputRowsEmpty.js';
+import MyListOptions from './listOptions.js';
+
+import { isAttributeTextSearchable } from './shared/attribute.js';
+import { getColumnBatches, getOrderIndexesFromColumnBatch } from './shared/column.js';
+import { consoleError } from './shared/error.js';
+import { getRowsDecrypted } from './shared/form.js';
+import { checkDataOptions, colorAdjustBg, colorMakeContrastFont, deepIsEqual } from './shared/generic.js';
+import { getCaption } from './shared/language.js';
+import { layoutSettleSpace } from './shared/layout.js';
 import {
-	getColumnBatches,
-	getOrderIndexesFromColumnBatch
-} from './shared/column.js';
-import {
-	checkDataOptions,
-	colorAdjustBg,
-	colorMakeContrastFont,
-	deepIsEqual
-} from './shared/generic.js';
-import {
-	fillRelationRecordIds,
-	getFiltersEncapsulated,
-	getQueryAttributesPkFilter,
-	getQueryExpressions,
-	getRelationsJoined
+	fillRelationRecordIds, getFiltersEncapsulated, getQueryAttributesPkFilter,
+	getQueryExpressions, getRelationsJoined
 } from './shared/query.js';
-import {
-	routeChangeFieldReload,
-	routeParseParams
-} from './shared/router.js';
+import { routeChangeFieldReload, routeParseParams } from './shared/router.js';
 
 export default {
-	name:'my-list',
-	components:{
-		MyFilters,
-		MyInputCollection,
-		MyInputOffset,
-		MyListAggregate,
-		MyListColumnBatch,
-		MyListCsv,
-		MyListFilters,
-		MyListInputFlow,
-		MyListInputRows,
-		MyListInputRowsEmpty,
-		MyListOptions
+	name: 'my-list',
+	components: {
+		MyFilters, MyInputCollection, MyInputOffset, MyListAggregate,
+		MyListColumnBatch, MyListCsv, MyListFilters, MyListInputFlow,
+		MyListInputRows, MyListInputRowsEmpty, MyListOptions
 	},
-	template:`<div class="list" ref="content"
+	template: `<div class="list" ref="content"
 		@keydown="handleKeydownLocal"
 		:class="{ asInput:isInput, readonly:inputIsReadonly, isDynamicSize:isDynamicSize, isSingleField:isSingleField }"
 	>
@@ -124,7 +103,7 @@ export default {
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- list as input field (showing record(s) from active field value) -->
 		<my-list-input-flow
 			v-if="isInput && inputAsFlow"
@@ -177,16 +156,16 @@ export default {
 		>
 			<template #input-icon><slot name="input-icon" /></template>
 		</my-list-input-rows-empty>
-		
+
 		<!-- regular list view (either view or input dropdown) -->
 		<template v-if="!isInput || (dropdownShow && !showAllValues)">
-			
+
 			<!-- list header -->
 			<div class="list-header" v-if="header && showHeader" :class="{ 'no-column-titles':!headerColumns }">
-				
+
 				<div class="row gap nowrap">
 					<slot name="input-icon" />
-					
+
 					<!-- record actions -->
 					<my-button image="new.png"
 						v-if="hasCreate"
@@ -217,26 +196,27 @@ export default {
 						:captionTitle="capGen.button.deleteHint"
 					/>
 				</div>
-				
+
 				<!-- empty element for header collapse calculation -->
 				<div ref="empty" class="empty"></div>
-				
+
 				<div class="row gap nowrap centered list-header-title" v-if="showTitle">
 					<span v-if="caption !== ''">{{ caption }}</span>
 				</div>
-				
+
 				<div class="row gap nowrap">
 					<my-input-offset
 						v-if="hasPaging"
 						@input="setOffsetParamAndReload($event,true)"
 						:arrows="showOffsetArrows"
 						:caption="showResultsCount && count > 1"
-						:limit="limit"
-						:offset="offset"
+						:inputAsPageNo="settings.offsetPageNo"
+						:limit
+						:offset
 						:total="count"
 					/>
 				</div>
-				
+
 				<div class="row gap nowrap default-inputs">
 					<my-button
 						v-if="showRefresh"
@@ -246,7 +226,7 @@ export default {
 						:image="rowsFetching ? 'load.gif' : (autoRenew === -1 ? 'refresh.png' : 'autoRenew.png')"
 						:naked="true"
 					/>
-					
+
 					<my-button image="filterCog.png"
 						v-if="headerActions"
 						@trigger="showFilters = !showFilters"
@@ -255,7 +235,7 @@ export default {
 						:captionTitle="capGen.button.filterHint"
 						:naked="true"
 					/>
-					
+
 					<input autocomplete="off" class="short" enterkeyhint="send" type="text"
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
@@ -263,7 +243,7 @@ export default {
 						:placeholder="capGen.threeDots"
 						:title="capApp.quick"
 					/>
-					
+
 					<my-input-collection
 						v-for="c in collections"
 						@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event);resized()"
@@ -275,7 +255,7 @@ export default {
 						:previewCount="showCollectionCnt"
 						:showTitle="showCollectionTitles"
 					/>
-					
+
 					<select class="dynamic"
 						v-if="hasChoices"
 						@change="setLoginOption('choiceId',$event.target.value)"
@@ -286,7 +266,7 @@ export default {
 							{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 						</option>
 					</select>
-					
+
 					<my-button image="listCog.png"
 						v-if="headerActions"
 						@trigger="showOptions = !showOptions"
@@ -301,10 +281,10 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<!-- list content -->
 			<div class="list-content" :class="{ showsInlineForm:popUpFormInline !== null }" :id="usesPageHistory ? scrollFormId : null">
-			
+
 				<!-- list results as table or card layout -->
 				<teleport to="#dropdown" :disabled="!dropdownShow">
 					<div
@@ -369,15 +349,16 @@ export default {
 													{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 												</option>
 											</select>
-											
+
 											<my-input-offset
 												@input="setOffsetParamAndReload($event,true)"
 												:caption="false"
-												:limit="limit"
-												:offset="offset"
+												:inputAsPageNo="settings.offsetPageNo"
+												:limit
+												:offset
 												:total="count"
 											/>
-											
+
 											<input autocomplete="off" class="short" enterkeyhint="send" type="text"
 												v-if="filterQuick"
 												@keyup.enter="updatedFilterQuick"
@@ -385,7 +366,7 @@ export default {
 												:placeholder="capGen.threeDots"
 												:title="capApp.quick"
 											/>
-											
+
 											<my-button image="checkbox1.png"
 												v-if="showInputAddAll"
 												@trigger="clickRowAll"
@@ -396,7 +377,7 @@ export default {
 										</div>
 									</td>
 								</tr>
-								
+
 								<!-- result rows -->
 								<tr
 									v-for="(r,ri) in rowsClear"
@@ -416,7 +397,7 @@ export default {
 											:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 										/>
 									</td>
-									
+
 									<!-- row values per column batch -->
 									<td v-for="b in columnBatches">
 										<div class="columnBatch"
@@ -449,7 +430,7 @@ export default {
 									<!-- empty column for taking remaining space -->
 									<td></td>
 								</tr>
-								
+
 								<!-- no results message -->
 								<tr v-if="rows.length === 0">
 									<td v-if="rowsFetching" colspan="999">
@@ -473,15 +454,15 @@ export default {
 								/>
 							</tfoot>
 						</table>
-					
+
 						<div class="empty-space"
 							v-if="isTable"
 							@click="clickOnEmpty"
 						></div>
-						
+
 						<!-- list results as cards -->
 						<template v-if="isCards">
-						
+
 							<!-- actions -->
 							<div class="list-cards-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
 								<div class="row centered">
@@ -494,7 +475,7 @@ export default {
 										:naked="true"
 									/>
 								</div>
-								
+
 								<div class="row centered">
 									<!-- sorting -->
 									<template v-if="hasResults">
@@ -502,7 +483,7 @@ export default {
 										<select @change="cardsSetOrderBy($event.target.value)" :value="cardsOrderByColumnBatchIndex">
 											<option value="-1">-</option>
 											<option v-for="(b,i) in columnBatches" :value="i">{{ b.caption }}</option>
-										</select>	
+										</select>
 										<my-button
 											v-if="cardsOrderByColumnBatchIndex !== -1"
 											@trigger="cardsToggleOrderBy"
@@ -511,7 +492,7 @@ export default {
 										/>
 									</template>
 								</div>
-								
+
 								<div class="row centered">
 									<my-button image="toggleDown.png"
 										v-if="!showHeader"
@@ -520,9 +501,9 @@ export default {
 									/>
 								</div>
 							</div>
-							
+
 							<div class="list-cards-entries" @click="clickOnEmpty" :id="usesPageHistory ? scrollFormId : null">
-								
+
 								<!-- no results message -->
 								<template v-if="!hasResults">
 									<div class="list-cards-entry no-results" v-if="!rowsFetching">
@@ -532,7 +513,7 @@ export default {
 										<my-label image="load.gif" :caption="capApp.fetching" />
 									</div>
 								</template>
-								
+
 								<div class="list-cards-entry"
 									v-for="(r,ri) in rowsClear"
 									@click.ctrl.exact.stop="clickRow(r,true)"
@@ -555,7 +536,7 @@ export default {
 											:naked="true"
 										/>
 									</div>
-									
+
 									<!-- row values per column batch -->
 									<table>
 										<tbody>
@@ -594,7 +575,7 @@ export default {
 						</template>
 					</div>
 				</teleport>
-				
+
 				<!-- inline form -->
 				<my-form class="inline list-inline-form"
 					v-if="popUpFormInline !== null"
@@ -616,80 +597,80 @@ export default {
 			</div>
 		</template>
 	</div>`,
-	props:{
-		autoRenewDefault:{ required:false, default:null },                   // default for list refresh (number in seconds)
-		caption:         { type:String,  required:false, default:'' },       // caption to display in list header
-		choices:         { type:Array,   required:false, default:() => [] }, // processed query choices
-		collections:     { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
-		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		columns:         { type:Array,   required:true },                    // list columns, processed (applied filter values, only columns shown by user choice)
-		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
-		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
-		filters:         { type:Array,   required:true },                    // processed query filters
-		filtersInput:    { type:Array,   required:false, default:() => [] }, // processed query filters relevant for input lookup
-		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
-		limitDefault:    { type:Number,  required:false, default:10 },       // default list limit
-		loginOptions:    { type:Object,  required:true },
-		moduleId:        { type:String,  required:true },
-		popUpFormInline: { required:false, default:null },                   // form to show inside list
-		query:           { type:Object,  required:true },                    // list query
-		
+	props: {
+		autoRenewDefault: { required: false, default: null },               // default for list refresh (number in seconds)
+		caption: { type: String, required: false, default: '' },            // caption to display in list header
+		choices: { type: Array, required: false, default: () => [] },       // processed query choices
+		collections: { type: Array, required: false, default: () => [] },   // consumed collections to filter by user input
+		collectionIdMapIndexes: { type: Object, required: false, default: () => { return {} } },
+		columns: { type: Array, required: true },                           // list columns, processed (applied filter values, only columns shown by user choice)
+		columnsAll: { type: Array, required: false, default: () => [] },    // list columns, all
+		dataOptions: { type: Number, required: false, default: 0 },         // data permissions following form states
+		filters: { type: Array, required: true },                           // processed query filters
+		filtersInput: { type: Array, required: false, default: () => [] },  // processed query filters relevant for input lookup
+		layoutDefault: { type: String, required: false, default: 'table' }, // default list layout: table, cards
+		limitDefault: { type: Number, required: false, default: 10 },       // default list limit
+		loginOptions: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		popUpFormInline: { required: false, default: null },                // form to show inside list
+		query: { type: Object, required: true },                            // list query
+
 		// toggles
-		blockDuringLoad:{ type:Boolean, required:false, default:true },  // list blocks user input during data retrieval
-		columnsSortOnly:{ type:Boolean, required:false, default:false }, // list columns can only be sorted, not filtered or aggregated
-		csvExport:      { type:Boolean, required:false, default:false },
-		csvImport:      { type:Boolean, required:false, default:false },
-		dropdownShow:   { type:Boolean, required:false, default:false },
-		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
-		formLoading:    { type:Boolean, required:false, default:false }, // control list reloads
-		hasOpenForm:    { type:Boolean, required:false, default:false }, // list can open record in form
-		hasOpenFormBulk:{ type:Boolean, required:false, default:false }, // list can open records in bulk form
-		header:         { type:Boolean, required:false, default:true  }, // show list header
-		headerActions:  { type:Boolean, required:false, default:true  }, // show list header actions (complex filters, list options, header collapse)
-		headerColumns:  { type:Boolean, required:false, default:true  }, // show list column headers
-		isDynamicSize:  { type:Boolean, required:false, default:false }, // list does not have minimum fixed height
-		isInput:        { type:Boolean, required:false, default:false }, // list is used as input
-		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
-		isSingleField:  { type:Boolean, required:false, default:false }, // list is single field within a parent (form/tab - not container!)
-		loadWhileHidden:{ type:Boolean, required:false, default:false },
-		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
-		
+		blockDuringLoad: { type: Boolean, required: false, default: true },  // list blocks user input during data retrieval
+		columnsSortOnly: { type: Boolean, required: false, default: false }, // list columns can only be sorted, not filtered or aggregated
+		csvExport: { type: Boolean, required: false, default: false },
+		csvImport: { type: Boolean, required: false, default: false },
+		dropdownShow: { type: Boolean, required: false, default: false },
+		filterQuick: { type: Boolean, required: false, default: false },     // enable quick filter
+		formLoading: { type: Boolean, required: false, default: false },     // control list reloads
+		hasOpenForm: { type: Boolean, required: false, default: false },     // list can open record in form
+		hasOpenFormBulk: { type: Boolean, required: false, default: false }, // list can open records in bulk form
+		header: { type: Boolean, required: false, default: true },           // show list header
+		headerActions: { type: Boolean, required: false, default: true },    // show list header actions (complex filters, list options, header collapse)
+		headerColumns: { type: Boolean, required: false, default: true },    // show list column headers
+		isDynamicSize: { type: Boolean, required: false, default: false },   // list does not have minimum fixed height
+		isInput: { type: Boolean, required: false, default: false },         // list is used as input
+		isHidden: { type: Boolean, required: false, default: false },        // list is not visible and therefore not loaded/updated
+		isSingleField: { type: Boolean, required: false, default: false },   // list is single field within a parent (form/tab - not container!)
+		loadWhileHidden: { type: Boolean, required: false, default: false },
+		usesPageHistory: { type: Boolean, required: false, default: false }, // list uses page getters for filtering/sorting/etc.
+
 		// list as input field
-		inputAsCategory:{ type:Boolean, required:false, default:false },    // input is category selector (all records are shown, active ones are checked off)
-		inputAsFlow:    { type:Boolean, required:false, default:false },    // input is a flow selector (all records are shown, all records up to, and incl. the selected one, are marked)
-		inputAutoSelect:{ type:Number,  required:false, default:0 },        // # of records to auto select (2 = first two, -3 = last three, 0 = none)
-		inputIsNew:     { type:Boolean, required:false, default:false },    // input field belongs to new record
-		inputIsReadonly:{ type:Boolean, required:false, default:false },    // input field is readonly
-		inputMulti:     { type:Boolean, required:false, default:false },    // input has multiple records to represent (instead of just one)
-		inputRecordIds: { type:Array,   required:false, default:() => [] }, // input record IDs, representing active values to show
-		inputValid:     { type:Boolean, required:false, default:true }
+		inputAsCategory: { type: Boolean, required: false, default: false }, // input is category selector (all records are shown, active ones are checked off)
+		inputAsFlow: { type: Boolean, required: false, default: false },     // input is a flow selector (all records are shown, all records up to, and incl. the selected one, are marked)
+		inputAutoSelect: { type: Number, required: false, default: 0 },      // # of records to auto select (2 = first two, -3 = last three, 0 = none)
+		inputIsNew: { type: Boolean, required: false, default: false },      // input field belongs to new record
+		inputIsReadonly: { type: Boolean, required: false, default: false }, // input field is readonly
+		inputMulti: { type: Boolean, required: false, default: false },      // input has multiple records to represent (instead of just one)
+		inputRecordIds: { type: Array, required: false, default: () => [] }, // input record IDs, representing active values to show
+		inputValid: { type: Boolean, required: false, default: true }
 	},
-	emits:[
-		'clipboard','close-inline','dropdown-show','open-form','open-form-bulk','record-count-change',
-		'record-removed','records-selected','records-selected-original','set-args','set-column-ids-by-user',
-		'set-collection-indexes','set-index-record-ids','set-login-option'
+	emits: [
+		'clipboard', 'close-inline', 'dropdown-show', 'open-form', 'open-form-bulk', 'record-count-change',
+		'record-removed', 'records-selected', 'records-selected-original', 'set-args', 'set-column-ids-by-user',
+		'set-collection-indexes', 'set-index-record-ids', 'set-login-option'
 	],
 	data() {
 		return {
 			// state
-			autoRenewTimer:null,        // interval timer for auto renew
-			cardsOrderByColumnBatchIndex:-1,
-			filtersQuick:'',            // current user quick text filter
-			focused:false,
-			inputAutoSelectDone:false,
-			rowsFetching:false,         // row values are being fetched
-			selectedRows:[],            // bulk selected rows by row index
-			showCsv:false,              // show UI for CSV import/export
-			showFilters:false,          // show UI for user filters
-			showOptions:false,          // show UI for list options
-			
+			autoRenewTimer: null,        // interval timer for auto renew
+			cardsOrderByColumnBatchIndex: -1,
+			filtersQuick: '',            // current user quick text filter
+			focused: false,
+			inputAutoSelectDone: false,
+			rowsFetching: false,         // row values are being fetched
+			selectedRows: [],            // bulk selected rows by row index
+			showCsv: false,              // show UI for CSV import/export
+			showFilters: false,          // show UI for user filters
+			showOptions: false,          // show UI for list options
+
 			// constants
-			refTabindex:'input_row_', // prefix for vue references to tabindex elements
-			
+			refTabindex: 'input_row_', // prefix for vue references to tabindex elements
+
 			// header
-			headerCheckTimer:null,
-			headerElements:[],               // elements that are shown, based on available space
-			headerElementsAvailableInOrder:[ // elements that can be shown, in order of priority
+			headerCheckTimer: null,
+			headerElements: [],               // elements that are shown, based on available space
+			headerElementsAvailableInOrder: [ // elements that can be shown, in order of priority
 				'collectionValuesAll',       // optional, show all collection filter values
 				'collectionValuesFew',       // optional, show few collection filter values
 				'listTitle',                 // optional
@@ -701,204 +682,204 @@ export default {
 				'actionsReadonly',           // optional
 				'resultsCount'               // not important
 			],
-			
+
 			// data
-			count:0,     // total result set count
-			offset:0,    // result offset
-			rows:[],     // result set
-			rowsInput:[] // rows that reflect current input (following active record IDs)
-			             // as opposed to list rows which show lookup data (regular list or input dropdown)
+			count: 0,     // total result set count
+			offset: 0,    // result offset
+			rows: [],     // result set
+			rowsInput: [] // rows that reflect current input (following active record IDs)
+			// as opposed to list rows which show lookup data (regular list or input dropdown)
 		};
 	},
-	computed:{
-		filtersCombined:(s) => {
+	computed: {
+		filtersCombined: s => {
 			// already encapsulated filters: list, choice, quick, column
-			let filters = s.filters
+			const filters = s.filters
 				.concat(s.filtersColumn)
 				.concat(s.filtersQuickParsed)
 				.concat(s.getFiltersEncapsulated(
 					JSON.parse(JSON.stringify(s.filtersUser))
 				));
-			
+
 			// remove IDs from input in result set if it´s an input
-			if(s.anyInputRows)
+			if (s.anyInputRows)
 				filters.push(s.getQueryAttributesPkFilter(
-					s.query.relationId,s.inputRecordIds,0,true
+					s.query.relationId, s.inputRecordIds, 0, true
 				));
-			
+
 			return filters;
 		},
-		hasDeleteAny:(s) => {
-			if(!s.checkDataOptions(1,s.dataOptions))
+		hasDeleteAny: s => {
+			if (!s.checkDataOptions(1, s.dataOptions))
 				return false;
 
-			for(const join of s.joins) {
-				if(join.applyDelete)
+			for (const join of s.joins) {
+				if (join.applyDelete)
 					return true;
 			}
 			return false;
 		},
-		hasGalleryIcon:(s) => {
+		hasGalleryIcon: s => {
 			return s.columns.length !== 0 &&
 				s.columns[0].display === 'gallery' &&
 				(s.columns[0].onMobile || !s.isMobile) &&
 				(!s.isInput || s.rowsInput.length !== 0) &&
 				s.attributeIdMap[s.columns[0].attributeId].content === 'files';
 		},
-		hoverCaption:(s) => {
-			if     (s.showCsv)     return s.capApp.button.csv;
-			else if(s.showFilters) return s.capGen.button.filterHint;
-			else if(s.showOptions) return s.capGen.options;
+		hoverCaption: s => {
+			if (s.showCsv) return s.capApp.button.csv;
+			else if (s.showFilters) return s.capGen.button.filterHint;
+			else if (s.showOptions) return s.capGen.options;
 			return '';
 		},
-		hoverIconSrc:(s) => {
-			if     (s.showCsv)     return 'images/fileSheet.png';
-			else if(s.showFilters) return 'images/filterCog.png';
-			else if(s.showOptions) return 'images/listCog.png';
+		hoverIconSrc: s => {
+			if (s.showCsv) return 'images/fileSheet.png';
+			else if (s.showFilters) return 'images/filterCog.png';
+			else if (s.showOptions) return 'images/listCog.png';
 			return '';
 		},
-		pageCount:(s) => {
-			if(s.count === 0) return 0;
-			
+		pageCount: s => {
+			if (s.count === 0) return 0;
+
 			const cnt = Math.floor(s.count / s.limit);
-			return s.count % s.limit !== 0 ? cnt+1 : cnt;
+			return s.count % s.limit !== 0 ? cnt + 1 : cnt;
 		},
 
 		// filters
-		filtersQuickColumns:(s) => {
-			let out = [];
-			for(const c of s.columns) {
-				if(c.content !== 'attribute')
+		filtersQuickColumns: s => {
+			const out = [];
+			for (const c of s.columns) {
+				if (c.content !== 'attribute')
 					continue;
 
 				const a = s.attributeIdMap[c.attributeId];
-				if(s.isAttributeTextSearchable(a.content,a.contentUse) && (c.aggregator === null || c.aggregator === 'record'))
+				if (s.isAttributeTextSearchable(a.content, a.contentUse) && (c.aggregator === null || c.aggregator === 'record'))
 					out.push(c);
 			}
 			return out;
 		},
-		filtersQuickParsed:(s) => {
-			if(s.filtersQuick === '') return [];
-			
-			let out = [];
-			for(const c of s.filtersQuickColumns) {
+		filtersQuickParsed: s => {
+			if (s.filtersQuick === '') return [];
+
+			const out = [];
+			for (const c of s.filtersQuickColumns) {
 				out.push({
-					connector:out.length === 0 ? 'AND' : 'OR',
-					index:0,
-					operator:'ILIKE',
-					side0:{ attributeId:c.attributeId, attributeIndex:c.index, brackets:0 },
-					side1:{ brackets:0, value:s.filtersQuick }
+					connector: out.length === 0 ? 'AND' : 'OR',
+					index: 0,
+					operator: 'ILIKE',
+					side0: { attributeId: c.attributeId, attributeIndex: c.index, brackets: 0 },
+					side1: { brackets: 0, value: s.filtersQuick }
 				});
 			}
 			return s.getFiltersEncapsulated(out);
 		},
-		
+
 		// simple
-		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
-		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
-		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
-		columnBatchesAll:    (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],s.orders,[],true),
-		expressions:         (s) => s.getQueryExpressions(s.columns),
-		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
-		hasChoices:          (s) => s.query.choices.length > 1,
-		hasCreate:           (s) => s.checkDataOptions(4,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
-		hasPaging:           (s) => s.query.fixedLimit === 0,
-		hasResults:          (s) => s.rowsClear.length !== 0,
-		hasUpdate:           (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
-		hasUpdateBulk:       (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
-		isCards:             (s) => s.layout === 'cards',
-		isOrderedOrginal:    (s) => s.deepIsEqual(s.query.orders,s.orders),
-		isTable:             (s) => s.layout === 'table',
-		joins:               (s) => s.fillRelationRecordIds(s.query.joins),
-		ordersOriginal:      (s) => JSON.parse(JSON.stringify(s.query.orders)),
-		relationsJoined:     (s) => s.getRelationsJoined(s.joins),
-		rowSelect:           (s) => s.isInput || s.hasUpdate,
-		rowsClear:           (s) => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
-		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
-		showAllValues:       (s) => s.inputAsFlow || s.inputAsCategory,
-		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
-		showHover:           (s) => s.showCsv || s.showFilters || s.showOptions,
-		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
-		showInputAddLine:    (s) => !s.showAllValues && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
-		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
-		showOffsetArrows:    (s) => s.headerElements.includes('offsetArrows'),
-		showRefresh:         (s) => s.headerElements.includes('refresh'),
-		showResultsCount:    (s) => s.headerElements.includes('resultsCount'),
-		showTitle:           (s) => s.headerElements.includes('listTitle'),
-		showCollectionCnt:   (s) => {
-			if(s.headerElements.includes('collectionValuesAll')) return 999;
-			if(s.headerElements.includes('collectionValuesFew')) return 2;
+		anyInputRows: s => s.inputRecordIds.length !== 0,
+		autoSelect: s => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
+		columnBatches: s => s.getColumnBatches(s.moduleId, s.columns, [], s.orders, s.columnBatchSort[0], true),
+		columnBatchesAll: s => s.getColumnBatches(s.moduleId, s.columnsAll, [], s.orders, [], true),
+		expressions: s => s.getQueryExpressions(s.columns),
+		hasBulkActions: s => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
+		hasChoices: s => s.query.choices.length > 1,
+		hasCreate: s => s.checkDataOptions(4, s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
+		hasPaging: s => s.query.fixedLimit === 0,
+		hasResults: s => s.rowsClear.length !== 0,
+		hasUpdate: s => s.checkDataOptions(2, s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
+		hasUpdateBulk: s => s.checkDataOptions(2, s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
+		isCards: s => s.layout === 'cards',
+		isOrderedOrginal: s => s.deepIsEqual(s.query.orders, s.orders),
+		isTable: s => s.layout === 'table',
+		joins: s => s.fillRelationRecordIds(s.query.joins),
+		ordersOriginal: s => JSON.parse(JSON.stringify(s.query.orders)),
+		relationsJoined: s => s.getRelationsJoined(s.joins),
+		rowSelect: s => s.isInput || s.hasUpdate,
+		rowsClear: s => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
+		showActionTitles: s => s.headerElements.includes('actionTitles'),
+		showAllValues: s => s.inputAsFlow || s.inputAsCategory,
+		showCollectionTitles: s => s.headerElements.includes('collectionTitles'),
+		showHover: s => s.showCsv || s.showFilters || s.showOptions,
+		showInputAddAll: s => s.inputMulti && s.hasResults,
+		showInputAddLine: s => !s.showAllValues && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
+		showInputHeader: s => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
+		showOffsetArrows: s => s.headerElements.includes('offsetArrows'),
+		showRefresh: s => s.headerElements.includes('refresh'),
+		showResultsCount: s => s.headerElements.includes('resultsCount'),
+		showTitle: s => s.headerElements.includes('listTitle'),
+		showCollectionCnt: s => {
+			if (s.headerElements.includes('collectionValuesAll')) return 999;
+			if (s.headerElements.includes('collectionValuesFew')) return 2;
 			return 0;
 		},
 
 		// login options
-		autoRenew:      (s) => s.$root.getOrFallback(s.loginOptions,'autoRenew',(s.autoRenewDefault === null ? -1 : s.autoRenewDefault)), // refresh list data every X seconds, -1 if disabled
-		cardsCaptions:  (s) => s.$root.getOrFallback(s.loginOptions,'cardsCaptions',true),
-		choiceId:       (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		columnBatchSort:(s) => s.$root.getOrFallback(s.loginOptions,'columnBatchSort',[[],[]]),
-		columnIdMapAggr:(s) => s.$root.getOrFallback(s.loginOptions,'columnIdMapAggr',{}),      // aggregators by column ID
-		filtersColumn:  (s) => s.$root.getOrFallback(s.loginOptions,'filtersColumn',[]),        // column filters
-		filtersUser:    (s) => s.$root.getOrFallback(s.loginOptions,'filtersUser',[]),          // user filters
-		showHeader:     (s) => s.$root.getOrFallback(s.loginOptions,'header',true),             // show UI for list header
-		limit:          (s) => s.$root.getOrFallback(s.loginOptions,'limit',s.limitDefault),    // result limit
-		layout:         (s) => s.$root.getOrFallback(s.loginOptions,'layout',s.layoutDefault),  // list layout (table, cards)
-		orders:         (s) => s.$root.getOrFallback(s.loginOptions,'orders',s.ordersOriginal), // order by definitions for query
-		
+		autoRenew: s => s.$root.getOrFallback(s.loginOptions, 'autoRenew', (s.autoRenewDefault === null ? -1 : s.autoRenewDefault)), // refresh list data every X seconds, -1 if disabled
+		cardsCaptions: s => s.$root.getOrFallback(s.loginOptions, 'cardsCaptions', true),
+		choiceId: s => s.$root.getOrFallback(s.loginOptions, 'choiceId', s.choices.length === 0 ? null : s.choices[0].id),
+		columnBatchSort: s => s.$root.getOrFallback(s.loginOptions, 'columnBatchSort', [[], []]),
+		columnIdMapAggr: s => s.$root.getOrFallback(s.loginOptions, 'columnIdMapAggr', {}),      // aggregators by column ID
+		filtersColumn: s => s.$root.getOrFallback(s.loginOptions, 'filtersColumn', []),        // column filters
+		filtersUser: s => s.$root.getOrFallback(s.loginOptions, 'filtersUser', []),          // user filters
+		showHeader: s => s.$root.getOrFallback(s.loginOptions, 'header', true),             // show UI for list header
+		limit: s => s.$root.getOrFallback(s.loginOptions, 'limit', s.limitDefault),    // result limit
+		layout: s => s.$root.getOrFallback(s.loginOptions, 'layout', s.layoutDefault),  // list layout (table, cards)
+		orders: s => s.$root.getOrFallback(s.loginOptions, 'orders', s.ordersOriginal), // order by definitions for query
+
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		appResized:    (s) => s.$store.getters.appResized,
-		capApp:        (s) => s.$store.getters.captions.list,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		isMobile:      (s) => s.$store.getters.isMobile,
-		scrollFormId:  (s) => s.$store.getters.constants.scrollFormId,
-		settings:      (s) => s.$store.getters.settings
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		appResized: s => s.$store.getters.appResized,
+		capApp: s => s.$store.getters.captions.list,
+		capGen: s => s.$store.getters.captions.generic,
+		isMobile: s => s.$store.getters.isMobile,
+		scrollFormId: s => s.$store.getters.constants.scrollFormId,
+		settings: s => s.$store.getters.settings
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		if(!this.isInput)
+		if (!this.isInput)
 			this.resized();
-		
+
 		// setup watchers
-		this.$watch('appResized',this.resized);
-		this.$watch('limit',this.get);
-		this.$watch('dropdownShow',v => {
-			if(v) this.setOffsetAndReload(0);
+		this.$watch('appResized', this.resized);
+		this.$watch('limit', this.get);
+		this.$watch('dropdownShow', v => {
+			if (v) this.setOffsetAndReload(0);
 			this.focusOnInput();
 		});
-		this.$watch('formLoading',v => {
-			if(v) return;
+		this.$watch('formLoading', v => {
+			if (v) return;
 			this.inputAutoSelectDone = false;
 			this.reloadOutside();
 		});
-		this.$watch('isHidden',v => {
-			if(v) return;
+		this.$watch('isHidden', v => {
+			if (v) return;
 			this.reloadOutside();
 			this.resized();
 		});
-		this.$watch('loadWhileHidden',v => {
-			if(!v) return;
+		this.$watch('loadWhileHidden', v => {
+			if (!v) return;
 			this.reloadOutside();
 			this.resized();
 		});
-		this.$watch(() => [this.filters,this.filtersColumn,this.filtersUser],(newVals,oldVals) => {
-			for(let i = 0, j = newVals.length; i < j; i++) {
-				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+		this.$watch(() => [this.filters, this.filtersColumn, this.filtersUser], (newVals, oldVals) => {
+			for (let i = 0, j = newVals.length; i < j; i++) {
+				if (JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
 					this.offset = 0;
 					this.removeInvalidFilters();
 					return this.reloadOutside();
 				}
 			}
 		});
-		if(!this.isInput) {
-			this.$watch(() => [this.columns,this.columnsAll,this.orders],(newVals,oldVals) => {
-				for(let i = 0, j = newVals.length; i < j; i++) {
-					if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+		if (!this.isInput) {
+			this.$watch(() => [this.columns, this.columnsAll, this.orders], (newVals, oldVals) => {
+				for (let i = 0, j = newVals.length; i < j; i++) {
+					if (JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
 						// if columns change, kill row data, otherwise content does not match columns
 						this.count = 0;
-						this.rows  = [];
+						this.rows = [];
 						this.removeInvalidFilters(); // if columns change, column filters can become invalid
 						this.removeInvalidOrders();
 						return this.get();
@@ -906,22 +887,22 @@ export default {
 				}
 			});
 		}
-		if(this.isInput && !this.showAllValues) {
-			this.$watch('inputRecordIds',v => {
+		if (this.isInput && !this.showAllValues) {
+			this.$watch('inputRecordIds', v => {
 				// update input if record IDs are different (different count or IDs)
 				// input rows are usually taken from selection, but record IDs can also be set by functions, requiring reload of these record rows
-				if(v.length !== this.rowsInput.length)
+				if (v.length !== this.rowsInput.length)
 					return this.getInput();
-				
-				for(const r of this.rowsInput) {
-					if(!v.includes(r.indexRecordIds[0]))
+
+				for (const r of this.rowsInput) {
+					if (!v.includes(r.indexRecordIds[0]))
 						return this.getInput();
 				}
 			});
 		}
-		if(this.usesPageHistory) {
-			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals))
+		if (this.usesPageHistory) {
+			this.$watch(() => [this.$route.path, this.$route.query], (newVals, oldVals) => {
+				if (this.routeChangeFieldReload(newVals, oldVals))
 					this.paramsUpdated(true);
 			});
 
@@ -936,7 +917,7 @@ export default {
 	beforeUnmount() {
 		this.clearAutoRenewTimer();
 	},
-	methods:{
+	methods: {
 		// externals
 		checkDataOptions,
 		colorAdjustBg,
@@ -959,108 +940,108 @@ export default {
 
 		handleKeydownLocal(ev) {
 			let focusTarget = null;
-			let arrow       = false;
-			
-			switch(ev.code) {
-				case 'ArrowDown': arrow = true; focusTarget = ev.target.nextElementSibling;     break;
-				case 'ArrowUp':   arrow = true; focusTarget = ev.target.previousElementSibling; break;
-				case 'Escape':    return this.escape(ev); break;
+			let arrow = false;
+
+			switch (ev.code) {
+				case 'ArrowDown': arrow = true; focusTarget = ev.target.nextElementSibling; break;
+				case 'ArrowUp': arrow = true; focusTarget = ev.target.previousElementSibling; break;
+				case 'Escape': return this.escape(ev);
 			}
 
 			// deal with arrow key in input if dropdown is available
-			if(arrow && this.isInput && !this.showAllValues) {
-				
-				if(!this.dropdownShow) {
+			if (arrow && this.isInput && !this.showAllValues) {
+
+				if (!this.dropdownShow) {
 					ev.preventDefault();
-					return this.$emit('dropdown-show',true);
+					return this.$emit('dropdown-show', true);
 				}
 
-				if(focusTarget !== null && focusTarget.tabIndex !== -1) {
+				if (focusTarget !== null && focusTarget.tabIndex !== -1) {
 					ev.preventDefault();
 					return focusTarget.focus();
 				}
 
 				// focus first/last input element
-				if(this.dropdownShow && this.rows.length !== 0) {
+				if (this.dropdownShow && this.rows.length !== 0) {
 					ev.preventDefault();
 
-					return ev.target !== this.$refs[this.refTabindex+'0'][0]
-						? this.$refs[this.refTabindex+'0'][0].focus()
-						: this.$refs[this.refTabindex+String(this.rows.length-1)][0].focus();
+					return ev.target !== this.$refs[`${this.refTabindex}0`][0]
+						? this.$refs[`${this.refTabindex}0`][0].focus()
+						: this.$refs[`${this.refTabindex}${String(this.rows.length - 1)}`][0].focus();
 				}
 			}
 		},
 		updateRecordIdsLoaded() {
-			let indexMapRecordIds = {};
-			for(const j of this.joins) {
+			const indexMapRecordIds = {};
+			for (const j of this.joins) {
 				indexMapRecordIds[j.index] = [];
 			}
-			for(const r of this.rows) {
-				for(const ind in r.indexRecordIds) {
-					if(r.indexRecordIds[ind] !== null)
+			for (const r of this.rows) {
+				for (const ind in r.indexRecordIds) {
+					if (r.indexRecordIds[ind] !== null)
 						indexMapRecordIds[ind].push(r.indexRecordIds[ind]);
 				}
 			}
-			this.$emit('set-index-record-ids',indexMapRecordIds);
-			this.$emit('record-count-change',this.count);
+			this.$emit('set-index-record-ids', indexMapRecordIds);
+			this.$emit('record-count-change', this.count);
 		},
-		
+
 		// presentation
 		displayColorColumn(color) {
-			if(color === null) return '';
-			
-			let bg   = this.colorAdjustBg(color);
-			let font = this.colorMakeContrastFont(bg);
+			if (color === null) return '';
+
+			const bg = this.colorAdjustBg(color);
+			const font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},
 		resized() {
-			if(this.headerCheckTimer !== null)
+			if (this.headerCheckTimer !== null)
 				clearTimeout(this.headerCheckTimer);
-			
+
 			this.headerCheckTimer = setTimeout(() => {
 				this.headerElements = JSON.parse(JSON.stringify(this.headerElementsAvailableInOrder));
-				this.$nextTick(() => this.layoutSettleSpace(this.headerElements,this.$refs.empty));
-			},200);
+				this.$nextTick(() => this.layoutSettleSpace(this.headerElements, this.$refs.empty));
+			}, 200);
 		},
-		
+
 		// reloads
 		reloadAggregations(nextTick) {
-			if(!this.isTable || typeof this.$refs.aggregations === 'undefined' || this.$refs.aggregations === null)
+			if (!this.isTable || typeof this.$refs.aggregations === 'undefined' || this.$refs.aggregations === null)
 				return;
 
-			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
-			else         this.$refs.aggregations.get();
+			if (nextTick) this.$nextTick(this.$refs.aggregations.get);
+			else this.$refs.aggregations.get();
 		},
 		reloadOutside() {
-			if(this.isInput) this.getInput();
-			else             this.get();
+			if (this.isInput) this.getInput();
+			else this.get();
 		},
-		
+
 		// parsing
 		paramsUpdate(pushHistory) {
-			if(this.usesPageHistory)
-				this.$emit('set-args',this.offset !== 0 ? [`offset=${this.offset}`] : [],pushHistory);
+			if (this.usesPageHistory)
+				this.$emit('set-args', this.offset !== 0 ? [`offset=${this.offset}`] : [], pushHistory);
 		},
 		paramsUpdated(reloadIfChanged) {
-			let params = { offset:{ parse:'int', value:0 } };
+			const params = { offset: { parse: 'int', value: 0 } };
 			this.routeParseParams(params);
-			
-			if(this.offset !== params.offset.value) {
+
+			if (this.offset !== params.offset.value) {
 				this.offset = params.offset.value;
 
-				if(reloadIfChanged)
+				if (reloadIfChanged)
 					this.get();
 			}
 		},
-		
+
 		// user actions, generic
 		clearAutoRenewTimer() {
-			if(this.autoRenewTimer !== null)
+			if (this.autoRenewTimer !== null)
 				clearInterval(this.autoRenewTimer);
 		},
-		clickOpen(row,middleClick) {
-			if(this.hasUpdate) {
-				this.$emit('open-form',[row],middleClick);
+		clickOpen(row, middleClick) {
+			if (this.hasUpdate) {
+				this.$emit('open-form', [row], middleClick);
 				this.escape();
 			}
 		},
@@ -1068,81 +1049,81 @@ export default {
 			this.$emit('close-inline');
 		},
 		clickInputEmpty() {
-			if(!this.inputIsReadonly && !this.dropdownShow)
-				this.$emit('dropdown-show',true);
+			if (!this.inputIsReadonly && !this.dropdownShow)
+				this.$emit('dropdown-show', true);
 		},
 		clickInputRow() {
-			if(!this.inputIsReadonly && !this.showAllValues && (!this.showInputAddLine || this.inputMulti))
-				this.$emit('dropdown-show',!this.dropdownShow);
+			if (!this.inputIsReadonly && !this.showAllValues && (!this.showInputAddLine || this.inputMulti))
+				this.$emit('dropdown-show', !this.dropdownShow);
 		},
-		clickRow(row,middleClick) {
-			if(!this.isInput)
-				return this.clickOpen(row,middleClick);
-			
-			if(this.inputMulti) this.rowsInput.push(row);
-			else                this.rowsInput = [row];
+		clickRow(row, middleClick) {
+			if (!this.isInput)
+				return this.clickOpen(row, middleClick);
 
-			this.$emit('dropdown-show',false);
+			if (this.inputMulti) this.rowsInput.push(row);
+			else this.rowsInput = [row];
+
+			this.$emit('dropdown-show', false);
 			this.filtersQuick = '';
-			this.$emit('records-selected',[row.indexRecordIds['0']]);
+			this.$emit('records-selected', [row.indexRecordIds['0']]);
 		},
 		clickRowAll() {
-			let ids = [];
-			for(const row of this.rows) {
+			const ids = [];
+			for (const row of this.rows) {
 				ids.push(row.indexRecordIds['0']);
 			}
 			this.rowsInput = this.rowsInput.concat(this.rows);
 			this.filtersQuick = '';
-			this.$emit('dropdown-show',false);
-			this.$emit('records-selected',ids);
+			this.$emit('dropdown-show', false);
+			this.$emit('records-selected', ids);
 		},
 		closeHover() {
-			this.showCsv     = false;
+			this.showCsv = false;
 			this.showFilters = false;
 			this.showOptions = false;
 		},
 		escape(ev) {
 			const somethingToClose = (this.isInput && this.dropdownShow) || this.showHover;
 
-			if(this.isInput) {
+			if (this.isInput) {
 				this.focused = false;
-				if(this.dropdownShow)
-					this.$emit('dropdown-show',false);
+				if (this.dropdownShow)
+					this.$emit('dropdown-show', false);
 			}
-			if(this.showHover) {
-				this.showCsv     = false;
+			if (this.showHover) {
+				this.showCsv = false;
 				this.showFilters = false;
 				this.showOptions = false;
 			}
-			if(somethingToClose && ev !== undefined) {
+			if (somethingToClose && ev !== undefined) {
 				ev.stopPropagation();
 				ev.preventDefault();
 			}
 		},
 		focus() {
-			if(!this.inputIsReadonly && this.isInput && !this.showAllValues && !this.dropdownShow) {
-				this.focused      = true;
+			if (!this.inputIsReadonly && this.isInput && !this.showAllValues && !this.dropdownShow) {
+				this.focused = true;
 				this.filtersQuick = '';
 			}
 		},
 		focusOnInput() {
 			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
-			if(inputEl !== null)
+			if (inputEl !== null)
 				inputEl.focus();
 		},
 		resetColumns() {
-			this.setColumnBatchSort([[],[]]);
+			this.setColumnBatchSort([[], []]);
 			// setting columns will reload data & aggregations
-			this.$nextTick(() => this.$emit('set-column-ids-by-user',[]));
+			this.$nextTick(() => this.$emit('set-column-ids-by-user', []));
 		},
-		setAggregators(columnId,aggregator) {
-			if(!this.isTable) return;
+		setAggregators(columnId, aggregator) {
+			if (!this.isTable) return;
 			let v = JSON.parse(JSON.stringify(this.columnIdMapAggr));
-			
-			if(aggregator !== null) v[columnId] = aggregator;
-			else                    delete(v[columnId]);
-			
-			this.$emit('set-login-option','columnIdMapAggr',v);
+
+			if (aggregator !== null) v[columnId] = aggregator;
+			else delete (v[columnId]);
+
+			this.$emit('set-login-option', 'columnIdMapAggr', v);
 			this.reloadAggregations(true);
 		},
 		setAutoRenewTimer(v) {
@@ -1150,69 +1131,69 @@ export default {
 
 			// we use -1 instead of null to define disabled auto renew
 			// NULL is removed as field option, making it impossible to disable the default setting
-			if(v !== -1) {
+			if (v !== -1) {
 				// apply min. interval
-				if(v < 10) v = 10;
+				if (v < 10) v = 10;
 
-				this.autoRenewTimer = setInterval(this.get,v * 1000);
+				this.autoRenewTimer = setInterval(this.get, v * 1000);
 			}
 
-			if(v !== this.autoRenew)
-				this.$emit('set-login-option','autoRenew',v);
+			if (v !== this.autoRenew)
+				this.$emit('set-login-option', 'autoRenew', v);
 		},
 		setColumnBatchSort(v) {
-			this.$emit('set-login-option','columnBatchSort',v);
+			this.$emit('set-login-option', 'columnBatchSort', v);
 			this.reloadAggregations(true);
 		},
 		setColumnFilters(v) {
-			this.$emit('set-login-option','filtersColumn',v);
+			this.$emit('set-login-option', 'filtersColumn', v);
 		},
-		setLoginOption(name,v) {
-			this.$emit('set-login-option',name,v);
+		setLoginOption(name, v) {
+			this.$emit('set-login-option', name, v);
 		},
 		setOffsetAndReload(v) {
 			this.offset = v;
 			this.get();
 		},
-		setOffsetParamAndReload(v,pushHistory) {
+		setOffsetParamAndReload(v, pushHistory) {
 			this.setOffsetAndReload(v);
 			this.paramsUpdate(pushHistory);
 		},
-		setOrder(columnBatch,directionAsc,clearAllBefore) {
+		setOrder(columnBatch, directionAsc, clearAllBefore) {
 			// remove initial sorting (if active) when changing anything
 			let orders = this.isOrderedOrginal ? [] : JSON.parse(JSON.stringify(this.orders));
 
-			if(clearAllBefore)
+			if (clearAllBefore)
 				orders = [];
-			
-			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,orders);
-			const notOrdered       = orderIndexesUsed.length === 0;
-			if(notOrdered) {
-				if(directionAsc === null)
+
+			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch, this.columns, orders);
+			const notOrdered = orderIndexesUsed.length === 0;
+			if (notOrdered) {
+				if (directionAsc === null)
 					return; // not ordered and nothing to order, no change
-				
-				for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
+
+				for (const columnIndexSort of columnBatch.columnIndexesSortBy) {
 					const col = this.columns[columnIndexSort];
-					if(col.content === 'attribute') {
+					if (col.content === 'attribute') {
 						orders.push({
-							ascending:directionAsc,
-							attributeId:col.attributeId,
-							index:col.index
+							ascending: directionAsc,
+							attributeId: col.attributeId,
+							index: col.index
 						});
 					}
 					else {
 						orders.push({
-							ascending:directionAsc,
-							expressionPos:columnIndexSort // equal to expression index
+							ascending: directionAsc,
+							expressionPos: columnIndexSort // equal to expression index
 						});
 					}
 				}
 			} else {
-				if(directionAsc === null) {
-					orders = orders.filter((v,i) => !orderIndexesUsed.includes(i));
+				if (directionAsc === null) {
+					orders = orders.filter((v, i) => !orderIndexesUsed.includes(i));
 				} else {
-					for(const orderIndex of orderIndexesUsed) {
-						if(orders[orderIndex].ascending !== directionAsc)
+					for (const orderIndex of orderIndexesUsed) {
+						if (orders[orderIndex].ascending !== directionAsc)
 							orders[orderIndex].ascending = directionAsc;
 					}
 				}
@@ -1221,30 +1202,30 @@ export default {
 			this.setOrders(orders.length === 0 ? this.ordersOriginal : orders);
 		},
 		setOrders(v) {
-			this.$emit('set-login-option','orders',v);
+			this.$emit('set-login-option', 'orders', v);
 		},
 		setUserFilters(v) {
-			this.$emit('set-login-option','filtersUser',v);
+			this.$emit('set-login-option', 'filtersUser', v);
 		},
 		toggleHeader() {
-			this.$emit('set-login-option','header',!this.showHeader);
+			this.$emit('set-login-option', 'header', !this.showHeader);
 			this.$store.commit('appResized');
 		},
 		updatedTextInput(event) {
-			if(event.code === 'Tab' || event.code === 'Escape')
+			if (event.code === 'Tab' || event.code === 'Escape')
 				return;
-			
+
 			// any input opens table (dropdown) if not open already
-			if(!this.dropdownShow) {
-				this.$emit('dropdown-show',true);
+			if (!this.dropdownShow) {
+				this.$emit('dropdown-show', true);
 			}
-			else if(event.code === 'Enter') {
-				
+			else if (event.code === 'Enter') {
+
 				// if open already, enter can select first result
-				if(this.rows.length !== 0)
-					this.clickRow(this.rows[0],false);
-				
-				this.$emit('dropdown-show',false);
+				if (this.rows.length !== 0)
+					this.clickRow(this.rows[0], false);
+
+				this.$emit('dropdown-show', false);
 			}
 			else {
 				// table already open -> reload
@@ -1252,61 +1233,61 @@ export default {
 			}
 		},
 		updatedFilterQuick() {
-			if(this.isInput && !this.dropdownShow)
-				return this.$emit('dropdown-show',true);
-			
+			if (this.isInput && !this.dropdownShow)
+				return this.$emit('dropdown-show', true);
+
 			this.offset = 0;
-			
-			if(!this.rowsFetching)
+
+			if (!this.rowsFetching)
 				this.get();
 		},
-		
+
 		// user actions, cards layout
 		cardsSetOrderBy(columnBatchIndexStr) {
-			const columnBatchIndex = parseInt(columnBatchIndexStr);
+			const columnBatchIndex = parseInt(columnBatchIndexStr, 10);
 			this.cardsOrderByColumnBatchIndex = columnBatchIndex;
-			if(columnBatchIndex !== -1)
-				this.setOrder(this.columnBatches[columnBatchIndex],true,true);
+			if (columnBatchIndex !== -1)
+				this.setOrder(this.columnBatches[columnBatchIndex], true, true);
 			else
 				this.setOrders(this.ordersOriginal);
 		},
 		cardsToggleOrderBy() {
 			const wasAsc = this.orders[0].ascending;
-			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc,true);
+			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex], !wasAsc, true);
 		},
-		
+
 		// user actions, inputs
 		inputTriggerRow(row) {
-			if(this.showAllValues && !this.inputIsReadonly) {
+			if (this.showAllValues && !this.inputIsReadonly) {
 				const id = row.indexRecordIds['0'];
 
-				if(this.inputRecordIds.includes(id)) this.$emit('record-removed', id);
-				else                                 this.$emit('records-selected', [id]);
+				if (this.inputRecordIds.includes(id)) this.$emit('record-removed', id);
+				else this.$emit('records-selected', [id]);
 			}
 			this.focus();
 		},
 		inputTriggerRowRemove(i) {
-			this.$emit('record-removed',this.rowsInput[i].indexRecordIds['0']);
-			this.rowsInput.splice(i,1);
+			this.$emit('record-removed', this.rowsInput[i].indexRecordIds['0']);
+			this.rowsInput.splice(i, 1);
 			this.escape();
 			this.$nextTick(this.focusOnInput);
 		},
 
 		// cleanup
 		removeInvalidFilters() {
-			const f = (filters,columns,fncUpdate) => {
-				let out = [];
+			const f = (filters, columns, fncUpdate) => {
+				const out = [];
 				let br0 = 0;
 				let br1 = 0;
-				for(const f of filters) {
+				for (const f of filters) {
 					br0 += f.side0.brackets;
 					br1 += f.side1.brackets;
-	
+
 					// only allow filters based on available columns (only side0 is relevant for user/column filters)
-					for(const c of columns) {
-						if(
-							(c.content === 'attribute'  && c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) ||
-							(c.content === 'fnc_pg'     && c.pgFunctionId === f.side0.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments)) ||
+					for (const c of columns) {
+						if (
+							(c.content === 'attribute' && c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) ||
+							(c.content === 'fnc_pg' && c.pgFunctionId === f.side0.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments)) ||
 							(c.content === 'fnc_scalar' && c.scalar === f.side0.scalar && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments))
 						) {
 							out.push(f)
@@ -1314,236 +1295,237 @@ export default {
 						}
 					}
 				}
-				if(br0 !== br1) // brackets do not match, remove all filters
+				if (br0 !== br1) // brackets do not match, remove all filters
 					return fncUpdate([]);
 
-				if(out.length !== filters.length) // some filters were removed, update
+				if (out.length !== filters.length) // some filters were removed, update
 					fncUpdate(out);
 			};
-			f(this.filtersColumn,this.columns,this.setColumnFilters);
-			f(this.filtersUser,this.columnsAll,this.setUserFilters);
+			f(this.filtersColumn, this.columns, this.setColumnFilters);
+			f(this.filtersUser, this.columnsAll, this.setUserFilters);
 		},
 		removeInvalidOrders() {
-			if(this.isOrderedOrginal) return;
+			if (this.isOrderedOrginal) return;
 
-			for(const o of this.orders) {
+			for (const o of this.orders) {
 				// order by expression position (= index of retrieved columns), is used for non-attribute columns
-				if(typeof o.expressionPos !== 'undefined') {
+				if (typeof o.expressionPos !== 'undefined') {
 
 					// order is invalid, if column index does not exist or column is a attribute
-					if(o.expressionPos > this.columns.length - 1 || this.columns[o.expressionPos].content === 'attribute')
+					if (o.expressionPos > this.columns.length - 1 || this.columns[o.expressionPos].content === 'attribute')
 						return this.setOrders(this.ordersOriginal);
-					
+
 					continue;
 				}
 
 				// order by attribute ID + relation index, check if corresponding column is displayed
 				// only displayed columns are retrieved, any user-defined order must be visible to be removable by the user
 				let columnFound = false;
-				for(const c of this.columns) {
-					if(o.index === c.index && o.attributeId === c.attributeId) {
+				for (const c of this.columns) {
+					if (o.index === c.index && o.attributeId === c.attributeId) {
 						columnFound = true;
 						break;
 					}
 				}
 
 				// order is invalid if corresponding column is not displayed
-				if(!columnFound)
+				if (!columnFound)
 					return this.setOrders(this.ordersOriginal);
 			}
 		},
-		
+
 		// bulk selection
 		selectRow(rowIndex) {
-			let pos = this.selectedRows.indexOf(rowIndex);
-			if(pos === -1) this.selectedRows.push(rowIndex);
-			else           this.selectedRows.splice(pos,1);
+			const pos = this.selectedRows.indexOf(rowIndex);
+			if (pos === -1) this.selectedRows.push(rowIndex);
+			else this.selectedRows.splice(pos, 1);
 		},
 		selectReset() {
 			this.selectedRows = [];
 		},
 		selectRowsAllToggle() {
-			if(this.rows.length === this.selectedRows.length) {
+			if (this.rows.length === this.selectedRows.length) {
 				this.selectedRows = [];
 				return;
 			}
-			
 			this.selectedRows = [];
-			for(let i = 0, j = this.rows.length; i < j; i++) {
+			for (let i = 0, j = this.rows.length; i < j; i++) {
 				this.selectedRows.push(i);
 			}
 		},
 		selectRowsBulkEdit(rowIndexes) {
-			let rows = [];
-			for(let rowIndex of rowIndexes) {
+			const rows = [];
+			for (const rowIndex of rowIndexes) {
 				rows.push(this.rows[rowIndex]);
 			}
-			if(this.hasUpdateBulk && rows.length !== 0)
-				this.$emit('open-form-bulk',rows,false);
+			if (this.hasUpdateBulk && rows.length !== 0)
+				this.$emit('open-form-bulk', rows, false);
 		},
-		
+
 		// backend calls
 		delAsk(rowIndexes) {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png',
-					params:[rowIndexes]
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
+			this.$store.commit('dialog', {
+				captionBody: this.capApp.dialog.delete,
+				buttons: [{
+					cancel: true,
+					caption: this.capGen.button.delete,
+					exec: this.del,
+					image: 'delete.png',
+					params: [rowIndexes]
+				}, {
+					caption: this.capGen.button.cancel,
+					image: 'cancel.png'
 				}]
 			});
 		},
 		del(rowIndexes) {
-			let requests = [];
-			for(let j of this.joins) {
-				if(!j.applyDelete)
+			const requests = [];
+			for (const j of this.joins) {
+				if (!j.applyDelete)
 					continue;
-				
+
 				// specific rows selected
-				for(let rowIndex of rowIndexes) {
-					let r = this.rows[rowIndex];
-					
-					if(r.indexRecordIds[j.index] === 0)
+				for (const rowIndex of rowIndexes) {
+					const r = this.rows[rowIndex];
+
+					if (r.indexRecordIds[j.index] === 0)
 						continue;
-					
-					requests.push(ws.prepare('data','del',{
-						relationId:j.relationId,
-						recordId:r.indexRecordIds[j.index]
+
+					requests.push(ws.prepare('data', 'del', {
+						relationId: j.relationId,
+						recordId: r.indexRecordIds[j.index]
 					}));
 				}
 			}
-			ws.sendMultiple(requests,true).then(
+			ws.sendMultiple(requests, true).then(
 				this.get,
 				this.$root.genericError
 			);
 		},
 		get() {
 			// do nothing if nothing is shown, form is loading or list is in a non-visible tab
-			if(this.formLoading || (this.isInput && !this.dropdownShow) || (this.isHidden && !this.loadWhileHidden))
+			if (this.formLoading || (this.isInput && !this.dropdownShow) || (this.isHidden && !this.loadWhileHidden))
 				return;
-			
+
 			// fix invalid offset (can occur when limit is changed)
-			if(this.offset !== 0 && this.offset % this.limit !== 0)
-				return this.setOffsetParamAndReload(this.offset -= this.offset % this.limit,false);
-			
+			if (this.offset !== 0 && this.offset % this.limit !== 0) {
+				this.offset -= this.offset % this.limit;
+				return this.setOffsetParamAndReload(this.offset, false);
+			}
+
 			this.rowsFetching = true;
-			ws.send('data','get',{
-				relationId:this.query.relationId,
-				joins:this.relationsJoined,
-				expressions:this.expressions,
-				filters:this.filtersCombined,
-				orders:this.orders,
-				limit:this.limit,
-				offset:this.offset,
-				getIds:true
-			},this.blockDuringLoad).then(
+			ws.send('data', 'get', {
+				relationId: this.query.relationId,
+				joins: this.relationsJoined,
+				expressions: this.expressions,
+				filters: this.filtersCombined,
+				orders: this.orders,
+				limit: this.limit,
+				offset: this.offset,
+				getIds: true
+			}, this.blockDuringLoad).then(
 				res => {
 					const count = res.payload.count;
-					this.getRowsDecrypted(res.payload.rows,this.expressions).then(
+					this.getRowsDecrypted(res.payload.rows, this.expressions).then(
 						rows => {
 							this.count = count;
-							this.rows  = rows;
+							this.rows = rows;
 							this.selectReset();
 							this.reloadAggregations(false);
 							this.updateRecordIdsLoaded();
 						},
 						this.consoleError
 					);
-					
+
 				},
 				this.$root.genericError
 			).finally(() => this.rowsFetching = false);
 		},
 		getInput() {
 			// nothing to get if form is currently loading
-			if(this.formLoading)
+			if (this.formLoading)
 				return;
-			
+
 			// reload record representation
 			// must happen even if no GET is executed (clear inputs)
 			// if list is reloaded, close dropdown
 			this.rowsInput = [];
 
-			if(this.dropdownShow)
+			if (this.dropdownShow)
 				this.get();
-			
+
 			// for inputs we only need data if:
 			// * field shows all values
 			// * auto select is active
 			// * input has records to get data for
-			if(!this.showAllValues && !this.autoSelect && !this.anyInputRows)
+			if (!this.showAllValues && !this.autoSelect && !this.anyInputRows)
 				return;
-			
+
 			// apply input filters (all but choice filters, which should never affect input display)
 			// input filters cannot be ignored even in readonly contexts (such as log viewer)
 			//  reason: input filters may resolve 1:n relationships (like translations)
-			let filters = JSON.parse(JSON.stringify(this.filtersInput));
-			
-			if(!this.showAllValues && this.anyInputRows)
+			const filters = JSON.parse(JSON.stringify(this.filtersInput));
+
+			if (!this.showAllValues && this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
-					this.query.relationId,this.inputRecordIds,0,false
+					this.query.relationId, this.inputRecordIds, 0, false
 				));
-			
-			ws.send('data','get',{
-				relationId:this.query.relationId,
-				joins:this.relationsJoined,
-				expressions:this.expressions,
-				filters:filters,
-				orders:this.orders,
-				getIds:true
-			},false).then(
+
+			ws.send('data', 'get', {
+				relationId: this.query.relationId,
+				joins: this.relationsJoined,
+				expressions: this.expressions,
+				filters: filters,
+				orders: this.orders,
+				getIds: true
+			}, false).then(
 				res => {
 					// apply results to input rows if all values are shown or specific record IDs were retrieved
-					if(this.showAllValues || this.anyInputRows)
-						this.getRowsDecrypted(res.payload.rows,this.expressions).then(
+					if (this.showAllValues || this.anyInputRows)
+						this.getRowsDecrypted(res.payload.rows, this.expressions).then(
 							rows => this.rowsInput = rows,
 							this.consoleError
 						);
-					
+
 					// remove invalid records (due to field filters)
-					let recordIdsValid = [];
+					const recordIdsValid = [];
 					let recordsRemoved = 0;
-					for(const row of res.payload.rows) {
+					for (const row of res.payload.rows) {
 						recordIdsValid.push(row.indexRecordIds['0']);
 					}
-					
-					for(const recordId of this.inputRecordIds) {
-						if(!recordIdsValid.includes(recordId)) {
-							this.$emit('record-removed',recordId);
+
+					for (const recordId of this.inputRecordIds) {
+						if (!recordIdsValid.includes(recordId)) {
+							this.$emit('record-removed', recordId);
 							recordsRemoved++;
 						}
 					}
-					
+
 					// auto-selection of records
 					// only if nothing was selected or entire selection was invalid
-					if(this.autoSelect && (this.inputRecordIds.length - recordsRemoved) === 0) {
-						
+					if (this.autoSelect && (this.inputRecordIds.length - recordsRemoved) === 0) {
+
 						// select first/last X records
-						let ids = [];
-						if(this.inputAutoSelect > 0) {
-							for(let i = 0; i < this.inputAutoSelect; i++) {
-								if(res.payload.rows.length - 1 < i)
+						const ids = [];
+						if (this.inputAutoSelect > 0) {
+							for (let i = 0; i < this.inputAutoSelect; i++) {
+								if (res.payload.rows.length - 1 < i)
 									break;
-								
+
 								ids.push(res.payload.rows[i].indexRecordIds['0']);
 							}
 						}
 						else {
-							for(let i = 0; i > this.inputAutoSelect; i--) {
-								if(res.payload.rows.length - 1 + i < 0)
+							for (let i = 0; i > this.inputAutoSelect; i--) {
+								if (res.payload.rows.length - 1 + i < 0)
 									break;
-								
+
 								ids.push(res.payload.rows[res.payload.rows.length - 1 + i].indexRecordIds['0']);
 							}
 						}
-						if(ids.length !== 0)
-							this.$emit('records-selected-original',this.inputMulti ? ids : ids[0]);
-						
+						if (ids.length !== 0)
+							this.$emit('records-selected-original', this.inputMulti ? ids : ids[0]);
+
 						this.inputAutoSelectDone = true;
 					}
 				},

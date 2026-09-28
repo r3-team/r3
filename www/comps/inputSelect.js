@@ -1,11 +1,11 @@
 export default {
-	name:'my-input-select',
-	template:`<div class="input-select"
+	name: 'my-input-select',
+	template: `<div class="input-select"
 		@keydown.esc="escape"
 		v-click-outside="escape"
 	>
 		<div class="part row gap" @click="toggle" :class="{ clickable:!readonly }">
-			<input class="input" data-is-input="1" type="text"
+			<input class="field-input" data-is-input="1" type="text"
 				v-model="textInput"
 				@focus="$emit('focused')"
 				@keyup="inputChange"
@@ -15,7 +15,7 @@ export default {
 				:placeholder="placeholder"
 				:tabindex="!readonly ? 0 : -1"
 			/>
-			
+
 			<div class="row centered gap">
 				<my-button
 					v-if="showOpen"
@@ -55,82 +55,82 @@ export default {
 			</div>
 		</teleport>
 	</div>`,
-	props:{
-		dropdownShow:{ type:Boolean, required:false, default:false },
-		inputTextSet:{ type:String,  required:false, default:'' },
-		nakedIcons:  { type:Boolean, required:false, default:true },
-		options:     { type:Array,   required:false, default:() => [] }, // options: [{'id':12,'name':'Hans-Martin'},{...}]
-		placeholder: { type:String,  required:false, default:'' },
-		readonly:    { type:Boolean, required:false, default:false },
-		selected:    { required:false, default:null },                   // selected option ID (as in: 12)
-		showOpen:    { type:Boolean, required:false, default:false }
+	props: {
+		dropdownShow: { type: Boolean, required: false, default: false },
+		inputTextSet: { type: String, required: false, default: '' },
+		nakedIcons: { type: Boolean, required: false, default: true },
+		options: { type: Array, required: false, default: () => [] }, // options: [{'id':12,'name':'Hans-Martin'},{...}]
+		placeholder: { type: String, required: false, default: '' },
+		readonly: { type: Boolean, required: false, default: false },
+		selected: { required: false, default: null },                   // selected option ID (as in: 12)
+		showOpen: { type: Boolean, required: false, default: false }
 	},
-	emits:['blurred','dropdown-show','focused','open','request-data','updated-text-input','update:selected'],
+	emits: ['blurred', 'dropdown-show', 'focused', 'open', 'request-data', 'updated-text-input', 'update:selected'],
 	data() {
 		return {
-			limit:10,    // fixed result limit
-			textInput:'' // text line input
+			limit: 10,    // fixed result limit
+			textInput: '' // text line input
 		};
 	},
-	watch:{
-		inputTextSet:{
+	watch: {
+		inputTextSet: {
 			handler(v) { this.textInput = v; },
-			immediate:true
+			immediate: true
 		}
 	},
-	computed:{
-		hasValue:(s) => s.selected !== null,
-		
+	computed: {
+		hasValue: s => s.selected !== null,
+
 		// stores
-		capGen:  (s) => s.$store.getters.captions.generic,
-		settings:(s) => s.$store.getters.settings
+		capGen: s => s.$store.getters.captions.generic,
+		settings: s => s.$store.getters.settings
 	},
-	methods:{
+	methods: {
 		apply(i) {
-			this.$emit('update:selected',this.options[i].id);
-			this.$emit('dropdown-show',false);
+			this.$emit('update:selected', this.options[i].id);
+			this.$emit('dropdown-show', false);
 		},
 		clear() {
-			this.$emit('update:selected',null);
+			this.$emit('update:selected', null);
 		},
 		enter() {
-			if(!this.dropdownShow)
+			if (!this.dropdownShow)
 				return this.openDropdown();
-			
+
 			// if dropdown is shown, apply first result
-			if(this.options.length > 0)
+			if (this.options.length > 0)
 				this.apply(0);
 		},
 		escape(ev) {
 			this.$emit('blurred');
 
-			if(this.dropdownShow) {
-				this.$emit('dropdown-show',false);
+			if (this.dropdownShow) {
+				this.$emit('dropdown-show', false);
 
-				if(ev !== undefined) {
+				if (ev !== undefined) {
 					ev.preventDefault();
 					ev.stopPropagation();
 				}
 			}
 		},
 		inputChange() {
-			if(!this.dropdownShow && this.textInput === '')
+			if (!this.dropdownShow && this.textInput === '')
 				return;
-			
-			this.$emit('updated-text-input',this.textInput);
+
+			this.$emit('updated-text-input', this.textInput);
 			this.openDropdown();
 		},
 		openDropdown() {
-			this.$emit('dropdown-show',true);
+			this.$emit('dropdown-show', true);
 			this.$emit('request-data');
 		},
 		toggle() {
-			if(this.readonly)
+			if (this.readonly)
 				return;
-			
-			if(this.dropdownShow)
-				return this.$emit('dropdown-show',false);
-			
+
+			if (this.dropdownShow)
+				return this.$emit('dropdown-show', false);
+
 			this.openDropdown();
 		}
 	}

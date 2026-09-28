@@ -235,7 +235,7 @@ export default {
 
 		// actions
 		setCacheDenialTimestamp() {
-			this.cacheDenialTimestamp = Math.floor(Date().now() / 1000);
+			this.cacheDenialTimestamp = Math.floor(Date.now() / 1000);
 		},
 		setFile(evt) {
 			this.fileElm = evt.target;

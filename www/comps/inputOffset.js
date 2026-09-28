@@ -1,35 +1,54 @@
+import MyInputDecimal from './inputDecimal.js';
+
 export default {
 	name: 'my-input-offset',
+	components: { MyInputDecimal },
 	template: `<div class="my-input-offset default-inputs">
 		<!-- prev page -->
 		<my-button image="pagePrev.png"
 			v-if="arrows && limit < total"
 			@trigger="pageChange(false)"
-			@triggerShift="pageSetFirst"
+			@triggerRight="pageSetFirst"
 			:active="offset !== 0"
 			:naked="true"
 		/>
 
-		<!-- offset selector: dropdown -->
-		<select class="auto"
-			v-if="offsetSelectShow"
-			v-model="offsetSelect"
-			:class="classInput"
-			:title="captionText"
-		>
-			<option v-for="n in pages" :class="{ currentPage:n === pageCurr }" :key="n" :value="(n-1)*limit">
-				{{ displayOffset(n) }}
-			</option>
-		</select>
+		<template v-if="inputAsPageNo">
+			<!-- offset selector: page no input -->
+			<div class="row gap centered default-inputs" v-if="offsetShow">
+				<span>{{ capGen.page }}</span>
+				<my-input-decimal class="short"
+					v-model="offsetInput"
+					:allowNull="true"
+					:lengthFract="0"
+					:max="pageCountTotal"
+					:min="1"
+					:size="offsetInputSize"
+				/>
+			</div>
+			<div v-if="caption" class="my-input-offset-caption">{{ captionTextInput }}</div>
+		</template>
 
-		<!-- optional caption -->
-		<div v-if="caption" class="my-input-offset-caption">{{ captionText }}</div>
+		<template v-if="!inputAsPageNo">
+			<!-- offset selector: results dropdown -->
+			<select class="auto"
+				v-if="offsetShow"
+				v-model="offsetSelect"
+				:class="classInput"
+				:title="captionTextSelect"
+			>
+				<option v-for="n in pages" :class="{ currentPage:n === pageCurr }" :key="n" :value="(n-1)*limit">
+					{{ displayOffset(n) }}
+				</option>
+			</select>
+			<div v-if="caption" class="my-input-offset-caption">{{ captionTextSelect }}</div>
+		</template>
 
 		<!-- next page -->
 		<my-button image="pageNext.png"
 			v-if="arrows && limit < total"
 			@trigger="pageChange(true)"
-			@triggerShift="pageSetLast"
+			@triggerRight="pageSetLast"
 			:active="(offset + limit) < total"
 			:naked="true"
 		/>
@@ -38,15 +57,18 @@ export default {
 		arrows: { type: Boolean, required: false, default: true },
 		caption: { type: Boolean, required: false, default: false },
 		classInput: { type: String, required: false, default: '' },
+		inputAsPageNo: { type: Boolean, required: false, default: false },
 		limit: { type: Number, required: true },
 		offset: { type: Number, required: true },
 		total: { type: Number, required: true }
 	},
 	emits: ['input'],
 	computed: {
-		captionText: s => s.offsetSelectShow ? s.capGen.resultsOf.replace('{CNT}', s.total) : s.capGen.results.replace('{CNT}', s.total),
-		offsetSelectShow: s => s.total > s.limit || s.offset !== 0,
-		pageCountTotal: s => s.total % s.limit === 0 ? parseInt(s.total / s.limit, 10) : parseInt(s.total / s.limit, 10) + 1,
+		captionTextInput: s => s.offsetShow ? s.capGen.resultsOf.replace('{CNT}', s.pageCountTotal) : s.capGen.results.replace('{CNT}', s.total),
+		captionTextSelect: s => s.offsetShow ? s.capGen.resultsOf.replace('{CNT}', s.total) : s.capGen.results.replace('{CNT}', s.total),
+		offsetInputSize: s => String(s.pageCountTotal).length,
+		offsetShow: s => s.total > s.limit || s.offset !== 0,
+		pageCountTotal: s => Math.ceil(s.total / s.limit, 10),
 		pageCurr: s => parseInt(Math.ceil((s.offset + 1) / s.limit), 10),
 		pageLast: s => parseInt(Math.ceil((s.total) / s.limit), 10),
 		pages: s => {
@@ -64,6 +86,13 @@ export default {
 		},
 
 		// inputs
+		offsetInput: {
+			get() { return (this.offset / this.limit) + 1; },
+			set(v) {
+				if (v !== null && v !== 0 && v <= this.pageCountTotal)
+					this.$emit('input', (v - 1) * this.limit);
+			}
+		},
 		offsetSelect: {
 			get() { return this.offset; },
 			set(v) { this.$emit('input', v); }

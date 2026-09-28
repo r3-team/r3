@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "إضافة/تحرير ملف الرمز",
 			"addHelp": "ملفات PNG فقط بحد أقصى. ",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "اسم الرمز الاختياري",
 			"title": "أيقونات"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "الهاتف المحمول: قم بتمرير النموذج بأكمله",
 		"nodeName": "متصل بـ: {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "إعدادات",
 		"pattern": "نمط الخلفية",
 		"spacing": "تباعد",

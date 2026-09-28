@@ -24,6 +24,7 @@ type Settings struct {
 	MobileScrollForm  bool        `json:"mobileScrollForm"`
 	NumberSepDecimal  string      `json:"numberSepDecimal"`
 	NumberSepThousand string      `json:"numberSepThousand"`
+	OffsetPageNo      bool        `json:"offsetPageNo"`
 	PageLimit         int         `json:"pageLimit"`
 	Pattern           pgtype.Text `json:"pattern"`
 	ShadowsInputs     bool        `json:"shadowsInputs"`

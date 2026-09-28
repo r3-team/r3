@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Ikon fájl hozzáadása/szerkesztése",
 			"addHelp": "Csak PNG fájlokat támogatunk, legfeljebb 64kb méretben. Az ikonoknak mindig négyzetnek kell lenniük.",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "Opcionális ikon neve",
 			"title": "Ikonok"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Mobil: Teljes űrlap görgetése",
 		"nodeName": "Kapcsolódva: {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "Beállítások",
 		"pattern": "Háttérminta",
 		"spacing": "Térköz",

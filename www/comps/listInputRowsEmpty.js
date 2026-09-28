@@ -11,7 +11,7 @@ export default {
 				</td>
 				<td>
 					<div class="list-input-row-items">
-						<input class="input" data-is-input="1" data-is-input-empty="1" enterkeyhint="send"
+						<input class="field-input" data-is-input="1" data-is-input-empty="1" enterkeyhint="send"
 							@click="$emit('focus')"
 							@focus="$emit('focus')"
 							@input="$emit('text-updated',$event.target.value)"

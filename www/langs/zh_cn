@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "添加/编辑图标文件",
 			"addHelp": "仅支持最大64kb的PNG文件。图标应始终是正方形。",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "可选的图标名称",
 			"title": "图标"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "移动端：滚动整个表单",
 		"nodeName": "已连接到：{NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "设置",
 		"pattern": "背景图案",
 		"spacing": "间距",

@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Ajouter/éditer le fichier d'icône",
 			"addHelp": "Seuls les fichiers PNG d'une taille maximale de 64 Ko sont pris en charge. Les icônes doivent toujours être carrées.",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "Nom d'icône facultatif",
 			"title": "Icônes"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Mobile : Faire défiler tout le formulaire",
 		"nodeName": "Connecté avec : {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "Paramètres",
 		"pattern": "Motif de fond",
 		"spacing": "Espacement",

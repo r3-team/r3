@@ -1693,6 +1693,9 @@
 		"icon": {
 			"add": "Adăugați/editați fișierul pictogramă",
 			"addHelp": "Doar fișiere PNG cu dimensiunea maximă de 64 kb sunt acceptate. Pictogramele ar trebui să fie întotdeauna pătrate.",
+			"dialog": {
+				"delete": "Are you sure you want to delete these icons?"
+			},
 			"nameHint": "Optional icon name",
 			"title": "Pictograme"
 		},
@@ -3191,6 +3194,7 @@
 		},
 		"mobileScrollForm": "Mobile: Scroll entire form",
 		"nodeName": "Connected with: {NAME}",
+		"offsetPageNo": "Navigate by page numbers",
 		"pageTitle": "Setări",
 		"pattern": "Background pattern",
 		"spacing": "Spaţierea",
