@@ -21,7 +21,7 @@ export default {
 	props: {
 		allowNull: { type: Boolean, required: false, default: false },
 		embedded: { type: Boolean, required: false, default: false },
-		length: { type: Number, required: false, default: 0 }, // length of integer + fraction, 0 if unrestricted
+		length: { type: Number, required: false, default: 0 },      // length of integer + fraction, 0 if unrestricted
 		lengthFract: { type: Number, required: false, default: 2 }, // length of fraction, if total length is defined 0 = no fract., otherwise 0 = unrestricted
 		max: { type: [Number, null], required: false, default: null },
 		min: { type: [Number, null], required: false, default: null },
@@ -32,8 +32,8 @@ export default {
 	computed: {
 		// simple
 		hasFract: s => s.lengthFract !== 0,                                    // input has fixed fractional length (ie. 2 decimal places)
-		hasLength: s => s.length !== 0 || s.lengthFract !== 0,                  // if neither total nor fractional length is defined, both are unrestricted
-		maxInteger: s => (10 ** (s.length - s.lengthFract)) - 1,                 // max. integer part,    4 digits = 9999
+		hasLength: s => s.length !== 0 || s.lengthFract !== 0,                 // if neither total nor fractional length is defined, both are unrestricted
+		maxInteger: s => (10 ** (s.length - s.lengthFract)) - 1,               // max. integer part,    4 digits = 9999
 		maxFract: s => s.lengthFract !== 0 ? 1 - (10 ** - s.lengthFract) : 0,  // max. fractional part, 2 digits = 0.99
 		maxValue: s => s.max !== null ? s.max : s.maxInteger + s.maxFract,     // max. value, either direct or from length such as  9999.99 (length 6, 4 int, 2 fract)
 		minValue: s => s.min !== null ? s.min : s.maxValue - (s.maxValue * 2), // min. value, either direct or from length such as -9999.99 (length 6, 4 int, 2 fract)
@@ -150,7 +150,7 @@ export default {
 
 			// attempt to parse number from sanitized text input
 			let n = Number(t);
-			if (isNaN(n)) {
+			if (Number.isNaN(n)) {
 				// text is not a number, reset input to valid numeric value
 				e.target.value = this.getNumberAsText(this.valueNum);
 				return this.setCursor(e, cursorPos);

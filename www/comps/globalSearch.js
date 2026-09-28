@@ -1,33 +1,18 @@
+import MyForm from './form.js';
+import MyInputDictionary from './inputDictionary.js';
+import MyList from './list.js';
 
-import {getColumnsProcessed} from './shared/column.js';
-import srcBase64Icon         from './shared/image.js';
-import MyForm                from './form.js';
-import MyInputDictionary     from './inputDictionary.js';
-import MyList                from './list.js';
-import {
-	getFormPopUpConfig,
-	getFormRoute
-}  from './shared/form.js';
-import {
-	colorAdjustBg,
-	getRandomInt,
-	openLink
-} from './shared/generic.js';
-import {
-	getCaption,
-	getDictByLang
-} from './shared/language.js';
-import {
-	getIsOperatorInAnyFilter,
-	getQueryFiltersProcessed,
-	getJoinsIndexMap
-} from './shared/query.js';
-export {MyGlobalSearch as default};
+import { getColumnsProcessed } from './shared/column.js';
+import { getFormPopUpConfig, getFormRoute } from './shared/form.js';
+import { colorAdjustBg, getRandomInt, openLink } from './shared/generic.js';
+import srcBase64Icon from './shared/image.js';
+import { getCaption, getDictByLang } from './shared/language.js';
+import { getIsOperatorInAnyFilter, getJoinsIndexMap, getQueryFiltersProcessed } from './shared/query.js';
 
 const MyGlobalSearchModuleSearchBar = {
-	name:'my-global-search-module-search-bar',
+	name: 'my-global-search-module-search-bar',
 	components: { MyList },
-	template:`<div class="global-search-bar" v-show="resultCount !== 0">
+	template: `<div class="global-search-bar" v-show="resultCount !== 0">
 		<my-list
 			@open-form="openForm"
 			@record-count-change="resultCountUpdate"
@@ -58,42 +43,42 @@ const MyGlobalSearchModuleSearchBar = {
 			</template>
 		</my-list>
 	</div>`,
-	emits:['pop-up-open','result-count-update'],
-	props:{
-		input:    { type:String, required:true },
-		searchBar:{ type:Object, required:true }
+	emits: ['pop-up-open', 'result-count-update'],
+	props: {
+		input: { type: String, required: true },
+		searchBar: { type: Object, required: true }
 	},
-	watch:{
-		input:{
+	watch: {
+		input: {
 			handler() {
 				this.resultCount = 0;
-				this.ready       = false;
+				this.ready = false;
 				this.$nextTick(() => this.ready = true);
 			},
-			immediate:true
+			immediate: true
 		}
 	},
 	data() {
 		return {
-			listOptions:{},
-			resultCount:0,
-			ready:false
+			listOptions: {},
+			resultCount: 0,
+			ready: false
 		}
 	},
-	computed:{
+	computed: {
 		// simple
-		columns:         (s) => s.searchBar.columns,
-		columnsProcessed:(s) => s.getColumnsProcessed(s.columns,[],s.joinIndexMap,s.input,s.options.dictionary),
-		dataOptions:     (s) => s.searchBar.openForm !== null ? 2 : -1,
-		filters:         (s) => s.searchBar.query.filters,
-		filtersProcessed:(s) => s.getQueryFiltersProcessed(s.filters,s.joinIndexMap,s.input,s.options.dictionary),
-		joinIndexMap:    (s) => s.getJoinsIndexMap(s.searchBar.query.joins),
+		columns: s => s.searchBar.columns,
+		columnsProcessed: s => s.getColumnsProcessed(s.columns, [], s.joinIndexMap, s.input, s.options.dictionary),
+		dataOptions: s => s.searchBar.openForm !== null ? 2 : -1,
+		filters: s => s.searchBar.query.filters,
+		filtersProcessed: s => s.getQueryFiltersProcessed(s.filters, s.joinIndexMap, s.input, s.options.dictionary),
+		joinIndexMap: s => s.getJoinsIndexMap(s.searchBar.query.joins),
 
 		// stores
-		capGen: (s) => s.$store.getters.captions.generic,
-		options:(s) => s.$store.getters['local/globalSearchOptions']
+		capGen: s => s.$store.getters.captions.generic,
+		options: s => s.$store.getters['local/globalSearchOptions']
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
 		getColumnsProcessed,
@@ -107,45 +92,45 @@ const MyGlobalSearchModuleSearchBar = {
 		// data
 		resultCountUpdate(count) {
 			this.resultCount = count;
-			this.$emit('result-count-update',count);
+			this.$emit('result-count-update', count);
 			this.$store.commit('appResized');
 		},
 
 		// actions
-		openForm(rows,newTab) {
+		openForm(rows, newTab) {
 			const openForm = this.searchBar.openForm;
-			let recordIds = [];
-			for(const r of rows) {
+			const recordIds = [];
+			for (const r of rows) {
 				const id = r.indexRecordIds[openForm.relationIndexOpen];
-				
-				if(id !== undefined && id !== null)
+
+				if (id !== undefined && id !== null)
 					recordIds.push(id);
 			}
 
 			// open pop-up form unless new tab is requested
-			if(this.options.openAsPopUp && !newTab)
-				return this.$emit('pop-up-open',this.getFormPopUpConfig(recordIds,openForm,[],null));
+			if (this.options.openAsPopUp && !newTab)
+				return this.$emit('pop-up-open', this.getFormPopUpConfig(recordIds, openForm, [], null));
 
 			// full form navigation, only single record allowed as target
 			const recordIdOpen = recordIds.length === 1 ? recordIds[0] : 0;
-			const path = this.getFormRoute(null,openForm.formIdOpen,recordIdOpen,true,[]);
+			const path = this.getFormRoute(null, openForm.formIdOpen, recordIdOpen, true, []);
 
-			if(newTab)
-				return this.openLink('#'+path,true);
+			if (newTab)
+				return this.openLink(`#${path}`, true);
 
 			this.$router.push(path);
 			this.$emit('close');
 		},
-		setListOption(name,value) {
+		setListOption(name, value) {
 			this.listOptions[name] = value;
 		}
 	}
 };
 
 const MyGlobalSearchModule = {
-	name:'my-global-search-module',
-	components:{ MyGlobalSearchModuleSearchBar },
-	template:`<div class="global-search-module column">
+	name: 'my-global-search-module',
+	components: { MyGlobalSearchModuleSearchBar },
+	template: `<div class="global-search-module column">
 		<div class="global-search-module-title row gap centered clickable" @click="$emit('toggle',module.id)" :class="{ disabled }">
 			<div class="row gap">
 				<my-button
@@ -198,73 +183,73 @@ const MyGlobalSearchModule = {
 			/>
 		</div>
 	</div>`,
-	emits:['close','pop-up-open','result-count-update','toggle'],
-	props:{
-		disabled:{ type:Boolean, required:false, default:false },
-		input:   { type:String,  required:false, default:'' },
-		module:  { type:Object,  required:true }
+	emits: ['close', 'pop-up-open', 'result-count-update', 'toggle'],
+	props: {
+		disabled: { type: Boolean, required: false, default: false },
+		input: { type: String, required: false, default: '' },
+		module: { type: Object, required: true }
 	},
-	watch:{
+	watch: {
 		input() {
 			this.searchBarIdMapResultCount = {};
 		}
 	},
 	data() {
 		return {
-			searchBarIdMapResultCount:{}
+			searchBarIdMapResultCount: {}
 		};
 	},
-	computed:{
-		anyRunning:(s) => {
-			for(const b of s.searchBars) {
-				if(s.searchBarIdMapResultCount[b.id] === undefined)
+	computed: {
+		anyRunning: s => {
+			for (const b of s.searchBars) {
+				if (s.searchBarIdMapResultCount[b.id] === undefined)
 					return true;
 			}
 			return false;
 		},
-		anyFtsOperator:(s) => {
-			for(const b of s.module.searchBars.filter(v => v.query !== null)) {
-				if(s.getIsOperatorInAnyFilter(b.query.filters,b.columns,'@@'))
+		anyFtsOperator: s => {
+			for (const b of s.module.searchBars.filter(v => v.query !== null)) {
+				if (s.getIsOperatorInAnyFilter(b.query.filters, b.columns, '@@'))
 					return true;
 			}
 			return false;
 		},
-		resultCount:(s) => {
+		resultCount: s => {
 			let cnt = 0;
-			for(const k in s.searchBarIdMapResultCount) {
+			for (const k in s.searchBarIdMapResultCount) {
 				cnt += s.searchBarIdMapResultCount[k];
 			}
 			return cnt;
 		},
-		resultImage:(s) => {
-			if(!s.active)    return '';
-			if(s.anyRunning) return 'load.gif';
+		resultImage: s => {
+			if (!s.active) return '';
+			if (s.anyRunning) return 'load.gif';
 			return 'ok.png';
 		},
-		resultLabel:(s) => {
-			if(s.disabled)   return s.capGen.disabled;
-			if(!s.active)    return '-';
-			if(s.anyRunning) return s.capGen.searchRunning;
+		resultLabel: s => {
+			if (s.disabled) return s.capGen.disabled;
+			if (!s.active) return '-';
+			if (s.anyRunning) return s.capGen.searchRunning;
 			return s.isMobile
 				? `${s.resultCount}`
-				: `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}',s.resultCount)}`;
+				: `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}', s.resultCount)}`;
 		},
 
 		// simple
-		active:     (s) => s.input !== '' && !s.disabled,
-		bobbleStyle:(s) => s.module.color1 !== null ? `border-bottom-color:${s.colorAdjustBg(s.module.color1)}` : '',
-		searchBars: (s) => s.module.searchBars.filter(v => v.query !== null && s.access[v.id] !== undefined && s.access[v.id] === 1),
+		active: s => s.input !== '' && !s.disabled,
+		bobbleStyle: s => s.module.color1 !== null ? `border-bottom-color:${s.colorAdjustBg(s.module.color1)}` : '',
+		searchBars: s => s.module.searchBars.filter(v => v.query !== null && s.access[v.id] !== undefined && s.access[v.id] === 1),
 
 		// stores
-		builderEnabled:(s) => s.$store.getters.builderEnabled,
-		access:        (s) => s.$store.getters.access.searchBar,
-		capApp:        (s) => s.$store.getters.captions.globalSearch,
-		capAppFilter:  (s) => s.$store.getters.captions.filter,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		isAdmin:       (s) => s.$store.getters.isAdmin,
-		isMobile:      (s) => s.$store.getters.isMobile
+		builderEnabled: s => s.$store.getters.builderEnabled,
+		access: s => s.$store.getters.access.searchBar,
+		capApp: s => s.$store.getters.captions.globalSearch,
+		capAppFilter: s => s.$store.getters.captions.filter,
+		capGen: s => s.$store.getters.captions.generic,
+		isAdmin: s => s.$store.getters.isAdmin,
+		isMobile: s => s.$store.getters.isMobile
 	},
-	methods:{
+	methods: {
 		// externals
 		colorAdjustBg,
 		getCaption,
@@ -273,34 +258,34 @@ const MyGlobalSearchModule = {
 		srcBase64Icon,
 
 		// data
-		resultCountUpdate(searchBarId,count) {
+		resultCountUpdate(searchBarId, count) {
 			this.searchBarIdMapResultCount[searchBarId] = count;
-			this.$nextTick(() => this.$emit('result-count-update',this.resultCount));
+			this.$nextTick(() => this.$emit('result-count-update', this.resultCount));
 		},
 
 		// actions
 		openBuilder(middle) {
-			if(middle)
-				return this.openLink('#/builder/search-bars/'+this.module.id,true);
-			
-			this.$router.push('/builder/search-bars/'+this.module.id);
+			if (middle)
+				return this.openLink(`#/builder/search-bars/${this.module.id}`, true);
+
+			this.$router.push(`/builder/search-bars/${this.module.id}`);
 			this.$emit('close');
 		},
 		showFtsHelp() {
-			this.$store.commit('dialog',{
-				captionTop:this.capGen.contextHelp,
-				captionBody:this.capAppFilter.dialog.ftsHelp,
-				image:'languages.png',
-				width:1000
+			this.$store.commit('dialog', {
+				captionTop: this.capGen.contextHelp,
+				captionBody: this.capAppFilter.dialog.ftsHelp,
+				image: 'languages.png',
+				width: 1000
 			});
 		}
 	}
 };
 
-const MyGlobalSearch = {
-	name:'my-global-search',
-	components:{ MyForm, MyGlobalSearchModule, MyInputDictionary },
-	template:`<div class="app-sub-window"
+export default {
+	name: 'my-global-search',
+	components: { MyForm, MyGlobalSearchModule, MyInputDictionary },
+	template: `<div class="app-sub-window"
 		@mousedown.self="close"
 		:class="{ 'under-header':!isMobile }"
 	>
@@ -443,152 +428,152 @@ const MyGlobalSearch = {
 	</div>`,
 	data() {
 		return {
-			inputActive:'', // submitted input
-			input:'',       // input text from input element
-			larger:false,
-			moduleIdMapResultCount:{}, // result count per module ID
-			moduleIdsActive:[],
-			popUp:null,
-			ready:false,
-			tipIndex:0      // index of tip entries that is currently shown
+			inputActive: '', // submitted input
+			input: '',       // input text from input element
+			larger: false,
+			moduleIdMapResultCount: {}, // result count per module ID
+			moduleIdsActive: [],
+			popUp: null,
+			ready: false,
+			tipIndex: 0      // index of tip entries that is currently shown
 		};
 	},
-	emits:['close'],
-	computed:{
-		anySearchRunning:(s) => {
-			for(const m of s.modulesActive) {
-				if(s.moduleIdMapResultCount[m.id] === undefined)
+	emits: ['close'],
+	computed: {
+		anySearchRunning: s => {
+			for (const m of s.modulesActive) {
+				if (s.moduleIdMapResultCount[m.id] === undefined)
 					return true;
 			}
 			return false;
 		},
-		modulesActive:(s) => {
-			let out = [];
-			for(const id of s.moduleIdsActive) {
+		modulesActive: s => {
+			const out = [];
+			for (const id of s.moduleIdsActive) {
 				out.push(s.moduleIdMap[id]);
 			}
 			return out;
 		},
-		modulesInactive:(s) => {
-			let out = [];
-			for(const id of s.modulesIdsInactive) {
+		modulesInactive: s => {
+			const out = [];
+			for (const id of s.modulesIdsInactive) {
 				out.push(s.moduleIdMap[id]);
 			}
 			return out;
 		},
-		resultCount:(s) => {
+		resultCount: s => {
 			let cnt = 0;
-			for(const k in s.moduleIdMapResultCount) {
+			for (const k in s.moduleIdMapResultCount) {
 				cnt += s.moduleIdMapResultCount[k];
 			}
 			return cnt;
 		},
 
 		// status message
-		statusImage:(s) => {
-			if(s.empty)            return 'search.png';
-			if(s.anySearchRunning) return 'load.gif';
+		statusImage: s => {
+			if (s.empty) return 'search.png';
+			if (s.anySearchRunning) return 'load.gif';
 			return 'ok.png';
 		},
-		statusLabel:(s) => {
-			if(s.empty)            return s.capGen.globalSearch;
-			if(s.anySearchRunning) return s.capGen.searchRunning;
+		statusLabel: s => {
+			if (s.empty) return s.capGen.globalSearch;
+			if (s.anySearchRunning) return s.capGen.searchRunning;
 			return s.isMobile
-				? `${s.capGen.results.replace('{CNT}',s.resultCount)}`
-				: `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}',s.resultCount)}`;
+				? `${s.capGen.results.replace('{CNT}', s.resultCount)}`
+				: `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}', s.resultCount)}`;
 		},
 
 		// simple
-		empty:             (s) => s.inputActive === '',
-		modulesIdsInactive:(s) => s.searchModuleIds.filter(v => !s.moduleIdsActive.includes(v)),
-		
+		empty: s => s.inputActive === '',
+		modulesIdsInactive: s => s.searchModuleIds.filter(v => !s.moduleIdsActive.includes(v)),
+
 		// stores
-		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
-		options:          (s) => s.$store.getters['local/globalSearchOptions'],
-		capApp:           (s) => s.$store.getters.captions.globalSearch,
-		capGen:           (s) => s.$store.getters.captions.generic,
-		globalSearchInput:(s) => s.$store.getters.globalSearchInput,
-		isAtModule:       (s) => s.$store.getters.isAtModule,
-		isMobile:         (s) => s.$store.getters.isMobile,
-		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
-		patternStyle:     (s) => s.$store.getters.patternStyle,
-		searchModuleIds:  (s) => s.$store.getters.searchModuleIds
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		options: s => s.$store.getters['local/globalSearchOptions'],
+		capApp: s => s.$store.getters.captions.globalSearch,
+		capGen: s => s.$store.getters.captions.generic,
+		globalSearchInput: s => s.$store.getters.globalSearchInput,
+		isAtModule: s => s.$store.getters.isAtModule,
+		isMobile: s => s.$store.getters.isMobile,
+		moduleIdLast: s => s.$store.getters.moduleIdLast,
+		patternStyle: s => s.$store.getters.patternStyle,
+		searchModuleIds: s => s.$store.getters.searchModuleIds
 	},
 	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown', this.handleHotkeys);
 
-		if(this.options.dictionary === null)
+		if (this.options.dictionary === null)
 			this.resetDict();
 
 		this.moduleIdsActive = this.isAtModule && this.searchModuleIds.includes(this.moduleIdLast)
 			? [this.moduleIdLast] : JSON.parse(JSON.stringify(this.searchModuleIds));
 
-		this.tipIndex = this.getRandomInt(0,this.capApp.tips.length -1);
+		this.tipIndex = this.getRandomInt(0, this.capApp.tips.length - 1);
 
 		this.input = this.globalSearchInput;
 		this.submit();
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// externals
 		getDictByLang,
 		getFormPopUpConfig,
 		getRandomInt,
-		
+
 		// general
 		handleHotkeys(e) {
-			if(e.key === 'Escape') {
-				if(this.popUp === null) {
+			if (e.key === 'Escape') {
+				if (this.popUp === null) {
 					this.close();
 					e.preventDefault();
 				}
 			}
 		},
-		resultCountUpdate(id,v) {
+		resultCountUpdate(id, v) {
 			this.moduleIdMapResultCount[id] = v;
 		},
 
 		// actions
 		close() {
-			this.$store.commit('globalSearchInput',null);
+			this.$store.commit('globalSearchInput', null);
 		},
-		popUpReplace(recordIds,openForm) {
+		popUpReplace(recordIds, openForm) {
 			this.popUp = null;
 			openForm.popUpType === 'float';
-			this.$nextTick(() => this.popUp = this.getFormPopUpConfig(recordIds,openForm,[],null));
+			this.$nextTick(() => this.popUp = this.getFormPopUpConfig(recordIds, openForm, [], null));
 		},
 		resetDict() {
-			this.setOption('dictionary',this.getDictByLang());
+			this.setOption('dictionary', this.getDictByLang());
 		},
 		nextTip() {
 			this.tipIndex = this.tipIndex < this.capApp.tips.length - 1 ? this.tipIndex + 1 : 0;
 		},
-		setOption(name,value) {
-			let o = JSON.parse(JSON.stringify(this.options));
+		setOption(name, value) {
+			const o = JSON.parse(JSON.stringify(this.options));
 			o[name] = value;
-			this.$store.commit('local/globalSearchOptions',o);
+			this.$store.commit('local/globalSearchOptions', o);
 		},
 		showFtsHelp() {
-			this.$store.commit('dialog',{
-				captionTop:this.capApp.help.ftsDictTitle,
-				captionBody:`<p>${this.capApp.help.ftsDict.join('</p><p>')}</p>`,
-				image:'languages.png'
+			this.$store.commit('dialog', {
+				captionTop: this.capApp.help.ftsDictTitle,
+				captionBody: `<p>${this.capApp.help.ftsDict.join('</p><p>')}</p>`,
+				image: 'languages.png'
 			});
 		},
 		submit() {
-			if(this.inputActive !== this.input) {
-				this.inputActive            = this.input;
+			if (this.inputActive !== this.input) {
+				this.inputActive = this.input;
 				this.moduleIdMapResultCount = {};
 			}
 		},
 		toggle(id) {
 			const p = this.moduleIdsActive.indexOf(id);
-			if(p === -1)
+			if (p === -1)
 				return this.moduleIdsActive.push(id);
 
-			this.moduleIdsActive.splice(p,1);
+			this.moduleIdsActive.splice(p, 1);
 			delete this.moduleIdMapResultCount[id];
 		}
 	}

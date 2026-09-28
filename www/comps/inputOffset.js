@@ -4,12 +4,13 @@ export default {
 		<!-- prev page -->
 		<my-button image="pagePrev.png"
 			v-if="arrows && limit < total"
-			@trigger="pageChanged(false)"
+			@trigger="pageChange(false)"
+			@triggerShift="pageSetFirst"
 			:active="offset !== 0"
 			:naked="true"
 		/>
 
-		<!-- offset selector -->
+		<!-- offset selector: dropdown -->
 		<select class="auto"
 			v-if="offsetSelectShow"
 			v-model="offsetSelect"
@@ -27,7 +28,8 @@ export default {
 		<!-- next page -->
 		<my-button image="pageNext.png"
 			v-if="arrows && limit < total"
-			@trigger="pageChanged(true)"
+			@trigger="pageChange(true)"
+			@triggerShift="pageSetLast"
 			:active="(offset + limit) < total"
 			:naked="true"
 		/>
@@ -44,6 +46,7 @@ export default {
 	computed: {
 		captionText: s => s.offsetSelectShow ? s.capGen.resultsOf.replace('{CNT}', s.total) : s.capGen.results.replace('{CNT}', s.total),
 		offsetSelectShow: s => s.total > s.limit || s.offset !== 0,
+		pageCountTotal: s => s.total % s.limit === 0 ? parseInt(s.total / s.limit, 10) : parseInt(s.total / s.limit, 10) + 1,
 		pageCurr: s => parseInt(Math.ceil((s.offset + 1) / s.limit), 10),
 		pageLast: s => parseInt(Math.ceil((s.total) / s.limit), 10),
 		pages: s => {
@@ -75,9 +78,17 @@ export default {
 				? `${((page - 1) * this.limit) + 1} - ${this.total}`
 				: `${((page - 1) * this.limit) + 1} - ${((page - 1) * this.limit) + this.limit}`;
 		},
-		pageChanged(next) {
+
+		// actions
+		pageChange(next) {
 			if (next) this.$emit('input', this.offset + this.limit);
 			else this.$emit('input', this.offset - this.limit);
+		},
+		pageSetFirst() {
+			this.$emit('input', 0);
+		},
+		pageSetLast() {
+			this.$emit('input', (this.pageCountTotal * this.limit) - 1);
 		}
 	}
 };

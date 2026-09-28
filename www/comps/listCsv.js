@@ -1,14 +1,15 @@
-import {isAttributeDecimal}     from './shared/attribute.js';
-import {getColumnTitleFallback} from './shared/column.js';
-import {resolveErrCode}         from './shared/error.js';
-import {getCaption}             from './shared/language.js';
-import {getQueryExpressions}    from './shared/query.js';
-import MyInputNumberSep         from './inputNumberSep.js';
+import MyInputNumberSep from './inputNumberSep.js';
+
+import { isAttributeDecimal } from './shared/attribute.js';
+import { getColumnTitleFallback } from './shared/column.js';
+import { resolveErrCode } from './shared/error.js';
+import { getCaption } from './shared/language.js';
+import { getQueryExpressions } from './shared/query.js';
 
 export default {
-	name:'my-list-csv',
-	components:{ MyInputNumberSep },
-	template:`
+	name: 'my-list-csv',
+	components: { MyInputNumberSep },
+	template: `
 		<p v-if="action === 'export'">{{ capApp.message.csvExport }}</p>
 		<p v-if="action === 'import'">{{ capApp.message.csvImport.replace('{COUNT}',columns.length) }}</p>
 
@@ -114,77 +115,77 @@ export default {
 		<a download="export.csv" v-if="action === 'export'" :href="charComma !== '' ? exportHref : null">
 			<my-button image="download.png" :active="charComma !== ''" :caption="capGen.button.export" />
 		</a>`,
-	props:{
-		columns:      { type:Array,  required:true },
-		columnBatches:{ type:Array,  required:true },
-		filters:      { type:Array,  required:true },
-		isExport:     { type:Boolean,required:true },
-		isImport:     { type:Boolean,required:true },
-		joins:        { type:Array,  required:true },
-		loginOptions: { type:Object, required:true },
-		moduleId:     { type:String, required:true },
-		orders:       { type:Array,  required:true },
-		query:        { type:Object, required:true }
+	props: {
+		columns: { type: Array, required: true },
+		columnBatches: { type: Array, required: true },
+		filters: { type: Array, required: true },
+		isExport: { type: Boolean, required: true },
+		isImport: { type: Boolean, required: true },
+		joins: { type: Array, required: true },
+		loginOptions: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		orders: { type: Array, required: true },
+		query: { type: Object, required: true }
 	},
-	emits:['reload','set-login-option'],
+	emits: ['reload', 'set-login-option'],
 	data() {
 		return {
-			action:'',               // CSV action (export/import)
-			cacheDenialTimeout:null, // timer do refresh cache denial timestamp
-			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
-			charComma:',',
-			fileElm:null,
-			fileSet:false,
-			hasBool:false,
-			hasDate:false,
-			hasDatetime:false,
-			hasDecimal:false,
-			hasHeader:true,
-			hasTime:false,
-			message:'',
-			messageError:false,
-			totalLimit:500
+			action: '',               // CSV action (export/import)
+			cacheDenialTimeout: null, // timer do refresh cache denial timestamp
+			cacheDenialTimestamp: 0,  // unix timestamp, used for CSV export cache denial
+			charComma: ',',
+			fileElm: null,
+			fileSet: false,
+			hasBool: false,
+			hasDate: false,
+			hasDatetime: false,
+			hasDecimal: false,
+			hasHeader: true,
+			hasTime: false,
+			message: '',
+			messageError: false,
+			totalLimit: 500
 		};
 	},
 	mounted() {
-		this.action    = this.isExport ? 'export' : 'import';
-		this.charComma = this.$root.getOrFallback(this.loginOptions,'csvCharComma',',');
+		this.action = this.isExport ? 'export' : 'import';
+		this.charComma = this.$root.getOrFallback(this.loginOptions, 'csvCharComma', ',');
 
-		for(const c of this.columns) {
-			if(c.content !== 'attribute')
+		for (const c of this.columns) {
+			if (c.content !== 'attribute')
 				continue;
 
 			const atr = this.attributeIdMap[c.attributeId];
-			if(this.isAttributeDecimal(atr.content)) this.hasDecimal  = true;
-			if(atr.content    === 'boolean')         this.hasBool     = true;
-			if(atr.contentUse === 'date')            this.hasDate     = true;
-			if(atr.contentUse === 'datetime')        this.hasDatetime = true;
-			if(atr.contentUse === 'time')            this.hasTime     = true;
+			if (this.isAttributeDecimal(atr.content)) this.hasDecimal = true;
+			if (atr.content === 'boolean') this.hasBool = true;
+			if (atr.contentUse === 'date') this.hasDate = true;
+			if (atr.contentUse === 'datetime') this.hasDatetime = true;
+			if (atr.contentUse === 'time') this.hasTime = true;
 		}
-		this.cacheDenialTimeout = setInterval(this.setCacheDenialTimestamp,1000);
+		this.cacheDenialTimeout = setInterval(this.setCacheDenialTimestamp, 1000);
 	},
 	unmounted() {
 		clearInterval(this.setCacheDenialTimestamp);
 	},
-	computed:{
-		columnCaptions:s => {
-			let out = [];
-			for(const c of s.columnsSorted) {
-				const cap = s.getCaption('columnTitle',s.moduleId,c.id,c.captions,'');
-				out.push(cap !== '' ? cap : s.getColumnTitleFallback(c,s.moduleId));
+	computed: {
+		columnCaptions: s => {
+			const out = [];
+			for (const c of s.columnsSorted) {
+				const cap = s.getCaption('columnTitle', s.moduleId, c.id, c.captions, '');
+				out.push(cap !== '' ? cap : s.getColumnTitleFallback(c, s.moduleId));
 			}
 			return out;
 		},
-		columnsSorted:s => {
-			let out = [];
-			for(const b of s.columnBatches) {
-				for(const columnIndex of b.columnIndexes) {
+		columnsSorted: s => {
+			const out = [];
+			for (const b of s.columnBatches) {
+				for (const columnIndex of b.columnIndexes) {
 					out.push(s.columns[columnIndex]);
 				}
 			}
 			return out;
 		},
-		exportHref:s => {
+		exportHref: s => {
 			const getters = [
 				`token=${s.token}`,
 				`bool_false=${s.boolNative ? 'false' : s.capGen.option.no}`,
@@ -208,23 +209,23 @@ export default {
 		},
 
 		// inputs
-		boolNative:s => s.$root.getOrFallback(s.loginOptions,'csvBoolNative',true), // use native bool strings (true/false) or translations (yes/no, ...)
-		charDec:   s => s.$root.getOrFallback(s.loginOptions,'csvCharDec','.'),
-		charThou:  s => s.$root.getOrFallback(s.loginOptions,'csvCharThou',''),
-		dateFormat:s => s.$root.getOrFallback(s.loginOptions,'csvDateFormat',s.settings.dateFormat),
+		boolNative: s => s.$root.getOrFallback(s.loginOptions, 'csvBoolNative', true), // use native bool strings (true/false) or translations (yes/no, ...)
+		charDec: s => s.$root.getOrFallback(s.loginOptions, 'csvCharDec', '.'),
+		charThou: s => s.$root.getOrFallback(s.loginOptions, 'csvCharThou', ''),
+		dateFormat: s => s.$root.getOrFallback(s.loginOptions, 'csvDateFormat', s.settings.dateFormat),
 
 		// simple
-		expressions:s => s.getQueryExpressions(s.columnsSorted),
-		timezone:   s => Intl.DateTimeFormat().resolvedOptions().timeZone,
+		expressions: s => s.getQueryExpressions(s.columnsSorted),
+		timezone: s => Intl.DateTimeFormat().resolvedOptions().timeZone,
 
 		// stores
-		token:         s => s.$store.getters['local/token'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capApp:        s => s.$store.getters.captions.list,
-		capGen:        s => s.$store.getters.captions.generic,
-		settings:      s => s.$store.getters.settings
+		token: s => s.$store.getters['local/token'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.list,
+		capGen: s => s.$store.getters.captions.generic,
+		settings: s => s.$store.getters.settings
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
 		getColumnTitleFallback,
@@ -234,61 +235,61 @@ export default {
 
 		// actions
 		setCacheDenialTimestamp() {
-			this.cacheDenialTimestamp = Math.floor(new Date().getTime() / 1000);
+			this.cacheDenialTimestamp = Math.floor(Date().now() / 1000);
 		},
 		setFile(evt) {
 			this.fileElm = evt.target;
 			this.fileSet = true;
 		},
-		setMessage(msg,isError) {
-			this.message      = msg;
+		setMessage(msg, isError) {
+			this.message = msg;
 			this.messageError = isError;
 		},
-		setOption(name,value) {
-			this.$emit('set-login-option',name,value);
+		setOption(name, value) {
+			this.$emit('set-login-option', name, value);
 		},
 		send() {
-			let formData    = new FormData();
-			let httpRequest = new XMLHttpRequest();
+			const formData = new FormData();
+			const httpRequest = new XMLHttpRequest();
 
 			httpRequest.upload.onprogress = event => {
-				if(event.lengthComputable) {}
+				if (event.lengthComputable) { }
 			};
 			httpRequest.onerror = event => {
 				this.$store.commit('busyRemove');
-				this.setMessage(this.capApp.csvLoadError,true);
+				this.setMessage(this.capApp.csvLoadError, true);
 			};
 			httpRequest.onload = event => {
 				this.$store.commit('busyRemove');
 				const res = JSON.parse(httpRequest.response);
 
-				if(res.error === '') {
-					this.setMessage(this.capApp.message.csvImportSuccess.replace('{COUNT}',res.count),false);
+				if (res.error === '') {
+					this.setMessage(this.capApp.message.csvImportSuccess.replace('{COUNT}', res.count), false);
 					this.$emit('reload');
 					return;
 				}
 
-				const errRow = this.hasHeader ? res.count+2 : res.count+1;
-				this.setMessage(this.capApp.csvLineError.replace('{COUNT}',errRow) + this.resolveErrCode(res.error),true);
+				const errRow = this.hasHeader ? res.count + 2 : res.count + 1;
+				this.setMessage(this.capApp.csvLineError.replace('{COUNT}', errRow) + this.resolveErrCode(res.error), true);
 			};
-			formData.append('token',this.token);
-			formData.append('columns',JSON.stringify(this.columnsSorted));
-			formData.append('joins',JSON.stringify(this.query.joins));
-			formData.append('lookups',JSON.stringify(this.query.lookups));
-			formData.append('boolTrue',this.boolNative ? 'true' : this.capGen.option.yes);
-			formData.append('dateFormat',this.dateFormat);
-			formData.append('timezone',this.timezone);
-			formData.append('charComma',this.charComma);
-			formData.append('charDec',this.charDec);
-			formData.append('charThou',this.charThou);
-			formData.append('ignoreHeader',this.hasHeader ? 'true' : 'false');
-			formData.append('file',this.fileElm.files[0]);
-			httpRequest.open('POST','csv/upload',true);
+			formData.append('token', this.token);
+			formData.append('columns', JSON.stringify(this.columnsSorted));
+			formData.append('joins', JSON.stringify(this.query.joins));
+			formData.append('lookups', JSON.stringify(this.query.lookups));
+			formData.append('boolTrue', this.boolNative ? 'true' : this.capGen.option.yes);
+			formData.append('dateFormat', this.dateFormat);
+			formData.append('timezone', this.timezone);
+			formData.append('charComma', this.charComma);
+			formData.append('charDec', this.charDec);
+			formData.append('charThou', this.charThou);
+			formData.append('ignoreHeader', this.hasHeader ? 'true' : 'false');
+			formData.append('file', this.fileElm.files[0]);
+			httpRequest.open('POST', 'csv/upload', true);
 			httpRequest.send(formData);
 
 			this.fileElm.value = null;
-			this.fileSet       = false;
-			this.setMessage('',false);
+			this.fileSet = false;
+			this.setMessage('', false);
 			this.$store.commit('busyAdd');
 		}
 	}
