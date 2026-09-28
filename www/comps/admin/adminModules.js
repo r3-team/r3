@@ -7,11 +7,8 @@ import MyAdminRepos from './adminRepos.js';
 export default {
 	name: 'my-admin-modules',
 	components: {
-		MyAdminModulesItem,
-		MyAdminRepos,
-		MyAdminRepoInstall,
-		MyAdminRepoKeys,
-		MyArticles
+		MyAdminModulesItem, MyAdminRepos, MyAdminRepoInstall,
+		MyAdminRepoKeys, MyArticles
 	},
 	template: `<div class="contentBox scroll admin-modules grow">
 
@@ -203,8 +200,8 @@ export default {
 	},
 	computed: {
 		moduleIdsUpdate: s => {
-			let out = [];
-			for (let rm of s.repoModules) {
+			const out = [];
+			for (const rm of s.repoModules) {
 				if (rm.releaseBuildApp <= s.appVersionBuild
 					&& typeof s.moduleIdMap[rm.moduleId] !== 'undefined'
 					&& rm.releaseBuild > s.moduleIdMap[rm.moduleId].releaseBuild

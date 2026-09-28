@@ -1,3 +1,5 @@
+import srcBase64Icon from '../shared/image.js';
+import { getCaption } from '../shared/language.js';
 import { getHasAnyReferences } from '../shared/schemaLookup.js';
 import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
@@ -25,6 +27,32 @@ export default {
 			</div>
 
 			<div class="content flex column gap default-inputs">
+				<!-- source / dependency -->
+				<table>
+					<tbody>
+						<tr>
+							<td>{{ capGen.application }}</td>
+							<td>
+								<my-label
+									:caption="moduleSourceTitle"
+									:image="moduleSource.iconId === null ? 'module.png' : ''"
+									:imageBase64="moduleSource.iconId !== null ? srcBase64Icon(moduleSource.iconId,'') : ''"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dependsOn }}</td>
+							<td>
+								<my-label
+									:caption="moduleParentTitle"
+									:image="moduleParent.iconId === null ? 'module.png' : ''"
+									:imageBase64="moduleParent.iconId !== null ? srcBase64Icon(moduleParent.iconId,'') : ''"
+								/>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
 				<!-- progress -->
 				<my-label
 					v-if="isRunning || entityIdFinding !== null"
@@ -43,7 +71,7 @@ export default {
 					/>
 				</div>
 				<my-label image="ok.png"
-					v-if="isNoDependencies"
+					v-if="!isRunning && isNoDependencies"
 					:caption="capApp.referencesNone"
 				/>
 
@@ -92,9 +120,11 @@ export default {
 	},
 	computed: {
 		isNoDependencies: s => s.entityIdFinding === null,
-		progressMsg: s => `${s.capGen.checking}: ${s.entityTitle} (${s.countChecked}/${s.entityList.length})`,
+		progressMsg: s => `${s.capGen.checking}: ${s.entityTitle} (${s.countChecked}/${s.entityList.length}) in '${s.moduleParentTitle}'`,
 		moduleParent: s => s.moduleIdMap[s.moduleIdParent],
+		moduleParentTitle: s => s.getCaption('moduleTitle', s.moduleParent.id, s.moduleParent.id, s.moduleParent.captions, s.moduleParent.name),
 		moduleSource: s => s.moduleIdMap[s.moduleIdSource],
+		moduleSourceTitle: s => s.getCaption('moduleTitle', s.moduleSource.id, s.moduleSource.id, s.moduleSource.captions, s.moduleSource.name),
 
 		// stores
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
@@ -104,12 +134,17 @@ export default {
 	mounted() {
 		this.exec();
 	},
+	unmounted() {
+		this.isRunning = false;
+	},
 	methods: {
 		// externals
+		getCaption,
 		getHasAnyReferences,
+		srcBase64Icon,
 
 		// actions
-		exec() {
+		async exec() {
 			this.entityIdFinding = null;
 			this.isRunning = true;
 
@@ -178,6 +213,11 @@ export default {
 				}
 				for (const l of this.entityList) {
 					this.countChecked++;
+					await new Promise(resolve => setTimeout(resolve, 5));
+
+					// in case, dependency checker is closed
+					if (!this.isRunning)
+						return;
 
 					if (this.getHasAnyReferences(this.moduleSource, entity, l.id, true)) {
 						this.entityIdFinding = l.id;

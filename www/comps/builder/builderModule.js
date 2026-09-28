@@ -602,9 +602,6 @@ export default {
 		},
 		dependsOnRemoveCheck(moduleId) {
 			this.moduleIdCheckParent = moduleId;
-
-			// TEMP, skip to removal until dependency checker is ready
-			this.dependsOnRemove();
 		},
 
 		// presentation
