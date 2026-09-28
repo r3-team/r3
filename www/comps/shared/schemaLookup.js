@@ -224,7 +224,8 @@ function getReferencesAttribut(mod, atrId, lookups) {
 		}
 	}
 	for (const f of mod.pgFunctions) {
-		if (f.codeFunction.includes(`(${atrId})`)) {
+		// finds attribute as placeholder (ATR_ID) as well as in function calls (instance.files_get('ATR_ID', ...))
+		if (f.codeFunction.includes(atrId)) {
 			lookups.pgFunctionIds.push(f.id);
 			lookups.anyResults = true;
 		}
@@ -1006,8 +1007,15 @@ function getReferencesRelation(mod, relId, lookups) {
 		lookupInFields(f.id, f.fields);
 	}
 	for (const f of mod.pgFunctions) {
-		if (f.codeFunction.includes(`}.[${relId}]`)) {
+		// finds attribute as placeholder [REL_ID] as well as in function calls (instance.data_log_delete('REL_ID', ...))
+		if (f.codeFunction.includes(relId)) {
 			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const t of mod.pgTriggers) {
+		if (t.relationId === relId) {
+			lookups.pgTriggerIds.push(t.id);
 			lookups.anyResults = true;
 		}
 	}
@@ -1018,7 +1026,6 @@ function getReferencesRelation(mod, relId, lookups) {
 		}
 	}
 };
-
 
 function getReferencesRole(mod, roleId, lookups) {
 	const isInQuery = query => query !== null && isInFilters(query.filters);
@@ -1094,6 +1101,20 @@ function getReferencesRole(mod, roleId, lookups) {
 			lookups.anyResults = true;
 		}
 		lookupInFields(f.id, f.fields);
+	}
+	for (const f of mod.jsFunctions) {
+		// finds role in function calls (app.has_role('ROLE_ID', ...))
+		if (f.codeFunction.includes(roleId)) {
+			lookups.jsFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for (const f of mod.pgFunctions) {
+		// finds role in function calls (instance.has_role('ROLE_ID', ...))
+		if (f.codeFunction.includes(roleId)) {
+			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
 	}
 	for (const r of mod.relations) {
 		if (r.policies.some(v => roleId === v.roleId || roleId === v.roleId)) {
