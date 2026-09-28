@@ -501,6 +501,7 @@ export default {
 					@dropdown-show="dropdownSet"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
+					@set-view-month="setLoginOption('dateTimeUseMonthView', $event)"
 					:dropdownShow="dropdownShow"
 					:isDate="isDatetime || isDate"
 					:isTime="isDatetime || isTime"
@@ -508,6 +509,7 @@ export default {
 					:isReadonly="isReadonly"
 					:unixFrom="value"
 					:unixTo="valueAlt"
+					:useMonth="dateTimeUseMonthView"
 				/>
 
 				<!-- drawing input -->
@@ -1117,6 +1119,7 @@ export default {
 		customErr: s => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		dataOptions: s => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
+		dateTimeUseMonthView: s => s.isDatetime && s.$root.getOrFallback(s.loginOptions, 'dateTimeUseMonthView', false),
 		dropdownShow: s => s.dropdownElm === s.$refs.content,
 		inputRegex: s => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link: s => !s.isData ? false : s.getLinkMeta(s.field.display, s.value),

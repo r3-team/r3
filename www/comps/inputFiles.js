@@ -1,18 +1,13 @@
-import {getFilesFromDataItems} from './shared/drop.js';
-import {getUnixFormat}         from './shared/time.js';
-import {
-	getAttributeFileThumbHref,
-	getAttributeFileVersionHref
-} from './shared/attribute.js';
-import {
-	getNilUuid,
-	getSizeReadable
-} from './shared/generic.js';
-export {MyInputFiles as default};
+import { getAttributeFileThumbHref, getAttributeFileVersionHref } from './shared/attribute.js';
+import { getFilesFromDataItems } from './shared/drop.js';
+import { getNilUuid, getSizeReadable } from './shared/generic.js';
+import { getUnixFormat } from './shared/time.js';
+
+export { MyInputFiles as default };
 
 const MyInputFilesName = {
-	name:'my-input-files-name',
-	template:`<div class="input-files-name">
+	name: 'my-input-files-name',
+	template: `<div class="input-files-name">
 		<input
 			@input="$emit('update:name',$event.target.value)"
 			:disabled="readonly"
@@ -22,46 +17,43 @@ const MyInputFilesName = {
 			{{ capApp.unsaved }}
 		</span>
 	</div>`,
-	props:{
-		change:  { required:true },               // known file change (not affected by sort)
-		name:    { type:String,  required:true }, // file name
-		readonly:{ type:Boolean, required:true },
-		unsaved: { type:Boolean, required:true }
+	props: {
+		change: { required: true },             // known file change (not affected by sort)
+		name: { type: String, required: true }, // file name
+		readonly: { type: Boolean, required: true },
+		unsaved: { type: Boolean, required: true }
 	},
-	emits:['update:name'],
-	computed:{
-		value:(s) => typeof s.change !== 'undefined' && s.change.name !== '' ? s.change.name : s.name,
-		
+	emits: ['update:name'],
+	computed: {
+		value: s => typeof s.change !== 'undefined' && s.change.name !== '' ? s.change.name : s.name,
+
 		// store
-		capApp:(s) => s.$store.getters.captions.input.files
+		capApp: s => s.$store.getters.captions.input.files
 	}
 };
 
 const MyInputFilesRequest = {
-	name:'my-input-files-request',
-	template:`<my-button image="screenFile.png"
+	name: 'my-input-files-request',
+	template: `<my-button image="screenFile.png"
 		@trigger="$emit('open',false)"
 		@trigger-shift="$emit('open',true)"
 		:captionTitle="capApp.button.fileRequestHint"
 		:active="hasClient && productionMode"
 		:naked="true"
 	/>`,
-	emits:['open'],
-	computed:{
+	emits: ['open'],
+	computed: {
 		// store
-		capApp:        (s) => s.$store.getters.captions.input.files,
-		hasClient:     (s) => s.$store.getters.loginHasClient,
-		productionMode:(s) => s.$store.getters.productionMode
+		capApp: s => s.$store.getters.captions.input.files,
+		hasClient: s => s.$store.getters.loginHasClient,
+		productionMode: s => s.$store.getters.productionMode
 	}
 };
 
 const MyInputFiles = {
-	name:'my-input-files',
-	components:{
-		MyInputFilesName,
-		MyInputFilesRequest
-	},
-	template:`<div class="input-files" ref="main"
+	name: 'my-input-files',
+	components: { MyInputFilesName, MyInputFilesRequest },
+	template: `<div class="input-files" ref="main"
 			v-on:dragleave.stop.prevent="dragLeave"
 			v-on:dragenter.stop.prevent="dragEnter"
 			v-on:dragover.stop.prevent="dragOver"
@@ -71,7 +63,7 @@ const MyInputFiles = {
 		<div v-if="!dragActive" class="input-files-header input-toolbar default-inputs">
 			<div class="row gap centered">
 				<slot name="input-icon" />
-				
+
 				<!-- new files upload -->
 				<label v-if="!readonly && !maxFiles">
 					<input hidden="hidden" multiple="multiple" type="file"
@@ -82,7 +74,7 @@ const MyInputFiles = {
 						:naked="true"
 					/>
 				</label>
-				
+
 				<!-- file actions -->
 				<my-button image="files.png"
 					v-if="!unsavedSelected && fileIdsSelected.length !== 0"
@@ -104,15 +96,15 @@ const MyInputFiles = {
 					:caption="!noSpace ? capGen.button.delete : ''"
 					:naked="true"
 				/>
-				
+
 	   			<transition name="fade_out">
 					<span v-if="progress !== 100">{{ progress + '%' }}</span>
 				</transition>
 			</div>
-			
+
 			<!-- file count -->
 			<div>{{ fileCountCaption }}</div>
-			
+
 			<!-- file name filter -->
 			<div class="row gap centered">
 				<img class="view-toggle" draggable="false"
@@ -123,15 +115,15 @@ const MyInputFiles = {
 				<input v-if="!noSpace && !noFiles" v-model="filterName" class="short" placeholder="..." />
 			</div>
 		</div>
-		
+
 		<!-- drag&drop display -->
 		<div v-if="dragActive" class="input-files-drop">
 			{{ !maxFiles ? capApp.dropTarget : capGen.inputTooManyFiles }}
 		</div>
-		
+
 		<div v-if="!dragActive" class="input-files-content">
 			<div class="input-files-actions" v-if="showActionBar">
-				
+
 				<div class="row centered gap">
 					<!-- toggle all -->
 					<my-button
@@ -142,7 +134,7 @@ const MyInputFiles = {
 						:naked="true"
 					/>
 				</div>
-				
+
 				<div class="row gap centered default-inputs">
 					<!-- gallery option: show meta -->
 					<my-button
@@ -152,7 +144,7 @@ const MyInputFiles = {
 						:image="displayChecked(galleryMeta)"
 						:naked="true"
 					/>
-					
+
 					<!-- sort mode input (for non-tables) -->
 					<div class="row centered" v-if="showSortInput">
 						<select @change="setSortMode($event.target.value)" :value="sortMode">
@@ -167,10 +159,10 @@ const MyInputFiles = {
 						/>
 					</div>
 				</div>
-				
+
 				<div />
 			</div>
-			
+
 			<!-- listCompact -->
 			<table class="listCompact" v-if="viewListCompact && !noFiles">
 				<thead>
@@ -248,7 +240,7 @@ const MyInputFiles = {
 					</tr>
 				</tbody>
 			</table>
-			
+
 			<!-- list comfortable -->
 			<div class="listComfort" v-if="viewListComfort">
 				<div class="item" v-for="f in filesProcessed">
@@ -286,7 +278,7 @@ const MyInputFiles = {
 					</div>
 				</div>
 			</div>
-			
+
 			<!-- gallery -->
 			<div class="gallery" v-if="viewGallery" >
 				<div class="item" v-for="f in filesProcessed">
@@ -324,126 +316,126 @@ const MyInputFiles = {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		attributeId: { type:String,  required:true },
-		countAllowed:{ type:Number,  required:true }, // number of allowed files
-		fieldId:     { type:String,  required:true },
-		formLoading: { type:Boolean, required:true }, // to react to form load events
-		isHidden:    { type:Boolean, required:false, default:false },
-		loginOptions:{ type:Object,  required:true },
-		modelValue:  { required:true },
-		readonly:    { type:Boolean, required:false, default:false },
-		recordId:    { type:Number,  required:true },
-		showGallery: { type:Boolean, required:false, default:false }
+	props: {
+		attributeId: { type: String, required: true },
+		countAllowed: { type: Number, required: true }, // number of allowed files
+		fieldId: { type: String, required: true },
+		formLoading: { type: Boolean, required: true }, // to react to form load events
+		isHidden: { type: Boolean, required: false, default: false },
+		loginOptions: { type: Object, required: true },
+		modelValue: { required: true },
+		readonly: { type: Boolean, required: false, default: false },
+		recordId: { type: Number, required: true },
+		showGallery: { type: Boolean, required: false, default: false }
 	},
-	emits:['file-count-change','set-login-option','update:modelValue'],
+	emits: ['file-count-change', 'set-login-option', 'update:modelValue'],
 	data() {
 		return {
-			extPreview:[
-				'bmp','gif','jpg','jpeg','pdf','png','psd','svg','xcf','webp',
-				'cfg','conf','css','csv','go','html','ini','java','js','json',
-				'log','md','php','pl','ps1','py','sql','txt','xml'
+			extPreview: [
+				'bmp', 'gif', 'jpg', 'jpeg', 'pdf', 'png', 'psd', 'svg', 'xcf', 'webp',
+				'cfg', 'conf', 'css', 'csv', 'go', 'html', 'ini', 'java', 'js', 'json',
+				'log', 'md', 'php', 'pl', 'ps1', 'py', 'sql', 'txt', 'xml'
 			],
-			
-			extRegex:/(?:\.([^.]+))?$/,
-			noSpace:false,         // if input field is tiny, reduces clutter,
-			progress:100,
-			viewModes:['listCompact','listComfort','gallery'],
-			
+
+			extRegex: /(?:\.([^.]+))?$/,
+			noSpace: false,         // if input field is tiny, reduces clutter,
+			progress: 100,
+			viewModes: ['listCompact', 'listComfort', 'gallery'],
+
 			// states
-			dragActive:false,
-			dragTarget:{},
-			files:[],           // files from value
-			fileIdMapChange:{}, // map of file changes done inside this component, key: file ID
-			fileIdsSelected:[], // file IDs selected by checkbox
-			filterName:'',      // filter files by name
-			galleryMeta:false,  // show file meta data in gallery view
-			sortDirAsc:true,
-			sortMode:'name'     // name, size, changed
+			dragActive: false,
+			dragTarget: {},
+			files: [],           // files from value
+			fileIdMapChange: {}, // map of file changes done inside this component, key: file ID
+			fileIdsSelected: [], // file IDs selected by checkbox
+			filterName: '',      // filter files by name
+			galleryMeta: false,  // show file meta data in gallery view
+			sortDirAsc: true,
+			sortMode: 'name'     // name, size, changed
 		};
 	},
 	mounted() {
 		// setup watchers
-		this.$watch('appResized',this.resized);
-		this.$watch('formLoading',v => { if(!v) this.reset(); });
-		this.$watch('isHidden',   v => { if(!v) this.$nextTick(this.resized); });
-		this.$watch('modelValue',this.reset);
-		
+		this.$watch('appResized', this.resized);
+		this.$watch('formLoading', v => { if (!v) this.reset(); });
+		this.$watch('isHidden', v => { if (!v) this.$nextTick(this.resized); });
+		this.$watch('modelValue', this.reset);
+
 		this.resized();
 	},
-	computed:{
-		filesProcessed:{
+	computed: {
+		filesProcessed: {
 			get() {
 				let v = JSON.parse(JSON.stringify(this.files));
-				
-				if(this.filterName !== '')
+
+				if (this.filterName !== '')
 					v = v.filter(f => f.name.includes(this.filterName))
-				
-				if(this.sortByChanged) {
-					if(this.sortDirAsc)  v.sort((a, b) => a.changed - b.changed);
-					if(!this.sortDirAsc) v.sort((a, b) => b.changed - a.changed);
-				} else if(this.sortByName) {
-					if(this.sortDirAsc)  v.sort((a, b) => a.name.localeCompare(b.name));
-					if(!this.sortDirAsc) v.sort((a, b) => b.name.localeCompare(a.name));
-				} else if(this.sortBySize) {
-					if(this.sortDirAsc)  v.sort((a, b) => a.size - b.size);
-					if(!this.sortDirAsc) v.sort((a, b) => b.size - a.size);
+
+				if (this.sortByChanged) {
+					if (this.sortDirAsc) v.sort((a, b) => a.changed - b.changed);
+					if (!this.sortDirAsc) v.sort((a, b) => b.changed - a.changed);
+				} else if (this.sortByName) {
+					if (this.sortDirAsc) v.sort((a, b) => a.name.localeCompare(b.name));
+					if (!this.sortDirAsc) v.sort((a, b) => b.name.localeCompare(a.name));
+				} else if (this.sortBySize) {
+					if (this.sortDirAsc) v.sort((a, b) => a.size - b.size);
+					if (!this.sortDirAsc) v.sort((a, b) => b.size - a.size);
 				}
 				return v;
 			}
 		},
-		fileCountCaption:(s) => {
+		fileCountCaption: s => {
 			let out = `${s.files.length}`;
-			if(s.countAllowed !== 0) out += ` / ${s.countAllowed}`;
-			if(!s.noSpace)           out += ` ${s.capGen.files}`;
+			if (s.countAllowed !== 0) out += ` / ${s.countAllowed}`;
+			if (!s.noSpace) out += ` ${s.capGen.files}`;
 			return out;
 		},
-		fileIdsUnsaved:(s) => {
-			let out = [];
-			for(let fileId in s.fileIdMapChange) {
-				if(s.fileIdMapChange[fileId].action === 'create')
+		fileIdsUnsaved: s => {
+			const out = [];
+			for (const fileId in s.fileIdMapChange) {
+				if (s.fileIdMapChange[fileId].action === 'create')
 					out.push(fileId);
 			}
 			return out;
 		},
-		viewSrc:(s) => {
-			if(s.viewListComfort) return 'images/files_list2.png';
-			if(s.viewListCompact) return 'images/files_list1.png';
-			if(s.viewGallery)     return 'images/files_list3.png';
+		viewSrc: s => {
+			if (s.viewListComfort) return 'images/files_list2.png';
+			if (s.viewListCompact) return 'images/files_list1.png';
+			if (s.viewGallery) return 'images/files_list3.png';
 			return '';
 		},
-		
+
 		// simple
-		allSelected:    (s) => s.filesProcessed.length === s.fileIdsSelected.length,
-		fewFiles:       (s) => s.files.length <= 5,
-		maxFiles:       (s) => s.countAllowed !== 0 && s.countAllowed <= s.files.length,
-		noFiles:        (s) => s.files.length === 0,
-		oneFile:        (s) => s.files.length === 1,
-		showActionBar:  (s) => !s.viewListCompact && (s.showGalleryMeta || s.showSortInput || s.showToggleAll),
-		showGalleryMeta:(s) => s.viewGallery && !s.noFiles && !s.oneFile,
-		showSortInput:  (s) => !s.fewFiles && !s.noSpace,
-		showToggleAll:  (s) => !s.noFiles && !s.oneFile && !s.readonly,
-		sortByChanged:  (s) => s.sortMode === 'changed',
-		sortByName:     (s) => s.sortMode === 'name',
-		sortBySize:     (s) => s.sortMode === 'size',
-		unsavedSelected:(s) => s.fileIdsSelected.some(v => s.fileIdsUnsaved.includes(v)),
-		viewListComfort:(s) => s.viewMode === 'listComfort',
-		viewListCompact:(s) => s.viewMode === 'listCompact',
-		viewGallery:    (s) => s.viewMode === 'gallery',
+		allSelected: s => s.filesProcessed.length === s.fileIdsSelected.length,
+		fewFiles: s => s.files.length <= 5,
+		maxFiles: s => s.countAllowed !== 0 && s.countAllowed <= s.files.length,
+		noFiles: s => s.files.length === 0,
+		oneFile: s => s.files.length === 1,
+		showActionBar: s => !s.viewListCompact && (s.showGalleryMeta || s.showSortInput || s.showToggleAll),
+		showGalleryMeta: s => s.viewGallery && !s.noFiles && !s.oneFile,
+		showSortInput: s => !s.fewFiles && !s.noSpace,
+		showToggleAll: s => !s.noFiles && !s.oneFile && !s.readonly,
+		sortByChanged: s => s.sortMode === 'changed',
+		sortByName: s => s.sortMode === 'name',
+		sortBySize: s => s.sortMode === 'size',
+		unsavedSelected: s => s.fileIdsSelected.some(v => s.fileIdsUnsaved.includes(v)),
+		viewListComfort: s => s.viewMode === 'listComfort',
+		viewListCompact: s => s.viewMode === 'listCompact',
+		viewGallery: s => s.viewMode === 'gallery',
 
 		// login options
-		viewMode:(s) => s.$root.getOrFallback(s.loginOptions,'fileViewMode',(s.showGallery ? 'gallery' : 'listCompact')),
-		
+		viewMode: s => s.$root.getOrFallback(s.loginOptions, 'fileViewMode', (s.showGallery ? 'gallery' : 'listCompact')),
+
 		// store
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		appResized:    (s) => s.$store.getters.appResized,
-		capApp:        (s) => s.$store.getters.captions.input.files,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		filesCopy:     (s) => s.$store.getters.filesCopy,
-		settings:      (s) => s.$store.getters.settings,
-		token:         (s) => s.$store.getters['local/token']
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		appResized: s => s.$store.getters.appResized,
+		capApp: s => s.$store.getters.captions.input.files,
+		capGen: s => s.$store.getters.captions.generic,
+		filesCopy: s => s.$store.getters.filesCopy,
+		settings: s => s.$store.getters.settings,
+		token: s => s.$store.getters['local/token']
 	},
-	methods:{
+	methods: {
 		// externals
 		getAttributeFileThumbHref,
 		getAttributeFileVersionHref,
@@ -451,79 +443,77 @@ const MyInputFiles = {
 		getNilUuid,
 		getSizeReadable,
 		getUnixFormat,
-		
+
 		reset() {
 			// model value is either:
 			// * null, empty input/no files -> reset input
 			// * array of files, initial attribute value -> initialize input
 			// * object with file changes (removed, renamed, ...)
-			if(this.modelValue === null || Array.isArray(this.modelValue)) {
+			if (this.modelValue === null || Array.isArray(this.modelValue)) {
 				let v = JSON.parse(JSON.stringify(this.modelValue));
 				this.files = v !== null ? v : [];
 				this.fileIdMapChange = {};
-				this.$emit('file-count-change',this.files.length);
+				this.$emit('file-count-change', this.files.length);
 			} else {
 				// modelValue can be updated from outside (PDF generation) -> add unknown file changes
-				for(const fileId in this.modelValue.fileIdMapChange) {
-					if(this.fileIdMapChange[fileId] !== undefined)
+				for (const fileId in this.modelValue.fileIdMapChange) {
+					if (this.fileIdMapChange[fileId] !== undefined)
 						continue;
 
 					const c = this.modelValue.fileIdMapChange[fileId];
 					this.files.push({
-						changed:Math.floor(new Date().getTime() / 1000),
-						id:fileId,
-						name:c.name,
-						size:0,
-						version:c.version
+						changed: Math.floor(Date.now() / 1000),
+						id: fileId,
+						name: c.name,
+						size: 0,
+						version: c.version,
 					});
 					this.fileIdMapChange[fileId] = c;
 				}
 			}
 		},
-		
+
 		// presentation
 		displayChecked(state) {
 			return state ? 'checkbox1.png' : 'checkbox0.png';
 		},
 		displayDate(date) {
-			return date !== 0
-				? this.getUnixFormat(date,[this.settings.dateFormat,'H:i:S'].join(' '))
-				: '-';
+			return date !== 0 ? this.getUnixFormat(date, [this.settings.dateFormat, 'H:i:S'].join(' ')) : '-';
 		},
 		displaySortDir(mode) {
-			if(this.sortMode !== mode)
+			if (this.sortMode !== mode)
 				return '';
-			
+
 			return this.sortDirAsc ? ' \u25B2' : ' \u25BC';
 		},
-		imagePreview(fileId,name,version) {
+		imagePreview(fileId, name, version) {
 			let ext = this.extRegex.exec(name)[1];
-			if(ext !== undefined) {
+			if (ext !== undefined) {
 				// if extension can be identified, decide what to display based on type
 				ext = ext.toLowerCase();
 
-				if(this.extPreview.includes(ext))
-					return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
-				
-				if(['doc','docx','odt'].includes(ext))
+				if (this.extPreview.includes(ext))
+					return this.getAttributeFileThumbHref(this.attributeId, fileId, name, version, this.token);
+
+				if (['doc', 'docx', 'odt'].includes(ext))
 					return 'images/fileRichtext.png';
-				
-				if(['xls','xlsx','ods'].includes(ext))
+
+				if (['xls', 'xlsx', 'ods'].includes(ext))
 					return 'images/fileSheet.png';
-				
-				if(['7z','gz','iso','rar','zip'].includes(ext))
+
+				if (['7z', 'gz', 'iso', 'rar', 'zip'].includes(ext))
 					return 'images/fileZip.png';
-				
-				if(['asc','der','key','p12','pem','pfx','ppk','pub'].includes(ext))
+
+				if (['asc', 'der', 'key', 'p12', 'pem', 'pfx', 'ppk', 'pub'].includes(ext))
 					return 'images/fileKey.png';
-				
-				if(['aac','flac','m4a','mp3','mp4','ogg','wav','wma'].includes(ext))
+
+				if (['aac', 'flac', 'm4a', 'mp3', 'mp4', 'ogg', 'wav', 'wma'].includes(ext))
 					return 'images/fileAudio.png';
-				
-				if(['avi','flv','m4v','mp4','mov','mpg','mpeg','mkv','ogv','webm','wmv'].includes(ext))
+
+				if (['avi', 'flv', 'm4v', 'mp4', 'mov', 'mpg', 'mpeg', 'mkv', 'ogv', 'webm', 'wmv'].includes(ext))
 					return 'images/fileVideo.png';
-				
-				if(ext === 'rei3')
+
+				if (ext === 'rei3')
 					return 'images/fileRei3.png';
 			}
 			return 'images/noPic.png';
@@ -531,14 +521,14 @@ const MyInputFiles = {
 		resized() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;
 		},
-		
+
 		// drag&drop
 		dragEnter(event) {
 			this.dragTarget = event.target;
 			this.dragActive = true;
 		},
 		dragLeave(event) {
-			if(event.target === this.dragTarget)
+			if (event.target === this.dragTarget)
 				this.dragActive = false;
 		},
 		dragOver(event) {
@@ -546,48 +536,48 @@ const MyInputFiles = {
 		},
 		drop(event) {
 			this.dragActive = false;
-			if(!this.maxFiles) {
+			if (!this.maxFiles) {
 				this.getFilesFromDataItems(event.dataTransfer.items).then(
-					files => this.upload(files,null)
+					files => this.upload(files, null)
 				);
 			}
 		},
-		
+
 		// actions
 		copyFilesSelected() {
 			let v = {
-				attributeId:this.attributeId,
-				fileIds:this.fileIdsSelected,
-				recordId:this.recordId
+				attributeId: this.attributeId,
+				fileIds: this.fileIdsSelected,
+				recordId: this.recordId
 			};
-			ws.send('event','filesCopied',v,true);
-			this.$store.commit('filesCopy',v);
+			ws.send('event', 'filesCopied', v, true);
+			this.$store.commit('filesCopy', v);
 			this.fileIdsSelected = [];
 		},
-		fileRequest(fileId,chooseApp) {
-			ws.send('event','fileRequested',{
-				attributeId:this.attributeId,
-				fileId:fileId,
-				recordId:this.recordId,
-				chooseApp:chooseApp
-			},false);
+		fileRequest(fileId, chooseApp) {
+			ws.send('event', 'fileRequested', {
+				attributeId: this.attributeId,
+				fileId: fileId,
+				recordId: this.recordId,
+				chooseApp: chooseApp
+			}, false);
 		},
 		pasteFilesStored() {
-			ws.send('file','paste',{
-				srcAttributeId:this.filesCopy.attributeId,
-				srcFileIds:this.filesCopy.fileIds,
-				srcRecordId:this.filesCopy.recordId,
-				dstAttributeId:this.attributeId
-			},true).then(
+			ws.send('file', 'paste', {
+				srcAttributeId: this.filesCopy.attributeId,
+				srcFileIds: this.filesCopy.fileIds,
+				srcRecordId: this.filesCopy.recordId,
+				dstAttributeId: this.attributeId
+			}, true).then(
 				res => {
-					let files = [];
-					for(let i = 0, j = res.payload.length; i < j; i++) {
-						let f = res.payload[i];
+					const files = [];
+					for (let i = 0, j = res.payload.length; i < j; i++) {
+						const f = res.payload[i];
 						files.push({
-							id:f.id,
-							name:f.name,
-							size:f.size,
-							changed:f.changed
+							id: f.id,
+							name: f.name,
+							size: f.size,
+							changed: f.changed
 						});
 					}
 					this.updateCreate(files);
@@ -601,20 +591,20 @@ const MyInputFiles = {
 			this.fileIdsSelected = [];
 		},
 		setSortMode(mode) {
-			if(this.sortMode === mode) {
+			if (this.sortMode === mode) {
 				this.sortDirAsc = !this.sortDirAsc;
 			} else {
-				this.sortMode   = mode;
+				this.sortMode = mode;
 				this.sortDirAsc = true;
 			}
-			
-			if(mode === 'name') {
-				for(let fileId in this.fileIdMapChange) {
-					if(this.fileIdMapChange[fileId].action !== 'rename')
+
+			if (mode === 'name') {
+				for (const fileId in this.fileIdMapChange) {
+					if (this.fileIdMapChange[fileId].action !== 'rename')
 						continue;
-					
-					for(let i = 0, j = files.length; i < j; i++) {
-						if(files[i].id === fileId) {
+
+					for (let i = 0, j = files.length; i < j; i++) {
+						if (files[i].id === fileId) {
 							files[i].name = this.fileIdMapChange[fileId].name;
 							break;
 						}
@@ -623,130 +613,131 @@ const MyInputFiles = {
 			}
 		},
 		setSortModeClear(mode) {
-			if(this.sortMode === mode)
+			if (this.sortMode === mode)
 				this.setSortMode('');
 		},
 		toggle(fileId) {
-			let pos = this.fileIdsSelected.indexOf(fileId);
-			if(pos === -1) this.fileIdsSelected.push(fileId);
-			else           this.fileIdsSelected.splice(pos,1);
+			const pos = this.fileIdsSelected.indexOf(fileId);
+			if (pos === -1) this.fileIdsSelected.push(fileId);
+			else this.fileIdsSelected.splice(pos, 1);
 		},
 		toggleAll() {
-			if(this.allSelected)
-				return this.fileIdsSelected = [];
-			
+			if (this.allSelected) {
+				this.fileIdsSelected = [];
+				return;
+			}
 			this.fileIdsSelected = [];
-			for(let i = 0, j = this.filesProcessed.length; i < j; i++) {
+			for (let i = 0, j = this.filesProcessed.length; i < j; i++) {
 				this.fileIdsSelected.push(this.filesProcessed[i].id);
 			}
 		},
-		toggleSortDir(){
+		toggleSortDir() {
 			this.sortDirAsc = !this.sortDirAsc;
 		},
 		toggleViewMode() {
-			switch(this.viewMode) {
-				case 'listCompact': this.$emit('set-login-option','fileViewMode','listComfort'); break;
-				case 'listComfort': this.$emit('set-login-option','fileViewMode','gallery');     break;
-				case 'gallery':     this.$emit('set-login-option','fileViewMode','listCompact'); break;
+			switch (this.viewMode) {
+				case 'listCompact': this.$emit('set-login-option', 'fileViewMode', 'listComfort'); break;
+				case 'listComfort': this.$emit('set-login-option', 'fileViewMode', 'gallery'); break;
+				case 'gallery': this.$emit('set-login-option', 'fileViewMode', 'listCompact'); break;
 			}
 		},
-		update(fileId,action,name) {
-			if(this.fileIdMapChange[fileId] === undefined) {
+		update(fileId, action, name) {
+			if (this.fileIdMapChange[fileId] === undefined) {
 				this.fileIdMapChange[fileId] = {
-					action:action,
-					name:name,
-					version:-1
+					action: action,
+					name: name,
+					version: -1
 				};
 			} else {
 				// delete action always takes priority, even if another already existed
-				if(action === 'delete')
+				if (action === 'delete')
 					this.fileIdMapChange[fileId].action = action;
-				
+
 				// file name is used for file reference in change logs regardless of action
 				this.fileIdMapChange[fileId].name = name;
 			}
-			
+
 			// update parent
-			this.$emit('update:modelValue',{
-				fileCount:this.files.length,
-				fileIdMapChange:this.fileIdMapChange
+			this.$emit('update:modelValue', {
+				fileCount: this.files.length,
+				fileIdMapChange: this.fileIdMapChange
 			});
 		},
 		updateCreate(filesNew) {
-			for(let f of filesNew) {
+			for (const f of filesNew) {
 				this.files.push(f);
-				this.update(f.id,'create',f.name);
+				this.update(f.id, 'create', f.name);
 			}
-			this.$emit('file-count-change',this.files.length);
+			this.$emit('file-count-change', this.files.length);
 		},
 		updateDelete(fileIds) {
-			for(let fileId of fileIds) {
-				for(let i = 0, j = this.files.length; i < j; i++) {
-					if(this.files[i].id === fileId) {
-						this.update(fileId,'delete',this.files[i].name);
-						this.files.splice(i,1);
+			for (const fileId of fileIds) {
+				for (let i = 0, j = this.files.length; i < j; i++) {
+					if (this.files[i].id === fileId) {
+						this.update(fileId, 'delete', this.files[i].name);
+						this.files.splice(i, 1);
 						break;
 					}
 				}
 			}
-			this.$emit('file-count-change',this.files.length);
+			this.$emit('file-count-change', this.files.length);
 		},
-		updateName(fileId,name) {
+		updateName(fileId, name) {
 			// name is not immediately updated in files list to conserve sorting
 			// when form is reloaded or sort updated, file name changes are applied
-			this.update(fileId,'rename',name);
+			this.update(fileId, 'rename', name);
 		},
-		upload(files,inputTarget) {
-			let maxSize = this.attributeIdMap[this.attributeId].length;
-			
-			for(let file of files) {
-				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
+		upload(files, inputTarget) {
+			const maxSize = this.attributeIdMap[this.attributeId].length;
+
+			for (const file of files) {
+				if (maxSize !== 0 && Math.floor(file.size / 1024) > maxSize) {
 					file.hasProgress = 100;
 					this.$root.genericError(this.capApp.tooLarge.replace(
-						'{NAME}',file.name).replace('{SIZE}',this.getSizeReadable(maxSize))
+						'{NAME}', file.name).replace('{SIZE}', this.getSizeReadable(maxSize))
 					);
 					continue;
 				}
-				
+
 				// upload file
-				let xhr = new XMLHttpRequest();
+				const xhr = new XMLHttpRequest();
 				file.hasProgress = 0;
 
 				xhr.addEventListener('load', () => {
 					const res = JSON.parse(xhr.response);
-					
-					if(typeof res.error !== 'undefined')
+
+					if (typeof res.error !== 'undefined')
 						return this.$root.genericError('import failed');
-					
+
 					this.updateCreate([{
-						id:res.id,
-						name:file.name,
-						size:Math.floor(file.size/1024),
-						changed:0
+						id: res.id,
+						name: file.name,
+						size: Math.floor(file.size / 1024),
+						changed: 0
 					}]);
 
 					// reset input to allow same file to be uploaded twice
-					if(inputTarget !== null)
+					if (inputTarget !== null)
 						inputTarget.value = '';
 				});
 				xhr.upload.addEventListener('progress', event => {
-					if(!event.lengthComputable)
+					if (!event.lengthComputable)
 						return;
-					
+
 					file.hasProgress = Math.floor(event.loaded / event.total * 100);
 					let total = 0;
-					for(let f of files) {
+					for (const f of files) {
 						total += f.hasProgress;
 					}
 					this.progress = Math.floor(total / files.length);
 				});
 
-				let formData = new FormData();
-				formData.append('token',this.token);
-				formData.append('attributeId',this.attributeId);
-				formData.append('fileId',this.getNilUuid());
-				formData.append('file',file);
-				xhr.open('POST','data/upload',true);
+				const formData = new FormData();
+				formData.append('token', this.token);
+				formData.append('attributeId', this.attributeId);
+				formData.append('fileId', this.getNilUuid());
+				formData.append('file', file);
+				xhr.open('POST', 'data/upload', true);
 				xhr.send(formData);
 			}
 		}

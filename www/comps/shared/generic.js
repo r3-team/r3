@@ -107,8 +107,7 @@ export function deepIsEqual(o1, o2) {
 };
 
 export function getBuildFromVersion(fullVersion) {
-	let m = fullVersion.match(/\d+\.\d+\.\d+\.(\d+)/);
-
+	const m = fullVersion.match(/\d+\.\d+\.\d+\.(\d+)/);
 	if (m.length !== 2)
 		return false;
 
