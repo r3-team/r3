@@ -35,6 +35,7 @@ export default {
 		<my-builder-preset
 			v-if="idEdit !== false"
 			@close="idEdit = false"
+			@new="idEdit = null"
 			:id="idEdit"
 			:key="idEdit"
 			:module

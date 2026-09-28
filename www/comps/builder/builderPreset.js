@@ -107,9 +107,14 @@ export default {
 			<div class="top lower">
 				<div class="area">
 					<my-button image="save.png"
-						@trigger="set"
+						@trigger="set(false)"
 						:active="canSave"
 						:caption="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="save_new.png"
+						@trigger="set(true)"
+						:active="canSave"
+						:caption="isNew ? capGen.button.createNew : capGen.button.saveNew"
 					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
@@ -125,6 +130,7 @@ export default {
 					/>
 					<my-button image="builderLookup.png"
 						@trigger="showLookup = true"
+						:active="!isNew"
 						:caption="capGen.references"
 					/>
 					<my-button image="delete.png"
@@ -208,7 +214,7 @@ export default {
 		readonly: { type: Boolean, required: true },
 		relation: { type: Object, required: true },
 	},
-	emits: ['close'],
+	emits: ['close', 'new'],
 	data() {
 		return {
 			hasReferences: false,
@@ -317,7 +323,7 @@ export default {
 		},
 		handleHotkeys(e) {
 			if (e.ctrlKey && e.key === 's' && this.canSave) {
-				this.set();
+				this.set(false);
 				e.preventDefault();
 			}
 			if (e.key === 'Escape') {
@@ -355,9 +361,17 @@ export default {
 				this.$root.genericError
 			);
 		},
-		set() {
+		set(newAfterSave) {
 			ws.send('preset', 'set', this.values, true).then(
-				this.closeReload,
+				() => {
+					if (newAfterSave) {
+						this.$root.schemaReload(this.relation.moduleId);
+						this.reset();
+						this.$emit('new');
+					} else {
+						this.closeReload();
+					}
+				},
 				this.$root.genericError
 			);
 		}
