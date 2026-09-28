@@ -116,7 +116,7 @@ const MySettingsEncryption = {
 				<tbody>
 					<tr v-if="!loginNoCred">
 						<td>{{ capApp.prevPassword }}</td>
-						<td><input v-model="regainPassword" /></td>
+						<td><input v-model="regainPassword" type="password" /></td>
 						<td>
 							<my-button image="key.png"
 								@trigger="unlockWithPassphrase"
