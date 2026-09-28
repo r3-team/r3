@@ -1,29 +1,19 @@
-import MyBuilderQuery         from './builderQuery.js';
-import MyBuilderColumnOptions from './builderColumnOptions.js';
-import {getTemplateQuery}     from '../shared/builderTemplate.js';
-import {getColumnTitle}       from '../shared/column.js';
-import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {
-	isAttributeBoolean,
-	isAttributeDecimal,
-	isAttributeFiles,
-	isAttributeInteger,
-	isAttributeRelationship,
-	isAttributeString,
-	isAttributeUuid,
+	isAttributeBoolean, isAttributeDecimal, isAttributeFiles, isAttributeInteger,
+	isAttributeRelationship, isAttributeString, isAttributeUuid,
 } from '../shared/attribute.js';
-import {
-	MyBuilderColumns,
-	MyBuilderColumnTemplates
-} from './builderColumns.js';
-import {
-	copyValueDialog,
-	deepIsEqual
-} from '../shared/generic.js';
+import { getTemplateQuery } from '../shared/builderTemplate.js';
+import { getColumnTitle } from '../shared/column.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { copyValueDialog, deepIsEqual } from '../shared/generic.js';
+
+import MyBuilderColumnOptions from './builderColumnOptions.js';
+import { MyBuilderColumns, MyBuilderColumnTemplates } from './builderColumns.js';
+import MyBuilderQuery from './builderQuery.js';
 
 const MyBuilderApiPreview = {
-	name:'my-builder-api-preview',
-	template:`<table class="generic-table-vertical default-inputs">
+	name: 'my-builder-api-preview',
+	template: `<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<tr>
 				<td>{{ capApp.call }}</td>
@@ -143,101 +133,101 @@ const MyBuilderApiPreview = {
 			</tr>
 		</tbody>
 	</table>`,
-	props:{
-		api:            { type:Object,  required:true },
-		builderLanguage:{ type:String,  required:true },
-		columns:        { type:Array,   required:true },
-		hasDelete:      { type:Boolean, required:true },
-		hasGet:         { type:Boolean, required:true },
-		hasPost:        { type:Boolean, required:true },
-		joins:          { type:Array,   required:true },
-		limitDef:       { type:Number,  required:true },
-		module:         { type:Object,  required:true },
-		name:           { type:String,  required:true },
-		verboseDef:     { type:Boolean, required:true },
-		version:        { type:Number,  required:true },
-		warnings:       { type:Array,   required:true }
+	props: {
+		api: { type: Object, required: true },
+		builderLanguage: { type: String, required: true },
+		columns: { type: Array, required: true },
+		hasDelete: { type: Boolean, required: true },
+		hasGet: { type: Boolean, required: true },
+		hasPost: { type: Boolean, required: true },
+		joins: { type: Array, required: true },
+		limitDef: { type: Number, required: true },
+		module: { type: Object, required: true },
+		name: { type: String, required: true },
+		verboseDef: { type: Boolean, required: true },
+		version: { type: Number, required: true },
+		warnings: { type: Array, required: true }
 	},
 	data() {
 		return {
 			// API call preview
-			call:'AUTH', // AUTH, GET, POST, DELETE
-			contentType:'application/json',
-			limitChanged:false,
-			params:{
-				limit:100,
-				offset:0,
-				verbose:false
+			call: 'AUTH', // AUTH, GET, POST, DELETE
+			contentType: 'application/json',
+			limitChanged: false,
+			params: {
+				limit: 100,
+				offset: 0,
+				verbose: false
 			},
-			recordId:0,
-			verboseChanged:false
+			recordId: 0,
+			verboseChanged: false
 		};
 	},
-	computed:{
+	computed: {
 		// preview values
-		method:s => s.isAuth ? 'POST' : s.call,
-		paramsUrl:s => {
-			if(s.isAuth) return '';
+		method: s => s.isAuth ? 'POST' : s.call,
+		paramsUrl: s => {
+			if (s.isAuth) return '';
 
-			let out = [];
-			if(s.verboseChanged)       out.push(`verbose=${s.params.verbose ? '1' : '0'}`);
-			if(s.isGet && s.limitSet)  out.push(`limit=${s.params.limit}`);
-			if(s.isGet && s.offsetSet) out.push(`offset=${s.params.offset}`);
+			const out = [];
+			if (s.verboseChanged) out.push(`verbose=${s.params.verbose ? '1' : '0'}`);
+			if (s.isGet && s.limitSet) out.push(`limit=${s.params.limit}`);
+			if (s.isGet && s.offsetSet) out.push(`offset=${s.params.offset}`);
 			return out.length === 0 ? '' : `?${out.join('&')}`;
 		},
-		request:s => {
-			if(s.isAuth) return `{\n\t"username": "API_USER_NAME",\n\t"password": "API_USER_PASSWORD"\n}`;
-			if(s.isPost) return s.getBodyPreview(true);
+		request: s => {
+			if (s.isAuth) return `{\n\t"username": "API_USER_NAME",\n\t"password": "API_USER_PASSWORD"\n}`;
+			if (s.isPost) return s.getBodyPreview(true);
 			return s.capApp.empty;
 		},
-		response:s => {
-			if(s.isAuth) return `{\n\t"token": "ACCESS_TOKEN"\n}`;
-			if(s.isGet)  return s.getBodyPreview(false);
+		response: s => {
+			if (s.isAuth) return `{\n\t"token": "ACCESS_TOKEN"\n}`;
+			if (s.isGet) return s.getBodyPreview(false);
 
-			if(s.isPost) {
-				let out = {};
-				for(let join of s.joins) {
+			if (s.isPost) {
+				const out = {};
+				for (const join of s.joins) {
 					out[join.index] = 123;
 				}
-				return JSON.stringify(out,null,'\t');
+				return JSON.stringify(out, null, '\t');
 			}
 			return s.capApp.empty;
 		},
-		url:s => {
+		url: s => {
 			let base = `${location.protocol}//${location.host}/api/`;
-			switch(s.call) {
+			switch (s.call) {
 				case 'AUTH': base += 'auth'; break;
 				default: base += `${s.module.name}/${s.name}/v${s.version}`; break;
 			}
 
-			if(s.isDelete)             base += `/${s.recordSet ? s.recordId : 1}`;
-			if(s.isGet && s.recordSet) base += `/${s.recordId}`;
+			if (s.isDelete) base += `/${s.recordSet ? s.recordId : 1}`;
+			if (s.isGet && s.recordSet) base += `/${s.recordId}`;
 			return base + s.paramsUrl;
 		},
 
 		// simple
-		isAuth:   s => s.call === 'AUTH',
+		isAuth: s => s.call === 'AUTH',
 		isDelete: s => s.call === 'DELETE',
-		isGet:    s => s.call === 'GET',
-		isPost:   s => s.call === 'POST',
-		limitSet: s => s.params.limit  !== '' && s.params.limit  !== 0 && s.limitChanged,
-		offsetSet:s => s.params.offset !== '' && s.params.offset !== 0,
-		recordSet:s => s.recordId      !== '' && s.recordId      !== 0,
+		isGet: s => s.call === 'GET',
+		isPost: s => s.call === 'POST',
+		limitSet: s => s.params.limit !== '' && s.params.limit !== 0 && s.limitChanged,
+		offsetSet: s => s.params.offset !== '' && s.params.offset !== 0,
+		recordSet: s => s.recordId !== '' && s.recordId !== 0,
 
 		// stores
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
-		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
-		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
-		capApp:         s => s.$store.getters.captions.builder.api.preview,
-		capAppApi:      s => s.$store.getters.captions.builder.api,
-		capGen:         s => s.$store.getters.captions.generic
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		capApp: s => s.$store.getters.captions.builder.api.preview,
+		capAppApi: s => s.$store.getters.captions.builder.api,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		// set defaults from API
-		this.params.limit   = this.limitDef;
+		this.params.limit = this.limitDef;
 		this.params.verbose = this.verboseDef;
 	},
-	methods:{
+	methods: {
 		// externals
 		getColumnTitle,
 		isAttributeBoolean,
@@ -251,109 +241,109 @@ const MyBuilderApiPreview = {
 		// display
 		getColumnExampleValue(column) {
 			let contentDisplay = 'text';
-			let value          = '';
-			switch(column.content) {
+			let value = '';
+			switch (column.content) {
 				case 'fnc_pg':
-					if(column.pgFunctionId !== null) {
+					if (column.pgFunctionId !== null) {
 						// return content of function return
 						const fnc = this.pgFunctionIdMap[column.pgFunctionId];
 						contentDisplay = fnc.codeReturns.toLowerCase();
 					}
-				break;
+					break;
 				case 'fnc_scalar':
-					if(column.arguments.length > 0) {
+					if (column.arguments.length > 0) {
 						// return content of first argument
 						const arg = column.arguments[0];
 						value = arg.attributeId !== null ? this.attributeIdMap[arg.attributeId].content : 'text';
 					}
-				break;
+					break;
 				case 'query': // fallthrough
 				case 'attribute':
 					// return content of returned attribute
 					contentDisplay = this.attributeIdMap[column.attributeId].content;
-				break;
+					break;
 			}
 
-			if(this.isAttributeInteger(contentDisplay))      value = 123;
-			if(this.isAttributeDecimal(contentDisplay))      value = 123.45;
-			if(this.isAttributeString(contentDisplay))       value = 'ABC';
-			if(this.isAttributeRelationship(contentDisplay)) value = 456;
-			if(this.isAttributeUuid(contentDisplay))         value = '064fc31d-479d-450d-22cd-71f874df3a50';
-			if(this.isAttributeBoolean(contentDisplay))      value = true;
-			if(this.isAttributeFiles(contentDisplay)) {
-				if(this.isPost) {
+			if (this.isAttributeInteger(contentDisplay)) value = 123;
+			if (this.isAttributeDecimal(contentDisplay)) value = 123.45;
+			if (this.isAttributeString(contentDisplay)) value = 'ABC';
+			if (this.isAttributeRelationship(contentDisplay)) value = 456;
+			if (this.isAttributeUuid(contentDisplay)) value = '064fc31d-479d-450d-22cd-71f874df3a50';
+			if (this.isAttributeBoolean(contentDisplay)) value = true;
+			if (this.isAttributeFiles(contentDisplay)) {
+				if (this.isPost) {
 					value = {
-						fileIdMapChange:{
-							"342acecc-2422-4af7-aa9a-ef9879fbffab":{
-								"action":"create",
-								"name":"MyFirstFile.txt",
-								"version":0
+						fileIdMapChange: {
+							"342acecc-2422-4af7-aa9a-ef9879fbffab": {
+								"action": "create",
+								"name": "MyFirstFile.txt",
+								"version": 0
 							},
-							"fc72198c-5d4e-400c-b4f5-2acc0dc279d4":{
-								"action":"create",
-								"name":"MySecondFile.txt",
-								"version":0
+							"fc72198c-5d4e-400c-b4f5-2acc0dc279d4": {
+								"action": "create",
+								"name": "MySecondFile.txt",
+								"version": 0
 							}
 						}
 					};
 				} else {
 					value = [{
-						"changed":1677925664,
-						"hash":"FILE_HASH",
-						"id":"342acecc-2422-4af7-aa9a-ef9879fbffab",
-						"name":"MyFirstFile.txt",
-						"size":240,
-						"version":0
-					},{
-						"changed":1677925669,
-						"hash":"FILE_HASH",
-						"id":"fc72198c-5d4e-400c-b4f5-2acc0dc279d4",
-						"name":"MySecondFile.txt",
-						"size":390,
-						"version":0
+						"changed": 1677925664,
+						"hash": "FILE_HASH",
+						"id": "342acecc-2422-4af7-aa9a-ef9879fbffab",
+						"name": "MyFirstFile.txt",
+						"size": 240,
+						"version": 0
+					}, {
+						"changed": 1677925669,
+						"hash": "FILE_HASH",
+						"id": "fc72198c-5d4e-400c-b4f5-2acc0dc279d4",
+						"name": "MySecondFile.txt",
+						"size": 390,
+						"version": 0
 					}];
 				}
 			}
 
-			if(column.aggregator !== null) {
-				switch(column.aggregator) {
-					case 'array': return [value,value];        break;
-					case 'list':  return `${value}, ${value}`; break;
+			if (column.aggregator !== null) {
+				switch (column.aggregator) {
+					case 'array': return [value, value];
+					case 'list': return `${value}, ${value}`;
 				}
 			}
 			return value;
 		},
 		getBodyPreview(singleRecord) {
-			let rows     = [];
+			const rows = [];
 			let rowCount = this.recordSet || this.params.limit === 1 || singleRecord ? 1 : 2;
 
-			for(;rowCount > 0;rowCount--) {
-				if(!this.params.verbose) {
-					let row = [];
-					for(const column of this.columns) {
+			for (; rowCount > 0; rowCount--) {
+				if (!this.params.verbose) {
+					const row = [];
+					for (const column of this.columns) {
 						row.push(this.getColumnExampleValue(column));
 					}
 					rows.push(row);
 				} else {
-					let row        = {};
+					const row = {};
 					let noTitleCtr = 0;
-					for(const join of this.joins) {
+					for (const join of this.joins) {
 						// relation reference (relation index + name): '0(person)' or '1(department)'
-						let relRef  = `${join.index}(${this.relationIdMap[join.relationId].name})`;
+						const relRef = `${join.index}(${this.relationIdMap[join.relationId].name})`;
 						row[relRef] = {};
 
-						for(const column of this.columns) {
-							if(column.index !== join.index)
+						for (const column of this.columns) {
+							if (column.index !== join.index)
 								continue;
 
-							const colRef = this.getColumnTitle(column,this.module.id,this.builderLanguage);
+							const colRef = this.getColumnTitle(column, this.module.id, this.builderLanguage);
 							row[relRef][colRef !== '' ? colRef : `NO_TITLE${noTitleCtr++}`] = this.getColumnExampleValue(column);
 						}
 					}
 					rows.push(row);
 				}
 			}
-			return JSON.stringify(singleRecord ? rows[0] : rows,null,'\t');
+			return JSON.stringify(singleRecord ? rows[0] : rows, null, '\t');
 		},
 
 		// actions
@@ -364,15 +354,12 @@ const MyBuilderApiPreview = {
 };
 
 export default {
-	name:'my-builder-api',
-	components:{
-		MyBuilderApiPreview,
-		MyBuilderColumnOptions,
-		MyBuilderColumns,
-		MyBuilderColumnTemplates,
-		MyBuilderQuery
+	name: 'my-builder-api',
+	components: {
+		MyBuilderApiPreview, MyBuilderColumnOptions, MyBuilderColumns,
+		MyBuilderColumnTemplates, MyBuilderQuery
 	},
-	template:`<div class="builder-api" v-if="api">
+	template: `<div class="builder-api" v-if="api">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
@@ -604,66 +591,66 @@ export default {
 			/>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:false, default:'' },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: false, default: '' },
+		readonly: { type: Boolean, required: true }
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
 	data() {
 		return {
 			// inputs
-			api:false,  // API being edited in this component
-			apiCopy:{}, // copy of API from schema when component last reset
+			api: false,  // API being edited in this component
+			apiCopy: {}, // copy of API from schema when component last reset
 
 			// state
-			columnIdShow:null,
-			filtersDisable:[
-				'collection','field','fieldChanged','fieldValid','formChanged',
-				'formState','globalSearch','javascript','record','recordMayCreate',
-				'recordMayDelete','recordMayUpdate','recordNew','variable'
+			columnIdShow: null,
+			filtersDisable: [
+				'collection', 'field', 'fieldChanged', 'fieldValid', 'formChanged',
+				'formState', 'globalSearch', 'javascript', 'record', 'recordMayCreate',
+				'recordMayDelete', 'recordMayUpdate', 'recordNew', 'variable'
 			],
-			showPreview:false,
-			showSidebar:true,
-			tabTarget:'properties'
+			showPreview: false,
+			showSidebar: true,
+			tabTarget: 'properties'
 		};
 	},
-	computed:{
+	computed: {
 		// states
-		columnShow:s => {
-			if(s.columnIdShow === null) return false;
+		columnShow: s => {
+			if (s.columnIdShow === null) return false;
 
-			for(let i = 0, j = s.api.columns.length; i < j; i++) {
-				if(s.api.columns[i].id === s.columnIdShow)
+			for (let i = 0, j = s.api.columns.length; i < j; i++) {
+				if (s.api.columns[i].id === s.columnIdShow)
 					return s.api.columns[i];
 			}
 			return false;
 		},
-		warnings:s => {
-			let out = [];
-			if(s.api.hasGet || s.api.hasPost) {
+		warnings: s => {
+			const out = [];
+			if (s.api.hasGet || s.api.hasPost) {
 				// check no base relation/no columns
-				if(s.query.relationId === '' || s.api.columns.length === 0)
+				if (s.query.relationId === '' || s.api.columns.length === 0)
 					out.push(s.capApp.warning.noData);
 			}
-			if(s.api.hasPost) {
+			if (s.api.hasPost) {
 				// check sub queries in POST API
-				if(s.api.columns.some(v => v.content === 'query'))
+				if (s.api.columns.some(v => v.content === 'query'))
 					out.push(s.capApp.warning.postSubQuery);
 
-				if(s.api.columns.some(v => v.content === 'fnc_pg' || v.content === 'fnc_scalar'))
+				if (s.api.columns.some(v => v.content === 'fnc_pg' || v.content === 'fnc_scalar'))
 					out.push(s.capApp.warning.postFunction);
 
 				// check missing record lookups
-				for(let j of s.query.joins) {
-					if(!j.applyUpdate) continue;
+				for (const j of s.query.joins) {
+					if (!j.applyUpdate) continue;
 
-					if(s.query.lookups.filter(l => l.index === j.index).length === 0) {
+					if (s.query.lookups.filter(l => l.index === j.index).length === 0) {
 						out.push(s.capApp.warning.postNoUpdate);
 						break;
 					}
@@ -674,23 +661,23 @@ export default {
 
 		// simple
 		apiSchema: s => s.apiIdMap[s.id] === undefined ? false : s.apiIdMap[s.id],
-		hasChanges:s => !s.deepIsEqual(s.api,s.apiSchema),
-		module:    s => s.moduleIdMap[s.api.moduleId],
-		query:     s => s.api.query !== null ? s.api.query : s.getTemplateQuery(),
+		hasChanges: s => !s.deepIsEqual(s.api, s.apiSchema),
+		module: s => s.moduleIdMap[s.api.moduleId],
+		query: s => s.api.query !== null ? s.api.query : s.getTemplateQuery(),
 
 		// stores
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
-		apiIdMap:   s => s.$store.getters['schema/apiIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.api,
-		capGen:     s => s.$store.getters.captions.generic
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		apiIdMap: s => s.$store.getters['schema/apiIdMap'],
+		capApp: s => s.$store.getters.captions.builder.api,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	watch:{
-		apiSchema:{
+	watch: {
+		apiSchema: {
 			handler() { this.reset(false); },
-			immediate:true
+			immediate: true
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
@@ -698,20 +685,20 @@ export default {
 		getTemplateQuery,
 
 		// actions
-		columnSet(name,value) {
+		columnSet(name, value) {
 			this.columnShow[name] = value;
 		},
 		removeIndex(index) {
-			for(let i = 0, j = this.api.columns.length; i < j; i++) {
-				if(this.api.columns[i].content === 'attribute' && this.api.columns[i].index === index) {
-					this.api.columns.splice(i,1);
+			for (let i = 0, j = this.api.columns.length; i < j; i++) {
+				if (this.api.columns[i].content === 'attribute' && this.api.columns[i].index === index) {
+					this.api.columns.splice(i, 1);
 					i--; j--;
 				}
 			}
 		},
 		reset(manuelReset) {
-			if(this.apiSchema !== false && (manuelReset || !this.deepIsEqual(this.apiCopy,this.apiSchema))) {
-				this.api     = JSON.parse(JSON.stringify(this.apiSchema));
+			if (this.apiSchema !== false && (manuelReset || !this.deepIsEqual(this.apiCopy, this.apiSchema))) {
+				this.api = JSON.parse(JSON.stringify(this.apiSchema));
 				this.apiCopy = JSON.parse(JSON.stringify(this.apiSchema));
 				this.columnIdShow = null;
 			}
@@ -719,34 +706,31 @@ export default {
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
 
-			if(this.columnIdShow !== null)
+			if (this.columnIdShow !== null)
 				this.tabTarget = 'content';
 		},
 
 		// backend calls
 		copy() {
-			ws.send('api','copy',{id:this.id},true).then(
+			ws.send('api', 'copy', { id: this.id }, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					this.$router.push('/builder/apis/'+this.module.id);
+					this.$router.push(`/builder/apis/${this.module.id}`);
 				},
 				this.$root.genericError
 			);
 		},
 		del() {
-			ws.send('api','del',{id:this.api.id},true).then(
+			ws.send('api', 'del', { id: this.api.id }, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					this.$router.push('/builder/apis/'+this.module.id);
+					this.$router.push(`/builder/apis/${this.module.id}`);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
-			ws.sendMultiple([
-				ws.prepare('api','set',this.api),
-				ws.prepare('schema','check',{moduleId:this.module.id})
-			],true).then(
+			ws.send('api', 'set', this.api, true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

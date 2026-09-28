@@ -807,9 +807,7 @@ export default {
 			for (const fieldId of this.fieldIdsRemove) {
 				requests.push(ws.prepare('field', 'del', fieldId));
 			}
-
 			requests.push(ws.prepare('form', 'set', this.form));
-			requests.push(ws.prepare('schema', 'check', { moduleId: this.form.moduleId }));
 
 			ws.sendMultiple(requests, true).then(
 				() => this.$root.schemaReload(this.module.id),

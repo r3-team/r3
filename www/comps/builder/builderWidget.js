@@ -213,10 +213,7 @@ export default {
 			);
 		},
 		set() {
-			ws.sendMultiple([
-				ws.prepare('widget', 'set', this.values),
-				ws.prepare('schema', 'check', { moduleId: this.module.id })
-			], true).then(
+			ws.send('widget', 'set', this.values, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');

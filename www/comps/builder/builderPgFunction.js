@@ -1125,10 +1125,7 @@ export default {
 			);
 		},
 		set() {
-			ws.sendMultiple([
-				ws.prepare('pgFunction', 'set', this.fnc),
-				ws.prepare('schema', 'check', { moduleId: this.module.id })
-			], true).then(
+			ws.send('pgFunction', 'set', this.fnc, true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

@@ -689,8 +689,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "schema":
 		switch action {
-		case "check":
-			return nil, SchemaCheck_tx(ctx, tx, reqJson)
 		case "reload":
 			return nil, SchemaReload_tx(ctx, tx, reqJson)
 		}

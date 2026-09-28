@@ -620,10 +620,7 @@ export default {
 			// for module change comparissons
 			this.inputs.languages.sort();
 
-			ws.sendMultiple([
-				ws.prepare('module', 'set', this.inputs),
-				ws.prepare('schema', 'check', { moduleId: this.id })
-			], true).then(
+			ws.send('module', 'set', this.inputs, true).then(
 				() => this.$root.schemaReload(this.id),
 				this.$root.genericError
 			);
@@ -636,10 +633,7 @@ export default {
 					break;
 				}
 			}
-			ws.sendMultiple([
-				ws.prepare('pgFunction', 'set', this.getTemplatePgFunction(this.id, fncName, [], 'loginSync', false)),
-				ws.prepare('schema', 'check', { moduleId: this.id })
-			], true).then(
+			ws.send('pgFunction', 'set', this.getTemplatePgFunction(this.id, fncName, [], 'loginSync', false), true).then(
 				() => this.$root.schemaReload(this.id),
 				this.$root.genericError
 			);

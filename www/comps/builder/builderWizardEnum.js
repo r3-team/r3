@@ -1,18 +1,15 @@
-import MyBuilderCaption   from './builderCaption.js';
-import MyBuilderIconInput from './builderIconInput.js';
 import {
-	getTemplateAttribute,
-	getTemplatePgIndex,
-	getTemplatePgIndexAttribute,
-	getTemplatePreset,
-	getTemplatePresetValue,
-	getTemplateRelation
+	getTemplateAttribute, getTemplatePgIndex, getTemplatePgIndexAttribute,
+	getTemplatePreset, getTemplatePresetValue, getTemplateRelation
 } from '../shared/builderTemplate.js';
 
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderIconInput from './builderIconInput.js';
+
 export default {
-	name:'my-builder-wizard-enum',
-	components:{ MyBuilderCaption, MyBuilderIconInput },
-	template:`<div class="app-sub-window under-header" @mousedown.self="close">
+	name: 'my-builder-wizard-enum',
+	components: { MyBuilderCaption, MyBuilderIconInput },
+	template: `<div class="app-sub-window under-header" @mousedown.self="close">
 		<div class="contentBox builder-wizard-enum float">
 			<div class="top">
 				<div class="area nowrap">
@@ -127,11 +124,11 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		relation:       { type:Object,  required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		relation: { type: Object, required: true }
 	},
-	emits:['close','nextLanguage'],
+	emits: ['close', 'nextLanguage'],
 	data() {
 		return {
 			// attribute inputs
@@ -147,7 +144,7 @@ export default {
 			relPresetNames: [],
 
 			// states
-			relNameOverwritten:false
+			relNameOverwritten: false
 		};
 	},
 	watch: {
@@ -160,33 +157,33 @@ export default {
 				this.relName = name;
 		}
 	},
-	computed:{
-		isAllInputs:   s => s.atrName !== '' && s.relName !== '' && s.relPresetNames.length !== 0,
-		isNameTakenAtr:s => s.relation.attributes.some(v => v.name === s.atrName),
-		isNameTakenRel:s => s.module.relations.some(v => v.name === s.relName),
+	computed: {
+		isAllInputs: s => s.atrName !== '' && s.relName !== '' && s.relPresetNames.length !== 0,
+		isNameTakenAtr: s => s.relation.attributes.some(v => v.name === s.atrName),
+		isNameTakenRel: s => s.module.relations.some(v => v.name === s.relName),
 		isSaveAllowed: s => s.isAllInputs && !s.isNameTakenAtr && !s.isNameTakenRel,
 
 		// stores
-		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capApp:        s => s.$store.getters.captions.builder.attribute,
-		capAppRel:     s => s.$store.getters.captions.builder.relation,
-		capGen:        s => s.$store.getters.captions.generic,
-		module:        s => s.moduleIdMap[s.relation.moduleId]
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.builder.attribute,
+		capAppRel: s => s.$store.getters.captions.builder.relation,
+		capGen: s => s.$store.getters.captions.generic,
+		module: s => s.moduleIdMap[s.relation.moduleId]
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.nextLanguage,key:'q',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.nextLanguage, key: 'q', keyCtrl: true });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.close, key: 'Escape' });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
-		this.$store.commit('keyDownHandlerDel',this.nextLanguage);
-		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerDel', this.set);
+		this.$store.commit('keyDownHandlerDel', this.nextLanguage);
+		this.$store.commit('keyDownHandlerDel', this.close);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	methods:{
+	methods: {
 		// external
 		getTemplateAttribute,
 		getTemplatePgIndex,
@@ -215,36 +212,36 @@ export default {
 
 		// backend calls
 		set() {
-			if(!this.isSaveAllowed)
+			if (!this.isSaveAllowed)
 				return;
 
-			let requests = [];
+			const requests = [];
 
 			// create relation with name-attribute for relationship target
-		 	let targetRel     = this.getTemplateRelation(this.module.id, this.relName, [], false);
-			let targetAtrName = this.getTemplateAttribute(this.module.id, targetRel.id, 'name');
+			const targetRel = this.getTemplateRelation(this.module.id, this.relName, [], false);
+			const targetAtrName = this.getTemplateAttribute(this.module.id, targetRel.id, 'name');
 			targetAtrName.captions.attributeTitle = this.atrCaptions;
 			targetAtrName.nullable = false;
 
-			requests.push(ws.prepare('relation','set',targetRel));
+			requests.push(ws.prepare('relation', 'set', targetRel));
 			requests.push(ws.prepare('attribute', 'set', targetAtrName));
 
 			// create unique PG index
-			let ind = this.getTemplatePgIndex(targetRel.id);
+			const ind = this.getTemplatePgIndex(targetRel.id);
 			ind.noDuplicates = true;
 			ind.attributes.push(this.getTemplatePgIndexAttribute(targetAtrName.id, true));
-			requests.push(ws.prepare('pgIndex','set',ind));
+			requests.push(ws.prepare('pgIndex', 'set', ind));
 
 			// create presets for every text value
 			for (const n of this.relPresetNames) {
-				let preset = this.getTemplatePreset(targetRel.id, n);
+				const preset = this.getTemplatePreset(targetRel.id, n);
 				preset.protected = this.relPresetsProtected;
-				preset.values = [this.getTemplatePresetValue(targetAtrName.id,null,this.relPresetsProtected,n)];
-				requests.push(ws.prepare('preset','set',preset));
+				preset.values = [this.getTemplatePresetValue(targetAtrName.id, null, this.relPresetsProtected, n)];
+				requests.push(ws.prepare('preset', 'set', preset));
 			}
 
 			// create n:1 relationship attribute on this relation
-			let localAtr = this.getTemplateAttribute(this.module.id, this.relation.id, this.atrName);
+			const localAtr = this.getTemplateAttribute(this.module.id, this.relation.id, this.atrName);
 			localAtr.captions.attributeTitle = this.atrCaptions;
 			localAtr.content = 'n:1';
 			localAtr.iconId = this.atrIconId;
@@ -253,10 +250,7 @@ export default {
 
 			requests.push(ws.prepare('attribute', 'set', localAtr));
 
-			// send requests with final schema check
-			requests.push(ws.prepare('schema','check',{ moduleId:this.module.id }));
-
-			ws.sendMultiple(requests,true).then(
+			ws.sendMultiple(requests, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.close();

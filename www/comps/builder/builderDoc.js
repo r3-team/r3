@@ -501,10 +501,7 @@ export default {
 			);
 		},
 		set() {
-			ws.sendMultiple([
-				ws.prepare('doc', 'set', this.doc),
-				ws.prepare('schema', 'check', { moduleId: this.module.id })
-			], true).then(
+			ws.send('doc', 'set', this.doc, true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

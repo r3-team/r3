@@ -330,7 +330,6 @@ export default {
 
 			let action = 'set';
 			let request;
-			let dependencyCheck = false;
 			switch (this.entity) {
 				case 'api': request = this.getTemplateApi(this.module.id, this.inputs.name); break;
 				case 'article': request = this.getTemplateArticle(this.module.id, this.inputs.name); break;
@@ -351,7 +350,6 @@ export default {
 							moduleId: this.moduleId,
 							newName: this.inputs.name
 						};
-						dependencyCheck = true;
 					} else {
 						request = this.getTemplateDoc(this.module.id, this.builderLanguage, this.inputs.name, this.inputs.tagIds);
 					}
@@ -364,7 +362,6 @@ export default {
 							moduleId: this.moduleId,
 							newName: this.inputs.name
 						};
-						dependencyCheck = true;
 					} else {
 						request = this.getTemplateForm(this.moduleId, this.inputs.name, this.inputs.tagIds);
 					}
@@ -372,13 +369,7 @@ export default {
 				case 'tag': request = { moduleId: this.moduleId, tag: this.getTemplateTag(this.inputs.name) }; break;
 				default: return;
 			}
-
-			const requests = [ws.prepare(this.entity, action, request)];
-
-			if (dependencyCheck)
-				requests.push(ws.prepare('schema', 'check', { moduleId: this.moduleId }));
-
-			ws.sendMultiple(requests, true).then(
+			ws.send(this.entity, action, request, true).then(
 				res => {
 					if (this.entity === 'module') this.$root.schemaReload(res[0].payload);
 					else this.$root.schemaReload(this.moduleId);

@@ -651,10 +651,7 @@ export default {
 			if (this.values.encrypted && !this.canEncrypt)
 				this.values.encrypted = false;
 
-			ws.sendMultiple([
-				ws.prepare('attribute', 'set', this.values),
-				ws.prepare('schema', 'check', { moduleId: this.module.id })
-			], true).then(
+			ws.send('attribute', 'set', this.values, true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 

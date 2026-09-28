@@ -1,27 +1,21 @@
-import MyBuilderCaption                from './builderCaption.js';
-import MyBuilderCollectionInput        from './builderCollectionInput.js';
-import MyBuilderFormInput              from './builderFormInput.js';
-import MyBuilderIconInput              from './builderIconInput.js';
-import MyBuilderMenuTabSelect          from './builderMenuTabSelect.js';
-import {getDependentModules}           from '../shared/builder.js';
-import {getUuidV4}                     from '../shared/crypto.js';
-import {getCaptionForLang}             from '../shared/language.js';
-import {
-	getTemplateCollectionConsumer,
-	getTemplateMenu,
-	getTemplateMenuTab
-} from '../shared/builderTemplate.js';
+import { getDependentModules } from '../shared/builder.js';
+import { getTemplateCollectionConsumer, getTemplateMenu, getTemplateMenuTab } from '../shared/builderTemplate.js';
+import { getUuidV4 } from '../shared/crypto.js';
+import { getCaptionForLang } from '../shared/language.js';
+
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderCollectionInput from './builderCollectionInput.js';
+import MyBuilderFormInput from './builderFormInput.js';
+import MyBuilderIconInput from './builderIconInput.js';
+import MyBuilderMenuTabSelect from './builderMenuTabSelect.js';
 
 const MyBuilderMenuItems = {
-	name:'my-builder-menu-items',
-	components:{
-		'chrome-picker':VueColor.Chrome,
-		MyBuilderCaption,
-		MyBuilderCollectionInput,
-		MyBuilderFormInput,
-		MyBuilderIconInput
+	name: 'my-builder-menu-items',
+	components: {
+		'chrome-picker': VueColor.Chrome, MyBuilderCaption,
+		MyBuilderCollectionInput, MyBuilderFormInput, MyBuilderIconInput
 	},
-	template:`<draggable handle=".dragAnchor" group="menu" itemKey="id" animation="100"
+	template: `<draggable handle=".dragAnchor" group="menu" itemKey="id" animation="100"
 		:fallbackOnBody="true"
 		:list="list"
 	>
@@ -172,26 +166,26 @@ const MyBuilderMenuItems = {
 			</div>
 		</template>
 	</draggable>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		colorParent:    { required:false, default:null },
-		module:         { type:Object,  required:true },
-		list:           { type:Array,   required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		colorParent: { required: false, default: null },
+		module: { type: Object, required: true },
+		list: { type: Array, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			showOptionsIndex:-1
+			showOptionsIndex: -1
 		};
 	},
-	computed:{
+	computed: {
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.menu,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		settings:   (s) => s.$store.getters.settings
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.menu,
+		capGen: s => s.$store.getters.captions.generic,
+		settings: s => s.$store.getters.settings
 	},
-	methods:{
+	methods: {
 		// externals
 		getTemplateCollectionConsumer,
 
@@ -206,18 +200,18 @@ const MyBuilderMenuItems = {
 			return input === '' ? null : input;
 		},
 		remove(i) {
-			this.list.splice(i,1);
+			this.list.splice(i, 1);
 		}
 	}
 };
 
 const MyBuilderMenuTabOptions = {
-	name:'my-builder-menu-tab-options',
-	components:{
+	name: 'my-builder-menu-tab-options',
+	components: {
 		MyBuilderCaption,
 		MyBuilderIconInput
 	},
-	template:`<table class="generic-table-vertical default-inputs">
+	template: `<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<tr>
 				<td>{{ capGen.title }}</td>
@@ -244,33 +238,29 @@ const MyBuilderMenuTabOptions = {
 			</tr>
 		</tbody>
 	</table>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		module:         { type:Object,  required:true },
-		modelValue:     { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		module: { type: Object, required: true },
+		modelValue: { type: Object, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		capGen:(s) => s.$store.getters.captions.generic
+	emits: ['update:modelValue'],
+	computed: {
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
-		set(name,value) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+	methods: {
+		set(name, value) {
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		}
 	}
 };
 
 export default {
-	name:'my-builder-menu',
-	components:{
-		MyBuilderMenuItems,
-		MyBuilderMenuTabOptions,
-		MyBuilderMenuTabSelect
-	},
-	template:`<div v-if="module" class="builder-menus contentBox grow">
+	name: 'my-builder-menu',
+	components: { MyBuilderMenuItems, MyBuilderMenuTabOptions, MyBuilderMenuTabSelect },
+	template: `<div v-if="module" class="builder-menus contentBox grow">
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/menu.png" />
@@ -377,59 +367,59 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		id:             { type:String,  required:true },
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		id: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
 	data() {
 		return {
-			copyMenuTabId:null,
-			copyModuleId:null,
-			menuTabs:[],
-			menuTabsIndexShown:0,
-			menuTabIdsRemoved:[]
+			copyMenuTabId: null,
+			copyModuleId: null,
+			menuTabs: [],
+			menuTabsIndexShown: 0,
+			menuTabIdsRemoved: []
 		};
 	},
 	mounted() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
-	watch:{
-		module:{
+	watch: {
+		module: {
 			handler() {
 				this.reset();
 				this.switchToValidMenuTab();
 			},
-			immediate:true
+			immediate: true
 		}
 	},
-	computed:{
+	computed: {
 		// inputs
-		menuTabShown:{
+		menuTabShown: {
 			get() { return this.menuTabs[this.menuTabsIndexShown]; },
 			set(v) {
-				for(let i = 0, j = this.menuTabs.length; i < j; i++) {
-					if(this.menuTabs[i].id === v.id)
+				for (let i = 0, j = this.menuTabs.length; i < j; i++) {
+					if (this.menuTabs[i].id === v.id)
 						this.menuTabs[i] = v;
 				}
 			}
 		},
 
 		// simple
-		canDelete: (s) => !s.readonly && s.menuTabs.length > 1,
-		hasChanges:(s) => JSON.stringify(s.menuTabs) !== JSON.stringify(s.module.menuTabs) || s.menuTabIdsRemoved.length !== 0,
-		module:    (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		canDelete: s => !s.readonly && s.menuTabs.length > 1,
+		hasChanges: s => JSON.stringify(s.menuTabs) !== JSON.stringify(s.module.menuTabs) || s.menuTabIdsRemoved.length !== 0,
+		module: s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.menu,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		settings:   (s) => s.$store.getters.settings
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.menu,
+		capGen: s => s.$store.getters.captions.generic,
+		settings: s => s.$store.getters.settings
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaptionForLang,
 		getDependentModules,
@@ -446,24 +436,26 @@ export default {
 		},
 		copy() {
 			const mod = this.moduleIdMap[this.copyModuleId];
-			for(const mt of mod.menuTabs) {
-				if(mt.id === this.copyMenuTabId) {
-					return this.menuTabs[this.menuTabsIndexShown].menus = this.replaceIdsForCopy(
+			for (const mt of mod.menuTabs) {
+				if (mt.id === this.copyMenuTabId) {
+					this.menuTabs[this.menuTabsIndexShown].menus = this.replaceIdsForCopy(
 						this.menuTabs[this.menuTabsIndexShown].menus.concat(JSON.parse(JSON.stringify(mt.menus))));
+
+					return;
 				}
 			}
 		},
 		moveTab(forward) {
-			const newIndex = forward ? this.menuTabsIndexShown+1 : this.menuTabsIndexShown-1;
-			this.menuTabs.splice(newIndex, 0, this.menuTabs.splice(this.menuTabsIndexShown,1)[0]);
+			const newIndex = forward ? this.menuTabsIndexShown + 1 : this.menuTabsIndexShown - 1;
+			this.menuTabs.splice(newIndex, 0, this.menuTabs.splice(this.menuTabsIndexShown, 1)[0]);
 			this.menuTabsIndexShown = newIndex;
 		},
 		replaceIdsForCopy(menus) {
-			for(let i = 0, j = menus.length; i < j; i++) {
+			for (let i = 0, j = menus.length; i < j; i++) {
 
 				// replace menu & collection consumer UUIDs with new ones
 				menus[i].id = this.getUuidV4();
-				for(let ci = 0, cj = menus[i].collections.length; ci < cj; ci++) {
+				for (let ci = 0, cj = menus[i].collections.length; ci < cj; ci++) {
 					menus[i].collections[ci].id = this.getUuidV4();
 				}
 				menus[i].menus = this.replaceIdsForCopy(menus[i].menus);
@@ -471,7 +463,7 @@ export default {
 			return menus;
 		},
 		reset() {
-			if(this.module) {
+			if (this.module) {
 				this.menuTabs = JSON.parse(JSON.stringify(this.module.menuTabs));
 				this.switchToValidMenuTab();
 			}
@@ -479,27 +471,25 @@ export default {
 
 		// presentation
 		switchToValidMenuTab() {
-			if(this.menuTabsIndexShown > this.menuTabs.length - 1)
+			if (this.menuTabsIndexShown > this.menuTabs.length - 1)
 				this.menuTabsIndexShown = 0;
 		},
 
 		// backend functions
 		del() {
 			this.menuTabIdsRemoved.push(this.menuTabs[this.menuTabsIndexShown].id);
-			this.menuTabs.splice(this.menuTabsIndexShown,1);
+			this.menuTabs.splice(this.menuTabsIndexShown, 1);
 			this.switchToValidMenuTab();
 		},
 		set() {
-			let requests = [];
-			for(let i = 0, j = this.menuTabs.length; i < j; i++) {
-				requests.push(ws.prepare('menuTab','set',{menuTab:this.menuTabs[i],position:i}));
+			const requests = [];
+			for (let i = 0, j = this.menuTabs.length; i < j; i++) {
+				requests.push(ws.prepare('menuTab', 'set', { menuTab: this.menuTabs[i], position: i }));
 			}
-			for(const id of this.menuTabIdsRemoved) {
-				requests.push(ws.prepare('menuTab','del',id));
+			for (const id of this.menuTabIdsRemoved) {
+				requests.push(ws.prepare('menuTab', 'del', id));
 			}
-			requests.push(ws.prepare('schema','check',{moduleId:this.module.id}));
-
-			ws.sendMultiple(requests,true).then(
+			ws.sendMultiple(requests, true).then(
 				() => {
 					this.menuTabIdsRemoved = [];
 					this.$root.schemaReload(this.module.id);

@@ -1181,10 +1181,7 @@ export default {
 			);
 		},
 		set() {
-			ws.sendMultiple([
-				ws.prepare('jsFunction', 'set', this.fnc),
-				ws.prepare('schema', 'check', { moduleId: this.module.id })
-			], true).then(
+			ws.send('jsFunction', 'set', this.fnc, true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

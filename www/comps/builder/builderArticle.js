@@ -186,10 +186,7 @@ export default {
 			);
 		},
 		set() {
-			ws.sendMultiple([
-				ws.prepare('article', 'set', this.article),
-				ws.prepare('schema', 'check', { moduleId: this.module.id })
-			], true).then(
+			ws.send('article', 'set', this.article, true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

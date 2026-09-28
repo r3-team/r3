@@ -320,10 +320,7 @@ export default {
 			);
 		},
 		set() {
-			ws.sendMultiple([
-				ws.prepare('searchBar', 'set', this.searchBar),
-				ws.prepare('schema', 'check', { moduleId: this.module.id })
-			], true).then(
+			ws.send('searchBar', 'set', this.searchBar, true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

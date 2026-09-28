@@ -966,6 +966,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					);
 				END;
 			$BODY$;
+
+			-- remove legacy schema lookup function
+			DROP FUNCTION app.get_preset_ids_inside_queries;
 		`)
 		return "3.13", err
 	},
