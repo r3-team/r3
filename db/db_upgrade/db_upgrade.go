@@ -808,6 +808,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login ADD COLUMN mfa_required BOOLEAN;
 			INSERT INTO instance.config (name,value) VALUES ('mfaRequired',0);
 
+			-- MFA interval windows
+			INSERT INTO instance.config (name,value) VALUES ('mfaIntervalWindows',1);
+
 			-- login reset via message
 			CREATE TABLE IF NOT EXISTS instance.login_reset (
 				login_id INTEGER NOT NULL,

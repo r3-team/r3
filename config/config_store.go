@@ -32,12 +32,12 @@ var (
 		"bruteforceAttempts", "bruteforceProtection", "builderMode",
 		"clusterNodeMissingAfter", "dbSyncJobLogKeepDays", "dbTimeoutCsv",
 		"dbTimeoutDataRest", "dbTimeoutDataWs", "dbTimeoutIcs", "filesKeepDaysDeleted",
-		"fileVersionsKeepCount", "fileVersionsKeepDays", "icsDaysPost",
-		"icsDaysPre", "icsDownload", "imagerThumbWidth", "logApi", "logBackup",
-		"logCache", "logCluster", "logCode", "logCsv", "logDbSync", "logDoc",
-		"logFile", "logImager", "logLdap", "logMail", "logModule", "logOauth",
-		"logServer", "logScheduler", "logTransfer", "logWebsocket", "logsKeepDays",
-		"mailTrafficKeepDays", "mfaRequired", "productionMode", "pwForceDigit",
+		"fileVersionsKeepCount", "fileVersionsKeepDays", "icsDaysPost", "icsDaysPre",
+		"icsDownload", "imagerThumbWidth", "logApi", "logBackup", "logCache",
+		"logCluster", "logCode", "logCsv", "logDbSync", "logDoc", "logFile", "logImager",
+		"logLdap", "logMail", "logModule", "logOauth", "logServer", "logScheduler",
+		"logTransfer", "logWebsocket", "logsKeepDays", "mailTrafficKeepDays",
+		"mfaIntervalWindows", "mfaRequired", "productionMode", "pwForceDigit",
 		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin", "systemMsgDate0",
 		"systemMsgDate1", "systemMsgMaintenance", "tokenExpiryHours", "tokenKeepEnable"}
 

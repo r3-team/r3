@@ -7,6 +7,8 @@ const (
 	AccessRead   types.Access = 1
 	AccessWrite  types.Access = 2
 
+	LoginMfaIntervalSec int64 = 30 // MFA interval window size (in seconds)
+
 	LoginTypeFixed  types.LoginType = "fixed"  // auth via fixed token, used for ICS & fat client
 	LoginTypeLdap   types.LoginType = "ldap"   // auth via credentials, credentials managed in ext. directory
 	LoginTypeLocal  types.LoginType = "local"  // auth via credentials, credentials managed in internal login backend

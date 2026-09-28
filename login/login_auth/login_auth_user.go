@@ -3,7 +3,6 @@ package login_auth
 import (
 	"context"
 	"database/sql"
-	"encoding/base32"
 	"errors"
 	"r3/cache"
 	"r3/config"
@@ -17,7 +16,6 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/xlzd/gotp"
 )
 
 // performs authentication attempt for known login via username + password + MFA (if used)
@@ -100,10 +98,7 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 		`, l.Id, mfaTokenId.Int32).Scan(&mfaToken); err != nil {
 			return types.LoginAuthResult{}, err
 		}
-
-		if mfaTokenPin.String != gotp.NewDefaultTOTP(base32.StdEncoding.WithPadding(
-			base32.NoPadding).EncodeToString(mfaToken)).Now() {
-
+		if !checkMfaToken(mfaTokenPin.String, mfaToken) {
 			return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 		}
 	} else {

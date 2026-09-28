@@ -2,15 +2,18 @@ package login_auth
 
 import (
 	"context"
+	"encoding/base32"
 	"errors"
 	"r3/config"
 	"r3/db"
 	"r3/login/login_session"
 	"r3/types"
+	"r3/types/constants"
 	"time"
 
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/xlzd/gotp"
 )
 
 type tokenPayload struct {
@@ -82,4 +85,23 @@ func getMfaTokens(ctx context.Context, loginId int64) ([]types.LoginMfaToken, er
 		tokens = append(tokens, m)
 	}
 	return tokens, nil
+}
+
+func checkMfaToken(pinProvided string, mfaToken []byte) bool {
+
+	// go through interval windows (past/now/future) to check valid MFA PIN
+	// 2 interval windows result in 5 checks (-2, -1, 0, 1, 2) => -60, -30, 0, 30, 60 seconds added to now()
+	intervalWindows := int64(config.GetUint64("mfaIntervalWindows"))
+	now := time.Now().Unix()
+
+	for i := 0 - intervalWindows; i <= intervalWindows; i++ {
+
+		pinValid := gotp.NewDefaultTOTP(base32.StdEncoding.WithPadding(
+			base32.NoPadding).EncodeToString(mfaToken)).At(now + (constants.LoginMfaIntervalSec * i))
+
+		if pinValid == pinProvided {
+			return true
+		}
+	}
+	return false
 }
