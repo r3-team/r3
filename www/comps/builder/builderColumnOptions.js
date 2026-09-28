@@ -1,32 +1,24 @@
-import MyBuilderAggregatorInput       from './builderAggregatorInput.js';
-import MyBuilderCaption               from './builderCaption.js';
-import MyBuilderQuery                 from './builderQuery.js';
-import MyBuilderColumnArguments       from './builderColumnArguments.js';
-import {getColumnIcon}                from '../shared/column.js';
-import {getTemplateQuery}             from '../shared/builderTemplate.js';
-import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
-	getIndexAttributeIdsByJoins,
-	isAttributeBoolean,
-	isAttributeFiles,
-	isAttributeInteger,
-	isAttributeString,
-	isAttributeUuid
+	getIndexAttributeIdsByJoins, isAttributeBoolean, isAttributeFiles,
+	isAttributeInteger, isAttributeString, isAttributeUuid
 } from '../shared/attribute.js';
-import {
-	getDependentModules,
-	getItemTitleColumn
-} from '../shared/builder.js';
+import { getDependentModules, getItemTitleColumn } from '../shared/builder.js';
+import { getTemplateQuery } from '../shared/builderTemplate.js';
+import { getColumnIcon } from '../shared/column.js';
+import { getCaptionByIndexAttributeId } from '../shared/query.js';
+
+import MyBuilderAggregatorInput from './builderAggregatorInput.js';
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderColumnArguments from './builderColumnArguments.js';
+import MyBuilderQuery from './builderQuery.js';
 
 export default {
-	name:'my-builder-column-options',
-	components:{
-		MyBuilderAggregatorInput,
-		MyBuilderCaption,
-		MyBuilderColumnArguments,
-		MyBuilderQuery
+	name: 'my-builder-column-options',
+	components: {
+		MyBuilderAggregatorInput, MyBuilderCaption,
+		MyBuilderColumnArguments, MyBuilderQuery
 	},
-	template:`<div class="top lower">
+	template: `<div class="top lower">
 		<div class="area">
 			<img class="icon" src="images/dash.png" />
 			<img class="icon" :src="'images/' + getColumnIcon(column)" />
@@ -330,68 +322,68 @@ export default {
 			</tr>
 		</tbody>
 	</table>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		column:         { type:Object,  required:true },
-		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
-		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} },
-		filtersDisable: { type:Array,   required:false, default:[] },
-		formId:         { type:String,  required:false, default:'' },
-		hasCaptions:    { type:Boolean, required:true },
-		joinsParents:   { type:Array,   required:false, default:[] },
-		moduleId:       { type:String,  required:true },
-		onlyData:       { type:Boolean, required:true }, // no display/formatting options
-		readonly:       { type:Boolean, required:true }
+	props: {
+		builderLanguage: { type: String, required: true },
+		column: { type: Object, required: true },
+		entityIdMapRef: { type: Object, required: false, default: () => { return {} } },
+		fieldIdMap: { type: Object, required: false, default: () => { return {} } },
+		filtersDisable: { type: Array, required: false, default: [] },
+		formId: { type: String, required: false, default: '' },
+		hasCaptions: { type: Boolean, required: true },
+		joinsParents: { type: Array, required: false, default: [] },
+		moduleId: { type: String, required: true },
+		onlyData: { type: Boolean, required: true }, // no display/formatting options
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['close','set'],
-	computed:{
-		attribute:s => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
+	emits: ['close', 'set'],
+	computed: {
+		attribute: s => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.column.attributeId],
-		module:s => s.moduleIdMap[s.moduleId],
-		query:s => s.isSubQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
-		indexAttributeIds:s => !s.isSubQuery && s.column.query !== null
-			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[],[]),
+		module: s => s.moduleIdMap[s.moduleId],
+		query: s => s.isSubQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
+		indexAttributeIds: s => !s.isSubQuery && s.column.query !== null
+			? [] : s.getIndexAttributeIdsByJoins(s.query.joins, [], []),
 
 		// inputs
-		alignment:{
-			get()  {
-				if(this.column.styles.includes('alignEnd')) return 'end';
-				if(this.column.styles.includes('alignMid')) return 'mid';
+		alignment: {
+			get() {
+				if (this.column.styles.includes('alignEnd')) return 'end';
+				if (this.column.styles.includes('alignMid')) return 'mid';
 				return 'def';
 			},
 			set(v) {
-				let styles = JSON.parse(JSON.stringify(this.column.styles));
+				const styles = JSON.parse(JSON.stringify(this.column.styles));
 
-				if(v !== 'end' &&  styles.includes('alignEnd')) styles.splice(styles.indexOf('alignEnd'),1);
-				if(v !== 'mid' &&  styles.includes('alignMid')) styles.splice(styles.indexOf('alignMid'),1);
-				if(v === 'end' && !styles.includes('alignEnd')) styles.push('alignEnd');
-				if(v === 'mid' && !styles.includes('alignMid')) styles.push('alignMid');
+				if (v !== 'end' && styles.includes('alignEnd')) styles.splice(styles.indexOf('alignEnd'), 1);
+				if (v !== 'mid' && styles.includes('alignMid')) styles.splice(styles.indexOf('alignMid'), 1);
+				if (v === 'end' && !styles.includes('alignEnd')) styles.push('alignEnd');
+				if (v === 'mid' && !styles.includes('alignMid')) styles.push('alignMid');
 
-				this.set('styles',styles);
+				this.set('styles', styles);
 			}
 		},
 
 		// simple
-		isBarcode:  s => s.isString  && s.attribute.contentUse.includes('barcode'),
-		isBoolean:  s => s.isAttributeBoolean(s.attribute.content),
-		isColor:    s => s.isString  && s.attribute.contentUse === 'color',
-		isDrawing:  s => s.isString  && s.attribute.contentUse === 'drawing',
-		isFiles:    s => s.isAttributeFiles(s.attribute.content),
-		isFncPg:    s => s.column.content === 'fnc_pg',
-		isFncScalar:s => s.column.content === 'fnc_scalar',
-		isInteger:  s => s.isAttributeInteger(s.attribute.content),
-		isString:   s => s.isAttributeString(s.attribute.content),
+		isBarcode: s => s.isString && s.attribute.contentUse.includes('barcode'),
+		isBoolean: s => s.isAttributeBoolean(s.attribute.content),
+		isColor: s => s.isString && s.attribute.contentUse === 'color',
+		isDrawing: s => s.isString && s.attribute.contentUse === 'drawing',
+		isFiles: s => s.isAttributeFiles(s.attribute.content),
+		isFncPg: s => s.column.content === 'fnc_pg',
+		isFncScalar: s => s.column.content === 'fnc_scalar',
+		isInteger: s => s.isAttributeInteger(s.attribute.content),
+		isString: s => s.isAttributeString(s.attribute.content),
 		isSubQuery: s => s.column.content === 'query',
-		isUuid:     s => s.isAttributeUuid(s.attribute.content),
+		isUuid: s => s.isAttributeUuid(s.attribute.content),
 		isWithArgs: s => s.isFncScalar || s.isFncPg,
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
-		capApp:        s => s.$store.getters.captions.builder.form,
-		capGen:        s => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.form,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaptionByIndexAttributeId,
 		getColumnIcon,
@@ -407,44 +399,43 @@ export default {
 
 		// actions
 		addArgument() {
-			let v = JSON.parse(JSON.stringify(this.column.arguments));
+			const v = JSON.parse(JSON.stringify(this.column.arguments));
 			v.push({
-				attributeIndex:0,
-				attributeId:null,
-				value:null
+				attributeIndex: 0,
+				attributeId: null,
+				value: null
 			});
-			this.$emit('set','arguments',v);
+			this.$emit('set', 'arguments', v);
 		},
-		set(name,val) {
-			if(val === '') val = null;
-			this.$emit('set',name,val);
+		set(name, val) {
+			if (val === '') val = null;
+			this.$emit('set', name, val);
 		},
-		setInt(name,val,allowNull) {
-			if(val !== '')
-				return this.$emit('set',name,parseInt(val));
+		setInt(name, val, allowNull) {
+			if (val !== '')
+				return this.$emit('set', name, parseInt(val, 10));
 
-			if(allowNull) return this.$emit('set',name,null);
-			else          return this.$emit('set',name,0);
+			if (allowNull) return this.$emit('set', name, null);
+			else return this.$emit('set', name, 0);
 		},
 		setIndexAttribute(indexAttributeId) {
-			let v = indexAttributeId.split('_');
-
-			if(v[1] === 'null') {
-				this.set('index',0);
-				this.set('attributeId',null);
+			const v = indexAttributeId.split('_');
+			if (v[1] === 'null') {
+				this.set('index', 0);
+				this.set('attributeId', null);
 				return;
 			}
-			this.set('index',parseInt(v[0]));
-			this.set('attributeId',v[1]);
+			this.set('index', parseInt(v[0], 10));
+			this.set('attributeId', v[1]);
 		},
-		setStyle(name,val) {
-			let styles = JSON.parse(JSON.stringify(this.column.styles));
-			const pos  = styles.indexOf(name);
+		setStyle(name, val) {
+			const styles = JSON.parse(JSON.stringify(this.column.styles));
+			const pos = styles.indexOf(name);
 
-			if(pos === -1 && val)  styles.push(name);
-			if(pos !== -1 && !val) styles.splice(pos,1);
+			if (pos === -1 && val) styles.push(name);
+			if (pos !== -1 && !val) styles.splice(pos, 1);
 
-			this.set('styles',styles);
+			this.set('styles', styles);
 		}
 	}
 };
