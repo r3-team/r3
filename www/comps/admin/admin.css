@@ -322,6 +322,16 @@
 	filter: var(--image-filter);
 }
 
+/* role assign */
+.admin-login-roles-assign-input {
+	max-height: 380px;
+	flex: 1 1 auto;
+	overflow: auto;
+	border: var(--border-input);
+	border-radius: var(--border-input-radius);
+	background-color: var(--color-input);
+}
+
 /* login sessions */
 .admin-sessions img.line-icon {
 	width: 24px;

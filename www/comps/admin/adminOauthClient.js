@@ -1,19 +1,16 @@
-import MyAdminLoginMeta        from './adminLoginMeta.js';
+import MyInputDateWrap from '../inputDateWrap.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { deepIsEqual } from '../shared/generic.js';
+import { getUnixNowDate } from '../shared/time.js';
+
+import MyAdminLoginMeta from './adminLoginMeta.js';
 import MyAdminLoginRolesAssign from './adminLoginRolesAssign.js';
-import MyInputDateWrap         from '../inputDateWrap.js';
-import {dialogDeleteAsk}       from '../shared/dialog.js';
-import {deepIsEqual}           from '../shared/generic.js';
-import {getUnixNowDate}        from '../shared/time.js';
 
 export default {
-	name:'my-admin-oauth-client',
-	components:{
-		MyAdminLoginMeta,
-		MyAdminLoginRolesAssign,
-		MyInputDateWrap
-	},
-	template:`<div v-if="ready" class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
-		
+	name: 'my-admin-oauth-client',
+	components: { MyAdminLoginMeta, MyAdminLoginRolesAssign, MyInputDateWrap },
+	template: `<div v-if="ready" class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
+
 		<div class="contentBox admin-oauth-client scroll float">
 			<div class="top">
 				<div class="area nowrap">
@@ -57,7 +54,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -216,99 +213,99 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		id:              { type:Number,  required:true },
-		loginTemplates:  { type:Array,   required:true },
-		oauthClientIdMap:{ type:Object,  required:true },
-		readonly:        { type:Boolean, required:true }
+	props: {
+		id: { type: Number, required: true },
+		loginTemplates: { type: Array, required: true },
+		oauthClientIdMap: { type: Object, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['close','makeNew'],
-	watch:{
-		id:{
-			handler(v) { this.reset(); },
-			immediate:true
+	emits: ['close', 'makeNew'],
+	watch: {
+		id: {
+			handler() { this.reset(); },
+			immediate: true
 		},
 	},
 	data() {
 		return {
-			inputs:{},
-			ready:false,
-			scopeLine:''
+			inputs: {},
+			ready: false,
+			scopeLine: ''
 		};
 	},
-	computed:{
-		canSave:s =>
+	computed: {
+		canSave: s =>
 			s.ready &&
 			!s.readonly &&
 			s.isChanged &&
-			s.inputs.name          !== '' &&
-			s.inputs.clientId      !== '' &&
-			s.inputs.clientSecret  !== '' &&
+			s.inputs.name !== '' &&
+			s.inputs.clientId !== '' &&
+			s.inputs.clientSecret !== '' &&
 			s.inputs.scopes.length !== 0 &&
 			(!s.isFlowAuthCodePkce || s.inputs.claimUsername !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.providerUrl !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.redirectUrl !== '') &&
-			(!s.isFlowClientCreds  || s.isTokenUrlSet),
-		inputsOrg:s => s.isNew ? {
-			id:0,
-			name:'',
-			flow:'authCodePkce',
-			clientId:'',
-			clientSecret:'',
-			dateExpiry:s.getUnixNowDate(),
-			scopes:[],
-			loginTemplateId:null,
-			loginMetaMap:{},
-			loginRolesAssign:[],
-			claimAdmin:null,
-			claimAdminValue:null,
-			claimRoles:null,
-			claimUsername:null,
-			providerUrl:null,
-			redirectUrl:null,
-			tokenUrl:null
+			(!s.isFlowClientCreds || s.isTokenUrlSet),
+		inputsOrg: s => s.isNew ? {
+			id: 0,
+			name: '',
+			flow: 'authCodePkce',
+			clientId: '',
+			clientSecret: '',
+			dateExpiry: s.getUnixNowDate(),
+			scopes: [],
+			loginTemplateId: null,
+			loginMetaMap: {},
+			loginRolesAssign: [],
+			claimAdmin: null,
+			claimAdminValue: null,
+			claimRoles: null,
+			claimUsername: null,
+			providerUrl: null,
+			redirectUrl: null,
+			tokenUrl: null
 		} : s.oauthClientIdMap[s.id],
-		
+
 		// simple
-		isChanged:         s => !s.deepIsEqual(s.inputsOrg,s.inputs),
-		isClaimRolesSet:   s => s.inputs.claimRoles !== null && s.inputs.claimRoles !== '',
-		isFlowAuthCodePkce:s => s.inputs.flow === 'authCodePkce',
+		isChanged: s => !s.deepIsEqual(s.inputsOrg, s.inputs),
+		isClaimRolesSet: s => s.inputs.claimRoles !== null && s.inputs.claimRoles !== '',
+		isFlowAuthCodePkce: s => s.inputs.flow === 'authCodePkce',
 		isFlowClientCreds: s => s.inputs.flow === 'clientCreds',
-		isTokenUrlSet:     s => s.inputs.tokenUrl   !== null && s.inputs.tokenUrl   !== '',
-		isNew:             s => s.id === 0,
-		
+		isTokenUrlSet: s => s.inputs.tokenUrl !== null && s.inputs.tokenUrl !== '',
+		isNew: s => s.id === 0,
+
 		// stores
-		capApp:s => s.$store.getters.captions.admin.oauthClient,
-		capGen:s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.admin.oauthClient,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.close, key: 'Escape' });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
-		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerDel', this.set);
+		this.$store.commit('keyDownHandlerDel', this.close);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	methods:{
+	methods: {
 		// external
 		deepIsEqual,
 		dialogDeleteAsk,
 		getUnixNowDate,
-		
+
 		// actions
 		applyTemplate(value) {
-			switch(value) {
-				case 'o365':   this.inputs.scopes = ['https://outlook.office.com/.default']; break;
-				case 'openId': this.inputs.scopes = ['openid'];                              break;
+			switch (value) {
+				case 'o365': this.inputs.scopes = ['https://outlook.office.com/.default']; break;
+				case 'openId': this.inputs.scopes = ['openid']; break;
 			}
 		},
 		close() {
 			this.$emit('close');
 		},
 		reloadAndClose() {
-			ws.send('oauthClient','reload',{},true).then(
+			ws.send('oauthClient', 'reload', {}, true).then(
 				() => this.$emit('close'),
 				this.$root.genericError
 			);
@@ -316,31 +313,31 @@ export default {
 		reset() {
 			this.inputs = JSON.parse(JSON.stringify(this.inputsOrg));
 
-			if(this.isNew && this.loginTemplates.length > 0)
+			if (this.isNew && this.loginTemplates.length > 0)
 				this.inputs.loginTemplateId = this.loginTemplates[0].id;
 
 			this.ready = true;
 		},
-		
+
 		// backend calls
 		del() {
-			ws.send('oauthClient','del',this.id,true).then(
+			ws.send('oauthClient', 'del', this.id, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);
 		},
 		set() {
-			if(!this.canSave) return;
+			if (!this.canSave) return;
 
-			if(this.inputs.claimAdmin      === '') this.inputs.claimAdmin      = null;
-			if(this.inputs.claimAdminValue === '') this.inputs.claimAdminValue = null;
-			if(this.inputs.claimRoles      === '') this.inputs.claimRoles      = null;
-			if(this.inputs.claimUsername   === '') this.inputs.claimUsername   = null;
-			if(this.inputs.providerUrl     === '') this.inputs.providerUrl     = null;
-			if(this.inputs.redirectUrl     === '') this.inputs.redirectUrl     = null;
-			if(this.inputs.tokenUrl        === '') this.inputs.tokenUrl        = null;
-			
-			ws.send('oauthClient','set',this.inputs,true).then(
+			if (this.inputs.claimAdmin === '') this.inputs.claimAdmin = null;
+			if (this.inputs.claimAdminValue === '') this.inputs.claimAdminValue = null;
+			if (this.inputs.claimRoles === '') this.inputs.claimRoles = null;
+			if (this.inputs.claimUsername === '') this.inputs.claimUsername = null;
+			if (this.inputs.providerUrl === '') this.inputs.providerUrl = null;
+			if (this.inputs.redirectUrl === '') this.inputs.redirectUrl = null;
+			if (this.inputs.tokenUrl === '') this.inputs.tokenUrl = null;
+
+			ws.send('oauthClient', 'set', this.inputs, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

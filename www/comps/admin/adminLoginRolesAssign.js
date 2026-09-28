@@ -3,13 +3,19 @@ import { getCaption } from '../shared/language.js';
 
 export default {
 	name: 'my-admin-login-roles-assign',
-	template: `<div class="column gap">
-		<table v-if="modelValue.length !== 0">
+	template: `<div class="admin-login-roles-assign-input">
+		<table class="generic-table bright sticky-top">
 			<thead>
 				<tr>
 					<th>{{ capGen.value }}</th>
 					<th>{{ capGen.role }}</th>
-					<th></th>
+					<th class="minimum">
+						<my-button image="add.png"
+							@trigger="add"
+							:active="!readonly"
+							:caption="capGen.button.add"
+						/>
+					</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -40,23 +46,16 @@ export default {
 							</optgroup>
 						</select>
 					</td>
-					<td>
+					<td class="minimum">
 						<my-button image="cancel.png"
 							v-if="!readonly"
 							@trigger="remove(i)"
-							:naked="true"
+							:cancel="true"
 						/>
 					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div>
-			<my-button image="add.png"
-				@trigger="add"
-				:active="!readonly"
-				:caption="capGen.button.add"
-			/>
-		</div>
 	</div>`,
 	props: {
 		modelValue: { type: Array, required: true },
