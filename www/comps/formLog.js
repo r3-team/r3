@@ -43,6 +43,15 @@ const myFormLogValue = {
 		<template v-if="!isNull">
 			<my-value-rich v-if="isValueRegular" :attributeId :key="attributeId" :length="60" :value />
 
+			<div class="row gap centered" v-if="isPassword">
+				<my-button
+					@trigger="showPassword = !showPassword"
+					:image="showPassword ? 'visible1.png' : 'visible0.png'"
+					:naked="true"
+				/>
+				<my-value-rich :attributeId :key="attributeId" :length="60" :value="showPassword ? value : '**************'" />
+			</div>
+
 			<div class="form-log-value-richtext" v-if="showLarge && isRichtext" :class="{ fullscreen:isFullscreen }">
 				<my-input-richtext :modelValue="value" :readonly="true" />
 			</div>
@@ -87,23 +96,28 @@ const myFormLogValue = {
 		attributeId: { type: String, required: true },
 		isFiles: { type: Boolean, required: true },
 		isFullscreen: { type: Boolean, required: false, default: false },
+		isPassword: { type: Boolean, required: false, default: false },
 		relationId: { type: [String, null], required: true }, // set if attribute is relationship, relation of target records
 		relationIdMapRecordIdMapTitle: { type: Object, required: true },
 		showLarge: { type: Boolean, required: false, default: false },
 		value: { required: true }
 	},
-	emits: [],
+	data() {
+		return {
+			showPassword: false
+		};
+	},
 	computed: {
 		isLarge: s => s.isRichtext,
 		isNull: s => s.value === null,
 		isRelationship: s => s.relationId !== null,
 		isRichtext: s => s.attribute.contentUse === 'richtext',
-		isValueRegular: s => !s.isFiles && !s.isRelationship && (!s.showLarge || !s.isLarge),
+		isValueRegular: s => !s.isFiles && !s.isPassword && !s.isRelationship && (!s.showLarge || !s.isLarge),
 
 		// stores
+		attribute: s => s.attributeIdMap[s.attributeId],
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		token: s => s.$store.getters['local/token'],
-		attribute: s => s.attributeIdMap[s.attributeId],
 		capApp: s => s.$store.getters.captions.formLog,
 		capGen: s => s.$store.getters.captions.generic
 	},
@@ -124,11 +138,7 @@ const myFormLogValue = {
 
 const myFormLogValueSidebar = {
 	name: 'my-form-log-value-sidebar',
-	components: {
-		myFormLogLabel,
-		myFormLogValue,
-		MyInputRichtext
-	},
+	components: { myFormLogLabel, myFormLogValue, MyInputRichtext },
 	template: `<div class="form-log-value-sidebar" v-if="isReady">
 		<div class="row gap-large center space-between" v-if="recordTitle !== null">
 			<my-label :caption="recordTitle" :imageBase64="source.image" :large="true" />
@@ -162,6 +172,7 @@ const myFormLogValueSidebar = {
 			:attributeId="attributeValue.attributeId"
 			:isFiles="source.attributeIdsFiles.includes(attributeValue.attributeId)"
 			:isFullscreen
+			:isPassword="source.attributeIdsPassword.includes(attributeValue.attributeId)"
 			:relationId="attributeValue.relationId"
 			:relationIdMapRecordIdMapTitle
 			:showLarge=true
@@ -196,18 +207,13 @@ const myFormLogValueSidebar = {
 		capGen: s => s.$store.getters.captions.generic
 	},
 	methods: {
-		// externals
 		getUnixFormat
 	}
 };
 
 export default {
 	name: 'my-form-log',
-	components: {
-		myFormLogLabel,
-		myFormLogValue,
-		myFormLogValueSidebar
-	},
+	components: { myFormLogLabel, myFormLogValue, myFormLogValueSidebar },
 	template: `<div class="app-sub-window" @mousedown.left.self="$emit('close')" :class="{ 'under-header':!isMobile }">
 		<div class="contentBox scroll float form-log" :class="{ fullscreen:showFullscreen }">
 			<div class="top lower">
@@ -323,7 +329,7 @@ export default {
 												:isFiles="sources[l.sourceIndex].attributeIdsFiles.includes(a.attributeId)"
 												:relationId="a.relationId"
 												:relationIdMapRecordIdMapTitle
-												:value="a.value"
+												:value="sources[l.sourceIndex].attributeIdsPassword.includes(a.attributeId) ? '**************' : a.value"
 											/>
 										</td>
 									</tr>
@@ -408,43 +414,48 @@ export default {
 							}
 							break;
 						case 'data':
-							// if field join index is available
-							const src = out.find(v => v.fieldId === null && v.index === f.index);
-							if (src !== undefined && !src.attributeIds.includes(f.attributeId)) {
+							{
+								// if field join index is available
+								const src = out.find(v => v.fieldId === null && v.index === f.index);
+								if (src !== undefined && !src.attributeIds.includes(f.attributeId)) {
 
-								const isNm = f.attributeIdNm !== undefined && f.attributeIdNm !== null;
-								const atr = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
-								const rel = s.relationIdMap[s.joinsIndexMap[f.index].relationId];
+									const isNm = f.attributeIdNm !== undefined && f.attributeIdNm !== null;
+									const atr = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
+									const rel = s.relationIdMap[s.joinsIndexMap[f.index].relationId];
 
-								if (!s.relationHasRetention(rel))
-									continue;
-
-								if (isNm || s.isAttributeRelationship(atr.content)) {
-									// fetch only relationship attributes, if their relation has record titles
-									const relShip = s.relationIdMap[atr.relationshipId];
-									if (relShip.attributeIdsTitle.length === 0)
+									if (!s.relationHasRetention(rel))
 										continue;
+
+									if (isNm || s.isAttributeRelationship(atr.content)) {
+										// fetch only relationship attributes, if their relation has record titles
+										const relShip = s.relationIdMap[atr.relationshipId];
+										if (relShip.attributeIdsTitle.length === 0)
+											continue;
+									}
+
+									let title = '';
+									const iconId = f.iconId !== null ? f.iconId : atr.iconId;
+
+									if (s.fieldIdMapOverwrite.caption[f.id] !== undefined)
+										title = s.fieldIdMapOverwrite.caption[f.id];
+
+									if (title === '') title = s.getCaption('fieldTitle', s.moduleId, f.id, f.captions);
+									if (title === '') title = tabTitle;
+									if (title === '') title = s.getCaption('attributeTitle', s.moduleId, f.attributeId, atr.captions, atr.name);
+
+									src.attributeIds.push(f.attributeId);
+									src.attributeIdMapIcon[f.attributeId] = iconId;
+									src.attributeIdMapTitle[f.attributeId] = title;
+
+									if (!isNm && atr.encrypted)
+										src.attributeIdsEnc.push(f.attributeId);
+
+									if (s.isAttributeFiles(atr.content))
+										src.attributeIdsFiles.push(f.attributeId);
+
+									if (f.display === 'password')
+										src.attributeIdsPassword.push(f.attributeId);
 								}
-
-								let title = '';
-								let iconId = f.iconId !== null ? f.iconId : atr.iconId;
-
-								if (s.fieldIdMapOverwrite.caption[f.id] !== undefined)
-									title = s.fieldIdMapOverwrite.caption[f.id];
-
-								if (title === '') title = s.getCaption('fieldTitle', s.moduleId, f.id, f.captions);
-								if (title === '') title = tabTitle;
-								if (title === '') title = s.getCaption('attributeTitle', s.moduleId, f.attributeId, atr.captions, atr.name);
-
-								src.attributeIds.push(f.attributeId);
-								src.attributeIdMapIcon[f.attributeId] = iconId;
-								src.attributeIdMapTitle[f.attributeId] = title;
-
-								if (!isNm && atr.encrypted)
-									src.attributeIdsEnc.push(f.attributeId);
-
-								if (s.isAttributeFiles(atr.content))
-									src.attributeIdsFiles.push(f.attributeId);
 							}
 							break;
 						case 'list':
@@ -453,9 +464,8 @@ export default {
 								continue;
 
 							for (const k in s.fieldIdMapIndexMapRecordIds[f.id]) {
-								const index = parseInt(k);
+								const index = parseInt(k, 10);
 								const join = f.query.joins.find(v => v.index === index);
-
 								if (join === undefined)
 									continue;
 
@@ -534,7 +544,7 @@ export default {
 			return out;
 		},
 		sourcesFieldIds: s => {
-			let out = [];
+			const out = [];
 			for (const src of s.sources) {
 				if (!out.includes(src.fieldId))
 					out.push(src.fieldId);
@@ -615,6 +625,7 @@ export default {
 				attributeIds: [],
 				attributeIdsEnc: [],
 				attributeIdsFiles: [],
+				attributeIdsPassword: [],
 				attributeIdMapIcon: {},
 				attributeIdMapTitle: {}
 			};
@@ -654,9 +665,8 @@ export default {
 
 		// backend calls
 		get(isNextPage) {
-			let requests = [];
-
 			// copy sources in cases it changes before responses come back (need to match request response to each source)
+			const requests = [];
 			for (let i = 0, j = this.sources.length; i < j; i++) {
 				const src = this.sources[i];
 				if (src.recordIds.length === 0 || src.attributeIds.length === 0)
