@@ -15,12 +15,8 @@ import MyBuilderQuery from './builderQuery.js';
 export default {
 	name: 'my-builder-field',
 	components: {
-		MyBuilderCaption,
-		MyBuilderColumns,
-		MyBuilderColumnOptions,
-		MyBuilderColumnTemplates,
-		MyBuilderFieldOptions,
-		MyBuilderQuery
+		MyBuilderCaption, MyBuilderColumns, MyBuilderColumnOptions,
+		MyBuilderColumnTemplates, MyBuilderFieldOptions, MyBuilderQuery
 	},
 	template: `<div class="builder-field"
 		v-show="show"

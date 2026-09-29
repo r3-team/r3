@@ -110,8 +110,8 @@ export default {
 			@clicked-open="clickOpen($event,false)"
 			@clicked-open-middle="clickOpen($event,true)"
 			@clicked-row="inputTriggerRow($event)"
-			:columns="columns"
-			:columnBatches="columnBatches"
+			:columns
+			:columnBatches
 			:readonly="inputIsReadonly"
 			:recordIdsSelected="inputRecordIds"
 			:rows="rowsInput"
@@ -127,9 +127,11 @@ export default {
 			@clicked-row="clickInputRow();inputTriggerRow($event)"
 			@clicked-row-remove="inputTriggerRowRemove($event)"
 			@focus="focus"
-			:columns="columns"
-			:columnBatches="columnBatches"
+			@showHelp="$emit('showHelp')"
+			:columns
+			:columnBatches
 			:hasGalleryIcon="hasGalleryIcon"
+			:isWithHelp="inputIsWithHelp && !showInputAddLine"
 			:multiInput="inputMulti"
 			:readonly="inputIsReadonly"
 			:recordIdsSelected="inputRecordIds"
@@ -147,8 +149,10 @@ export default {
 			@clicked-open-middle="escape();$emit('open-form',[],true)"
 			@focus="focus"
 			@key-pressed="updatedTextInput"
+			@showHelp="$emit('showHelp')"
 			@text-updated="filtersQuick = $event"
 			:anyRows="anyInputRows"
+			:isWithHelp="inputIsWithHelp"
 			:readonly="inputIsReadonly"
 			:showCreate="hasCreate"
 			:text="filtersQuick"
@@ -641,6 +645,7 @@ export default {
 		inputAutoSelect: { type: Number, required: false, default: 0 },      // # of records to auto select (2 = first two, -3 = last three, 0 = none)
 		inputIsNew: { type: Boolean, required: false, default: false },      // input field belongs to new record
 		inputIsReadonly: { type: Boolean, required: false, default: false }, // input field is readonly
+		inputIsWithHelp: { type: Boolean, required: false, default: false }, // input field has help
 		inputMulti: { type: Boolean, required: false, default: false },      // input has multiple records to represent (instead of just one)
 		inputRecordIds: { type: Array, required: false, default: () => [] }, // input record IDs, representing active values to show
 		inputValid: { type: Boolean, required: false, default: true }
@@ -648,7 +653,7 @@ export default {
 	emits: [
 		'clipboard', 'close-inline', 'dropdown-show', 'open-form', 'open-form-bulk', 'record-count-change',
 		'record-removed', 'records-selected', 'records-selected-original', 'set-args', 'set-column-ids-by-user',
-		'set-collection-indexes', 'set-index-record-ids', 'set-login-option'
+		'set-collection-indexes', 'set-index-record-ids', 'set-login-option', 'showHelp'
 	],
 	data() {
 		return {

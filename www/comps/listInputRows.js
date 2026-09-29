@@ -72,6 +72,13 @@ export default {
 						<!-- actions -->
 						<td class="minimum">
 							<div class="list-input-row-items nowrap justifyEnd">
+								<my-button image="question.png"
+									v-if="isWithHelp"
+									@trigger="$emit('showHelp')"
+									:blockBubble="true"
+									:captionTitle="capGen.contextHelp"
+									:naked="true"
+								/>
 								<my-button image="open.png"
 									v-if="showOpen"
 									@trigger="$emit('clicked-open',r)"
@@ -98,6 +105,7 @@ export default {
 		columns: { type: Array, required: true },
 		columnBatches: { type: Array, required: true },
 		hasGalleryIcon: { type: Boolean, required: true },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		multiInput: { type: Boolean, required: true }, // more than 1 row can be selected at the same time
 		readonly: { type: Boolean, required: true },
 		recordIdsSelected: { type: Array, required: true },
@@ -105,7 +113,7 @@ export default {
 		showAllValues: { type: Boolean, required: true }, // for category display option
 		showOpen: { type: Boolean, required: true }
 	},
-	emits: ['clicked-open', 'clicked-open-middle', 'clicked-row', 'clicked-row-remove', 'focus'],
+	emits: ['clicked-open', 'clicked-open-middle', 'clicked-row', 'clicked-row-remove', 'focus', 'showHelp'],
 	computed: {
 		capGen: s => s.$store.getters.captions.generic
 	},

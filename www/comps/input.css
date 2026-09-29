@@ -7,10 +7,17 @@
 	border-radius: var(--border-input-radius) var(--border-input-radius) 0px 0px;
 	background-color: var(--color-bg);
 	padding: 0px calc(var(--spacing) / 2);
-	gap: 12px;
+	gap: calc(var(--spacing) / 1.75);
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: space-between;
+	align-items: center;
+}
+.input-toolbar-sub {
+	flex: 0 0 auto;
+	gap: calc(var(--spacing) / 1.75);
+	display: flex;
+	flex-flow: row nowrap;
 	align-items: center;
 }
 

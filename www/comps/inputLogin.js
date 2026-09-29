@@ -1,82 +1,86 @@
 import MyInputSelect from './inputSelect.js';
 
 export default {
-	name:'my-input-login',
-	components:{ MyInputSelect },
-	template:`<my-input-select
+	name: 'my-input-login',
+	components: { MyInputSelect },
+	template: `<my-input-select
 		v-if="inputText !== null"
 		v-model:selected="loginId"
 		@dropdown-show="$emit('dropdown-show',$event)"
 		@request-data="get"
+		@showHelp="$emit('showHelp')"
 		@updated-text-input="inputText = $event"
 		:dropdownShow
 		:inputTextSet
+		:isWithHelp
 		:options="logins"
 		:placeholder
 		:readonly
 	/>`,
-	props:{
-		clearInput:  { type:Boolean, required:false, default:false }, // keep text input clear
-		dropdownShow:{ type:Boolean, required:false, default:false },
-		idsExclude:  { type:Array,   required:false, default:() => [] },
-		modelValue:  { required:true },
-		noLdapAssign:{ type:Boolean, required:false, default:false },
-		placeholder: { type:String,  required:false, default:'' },
-		readonly:    { type:Boolean, required:false, default:false }
+	props: {
+		clearInput: { type: Boolean, required: false, default: false }, // keep text input clear
+		dropdownShow: { type: Boolean, required: false, default: false },
+		idsExclude: { type: Array, required: false, default: () => [] },
+		isWithHelp: { type: Boolean, required: false, default: false },
+		modelValue: { required: true },
+		noLdapAssign: { type: Boolean, required: false, default: false },
+		placeholder: { type: String, required: false, default: '' },
+		readonly: { type: Boolean, required: false, default: false }
 	},
-	emits:['dropdown-show','update:modelValue'],
-	watch:{
-		loginId:{
-			handler(valNew,valOld) {
-				if(valNew === null)
-					return this.inputTextSet = '';
-				
-				if(valNew !== valOld && !this.clearInput)
+	emits: ['dropdown-show', 'showHelp', 'update:modelValue'],
+	watch: {
+		loginId: {
+			handler(valNew, valOld) {
+				if (valNew === null) {
+					this.inputTextSet = '';
+					return;
+				}
+				if (valNew !== valOld && !this.clearInput)
 					this.getName();
 			},
-			immediate:true
+			immediate: true
 		}
 	},
 	data() {
 		return {
-			inputText:'',
-			inputTextSet:'',
-			logins:[] // [{'id':123,'name':admin},...]
+			inputText: '',
+			inputTextSet: '',
+			logins: [] // [{'id':123,'name':admin},...]
 		};
 	},
-	computed:{
-		loginId:{
-			get()  { return this.modelValue; },
+	computed: {
+		loginId: {
+			get() { return this.modelValue; },
 			set(v) {
-				this.$emit('update:modelValue',v);
-				
-				if(this.clearInput)
+				this.$emit('update:modelValue', v);
+
+				if (this.clearInput)
 					this.inputTextSet = '';
 			}
 		}
 	},
-	methods:{
+	methods: {
 		get() {
 			// if login is set, exclude ID
-			let idsExclude = this.loginId !== null
+			const idsExclude = this.loginId !== null
 				? this.idsExclude.concat([this.loginId]) : this.idsExclude;
-			
-			ws.send('login','getNames',{
-				byString:this.inputText,
-				idsExclude:idsExclude,
-				noLdapAssign:this.noLdapAssign
-			},true).then(
+
+			ws.send('login', 'getNames', {
+				byString: this.inputText,
+				idsExclude: idsExclude,
+				noLdapAssign: this.noLdapAssign
+			}, true).then(
 				res => this.logins = res.payload,
 				this.$root.genericError
 			);
 		},
 		getName() {
-			ws.send('login','getNames',{
-				id:this.loginId,
-				noLdapAssign:this.noLdapAssign
-			},true).then(
+			ws.send('login', 'getNames', {
+				id: this.loginId,
+				noLdapAssign: this.noLdapAssign
+			}, true).then(
 				res => {
-					if(res.payload.length === 1)
+					if (res.payload.length === 1)
 						this.inputTextSet = res.payload[0].name;
 				},
 				this.$root.genericError

@@ -34,11 +34,10 @@ import { variableValueGet, variableValueSet } from './shared/variable.js';
 export default {
 	name: 'my-field',
 	components: {
-		MyCalendar, MyChart, MyGantt, MyKanban,
-		MyInputBarcode, MyInputColor, MyInputDate, MyInputDecimal,
-		MyInputDrawing, MyInputFiles, MyInputIframe, MyInputLogin,
-		MyInputRating, MyInputRichtext, MyInputSelect, MyInputUuid,
-		MyList, MyMap
+		MyCalendar, MyChart, MyGantt, MyKanban, MyInputBarcode,
+		MyInputColor, MyInputDate, MyInputDecimal, MyInputDrawing,
+		MyInputFiles, MyInputIframe, MyInputLogin, MyInputRating,
+		MyInputRichtext, MyInputSelect, MyInputUuid, MyList, MyMap
 	},
 	template: `<div class="field"
 		v-if="isActive"
@@ -59,10 +58,10 @@ export default {
 
 			<div class="field-content" ref="content"
 				v-click-outside="clickOutside"
-				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:isWithIntent }"
+				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, isMultiline }"
 			>
 				<!-- data field icon -->
-				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea && !isRating && !isBarcode && !isIframe">
+				<div class="field-icon" v-if="isWithIcon">
 					<img :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 
@@ -354,10 +353,12 @@ export default {
 					v-if="isIframe"
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
+					@showHelp="showHelp"
 					:clipboard="isClipboard"
 					:formLoading="formLoading"
 					:hideInputs="field.flags.includes('hideInputs')"
-					:isHidden="isHidden"
+					:isHidden
+					:isWithHelp
 					:monospace="isMonospace"
 					:readonly="isReadonly"
 				>
@@ -372,6 +373,8 @@ export default {
 				<my-input-uuid
 					v-if="isUuid"
 					v-model="value"
+					@showHelp="showHelp"
+					:isWithHelp
 					:readonly="isReadonly"
 				/>
 
@@ -380,9 +383,11 @@ export default {
 					v-if="isBarcode"
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
+					@showHelp="showHelp"
 					:clipboard="isClipboard"
 					:contentUse
 					:hideInputs="field.flags.includes('hideInputs')"
+					:isWithHelp
 					:monospace="isMonospace"
 					:readonly="isReadonly"
 				>
@@ -397,10 +402,12 @@ export default {
 				<my-input-select
 					v-if="isRegconfig"
 					@dropdown-show="dropdownSet"
+					@showHelp="showHelp"
 					@updated-text-input="regconfigInput = $event"
 					@update:selected="value = $event;regconfigInput = ''"
 					:dropdownShow="dropdownShow"
 					:inputTextSet="value"
+					:isWithHelp
 					:nakedIcons="true"
 					:options="regconfigOptions"
 					:placeholder="capGen.threeDots"
@@ -408,30 +415,17 @@ export default {
 					:selected="value"
 				/>
 
-				<!-- password show action -->
-				<my-button
-					v-if="isPassword"
-					@trigger="showPassword = !showPassword"
-					:image="showPassword ? 'visible0.png' : 'visible1.png'"
-					:naked="true"
-				/>
-
-				<!-- link open action -->
-				<my-button
-					v-if="link !== false"
-					@trigger="openLink(link.href,link.blank)"
-					:active="value !== null"
-					:image="link.image"
-					:naked="true"
-				/>
-
 				<!-- color input -->
 				<my-input-color
 					v-if="isColor"
 					v-model="value"
+					@copyToClipboard="copyToClipboard"
 					@dropdown-show="dropdownSet"
+					@showHelp="showHelp"
 					:allowNull="true"
 					:dropdownShow="dropdownShow"
+					:isClipboard
+					:isWithHelp
 					:readonly="isReadonly"
 				/>
 
@@ -448,9 +442,11 @@ export default {
 					v-if="isRichtext"
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
+					@showHelp="showHelp"
 					:attributeIdFile="field.attributeIdAlt"
 					:clipboard="isClipboard"
-					:isHidden="isHidden"
+					:isHidden
+					:isWithHelp
 					:printCaption="caption"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
@@ -490,7 +486,9 @@ export default {
 					@dropdown-show="dropdownSet"
 					v-if="isLogin"
 					v-model="value"
+					@showHelp="showHelp"
 					:dropdownShow="dropdownShow"
+					:isWithHelp
 					:readonly="isReadonly"
 					:placeholder="capGen.threeDots"
 				/>
@@ -502,11 +500,13 @@ export default {
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
 					@set-view-month="setLoginOption('dateTimeUseMonthView', $event)"
+					@showHelp="showHelp"
 					:dropdownShow="dropdownShow"
 					:isDate="isDatetime || isDate"
 					:isTime="isDatetime || isTime"
 					:isRange="isDateRange"
 					:isReadonly="isReadonly"
+					:isWithHelp
 					:unixFrom="value"
 					:unixTo="valueAlt"
 					:useMonth="dateTimeUseMonthView"
@@ -516,9 +516,11 @@ export default {
 				<my-input-drawing
 					v-if="isDrawing"
 					v-model="value"
+					@showHelp="showHelp"
 					:formLoading="formLoading"
 					:hideInputs="field.flags.includes('hideInputs')"
-					:isHidden="isHidden"
+					:isHidden
+					:isWithHelp
 					:readonly="isReadonly"
 				>
 					<template #input-icon>
@@ -541,11 +543,13 @@ export default {
 					v-model="value"
 					@file-count-change="$emit('set-counter',field.id,$event)"
 					@set-login-option="setLoginOption"
+					@showHelp="showHelp"
 					:attributeId="field.attributeId"
 					:countAllowed="field.max !== null ? field.max : 0"
 					:fieldId="field.id"
 					:formLoading
 					:isHidden
+					:isWithHelp
 					:loginOptions
 					:readonly="isReadonly"
 					:recordId="joinsIndexMap[field.index].recordId"
@@ -567,6 +571,7 @@ export default {
 					@records-selected="relationshipRecordsSelected($event,false)"
 					@records-selected-original="relationshipRecordsSelected($event,true)"
 					@set-login-option="setLoginOption"
+					@showHelp="showHelp"
 					:choices
 					:columns
 					:dataOptions="dataOptions"
@@ -578,10 +583,11 @@ export default {
 					:hasOpenForm="!isVariable && field.openForm !== null"
 					:header="false"
 					:inputAsCategory="field.flags.includes('relCategory')"
-					:inputAsFlow="field.flags.includes('relFlow')"
+					:inputAsFlow="isRelationshipFlow"
 					:inputAutoSelect="field.autoSelect"
 					:inputIsNew="isNew"
 					:inputIsReadonly="isReadonly"
+					:inputIsWithHelp="isWithHelp"
 					:inputMulti="isRelationship1N"
 					:inputRecordIds="relationshipRecordIds"
 					:inputValid="!showInvalid"
@@ -598,19 +604,34 @@ export default {
 					</template>
 				</my-list>
 
-				<!-- copy to clipboard action -->
-				<my-button image="copyClipboard.png"
-					v-if="isClipboard && !isFiles && !isIframe && !isBarcode && !isRichtext"
-					@trigger="copyToClipboard"
-					:active="value !== null"
-					:captionTitle="capGen.button.copyClipboard"
-					:naked="true"
-				/>
-			</div>
-
-			<!-- helper text -->
-			<div class="captionSub" v-if="captionHelp !== '' && captionError === ''">
-				{{ captionHelp }}
+				<div class="input-toolbar-sub field-actions" v-if="isWithAction" :class="{ isMultiline }">
+					<my-button image="question.png"
+						v-if="isWithActionHelp"
+						@trigger="showHelp"
+						:captionTitle="capGen.contextHelp"
+						:naked="true"
+					/>
+					<my-button image="copyClipboard.png"
+						v-if="isWithActionClipboard"
+						@trigger="copyToClipboard"
+						:active="value !== null"
+						:captionTitle="capGen.button.copyClipboard"
+						:naked="true"
+					/>
+					<my-button
+						v-if="isWithActionPassword"
+						@trigger="showPassword = !showPassword"
+						:image="showPassword ? 'visible1.png' : 'visible0.png'"
+						:naked="true"
+					/>
+					<my-button
+						v-if="isWithActionLink"
+						@trigger="openLink(link.href,link.blank)"
+						:active="value !== null"
+						:image="link.image"
+						:naked="true"
+					/>
+				</div>
 			</div>
 
 			<!-- bulk notice -->
@@ -1165,11 +1186,13 @@ export default {
 		isLogin: s => s.isData && s.field.display === 'login',
 		isMap: s => s.content === 'map',
 		isMonospace: s => s.field.flags.includes('monospace'),
+		isMultiline: s => s.isChart || s.isKanban || s.isCalendar || s.isTabs || s.isMap || s.isList || s.isDrawing || s.isFiles || s.isBarcode || s.isTextarea || s.isRichtext || s.isRelationshipFlow,
 		isPassword: s => s.isData && s.field.display === 'password',
 		isRating: s => s.isData && s.field.display === 'rating',
 		isReadonly: s => s.stateFinal === 'readonly',
 		isRelationship: s => s.isData && s.isAttributeRelationship(s.contentData),
 		isRelationship1N: s => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
+		isRelationshipFlow: s => s.isRelationship && s.field.flags.includes('relFlow'),
 		isRegconfig: s => s.isData && s.isAttributeRegconfig(s.contentData),
 		isRequired: s => s.stateFinal === 'required',
 		isRichtext: s => s.isData && s.contentUse === 'richtext',
@@ -1181,8 +1204,14 @@ export default {
 		isTime: s => s.isData && s.contentUse === 'time',
 		isTouched: s => s.fieldIdsTouched.includes(s.field.id),
 		isVariable: s => s.field.content === 'variable',
+		isWithAction: s => (s.isWithActionHelp || s.isWithActionClipboard || s.isWithActionLink || s.isWithActionPassword) && (s.isRelationshipFlow || s.isLineInput || s.isDecimal || s.isBoolean || s.isTextarea || s.isSlider),
+		isWithActionClipboard: s => s.isClipboard && !s.isFiles && !s.isIframe && !s.isBarcode && !s.isRichtext,
+		isWithActionHelp: s => s.isWithHelp,
+		isWithActionLink: s => s.link !== false,
+		isWithActionPassword: s => s.isPassword,
 		isWithCaption: s => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		isWithIntent: s => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isMap && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
+		isWithIcon: s => s.iconId && s.isData && !s.isRelationship && !s.isDrawing && !s.isFiles && !s.isTextarea && !s.isRichtext && !s.isRating && !s.isBarcode && !s.isIframe,
+		isWithHelp: s => s.captionHelp !== '',
 		isUuid: s => s.isData && s.isAttributeUuid(s.contentData),
 
 		// stores
@@ -1453,6 +1482,9 @@ export default {
 			// on field value change, execute registered function
 			if (!isOriginal && this.field.jsFunctionId !== null)
 				this.$emit('execute-function', this.field.jsFunctionId);
+		},
+		showHelp() {
+			this.$store.commit('dialog', { captionBody: this.captionHelp, captionTop: this.capGen.contextHelp, image: 'question.png', });
 		},
 		triggerButton(middleClick) {
 			if (this.field.openDoc !== null)

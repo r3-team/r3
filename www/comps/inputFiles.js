@@ -105,14 +105,21 @@ const MyInputFiles = {
 			<!-- file count -->
 			<div>{{ fileCountCaption }}</div>
 
-			<!-- file name filter -->
-			<div class="row gap centered">
+			<div class="input-toolbar-sub">
+				<!-- file name filter -->
 				<img class="view-toggle" draggable="false"
 					@click="toggleViewMode"
 					v-if="!noFiles"
 					:src="viewSrc"
 				/>
 				<input v-if="!noSpace && !noFiles" v-model="filterName" class="short" placeholder="..." />
+
+				<my-button image="question.png"
+					v-if="isWithHelp"
+					@trigger="$emit('showHelp')"
+					:captionTitle="capGen.contextHelp"
+					:naked="true"
+				/>
 			</div>
 		</div>
 
@@ -322,13 +329,14 @@ const MyInputFiles = {
 		fieldId: { type: String, required: true },
 		formLoading: { type: Boolean, required: true }, // to react to form load events
 		isHidden: { type: Boolean, required: false, default: false },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		loginOptions: { type: Object, required: true },
 		modelValue: { required: true },
 		readonly: { type: Boolean, required: false, default: false },
 		recordId: { type: Number, required: true },
 		showGallery: { type: Boolean, required: false, default: false }
 	},
-	emits: ['file-count-change', 'set-login-option', 'update:modelValue'],
+	emits: ['file-count-change', 'set-login-option', 'showHelp', 'update:modelValue'],
 	data() {
 		return {
 			extPreview: [

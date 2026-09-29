@@ -17,7 +17,22 @@ export default {
 
 		<div class="input-color-preview" :style="'background-color:#'+input"></div>
 
-		<div class="row gap centered">
+		<div class="input-toolbar-sub">
+			<my-button image="question.png"
+				v-if="isWithHelp"
+				@trigger="$emit('showHelp')"
+				:blockBubble="true"
+				:captionTitle="capGen.contextHelp"
+				:naked="true"
+			/>
+			<my-button image="copyClipboard.png"
+				v-if="isClipboard"
+				@trigger="$emit('copyToClipboard')"
+				:active="modelValue !== null"
+				:blockBubble="true"
+				:captionTitle="capGen.button.copyClipboard"
+				:naked="true"
+			/>
 			<my-button image="cancel.png"
 				@trigger="clear"
 				v-if="isSet"
@@ -45,6 +60,8 @@ export default {
 	props: {
 		allowNull: { type: Boolean, required: false, default: false },
 		dropdownShow: { type: Boolean, required: false, default: false },
+		isClipboard: { type: Boolean, required: false, default: false },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		modelValue: { required: true },
 		readonly: { type: Boolean, required: false, default: false },
 		showInput: { type: Boolean, required: false, default: true }
@@ -54,7 +71,7 @@ export default {
 			setValueAfterDelay: null
 		};
 	},
-	emits: ['dropdown-show', 'update:modelValue'],
+	emits: ['copyToClipboard', 'dropdown-show', 'showHelp', 'update:modelValue'],
 	computed: {
 		// inputs
 		input: {

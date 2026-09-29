@@ -26,6 +26,13 @@ export default {
 				</td>
 				<td class="minimum">
 					<div class="list-input-row-items nowrap">
+						<my-button image="question.png"
+							v-if="isWithHelp"
+							@trigger="$emit('showHelp')"
+							:blockBubble="true"
+							:captionTitle="capGen.contextHelp"
+							:naked="true"
+						/>
 						<my-button image="add.png"
 							v-if="!readonly && showCreate"
 							@trigger="$emit('clicked-open')"
@@ -45,12 +52,13 @@ export default {
 	</table>`,
 	props: {
 		anyRows: { type: Boolean, required: true },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		readonly: { type: Boolean, required: true },
-		text: { type: String, required: true },
 		showCreate: { type: Boolean, required: true },
+		text: { type: String, required: true },
 		valid: { type: Boolean, required: true }
 	},
-	emits: ['clicked', 'clicked-open', 'clicked-open-middle', 'focus', 'key-pressed', 'text-updated'],
+	emits: ['clicked', 'clicked-open', 'clicked-open-middle', 'focus', 'key-pressed', 'showHelp', 'text-updated'],
 	computed: {
 		placeholder: s => s.anyRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots,
 

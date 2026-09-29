@@ -47,6 +47,8 @@
 	flex-flow: row nowrap;
 	align-items: stretch;
 	gap: 8px;
+	padding-left: var(--spacing-field-padding);
+	padding-right: var(--spacing-field-padding);
 	background-color: var(--color-input);
 	border: var(--border-input);
 	border-radius: var(--border-input-radius);
@@ -66,14 +68,19 @@
 	color: var(--color-font-disabled);
 	background-color: var(--color-input-disabled);
 }
-.field-content.intent {
-	padding-left: var(--spacing-field-padding);
-	padding-right: var(--spacing-field-padding);
+.field-content.isMultiline {
+	padding-left: 0px;
+	padding-right: 0px;
+	gap: 0px;
 }
 .field-content.isSingleField {
 	border: none !important;
 	box-shadow: none !important;
 	border-radius: 0px !important;
+}
+.field-content > .my-button,
+.field-content > .my-bool {
+	align-self: center;
 }
 .field-input {
 	width: 0px; /* base width, required for inputs < 100px */
@@ -100,15 +107,20 @@
 	resize: none;
 	margin: 0px;
 	padding-left: var(--spacing-field-padding);
+	padding-right: var(--spacing-field-padding);
+	border-radius: var(--border-input-radius);
 }
-.field-content > .input .list {
-	margin: 0px;
-	border: none;
-	overflow: visible;
+
+.field-actions {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
 }
-.field-content > .my-button,
-.field-content > .my-bool {
-	align-self: center;
+.field-actions.isMultiline {
+	gap: 4px;
+	flex-flow: column nowrap;
+	border-left: 1px solid var(--color-border);
+	padding: 3px var(--spacing-field-padding);
 }
 
 .field .field-icon {

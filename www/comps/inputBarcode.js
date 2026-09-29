@@ -4,7 +4,7 @@ import { jsLibrariesLoadNoCache } from './shared/jsLibrary.js';
 export default {
 	name: 'my-input-barcode',
 	template: `<div class="input-barcode">
-		<div class="input-toolbar row gap" v-if="!hideInputs">
+		<div class="input-toolbar" v-if="!hideInputs">
 			<div class="row grow default-inputs">
 				<slot name="input-icon" />
 				<input class="dynamic" data-is-input="1"
@@ -14,6 +14,19 @@ export default {
 					:placeholder="capGen.threeDots"
 				/>
 			</div>
+			<my-button image="question.png"
+				v-if="isWithHelp"
+				@trigger="$emit('showHelp')"
+				:captionTitle="capGen.contextHelp"
+				:naked="true"
+			/>
+			<my-button image="copyClipboard.png"
+				v-if="clipboard"
+				@trigger="$emit('copyToClipboard')"
+				:active="isActive"
+				:captionTitle="capGen.button.copyClipboard"
+				:naked="true"
+			/>
 			<my-button image="barcode.png"
 				v-if="isMixedCode && inputFormat !== null && !readonly"
 				@trigger="update('format',null)"
@@ -24,13 +37,6 @@ export default {
 				v-if="!readonly"
 				@trigger="openCamera"
 				:captionTitle="capApp.capture"
-				:naked="true"
-			/>
-			<my-button image="copyClipboard.png"
-				v-if="clipboard"
-				@trigger="$emit('copyToClipboard')"
-				:active="isActive"
-				:captionTitle="capGen.button.copyClipboard"
 				:naked="true"
 			/>
 		</div>
@@ -100,11 +106,12 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	emits: ['copyToClipboard', 'update:modelValue'],
+	emits: ['copyToClipboard', 'showHelp', 'update:modelValue'],
 	props: {
 		clipboard: { type: Boolean, required: true },
 		contentUse: { type: String, required: true },
 		hideInputs: { type: Boolean, required: true },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		modelValue: { type: [String, null], required: true },
 		monospace: { type: Boolean, required: true },
 		readonly: { type: Boolean, required: true }
@@ -131,15 +138,15 @@ export default {
 					return JSON.parse(this.modelValue).format;
 
 				switch (this.contentUse) {
-					case 'barcode_codabar': return 'CODABAR'; break;
-					case 'barcode_code39': return 'CODE_39'; break;
-					case 'barcode_code128': return 'CODE_128'; break;
-					case 'barcode_ean8': return 'EAN_8'; break;
-					case 'barcode_ean13': return 'EAN_13'; break;
-					case 'barcode_itf': return 'ITF'; break;
-					case 'barcode_qrcode': return 'QR_CODE'; break;
-					case 'barcode_upc_a': return 'UPC_A'; break;
-					case 'barcode_upc_e': return 'UPC_E'; break;
+					case 'barcode_codabar': return 'CODABAR';
+					case 'barcode_code39': return 'CODE_39';
+					case 'barcode_code128': return 'CODE_128';
+					case 'barcode_ean8': return 'EAN_8';
+					case 'barcode_ean13': return 'EAN_13';
+					case 'barcode_itf': return 'ITF';
+					case 'barcode_qrcode': return 'QR_CODE';
+					case 'barcode_upc_a': return 'UPC_A';
+					case 'barcode_upc_e': return 'UPC_E';
 				}
 				return null;
 			},
@@ -237,7 +244,7 @@ export default {
 				});
 			}
 			else {
-				let qr = qrcode(0, 'M');
+				const qr = qrcode(0, 'M');
 				qr.addData(this.inputText);
 				qr.make();
 				const src = qr.createDataURL();

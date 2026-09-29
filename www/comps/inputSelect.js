@@ -16,10 +16,18 @@ export default {
 				:tabindex="!readonly ? 0 : -1"
 			/>
 
-			<div class="row centered gap">
+			<div class="input-toolbar-sub">
+				<my-button image="question.png"
+					v-if="isWithHelp"
+					@trigger="$emit('showHelp')"
+					:blockBubble="true"
+					:captionTitle="capGen.contextHelp"
+					:naked="true"
+				/>
 				<my-button
 					v-if="showOpen"
 					@trigger="$emit('open')"
+					:blockBubble="true"
 					:captionTitle="hasValue ? capGen.button.edit : capGen.button.create"
 					:image="hasValue ? 'open.png' : 'add.png'"
 					:naked="nakedIcons"
@@ -28,6 +36,7 @@ export default {
 					v-if="hasValue"
 					@trigger="clear"
 					:active="!readonly"
+					:blockBubble="true"
 					:naked="nakedIcons"
 				/>
 				<my-button image="pageDown.png"
@@ -58,6 +67,7 @@ export default {
 	props: {
 		dropdownShow: { type: Boolean, required: false, default: false },
 		inputTextSet: { type: String, required: false, default: '' },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		nakedIcons: { type: Boolean, required: false, default: true },
 		options: { type: Array, required: false, default: () => [] }, // options: [{'id':12,'name':'Hans-Martin'},{...}]
 		placeholder: { type: String, required: false, default: '' },
@@ -65,7 +75,7 @@ export default {
 		selected: { required: false, default: null },                   // selected option ID (as in: 12)
 		showOpen: { type: Boolean, required: false, default: false }
 	},
-	emits: ['blurred', 'dropdown-show', 'focused', 'open', 'request-data', 'updated-text-input', 'update:selected'],
+	emits: ['blurred', 'dropdown-show', 'focused', 'open', 'request-data', 'showHelp', 'updated-text-input', 'update:selected'],
 	data() {
 		return {
 			limit: 10,    // fixed result limit

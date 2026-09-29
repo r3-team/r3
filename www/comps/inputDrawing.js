@@ -1,9 +1,9 @@
 import MyInputColorWrap from './inputColorWrap.js';
 
 export default {
-	name:'my-input-draw',
-	components:{ MyInputColorWrap },
-	template:`<div class="input-draw">
+	name: 'my-input-draw',
+	components: { MyInputColorWrap },
+	template: `<div class="input-draw">
 		<div class="input-toolbar" v-if="!hideInputs">
 			<div class="row gap centered">
 				<slot name="input-icon" />
@@ -45,7 +45,13 @@ export default {
 					:showInput="false"
 				/>
 			</div>
-			<div class="row gap">
+			<div class="input-toolbar-sub">
+				<my-button image="question.png"
+					v-if="isWithHelp"
+					@trigger="$emit('showHelp')"
+					:captionTitle="capGen.contextHelp"
+					:naked="true"
+				/>
 				<my-button image="undo.png"
 					v-if="!readonly"
 					@trigger="undo"
@@ -72,22 +78,23 @@ export default {
 			/>
 		</div>
 	</div>`,
-	props:{
-		formLoading:{ type:Boolean, required:true },
-		hideInputs: { type:Boolean, required:true },
-		isHidden:   { type:Boolean, required:true },
-		modelValue: { required:true },
-		readonly:   { type:Boolean, required:true }
+	props: {
+		formLoading: { type: Boolean, required: true },
+		hideInputs: { type: Boolean, required: true },
+		isHidden: { type: Boolean, required: true },
+		isWithHelp: { type: Boolean, required: false, default: false },
+		modelValue: { required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	watch:{
+	watch: {
 		appResized() {
 			this.resized();
 		},
 		formLoading(val) {
-			if(!val) this.reset();
+			if (!val) this.reset();
 		},
-		isHidden(val){
-			if(!val) this.reset();
+		isHidden(val) {
+			if (!val) this.reset();
 		},
 		zoomInput(val) {
 			this.canvasRedraw();
@@ -95,70 +102,70 @@ export default {
 	},
 	data() {
 		return {
-			canvasCtx:null,          // canvas context to draw in
-			dragMode:false,
-			dragModeForce:false,     // for mobile device, toggle drag mode
-			dragOffsetX:0,
-			dragOffsetY:0,
-			pointerActive:false,
-			pointerStartCords:null,  // starting coords of pointer as array [x,y]
-			strokeColor:'000000',
-			strokeColorDef:'000000',
-			strokeWidth:3,
-			strokeWidthDef:3,
-			strokeWidthMax:12,
-			strokeWidthMin:1,
-			strokes:[],              // strokes on canvas
-			timerDrag:null,
-			timerResize:null,
-			timerUpdate:null,
-			zoomInput:0,
-			zoomInputDef:0,
-			zoomInputMax:9,
-			zoomInputMin:-9
+			canvasCtx: null,          // canvas context to draw in
+			dragMode: false,
+			dragModeForce: false,     // for mobile device, toggle drag mode
+			dragOffsetX: 0,
+			dragOffsetY: 0,
+			pointerActive: false,
+			pointerStartCords: null,  // starting coords of pointer as array [x,y]
+			strokeColor: '000000',
+			strokeColorDef: '000000',
+			strokeWidth: 3,
+			strokeWidthDef: 3,
+			strokeWidthMax: 12,
+			strokeWidthMin: 1,
+			strokes: [],              // strokes on canvas
+			timerDrag: null,
+			timerResize: null,
+			timerUpdate: null,
+			zoomInput: 0,
+			zoomInputDef: 0,
+			zoomInputMax: 9,
+			zoomInputMin: -9
 		};
 	},
-	emits:['update:modelValue'],
-	computed:{
-		strokeColorClean:(s) => s.strokeColor !== '' ? s.strokeColor : '000000',
-		zoom:            (s) => 1 + (s.zoomInput / 10),
-		
+	emits: ['showHelp', 'update:modelValue'],
+	computed: {
+		strokeColorClean: s => s.strokeColor !== '' ? s.strokeColor : '000000',
+		zoom: s => 1 + (s.zoomInput / 10),
+
 		// stores
-		appResized:(s) => s.$store.getters.appResized,
-		capGen:    (s) => s.$store.getters.captions.generic,
-		isMobile:  (s) => s.$store.getters.isMobile
+		appResized: s => s.$store.getters.appResized,
+		capGen: s => s.$store.getters.captions.generic,
+		isMobile: s => s.$store.getters.isMobile
 	},
 	mounted() {
 		this.canvasCtx = this.$refs.canvas.getContext('2d');
-		this.canvasCtx.lineCap  = 'round';
+		this.canvasCtx.lineCap = 'round';
 		this.canvasCtx.lineJoin = 'round';
 	},
-	methods:{
+	methods: {
 		reset() {
 			this.strokes = this.modelValue === null ? [] : JSON.parse(this.modelValue).data;
 			this.$nextTick(this.resized);
 		},
-		
+
 		// events
 		dragged() {
-			if(this.timerDrag !== null)
+			if (this.timerDrag !== null)
 				clearTimeout(this.timerDrag);
-			
-			this.timerDrag = setTimeout(this.canvasRedraw,0.5);
+
+			this.timerDrag = setTimeout(this.canvasRedraw, 0.5);
 		},
 		resized() {
-			if(this.timerResize !== null)
+			if (this.timerResize !== null)
 				clearTimeout(this.timerResize);
-			
-			this.timerResize = setTimeout(this.canvasRedraw,200);
+
+			this.timerResize = setTimeout(this.canvasRedraw, 200);
 		},
 		updated() {
-			if(this.timerUpdate !== null)
+			if (this.timerUpdate !== null)
 				clearTimeout(this.timerUpdate);
-			
-			this.timerUpdate = setTimeout(this.update,200);
+
+			this.timerUpdate = setTimeout(this.update, 200);
 		},
-		
+
 		// helper
 		getCursorPosition(evt) {
 			return [
@@ -166,60 +173,60 @@ export default {
 				evt.clientY - evt.target.getBoundingClientRect().y
 			];
 		},
-		
+
 		// canvas draw
-		canvasBeginPath(zoom,posX,posY,color,width) {
+		canvasBeginPath(zoom, posX, posY, color, width) {
 			this.canvasCtx.strokeStyle = `#${color}`;
-			this.canvasCtx.lineWidth   = width*this.zoom;
+			this.canvasCtx.lineWidth = width * this.zoom;
 			this.canvasCtx.beginPath();
 			this.canvasCtx.moveTo(
-				(posX*zoom) + this.dragOffsetX,
-				(posY*zoom) + this.dragOffsetY
+				(posX * zoom) + this.dragOffsetX,
+				(posY * zoom) + this.dragOffsetY
 			);
 		},
-		canvasLineTo(zoom,posX,posY) {
+		canvasLineTo(zoom, posX, posY) {
 			this.canvasCtx.lineTo(
 				(posX * zoom) + this.dragOffsetX,
 				(posY * zoom) + this.dragOffsetY
 			);
 		},
 		canvasRedraw() {
-			if(this.isHidden) return;
-			
-			this.$refs.canvas.width  = this.$refs.canvasWrap.clientWidth;
+			if (this.isHidden) return;
+
+			this.$refs.canvas.width = this.$refs.canvasWrap.clientWidth;
 			this.$refs.canvas.height = this.$refs.canvasWrap.clientHeight;
 			this.canvasReset();
-			
+
 			// performance optimization: draw strokes after a new line started (or at the very end)
 			let strokeWaiting = false;
-			for(const s of this.strokes) {
-				switch(s[0]) {
+			for (const s of this.strokes) {
+				switch (s[0]) {
 					case 'b': // start a new path
-						if(strokeWaiting)
+						if (strokeWaiting)
 							this.canvasStroke();
-					
-						this.canvasBeginPath(this.zoom,s[1],s[2],s[3],s[4]);
+
+						this.canvasBeginPath(this.zoom, s[1], s[2], s[3], s[4]);
 						strokeWaiting = false;
-					break;
+						break;
 					case 'l': // (continuously) draw existing path
-						this.canvasLineTo(this.zoom,s[1],s[2]);
+						this.canvasLineTo(this.zoom, s[1], s[2]);
 						strokeWaiting = true;
-					break;
+						break;
 				}
 			}
 			// finish last path
-			if(strokeWaiting)
+			if (strokeWaiting)
 				this.canvasStroke();
 		},
 		canvasReset() {
-			this.canvasCtx.clearRect(0,0,
+			this.canvasCtx.clearRect(0, 0,
 				this.$refs.canvas.width,
 				this.$refs.canvas.height);
 		},
 		canvasStroke() {
 			this.canvasCtx.stroke();
 		},
-		
+
 		// actions
 		clear() {
 			this.canvasReset();
@@ -227,28 +234,28 @@ export default {
 			this.updated();
 		},
 		pointerDown(evt) {
-			this.dragMode          = evt.button === 2 || this.dragModeForce;
-			this.pointerActive     = true;
+			this.dragMode = evt.button === 2 || this.dragModeForce;
+			this.pointerActive = true;
 			this.pointerStartCords = this.getCursorPosition(evt);
 		},
 		pointerMove(evt) {
-			if(!this.pointerActive)
+			if (!this.pointerActive)
 				return;
-			
-			if(this.dragMode && this.pointerStartCords !== null) {
-				const [posXStart,posYStart] = this.pointerStartCords;
-				const [posX,posY]           = this.getCursorPosition(evt);
+
+			if (this.dragMode && this.pointerStartCords !== null) {
+				const [posXStart, posYStart] = this.pointerStartCords;
+				const [posX, posY] = this.getCursorPosition(evt);
 				this.dragOffsetX -= posXStart - posX;
 				this.dragOffsetY -= posYStart - posY;
-				this.pointerStartCords = [posX,posY];
+				this.pointerStartCords = [posX, posY];
 				this.dragged();
 				return;
 			}
-			
-			if(!this.readonly) {
+
+			if (!this.readonly) {
 				// path is started on the first pointer move event (otherwise: empty path)
-				if(this.pointerStartCords !== null) {
-					const [posXStart,posYStart] = this.pointerStartCords;
+				if (this.pointerStartCords !== null) {
+					const [posXStart, posYStart] = this.pointerStartCords;
 					this.canvasBeginPath(
 						1,
 						posXStart - this.dragOffsetX,
@@ -265,8 +272,8 @@ export default {
 					]);
 					this.pointerStartCords = null;
 				}
-				
-				const [posX,posY] = this.getCursorPosition(evt);
+
+				const [posX, posY] = this.getCursorPosition(evt);
 				this.canvasLineTo(
 					1,
 					posX - this.dragOffsetX,
@@ -282,14 +289,14 @@ export default {
 			}
 		},
 		pointerUp(evt) {
-			this.dragMode          = false;
-			this.pointerActive     = false;
+			this.dragMode = false;
+			this.pointerActive = false;
 			this.pointerStartCords = null;
 		},
 		undo() {
-			for(let i = this.strokes.length-1; i >= 0; i--) {
-				if(this.strokes[i][0] === 'b') {
-					this.strokes.splice(i,this.strokes.length - i + 1);
+			for (let i = this.strokes.length - 1; i >= 0; i--) {
+				if (this.strokes[i][0] === 'b') {
+					this.strokes.splice(i, this.strokes.length - i + 1);
 					this.canvasRedraw();
 					this.update();
 					break;
@@ -298,19 +305,19 @@ export default {
 		},
 		update() {
 			const empty = this.strokes.length === 0 || this.$refs.canvas === null;
-			
+
 			this.$emit('update:modelValue', empty ? null : JSON.stringify({
-				data:this.strokes,
-				image:this.$refs.canvas.toDataURL()
+				data: this.strokes,
+				image: this.$refs.canvas.toDataURL()
 			}));
 		},
 		wheel(evt) {
 			const wheelUp = evt.wheelDelta > 0;
-			
-			if(!wheelUp && this.zoomInput > this.zoomInputMin)
+
+			if (!wheelUp && this.zoomInput > this.zoomInputMin)
 				this.zoomInput -= 1;
-			
-			if(wheelUp && this.zoomInput < this.zoomInputMax)
+
+			if (wheelUp && this.zoomInput < this.zoomInputMax)
 				this.zoomInput += 1;
 		}
 	}

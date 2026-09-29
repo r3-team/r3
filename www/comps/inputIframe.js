@@ -1,6 +1,6 @@
 export default {
-	name:'my-input-iframe',
-	template:`<div class="input-iframe">
+	name: 'my-input-iframe',
+	template: `<div class="input-iframe">
 		<div class="input-toolbar" v-if="!hideInputs" :class="{ readonly:readonly }">
 			<div class="row grow default-inputs">
 				<slot name="input-icon" />
@@ -12,6 +12,18 @@ export default {
 					:placeholder="capGen.threeDots"
 				/>
 			</div>
+			<my-button image="question.png"
+				v-if="isWithHelp"
+				@trigger="$emit('showHelp')"
+				:captionTitle="capGen.contextHelp"
+				:naked="true"
+			/>
+			<my-button image="copyClipboard.png"
+				v-if="clipboard"
+				@trigger="$emit('copyToClipboard')"
+				:active="isActive"
+				:naked="true"
+			/>
 			<my-button image="ok.png"
 				v-if="!readonly"
 				@trigger="set"
@@ -24,12 +36,6 @@ export default {
 				:active="isActive"
 				:naked="true"
 			/>
-			<my-button image="copyClipboard.png"
-				v-if="clipboard"
-				@trigger="$emit('copyToClipboard')"
-				:active="isActive"
-				:naked="true"
-			/>
 		</div>
 		<iframe class="input-iframe-content" allowfullscreen="true" frameBorder="0" height="100%" width="100%"
 			v-if="isActive && hasBeenVisible"
@@ -39,63 +45,71 @@ export default {
 			<span>{{ capApp.empty }}</span>
 		</div>
 	</div>`,
-	props:{
-		clipboard:  { type:Boolean, required:true },
-		formLoading:{ type:Boolean, required:true },
-		hideInputs: { type:Boolean, required:true },
-		isHidden:   { type:Boolean, required:true },
-		modelValue: { required:true },
-		monospace:  { type:Boolean, required:true },
-		readonly:   { type:Boolean, required:true }
+	props: {
+		clipboard: { type: Boolean, required: true },
+		formLoading: { type: Boolean, required: true },
+		hideInputs: { type: Boolean, required: true },
+		isHidden: { type: Boolean, required: true },
+		isWithHelp: { type: Boolean, required: false, default: false },
+		modelValue: { required: true },
+		monospace: { type: Boolean, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	watch:{
+	watch: {
 		formLoading(val) {
-			if(!val) this.reset();
+			if (!val) this.reset();
 		},
-		isHidden:{
+		isHidden: {
 			handler(val) {
-				if(!val && !this.hasBeenVisible) {
+				if (!val && !this.hasBeenVisible) {
 					this.hasBeenVisible = true;
 					this.reset();
 				}
 			},
-			immediate:true
+			immediate: true
 		},
 		modelValue(v) {
-			if(v === null && this.srcInput !== '') return this.srcInput = '';
-			if(v !== this.srcInput)                return this.srcInput = v;
+			if (v === null && this.srcInput !== '') {
+				this.srcInput = '';
+				return;
+			}
+			if (v !== this.srcInput) {
+				this.srcInput = v;
+				return;
+			}
 		}
 	},
 	data() {
 		return {
-			hasBeenVisible:false, // loading invisible iframes causes issues in WebKit with HTML anchors
-			srcInput:''
+			hasBeenVisible: false, // loading invisible iframes causes issues in WebKit with HTML anchors
+			srcInput: ''
 		};
 	},
-	emits:['copyToClipboard','update:modelValue'],
-	computed:{
+	emits: ['copyToClipboard', 'showHelp', 'update:modelValue'],
+	computed: {
 		// simple
-		isActive: (s) => s.src        !== false,
-		isChanged:(s) => s.src        !== s.srcInput,
-		isEmpty:  (s) => s.srcInput   === '',
-		src:      (s) => s.modelValue !== null ? s.modelValue : false,
-		
+		isActive: s => s.src !== false,
+		isChanged: s => s.src !== s.srcInput,
+		isEmpty: s => s.srcInput === '',
+		src: s => s.modelValue !== null ? s.modelValue : false,
+
 		// stores
-		capApp:(s) => s.$store.getters.captions.input.iframe,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.input.iframe,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
+		del() {
+			this.srcInput = '';
+			this.$emit('update:modelValue', null);
+		},
 		reset() {
 			this.srcInput = this.modelValue === null ? '' : this.modelValue;
 		},
-		
-		// actions
-		del() {
-			this.srcInput = '';
-			this.$emit('update:modelValue',null);
+		showHelp(msg) {
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.contextHelp });
 		},
 		set() {
-			this.$emit('update:modelValue',this.srcInput);
+			this.$emit('update:modelValue', this.srcInput);
 		}
 	}
 };

@@ -18,7 +18,7 @@ export default {
 				<div class="input-richtext-toolbar-content" ref="toolbar" v-show="!readonly"></div>
 			</div>
 			<div></div>
-			<div class="row gap centered">
+			<div class="input-toolbar-sub">
 				<a
 					class="input-richtext-toolbar-link clickable"
 					target="_blank"
@@ -27,6 +27,12 @@ export default {
 				>
 					<img class="input-richtext-toolbar-logo" src="images/externals/tinymce.svg" />
 				</a>
+				<my-button image="question.png"
+					v-if="isWithHelp"
+					@trigger="$emit('showHelp')"
+					:captionTitle="capGen.contextHelp"
+					:naked="true"
+				/>
 				<my-button image="copyClipboard.png"
 					v-if="clipboard"
 					@trigger="$emit('copyToClipboard')"
@@ -46,11 +52,12 @@ export default {
 			/>
 		</div>
 	</div>`,
-	emits: ['copyToClipboard', 'hotkey', 'update:modelValue'],
+	emits: ['copyToClipboard', 'hotkey', 'showHelp', 'update:modelValue'],
 	props: {
 		attributeIdFile: { type: String, required: false, default: '' },
 		clipboard: { type: Boolean, required: false, default: false },
 		isHidden: { type: Boolean, required: false, default: false },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		modelValue: { required: true },
 		printCaption: { type: String, required: false, default: 'export' },
 		readonly: { type: Boolean, required: false, default: false },

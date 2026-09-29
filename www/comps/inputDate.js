@@ -405,7 +405,15 @@ export default {
 				/>
 			</div>
 
-			<div v-if="!isReadonly" class="row gap nowrap centered">
+			<div v-if="!isReadonly" class="input-toolbar-sub">
+
+				<my-button image="question.png"
+					v-if="isWithHelp"
+					@trigger="$emit('showHelp')"
+					:captionTitle="capGen.contextHelp"
+					:naked="true"
+				/>
+
 				<!-- full day selector -->
 				<my-button
 					v-if="isDate && isTime && isRange"
@@ -484,11 +492,12 @@ export default {
 		isTime: { type: Boolean, required: true },
 		isRange: { type: Boolean, required: false, default: false },
 		isReadonly: { type: Boolean, required: false, default: false },
+		isWithHelp: { type: Boolean, required: false, default: false },
 		unixFrom: { required: true },
 		unixTo: { required: false, default: null },
 		useMonth: { type: Boolean, required: false, default: false }
 	},
-	emits: ['dropdown-show', 'set-unix-from', 'set-unix-to', 'set-view-month'],
+	emits: ['dropdown-show', 'set-unix-from', 'set-unix-to', 'set-view-month', 'showHelp'],
 	data() {
 		return {
 			date: new Date(),  // date to control calendar navigation
@@ -536,6 +545,7 @@ export default {
 
 		// stores
 		capApp: s => s.$store.getters.captions.input.date,
+		capGen: s => s.$store.getters.captions.generic,
 		isMobile: s => s.$store.getters.isMobile
 	},
 	methods: {
