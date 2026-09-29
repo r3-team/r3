@@ -486,21 +486,22 @@ export default {
 
 								const src = s.getSourceTemplate(f.id, index, join.relationId, s.fieldIdMapIndexMapRecordIds[f.id][index], 'images/files_list2.png', title);
 								for (const c of f.columns) {
-									if (c.attribute && c.index === index) {
-										const atr = s.attributeIdMap[c.attributeId];
+									if (c.content !== 'attribute' || c.index !== index)
+										continue;
 
-										// encrypted change logs are not supported for sub lists, keys are not available
-										// it would require providing keys during data log GET call to implement this
-										if (atr.encrypted)
-											continue;
+									const atr = s.attributeIdMap[c.attributeId];
 
-										src.attributeIds.push(c.attributeId);
-										src.attributeIdMapIcon[c.attributeId] = atr.iconId;
-										src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c, s.moduleId);
+									// encrypted change logs are not supported for sub lists, keys are not available
+									// it would require providing keys during data log GET call to implement this
+									if (atr.encrypted)
+										continue;
 
-										if (s.isAttributeFiles(atr.content))
-											src.attributeIdsFiles.push(c.attributeId);
-									}
+									src.attributeIds.push(c.attributeId);
+									src.attributeIdMapIcon[c.attributeId] = atr.iconId;
+									src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c, s.moduleId);
+
+									if (s.isAttributeFiles(atr.content))
+										src.attributeIdsFiles.push(c.attributeId);
 								}
 								out.push(src);
 							}
