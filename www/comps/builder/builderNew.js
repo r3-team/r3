@@ -371,7 +371,7 @@ export default {
 			}
 			ws.send(this.entity, action, request, true).then(
 				res => {
-					if (this.entity === 'module') this.$root.schemaReload(res[0].payload);
+					if (this.entity === 'module') this.$root.schemaReload(res.payload);
 					else this.$root.schemaReload(this.moduleId);
 
 					this.$emit('close');
