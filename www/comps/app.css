@@ -147,6 +147,12 @@
 	--shadow-input-focus: none;
 
 	/**/
+	/* brightness */
+	--brightness-calendar-active: 75%;
+	--brightness-calendar-hover: 65%;
+	--brightness-calendar-lines: 90%;
+
+	/**/
 	/* borders & outlines */
 	--border-input: 1px solid var(--color-border);
 	--border-input-focus: 1px solid transparent;
@@ -1562,6 +1568,10 @@ table td.maximum {
 		hue-rotate(359deg) brightness(84%) contrast(58%);
 	--image-filter-success: invert(36%) sepia(75%) saturate(1288%)
 		hue-rotate(76deg) brightness(92%) contrast(48%);
+
+	--brightness-calendar-active: 60%;
+	--brightness-calendar-hover: 45%;
+	--brightness-calendar-lines: 80%;
 }
 .user-dark *::-webkit-scrollbar {
 	width: 15px;
