@@ -267,16 +267,24 @@ export default {
 						>
 							<my-label
 								:caption="tabLayoutElements.includes('label') || t.iconId === null ? tabIndexesTitle[i] : ''"
+								:captionTitle="tabIndexesTitle[i]"
 								:imageBase64="tabLayoutElements.includes('icon') && t.iconId !== null ? srcBase64(iconIdMap[t.iconId].file) : ''"
 							/>
 						</div>
-						<select v-if="tabLayoutElements.length === 0 && !isTabsSingle" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
-							<template v-for="(t,i) in field.tabs">
-								<option v-if="!tabIndexesHidden.includes(i)" :value="i">
-									{{ tabIndexesTitle[i] }}
-								</option>
-							</template>
-						</select>
+						<div class="tabs-entry select" v-if="tabLayoutElements.length === 0 && !isTabsSingle">
+							<my-label
+								v-if="field.tabs[tabIndexShow].iconId !== null"
+								:captionTitle="tabIndexesTitle[tabIndexShow]"
+								:imageBase64="srcBase64(iconIdMap[field.tabs[tabIndexShow].iconId].file)"
+							/>
+							<select @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
+								<template v-for="(t,i) in field.tabs">
+									<option v-if="!tabIndexesHidden.includes(i)" :value="i">
+										{{ tabIndexesTitle[i] }}
+									</option>
+								</template>
+							</select>
+						</div>
 						<div class="tabs-entry empty grow" ref="tabsEmpty" v-show="!isTabsSingle"></div>
 						<div class="tabs-entry clickable" v-if="field.collapseAllow" @click="setTagsCollapsed(!tabsCollabsed)">
 							<img class="tabs-icon" :src="tabsCollabsed ? 'images/pageDown.png' : 'images/pageUp.png'" />

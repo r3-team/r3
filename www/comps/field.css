@@ -278,21 +278,6 @@
 	align-items: center;
 	background-color: var(--color-input-disabled);
 }
-.field .tabs-entries select {
-	flex: 1 1 100%;
-	padding: 4px 6px;
-	margin: 2px 6px 2px 3px;
-	font-size: 110%;
-	color: var(--color-font);
-	border: none;
-	outline: none;
-	overflow: none;
-	background-color: var(--color-input);
-	border: var(--border-input);
-	border-radius: var(--border-input-radius);
-	box-shadow: var(--shadow-input);
-	overflow: hidden;
-}
 .field .tabs-entries option {
 	color: var(--color-font);
 	background-color: var(--color-bg);
@@ -313,6 +298,23 @@
 	border-top: none;
 	box-sizing: border-box;
 	font-size: 85%;
+}
+.field .tabs-entry.select {
+	width: 100%;
+	max-width: 400px;
+	gap: calc(var(--spacing) / 2);
+}
+.field .tabs-entry.select > select {
+	flex: 1 1 100%;
+	padding: 4px 6px;
+	font-size: initial;
+	color: var(--color-font);
+	outline: none;
+	background-color: var(--color-input);
+	border: var(--border-input);
+	border-radius: var(--border-input-radius);
+	box-shadow: var(--shadow-input);
+	overflow: hidden;
 }
 .field .tabs-entry.clickable:hover {
 	background-color: var(--color-bg);
