@@ -387,7 +387,7 @@ export default {
 			}
 			return this.isMobile || this.isInput
 				? this.capApp[`weekDayShort${dayOffset}`]
-				: this.capApp[`weekDay{dayOffset}`];
+				: this.capApp[`weekDay${dayOffset}`];
 		}
 	}
 };
