@@ -45,6 +45,9 @@
 	display: flex;
 	flex-flow: column nowrap;
 }
+.calendar-days-labels.isInput {
+	flex-basis: 45px;
+}
 .calendar-days-labels span {
 	padding: 2px 6px;
 	box-sizing: border-box;
@@ -82,13 +85,13 @@
 	text-align: center;
 	background-color: var(--color-bg);
 }
-.calendar-days-line.is-input {
+.calendar-days-line.isInput {
 	font-size: 80%;
 	line-height: unset;
 	min-height: unset;
 	overflow: hidden;
 }
-.calendar-days-line.header.is-input {
+.calendar-days-line.header.isInput {
 	font-size: 90%;
 }
 .calendar-days-line-day {
@@ -289,16 +292,16 @@
 	font-weight: bold;
 	text-decoration: underline;
 }
-.calendar-month.is-input .days {
+.calendar-month.isInput .days {
 	flex: 0 1 auto;
 	padding: 4px 0px;
 	text-align: center;
 	line-height: unset;
 }
-.calendar-month.is-input .day {
+.calendar-month.isInput .day {
 	min-height: unset;
 }
-.calendar-month.is-input .day h1 {
+.calendar-month.isInput .day h1 {
 	margin: 4px 6px;
 	text-align: center;
 	font-size: 100%;

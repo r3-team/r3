@@ -52,8 +52,8 @@ export default {
 	name: 'my-calendar-days',
 	components: { MyCalendarDaysEvent },
 	template: `<div class="calendar-days">
-		<div class="calendar-days-line header" :class="{ 'is-input':isInput }">
-			<div class="calendar-days-labels"></div>
+		<div class="calendar-days-line header" :class="{ isInput }">
+			<div class="calendar-days-labels" :class="{ isInput }"></div>
 			<div class="calendar-days-line-content">
 				<div v-for="d in events.fullDays" class="calendar-days-line-day" :class="{ today:d.today }" v-html="d.caption"></div>
 			</div>
@@ -91,8 +91,8 @@ export default {
 				</div>
 			</div>
 		</div>
-		<div class="calendar-days-line" :class="{ 'is-input':isInput }" ref="days">
-			<div class="calendar-days-labels">
+		<div class="calendar-days-line" :class="{ isInput }" ref="days">
+			<div class="calendar-days-labels" :class="{ isInput }">
 				<span v-for="i in 24" :style="heightHourStyle">
 					{{ getStringFilled(i-1,2,'0')+':00' }}
 				</span>
