@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api types.Api, loginId int64,
+func handleGet_tx(ctx context.Context, tx pgx.Tx, responseBody *[]byte, api types.Api, loginId int64,
 	languageCodeLogin, languageCode string, recordId int64, getters getter) (int, error, error) {
 
 	dataGet := types.DataGet{
@@ -144,12 +144,9 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 		}
 	}
 
-	payloadJson, err := json.Marshal(rows)
+	*responseBody, err = json.Marshal(rows)
 	if err != nil {
 		return http.StatusServiceUnavailable, err, fmt.Errorf(handler.ErrGeneral)
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(payloadJson)
-
 	return http.StatusOK, nil, nil
 }

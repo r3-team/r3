@@ -128,6 +128,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	api, err := cache.GetApiByNames(modName, apiName, version)
 	if err != nil {
 		abort(http.StatusNotFound, nil, err.Error())
+		return
 	}
 
 	// check supported API methods
@@ -207,18 +208,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// provide response variable as reference
+	var responseBody []byte = nil
+
 	if isGet {
-		if httpStatus, errToLog, err := handleGet_tx(ctx, tx, w, api, login.Id, login.LanguageCode, languageCodeModule, recordId, getters); err != nil {
+		if httpStatus, errToLog, err := handleGet_tx(ctx, tx, &responseBody, api, login.Id, login.LanguageCode, languageCodeModule, recordId, getters); err != nil {
 			abort(httpStatus, errToLog, err.Error())
 			return
 		}
 	} else if isPost {
-		if httpStatus, errToLog, err := handlePost_tx(ctx, tx, w, r, api, login.Id, languageCodeModule, getters); err != nil {
+		if httpStatus, errToLog, err := handlePost_tx(ctx, tx, &responseBody, r, api, login.Id, languageCodeModule, getters); err != nil {
 			abort(httpStatus, errToLog, err.Error())
 			return
 		}
 	} else if isDelete {
-		if httpStatus, errToLog, err := handleDelete_tx(ctx, tx, w, api, login.Id, recordId); err != nil {
+		if httpStatus, errToLog, err := handleDelete_tx(ctx, tx, api, login.Id, recordId); err != nil {
 			abort(httpStatus, errToLog, err.Error())
 			return
 		}
@@ -227,5 +231,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if err := tx.Commit(ctx); err != nil {
 		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 		return
+	}
+
+	// write response if transaction was successfully committed
+	w.WriteHeader(http.StatusOK)
+	if responseBody != nil {
+		w.Write(responseBody)
 	}
 }

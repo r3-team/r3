@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func handlePost_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, r *http.Request, api types.Api, loginId int64, languageCode string, getters getter) (int, error, error) {
+func handlePost_tx(ctx context.Context, tx pgx.Tx, responseBody *[]byte, r *http.Request, api types.Api, loginId int64, languageCode string, getters getter) (int, error, error) {
 
 	values := make([]any, len(api.Columns))
 	if !getters.verbose {
@@ -80,13 +80,9 @@ func handlePost_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, r *htt
 		return http.StatusConflict, nil, err
 	}
 
-	payloadJson, err := json.Marshal(indexRecordIds)
+	*responseBody, err = json.Marshal(indexRecordIds)
 	if err != nil {
 		return http.StatusServiceUnavailable, err, fmt.Errorf(handler.ErrGeneral)
 	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(payloadJson)
-
 	return http.StatusOK, nil, nil
 }

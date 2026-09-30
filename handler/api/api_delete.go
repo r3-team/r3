@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func handleDelete_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api types.Api, loginId int64, recordId int64) (int, error, error) {
+func handleDelete_tx(ctx context.Context, tx pgx.Tx, api types.Api, loginId int64, recordId int64) (int, error, error) {
 
 	if recordId < 1 {
 		return http.StatusBadRequest, nil, fmt.Errorf("record ID must be > 0")
@@ -75,7 +75,6 @@ func handleDelete_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api 
 
 	// execute delete
 	for _, join := range api.Query.Joins {
-
 		if _, exists := relationIndexMapRecordIds[join.Index]; !exists {
 			continue
 		}
@@ -86,7 +85,5 @@ func handleDelete_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api 
 			return http.StatusConflict, nil, err
 		}
 	}
-
-	w.WriteHeader(http.StatusOK)
 	return http.StatusOK, nil, nil
 }
