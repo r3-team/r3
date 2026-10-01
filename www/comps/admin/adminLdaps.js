@@ -22,6 +22,15 @@ export default {
 					@trigger="get"
 					:caption="capGen.button.refresh"
 				/>
+			</div>
+			<div class="area">
+				<my-button image="download.png"
+					@trigger="runImports"
+					:active="licenseValid"
+					:caption="capApp.button.import"
+				/>
+			</div>
+			<div class="area">
 				<my-button image="question.png"
 					v-if="isAnyLdaps"
 					@trigger="showHelp(capApp.description)"
@@ -103,6 +112,12 @@ export default {
 				ldap.loginTemplateId = this.templates[0].id;
 
 			this.ldapOpen = ldap;
+		},
+		runImports() {
+			ws.send('task', 'run', { clusterMasterOnly: true, taskName: 'importLdapLogins' }, true).then(
+				() => this.$store.commit('dialog', { captionBody: this.capApp.dialog.importPlanned }),
+				this.$root.genericError
+			);
 		},
 		showHelp(msg) {
 			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });

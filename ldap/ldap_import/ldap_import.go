@@ -11,6 +11,7 @@ import (
 	"r3/login"
 	"r3/types"
 	"slices"
+	"strings"
 	"unicode/utf8"
 
 	goldap "github.com/go-ldap/ldap/v3"
@@ -162,6 +163,7 @@ func run(ldapId int32) error {
 			}
 
 			for _, entry := range response.Entries {
+				loginName := entry.GetAttributeValue(ldap.LoginAttribute)
 
 				// key attribute is used to uniquely identify a user
 				// MS AD uses binary for some (like objectGUID), encode base64 if invalid UTF8
@@ -173,13 +175,41 @@ func run(ldapId int32) error {
 					key = fmt.Sprintf(base64.StdEncoding.EncodeToString(keyRaw))
 				}
 
+				// filter by DNs
+				if len(ldap.FilterDnExclude) != 0 {
+					isExcluded := false
+					for _, f := range ldap.FilterDnExclude {
+						if strings.HasSuffix(entry.DN, f) {
+							log.Info(log.ContextLdap, fmt.Sprintf("login '%s' (DN: %s) is excluded by DN blacklist: %s", loginName, entry.DN, f))
+							isExcluded = true
+							break
+						}
+					}
+					if isExcluded {
+						continue
+					}
+				}
+				if len(ldap.FilterDnInclude) != 0 {
+					isIncluded := false
+					for _, f := range ldap.FilterDnInclude {
+						if strings.HasSuffix(entry.DN, f) {
+							isIncluded = true
+							break
+						}
+					}
+					if !isIncluded {
+						log.Info(log.ContextLdap, fmt.Sprintf("login '%s' (DN: %s) is not included in any DN whitelist", loginName, entry.DN))
+						continue
+					}
+				}
+
 				l, exists := logins[key]
 				if !exists {
 					l = loginType{}
 					l.active = true
 					l.roleIds = make([]uuid.UUID, 0)
 				}
-				l.name = entry.GetAttributeValue(ldap.LoginAttribute)
+				l.name = loginName
 
 				if ldap.MsAdExt {
 					for _, value := range entry.GetAttributeValues("userAccountControl") {

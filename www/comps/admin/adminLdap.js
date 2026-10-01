@@ -43,6 +43,13 @@ export default {
 					/>
 				</div>
 				<div class="area">
+					<my-button image="settings.png"
+						v-if="!isNew"
+						@trigger="runCheck"
+						:caption="capApp.button.test"
+					/>
+				</div>
+				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
@@ -293,12 +300,6 @@ export default {
 		},
 
 		// backend calls
-		runImports() {
-			ws.send('task', 'run', { clusterMasterOnly: true, taskName: 'importLdapLogins' }, true).then(
-				() => this.$store.commit('dialog', { captionBody: this.capApp.dialog.importPlanned }),
-				this.$root.genericError
-			);
-		},
 		runCheck() {
 			ws.send('ldap', 'check', { id: this.ldap.id }, true).then(
 				() => this.$store.commit('dialog', { captionBody: this.capApp.dialog.testDone }),
