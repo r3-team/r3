@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "تعيين الأدوار حسب عضوية المجموعة<br />(تعطيل تعيين الأدوار يدويًا)",
+			"assignRoles": "تعيين الأدوار حسب عضوية المجموعة",
+			"assignRolesHint": "(تعطيل تعيين الأدوار يدويًا)",
 			"bindUserDn": "ربط الاسم المميز للمستخدم",
 			"bindUserDnHint": "على سبيل المثال: CN=للقراءة فقط،OU=المستخدم،DC=mycompany،DC=محلي",
 			"bindUserPw": "ربط كلمة مرور المستخدم",
@@ -260,8 +261,8 @@
 			"searchDnHint": "مثال: OU=المستخدم،DC=شركتي،DC=محلي",
 			"starttls": "استخدم StartTLS",
 			"template": "قالب تسجيل الدخول",
-			"title": "إنشاء/تحرير الاتصال",
-			"titleRoles": "الأدوار لكل عضوية المجموعة",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "استخدم SSL/TLS",
 			"tlsVerify": "التحقق من TLS"
 		},

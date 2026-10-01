@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "Iestatīt lomas pēc grupas piederības<br />(izslēdz manuālu lomas piešķiršanu)",
+			"assignRoles": "Iestatīt lomas pēc grupas piederības",
+			"assignRolesHint": "(izslēdz manuālu lomas piešķiršanu)",
 			"bindUserDn": "Sasaistīt lietotāja DN",
 			"bindUserDnHint": "Piemērs: CN=readonly,OU=Lietotājs,DC=manafirma,DC=locale",
 			"bindUserPw": "Sasaistīt lietotāja parole",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Piemērs: OU=Lietotājs,DC=manafirma,DC=locale",
 			"starttls": "Izmantot StartTLS",
 			"template": "User template",
-			"title": "Izveidot/rediģēt savienojumu",
-			"titleRoles": "Lomas pēc grupas piederības",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "Izmantot SSL/TLS",
 			"tlsVerify": "Pārbaudīt TLS"
 		},

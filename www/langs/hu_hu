@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "Szerepek hozzárendelése csoporttagság alapján<br />(letiltja a kézi szerephozzárendelést)",
+			"assignRoles": "Szerepek hozzárendelése csoporttagság alapján",
+			"assignRolesHint": "(letiltja a kézi szerephozzárendelést)",
 			"bindUserDn": "Felhasználó DN kötéshez",
 			"bindUserDnHint": "Példa: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Felhasználó jelszava kötéshez",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Példa: OU=User,DC=mycompany,DC=local",
 			"starttls": "StartTLS használata",
 			"template": "User template",
-			"title": "Kapcsolat létrehozása/módosítása",
-			"titleRoles": "Szerepek csoporttagság alapján",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "SSL/TLS használata",
 			"tlsVerify": "TLS ellenőrzése"
 		},

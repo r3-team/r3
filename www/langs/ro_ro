@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "Setați roluri în funcție de apartenența la grup<br />(dezactivați atribuirea manuală a rolului)",
+			"assignRoles": "Setați roluri în funcție de apartenența la grup",
+			"assignRolesHint": "(dezactivați atribuirea manuală a rolului)",
 			"bindUserDn": "Fixați utilizatorul DN",
 			"bindUserDnHint": "Exemplu: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Fixați parola utilizatorului",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Exemplu: OU=User,DC=mycompany,DC=local",
 			"starttls": "Utilizați StartTLS",
 			"template": "User template",
-			"title": "Creați/editați conexiunea",
-			"titleRoles": "Roluri pentru apartenența la un grup",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "Utilizați SSL/TLS",
 			"tlsVerify": "Verifică TLS"
 		},

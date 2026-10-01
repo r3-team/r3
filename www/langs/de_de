@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "Rollen nach Gruppenmitgliedschaft setzen<br />(deaktiviert manuelle Rollenzuweisung)",
+			"assignRoles": "Rollen nach Gruppenmitgliedschaft setzen",
+			"assignRolesHint": "(deaktiviert manuelle Rollenzuweisung)",
 			"bindUserDn": "Benutzer-DN für Verbindung",
 			"bindUserDnHint": "Beispiel: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Benutzer-Passwort für Verbindung",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Beispiel: OU=User,DC=mycompany,DC=local",
 			"starttls": "StartTLS verwenden",
 			"template": "Benutzervorlage",
-			"title": "Verbindung erstellen/bearbeiten",
-			"titleRoles": "Rollen nach Gruppenmitgliedschaft",
+			"title": "LDAP-Verbindung \"{NAME}\"",
+			"titleNew": "Neue LDAP-Verbindung",
 			"tls": "SSL/TLS verwenden",
 			"tlsVerify": "TLS überprüfen"
 		},
@@ -541,7 +542,7 @@
 		"navigationGeoFieldsAssign": "Geodaten: Karten konfigurieren",
 		"navigationGeoLayersBase": "Geodaten: Basisebenen",
 		"navigationInvitation": "Massenbenutzereinladung",
-		"navigationLdaps": "LDAP-Konnektoren",
+		"navigationLdaps": "LDAP-Verbindungen",
 		"navigationLicense": "Professional",
 		"navigationLoginSessions": "Benutzersitzungen",
 		"navigationLoginTemplates": "Benutzervorlagen",

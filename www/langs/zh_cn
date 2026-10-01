@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "通过组成员身份设置角色<br />(禁用手动角色分配)",
+			"assignRoles": "通过组成员身份设置角色",
+			"assignRolesHint": "(禁用手动角色分配)",
 			"bindUserDn": "绑定用户 DN",
 			"bindUserDnHint": "示例：CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "绑定用户密码",
@@ -260,8 +261,8 @@
 			"searchDnHint": "示例：OU=User,DC=mycompany,DC=local",
 			"starttls": "使用 StartTLS",
 			"template": "User template",
-			"title": "创建/编辑连接",
-			"titleRoles": "每个组成员身份的角色",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "使用 SSL/TLS",
 			"tlsVerify": "验证 TLS"
 		},

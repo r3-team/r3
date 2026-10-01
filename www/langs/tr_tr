@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "Rolleri grup üyeliğine göre ayarlayın<br />(manuel rol atamasını devre dışı bırakır)",
+			"assignRoles": "Rolleri grup üyeliğine göre ayarlayın",
+			"assignRolesHint": "(manuel rol atamasını devre dışı bırakır)",
 			"bindUserDn": "Kullanıcı DN'sini bağla",
 			"bindUserDnHint": "Örnek: CN=salt okunur,OU=Kullanıcı,DC=şirketim,DC=yerel",
 			"bindUserPw": "Kullanıcı şifresini bağla",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Örnek: OU=Kullanıcı,DC=şirketim,DC=yerel",
 			"starttls": "StartTLS'yi kullanın",
 			"template": "Kullanıcı şablonu",
-			"title": "Bağlantı oluştur/düzenle",
-			"titleRoles": "Grup üyeliği başına roller",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "SSL/TLS'yi kullanın",
 			"tlsVerify": "TLS'yi doğrulayın"
 		},

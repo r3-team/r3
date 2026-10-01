@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "Imposta i ruoli in base all'appartenenza al gruppo<br />(disabilita l'assegnazione dei ruoli manuale)",
+			"assignRoles": "Imposta i ruoli in base all'appartenenza al gruppo",
+			"assignRolesHint": "(disabilita l'assegnazione dei ruoli manuale)",
 			"bindUserDn": "Associa utente DN",
 			"bindUserDnHint": "Esempio: CN=sola lettura,OU=Utente,DC=miaazienda,DC=locale",
 			"bindUserPw": "Associa password utente",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Esempio: OU=User,DC=miaazienda,DC=local",
 			"starttls": "Usa StartTLS",
 			"template": "User template",
-			"title": "Crea/modifica connessione",
-			"titleRoles": "Ruoli per appartenenza al gruppo",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "Usa SSL/TLS",
 			"tlsVerify": "Verifica TLS"
 		},

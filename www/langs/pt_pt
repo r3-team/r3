@@ -224,7 +224,8 @@
 			]
 		},
 		"ldaps": {
-			"assignRoles": "Atribuir funções por associação a grupos<br />(desativa a atribuição manual de funções)",
+			"assignRoles": "Atribuir funções por associação a grupos",
+			"assignRolesHint": "(desativa a atribuição manual de funções)",
 			"bindUserDn": "DN do utilizador de ligação",
 			"bindUserDnHint": "Exemplo: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Palavra-passe do utilizador de ligação",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Exemplo: OU=User,DC=mycompany,DC=local",
 			"starttls": "Usar StartTLS",
 			"template": "Modelo de utilizador",
-			"title": "Criar/editar ligação",
-			"titleRoles": "Funções por associação a grupos",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "Usar SSL/TLS",
 			"tlsVerify": "Verificar TLS"
 		},

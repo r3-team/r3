@@ -70,6 +70,41 @@ export function getTemplateGeoLayerBase() {
 		url: '',
 	};
 };
+export function getTemplateLdap() {
+	return {
+		id: 0,
+		name: '',
+		host: '',
+		port: 636,
+		bindUserDn: '',
+		bindUserPw: '',
+		keyAttribute: 'objectGUID',
+		loginMetaMap: {
+			department: 'department',
+			email: 'mail',
+			location: 'physicalDeliveryOfficeName',
+			nameDisplay: 'displayName',
+			nameFore: 'givenName',
+			nameSur: 'sn',
+			notes: 'description',
+			organization: 'company',
+			phoneFax: 'facsimileTelephoneNumber',
+			phoneLandline: 'telephoneNumber',
+			phoneMobile: 'mobile'
+		},
+		loginAttribute: 'sAMAccountName',
+		loginRolesAssign: [],
+		loginTemplateId: null,
+		memberAttribute: 'memberOf',
+		searchClass: 'user',
+		searchDn: '',
+		assignRoles: false,
+		msAdExt: true,
+		starttls: false,
+		tls: true,
+		tlsVerify: true
+	};
+};
 export function getTemplateMailAccount() {
 	return {
 		id: 0,

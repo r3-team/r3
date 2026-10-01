@@ -224,7 +224,8 @@
 			"csvUpload": "Upload CSV data"
 		},
 		"ldaps": {
-			"assignRoles": "Set roles by group membership<br />(disables manual role assignment)",
+			"assignRoles": "Set roles by group membership",
+			"assignRolesHint": "(disables manual role assignment)",
 			"bindUserDn": "Bind user DN",
 			"bindUserDnHint": "Example: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Bind user password",
@@ -260,8 +261,8 @@
 			"searchDnHint": "Example: OU=User,DC=mycompany,DC=local",
 			"starttls": "Use StartTLS",
 			"template": "User template",
-			"title": "Create/edit connection",
-			"titleRoles": "Roles per group membership",
+			"title": "LDAP connection '{NAME}'",
+			"titleNew": "New LDAP connection",
 			"tls": "Use SSL/TLS",
 			"tlsVerify": "Verify TLS"
 		},
