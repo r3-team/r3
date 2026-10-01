@@ -46,6 +46,7 @@ export default {
 					<my-button image="settings.png"
 						v-if="!isNew"
 						@trigger="runCheck"
+						:active="licenseValid"
 						:caption="capApp.button.test"
 					/>
 				</div>

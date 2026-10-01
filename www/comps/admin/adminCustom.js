@@ -1,17 +1,17 @@
-import MyCodeEditor     from '../codeEditor.js';
+import MyCodeEditor from '../codeEditor.js';
+import { MyModuleSelect } from '../input.js';
 import MyInputColorWrap from '../inputColorWrap.js';
-import {srcBase64}      from '../shared/image.js';
-import {MyModuleSelect} from '../input.js';
+import { srcBase64 } from '../shared/image.js';
 
 const MyAdminCustomLogo = {
-	name:'my-admin-custom-logo',
-	template:`<td>
+	name: 'my-admin-custom-logo',
+	template: `<td>
 		<input type="file"
 			v-if="!hasValue"
 			@change="set"
 			:disabled="readonly"
 		/>
-		
+
 		<div class="row gap" v-if="hasValue">
 			<img class="logo" :src="srcBase64(modelValue)" />
 			<my-button image="cancel.png"
@@ -21,32 +21,32 @@ const MyAdminCustomLogo = {
 			/>
 		</div>
 	</td>`,
-	emits:['update:modelValue'],
-	props:{
-		maxSizeKb: { type:Number,  required:true },
-		modelValue:{ type:String,  required:true },
-		readonly:  { type:Boolean, required:true }
+	emits: ['update:modelValue'],
+	props: {
+		maxSizeKb: { type: Number, required: true },
+		modelValue: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	computed:{
-		hasValue:s => s.modelValue !== '',
-		
+	computed: {
+		hasValue: s => s.modelValue !== '',
+
 		// stores
-		capApp:s => s.$store.getters.captions.admin.customizing
+		capApp: s => s.$store.getters.captions.admin.customizing
 	},
-	methods:{
+	methods: {
 		// externals
 		srcBase64,
-		
+
 		// actions
 		set(evt) {
-			let file = evt.target.files[0];
-			if(Math.floor(file.size/1024) > this.maxSizeKb)
-				return this.$root.genericError(this.capApp.error.fileTooLarge.replace('{SIZE}',this.maxSizeKb));
-			
+			const file = evt.target.files[0];
+			if (Math.floor(file.size / 1024) > this.maxSizeKb)
+				return this.$root.genericError(this.capApp.error.fileTooLarge.replace('{SIZE}', this.maxSizeKb));
+
 			var reader = new FileReader();
 			reader.readAsDataURL(file);
-			reader.onload = () => this.$emit('update:modelValue',reader.result.split(',')[1]);
-			reader.onerror = function(error) {
+			reader.onload = () => this.$emit('update:modelValue', reader.result.split(',')[1]);
+			reader.onerror = error => {
 				that.$root.genericError(error);
 			};
 		}
@@ -54,14 +54,9 @@ const MyAdminCustomLogo = {
 };
 
 export default {
-	name:'my-admin-custom',
-	components:{
-		MyAdminCustomLogo,
-		MyCodeEditor,
-		MyInputColorWrap,
-		MyModuleSelect
-	},
-	template:`<div class="admin-custom contentBox grow">
+	name: 'my-admin-custom',
+	components: { MyAdminCustomLogo, MyCodeEditor, MyInputColorWrap, MyModuleSelect },
+	template: `<div class="admin-custom contentBox grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/colors.png" />
@@ -81,7 +76,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content no-padding" v-if="ready">
 			<table class="generic-table-vertical w1200 grouping-gap default-inputs">
 				<tbody>
@@ -239,6 +234,7 @@ export default {
 									/>
 									<my-button image="delete.png"
 										@trigger="pwaDomainDel(i)"
+										:active="activated"
 										:captionTitle="capGen.button.delete"
 										:cancel="true"
 									/>
@@ -246,6 +242,7 @@ export default {
 								<div>
 									<my-button image="add.png"
 										@trigger="pwaDomainAdd"
+										:active="activated"
 										:caption="capGen.button.add"
 									/>
 								</div>
@@ -278,114 +275,114 @@ export default {
 			</table>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
-	computed:{
-		hasChanges:s => JSON.stringify(s.config) !== JSON.stringify(s.configInput)
+	computed: {
+		hasChanges: s => JSON.stringify(s.config) !== JSON.stringify(s.configInput)
 			|| JSON.stringify(s.pwaDomainMap) !== JSON.stringify(s.pwaDomainMapInput),
-		
+
 		// inputs
-		pwaDomains:{
+		pwaDomains: {
 			get() {
-				let out = [];
-				let domains = Object.keys(this.pwaDomainMapInput);
+				const out = [];
+				const domains = Object.keys(this.pwaDomainMapInput);
 				domains.sort();
-				
-				for(let domain of domains) {
+
+				for (const domain of domains) {
 					out.push({
-						moduleId:this.pwaDomainMapInput[domain],
-						domain:domain
+						moduleId: this.pwaDomainMapInput[domain],
+						domain: domain
 					});
 				}
 				return out;
 			},
 			set(v) {
-				let map = {};
-				for(let e of v) {
+				const map = {};
+				for (const e of v) {
 					map[e.domain] = e.moduleId;
 				}
 				this.pwaDomainMapInput = map;
 			}
 		},
-		pwaModuleIdsUsed:s => {
-			let out = [];
-			for(let pd of s.pwaDomains) {
+		pwaModuleIdsUsed: s => {
+			const out = [];
+			for (const pd of s.pwaDomains) {
 				out.push(pd.moduleId);
 			}
 			return out;
 		},
-		
+
 		// stores
-		activated:   s => s.$store.getters['local/activated'],
-		capApp:      s => s.$store.getters.captions.admin.customizing,
-		capGen:      s => s.$store.getters.captions.generic,
-		config:      s => s.$store.getters.config,
-		pwaDomainMap:s => s.$store.getters.pwaDomainMap
+		activated: s => s.$store.getters['local/activated'],
+		capApp: s => s.$store.getters.captions.admin.customizing,
+		capGen: s => s.$store.getters.captions.generic,
+		config: s => s.$store.getters.config,
+		pwaDomainMap: s => s.$store.getters.pwaDomainMap
 	},
 	data() {
 		return {
 			// inputs
-			configInput:{},
-			pwaDomainMapInput:{},
-			
+			configInput: {},
+			pwaDomainMapInput: {},
+
 			// states
-			ready:false,
-			showColorHeader:false,
-			showColorLogin:false
+			ready: false,
+			showColorHeader: false,
+			showColorLogin: false
 		};
 	},
 	mounted() {
 		this.reset();
-		this.$store.commit('pageTitle',this.menuTitle);
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('pageTitle', this.menuTitle);
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 		this.ready = true;
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
-	methods:{
+	methods: {
 		// actions
-		applyColor(target,value) {
-			switch(target) {
+		applyColor(target, value) {
+			switch (target) {
 				case 'header': this.configInput.companyColorHeader = value.hex.substr(1); break;
-				case 'login':  this.configInput.companyColorLogin  = value.hex.substr(1); break;
+				case 'login': this.configInput.companyColorLogin = value.hex.substr(1); break;
 			}
 		},
-		applyPwaDomain(i,target,value) {
+		applyPwaDomain(i, target, value) {
 			this.pwaDomains[i][target] = value;
 			this.pwaDomains = this.pwaDomains;
 		},
 		pwaDomainAdd() {
 			this.pwaDomains.push({
-				moduleId:null,
-				domain:'my_new_subdomain'
+				moduleId: null,
+				domain: 'my_new_subdomain'
 			});
 			this.pwaDomains = this.pwaDomains;
 		},
 		pwaDomainDel(i) {
-			this.pwaDomains.splice(i,1);
+			this.pwaDomains.splice(i, 1);
 			this.pwaDomains = this.pwaDomains;
 		},
 		reset() {
-			this.configInput       = JSON.parse(JSON.stringify(this.config));
+			this.configInput = JSON.parse(JSON.stringify(this.config));
 			this.pwaDomainMapInput = JSON.parse(JSON.stringify(this.pwaDomainMap));
 		},
-		
+
 		// backend calls
 		set() {
-			if(!this.hasChanges) return;
-			
+			if (!this.hasChanges) return;
+
 			ws.sendMultiple([
-				ws.prepare('config','set',this.configInput),
-				ws.prepare('pwaDomain','set',this.pwaDomainMapInput)
-			],true).then(
+				ws.prepare('config', 'set', this.configInput),
+				ws.prepare('pwaDomain', 'set', this.pwaDomainMapInput)
+			], true).then(
 				() => {
 					// manually update store as its only updated on page refresh
-					this.$store.commit('pwaDomainMap',this.pwaDomainMapInput);
-					
+					this.$store.commit('pwaDomainMap', this.pwaDomainMapInput);
+
 					// after transaction is through
-					ws.send('pwaDomain','reset',{},true);
+					ws.send('pwaDomain', 'reset', {}, true);
 				},
 				this.$root.genericError
 			);

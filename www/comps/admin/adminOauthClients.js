@@ -1,10 +1,10 @@
+import { getUnixFormat } from '../shared/time.js';
 import MyAdminOauthClient from './adminOauthClient.js';
-import {getUnixFormat}    from '../shared/time.js';
 
 export default {
-	name:'my-admin-oauth-clients',
-	components:{ MyAdminOauthClient, },
-	template:`<div class="admin-oauth-client contentBox grow">
+	name: 'my-admin-oauth-clients',
+	components: { MyAdminOauthClient, },
+	template: `<div class="admin-oauth-clients contentBox grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/lockCog.png" />
@@ -24,7 +24,7 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content grow">
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
@@ -39,7 +39,7 @@ export default {
 					</div>
 				</div>
 			</div>
-			
+
 			<my-admin-oauth-client
 				v-if="idOpen !== null"
 				@close="idOpen = null;get()"
@@ -51,50 +51,50 @@ export default {
 			/>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
 	data() {
 		return {
-			loginTemplates:[],
-			oauthClientIdMap:[],
-			idOpen:null
+			loginTemplates: [],
+			oauthClientIdMap: [],
+			idOpen: null
 		};
 	},
-	computed:{
+	computed: {
 		// stores
-		capApp:      s => s.$store.getters.captions.admin.oauthClient,
-		capGen:      s => s.$store.getters.captions.generic,
-		licenseValid:s => s.$store.getters.licenseValid,
-		settings:    s => s.$store.getters.settings
+		capApp: s => s.$store.getters.captions.admin.oauthClient,
+		capGen: s => s.$store.getters.captions.generic,
+		licenseValid: s => s.$store.getters.licenseValid,
+		settings: s => s.$store.getters.settings
 	},
 	mounted() {
 		this.get();
-		this.$store.commit('pageTitle',this.menuTitle);
+		this.$store.commit('pageTitle', this.menuTitle);
 	},
-	methods:{
+	methods: {
 		// externals
 		getUnixFormat,
 
 		// presentation
 		subtitle(c) {
-			let parts = [`${this.capApp.option.flow[c.flow]}`];
-			
-			if(c.dateExpiry !== null)
-				parts.push(`${this.capApp.dateExpiry}: ${getUnixFormat(c.dateExpiry,this.settings.dateFormat)}`);
+			const parts = [`${this.capApp.option.flow[c.flow]}`];
+
+			if (c.dateExpiry !== null)
+				parts.push(`${this.capApp.dateExpiry}: ${getUnixFormat(c.dateExpiry, this.settings.dateFormat)}`);
 
 			return parts.join(', ');
 		},
-		
+
 		// backend calls
 		get() {
 			ws.sendMultiple([
-				ws.prepare('oauthClient','get',{}),
-				ws.prepare('loginTemplate','get',{byId:0})
-			],true).then(
+				ws.prepare('oauthClient', 'get', {}),
+				ws.prepare('loginTemplate', 'get', { byId: 0 })
+			], true).then(
 				res => {
 					this.oauthClientIdMap = res[0].payload;
-					this.loginTemplates   = res[1].payload;
+					this.loginTemplates = res[1].payload;
 				},
 				this.$root.genericError
 			);

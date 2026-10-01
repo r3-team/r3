@@ -55,7 +55,14 @@ export default {
 				</div>
 			</div>
 
-			<div class="content no-padding default-inputs">
+			<my-tabs
+				v-if="tabs.items.length > 1"
+				v-model="tabTarget"
+				:entries="tabs.items"
+				:entriesIcon="tabs.icons"
+				:entriesText="tabs.names"
+			/>
+			<div class="content no-padding default-inputs" v-if="tabTarget === 'general'">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
@@ -174,30 +181,6 @@ export default {
 								</td>
 								<td>{{ capApp.claimAdminHint }}</td>
 							</tr>
-							<tr>
-								<td>{{ capApp.claimRoles }}</td>
-								<td colspan="2">
-									<div class="column gap">
-										<input v-model="inputs.claimRoles" :disabled="readonly" />
-										<span>{{ capApp.claimRolesHint }}</span>
-										<my-admin-login-roles-assign
-											v-model="inputs.loginRolesAssign"
-											:maxHeight="400"
-											:readonly="readonly || !isClaimRolesSet"
-										/>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td colspan="3">
-									<span>{{ capApp.loginMetaMap }}</span>
-									<my-admin-login-meta
-										v-model="inputs.loginMetaMap"
-										:is-mapper="true"
-										:readonly="readonly"
-									/>
-								</td>
-							</tr>
 						</template>
 						<tr v-if="isFlowClientCreds">
 							<td>{{ capApp.tokenUrl }}*</td>
@@ -211,6 +194,27 @@ export default {
 						</tr>
 					</tbody>
 				</table>
+			</div>
+
+			<div class="content default-inputs" v-if="tabTarget === 'meta'">
+				<span>{{ capApp.loginMetaMap }}</span>
+				<my-admin-login-meta
+					v-model="inputs.loginMetaMap"
+					:is-mapper="true"
+					:readonly
+				/>
+			</div>
+
+			<div class="content grow gap flex column default-inputs" v-if="tabTarget === 'roles'">
+				<div class="row gap centered">
+					<span>{{ capApp.claimRoles }}</span>
+					<input v-model="inputs.claimRoles" :disabled="readonly" />
+				</div>
+				<span>{{ capApp.claimRolesHint }}</span>
+				<my-admin-login-roles-assign
+					v-model="inputs.loginRolesAssign"
+					:readonly="readonly || !isClaimRolesSet"
+				/>
 			</div>
 		</div>
 	</div>`,
@@ -231,7 +235,8 @@ export default {
 		return {
 			inputs: {},
 			ready: false,
-			scopeLine: ''
+			scopeLine: '',
+			tabTarget: 'general',
 		};
 	},
 	computed: {
@@ -266,6 +271,19 @@ export default {
 			redirectUrl: null,
 			tokenUrl: null
 		} : s.oauthClientIdMap[s.id],
+		tabs: s => {
+			const out = {
+				icons: ['images/settings.png'],
+				items: ['general'],
+				names: [s.capGen.properties]
+			};
+			if (s.isFlowAuthCodePkce) {
+				out.icons.push('images/person.png', 'images/personMultiple.png');
+				out.items.push('meta', 'roles');
+				out.names.push(s.capGen.userDetails, s.capGen.roles);
+			}
+			return out;
+		},
 
 		// simple
 		isChanged: s => !s.deepIsEqual(s.inputsOrg, s.inputs),

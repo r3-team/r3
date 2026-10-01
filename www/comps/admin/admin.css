@@ -30,13 +30,17 @@
 
 /* user invitation */
 .admin-invitation-preview-table {
-	width: 100%;
+	max-height: 500px;
 	padding: 6px;
-	background-color: var(--color-input);
-	border: var(--border-input);
+	border: 1px solid var(--color-border);
 	border-radius: var(--border-input-radius);
+	background-color: var(--color-input);
+	overflow: auto;
 }
-.admin-invitation-preview-table th {
+.admin-invitation-preview-table table {
+	width: 100%;
+}
+.admin-invitation-preview-table table th {
 	text-decoration: underline;
 	text-wrap: nowrap;
 }
@@ -44,9 +48,9 @@
 	width: 100%;
 	max-height: 500px;
 	overflow: auto;
-	background-color: var(--color-input);
-	border: var(--border-input);
+	border: 1px solid var(--color-border);
 	border-radius: var(--border-input-radius);
+	background-color: var(--color-input);
 }
 
 /* DB sync */
@@ -427,14 +431,9 @@
 
 /* OAuth client */
 .admin-oauth-client {
-}
-.admin-oauth-client-date-wrap {
-	min-width: 330px !important;
-	min-height: var(--row-height);
-	position: relative;
-	display: flex;
-	gap: 9px;
-	flex-flow: row nowrap;
+	width: 95%;
+	max-width: 800px;
+	min-height: 500px;
 }
 
 /* backups */
@@ -622,6 +621,7 @@
 .admin-ldap {
 	width: 95%;
 	max-width: 800px;
+	min-height: 500px;
 }
 
 /* repo */

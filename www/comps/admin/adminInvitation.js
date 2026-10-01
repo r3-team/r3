@@ -23,8 +23,11 @@ export default {
 			<div class="area">
 				<my-button image="download.png"
 					@trigger="fileTemplateLoad"
+					:active="activated"
 					:caption="capGen.template"
 				/>
+			</div>
+			<div class="area">
 				<my-button image="question.png"
 					@trigger="showHelp('<p>' + capApp.intro.join('</p><p>') + '</p>')"
 					:caption="capGen.information"
@@ -45,24 +48,40 @@ export default {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="csvRowsPreview.length !== 0">
+					<tr>
 						<td>
 							<div class="column gap">
-								<my-label :caption="capGen.preview" image="visible1.png" />
-								<table class="admin-invitation-preview-table">
-									<thead>
-										<tr>
-											<th>#</th>
-											<th v-for="h in csvHeaders">{{ h }}</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr v-for="(r,i) in csvRowsPreview">
-											<td>{{ i+1 }}</td>
-											<td v-for="c in r">{{ c }}</td>
-										</tr>
-									</tbody>
-								</table>
+								<div class="row centered space-between">
+									<my-button
+										@trigger="showPreview = !showPreview"
+										:active="csvRowsPreview.length !== 0"
+										:caption="capGen.preview"
+										:image="showPreview && csvRowsPreview.length !== 0 ? 'triangleDown.png' : 'triangleRight.png'"
+										:images="['visible1.png']"
+										:naked="true"
+									/>
+									<div class="row gap centered" v-if="showPreview && csvRows.length !== 0">
+										<span>{{ capGen.rows }}</span>
+										<input class="short" v-model.number="csvPreviewCount" :disabled="!activated" />
+										<span>/ {{ csvRows.length }}</span>
+									</div>
+								</div>
+								<div class="admin-invitation-preview-table" v-if="showPreview && csvRowsPreview.length !== 0">
+									<table>
+										<thead>
+											<tr>
+												<th>#</th>
+												<th v-for="h in csvHeaders">{{ h }}</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr v-for="(r,i) in csvRowsPreview">
+												<td>{{ i+1 }}</td>
+												<td v-for="c in r">{{ c }}</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
 								<ul v-if="errorMessages.length !== 0" class="textError">
 									<li v-for="e in errorMessages">{{ e }}</li>
 								</ul>
@@ -72,15 +91,21 @@ export default {
 					<tr>
 						<td>
 							<div class="column gap">
-								<my-label :caption="capGen.settings" image="cog.png" />
-								<table>
+								<my-button
+									@trigger="showSettings = !showSettings"
+									:caption="capGen.settings"
+									:image="showSettings ? 'triangleDown.png' : 'triangleRight.png'"
+									:images="['cog.png']"
+									:naked="true"
+								/>
+								<table v-if="showSettings">
 									<tbody>
 										<tr>
-											<td>{{ capGen.loginTemplate }}</td>
+											<td>{{ capGen.loginTemplate }}*</td>
 											<td><my-admin-login-template-input v-model="loginTemplateId" :readonly="!activated" /></td>
 										</tr>
 										<tr>
-											<td>{{ capGen.mailTemplate }}</td>
+											<td>{{ capGen.mailTemplate }}*</td>
 											<td>
 												<my-admin-mail-template-input
 													v-model="mailTemplateId"
@@ -90,7 +115,7 @@ export default {
 											</td>
 										</tr>
 										<tr>
-											<td>{{ capGen.mailAccount }}</td>
+											<td>{{ capGen.mailAccount }}*</td>
 											<td>
 												<my-admin-mail-account-input
 													v-model="mailAccountId"
@@ -100,7 +125,7 @@ export default {
 											</td>
 										</tr>
 										<tr>
-											<td>{{ capGen.expireAfter }}</td>
+											<td>{{ capGen.expireAfter }}*</td>
 											<td>
 												<div class="row gap centered">
 													<my-input-decimal class="short" v-model="expireAfterSeconds" :min="0" :allowNull="false" :lengthFract="0" :readonly="!activated" />
@@ -119,7 +144,7 @@ export default {
 											</td>
 										</tr>
 										<tr>
-											<td>{{ capGen.separator }}</td>
+											<td>{{ capGen.separator }}*</td>
 											<td><input class="short" maxlength="1" v-model="csvSeparator" :disabled="!activated" /></td>
 										</tr>
 									</tbody>
@@ -130,8 +155,14 @@ export default {
 					<tr>
 						<td>
 							<div class="column gap">
-								<my-label :caption="capGen.roles + ' (' + roleIds.length + ')'" image="admin.png" />
-								<div class="admin-invitation-roles-table">
+								<my-button
+									@trigger="showRoles = !showRoles"
+									:caption="capGen.roles + ' (' + roleIds.length + ')'"
+									:image="showRoles ? 'triangleDown.png' : 'triangleRight.png'"
+									:images="['admin.png']"
+									:naked="true"
+								/>
+								<div class="admin-invitation-roles-table" v-if="showRoles">
 									<my-admin-login-roles
 										v-model="roleIds"
 										:isExtRole="false"
@@ -166,7 +197,7 @@ export default {
 			s.capAppMeta.phoneMobile, s.capAppMeta.phoneLandline, s.capAppMeta.phoneFax, s.capAppMeta.notes
 		],
 		csvColumnCount: s => s.csvHeaders.length,
-		csvRowsPreview: s => s.csvRows.slice(0, 20),
+		csvRowsPreview: s => s.csvRows.slice(0, s.csvPreviewCount),
 		errorMessages: s => {
 			const out = [];
 			for (let i = 0, j = s.csvRows.length; i < j; i++) {
@@ -190,7 +221,7 @@ export default {
 			return out;
 		},
 		isReadyToExec: s => s.loginTemplateId !== null && s.mailAccountId !== 0 && s.mailTemplateId !== 0
-			&& s.csvRows.length !== 0 && s.errorMessages.length === 0,
+			&& s.csvSeparator !== '' && s.csvRows.length !== 0 && s.errorMessages.length === 0,
 
 		// inputs
 		mfaRequiredSelect: {
@@ -208,6 +239,7 @@ export default {
 		return {
 			// data
 			csvRows: [],
+			csvPreviewCount: 20,
 
 			// inputs
 			csvSeparator: ',',
@@ -219,7 +251,10 @@ export default {
 			roleIds: [],
 
 			// states
-			isReady: false
+			isReady: false,
+			showPreview: true,
+			showRoles: false,
+			showSettings: true,
 		};
 	},
 	mounted() {
