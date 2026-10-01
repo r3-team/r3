@@ -182,6 +182,7 @@ export default {
 										<span>{{ capApp.claimRolesHint }}</span>
 										<my-admin-login-roles-assign
 											v-model="inputs.loginRolesAssign"
+											:maxHeight="400"
 											:readonly="readonly || !isClaimRolesSet"
 										/>
 									</div>

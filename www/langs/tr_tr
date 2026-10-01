@@ -240,6 +240,15 @@
 				"importPlanned": "İçe aktarma işinin hemen yürütülmesi planlandı",
 				"testDone": "Bağlantı testi başarılı oldu"
 			},
+			"filterDn": "Filter by distinguished name (DN)",
+			"filterDnExclude": "Exclude users matching these DNs (blacklisting)",
+			"filterDnHint": [
+				"If filtering is used, the distinguished name (DN) of the imported user is matched against the exclude/include conditions.",
+				"A match occurs, if the user´s DN contains the filter DN. To match all users in an organizational unit (OU), use the DN of the specific OU.",
+				"To match users in some but not all sub OUs, do not include the parent OU, but all relevant sub OUs as conditions instead.",
+				"In general, include filters (ie. whitelists) are safer, as changes in DNs (by renaming or moving LDAP entities) are less likely to result in undesired users being imported."
+			],
+			"filterDnInclude": "Include users matching these DNs (whitelisting)",
 			"groupDnHint": "Örnek: CN=Yönetici_Kullanıcı,OU=Grup,DC=şirketim,DC=yerel",
 			"host": "Ev sahibi",
 			"hostHint": "LDAP ana bilgisayar adı",
@@ -2911,6 +2920,7 @@
 		"url": "URL",
 		"usage": "Usage",
 		"useOverview": "Open overview by default",
+		"userDetails": "User details",
 		"userSync": "User sync",
 		"username": "Kullanıcı adı",
 		"value": "Değer",

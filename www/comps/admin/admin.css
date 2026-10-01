@@ -324,9 +324,7 @@
 
 /* role assign */
 .admin-login-roles-assign-input {
-	max-height: 380px;
 	flex: 1 1 auto;
-	overflow: auto;
 	border: 1px solid var(--color-border);
 	border-radius: var(--border-input-radius);
 	background-color: var(--color-input);

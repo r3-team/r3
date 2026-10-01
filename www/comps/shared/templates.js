@@ -98,6 +98,8 @@ export function getTemplateLdap() {
 		memberAttribute: 'memberOf',
 		searchClass: 'user',
 		searchDn: '',
+		filterDnExclude: [],
+		filterDnInclude: [],
 		assignRoles: false,
 		msAdExt: true,
 		starttls: false,

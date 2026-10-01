@@ -240,6 +240,15 @@
 				"importPlanned": "Importaufgabe wurde zur sofortigen Ausführung eingeplant",
 				"testDone": "Verbindungstest war erfolgreich"
 			},
+			"filterDn": "Nach Distinguished Name (DN) filtern",
+			"filterDnExclude": "Benutzer ausschließen, die mit diesen DNs übereinstimmen (Blacklisting)",
+			"filterDnHint": [
+				"Wenn Filter genutzt werden, wird der Distinguished Name (DN) vom Benutzer mit den Ein-/Ausschließ-Konditionen verglichen.",
+				"Eine Übereinstimmung liegt vor, falls der DN vom Benutzer den Filter-DN beinhaltet. Für eine Übereinstimmung aller Benutzer in einer OU, wird der DN der spezifischen OU verwendet.",
+				"Für eine Übereinstimmung mit Benutzern in manchen aber nicht allen Unter-OUs, nicht die OU darüber, sondern die relevanten Unter-OUs als Konditionen verwenden.",
+				"Grundsätzlich sind Einschließen-Filter (aka Whitelisting) sicherer, da bei Änderungen von DNs (durch Umbenennen oder Verschieben von LDAP-Entitäten) es weniger wahrscheinlich ist, dass ungewollte Benutzer importiert werden."
+			],
+			"filterDnInclude": "Benutzer einschließen, die mit diesen DNs übereinstimmen (Whitelisting)",
 			"groupDnHint": "Beispiel: CN=Admin_User,OU=Group,DC=mycompany,DC=local",
 			"host": "Host",
 			"hostHint": "LDAP-Hostname",
@@ -2911,7 +2920,8 @@
 		"url": "URL",
 		"usage": "Verwendung",
 		"useOverview": "Übersicht zuerst öffnen",
-		"userSync": "User sync",
+		"userDetails": "Benutzer-Details",
+		"userSync": "Benutzer-Sync",
 		"username": "Benutzername",
 		"value": "Wert",
 		"valueExpected": "Erwarteter Wert",

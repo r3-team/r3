@@ -872,6 +872,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'<p>Hallo {DISPLAYNAME},</p><p>Sie erhalten diese Nachricht, weil für Sie der Benutzer "<b>{USERNAME}</b>" angelegt worden ist.</p><p>Bitte verwenden Sie diesen <a href="/{RESET_URL}">Link</a>, um Ihre Zugangsdaten zu wählen.</p><p>Dieser Link wird gültig sein bis: <b>{CODE_VALID_UNTIL}</b></p>'
 			);
 
+			-- LDAP import, DN black/white listing
+			ALTER TABLE instance.ldap ADD COLUMN filter_dn_exclude TEXT[];
+			ALTER TABLE instance.ldap ADD COLUMN filter_dn_include TEXT[];
+
 			-- raw file processing
 			-- add two new functions 'create'/'create_text', redirect legacy 'file_text_write' to 'create_text'
 			ALTER TABLE instance.file_spool ADD COLUMN file_content BYTEA;

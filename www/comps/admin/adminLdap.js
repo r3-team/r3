@@ -53,7 +53,13 @@ export default {
 				</div>
 			</div>
 
-			<div class="content no-padding grow">
+			<my-tabs
+				v-model="tabTarget"
+				:entries="tabs.items"
+				:entriesIcon="tabs.icons"
+				:entriesText="tabs.names"
+			/>
+			<div class="content grow no-padding" v-if="tabTarget === 'general'">
 				<table class="generic-table-vertical default-inputs">
 					<tbody>
 						<tr>
@@ -80,15 +86,15 @@ export default {
 						</tr>
 						<tr>
 							<td>{{ capApp.bindUserDn }}</td>
-							<td><input v-model="ldap.bindUserDn" :disabled="!licenseValid" :placeholder="capApp.bindUserDnHint" /></td>
+							<td><input class="long" v-model="ldap.bindUserDn" :disabled="!licenseValid" :placeholder="capApp.bindUserDnHint" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.bindUserPw }}</td>
-							<td><input v-model="ldap.bindUserPw" :disabled="!licenseValid" type="password" /></td>
+							<td><input class="long" v-model="ldap.bindUserPw" :disabled="!licenseValid" type="password" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.searchDn }}</td>
-							<td><input v-model="ldap.searchDn" :disabled="!licenseValid || !isNew" :placeholder="capApp.searchDnHint" /></td>
+							<td><input class="long" v-model="ldap.searchDn" :disabled="!licenseValid || !isNew" :placeholder="capApp.searchDnHint" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.tls }}</td>
@@ -121,16 +127,13 @@ export default {
 							<td>{{ capApp.loginAttribute }}</td>
 							<td><input v-model="ldap.loginAttribute" :disabled="!licenseValid" :placeholder="capApp.loginAttributeHint" /></td>
 						</tr>
-						<tr>
-							<td colspan="2">
-								<span>{{ capApp.loginMetaMap }}</span>
-								<my-admin-login-meta
-									v-model="ldap.loginMetaMap"
-									:is-mapper="true"
-									:readonly="!licenseValid"
-								/>
-							</td>
-						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="content grow flex column no-padding" v-if="tabTarget === 'roles'">
+				<table class="generic-table-vertical sticky-top default-inputs">
+					<tbody>
 						<tr>
 							<td colspan="2">
 								<div class="column gap">
@@ -151,19 +154,53 @@ export default {
 												:placeholder="capApp.memberAttributeHint"
 											/>
 										</div>
-										<br />
 										<my-admin-login-roles-assign
 											v-model="ldap.loginRolesAssign"
 											:placeholder="capApp.groupDnHint"
 											:readonly="!licenseValid || ldap.memberAttribute === ''"
 										/>
-										<br />
 									</template>
 								</div>
 							</td>
 						</tr>
 					</tbody>
 				</table>
+			</div>
+
+			<div class="content grow no-padding" v-if="tabTarget === 'meta'">
+				<my-admin-login-meta
+					v-model="ldap.loginMetaMap"
+					:is-mapper="true"
+					:readonly="!licenseValid"
+				/>
+			</div>
+
+			<div class="content grow flex column gap default-inputs" v-if="tabTarget === 'filter'">
+				<div class="row space-between centered">
+					<h2>{{ capApp.filterDn }}</h2>
+					<my-button image="question.png" @trigger="showHelp('<p>' + capApp.filterDnHint.join('</p><p>') + '</p>')" :caption="capGen.contextHelp" />
+				</div>
+				<div class="column gap">
+					<div class="row space-between centered">
+						<span>{{ capApp.filterDnExclude }}</span>
+						<my-button image="add.png" @trigger="filterDnAdd(true)" :active="licenseValid && ldap.filterDnInclude.length === 0" />
+					</div>
+					<div class="row gap centered" v-for="(f,i) in ldap.filterDnExclude">
+						<input class="dynamic" v-model="ldap.filterDnExclude[i]" :disabled="!licenseValid" :placeholder="capApp.searchDnHint" />
+						<my-button image="cancel.png" @trigger="filterDnRemove(true,i)" :active="licenseValid" :cancel="true" />
+					</div>
+				</div>
+				<div class="column gap">
+					<div class="row space-between centered">
+						<span>{{ capApp.filterDnInclude }}</span>
+						<my-button image="add.png" @trigger="filterDnAdd(false)" :active="licenseValid && ldap.filterDnExclude.length === 0" />
+					</div>
+					<div class="row gap centered" v-for="(f,i) in ldap.filterDnInclude">
+						<input class="dynamic" v-model="ldap.filterDnInclude[i]" :disabled="!licenseValid" :placeholder="capApp.searchDnHint" />
+						<my-button image="cancel.png" @trigger="filterDnRemove(false,i)" :active="licenseValid" :cancel="true" />
+					</div>
+				</div>
+				<br />
 			</div>
 		</div>
 	</div>`,
@@ -185,6 +222,7 @@ export default {
 
 			// states
 			isReady: false,
+			tabTarget: 'general',
 		};
 	},
 	computed: {
@@ -193,6 +231,13 @@ export default {
 			&& s.ldap.name !== ''
 			&& s.ldap.host !== ''
 			&& s.ldap.port !== '',
+		tabs: s => {
+			return {
+				icons: ['images/settings.png', 'images/person.png', 'images/personMultiple.png', 'images/filter.png'],
+				items: ['general', 'meta', 'roles', 'filter'],
+				names: [s.capGen.properties, s.capGen.userDetails, s.capGen.roles, s.capGen.filters]
+			};
+		},
 
 		// simple
 		isChanged: s => !s.deepIsEqual(s.ldapOrg, s.ldap),
@@ -226,6 +271,14 @@ export default {
 		close() {
 			this.$emit('close');
 		},
+		filterDnAdd(isExclude) {
+			if (isExclude) this.ldap.filterDnExclude.push('');
+			else this.ldap.filterDnInclude.push('');
+		},
+		filterDnRemove(isExclude, index) {
+			if (isExclude) this.ldap.filterDnExclude.splice(index, 1);
+			else this.ldap.filterDnInclude.splice(index, 1);
+		},
 		reloadAndClose() {
 			this.$emit('reload');
 			this.reloadBackendCache();
@@ -234,6 +287,9 @@ export default {
 		reset() {
 			this.ldap = JSON.parse(JSON.stringify(this.ldapOrg));
 			this.isReady = true;
+		},
+		showHelp(msg) {
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });
 		},
 
 		// backend calls

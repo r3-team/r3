@@ -3,7 +3,7 @@ import { getCaption } from '../shared/language.js';
 
 export default {
 	name: 'my-admin-login-roles-assign',
-	template: `<div class="admin-login-roles-assign-input">
+	template: `<div class="admin-login-roles-assign-input" :style="cssStyle">
 		<table class="generic-table bright sticky-top">
 			<thead>
 				<tr>
@@ -58,12 +58,15 @@ export default {
 		</table>
 	</div>`,
 	props: {
+		maxHeight: { type: [Number, null], required: false, default: null },
 		modelValue: { type: Array, required: true },
 		placeholder: { type: String, required: false, default: '' },
 		readonly: { type: Boolean, required: true }
 	},
 	emits: ['update:modelValue'],
 	computed: {
+		cssStyle: s => s.maxHeight === null ? '' : `max-height:${s.maxHeight}px;overflow:auto;`,
+
 		// stores
 		modules: s => s.$store.getters['schema/modules'],
 		capGen: s => s.$store.getters.captions.generic
