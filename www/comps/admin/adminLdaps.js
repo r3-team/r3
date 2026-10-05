@@ -26,7 +26,7 @@ export default {
 			<div class="area">
 				<my-button image="download.png"
 					@trigger="runImports"
-					:active="licenseValid"
+					:active="licenseValid && ldaps.length !== 0"
 					:caption="capApp.button.import"
 				/>
 			</div>
