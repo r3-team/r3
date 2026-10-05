@@ -171,7 +171,9 @@ func WithSecurityHeaders(n http.Handler) http.Handler {
 		//   * required for vue-color library - probably possible to replace
 		// # frame ancestors
 		// * we generally allow r3 to be loaded as iframe, for accessing forms in other apps or in itself - if relevant, could be defined by instance config
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; ; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors *")
+		// # connect-src
+		// * we allow r3 to load external sources for OpenID authentication - might be possible to adjust this automatically, based on known provider URLs
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' *; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; ; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors *")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		n.ServeHTTP(w, r)
