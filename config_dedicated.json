@@ -17,7 +17,7 @@
 	"mirror": false,
 	"paths": {
 		"certificates": "data/certificates/",
-		"embeddedDbBin": "pgsql16/bin/",
+		"embeddedDbBin": "pgsql18/bin/",
 		"embeddedDbData": "data/database/",
 		"files": "data/files/",
 		"fileExport": "",
