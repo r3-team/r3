@@ -268,6 +268,7 @@ export default {
 							<my-label
 								:caption="tabLayoutElements.includes('label') || t.iconId === null ? tabIndexesTitle[i] : ''"
 								:captionTitle="tabIndexesTitle[i]"
+								:error="formBadSave && tabIndexesInvalidFields.includes(i)"
 								:imageBase64="tabLayoutElements.includes('icon') && t.iconId !== null ? srcBase64(iconIdMap[t.iconId].file) : ''"
 							/>
 						</div>
@@ -981,16 +982,11 @@ export default {
 					switch (f.content) {
 						case 'data': if (s.fieldIdsInvalid.includes(f.id)) return true; break;
 						case 'container': if (hasAnyInvalid(f.fields)) return true; break;
-						case 'tabs':
-							for (const t of f.tabs) {
-								if (hasAnyInvalid(t.fields)) return true;
-							}
-							break;
+						case 'tabs': if (f.tabs.some(t => hasAnyInvalid(t.fields))) return true; break;
 					}
 				}
 				return false;
 			};
-
 			const out = [];
 			for (let i = 0, j = s.field.tabs.length; i < j; i++) {
 				if (hasAnyInvalid(s.field.tabs[i].fields))
@@ -1301,7 +1297,6 @@ export default {
 			return {
 				active: tabIndex === this.tabIndexShow && !this.tabsCollabsed,
 				collapsed: this.tabsCollabsed,
-				error: this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
 				inputBg: active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
 				grow: this.isMobile,
 				readonly: active && oneField && readonly,

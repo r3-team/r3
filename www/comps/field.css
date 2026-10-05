@@ -340,9 +340,6 @@
 	justify-content: flex-start;
 	border-top: none;
 }
-.field .tabs-entry.error {
-	color: var(--color-error);
-}
 .field .tabs-entry.active.inputBg {
 	background-color: var(--color-input);
 }
