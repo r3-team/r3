@@ -314,10 +314,14 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 		return openForm
 	}
 
-	replaceCollectionConsumer := func(consumer types.CollectionConsumer) types.CollectionConsumer {
-		consumer.Id = uuid.Nil
+	replaceCollectionConsumer := func(consumer types.CollectionConsumer) (types.CollectionConsumer, error) {
+		newId, err := uuid.NewV4()
+		if err != nil {
+			return consumer, err
+		}
+		consumer.Id = newId
 		consumer.OpenForm = replaceOpenForm(consumer.OpenForm)
-		return consumer
+		return consumer, nil
 	}
 
 	switch field := fieldIf.(type) {
@@ -362,7 +366,10 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 				return nil, err
 			}
 			for i, _ := range field.Collections {
-				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
+				field.Collections[i], err = replaceCollectionConsumer(field.Collections[i])
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 		fieldIf = field
@@ -407,7 +414,10 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 				return nil, err
 			}
 		} else {
-			field.DefCollection = replaceCollectionConsumer(field.DefCollection)
+			field.DefCollection, err = replaceCollectionConsumer(field.DefCollection)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		// remove references to form bound entities that do not exist after form copy
@@ -438,7 +448,10 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 			if err != nil {
 				return nil, err
 			}
-			field.DefCollection = replaceCollectionConsumer(field.DefCollection)
+			field.DefCollection, err = replaceCollectionConsumer(field.DefCollection)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		// remove references to form bound entities that do not exist after form copy
@@ -479,7 +492,10 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 				return nil, err
 			}
 			for i, _ := range field.Collections {
-				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
+				field.Collections[i], err = replaceCollectionConsumer(field.Collections[i])
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 		fieldIf = field
@@ -502,7 +518,10 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced 
 				return nil, err
 			}
 			for i, _ := range field.Collections {
-				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
+				field.Collections[i], err = replaceCollectionConsumer(field.Collections[i])
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 		fieldIf = field
