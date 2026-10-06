@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2025-07-07</em></p>
+<p><em>Aktualisiert 2026-10-06</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -51,7 +51,7 @@
 <p>Abhängig von der verfügbaren IT-Infrastruktur und wie REI3 eingesetzt werden soll, existieren verschiedene Bereitstellungsmodelle:</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th></th>
 <th style="text-align: center;">Dediziert</th>
 <th style="text-align: center;">Eigenständig</th>
@@ -60,28 +60,28 @@
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>Entworfen für</td>
 <td style="text-align: center;">Produktion</td>
 <td style="text-align: center;">Produktion</td>
 <td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
 <td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Integrierte Datenbank</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Läuft unter Windows</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr>
+<tr class="even">
 <td>Läuft unter Linux</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"></td>
@@ -90,11 +90,13 @@
 </tr>
 </tbody>
 </table>
-<p>Falls eigene REI3-Anwendungen erstellt werden sollen, ist es ratsam, diese auf einen System zu erstellen und dann auf einen anderen System auszurollen. Hierdurch werden Endbenutzer erst dann betroffen, wenn Anwendungen getestet und bereit sind. Besonders die portablen und Docker-Versionen bieten sich für das Entwickeln von Anwendungen an.</p>
+<p>Das dedizierte Bereitstellungsmodell, mit einem separaten Datenbanksystem, ist die Empfehlung in den meisten Fällen. Ein eigenständiger Betrieb, mit integrierter Datenbank, kann jedoch für kleine REI3-Instanzen auf Windows ausreichen (&lt;150 Benutzer). Eine Migration zwischen den Bereitstellungsmodellen ist immer möglich.</p>
+<p>Falls eigene REI3-Anwendungen entwickelt werden, ist es ratsam, diese auf einem getrennten System zu erstellen und dann im Zielsystem auszurollen. Hierdurch werden Endbenutzer erst dann betroffen, wenn Anwendungen getestet und bereit sind. Besonders die portablen und Docker-Versionen bieten sich für das Entwickeln von Anwendungen an.</p>
+<p>Die verschiedenen Bereitstellungsmodelle erläutert:</p>
 <h2 id="dediziert">Dediziert</h2>
 <p>Das häufigste Bereitstellungsmodell. REI3 wird auf einem Anwendungsserver (Windows oder Linux) installiert und mit einem separaten Datenbanksystem verbunden.</p>
 <h2 id="eigenständig">Eigenständig</h2>
-<p>Diese Option ist nur unter Windows Server verfügbar. Die eigenständige Bereitstellung hat fast keine externen Abhängigkeiten und verfügt über eine eigene Datenbank. Es ist das empfohlene Modell für Unternehmen mit kleinen IT-Teams.</p>
+<p>Diese Option ist nur unter Windows Server verfügbar. Die eigenständige Bereitstellung hat fast keine externen Abhängigkeiten und verfügt über eine eigene Datenbank. Es ist ein Modell für Unternehmen mit kleinen IT-Teams.</p>
 <h2 id="portable">Portable</h2>
 <p>Für Entwicklungs- und Testinstanzen - die portable Version von REI3 kann auf Windows-Clients ohne jegliche Einrichtung gestartet werden. Wie das eigenständige Modell verfügt auch die portable Version über eine eigene Datenbank. Es wird nicht empfohlen, eine portable Instanz produktiv zu nutzen.</p>
 <h2 id="docker">Docker</h2>
@@ -138,7 +140,7 @@
 </ul></li>
 <li>Datenbank (nur dedizierte Bereitstellung)
 <ul>
-<li>PostgresSQL Datenbank (13.0 oder neuer), UTF8 enkodiert, mit vollen Berechtigungen</li>
+<li>PostgresSQL Datenbank (14.0 oder neuer), UTF8 enkodiert, mit vollen Berechtigungen</li>
 </ul></li>
 </ul>
 <h2 id="endgeräte">Endgeräte</h2>
@@ -148,7 +150,7 @@
 <p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server geliefert. Das Installationsprogramm unterstützt sowohl <a href="#eigenständig">eigenständige</a> als auch <a href="#dediziert">dedizierte</a> Bereitstellungsmodelle.</p>
 <ul>
 <li><a href="#eigenständig">Eigenständig</a>: Nach Ausführung des Installationsprogrammes kann REI3 sofort gestartet werden.</li>
-<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (13.0 oder neuer) in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben</li>
+<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (14.0 oder neuer) in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben</li>
 </ul>
 <p>Falls REI3 hinter einem Proxy betrieben werden soll, bitte sicherstellen, dass die Sitzungszeit für Websocket-Clients nicht zeitlich limitiert wird. Mehr details <a href="#proxies">hier</a>.</p>
 <p>Unabhängig vom Bereitstellungsmodell, wird REI3 unter Windows Server als Windows-Dienst behandelt und kann über den Service-Manager gestartet werden (Befehl: <code>services.msc</code>). Falls der Dienst nicht starten kann, schreibt REI3 in das Windows-Applikationslog.</p>
@@ -159,7 +161,7 @@
 <li>Extrahieren Sie das REI3-Archiv in ein Verzeichnis Ihrer Wahl (<code>/opt/rei3/</code> zum Beispiel).</li>
 <li>Machen Sie die Datei <code>r3</code> ausführbar (<code>chmod u+x r3</code>).</li>
 <li>Kopieren Sie die Datei <code>config_template.json</code> zu <code>config.json</code> - die Datei muss im gleichen Verzeichnis sein wie die ausführbare Datei <code>r3</code>.</li>
-<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (13.0 oder neuer) hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
+<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (14.0 oder neuer) hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
 <li>Optional: Installieren Sie ImageMagick und Ghostscript falls Thumbnails erwünscht sind (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Installieren Sie PostgreSQL-Client-Werkzeuge falls Sie die integrierte Backup-Funktion nutzen möchten (<code>sudo apt install postgresql-client</code>).</li>
 <li>Registrieren Sie REI3 im Service-Manager (<code>sudo ./r3 -install</code>).</li>
@@ -173,7 +175,7 @@
 <h1 id="konfiguration">Konfiguration</h1>
 <p>Die Kernkonfiguration von REI3 kann in der Konfigurationsdatei (<code>config.json</code>) geändert werden, die sich im ausgewählten REI3-Installationsverzeichnis befindet. Das Festlegen von Dateipfaden, Webserver-Port und Datenbankverbindungsdetails ist unkompliziert - eine vollständige <a href="#konfigurationsdatei">Referenz</a> kann hier gefunden werden. Änderungen werden beim Neustart des Anwendungsdienstes angewendet.</p>
 <h2 id="ssl-zertifikate">SSL-Zertifikate</h2>
-<p>Während der Installation erstellt REI3 ein selbstsigniertes Zertifikat, um den verschlüsselten Zugriff auf die Anwendung zu ermöglichen. Es wird nicht empfohlen, dieses Zertifikat dauerhaft zu nutzen. Wenn möglich, sollte für REI3 ein ordnungsgemäß signiertes Zertifikat bereitgestellt werden, um eine sichere Kommunikation mit Vertrauen zwischen Endgeräten und Server zu gewährleisten.</p>
+<p>Während der Installation erstellt REI3 ein selbstsigniertes Zertifikat, um den verschlüsselten Zugriff auf die Anwendung zu ermöglichen. Es wird nicht empfohlen, dieses Zertifikat dauerhaft zu nutzen. Wenn möglich, sollte für REI3 ein ordnungsgemäß signiertes Zertifikat bereitgestellt werden, um eine sichere Kommunikation mit Vertrauen zwischen Endgeräten und Server zu gewährleisten. REI3 prüft und wendet aktualisierte Zertifikatsdateien automatisch an - dies ermöglicht die Nutzung von Zertifikaten mit kurzer Lebensdauer und/oder automatischer Erneuerung von Anbietern wie Let´s Encrypt.</p>
 <p>Einige allgemeine Überlegungen / Fallstricke:</p>
 <ul>
 <li>REI3 kann mit verschiedenen Zertifikaten arbeiten. Wenn REI3 ein Zertifikat nicht laden kann, startet es nicht und protokolliert in das Betriebssystem (<code>syslog</code> für Linux, sonst Windows-Applikationslog).</li>
@@ -187,8 +189,8 @@
 <li>Eine kontinuierliche Websocket-Verbindung für den Datenaustausch zwischen Server und Client. Wenn diese Verbindung unterbrochen wird, versucht der Client, diese wiederherzustellen.</li>
 </ul>
 <p>Bei Proxy-Servern (egal ob Forward- oder Reverse-Proxy) können HTTP(s)-Anfragen wie jede andere Webanwendung behandelt werden. Daher sind Good-Practices wie Anfrage-Timeouts sinnvoll.</p>
-<p>Websockets hingegen sollen so lange aktiv bleiben, bis eine der beiden Seiten (Server oder Client) die Verbindung absichtlich schließt. Bei der Konfiguration eines Proxys sollte das Anfrage-Timeout bzw. max. Sitzungszeit für Websocket-Verbindungen deaktiviert oder zumindest auf mehrere Stunden eingestellt werden. Einige Proxys (wie HAProxy) nennen diese Verbindungen "Tunnel". Jedes Mal, wenn eine Websocket-Verbindung von einem Proxy zwangsweise geschlossen wird, muss der Client die Verbindung neu aufbauen und es können ungespeicherte Änderungen verloren gehen.</p>
-<p>Im Falle von <a href="#clusterbetrieb-und-systemleistung">Cluster-Setups</a> muss eine Websocket-Verbindung bei einem bestimmten Server 'hängen bleiben', bis sie geschlossen wird. Auch wenn die ersten Anfragen über Round-Robin zugewiesen werden, ist ein bestimmter Server für die laufende Websocket-Kommunikation mit einem Client zuständig. HTTP(S)-Anfragen können jedoch jederzeit von einem beliebigen Cluster-Server bearbeitet werden.</p>
+<p>Websockets hingegen sollen so lange aktiv bleiben, bis eine der beiden Seiten (Server oder Client) die Verbindung absichtlich schließt. Bei der Konfiguration eines Proxys sollte das Anfrage-Timeout bzw. max. Sitzungszeit für Websocket-Verbindungen deaktiviert oder zumindest auf mehrere Stunden eingestellt werden. Jedes Mal, wenn eine Websocket-Verbindung von einem Proxy zwangsweise geschlossen wird, muss der Client die Verbindung neu aufbauen und es können ungespeicherte Änderungen verloren gehen.</p>
+<p>Im Falle von <a href="#clusterbetrieb-und-systemleistung">Cluster-Setups</a> muss eine Websocket-Verbindung bei einem bestimmten Server 'bleiben', bis sie geschlossen wird. Auch wenn die ersten Anfragen über Round-Robin zugewiesen werden, ist ein bestimmter Server für die laufende Websocket-Kommunikation mit einem Client zuständig. HTTP(S)-Anfragen können jedoch jederzeit von einem beliebigen Cluster-Server bearbeitet werden.</p>
 <h2 id="konfigurationsdatei">Konfigurationsdatei</h2>
 <p>Dies sind die Einstellungen in der REI3-Konfigurationsdatei <code>config.json</code> zur Referenz:</p>
 <ul>
@@ -200,7 +202,7 @@
 <li>user: Datenbank-Benutzername, mit dem die Verbindung hergestellt werden soll.</li>
 <li>pass: Passwort des Datenbankbenutzers, mit dem die Verbindung hergestellt werden soll.</li>
 <li>ssl: Verbindung zum Datenbank-Host über SSL. Funktioniert nur, wenn der Datenbankhost SSL unterstützt.</li>
-<li>sslSkipVerify: Wenn 'ssl' aktiv ist, wird ignoriert, wenn das angegebene SSL-Zertifikat nicht vom REI3-Hostsystem überprüft werden kann. Dies ermöglicht eine verschlüsselte Datenbankverbindung, auch wenn das angegebene Zertifikat nicht vertrauenswürdig ist.</li>
+<li>sslSkipVerify: Wenn 'ssl' aktiv ist, wird ignoriert, wenn das angegebene SSL-Zertifikat nicht vom REI3-Hostsystem überprüft werden kann. Dies ermöglicht eine verschlüsselte Datenbankverbindung, auch wenn das angegebene Zertifikat nicht vertrauenswürdig ist. Grundsätzlich nicht empfohlen.</li>
 <li>connsMin: Mindestanzahl der Datenbankverbindungen, die offen gehalten werden sollen. Wenn auf 0 gesetzt, wählt REI3 eine Anzahl.</li>
 <li>connsMax: Maximalanzahl der Datenbankverbindungen, die verwendet werden können. Eine Begrenzung dieser Zahl kann sinnvoll sein, wenn REI3 auf einem gemeinsam genutzten Datenbanksystem läuft. REI3 sollte mindestens 4 DB-Verbindungen für sich selbst haben. Wenn auf 0 gesetzt, wird REI3 eine Anzahl wählen.</li>
 <li>embedded: Wenn 'true', startet REI3 eine interne Datenbank. Relevant für eigenständige und portable Bereitstellungsmodelle. Wenn auf 'false' gesetzt, verbindet sich REI3 mit einem externen Datenbankserver.</li>
@@ -255,7 +257,7 @@
 <li>OAuth2: Rollen können basierend auf dem Inhalt eines Claims im ID-Token des Benutzers zugewiesen werden.</li>
 <li>LDAP: Rollen können auf Gruppenmitgliedschaften des authentifizierten Benutzers abgebildet werden. In Microsoft Active Directory werden verschachtelte Gruppen ebenso unterstützt wie die automatische Deaktivierung von Benutzern in REI3, wenn das zugehörige LDAP-Benutzerkonto deaktiviert wird.</li>
 </ul>
-<p>MFA (Multi-Faktor-Authentifizierung) in Form von TOTP (zeitbasierte Einmalpasswörter) steht Benutzern für die lokale und LDAP-Authentifizierung zur Verfügung. MFA kann auf mehreren Geräten eingerichtet werden und wird von den meisten Authenticator-Apps unterstützt (alle, die TOTP unterstützen). Admins können MFA für Benutzer bei Bedarf zurücksetzen.</p>
+<p>MFA (Multi-Faktor-Authentifizierung) in Form von TOTP (zeitbasierte Einmalpasswörter) steht Benutzern für die lokale und LDAP-Authentifizierung zur Verfügung. Sie kann auf mehreren Geräten eingerichtet werden und wird von den meisten Authenticator-Apps unterstützt (alle, die TOTP unterstützen). Admins können MFA für Benutzer bei Bedarf zurücksetzen sowie global oder benutzerspezifisch erzwingen.</p>
 <h1 id="anwendungen-verwalten">Anwendungen verwalten</h1>
 <p>Um REI3 nutzen zu können, müssen Anwendungen installiert werden; hierzu ist die Aktivierung des <a href="#wartungsmodus">Wartungsmodus</a> erforderlich.</p>
 <p>Anwendungen werden über die Adminoberfläche installiert. Sie können aus mehreren Quellen abgerufen werden:</p>
@@ -296,7 +298,7 @@
 <li>Wiederherstellungen vollständiger Sicherungen sollten immer in eine leere / neue Datenbank ausgeführt werden, um sicherzustellen, dass alle Daten in den gesicherten Zustand zurückversetzt werden können. Die wiederhergestellte Datenbank kann dann umbenannt oder die REI3-Konfigurationsdatei aktualisiert werden, um auf die wiederhergestellte Datenbank zuzugreifen.</li>
 </ul>
 <h1 id="aktualisierungen">Aktualisierungen</h1>
-<p>Es gibt zwei Arten von Aktualisierungen: Anwendung- und Plattformaktualisierung. Anwendungsaktualisierungen sind häufiger und dienen dazu, die Funktionalität für REI3-Anwendungen zu erweitern. Diese können direkt von der Adminoberfläche installiert werden, wenn der Wartungsmodus aktiv ist. Wenn die Aktualisierungen über das Repository empfangen werden, handelt es sich um einen Ein-Klick-Vorgang. Manuelle Aktualisierungen müssen über gepackte Anwendungsdateien bereitgestellt werden. Es wird empfohlen, Aktualisierungen zuerst in Testumgebungen zu installieren, da sich Aussehen und Verhalten zwischen Anwendungsversionen ändern können.</p>
+<p>Es gibt zwei Arten von Aktualisierungen: Anwendung- und Plattformaktualisierung. Anwendungsaktualisierungen sind häufiger und dienen dazu, die Funktionalität für REI3-Anwendungen zu erweitern. Diese können direkt von der Adminoberfläche installiert werden, wenn der Wartungsmodus aktiv ist. Wenn die Aktualisierungen über das Repository empfangen werden, handelt es sich um einen Ein-Klick-Vorgang. Manuelle Aktualisierungen müssen über Anwendungsdateien (also *.rei3-Dateien) bereitgestellt werden. Es wird empfohlen, Aktualisierungen zuerst in Testumgebungen zu installieren, da sich Aussehen und Verhalten zwischen Anwendungsversionen ändern können.</p>
 <p>Plattformaktualisierungen richten sich an die zugrunde liegende Plattform-Software und sind möglicherweise auch für Anwendungsaktualisierungen erforderlich, wenn für diese neuere Plattformfunktionen erforderlich sind. Da Sicherheits- und Stabilitätsprobleme mit Plattformaktualisierungen behoben werden, ist es immer gut, die Plattform selbst zu aktualisieren.</p>
 <h2 id="plattformaktualisierung">Plattformaktualisierung</h2>
 <p>Wenn das grafische Installationsprogramm für Windows verwendet wird, kann durch Ausführen einer neueren Version die Aktualisierung gestartet werden. Der Plattformdienst wird automatisch neu gestartet.</p>
@@ -334,7 +336,7 @@
 </ul></li>
 <li>Sobald sich ein neuer Serverknoten mit der bestehenden REI3-Datenbank verbindet, registriert er sich als neuer Clusterknoten und weist sich selbst eine eindeutige Knoten-ID zu.</li>
 </ol>
-<p>Dies ist die gesamte Einrichtung. Das Cluster konfiguriert sich automatisch und weist auch automatisch die Rolle des Clustermasters und die Aufgaben zu, je nachdem, welche Knoten einchecken.</p>
+<p>Das ist die gesamte Einrichtung. Das Cluster konfiguriert sich automatisch und weist die Rolle des Clustermasters und auch Aufgaben zu, je nachdem, welche Knoten einchecken. Nach der Einrichtung kann Netzwerkverkehr zu den verschiedenen Cluster-Knoten gerouted werden. Es ist aber wichtig, da REI3 auf Websockets setzt, dass Clients bei dem Knoten bleiben, mit denen sie die Verbindung hergestellt haben. Bei einer Neuverbindung kann dann ein anderer Knoten den gleichen Client bedienen.</p>
 <h1 id="cloudbetrieb">Cloudbetrieb</h1>
 <p>REI3 kann im Internet zugänglich gemacht werden, indem entsprechende Firewall-Ports geöffnet werden. Wir, die REI3-Hersteller, sind bestrebt, die Plattform so sicher wie möglich zu gestalten. Wie bei jeder anderen Anwendung ist es immer möglich, dass unentdeckte Sicherheitslücken ausgenutzt und unbefugter Zugriff erreicht wird. Neben der regelmäßigen Aktualisierung von REI3 selbst sind wir der Ansicht, dass zusätzliche Sicherheitsmaßnahmen erforderlich sind, um Webanwendungen in der Cloud sicher auszuführen. Diese sind u. A.:</p>
 <ul>
