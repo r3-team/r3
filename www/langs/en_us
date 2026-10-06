@@ -3082,6 +3082,7 @@
 		"globalSettings": "Global settings",
 		"inputPlaceholderAdd": "...add more",
 		"message": {
+			"columnsChanged": "Columns have changed due to an application update. To change column order and visibility, columns need to be reset to the new default.",
 			"csvExport": "The CSV export uses filters and ordering from the current list.",
 			"csvImport": "The CSV import requires the {COUNT} field(s) from the list shown below, in the same order for each row.",
 			"csvImportSuccess": "{COUNT} lines were imported",

@@ -3082,6 +3082,7 @@
 		"globalSettings": "Global settings",
 		"inputPlaceholderAdd": "...adăuga mai mult",
 		"message": {
+			"columnsChanged": "Columns have changed due to an application update. To change column order and visibility, columns need to be reset to the new default.",
 			"csvExport": "Exportul CSV folosește filtre și ordonarea din lista curentă.",
 			"csvImport": "Importul CSV necesită {COUNT} câmpuri din lista de mai jos, în aceeași ordine pentru fiecare rând.",
 			"csvImportSuccess": "Au fost importate {COUNT} linii",

@@ -3082,6 +3082,7 @@
 		"globalSettings": "Globale Einstellungen",
 		"inputPlaceholderAdd": "...weitere hinzufügen",
 		"message": {
+			"columnsChanged": "Spalten haben sich wegen einer Aktualisierung der Anwendung geändert. Um Spaltenreihenfolge und -sichtbarkeit anzupassen, müssen Spalten auf den neuen Standard zurückgesetzt werden.",
 			"csvExport": "Der CSV-Export verwendet Filter und Sortierung der aktuellen Liste.",
 			"csvImport": "Der CSV-Import erfordert die {COUNT} Feld(er) der unten angezeigten Liste für jede Zeile und in der gleichen Reihenfolge.",
 			"csvImportSuccess": "{COUNT} Zeilen wurden importiert",

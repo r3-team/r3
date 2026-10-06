@@ -3082,6 +3082,7 @@
 		"globalSettings": "Genel ayarlar",
 		"inputPlaceholderAdd": "...daha fazlasını ekle",
 		"message": {
+			"columnsChanged": "Columns have changed due to an application update. To change column order and visibility, columns need to be reset to the new default.",
 			"csvExport": "CSV dışa aktarımı filtreleri ve geçerli listeden sıralamayı kullanır.",
 			"csvImport": "CSV içe aktarma işlemi, aşağıda gösterilen listeden {COUNT} alanlarının her satır için aynı sırada olmasını gerektirir.",
 			"csvImportSuccess": "{COUNT} satırları içe aktarıldı",

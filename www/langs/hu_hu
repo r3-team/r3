@@ -3082,6 +3082,7 @@
 		"globalSettings": "Global settings",
 		"inputPlaceholderAdd": "...további hozzáadása",
 		"message": {
+			"columnsChanged": "Columns have changed due to an application update. To change column order and visibility, columns need to be reset to the new default.",
 			"csvExport": "A CSV export a jelenlegi lista szűrését és rendezését használja.",
 			"csvImport": "A CSV importáláshoz a(z) {COUNT} mezőre van szükség minden sorban a lenti listában, ugyanabban a sorrendben.",
 			"csvImportSuccess": "{COUNT} sor importálva lett",

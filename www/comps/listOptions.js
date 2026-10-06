@@ -49,73 +49,78 @@ export default {
 					</div>
 				</td>
 				<td>
-					<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100" class="list-options-column-config"
-						v-model="columnBatchesAllDrag"
-						@change="dropBatchSort"
-						:fallbackOnBody="true"
-					>
-						<template #item="{element,index}">
-							<div class="list-options-batch input-custom dynamic" v-if="getBatchIsVisible(element,columnIdsShown)">
+					<my-label image="question.png"
+						v-if="columnsNotStandard"
+						:caption="capApp.message.columnsChanged"
+					/>
+					<template v-if="!columnsNotStandard">
+						<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100" class="list-options-column-config"
+							v-model="columnBatchesAllDrag"
+							@change="dropBatchSort"
+							:fallbackOnBody="true"
+						>
+							<template #item="{element,index}">
+								<div class="list-options-batch input-custom dynamic" v-if="getBatchIsVisible(element,columnIdsShown)">
 
-								<!-- batch sort -->
-								<img class="dragAnchor" src="images/drag.png" v-if="!isMobile" />
+									<!-- batch sort -->
+									<img class="dragAnchor" src="images/drag.png" v-if="!isMobile" />
 
-								<!-- batch sort for mobile -->
-								<div class="row nowrap gap" v-if="isMobile">
-									<my-button image="arrowUp.png"
-										@trigger="clickBatchSort(element,true)"
-										:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== 0"
-									/>
-									<my-button image="arrowDown.png"
-										@trigger="clickBatchSort(element,false)"
-										:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== columnBatches.length - 1"
-									/>
-								</div>
+									<!-- batch sort for mobile -->
+									<div class="row nowrap gap" v-if="isMobile">
+										<my-button image="arrowUp.png"
+											@trigger="clickBatchSort(element,true)"
+											:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== 0"
+										/>
+										<my-button image="arrowDown.png"
+											@trigger="clickBatchSort(element,false)"
+											:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== columnBatches.length - 1"
+										/>
+									</div>
 
-								<!-- batch/columns -->
-								<div class="row wrap centered gap">
-									<span v-if="element.columnIndexes.length > 1">{{ element.caption }}</span>
+									<!-- batch/columns -->
+									<div class="row wrap centered gap">
+										<span v-if="element.columnIndexes.length > 1">{{ element.caption }}</span>
 
-									<div class="list-options-batch-columns">
-										<div class="list-options-batch-column clickable"
-											v-for="ci in element.columnIndexes"
-											@click="clickColumnInBatch(columnsAll[ci].id,element)"
-											:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
-										>
-											{{ element.columnIndexes.length > 1 ? getColumnTitleFallback(columnsAll[ci],moduleId) : element.caption }}
+										<div class="list-options-batch-columns">
+											<div class="list-options-batch-column clickable"
+												v-for="ci in element.columnIndexes"
+												@click="clickColumnInBatch(columnsAll[ci].id,element)"
+												:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+											>
+												{{ element.columnIndexes.length > 1 ? getColumnTitleFallback(columnsAll[ci],moduleId) : element.caption }}
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						</template>
-					</draggable>
+							</template>
+						</draggable>
+						<br />
+						<div class="list-options-column-config" v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">
+							<span>{{ capGen.notShown }}</span>
+							<template v-for="(b,bi) in columnBatchesAll">
+								<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
 
-					<br />
-					<div class="list-options-column-config" v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">
-						<span>{{ capGen.notShown }}</span>
-						<template v-for="(b,bi) in columnBatchesAll">
-							<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
+									<!-- batch/columns -->
+									<div class="row wrap centered gap">
+										<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
 
-								<!-- batch/columns -->
-								<div class="row wrap centered gap">
-									<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
-
-									<div class="list-options-batch-columns">
-										<div class="list-options-batch-column clickable"
-											v-for="ci in b.columnIndexes"
-											@click="clickColumnInBatch(columnsAll[ci].id,b)"
-											:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
-										>
-											{{ b.columnIndexes.length > 1 ? getColumnTitleFallback(columnsAll[ci],moduleId) : b.caption }}
+										<div class="list-options-batch-columns">
+											<div class="list-options-batch-column clickable"
+												v-for="ci in b.columnIndexes"
+												@click="clickColumnInBatch(columnsAll[ci].id,b)"
+												:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+											>
+												{{ b.columnIndexes.length > 1 ? getColumnTitleFallback(columnsAll[ci],moduleId) : b.caption }}
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						</template>
-					</div>
-					<div class="list-options-column-warning" v-if="csvImport">
-						{{ capApp.message.csvImportWarning }}
-					</div>
+							</template>
+						</div>
+						<div class="list-options-column-warning" v-if="csvImport">
+							{{ capApp.message.csvImportWarning }}
+						</div>
+					</template>
 				</td>
 			</tr>
 			<tr>
@@ -240,6 +245,7 @@ export default {
 		autoRenewOff: s => s.autoRenew === -1,
 		columnBatchesAll: s => s.getColumnBatches(s.moduleId, s.columnsAll, [], [], s.columnBatchSort[1], true),
 		columnBatchesAllUnsorted: s => s.getColumnBatches(s.moduleId, s.columnsAll, [], [], [], true),
+		columnsNotStandard: s => s.columnBatchSort[1].length !== 0 && s.columnBatchSort[1].length !== s.columnBatchesAll.length,
 		isCards: s => s.layoutInput === 'cards',
 		isTable: s => s.layoutInput === 'table',
 
@@ -250,11 +256,6 @@ export default {
 		capGen: s => s.$store.getters.captions.generic,
 		isMobile: s => s.$store.getters.isMobile,
 		settings: s => s.$store.getters.settings
-	},
-	mounted() {
-		// invalid batch sort, reset
-		if (this.columnBatchSort[1].length !== 0 && this.columnBatchSort[1].length !== this.columnBatchesAll.length)
-			this.$emit('reset-columns');
 	},
 	methods: {
 		// external
