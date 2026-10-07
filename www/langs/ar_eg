@@ -3147,6 +3147,8 @@
 			"backupCode": "رمز النسخ الاحتياطي",
 			"backupCodeDesc": "الرمز الاحتياطي هو <b>مهم جدا</b>; ",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "إنشاء مفاتيح",
 				"resetKeys": "إعادة ضبط المفاتيح الشخصية",
 				"storeKeys": "تمكين التشفير"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "لقد قمت بنسخ الرمز الاحتياطي إلى مكان آمن.",
 			"confirmEncryption": "أدرك أنه إذا فقدت الوصول إلى كل من كلمة المرور الخاصة بي والرمز الاحتياطي، فإن البيانات المشفرة تصبح غير قابلة للوصول بشكل دائم.",
 			"description": "يمكن للتطبيقات تشفير البيانات الحساسة للوصول الحصري لأفراد محددين. ",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "التطبيقات التي تستخدم التشفير",
 			"newKeys": "تم إنشاء المفاتيح بنجاح",
 			"newKeysDesc": "لإكمال الإعداد، انسخ الرمز الاحتياطي الشخصي الخاص بك إلى مكان آمن.",

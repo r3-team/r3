@@ -3147,6 +3147,8 @@
 			"backupCode": "Yedekleme kodu",
 			"backupCodeDesc": "Yedek kod <b>çok önemli</b>; şifrenizi unutursanız erişimi yeniden sağlamaya yarar.",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "Anahtar oluştur",
 				"resetKeys": "Kişisel anahtarları sıfırla",
 				"storeKeys": "Şifrelemeyi etkinleştir"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "Yedekleme kodunu güvenli bir konuma kopyaladım.",
 			"confirmEncryption": "Hem şifreme hem de yedek koduma erişimi kaybedersem, şifrelenmiş verilere kalıcı olarak erişilemez hale geleceğini anlıyorum.",
 			"description": "Uygulamalar, hassas verileri belirli kişilerin özel erişimi için şifreleyebilir. Verilerin şifrelenmesinden önce her kullanıcının kişisel anahtarlar oluşturması gerekir.",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "Şifreleme kullanan uygulamalar",
 			"newKeys": "Anahtarlar başarıyla oluşturuldu",
 			"newKeysDesc": "Kurulumu tamamlamak için kişisel yedekleme kodunuzu güvenli bir konuma kopyalayın.",

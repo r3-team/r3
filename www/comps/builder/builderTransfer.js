@@ -1,18 +1,15 @@
-import {MyModuleSelect} from '../input.js';
-import srcBase64Icon    from '../shared/image.js';
-import {getCaption}     from '../shared/language.js';
-import {
-	aesGcmEncryptBase64WithPhrase,
-	aesGcmDecryptBase64WithPhrase,
-	getRandomString,
-	rsaDecrypt,
-	rsaEncrypt
-} from '../shared/crypto.js';
+import { MyModuleSelect } from '../input.js';
 
+import {
+	aesGcmDecryptBase64WithPhrase, aesGcmEncryptBase64WithPhrase,
+	getRandomString, rsaDecrypt, rsaEncrypt
+} from '../shared/crypto.js';
+import srcBase64Icon from '../shared/image.js';
+import { getCaption } from '../shared/language.js';
 
 const MyBuilderTransferKeyCreate = {
-	name:'my-builder-transfer-key-create',
-	template:`<div class="app-sub-window" @click.self="$emit('close')">
+	name: 'my-builder-transfer-key-create',
+	template: `<div class="app-sub-window" @click.self="$emit('close')">
 		<div class="builder-transfer-key-create float contentBox">
 			<div class="top lower">
 				<div class="area">
@@ -28,7 +25,7 @@ const MyBuilderTransferKeyCreate = {
 				</div>
 			</div>
 			<div class="content default-inputs gap column flex">
-			
+
 				<my-label :caption="capApp.keyCreateLength" />
 				<div class="row gap centered">
 					<select v-model="keyLength" :disabled="running">
@@ -44,7 +41,7 @@ const MyBuilderTransferKeyCreate = {
 						:image="!running ? 'ok.png' : 'load.gif'"
 					/>
 				</div>
-				
+
 				<div class="column" v-if="keyPrivate !== ''">
 					<p><b>{{ capApp.keyCreateInfo }}</b></p>
 					<div class="row gap-large">
@@ -67,30 +64,30 @@ const MyBuilderTransferKeyCreate = {
 			</div>
 		</div>
 	</div>`,
-	emits:['close'],
-	computed:{
-		capApp:s => s.$store.getters.captions.builder.transfer,
-		capGen:s => s.$store.getters.captions.generic
+	emits: ['close'],
+	computed: {
+		capApp: s => s.$store.getters.captions.builder.transfer,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	data() {
 		return {
-			keyLength:'4096',
-			keyPrivate:'',
-			keyPublic:'',
-			running:false
+			keyLength: '4096',
+			keyPrivate: '',
+			keyPublic: '',
+			running: false
 		};
 	},
-	methods:{
+	methods: {
 		copyToClipboard(txt) {
 			navigator.clipboard.writeText(txt);
 		},
 		createKey() {
 			this.running = true;
-			ws.send('key','create',{keyLength:parseInt(this.keyLength)},true).then(
+			ws.send('key', 'create', { keyLength: parseInt(this.keyLength, 10) }, true).then(
 				res => {
 					this.keyPrivate = res.payload.private;
-					this.keyPublic  = res.payload.public;
-					this.running    = false;
+					this.keyPublic = res.payload.public;
+					this.running = false;
 				},
 				this.$root.genericError
 			);
@@ -99,12 +96,9 @@ const MyBuilderTransferKeyCreate = {
 };
 
 export default {
-	name:'my-builder-transfer',
-	components:{
-		MyBuilderTransferKeyCreate,
-		MyModuleSelect
-	},
-	template:`<div class="contentBox grow">
+	name: 'my-builder-transfer',
+	components: { MyBuilderTransferKeyCreate, MyModuleSelect },
+	template: `<div class="contentBox grow">
 		<div class="content default-inputs builder-transfer">
 
 			<my-builder-transfer-key-create v-if="showKeyCreate" @close="showKeyCreate = false" />
@@ -191,7 +185,7 @@ export default {
 								:caption="capApp.button.generate"
 							/>
 						</div>
-						
+
 						<div class="row gap-large" v-if="!isExportKeySet">
 							<my-button image="ok.png"
 								@trigger="setKey"
@@ -284,74 +278,72 @@ export default {
 			</template>
 		</div>
 	</div>`,
-	computed:{
-		moduleIdsChanged:s => {
-			if(s.moduleIdMapChanged === null) return [];
+	computed: {
+		moduleIdsChanged: s => {
+			if (s.moduleIdMapChanged === null) return [];
 
-			let out = [];
-			for(const id in s.moduleIdMapChanged) {
-				if(s.moduleIdMapChanged[id] && s.moduleIdMapMeta[id].owner)
+			const out = [];
+			for (const id in s.moduleIdMapChanged) {
+				if (s.moduleIdMapChanged[id] && s.moduleIdMapMeta[id].owner)
 					out.push(id);
 			}
 			return out;
 		},
 
 		// simple
-		changesOk:  s => s.moduleIdsChanged.length === 0,
+		changesOk: s => s.moduleIdsChanged.length === 0,
 		exportName: s => `${s.module.name}_${s.module.releaseBuild}.rei3`,
-		exportUrl:  s => !s.isExportKeySet || !s.changesOk ? null : `/export/${s.exportName}?token=${s.token}&module_id=${s.moduleId}&date=${Math.floor(new Date().getTime() / 1000)}`,
-		isE2eeReady:s => s.loginEncEnabled && !s.loginEncLocked,
-		repoId:     s => s.transferTarget === 'fileDownload' ? null : s.transferTarget,
-		repoUrl:    s => s.repoId === null ? '' : s.repos.filter(v => v.id === s.repoId)[0].url,
-		
+		exportUrl: s => !s.isExportKeySet || !s.changesOk ? null : `/export/${s.exportName}?token=${s.token}&module_id=${s.moduleId}&date=${Math.floor(Date.now() / 1000)}`,
+		repoId: s => s.transferTarget === 'fileDownload' ? null : s.transferTarget,
+		repoUrl: s => s.repoId === null ? '' : s.repos.filter(v => v.id === s.repoId)[0].url,
+
 		// stores
-		token:          s => s.$store.getters['local/token'],
-		modules:        s => s.$store.getters['schema/modules'],
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
-		capApp:         s => s.$store.getters.captions.builder.transfer,
-		capGen:         s => s.$store.getters.captions.generic,
-		keyLength:      s => s.$store.getters.constants.keyLength,
-		loginEncEnabled:s => s.$store.getters.loginEncEnabled,
-		loginEncLocked: s => s.$store.getters.loginEncLocked,
-		loginPrivateKey:s => s.$store.getters.loginPrivateKey,
-		loginPublicKey :s => s.$store.getters.loginPublicKey,
-		module:         s => s.moduleIdMap[s.moduleId] !== undefined ? s.moduleIdMap[s.moduleId] : false,
-		moduleIdMapMeta:s => s.$store.getters.moduleIdMapMeta
+		token: s => s.$store.getters['local/token'],
+		modules: s => s.$store.getters['schema/modules'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.builder.transfer,
+		capGen: s => s.$store.getters.captions.generic,
+		keyLength: s => s.$store.getters.constants.keyLength,
+		loginEncReady: s => s.$store.getters.loginEncReady,
+		loginPrivateKey: s => s.$store.getters.loginPrivateKey,
+		loginPublicKey: s => s.$store.getters.loginPublicKey,
+		module: s => s.moduleIdMap[s.moduleId] !== undefined ? s.moduleIdMap[s.moduleId] : false,
+		moduleIdMapMeta: s => s.$store.getters.moduleIdMapMeta
 	},
 	data() {
 		return {
-			exportKeyPrivate:'',          // private key for export
-			exportKeyPrivateAsE2ee:false, // store export key via E2EE (to reuse in new session)
-			isExportKeySet:false,         // private key for export ready?
-			isRepoCredSet:false,          // credentials for repository upload ready?
-			moduleId:null,                // selected module
-			moduleIdMapChanged:null,      // list of module IDs that have changes
-			repoAsE2ee:false,             // store repository credentials via E2EE (to reuse in new session)
-			repoCredPass:'',
-			repoCredUser:'',
-			repos:[],
-			showKeyCreate:false,
-			transferTarget:'fileDownload' // either 'fileDownload' or ID of repository to commit to
+			exportKeyPrivate: '',          // private key for export
+			exportKeyPrivateAsE2ee: false, // store export key via E2EE (to reuse in new session)
+			isExportKeySet: false,         // private key for export ready?
+			isRepoCredSet: false,          // credentials for repository upload ready?
+			moduleId: null,                // selected module
+			moduleIdMapChanged: null,      // list of module IDs that have changes
+			repoAsE2ee: false,             // store repository credentials via E2EE (to reuse in new session)
+			repoCredPass: '',
+			repoCredUser: '',
+			repos: [],
+			showKeyCreate: false,
+			transferTarget: 'fileDownload' // either 'fileDownload' or ID of repository to commit to
 		};
 	},
 	mounted() {
 		// fetch repos
-		ws.send('repo','get',{},true).then(
+		ws.send('repo', 'get', {}, true).then(
 			res => this.repos = res.payload,
 			this.$root.genericError
 		);
 
-		if(this.isE2eeReady) {
+		if (this.loginEncReady) {
 			// fetch stored export key for current login
-			ws.send('loginExportKey','get',{},true).then(
+			ws.send('loginExportKey', 'get', {}, true).then(
 				res => {
-					if(res.payload === null)
+					if (res.payload === null)
 						return;
 
 					// if available, decrypt export key and apply it
 					this.rsaDecrypt(this.loginPrivateKey, res.payload.dataKeyEnc).then(
 						dataKey => {
-							this.aesGcmDecryptBase64WithPhrase(res.payload.dataEnc,dataKey).then(
+							this.aesGcmDecryptBase64WithPhrase(res.payload.dataEnc, dataKey).then(
 								data => {
 									this.exportKeyPrivate = data;
 									this.setKeyForExport();
@@ -366,7 +358,7 @@ export default {
 			);
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64WithPhrase,
@@ -378,9 +370,9 @@ export default {
 
 		// versioning
 		addVersion(moduleId) {
-			ws.send('transfer','addVersion',moduleId,true).then(
+			ws.send('transfer', 'addVersion', moduleId, true).then(
 				() => {
-					ws.send('schema','reload',{moduleId},true).then(
+					ws.send('schema', 'reload', { moduleId }, true).then(
 						this.checkModule,
 						this.$root.genericError
 					);
@@ -391,16 +383,16 @@ export default {
 
 		// repository commit
 		exportToRepo() {
-			ws.send('repo','commit',{
-				credPass:this.repoCredPass,
-				credUser:this.repoCredUser,
-				fileName:this.exportName,
-				moduleId:this.moduleId,
-				repoId:this.repoId
-			},true,true).then(
+			ws.send('repo', 'commit', {
+				credPass: this.repoCredPass,
+				credUser: this.repoCredUser,
+				fileName: this.exportName,
+				moduleId: this.moduleId,
+				repoId: this.repoId
+			}, true, true).then(
 				() => {
-					this.$store.commit('dialog',{
-						captionBody:this.capApp.dialog.repoCommitSuccess
+					this.$store.commit('dialog', {
+						captionBody: this.capApp.dialog.repoCommitSuccess
 					});
 				},
 				this.$root.genericError
@@ -409,30 +401,30 @@ export default {
 
 		// repository credentials
 		getRepoCred() {
-			this.repoCredPass  = '';
-			this.repoCredUser  = '';
+			this.repoCredPass = '';
+			this.repoCredUser = '';
 			this.isRepoCredSet = false;
-			if(this.repoId === null)
+			if (this.repoId === null)
 				return;
 
-			ws.send('loginRepoCred','get',this.repoId,true).then(
+			ws.send('loginRepoCred', 'get', this.repoId, true).then(
 				res => {
-					if(res.payload === null)
+					if (res.payload === null)
 						return;
 
 					const dataKeyEnc = res.payload.dataKeyEnc;
-					const passEnc    = res.payload.dataPassEnc;
-					const userEnc    = res.payload.dataUserEnc;
-					
+					const passEnc = res.payload.dataPassEnc;
+					const userEnc = res.payload.dataUserEnc;
+
 					this.rsaDecrypt(this.loginPrivateKey, dataKeyEnc).then(
 						dataKey => {
 							Promise.all([
-								this.aesGcmDecryptBase64WithPhrase(passEnc,dataKey),
-								this.aesGcmDecryptBase64WithPhrase(userEnc,dataKey)
+								this.aesGcmDecryptBase64WithPhrase(passEnc, dataKey),
+								this.aesGcmDecryptBase64WithPhrase(userEnc, dataKey)
 							]).then(
 								res => {
-									this.repoCredPass  = res[0];
-									this.repoCredUser  = res[1];
+									this.repoCredPass = res[0];
+									this.repoCredUser = res[1];
 									this.isRepoCredSet = true
 								},
 								console.warn
@@ -445,32 +437,33 @@ export default {
 			);
 		},
 		resetRepoCred() {
-			ws.send('loginRepoCred','del',this.repoId,true).then(
+			ws.send('loginRepoCred', 'del', this.repoId, true).then(
 				() => {
-					this.repoCredPass  = '';
-					this.repoCredUser  = '';
+					this.repoCredPass = '';
+					this.repoCredUser = '';
 					this.isRepoCredSet = false;
 				},
 				this.$root.genericError
 			);
 		},
 		setRepoCred() {
-			if(!this.repoAsE2ee)
-				return this.isRepoCredSet = true;
-
+			if (!this.repoAsE2ee) {
+				this.isRepoCredSet = true;
+				return;
+			}
 			const dataKey = this.getRandomString(this.keyLength);
 			Promise.all([
-				this.rsaEncrypt(this.loginPublicKey,dataKey),
-				this.aesGcmEncryptBase64WithPhrase(this.repoCredPass,dataKey),
-				this.aesGcmEncryptBase64WithPhrase(this.repoCredUser,dataKey)
+				this.rsaEncrypt(this.loginPublicKey, dataKey),
+				this.aesGcmEncryptBase64WithPhrase(this.repoCredPass, dataKey),
+				this.aesGcmEncryptBase64WithPhrase(this.repoCredUser, dataKey)
 			]).then(
 				res => {
-					ws.send('loginRepoCred','set',{
-						dataKeyEnc:res[0],
-						dataPassEnc:res[1],
-						dataUserEnc:res[2],
-						repoId:this.repoId
-					},true).then(
+					ws.send('loginRepoCred', 'set', {
+						dataKeyEnc: res[0],
+						dataPassEnc: res[1],
+						dataUserEnc: res[2],
+						repoId: this.repoId
+					}, true).then(
 						() => this.isRepoCredSet = true,
 						this.$root.genericError
 					);
@@ -481,8 +474,8 @@ export default {
 
 		// module validation
 		checkModule() {
-			if(this.moduleId !== null) {
-				ws.send('module','checkChange',this.moduleId,true).then(
+			if (this.moduleId !== null) {
+				ws.send('module', 'checkChange', this.moduleId, true).then(
 					res => this.moduleIdMapChanged = res.payload.moduleIdMapChanged,
 					this.$root.genericError
 				);
@@ -491,29 +484,29 @@ export default {
 
 		// export key
 		resetKey() {
-			ws.send('loginExportKey','del',{},true).then(
+			ws.send('loginExportKey', 'del', {}, true).then(
 				() => this.isExportKeySet = false,
 				this.$root.genericError
 			);
 		},
 		setKey() {
-			if(!this.exportKeyPrivate.includes('-----BEGIN RSA PRIVATE KEY-----'))
-				return this.$store.commit('dialog',{captionBody:this.capApp.dialog.exportKeyBad});
+			if (!this.exportKeyPrivate.includes('-----BEGIN RSA PRIVATE KEY-----'))
+				return this.$store.commit('dialog', { captionBody: this.capApp.dialog.exportKeyBad });
 
-			if(!this.exportKeyPrivateAsE2ee)
+			if (!this.exportKeyPrivateAsE2ee)
 				return this.setKeyForExport();
 
 			// use E2EE to store export key for login
-			if(!this.isE2eeReady)
-				return this.$store.commit('dialog',{captionBody:this.capApp.dialog.e2eeNotReady});
-			
+			if (!this.loginEncReady)
+				return this.$store.commit('dialog', { captionBody: this.capApp.dialog.e2eeNotReady });
+
 			const dataKey = this.getRandomString(this.keyLength);
 			Promise.all([
-				this.aesGcmEncryptBase64WithPhrase(this.exportKeyPrivate,dataKey),
-				this.rsaEncrypt(this.loginPublicKey,dataKey)
+				this.aesGcmEncryptBase64WithPhrase(this.exportKeyPrivate, dataKey),
+				this.rsaEncrypt(this.loginPublicKey, dataKey)
 			]).then(
 				res => {
-					ws.send('loginExportKey','set',{dataEnc:res[0],dataKeyEnc:res[1]},true).then(
+					ws.send('loginExportKey', 'set', { dataEnc: res[0], dataKeyEnc: res[1] }, true).then(
 						this.setKeyForExport,
 						this.$root.genericError
 					);
@@ -522,9 +515,9 @@ export default {
 			);
 		},
 		setKeyForExport() {
-			ws.send('transfer','storeExportKey',this.exportKeyPrivate,true).then(
+			ws.send('transfer', 'storeExportKey', this.exportKeyPrivate, true).then(
 				() => {
-					this.isExportKeySet   = true;
+					this.isExportKeySet = true;
 					this.exportKeyPrivate = '';
 				},
 				this.$root.genericError

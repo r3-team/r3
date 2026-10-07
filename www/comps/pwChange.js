@@ -186,10 +186,10 @@ export default {
 
 			// use same request/transaction to update password & new encrypted private key (one must not change without the other)
 			if (newPrivateKeyEnc !== null)
-				requests.push(ws.prepare('loginKeys', 'storePrivate', { privateKeyEnc: newPrivateKeyEnc }));
+				requests.push(ws.prepare('loginKeys', 'storePrivate', newPrivateKeyEnc));
 
 			ws.sendMultiple(requests, true).then(
-				res => {
+				() => {
 					const pwNew = this.pwNew0;
 					this.pwNew0 = '';
 					this.pwNew1 = '';

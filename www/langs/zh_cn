@@ -3147,6 +3147,8 @@
 			"backupCode": "备份代码",
 			"backupCodeDesc": "备份代码非常重要；如果忘记密码，它用于重新获得访问权限。",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "创建密钥",
 				"resetKeys": "重置个人密钥",
 				"storeKeys": "启用加密"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "我已将备份代码复制到安全位置。",
 			"confirmEncryption": "我明白如果我既失去密码又失去备份代码，加密数据将变得永久不可访问。",
 			"description": "应用程序可以为特定个人加密敏感数据，以供其独占访问。在对数据进行加密之前，每个用户都必须创建个人密钥。",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "使用加密的应用程序",
 			"newKeys": "密钥创建成功",
 			"newKeysDesc": "为完成设置，请将您的个人备份代码复制到安全位置。",

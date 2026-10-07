@@ -3147,6 +3147,8 @@
 			"backupCode": "Backup code",
 			"backupCodeDesc": "The backup code is <b>very important</b>; it serves to re-establish access if you forget your password.",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "Create keys",
 				"resetKeys": "Reset personal keys",
 				"storeKeys": "Enable encryption"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "I have copied the backup code to a secure location.",
 			"confirmEncryption": "I understand that if I loose access to both my password and my backup code, encrypted data becomes permanently inaccessible.",
 			"description": "Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal keys.",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "Applications that use encryption",
 			"newKeys": "Keys created successfully",
 			"newKeysDesc": "To complete the setup, copy your personal backup code to a secure location.",

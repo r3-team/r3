@@ -767,7 +767,7 @@ export default {
 							.then(res => this.$store.commit('loginPublicKey', res))
 							.catch(this.setInitErr);
 
-						const keyPem = await this.pemImportPrivateEnc(res[6].payload.privateEnc, this.loginKeyAes)
+						const keyPem = await this.pemImportPrivateEnc(res[6].payload.privateEnc, this.loginKeyAes, false)
 							.catch(this.setInitErr);
 
 						// error is shown in header if private key cannot be decrypted

@@ -18,15 +18,6 @@
 	width: 24px;
 	filter: var(--image-filter);
 }
-.settings .encryption .backup-code {
-	font-family: monospace;
-	margin: 20px 10px;
-	padding: 16px;
-	color: var(--color-font);
-	border: 1px solid var(--color-border);
-	border-radius: 5px;
-	background-color: var(--color-bg);
-}
 .settings .settings-page-limit {
 	display: flex;
 	flex-direction: row;
@@ -58,6 +49,14 @@
 	flex-flow: row wrap;
 	align-items: center;
 	gap: 9px;
+}
+.settings-backup-code {
+	font-family: monospace;
+	padding: 16px;
+	color: var(--color-font);
+	border: 1px solid var(--color-border);
+	border-radius: 5px;
+	background-color: var(--color-bg);
 }
 
 /* multi factor authentication */

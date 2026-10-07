@@ -3147,6 +3147,8 @@
 			"backupCode": "Código de backup",
 			"backupCodeDesc": "O código de backup é <b>muito importante</b>; serve para repor o acesso se se esquecer da sua palavra-passe.",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "Criar chaves",
 				"resetKeys": "Repor chaves pessoais",
 				"storeKeys": "Ativar encriptação"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "Copiei o código de backup para um local seguro.",
 			"confirmEncryption": "Compreendo que se perder o acesso tanto à minha palavra-passe como ao meu código de backup, os dados encriptados se tornarão permanentemente inacessíveis.",
 			"description": "As aplicações podem encriptar dados sensíveis para acesso exclusivo de indivíduos específicos. Antes de os dados poderem ser encriptados, cada utilizador deve criar chaves pessoais.",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "Aplicações que usam encriptação",
 			"newKeys": "Chaves criadas com sucesso",
 			"newKeysDesc": "Para concluir a configuração, copie o seu código de backup pessoal para um local seguro.",

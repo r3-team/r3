@@ -523,6 +523,7 @@ const MyStore = Vuex.createStore({
 		licenseValid: s => s.licenseValid,
 		loginEncEnabled: s => s.loginPrivateKeyEnc !== null,
 		loginEncLocked: s => s.loginPrivateKeyEnc !== null && s.loginPrivateKey === null,
+		loginEncReady: s => s.loginPrivateKeyEnc !== null && s.loginPrivateKey !== null,
 		loginHasClient: s => s.loginHasClient,
 		loginId: s => s.loginId,
 		loginMfaSetup: s => s.loginMfaSetup,

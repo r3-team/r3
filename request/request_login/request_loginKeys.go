@@ -10,7 +10,6 @@ import (
 )
 
 func KeysGetPublic_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
-
 	var req struct {
 		LoginIds   []int64   `json:"loginIds"`
 		RelationId uuid.UUID `json:"relationId"`
@@ -27,7 +26,6 @@ func KeysReset_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 }
 
 func KeysStore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
-
 	var req struct {
 		PrivateKeyEnc       string `json:"privateKeyEnc"`
 		PrivateKeyEncBackup string `json:"privateKeyEncBackup"`
@@ -40,12 +38,17 @@ func KeysStore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, login
 }
 
 func KeysStorePrivate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
-
-	var req struct {
-		PrivateKeyEnc string `json:"privateKeyEnc"`
-	}
+	var req string
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return login_keys.StorePrivate_tx(ctx, tx, loginId, req.PrivateKeyEnc)
+	return login_keys.StorePrivate_tx(ctx, tx, loginId, req)
+}
+
+func KeysStorePrivateBackup_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) error {
+	var req string
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return err
+	}
+	return login_keys.StorePrivateBackup_tx(ctx, tx, loginId, req)
 }

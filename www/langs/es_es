@@ -3147,6 +3147,8 @@
 			"backupCode": "Código de respaldo",
 			"backupCodeDesc": "El código de respaldo es <b>muy importante</b>; sirve para restablecer el acceso si olvidas tu contraseña.",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "Crear claves",
 				"resetKeys": "Restablecer claves personales",
 				"storeKeys": "Habilitar cifrado"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "He copiado el código de respaldo en un lugar seguro.",
 			"confirmEncryption": "Entiendo que si pierdo el acceso tanto a mi contraseña como a mi código de respaldo, los datos cifrados se volverán permanentemente inaccesibles.",
 			"description": "Las aplicaciones pueden cifrar datos sensibles para acceso exclusivo de individuos específicos. Antes de que los datos puedan ser cifrados, cada usuario debe crear claves personales.",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "Aplicaciones que usan cifrado",
 			"newKeys": "Claves creadas con éxito",
 			"newKeysDesc": "Para completar la configuración, copia tu código de respaldo personal en un lugar seguro.",

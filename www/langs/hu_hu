@@ -3147,6 +3147,8 @@
 			"backupCode": "Biztonsági kód",
 			"backupCodeDesc": "A biztonsági kód <b>nagyon fontos</b>; visszaállítja a hozzáférést, ha elfelejted a jelszavad.",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "Kulcsok létrehozása",
 				"resetKeys": "Személyes kulcsok visszaállítása",
 				"storeKeys": "Titkosítás engedélyezése"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "Másolatot készítettem a biztonsági kódról egy biztonságos helyre.",
 			"confirmEncryption": "Értem, hogy ha elveszítem mind a jelszavam, mind a biztonsági kódomat, véglegesen elvesztem a hozzáférést az titkosított adatokhoz.",
 			"description": "Az alkalmazások érzékeny adatokat is titkosíthatnak specifikus személyek kizárólagos hozzáférése céljából. A titkosítás használata előtt minden felhasználónak személyes kulcsokat kell létrehoznia.",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "Titkosítást használó alkalmazások",
 			"newKeys": "Kulcsok sikeresen létrehozva",
 			"newKeysDesc": "Az beállítás befejezéséhez másold le a személyes biztonsági kódodat egy biztonságos helyre.",

@@ -15,8 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func GetPublic_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
-	recordIds []int64, loginIds []int64) ([]types.LoginPublicKey, error) {
+func GetPublic_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordIds, loginIds []int64) ([]types.LoginPublicKey, error) {
 
 	keys := make([]types.LoginPublicKey, 0)
 	loginNamesNoPublicKey := make([]string, 0)
@@ -107,8 +106,7 @@ func Reset_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 	return nil
 }
 
-func Store_tx(ctx context.Context, tx pgx.Tx, loginId int64, privateKeyEnc string,
-	privateKeyEncBackup string, publicKey string) error {
+func Store_tx(ctx context.Context, tx pgx.Tx, loginId int64, privateKeyEnc, privateKeyEncBackup, publicKey string) error {
 
 	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
@@ -126,6 +124,17 @@ func StorePrivate_tx(ctx context.Context, tx pgx.Tx, loginId int64, privateKeyEn
 		SET key_private_enc = $1
 		WHERE id = $2
 	`, privateKeyEnc, loginId)
+
+	return err
+}
+
+func StorePrivateBackup_tx(ctx context.Context, tx pgx.Tx, loginId int64, privateKeyEncBackup string) error {
+
+	_, err := tx.Exec(ctx, `
+		UPDATE instance.login
+		SET key_private_enc_backup = $1
+		WHERE id = $2
+	`, privateKeyEncBackup, loginId)
 
 	return err
 }

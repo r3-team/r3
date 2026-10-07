@@ -207,6 +207,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, request_login.KeysStore_tx(ctx, tx, reqJson, loginId)
 		case "storePrivate":
 			return nil, request_login.KeysStorePrivate_tx(ctx, tx, reqJson, loginId)
+		case "storePrivateBackup":
+			return nil, request_login.KeysStorePrivateBackup_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginOptions":
 		switch action {

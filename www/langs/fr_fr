@@ -3147,6 +3147,8 @@
 			"backupCode": "Code de sauvegarde",
 			"backupCodeDesc": "Le code de sauvegarde est <b>très important</b> ; il sert à rétablir l'accès si vous oubliez votre mot de passe.",
 			"button": {
+				"backupCodeReplace": "Save new backup code",
+				"backupCodeReplacePrepare": "Generate new backup code",
 				"createKeys": "Créer des clés",
 				"resetKeys": "Réinitialiser les clés personnelles",
 				"storeKeys": "Activer le chiffrement"
@@ -3154,6 +3156,9 @@
 			"confirmBackupCode": "J'ai copié le code de sauvegarde dans un endroit sécurisé.",
 			"confirmEncryption": "Je comprends que si je perds l'accès à la fois à mon mot de passe et à mon code de sauvegarde, l'accès aux données chiffrées devient définitivement inaccessible.",
 			"description": "Les applications peuvent chiffrer des données sensibles pour un accès exclusif par des individus spécifiques. Avant que les données ne puissent être chiffrées, chaque utilisateur doit créer des clés personnelles.",
+			"dialog": {
+				"backupCodeReplaced": "Your new backup code was successfully stored. You can now delete and/or destroy physical copies of your old backup code."
+			},
 			"modulesEnc": "Applications qui utilisent le chiffrement",
 			"newKeys": "Clés créées avec succès",
 			"newKeysDesc": "Pour compléter la configuration, copiez votre code de sauvegarde personnel dans un endroit sécurisé.",
