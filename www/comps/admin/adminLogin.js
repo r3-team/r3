@@ -381,6 +381,17 @@ export default {
 									</td>
 									<td>{{ capApp.hint.mfaReset }}</td>
 								</tr>
+								<tr><td colspan="3" class="grouping">{{ capApp.backupCodeRenew }}</td></tr>
+								<tr>
+									<td>
+										<my-button image="save.png"
+											@trigger="renewBackupCode"
+											:active="!isAuthPublic"
+											:caption="capGen.button.execute"
+										/>
+									</td>
+									<td>{{ capApp.hint.backupCodeRenew }}</td>
+								</tr>
 							</tbody>
 						</table>
 					</div>
@@ -717,6 +728,14 @@ export default {
 			);
 		},
 
+		// backup code calls
+		renewBackupCode() {
+			ws.send('login', 'renewBackupCode', this.loginId, true).then(
+				() => this.$store.commit('dialog', { captionBody: this.capApp.dialog.backupCodeRenew }),
+				this.$root.genericError
+			);
+		},
+
 		// MFA calls
 		resetTotpAsk() {
 			this.$store.commit('dialog', {
@@ -736,7 +755,7 @@ export default {
 			});
 		},
 		resetTotp() {
-			ws.send('login', 'resetTotp', { id: this.loginId }, true).then(
+			ws.send('login', 'resetTotp', this.loginId, true).then(
 				() => { }, this.$root.genericError
 			);
 		}

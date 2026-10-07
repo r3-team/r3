@@ -978,6 +978,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- remove legacy schema lookup function
 			DROP FUNCTION app.get_preset_ids_inside_queries;
+
+			-- reset backup code option for logins
+			ALTER TABLE instance.login ADD   COLUMN key_private_renew_backup BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login ALTER COLUMN key_private_renew_backup DROP DEFAULT;
 		`)
 		return "3.13", err
 	},

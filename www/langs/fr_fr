@@ -300,7 +300,9 @@
 		},
 		"login": {
 			"admin": "Admin",
+			"backupCodeRenew": "One-time renewal of E2EE backup code",
 			"dialog": {
+				"backupCodeRenew": "The user can now generate a new backup code in their personal settings.",
 				"delete": "Êtes-vous sûr de vouloir supprimer cet utilisateur?<br /><br />Cette action est irréversible.",
 				"notUniqueName": "Le même nom d'utilisateur a déjà été attribué à un autre utilisateur.",
 				"resetCodeSent": "Le courriel contenant le code de réinitialisation a été ajouté à la file d'attente de messagerie pour envoi.",
@@ -312,6 +314,7 @@
 			"hint": {
 				"active": "Lorsqu'il est désactivé, les sessions actives seront terminées.",
 				"admin": "Les privilèges d'administrateur incluent la gestion des applications et des utilisateurs. Les administrateurs peuvent également activer les modes de maintenance et de création.",
+				"backupCodeRenew": "Enables the user to generate a new backup code for the personal end-to-end encryption (E2EE) inside their personal settings. A new backup code can only be created, if the user currently has access to their encryption keys. After creating a new backup code, the previous one can no longer be used to regain access to personal encryption keys.",
 				"mfaRequired": "Remplace le paramètre global.",
 				"mfaReset": "Cette opération supprimera les jetons d'authentification multifacteur (MFA) existants pour cet utilisateur. L'utilisateur pourra alors s'authentifier sans MFA. Si le MFA est requis pour cet utilisateur, il devra être configuré à nouveau après la prochaine authentification.",
 				"name": "Nom d'utilisateur - doit être unique dans le système.",

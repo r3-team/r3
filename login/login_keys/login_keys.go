@@ -15,6 +15,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) (types.LoginKey, error) {
+	var k types.LoginKey
+	err := tx.QueryRow(ctx, `
+		SELECT key_private_enc, key_private_enc_backup, key_public
+		FROM instance.login
+		WHERE id = $1
+	`, loginId).Scan(&k.PrivateEnc, &k.PrivateEncBackup, &k.Public)
+
+	return k, err
+}
+
 func GetPublic_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordIds, loginIds []int64) ([]types.LoginPublicKey, error) {
 
 	keys := make([]types.LoginPublicKey, 0)
@@ -132,7 +143,7 @@ func StorePrivateBackup_tx(ctx context.Context, tx pgx.Tx, loginId int64, privat
 
 	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
-		SET key_private_enc_backup = $1
+		SET key_private_enc_backup = $1, key_private_renew_backup = FALSE
 		WHERE id = $2
 	`, privateKeyEncBackup, loginId)
 

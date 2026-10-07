@@ -300,7 +300,9 @@
 		},
 		"login": {
 			"admin": "Yönetici",
+			"backupCodeRenew": "One-time renewal of E2EE backup code",
 			"dialog": {
+				"backupCodeRenew": "The user can now generate a new backup code in their personal settings.",
 				"delete": "Bu kullanıcıyı silmek istediğinizden emin misiniz?<br /><br />Bu işlem geri alınamaz.</b>",
 				"notUniqueName": "Aynı kullanıcı adı zaten farklı bir kullanıcıya atanmış.",
 				"resetCodeSent": "Email with reset code has been added to the email spooler for delivery.",
@@ -312,6 +314,7 @@
 			"hint": {
 				"active": "Devre dışı bırakıldığında aktif oturumlar sonlandırılacaktır.",
 				"admin": "Yönetici ayrıcalıkları uygulamaların ve kullanıcıların yönetimini içerir. Yöneticiler ayrıca bakım ve oluşturucu modlarını da etkinleştirebilir.",
+				"backupCodeRenew": "Enables the user to generate a new backup code for the personal end-to-end encryption (E2EE) inside their personal settings. A new backup code can only be created, if the user currently has access to their encryption keys. After creating a new backup code, the previous one can no longer be used to regain access to personal encryption keys.",
 				"mfaRequired": "Overwrites the global setting.",
 				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "Kullanıcı adı - sistem içinde benzersiz olmalıdır.",

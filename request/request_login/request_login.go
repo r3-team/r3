@@ -209,12 +209,17 @@ func Reauth_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 func ReauthAll_tx(ctx context.Context, tx pgx.Tx) error {
 	return cluster.LoginReauthorizedAll_tx(ctx, tx, true)
 }
-func ResetTotp_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
-	var req struct {
-		Id int64 `json:"id"`
-	}
-	if err := json.Unmarshal(reqJson, &req); err != nil {
+func RenewBackupCode(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+	var loginId int64
+	if err := json.Unmarshal(reqJson, &loginId); err != nil {
 		return err
 	}
-	return login.ResetTotp_tx(ctx, tx, req.Id)
+	return login.RenewBackupCode(ctx, tx, loginId)
+}
+func ResetTotp_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+	var loginId int64
+	if err := json.Unmarshal(reqJson, &loginId); err != nil {
+		return err
+	}
+	return login.ResetTotp_tx(ctx, tx, loginId)
 }

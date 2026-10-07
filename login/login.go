@@ -263,9 +263,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 			INSERT INTO instance.login (
 				ldap_id, ldap_key, oauth_client_id, oauth_iss, oauth_sub, name, salt, hash,
 				salt_kdf, admin, no_auth, limited, active, token_expiry_hours, mfa_required,
-				date_favorites
+				key_private_renew_backup, date_favorites
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,0)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,FALSE,0)
 			RETURNING id
 		`, ldapId, ldapKey, oauthClientId, oauthIss, oauthSub, name, &salt, &hash, saltKdf,
 			admin, noAuth, isLimited, active, tokenExpiryHours, mfaRequired).Scan(&id); err != nil {
@@ -521,6 +521,16 @@ func CreateAdmin(username string, password string) error {
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+// enable renewal for personal E2EE private key backup code
+func RenewBackupCode(ctx context.Context, tx pgx.Tx, loginId int64) error {
+	_, err := tx.Exec(ctx, `
+		UPDATE instance.login
+		SET key_private_renew_backup = TRUE
+		WHERE id = $1
+	`, loginId)
+	return err
 }
 
 // reset all TOTP keys

@@ -8,7 +8,6 @@ import (
 	"r3/config"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func lookupGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
@@ -38,18 +37,14 @@ func lookupGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, login
 
 		return hasClient, err
 
-	case "loginKeys":
-		var res struct {
-			PrivateEnc       pgtype.Text `json:"privateEnc"`
-			PrivateEncBackup pgtype.Text `json:"privateEncBackup"`
-			Public           pgtype.Text `json:"public"`
-		}
-
+	case "loginMayRenewBackupCode":
+		var res bool
 		err := tx.QueryRow(ctx, `
-			SELECT key_private_enc, key_private_enc_backup, key_public
+			SELECT key_private_renew_backup
 			FROM instance.login
 			WHERE id = $1
-		`, loginId).Scan(&res.PrivateEnc, &res.PrivateEncBackup, &res.Public)
+			LIMIT 1
+		`, loginId).Scan(&res)
 
 		return res, err
 

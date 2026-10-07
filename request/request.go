@@ -199,6 +199,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "loginKeys":
 		switch action {
+		case "get":
+			return request_login.KeysGet_tx(ctx, tx, loginId)
 		case "getPublic":
 			return request_login.KeysGetPublic_tx(ctx, tx, reqJson)
 		case "reset":
@@ -472,6 +474,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, request_login.Reauth_tx(ctx, tx, reqJson)
 		case "reauthAll":
 			return nil, request_login.ReauthAll_tx(ctx, tx)
+		case "renewBackupCode":
+			return nil, request_login.RenewBackupCode(ctx, tx, reqJson)
 		case "resetTotp":
 			return nil, request_login.ResetTotp_tx(ctx, tx, reqJson)
 		case "set":

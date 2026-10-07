@@ -739,7 +739,7 @@ export default {
 				ws.prepare('loginWidgetGroups', 'get', {}),
 				ws.prepare('lookup', 'get', { name: 'access' }),
 				ws.prepare('lookup', 'get', { name: 'loginHasClient' }),
-				ws.prepare('lookup', 'get', { name: 'loginKeys' })
+				ws.prepare('loginKeys', 'get', {})
 			];
 
 			// system meta data, admins only

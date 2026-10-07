@@ -300,7 +300,9 @@
 		},
 		"login": {
 			"admin": "مسؤل",
+			"backupCodeRenew": "One-time renewal of E2EE backup code",
 			"dialog": {
+				"backupCodeRenew": "The user can now generate a new backup code in their personal settings.",
 				"delete": "هل أنت متأكد أنك تريد حذف تسجيل الدخول هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>",
 				"notUniqueName": "The same username has already been assigned to a different user.",
 				"resetCodeSent": "Email with reset code has been added to the email spooler for delivery.",
@@ -312,6 +314,7 @@
 			"hint": {
 				"active": "عند إلغاء التنشيط، سيتم إنهاء الجلسات النشطة.",
 				"admin": "تتضمن امتيازات المسؤول إدارة التطبيقات والمستخدمين. ",
+				"backupCodeRenew": "Enables the user to generate a new backup code for the personal end-to-end encryption (E2EE) inside their personal settings. A new backup code can only be created, if the user currently has access to their encryption keys. After creating a new backup code, the previous one can no longer be used to regain access to personal encryption keys.",
 				"mfaRequired": "Overwrites the global setting.",
 				"mfaReset": "This will clear existing multi-factor authentication (MFA) tokens for this user. The user will then be able to authenticate without MFA. If MFA is required for this user, it must be setup again after next authentication.",
 				"name": "اسم مستخدم تسجيل الدخول - يجب أن يكون فريدًا داخل النظام.",

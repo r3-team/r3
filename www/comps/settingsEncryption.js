@@ -21,7 +21,7 @@ export default {
 		</table>
 
 		<!-- backup code replacement -->
-		<div class="row" v-if="loginEncReady && backupCodeReplace === null">
+		<div class="row" v-if="loginEncReady && backupCodeMayRenew && backupCodeReplace === null">
 			<my-button image="time.png"
 				@trigger="replaceBackupCodePrepare"
 				:caption="capApp.button.backupCodeReplacePrepare"
@@ -193,8 +193,9 @@ export default {
 		return {
 			running: false,
 
-			// user actions
-			backupCodeReplace: null, // filled with new backup code, when user chooses to replace backup code for private key
+			// backup code renewal
+			backupCodeMayRenew: false, // whether login is allowed to renew the backup code
+			backupCodeReplace: null,   // filled with new backup code, when user chooses to renew backup code for private key
 
 			// user confirmations for enabling encryption
 			confirmBackupCode: false,
@@ -257,6 +258,14 @@ export default {
 		loginPublicKey: s => s.$store.getters.loginPublicKey,
 		moduleEntries: s => s.$store.getters.moduleEntries,
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap']
+	},
+	mounted() {
+		if (this.loginEncReady) {
+			ws.send('lookup', 'get', { name: 'loginMayRenewBackupCode' }, false).then(
+				res => this.backupCodeMayRenew = res.payload,
+				this.$root.genericError
+			);
+		}
 	},
 	methods: {
 		// externals
@@ -456,6 +465,7 @@ export default {
 												image: 'ok.png'
 											});
 											this.backupCodeReplace = null;
+											this.backupCodeMayRenew = false;
 										},
 										this.$root.genericError
 									);

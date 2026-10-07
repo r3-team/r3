@@ -89,6 +89,11 @@ type LoginOptions struct {
 	FieldId    uuid.UUID   `json:"fieldId"`
 	Options    string      `json:"options"`
 }
+type LoginKey struct {
+	PrivateEnc       pgtype.Text `json:"privateEnc"`
+	PrivateEncBackup pgtype.Text `json:"privateEncBackup"`
+	Public           pgtype.Text `json:"public"`
+}
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login
 	PublicKey string  `json:"publicKey"` // public key of login (not encrypted)

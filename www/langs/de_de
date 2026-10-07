@@ -300,7 +300,9 @@
 		},
 		"login": {
 			"admin": "Admin",
+			"backupCodeRenew": "Einmalige Erneuerung vom E2EE-Backup-Code",
 			"dialog": {
+				"backupCodeRenew": "Der Benutzer kann jetzt einen neuen Backup-Code in seinen persönlichen Einstellungen generieren.",
 				"delete": "Bist du sicher, dass du diesen Benutzer löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
 				"notUniqueName": "Der gleiche Benutzername wurde bereits einem anderen Benutzer zugewiesen.",
 				"resetCodeSent": "Eine E-Mail mit Einmallink zum Zurücksetzen des Passworts wurde der E-Mail-Warteschlange zur Auslieferung übergeben.",
@@ -312,6 +314,7 @@
 			"hint": {
 				"active": "Bei Deaktivierung werden aktive Sitzungen beendet.",
 				"admin": "Adminberechtigungen erlauben die Verwaltung von Anwendungen und Benutzern. Admins können ebenfalls den Wartungs- und Builder-Modus aktivieren.",
+				"backupCodeRenew": "Erlaubt das Erstellen eines neuen Backup-Codes für die persönliche Ende-zu-Ende-Verschlüsselung (E2EE) innerhalb der persönlichen Einstellungen. Ein neuer Backup-Code kann nur erzeugt werden, wenn der Benutzer aktuell Zugriff auf seine persönlichen Schlüssel hat. Nach Erstellung des neuen Backup-Codes, kann der vorherige nicht mehr genutzt werden, um Zugriff auf persönliche Schlüssel zu erlangen.",
 				"mfaRequired": "Überschreibt die globale Einstellung.",
 				"mfaReset": "Hiermit werden existierende Tokens des Benutzers für Multi-Faktor-Authentifizierung (MFA) gelöscht. Der Benutzer kann sich dann ohne MFA einloggen. Falls MFA für den Benutzer erforderlich ist, muss dieses nach der nächsten Authentifizierung erneut eingerichtet werden.",
 				"name": "Benutzername - muss im System einzigartig sein.",
