@@ -464,6 +464,7 @@ export default {
 												captionBody: this.capApp.dialog.backupCodeReplaced,
 												image: 'ok.png'
 											});
+											this.$store.commit('loginPrivateKeyEncBackup', keyPrivateEncBackup);
 											this.backupCodeReplace = null;
 											this.backupCodeMayRenew = false;
 										},
