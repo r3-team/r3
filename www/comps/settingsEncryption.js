@@ -42,7 +42,7 @@ export default {
 		<div class="textError" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
 
 		<!-- login without credentials -->
-		<template v-if="loginNoCred && !newKeys">
+		<div class="column gap" v-if="loginNoCred && !newKeys">
 			<p v-if="!loginEncEnabled">{{ capApp.noCredMasterKeyChoose }}</p>
 			<p v-if="loginEncLocked">{{ capApp.noCredMasterKeyEnter }}</p>
 
@@ -59,9 +59,8 @@ export default {
 						:active="noCredMasterKey !== '' && noCredMasterKeyChanged"
 					/>
 				</div>
-				<br />
 			</template>
-		</template>
+		</div>
 
 		<!-- create new key pair -->
 		<div class="column gap" v-if="!loginEncEnabled && loginKeyAes !== null">
@@ -260,12 +259,8 @@ export default {
 		moduleIdMap: s => s.$store.getters['schema/moduleIdMap']
 	},
 	mounted() {
-		if (this.loginEncReady) {
-			ws.send('lookup', 'get', { name: 'loginMayRenewBackupCode' }, false).then(
-				res => this.backupCodeMayRenew = res.payload,
-				this.$root.genericError
-			);
-		}
+		if (this.loginEncReady)
+			this.checkBackupCodeRenewal();
 	},
 	methods: {
 		// externals
@@ -353,7 +348,10 @@ export default {
 
 							// attempt to decrypt private key
 							this.pemImportPrivateEnc(this.loginPrivateKeyEnc, keyBase64, false).then(
-								keyPem => { this.$store.commit('loginPrivateKey', keyPem); },
+								keyPem => {
+									this.$store.commit('loginPrivateKey', keyPem);
+									this.checkBackupCodeRenewal();
+								},
 								() => {
 									this.noCredMasterKeyBadInput = true;
 									this.$store.commit('dialog', {
@@ -423,6 +421,12 @@ export default {
 		},
 
 		// backend calls
+		checkBackupCodeRenewal() {
+			ws.send('lookup', 'get', { name: 'loginMayRenewBackupCode' }, false).then(
+				res => this.backupCodeMayRenew = res.payload,
+				this.$root.genericError
+			);
+		},
 		reencrypt(privateKeyPem) {
 			Promise.all([
 				this.pemImport(privateKeyPem, 'RSA', false), // import private key PEM
