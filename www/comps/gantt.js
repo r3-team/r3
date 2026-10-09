@@ -1,38 +1,26 @@
+import MyForm from './form.js';
 import MyInputCollection from './inputCollection.js';
-import MyForm            from './form.js';
-import srcBase64Icon     from './shared/image.js';
-import { getCaption }    from './shared/language.js';
+
+import { isAttributeFiles } from './shared/attribute.js';
+import { checkDataOptions, colorAdjustBg, colorMakeContrastFont } from './shared/generic.js';
+import srcBase64Icon from './shared/image.js';
+import { getCaption } from './shared/language.js';
 import {
-	checkDataOptions,
-	colorAdjustBg,
-	colorMakeContrastFont
-} from './shared/generic.js';
-import {
-	getDateAtUtcZero,
-	getDateFormat,
-	getDateFromUnix,
-	getDateShifted,
-	getUnixFromDate,
-	getUnixShifted,
-	isUnixUtcZero
-} from './shared/time.js';
-import {
-	fillRelationRecordIds,
-	getQueryExpressions,
-	getQueryExpressionsDateRange,
-	getQueryFiltersDateRange,
-	getRelationsJoined
+	fillRelationRecordIds, getQueryExpressions, getQueryExpressionsDateRange,
+	getQueryFiltersDateRange, getRelationsJoined
 } from './shared/query.js';
+import { routeChangeFieldReload, routeParseParams } from './shared/router.js';
 import {
-	routeChangeFieldReload,
-	routeParseParams
-} from './shared/router.js';
-export {MyGantt as default};
+	getDateAtUtcZero, getDateFormat, getDateFromUnix, getDateShifted,
+	getUnixFromDate, getUnixShifted, isUnixUtcZero
+} from './shared/time.js';
+
+export { MyGantt as default };
 
 const MyGanttLineRecord = {
-	name:'my-gantt-line-record',
+	name: 'my-gantt-line-record',
 	template:
-	`<div class="gantt-line-record"
+		`<div class="gantt-line-record"
 		@click.ctrl.exact="clickRecord(true)"
 		@click.left.exact="clickRecord(false)"
 		@click.middle.exact="clickRecord(true)"
@@ -61,39 +49,39 @@ const MyGanttLineRecord = {
 			</template>
 		</div>
 	</div>`,
-	props:{
-		color:        { required:true },
-		columns:      { type:Array,  required:true },
-		date0:        { type:Date,   required:true }, // start date of record
-		date0Range:   { type:Date,   required:true }, // start date of gantt range
-		date1:        { type:Date,   required:true }, // end date of record
-		date1Range:   { type:Date,   required:true }, // end date of gantt range
-		hasUpdate:    { type:Boolean,required:true },
-		indexesHidden:{ type:Array,  required:true }, // hidden column indexes (either it is hidden or used as Gantt group)
-		isDateBased:  { type:Boolean,required:true },
-		pxLine:       { type:Number, required:true }, // total length in pixels of 1 Gantt line
-		row:          { type:Object, required:true },
-		values:       { type:Array,  required:true }
+	props: {
+		color: { required: true },
+		columns: { type: Array, required: true },
+		date0: { type: Date, required: true }, // start date of record
+		date0Range: { type: Date, required: true }, // start date of gantt range
+		date1: { type: Date, required: true }, // end date of record
+		date1Range: { type: Date, required: true }, // end date of gantt range
+		hasUpdate: { type: Boolean, required: true },
+		indexesHidden: { type: Array, required: true }, // hidden column indexes (either it is hidden or used as Gantt group)
+		isDateBased: { type: Boolean, required: true },
+		pxLine: { type: Number, required: true }, // total length in pixels of 1 Gantt line
+		row: { type: Object, required: true },
+		values: { type: Array, required: true }
 	},
-	emits:['record-selected'],
-	computed:{
-		style:s => {
+	emits: ['record-selected'],
+	computed: {
+		style: s => {
 			let d0 = new Date(s.date0.getTime());
 			let d1 = new Date(s.date1.getTime());
 
 			// limit record date to gantt presentation range
-			if(s.date0Range > d0) d0 = s.date0Range;
-			if(s.date1Range < d1) d1 = s.date1Range;
+			if (s.date0Range > d0) d0 = s.date0Range;
+			if (s.date1Range < d1) d1 = s.date1Range;
 
 			// calculate width and offset to gantt start
 			const secLine = (s.date1Range - s.date0Range) / 1000;
 			let secOffset = (d0 - s.date0Range) / 1000;
-			let secWidth  = (d1 - d0) / 1000;
+			const secWidth = (d1 - d0) / 1000;
 
 			// correction for DST change in day mode
-			if(s.isDateBased) {
-				let secDst0 = s.date0Range.getTimezoneOffset() * 60;
-				let secDst1 = d0.getTimezoneOffset() * 60;
+			if (s.isDateBased) {
+				const secDst0 = s.date0Range.getTimezoneOffset() * 60;
+				const secDst1 = d0.getTimezoneOffset() * 60;
 				secOffset += secDst0 - secDst1;
 			}
 
@@ -101,36 +89,36 @@ const MyGanttLineRecord = {
 			const pxOffset = secOffset / secLine * s.pxLine;
 			const pxWidth = secWidth / secLine * s.pxLine;
 
-			if(pxWidth < 1)
+			if (pxWidth < 1)
 				return 'display:none';
 
 			// max-width is overwritten by CSS if hovered over (show full entry)
-			return [`min-width:${pxWidth}px`,`max-width:${pxWidth}px`,`left:${pxOffset}px`].join(';');
+			return [`min-width:${pxWidth}px`, `max-width:${pxWidth}px`, `left:${pxOffset}px`].join(';');
 		},
 		styleBg: s => {
-			if(s.color === null) return '';
-			const colorBg   = s.colorAdjustBg(s.color);
+			if (s.color === null) return '';
+			const colorBg = s.colorAdjustBg(s.color);
 			const colorFont = s.colorMakeContrastFont(colorBg);
 			return `background-color:${colorBg};color:${colorFont};`
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		colorAdjustBg,
 		colorMakeContrastFont,
 
 		// actions
 		clickRecord(middleClick) {
-			if(this.hasUpdate)
-				this.$emit('record-selected',this.row,middleClick);
+			if (this.hasUpdate)
+				this.$emit('record-selected', this.row, middleClick);
 		}
 	}
 };
 
 const MyGanttLine = {
-	name:'my-gantt-line',
-	components:{MyGanttLineRecord},
-	template:`<div class="gantt-line">
+	name: 'my-gantt-line',
+	components: { MyGanttLineRecord },
+	template: `<div class="gantt-line">
 		<my-gantt-line-record
 			v-for="(r,i) in records"
 			@record-selected="(...args) => $emit('record-selected',...args)"
@@ -149,26 +137,26 @@ const MyGanttLine = {
 			:values="r.values"
 		/>
 	</div>`,
-	props:{
-		columns:      { type:Array,  required:true },
-		indexesHidden:{ type:Array,  required:true },
-		date0Range:   { type:Date,   required:true },
-		date1Range:   { type:Date,   required:true },
-		hasUpdate:    { type:Boolean,required:true },
-		isDateBased:  { type:Boolean,required:true },
-		pxLine:       { type:Number, required:true },
-		records:      { type:Array,  required:true }
+	props: {
+		columns: { type: Array, required: true },
+		indexesHidden: { type: Array, required: true },
+		date0Range: { type: Date, required: true },
+		date1Range: { type: Date, required: true },
+		hasUpdate: { type: Boolean, required: true },
+		isDateBased: { type: Boolean, required: true },
+		pxLine: { type: Number, required: true },
+		records: { type: Array, required: true }
 	},
-	emits:['record-selected']
+	emits: ['record-selected']
 };
 
 const MyGantt = {
-	name:'my-gantt',
-	components:{
+	name: 'my-gantt',
+	components: {
 		MyGanttLine,
 		MyInputCollection
 	},
-	template:`<div class="gantt-wrap" :class="{ isSingleField:isSingleField }" v-if="ready">
+	template: `<div class="gantt-wrap" :class="{ isSingleField:isSingleField }" v-if="ready">
 
 		<!-- header -->
 		<div class="top lower">
@@ -377,65 +365,65 @@ const MyGantt = {
 			/>
 		</div>
 	</div>`,
-	props:{
-		attributeIdColor:{ type:[String,null], required:true },
-		attributeIdDate0:{ type:String,  required:true },
-		attributeIdDate1:{ type:String,  required:true },
-		choices:         { type:Array,   required:false, default:() => [] },
-		columns:         { type:Array,   required:true }, // processed list columns
-		collections:     { type:Array,   required:true },
-		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		dataOptions:     { type:Number,  required:false, default:0 },
-		fieldId:         { type:String,  required:true },
-		filters:         { type:Array,   required:true }, // processed query filters
-		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
-		hasOpenForm:     { type:Boolean, required:true },
-		iconId:          { type:[String,null], required:true },
-		indexColor:      { type:[Number,null], required:true }, // index of attribute that provides record color
-		indexDate0:      { type:Number,  required:true }, // index of attribute that provides record date from
-		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
-		isHidden:        { type:Boolean, required:false, default:false },
-		isSingleField:   { type:Boolean, required:false, default:false },
-		loginOptions:    { type:Object,  required:true },
-		moduleId:        { type:String,  required:true },
-		popUpFormInline: { required:false, default:null },
-		query:           { type:Object,  required:true },
-		stepTypeDefault: { type:String,  required:true },
-		stepTypesShown:  { type:[Array,null], required:true },
-		usesHotkeys:     { type:Boolean, required:true },
-		usesPageHistory: { type:Boolean, required:true }
+	props: {
+		attributeIdColor: { type: [String, null], required: true },
+		attributeIdDate0: { type: String, required: true },
+		attributeIdDate1: { type: String, required: true },
+		choices: { type: Array, required: false, default: () => [] },
+		columns: { type: Array, required: true }, // processed list columns
+		collections: { type: Array, required: true },
+		collectionIdMapIndexes: { type: Object, required: false, default: () => { return {} } },
+		dataOptions: { type: Number, required: false, default: 0 },
+		fieldId: { type: String, required: true },
+		filters: { type: Array, required: true }, // processed query filters
+		formLoading: { type: Boolean, required: true }, // block GET while form is still loading (avoid redundant GET calls)
+		hasOpenForm: { type: Boolean, required: true },
+		iconId: { type: [String, null], required: true },
+		indexColor: { type: [Number, null], required: true }, // index of attribute that provides record color
+		indexDate0: { type: Number, required: true }, // index of attribute that provides record date from
+		indexDate1: { type: Number, required: true }, // index of attribute that provides record date to
+		isHidden: { type: Boolean, required: false, default: false },
+		isSingleField: { type: Boolean, required: false, default: false },
+		loginOptions: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		popUpFormInline: { required: false, default: null },
+		query: { type: Object, required: true },
+		stepTypeDefault: { type: String, required: true },
+		stepTypesShown: { type: [Array, null], required: true },
+		usesHotkeys: { type: Boolean, required: true },
+		usesPageHistory: { type: Boolean, required: true }
 	},
-	emits:['close-inline','open-form','set-args','set-collection-indexes','set-login-option'],
+	emits: ['close-inline', 'open-form', 'set-args', 'set-collection-indexes', 'set-login-option'],
 	data() {
 		return {
-			dateStart:null,
-			notScrolled:true,
-			groups:[],              // gantt groups, by defined column, each with its lines of records
-			headerItems:[],
-			headerItemsMeta:[],
-			groupWidthMin:80,       // minimum group label width in pixels
-			linePixels:30,          // line height in pixels
-			page:0,                 // which page we are on (0: default, 1: next, -1: prev)
-			ready:false,            // component ready to be used
-			resizeTimer:null,
-			startDate:0,            // start date (TZ), base for date ranges, set once to keep navigation clear
-			stepBase:8,             // base size of step width in pixels, used to multiply with zoom factor
-			stepZoomDefault:7,      // zoom reset to
-			stepZoomMin:3,
-			stepZoomMax:30,
-			steps:0,                // available steps, calculated based on field size and zoom factor
-			unixInput0:null,        // date input, start
-			unixInput1:null,        // date input, end
-			unixInputActive:false,
-			unixTimeRangeStart:null // for time range input
+			dateStart: null,
+			notScrolled: true,
+			groups: [],              // gantt groups, by defined column, each with its lines of records
+			headerItems: [],
+			headerItemsMeta: [],
+			groupWidthMin: 80,       // minimum group label width in pixels
+			linePixels: 30,          // line height in pixels
+			page: 0,                 // which page we are on (0: default, 1: next, -1: prev)
+			ready: false,            // component ready to be used
+			resizeTimer: null,
+			startDate: 0,            // start date (TZ), base for date ranges, set once to keep navigation clear
+			stepBase: 8,             // base size of step width in pixels, used to multiply with zoom factor
+			stepZoomDefault: 7,      // zoom reset to
+			stepZoomMin: 3,
+			stepZoomMax: 30,
+			steps: 0,                // available steps, calculated based on field size and zoom factor
+			unixInput0: null,        // date input, start
+			unixInput1: null,        // date input, end
+			unixInputActive: false,
+			unixTimeRangeStart: null // for time range input
 		};
 	},
-	computed:{
+	computed: {
 		// unix date range points, 0=gantt start, 1=gantt end
-		date0:s => {
+		date0: s => {
 			// start 3 steps before page start point
-			let d = new Date(s.dateStart.getTime());
-			switch(s.stepType) {
+			const d = new Date(s.dateStart.getTime());
+			switch (s.stepType) {
 				case 'hours': d.setHours(d.getHours() - 3 + (s.page * s.steps)); break;
 				case 'days': d.setDate(d.getDate() - 3 + (s.page * s.steps)); break;
 				case 'months': d.setMonth(d.getMonth() - 3 + (s.page * s.steps)); break;
@@ -444,8 +432,8 @@ const MyGantt = {
 			}
 			return d;
 		},
-		date1:s => {
-			let d = new Date(s.date0.getTime());
+		date1: s => {
+			const d = new Date(s.date0.getTime());
 			switch (s.stepType) {
 				case 'hours': d.setHours(d.getHours() + s.steps); break;
 				case 'days': d.setDate(d.getDate() + s.steps); break;
@@ -458,8 +446,8 @@ const MyGantt = {
 
 		dateRangeLabel: s => {
 			let format = s.settings.dateFormat;
-			let d0 = new Date(s.date0.getTime());
-			let d1 = new Date(s.date1.getTime());
+			const d0 = new Date(s.date0.getTime());
+			const d1 = new Date(s.date1.getTime());
 			switch (s.stepType) {
 				case 'hours':
 					format = s.settings.dateFormat + ' H:i';
@@ -467,15 +455,13 @@ const MyGantt = {
 						return s.getDateFormat(d0, format);
 
 					return d0.getDate() === d1.getDate()
-						? s.getDateFormat(d0, format) + '-' + s.getDateFormat(d1, 'H:i')
-						: s.getDateFormat(d0, format) + ' - ' + s.getDateFormat(d1, format);
-					break;
+						? `${s.getDateFormat(d0, format)}-${s.getDateFormat(d1, 'H:i')}`
+						: `${s.getDateFormat(d0, format)} - ${s.getDateFormat(d1, format)}`;
 				case 'days':
 					d1.setDate(d1.getDate() - 1);
 					return s.isMobile
 						? s.getDateFormat(d0, format)
-						: s.getDateFormat(d0, format) + ' - ' + s.getDateFormat(d1, format);
-					break;
+						: `${s.getDateFormat(d0, format)} - ${s.getDateFormat(d1, format)}`;
 				case 'months':
 					format = 'Y-m';
 					if (s.isMobile)
@@ -483,25 +469,26 @@ const MyGantt = {
 
 					d1.setMonth(d1.getMonth() - 1);
 					return `${s.getDateFormat(d0, 'Y-m')} - ${s.getDateFormat(d1, 'Y-m')}`;
-					break;
 				case 'quarters':
-					const d0Quarter = s.getDateCurrentQuarter(d0);
-					if (s.isMobile)
-						return `${d0.getFullYear()}-Q${d0Quarter}`;
+					{
+						const d0Quarter = s.getDateCurrentQuarter(d0);
+						if (s.isMobile)
+							return `${d0.getFullYear()}-Q${d0Quarter}`;
 
-					d1.setMonth(d1.getMonth() - 3);
-					const d1Quarter = s.getDateCurrentQuarter(d1);
-					return `${d0.getFullYear()}-Q${d0Quarter} - ${d1.getFullYear()}-Q${d1Quarter}`;
-				break;
+						d1.setMonth(d1.getMonth() - 3);
+						const d1Quarter = s.getDateCurrentQuarter(d1);
+						return `${d0.getFullYear()}-Q${d0Quarter} - ${d1.getFullYear()}-Q${d1Quarter}`;
+					}
 				case 'half-years':
-					const d0HalfYear = d0.getMonth() < 6 ? '1' : '2';
-					if (s.isMobile)
-						return `${d0.getFullYear()}-H${d0HalfYear}`;
+					{
+						const d0HalfYear = d0.getMonth() < 6 ? '1' : '2';
+						if (s.isMobile)
+							return `${d0.getFullYear()}-H${d0HalfYear}`;
 
-					d1.setMonth(d1.getMonth() - 6);
-					const d1HalfYear = d1.getMonth() < 6 ? '1' : '2';
-					return `${d0.getFullYear()}-H${d0HalfYear} - ${d1.getFullYear()}-H${d1HalfYear}`;
-				break;
+						d1.setMonth(d1.getMonth() - 6);
+						const d1HalfYear = d1.getMonth() < 6 ? '1' : '2';
+						return `${d0.getFullYear()}-H${d0HalfYear} - ${d1.getFullYear()}-H${d1HalfYear}`;
+					}
 			}
 			return '';
 		},
@@ -509,19 +496,19 @@ const MyGantt = {
 		// records in gantt are always grouped (basically 1 calendar line per group)
 		//  currently only 1 group level exists (group 0), more could be added to allow nesting
 		//  group 0 label expression indexes define, which expression index(es) hold grouping label values
-		group0LabelExpressionIndexes:s => {
-			let out = [];
+		group0LabelExpressionIndexes: s => {
+			const out = [];
 			let batchIndexUsed;
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(i === 0) {
+			for (let i = 0, j = s.columns.length; i < j; i++) {
+				if (i === 0) {
 					// get all columns from first used batch index
 					batchIndexUsed = s.columns[i].batch;
 					out.push(i);
 
 					// if no batch index is used, only use first column
-					if(batchIndexUsed === null) break;
+					if (batchIndexUsed === null) break;
 
-				} else if(s.columns[i].batch === batchIndexUsed) {
+				} else if (s.columns[i].batch === batchIndexUsed) {
 					out.push(i);
 				}
 			}
@@ -529,7 +516,7 @@ const MyGantt = {
 		},
 
 		// presentation
-		styleLine:s => {
+		styleLine: s => {
 			return [
 				`max-width:${s.stepPixels * s.steps}px`,
 				`background-size:${s.stepPixels}px ${s.linePixels}px`
@@ -537,34 +524,34 @@ const MyGantt = {
 		},
 
 		// simple
-		expressions:      s => s.getQueryExpressions(s.columns),
-		hasChoices:       s => s.choices.length > 1,
-		hasColor:         s => s.attributeIdColor !== null,
-		hasCreate:        s => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
-		hasUpdate:        s => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		isEmpty:          s => s.groups.length === 0,
-		isDateBased:      s => s.stepType !== 'hours',
-		joins:            s => s.fillRelationRecordIds(s.query.joins),
-		stepPixels:       s => s.stepBase * s.stepZoom,
-		styleHeaderItem:  s => `width:${s.stepPixels}px;`,
-		styleGroupLabel:  s => `width:${s.groupWidth > s.groupWidthMin ? s.groupWidth : s.groupWidthMin}px;`,
+		expressions: s => s.getQueryExpressions(s.columns),
+		hasChoices: s => s.choices.length > 1,
+		hasColor: s => s.attributeIdColor !== null,
+		hasCreate: s => s.checkDataOptions(4, s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate: s => s.checkDataOptions(2, s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		isEmpty: s => s.groups.length === 0,
+		isDateBased: s => s.stepType !== 'hours',
+		joins: s => s.fillRelationRecordIds(s.query.joins),
+		stepPixels: s => s.stepBase * s.stepZoom,
+		styleHeaderItem: s => `width:${s.stepPixels}px;`,
+		styleGroupLabel: s => `width:${s.groupWidth > s.groupWidthMin ? s.groupWidth : s.groupWidthMin}px;`,
 
 		// login options
-		choiceId:       s => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		groupWidth:     s => s.$root.getOrFallback(s.loginOptions,'ganttGroupWidth',180),
-		stepType:       s => s.$root.getOrFallback(s.loginOptions,'ganttStepType',s.stepTypeDefault), // gantt step type (hours, days)
-		stepZoom:       s => s.$root.getOrFallback(s.loginOptions,'ganttStepZoom',7),                 // zoom factor for step, 7 is default (7*8=56)
-		showGroupLabels:s => s.$root.getOrFallback(s.loginOptions,'ganttShowGroupLabels',true),
+		choiceId: s => s.$root.getOrFallback(s.loginOptions, 'choiceId', s.choices.length === 0 ? null : s.choices[0].id),
+		groupWidth: s => s.$root.getOrFallback(s.loginOptions, 'ganttGroupWidth', 180),
+		stepType: s => s.$root.getOrFallback(s.loginOptions, 'ganttStepType', s.stepTypeDefault), // gantt step type (hours, days)
+		stepZoom: s => s.$root.getOrFallback(s.loginOptions, 'ganttStepZoom', 7),                 // zoom factor for step, 7 is default (7*8=56)
+		showGroupLabels: s => s.$root.getOrFallback(s.loginOptions, 'ganttShowGroupLabels', true),
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
-		appResized:    s => s.$store.getters.appResized,
-		capApp:        s => s.$store.getters.captions.calendar,
-		capGen:        s => s.$store.getters.captions.generic,
-		dateSteps:     s => s.$store.getters.constants.ganttSteps,
-		isMobile:      s => s.$store.getters.isMobile,
-		settings:      s => s.$store.getters.settings
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		appResized: s => s.$store.getters.appResized,
+		capApp: s => s.$store.getters.captions.calendar,
+		capGen: s => s.$store.getters.captions.generic,
+		dateSteps: s => s.$store.getters.constants.ganttSteps,
+		isMobile: s => s.$store.getters.isMobile,
+		settings: s => s.$store.getters.settings
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
@@ -572,32 +559,32 @@ const MyGantt = {
 	},
 	mounted() {
 		// setup watchers
-		this.$watch('appResized',this.resized);
-		this.$watch('formLoading',v => { if(!v) this.get(); });
-		this.$watch('isHidden',v => { if(!v) this.$nextTick(() => this.setSteps(true)); });
-		this.$watch('popUpFormInline',this.resized);
-		this.$watch('stepType',() => {
+		this.$watch('appResized', this.resized);
+		this.$watch('formLoading', v => { if (!v) this.get(); });
+		this.$watch('isHidden', v => { if (!v) this.$nextTick(() => this.setSteps(true)); });
+		this.$watch('popUpFormInline', this.resized);
+		this.$watch('stepType', () => {
 			this.page = 0;
 			this.dateStart = this.getDateRounded(new Date());
 			this.paramsUpdate(true);
 			this.$nextTick(() => this.setSteps(true));
 		});
-		this.$watch('columns',(valNew,valOld) => {
-			if(JSON.stringify(valNew) !== JSON.stringify(valOld)) {
+		this.$watch('columns', (valNew, valOld) => {
+			if (JSON.stringify(valNew) !== JSON.stringify(valOld)) {
 				this.groups = [];
 				this.get();
 			}
 		});
-		this.$watch('filters',(valNew,valOld) => {
-			if(JSON.stringify(valNew) !== JSON.stringify(valOld))
+		this.$watch('filters', (valNew, valOld) => {
+			if (JSON.stringify(valNew) !== JSON.stringify(valOld))
 				this.get();
 		});
-		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
+		this.$watch(() => [this.showGroupLabels, this.stepZoom], () => {
 			this.$nextTick(() => this.setSteps(false));
 		});
-		if(this.usesPageHistory) {
-			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals))
+		if (this.usesPageHistory) {
+			this.$watch(() => [this.$route.path, this.$route.query], (newVals, oldVals) => {
+				if (this.routeChangeFieldReload(newVals, oldVals))
 					this.paramsUpdated(true);
 			});
 
@@ -605,21 +592,21 @@ const MyGantt = {
 			this.paramsUpdated(false);
 		}
 
-		if(this.usesHotkeys)
-			window.addEventListener('keydown',this.handleHotkeys);
+		if (this.usesHotkeys)
+			window.addEventListener('keydown', this.handleHotkeys);
 
 		if (this.stepTypesShown !== null && this.stepTypesShown.length > 0 && !this.stepTypesShown.includes(this.stepType))
 			this.$emit('set-login-option', 'ganttStepType', this.stepTypesShown[0])
 
 		this.dateStart = this.getDateRounded(new Date());
-		this.ready     = true;
+		this.ready = true;
 		this.$nextTick(() => this.setSteps(false));
 	},
 	unmounted() {
-		if(this.usesHotkeys)
-			window.removeEventListener('keydown',this.handleHotkeys);
+		if (this.usesHotkeys)
+			window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// external
 		checkDataOptions,
 		fillRelationRecordIds,
@@ -634,19 +621,20 @@ const MyGantt = {
 		getRelationsJoined,
 		getUnixFromDate,
 		getUnixShifted,
+		isAttributeFiles,
 		isUnixUtcZero,
 		routeChangeFieldReload,
 		routeParseParams,
 		srcBase64Icon,
 
 		createHeaderItems() {
-			this.headerItems     = [];
+			this.headerItems = [];
 			this.headerItemsMeta = [];
 
-			const addMeta = (steps,value) => {
+			const addMeta = (steps, value) => {
 				this.headerItemsMeta.push({
-					steps:steps,
-					value:value
+					steps: steps,
+					value: value
 				});
 			};
 			const add = d => {
@@ -656,138 +644,140 @@ const MyGantt = {
 					case 'hours': caption = d.getHours(); showWeekend = true; break;
 					case 'days': caption = `${d.getDate()}.`; showWeekend = true; break;
 					case 'months': caption = `${d.getMonth() + 1}`; break;
-					case 'quarters': caption = `Q${parseInt((d.getMonth() + 1) / 3) + 1}`; break;
+					case 'quarters': caption = `Q${parseInt((d.getMonth() + 1) / 3, 10) + 1}`; break;
 					case 'half-years': caption = d.getMonth() < 6 ? 'H1' : 'H2'; break;
 				}
 
 				this.headerItems.push({
 					caption,
-					isWeekend:showWeekend && (d.getDay() === 0 || d.getDay() === 6),
-					unixTime:this.getUnixFromDate(d)
+					isWeekend: showWeekend && (d.getDay() === 0 || d.getDay() === 6),
+					unixTime: this.getUnixFromDate(d)
 				});
 			};
 
 			// create one header item for each date step
 			// create one meta header item for each meta switch (new day/month/quarter/...)
 			let stepsTaken = 0;
-			let d = new Date(this.date0.getTime());
-			while(d < this.date1) {
+			const d = new Date(this.date0.getTime());
+			while (d < this.date1) {
 				stepsTaken++;
 				add(d);
 
 				switch (this.stepType) {
 					case 'hours':
-						d.setHours(d.getHours()+1);
+						d.setHours(d.getHours() + 1);
 
 						// next day meta item
-						if(d.getHours() === 0) {
-							let dCopy = new Date(d.getTime());
+						if (d.getHours() === 0) {
+							const dCopy = new Date(d.getTime());
 							dCopy.setHours(dCopy.getHours() - 1);
 
-							addMeta(stepsTaken,dCopy.getDate());
+							addMeta(stepsTaken, dCopy.getDate());
 							stepsTaken = 0;
 						}
-					break;
+						break;
 					case 'days':
-						d.setDate(d.getDate()+1);
+						d.setDate(d.getDate() + 1);
 
 						// next month meta item
-						if(d.getDate() === 1) {
-							let dCopy = new Date(d.getTime());
+						if (d.getDate() === 1) {
+							const dCopy = new Date(d.getTime());
 							dCopy.setDate(dCopy.getDate() - 1);
 
-							addMeta(stepsTaken,dCopy.getMonth());
+							addMeta(stepsTaken, dCopy.getMonth());
 							stepsTaken = 0;
 						}
-					break;
+						break;
 					case 'months': // fallthrough
 					case 'quarters': // fallthrough
 					case 'half-years':
-						const yearCurr = d.getFullYear();
+						{
+							const yearCurr = d.getFullYear();
 
-						switch (this.stepType) {
-							case 'months': d.setMonth(d.getMonth() + 1); break;
-							case 'quarters': d.setMonth(d.getMonth() + 3); break;
-							case 'half-years': d.setMonth(d.getMonth() + 6); break;
-						}
+							switch (this.stepType) {
+								case 'months': d.setMonth(d.getMonth() + 1); break;
+								case 'quarters': d.setMonth(d.getMonth() + 3); break;
+								case 'half-years': d.setMonth(d.getMonth() + 6); break;
+							}
 
-						// next year meta item
-						if(yearCurr !== d.getFullYear()) {
-							addMeta(stepsTaken,yearCurr);
-							stepsTaken = 0;
+							// next year meta item
+							if (yearCurr !== d.getFullYear()) {
+								addMeta(stepsTaken, yearCurr);
+								stepsTaken = 0;
+							}
 						}
-					break;
+						break;
 				}
 			}
 
 			// add last meta header item
-			if(stepsTaken !== 0) {
-				switch(this.stepType) {
-					case 'hours': addMeta(stepsTaken,d.getDate()); break;
-					case 'days': addMeta(stepsTaken,d.getMonth()); break;
-					case 'months': addMeta(stepsTaken,d.getFullYear()); break;
-					case 'quarters': addMeta(stepsTaken,d.getFullYear()); break;
-					case 'half-years': addMeta(stepsTaken,d.getFullYear()); break;
+			if (stepsTaken !== 0) {
+				switch (this.stepType) {
+					case 'hours': addMeta(stepsTaken, d.getDate()); break;
+					case 'days': addMeta(stepsTaken, d.getMonth()); break;
+					case 'months': addMeta(stepsTaken, d.getFullYear()); break;
+					case 'quarters': addMeta(stepsTaken, d.getFullYear()); break;
+					case 'half-years': addMeta(stepsTaken, d.getFullYear()); break;
 				}
 			}
 		},
 
 		// actions
-		clickHeaderItem(unix,mousedown) {
-			if(!this.hasCreate) return;
+		clickHeaderItem(unix, mousedown) {
+			if (!this.hasCreate) return;
 
 			this.unixInputActive = mousedown;
-			if(mousedown) {
+			if (mousedown) {
 				this.unixInput0 = unix;
 				this.unixInput1 = unix;
 				return;
 			}
 
 			if (this.unixInput0 !== null && this.unixInput1 !== null) {
-				let d0 = new Date(this.unixInput0 * 1000);
-				let d1 = new Date(this.unixInput1 * 1000);
-				switch(this.stepType) {
+				const d0 = new Date(this.unixInput0 * 1000);
+				const d1 = new Date(this.unixInput1 * 1000);
+				switch (this.stepType) {
 					case 'hours': this.unixInput1 += 3600; break; // add 1 hour
 					case 'days': break; // dates autom. include the following day, nothing to change
 					case 'months': // set to last day of month
 						d1.setUTCMonth(d1.getUTCMonth() + 1);
 						d1.setUTCDate(0);
-					break;
+						break;
 					case 'quarters': // set to last day of last month in quarter
 						d1.setUTCMonth(d1.getUTCMonth() + 3);
 						d1.setUTCDate(0);
-					break;
+						break;
 					case 'half-years': // set to last day of last month in half year
 						d1.setUTCMonth(d1.getUTCMonth() + 6);
 						d1.setUTCDate(0);
-					break;
+						break;
 				}
 				if (this.isDateBased) {
 					this.unixInput0 = Math.floor(this.getDateAtUtcZero(d0).getTime() / 1000);
 					this.unixInput1 = Math.floor(this.getDateAtUtcZero(d1).getTime() / 1000);
 				}
-				this.$emit('open-form',[],[`attributes=${[
+				this.$emit('open-form', [], [`attributes=${[
 					`${this.attributeIdDate0}_${this.unixInput0}`,
 					`${this.attributeIdDate1}_${this.unixInput1}`
-				].join(',')}`],false);
+				].join(',')}`], false);
 			}
 			this.unixInput0 = null;
 			this.unixInput1 = null;
 		},
 		handleHotkeys(e) {
-			switch(e.key) {
-				case 'ArrowLeft':  this.pageChange(-1); break;
-				case 'ArrowRight': this.pageChange(1);  break;
+			switch (e.key) {
+				case 'ArrowLeft': this.pageChange(-1); break;
+				case 'ArrowRight': this.pageChange(1); break;
 			}
 		},
 		hoverHeaderItem(unix) {
-			if(!this.unixInputActive) return;
+			if (!this.unixInputActive) return;
 
-			if(unix < this.unixInput0) this.unixInput0 = unix;
-			else                       this.unixInput1 = unix;
+			if (unix < this.unixInput0) this.unixInput0 = unix;
+			else this.unixInput1 = unix;
 		},
 		groupWidthSet(add) {
-			this.$emit('set-login-option','ganttGroupWidth',add ? this.groupWidth + 20 : this.groupWidth - 20);
+			this.$emit('set-login-option', 'ganttGroupWidth', add ? this.groupWidth + 20 : this.groupWidth - 20);
 			this.resized();
 		},
 		pageChange(factor) {
@@ -797,39 +787,38 @@ const MyGantt = {
 		},
 		resized() {
 			clearTimeout(this.resizeTimer);
-			this.resizeTimer = setTimeout(() => this.setSteps(false),150);
+			this.resizeTimer = setTimeout(() => this.setSteps(false), 150);
 		},
 		scrollToNow() {
-			if(this.page !== 0)
-				return this.pageChange(this.page-(this.page*2));
+			if (this.page !== 0)
+				return this.pageChange(this.page - (this.page * 2));
 		},
 
 		// page routing
 		paramsUpdate(pushHistory) {
-			if(this.usesPageHistory)
-				this.$emit('set-args',this.page !== 0 ? [`page=${this.page}`] : [],pushHistory);
+			if (this.usesPageHistory)
+				this.$emit('set-args', this.page !== 0 ? [`page=${this.page}`] : [], pushHistory);
 		},
 		paramsUpdated(reloadIfChanged) {
-			let params = { page:{ parse:'int', value:0 } };
+			const params = { page: { parse: 'int', value: 0 } };
 			this.routeParseParams(params);
-			if(this.page !== params.page.value) {
+			if (this.page !== params.page.value) {
 				this.page = params.page.value;
 
-				if(reloadIfChanged)
+				if (reloadIfChanged)
 					this.get();
 			}
 		},
 
 		// presentation
 		displayHeaderMetaItem(value) {
-			switch(this.stepType) {
-				case 'hours': return `${value}.`; break; // days shown as: 12., 13., ...
-				case 'days': return this.capApp['month' + value]; break; // months shown as: January, ...
+			switch (this.stepType) {
+				case 'hours': return `${value}.`; // days shown as: 12., 13., ...
+				case 'days': return this.capApp[`month${value}`]; // months shown as: January, ...
 				case 'months': // fallthrough
 				case 'quarters':
 				case 'half-years':
 					return value;
-				break;
 			}
 			return '';
 		},
@@ -840,14 +829,14 @@ const MyGantt = {
 				(this.stepBase * this.stepZoom)
 			);
 
-			if(stepsNew === this.steps && !forceReload)
+			if (stepsNew === this.steps && !forceReload)
 				return;
 
 			this.steps = stepsNew;
 			this.get();
 		},
 		styleLabel(group) {
-			return `height:${group.lines.length*this.linePixels}px;`;
+			return `height:${group.lines.length * this.linePixels}px;`;
 		},
 
 		// helpers
@@ -856,36 +845,36 @@ const MyGantt = {
 			d.setUTCSeconds(0);
 			d.setUTCMilliseconds(0);
 
-			if(this.stepType !== 'hours')
+			if (this.stepType !== 'hours')
 				d.setUTCHours(0);
 
-			if(this.stepType !== 'hours' && this.stepType !== 'days')
+			if (this.stepType !== 'hours' && this.stepType !== 'days')
 				d.setUTCDate(1);
 
-			if(this.stepType === 'quarters')
-				d.setMonth((this.getDateCurrentQuarter(d)-1) * 3); // set date to start of current quarter
+			if (this.stepType === 'quarters')
+				d.setMonth((this.getDateCurrentQuarter(d) - 1) * 3); // set date to start of current quarter
 
-			if(this.stepType === 'half-years')
+			if (this.stepType === 'half-years')
 				d.setMonth(d.getMonth() < 6 ? 0 : 6); // set date to start of current half-year
 
 			return d;
 		},
 		getDateCurrentQuarter(d) {
 			// returns quarter number, as in 1,2,3,4
-			return parseInt(d.getMonth() / 3) + 1;
+			return parseInt(d.getMonth() / 3, 10) + 1;
 		},
-		getFreeLineIndex(lines,date0,date1) {
+		getFreeLineIndex(lines, date0, date1) {
 			let index;
-			for(let i = 0, j = lines.length; i < j; i++) {
+			for (let i = 0, j = lines.length; i < j; i++) {
 				index = i;
-				for(const record of lines[i]) {
+				for (const record of lines[i]) {
 					// if another record´s date range overlaps, line is not suitable
-					if(date0 < record.date1 && record.date0 < date1) {
+					if (date0 < record.date1 && record.date0 < date1) {
 						index = -1;
 						break;
 					}
 				}
-				if(index !== -1)
+				if (index !== -1)
 					return index;
 			}
 			return index;
@@ -893,125 +882,125 @@ const MyGantt = {
 
 		// backend calls
 		get() {
-			if(this.formLoading || this.isHidden)
+			if (this.formLoading || this.isHidden)
 				return;
 
 			this.createHeaderItems();
-			let d0 = new Date(this.date0.getTime());
-			let d1 = new Date(this.date1.getTime());
+			const d0 = new Date(this.date0.getTime());
+			const d1 = new Date(this.date1.getTime());
 
 			// expand range start to include prev. day to include dates that range into today
 			if (this.stepType === 'hours')
 				d0.setDate(d0.getDate() - 1);
 
-			ws.send('data','get',{
-				relationId:this.query.relationId,
-				joins:this.getRelationsJoined(this.joins),
-				expressions:this.getQueryExpressionsDateRange(
-					this.attributeIdDate0,this.indexDate0,
-					this.attributeIdDate1,this.indexDate1,
-					this.attributeIdColor,this.indexColor
+			ws.send('data', 'get', {
+				relationId: this.query.relationId,
+				joins: this.getRelationsJoined(this.joins),
+				expressions: this.getQueryExpressionsDateRange(
+					this.attributeIdDate0, this.indexDate0,
+					this.attributeIdDate1, this.indexDate1,
+					this.attributeIdColor, this.indexColor
 				).concat(this.expressions),
-				filters:this.filters.concat(this.getQueryFiltersDateRange(
+				filters: this.filters.concat(this.getQueryFiltersDateRange(
 					true, true,
-					this.attributeIdDate0,this.indexDate0,this.getUnixFromDate(d0),
-					this.attributeIdDate1,this.indexDate1,this.getUnixFromDate(d1)
+					this.attributeIdDate0, this.indexDate0, this.getUnixFromDate(d0),
+					this.attributeIdDate1, this.indexDate1, this.getUnixFromDate(d1)
 				)),
-				orders:this.query.orders,
-				getIds:true
-			},true).then(
+				orders: this.query.orders,
+				getIds: true
+			}, true).then(
 				res => {
 					// clear existing groups
 					this.groups = [];
 
 					// parse result rows to gantt groups
-					let groups           = []; // groups
-					let groupBy          = []; // group by criteria (can be identical to label)
-					let groupColumns     = []; // group column values
-					let groupIndexByName = {}; // map of group indexes, key: group name
-					let values           = [];
+					const groups = [];           // groups
+					let groupBy = [];            // group by criteria (can be identical to label)
+					let groupColumns = [];       // group column values
+					const groupIndexByName = {}; // map of group indexes, key: group name
+					let values = [];
 
-					for(const r of res.payload.rows) {
-						groupBy      = [];
+					for (const r of res.payload.rows) {
+						groupBy = [];
 						groupColumns = [];
 
 						// collect special calendar values first
-						let date0       = this.getDateFromUnix(r.values[0]);
-						let date1       = this.getDateFromUnix(r.values[1]);
-						const color     = this.hasColor ? r.values[2] : null;
+						let date0 = this.getDateFromUnix(r.values[0]);
+						let date1 = this.getDateFromUnix(r.values[1]);
+						const color = this.hasColor ? r.values[2] : null;
 						const isFullDay = this.isUnixUtcZero(r.values[0]) && this.isUnixUtcZero(r.values[1]);
 
 						// parse non-calendar expression values
 						values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
 
-						for(let i = 0, j = values.length; i < j; i++) {
+						for (let i = 0, j = values.length; i < j; i++) {
 
-							if(!this.group0LabelExpressionIndexes.includes(i))
+							if (!this.group0LabelExpressionIndexes.includes(i))
 								continue;
 
 							// add non-file attributes as group criteria
 							const c = this.columns[i];
-							if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
-								if(!s.isAttributeFiles(s.attributeIdMap[c.attributeId].content))
+							if (c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
+								if (!this.isAttributeFiles(this.attributeIdMap[c.attributeId].content))
 									groupBy.push(values[i]);
 							} else {
 								groupBy.push(values[i]);
 							}
 
 							groupColumns.push({
-								index:i,
-								value:values[i],
-								vertical:this.columns[i].flags.vertical
+								index: i,
+								value: values[i],
+								vertical: this.columns[i].flags.vertical
 							});
 						}
 						const name = groupBy.join(' ');
 
 						// add group if not there yet
-						if(groupIndexByName[name] === undefined) {
+						if (groupIndexByName[name] === undefined) {
 							groupIndexByName[name] = groups.length;
 							groups.push({
-								lines:[[]], // each line is an array of records
-								columns:groupColumns,
-								vertical:groupColumns.length === 0 ? false : groupColumns[0].vertical
+								lines: [[]], // each line is an array of records
+								columns: groupColumns,
+								vertical: groupColumns.length === 0 ? false : groupColumns[0].vertical
 							});
 						}
 
 						if (!isFullDay && this.stepType !== 'hours') {
 							// datetime shown in non-hour gantts, shift to UTC time
-							date0 = this.getDateShifted(date0,false);
-							date1 = this.getDateShifted(date1,false);
+							date0 = this.getDateShifted(date0, false);
+							date1 = this.getDateShifted(date1, false);
 						}
 						if (isFullDay && this.stepType === 'hours') {
 							// dates shown in hour-gantt, shift to local time
-							date0 = this.getDateShifted(date0,true);
-							date1 = this.getDateShifted(date1,true);
+							date0 = this.getDateShifted(date0, true);
+							date1 = this.getDateShifted(date1, true);
 						}
 						if (isFullDay) {
 							// dates shown, expand date range by one
-							date1.setDate(date1.getDate()+1);
+							date1.setDate(date1.getDate() + 1);
 						}
 
 						// check in which line record fits (no overlapping)
-						let lineIndex = this.getFreeLineIndex(groups[groupIndexByName[name]].lines,date0,date1);
-						if(lineIndex === -1) {
+						let lineIndex = this.getFreeLineIndex(groups[groupIndexByName[name]].lines, date0, date1);
+						if (lineIndex === -1) {
 							lineIndex = groups[groupIndexByName[name]].lines.length;
 							groups[groupIndexByName[name]].lines.push([]);
 						}
 
 						groups[groupIndexByName[name]].lines[lineIndex].push({
-							color:color,
-							date0:date0,
-							date1:date1,
-							row:r,
-							values:values
+							color: color,
+							date0: date0,
+							date1: date1,
+							row: r,
+							values: values
 						});
 					}
 					this.groups = groups;
 
-					if(this.notScrolled) {
+					if (this.notScrolled) {
 						this.notScrolled = false;
 
-						if(this.page === 0)
+						if (this.page === 0)
 							this.scrollToNow();
 					}
 				},
