@@ -26,6 +26,9 @@ func IsContentGeometry(content string) bool {
 func IsContentNumeric(content string) bool {
 	return content == "numeric"
 }
+func IsContentRegconfig(content string) bool {
+	return content == "regconfig"
+}
 func IsContentRelationship(content string) bool {
 	return content == "1:1" || content == "n:1"
 }

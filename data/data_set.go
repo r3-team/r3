@@ -265,7 +265,11 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int, dataSetsByIndex m
 			params = append(params, param)
 		} else {
 			params = append(params, fmt.Sprintf(`"%s" = %s`, atr.Name, param))
-			paramsExcl = append(paramsExcl, fmt.Sprintf(`"%s" IS DISTINCT FROM %s`, atr.Name, param))
+			if schema.IsContentRegconfig(atr.Content) {
+				paramsExcl = append(paramsExcl, fmt.Sprintf(`"%s" IS DISTINCT FROM %s::REGCONFIG`, atr.Name, param))
+			} else {
+				paramsExcl = append(paramsExcl, fmt.Sprintf(`"%s" IS DISTINCT FROM %s`, atr.Name, param))
+			}
 		}
 	}
 
