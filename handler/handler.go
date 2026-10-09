@@ -156,24 +156,26 @@ func ServeErrorPage(w http.ResponseWriter, code int, err error) {
 
 func WithSecurityHeaders(n http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// # scripts
+		// # scripts-src
 		// * inline execution
 		//   * required for vue templates, executed at runtime
 		// * eval execution
 		//   * required for frontend functions, loaded from application authors - might be addressable by JS functions being served by webserver via custom handler
 		//   * required for ECharts at least in one context
-		// # images
+		// # img-src
 		// * data
 		//   * required for icons loaded as base64 encoded text values
-		// # styles
+		// * blob
+		//   * required for images pasted from clipboard into richtext inputs
+		// # style-src
 		// * inline styles
 		//   * required for HTML PDF generation, with styles loaded from application data
 		//   * required for vue-color library - probably possible to replace
-		// # frame ancestors
+		// # frame-ancestors
 		// * we generally allow r3 to be loaded as iframe, for accessing forms in other apps or in itself - if relevant, could be defined by instance config
 		// # connect-src
 		// * we allow r3 to load external sources for OpenID authentication - might be possible to adjust this automatically, based on known provider URLs
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' *; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; ; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors *")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' *; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors *")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		n.ServeHTTP(w, r)
