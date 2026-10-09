@@ -753,12 +753,12 @@ export default {
 
 			// tabs field
 			tabLayoutCheckTimer: null,
-			tabLayoutElements: [],                // elements that are shown, based on available space
+			tabLayoutElements: [],               // elements that are shown, based on available space
 			tabLayoutElementsAvailableInOrder: [ // elements that can be shown, in order of priority
 				'count', 'label', 'icon'
 			],
 			tabIndexFieldIdMapCounter: {}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
-			tabIndexShow: 0,              // tabs only: which tab is shown
+			tabIndexShow: 0,               // tabs only: which tab is shown
 			tabsCollabsed: false
 		};
 	},
@@ -1242,6 +1242,7 @@ export default {
 			this.setTabToValid();
 			this.resized();
 			this.$watch('appResized', this.resized);
+			this.$watch('isHidden', this.resized);
 		}
 	},
 	beforeUnmount() {
