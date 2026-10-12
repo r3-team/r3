@@ -140,7 +140,7 @@
 </ul></li>
 <li>Datenbank (nur dedizierte Bereitstellung)
 <ul>
-<li>PostgresSQL Datenbank (14.0 oder neuer), UTF8 enkodiert, mit vollen Berechtigungen</li>
+<li>PostgresSQL Datenbank (15.0 oder neuer), UTF8 enkodiert, mit vollen Berechtigungen</li>
 </ul></li>
 </ul>
 <h2 id="endgeräte">Endgeräte</h2>
@@ -150,7 +150,7 @@
 <p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server geliefert. Das Installationsprogramm unterstützt sowohl <a href="#eigenständig">eigenständige</a> als auch <a href="#dediziert">dedizierte</a> Bereitstellungsmodelle.</p>
 <ul>
 <li><a href="#eigenständig">Eigenständig</a>: Nach Ausführung des Installationsprogrammes kann REI3 sofort gestartet werden.</li>
-<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (14.0 oder neuer) in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben</li>
+<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (15.0 oder neuer) in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben</li>
 </ul>
 <p>Falls REI3 hinter einem Proxy betrieben werden soll, bitte sicherstellen, dass die Sitzungszeit für Websocket-Clients nicht zeitlich limitiert wird. Mehr details <a href="#proxies">hier</a>.</p>
 <p>Unabhängig vom Bereitstellungsmodell, wird REI3 unter Windows Server als Windows-Dienst behandelt und kann über den Service-Manager gestartet werden (Befehl: <code>services.msc</code>). Falls der Dienst nicht starten kann, schreibt REI3 in das Windows-Applikationslog.</p>
@@ -161,7 +161,7 @@
 <li>Extrahieren Sie das REI3-Archiv in ein Verzeichnis Ihrer Wahl (<code>/opt/rei3/</code> zum Beispiel).</li>
 <li>Machen Sie die Datei <code>r3</code> ausführbar (<code>chmod u+x r3</code>).</li>
 <li>Kopieren Sie die Datei <code>config_template.json</code> zu <code>config.json</code> - die Datei muss im gleichen Verzeichnis sein wie die ausführbare Datei <code>r3</code>.</li>
-<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (14.0 oder neuer) hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
+<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (15.0 oder neuer) hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
 <li>Optional: Installieren Sie ImageMagick und Ghostscript falls Thumbnails erwünscht sind (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Installieren Sie PostgreSQL-Client-Werkzeuge falls Sie die integrierte Backup-Funktion nutzen möchten (<code>sudo apt install postgresql-client</code>).</li>
 <li>Registrieren Sie REI3 im Service-Manager (<code>sudo ./r3 -install</code>).</li>
