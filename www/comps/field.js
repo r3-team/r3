@@ -258,7 +258,7 @@ export default {
 						<div class="tabs-entry" v-if="iconId">
 							<img class="tabs-icon" :src="srcBase64(iconIdMap[iconId].file)" />
 						</div>
-						<div class="tabs-entry clickable"
+						<div class="tabs-entry"
 							v-if="tabLayoutElements.length !== 0 || isTabsSingle"
 							v-for="(t,i) in field.tabs"
 							v-show="!tabIndexesHidden.includes(i)"
@@ -287,7 +287,7 @@ export default {
 							</select>
 						</div>
 						<div class="tabs-entry empty grow" ref="tabsEmpty" v-show="!isTabsSingle"></div>
-						<div class="tabs-entry clickable" v-if="field.collapseAllow" @click="setTagsCollapsed(!tabsCollabsed)">
+						<div class="tabs-entry clickable collapse" v-if="field.collapseAllow" @click="setTagsCollapsed(!tabsCollabsed)">
 							<img class="tabs-icon" :src="tabsCollabsed ? 'images/pageDown.png' : 'images/pageUp.png'" />
 						</div>
 					</div>
@@ -1297,6 +1297,7 @@ export default {
 
 			return {
 				active: tabIndex === this.tabIndexShow && !this.tabsCollabsed,
+				clickable: !this.isTabsSingle || this.field.collapseAllow,
 				collapsed: this.tabsCollabsed,
 				inputBg: active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
 				grow: this.isMobile,

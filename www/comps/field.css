@@ -303,6 +303,7 @@
 	width: 100%;
 	max-width: 400px;
 	gap: calc(var(--spacing) / 2);
+	border-right: none;
 }
 .field .tabs-entry.select > select {
 	flex: 1 1 100%;
@@ -331,6 +332,7 @@
 .field .tabs-entry.empty {
 	padding: 0px;
 	margin: 0px;
+	border-right: none;
 }
 .field .tabs-entry.grow {
 	flex: 1 1 auto;
@@ -339,6 +341,10 @@
 	flex: 1 1 auto;
 	justify-content: flex-start;
 	border-top: none;
+	border-right: none;
+}
+.field .tabs-entry.collapse {
+	border-left: 1px solid var(--color-border);
 }
 .field .tabs-entry.active.inputBg {
 	background-color: var(--color-input);
