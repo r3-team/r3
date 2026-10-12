@@ -218,15 +218,6 @@ export default {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capAppSet.listRows }}</td>
-							<td>
-								<div class="row gap">
-									<my-button-check v-model="settings.listSpaced"  :caption="capAppSet.listSpaced" />
-									<my-button-check v-model="settings.listColored" :caption="capAppSet.listColored" />
-								</div>
-							</td>
-						</tr>
-						<tr>
 							<td>{{ capAppSet.pattern }}</td>
 							<td>
 								<select v-model="settings.pattern">
@@ -285,6 +276,27 @@ export default {
 						<tr>
 							<td>{{ capAppSet.colorMenu }}</td>
 							<td><my-input-color-wrap v-model="settings.colorMenu" :allowNull="true" /></td>
+						</tr>
+
+						<!-- global list options -->
+						<tr>
+							<td class="grouping" colspan="2">
+								<br />
+								<my-label image="listCog.png" :caption="capAppSet.titleList" :large="true" />
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.listRows }}</td>
+							<td>
+								<div class="row gap">
+									<my-button-check v-model="settings.listSpaced"  :caption="capAppSet.listSpaced" />
+									<my-button-check v-model="settings.listColored" :caption="capAppSet.listColored" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.offsetPageNo }}</td>
+							<td><my-bool v-model="settings.offsetPageNo" /></td>
 						</tr>
 					</tbody>
 				</table>
