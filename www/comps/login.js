@@ -184,120 +184,102 @@ export default {
 			showError: false,
 
 			// default messages
-			language: 'en_US',
-			languages: ['de', 'en_US', 'fr_FR', 'fr_CA'],
+			language: 'en',
+			languages: ['de', 'en', 'fr'],
 			message: {
 				authExt: {
 					de: 'Externe Anmeldung',
-					en_US: 'External login',
-					fr_FR: 'Connexion externe',
-					fr_CA: 'Connexion externe'
+					en: 'External login',
+					fr: 'Connexion externe'
 				},
 				authInt: {
 					de: 'Interne Anmeldung',
-					en_US: 'Internal login',
-					fr_FR: 'Connexion interne',
-					fr_CA: 'Connexion interne'
+					en: 'Internal login',
+					fr: 'Connexion interne'
 				},
 				clusterNode: {
 					de: 'Verbunden mit: ',
-					en_US: 'Connected with: ',
-					fr_FR: 'Connecté avec: ',
-					fr_CA: 'Connecté avec: '
+					en: 'Connected with: ',
+					fr: 'Connecté avec: '
 				},
 				error: {
 					general: {
 						de: 'Ein Fehler ist aufgetreten - bitte erneut versuchen',
-						en_US: 'An error occurred - please try again',
-						fr_FR: 'Une erreur est survenue. Veuillez réessayer.',
-						fr_CA: 'Une erreur est survenue. Veuillez réessayer.'
+						en: 'An error occurred - please try again',
+						fr: 'Une erreur est survenue. Veuillez réessayer.'
 					},
 					reset: {
 						de: 'Code ist abgelaufen - bitte den Systemadministrator kontaktieren',
-						en_US: 'Code is expired - please contact your system administrator',
-						fr_FR: 'Le code a expiré. Veuillez communiquer avec votre administrateur système.',
-						fr_CA: 'Le code a expiré. Veuillez communiquer avec votre administrateur système.'
+						en: 'Code is expired - please contact your system administrator',
+						fr: 'Le code a expiré. Veuillez communiquer avec votre administrateur système.'
 					}
 				},
 				httpMode: {
 					de: 'Verbindung ist nicht verschlüsselt',
-					en_US: 'Connection is not encrypted',
-					fr_FR: 'La connexion n’est pas chiffrée',
-					fr_CA: 'La connexion n’est pas chiffrée'
+					en: 'Connection is not encrypted',
+					fr: 'La connexion n’est pas chiffrée'
 				},
 				license: {
 					'{ERR_LIC_001}': {
 						de: 'Systemaktivierung ist abgelaufen - bitte den Systemadministrator kontaktieren',
-						en_US: 'System activation has expired - please contact your system administrator',
-						fr_FR: 'L’activation du système a expiré. Veuillez communiquer avec votre administrateur système.',
-						fr_CA: 'L’activation du système a expiré. Veuillez communiquer avec votre administrateur système.'
+						en: 'System activation has expired - please contact your system administrator',
+						fr: 'L’activation du système a expiré. Veuillez communiquer avec votre administrateur système.'
 					},
 					'{ERR_LIC_002}': {
 						de: 'Anzahl gleichzeitiger Benutzer erreicht - bitte den Systemadministrator kontaktieren',
-						en_US: 'Concurrent user count reached - please contact your system administrator',
-						fr_FR: 'Le nombre maximal d’utilisateurs simultanés a été atteint. Veuillez communiquer avec votre administrateur système.',
-						fr_CA: 'Le nombre maximal d’utilisateurs simultanés a été atteint. Veuillez communiquer avec votre administrateur système.'
+						en: 'Concurrent user count reached - please contact your system administrator',
+						fr: 'Le nombre maximal d’utilisateurs simultanés a été atteint. Veuillez communiquer avec votre administrateur système.'
 					}
 				},
 				loading: {
 					de: 'Am Laden...',
-					en_US: 'Loading...',
-					fr_FR: 'Chargement...',
-					fr_CA: 'Chargement...'
+					en: 'Loading...',
+					fr: 'Chargement...'
 				},
 				login: {
 					de: 'Anmelden',
-					en_US: 'Login',
-					fr_FR: 'Connexion',
-					fr_CA: 'Connexion'
+					en: 'Login',
+					fr: 'Connexion'
 				},
 				maintenanceMode: {
 					de: 'Wartungsmodus ist aktiv',
-					en_US: 'Maintenance mode is active',
-					fr_FR: 'Le mode maintenance est actif',
-					fr_CA: 'Le mode maintenance est actif'
+					en: 'Maintenance mode is active',
+					fr: 'Le mode maintenance est actif'
 				},
 				mfa: {
 					de: 'Multi-Faktor-Anmeldung',
-					en_US: 'Multi-factor login',
-					fr_FR: 'Authentification multifacteur',
-					fr_CA: 'Authentification multifacteur'
+					en: 'Multi-factor login',
+					fr: 'Authentification multifacteur'
 				},
 				mfaHint: {
 					de: '6-stelliger Validierungs-Code',
-					en_US: '6 digit validation code',
-					fr_FR: 'Code de validation à 6 chiffres',
-					fr_CA: 'Code de validation à 6 chiffres'
+					en: '6 digit validation code',
+					fr: 'Code de validation à 6 chiffres'
 				},
 				password: {
 					de: 'Passwort',
-					en_US: 'Password',
-					fr_FR: 'Mot de passe',
-					fr_CA: 'Mot de passe'
+					en: 'Password',
+					fr: 'Mot de passe'
 				},
 				sessionExpired: {
 					de: 'Sitzung abgelaufen - bitte erneut anmelden',
-					en_US: 'Session expired - please login again',
-					fr_FR: 'La session a expiré. Veuillez vous reconnecter.',
-					fr_CA: 'La session a expiré. Veuillez vous reconnecter.'
+					en: 'Session expired - please login again',
+					fr: 'La session a expiré. Veuillez vous reconnecter.'
 				},
 				stayLoggedIn: {
 					de: 'Angemeldet bleiben',
-					en_US: 'Stay logged in',
-					fr_FR: 'Rester connecté',
-					fr_CA: 'Rester connecté'
+					en: 'Stay logged in',
+					fr: 'Rester connecté'
 				},
 				username: {
 					de: 'Benutzername',
-					en_US: 'Username',
-					fr_FR: 'Nom d’utilisateur',
-					fr_CA: 'Nom d’utilisateur'
+					en: 'Username',
+					fr: 'Nom d’utilisateur'
 				},
 				wsBroken: {
 					de: 'Warten auf Serververbindung...',
-					en_US: 'Waiting for server connection...',
-					fr_FR: 'En attente de la connexion au serveur...',
-					fr_CA: 'En attente de la connexion au serveur...'
+					en: 'Waiting for server connection...',
+					fr: 'En attente de la connexion au serveur...'
 				}
 			}
 		};
@@ -395,10 +377,10 @@ export default {
 		}
 	},
 	mounted() {
-		// overwrite language by browser setting
-		const browser_language = window.navigator.language.replace('-', '_');
-		if (this.languages.includes(browser_language))
-			this.language = browser_language;
+		// set language by browser data
+		const langCodeShort = window.navigator.language.substring(0, 2).toLowerCase();
+		if (this.languages.includes(langCodeShort))
+			this.language = langCodeShort;
 
 		// set page title
 		this.$store.commit('pageTitle', this.message.login[this.language]);
