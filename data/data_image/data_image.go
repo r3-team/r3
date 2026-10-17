@@ -39,7 +39,7 @@ func GetCanProcess() bool {
 
 // create a thumbnail for given file
 // optionally waits for result to use it directly
-func CreateThumbnail(fileId uuid.UUID, ext string, src string, dst string, waitForResult bool) error {
+func CreateThumbnail(fileId uuid.UUID, ext, src, dst string, waitForResult bool) error {
 
 	// abort if it cannot process images
 	if !canProcess {
@@ -76,7 +76,7 @@ func CreateThumbnail(fileId uuid.UUID, ext string, src string, dst string, waitF
 	return <-errChan
 }
 
-func processFile(fileId uuid.UUID, ext string, src string, dst string) {
+func processFile(fileId uuid.UUID, ext, src, dst string) {
 
 	// request worker
 	var returnErr error = nil
@@ -122,30 +122,26 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 
 	// image thumbnails
 	case "bmp", "jpeg", "jpg", "png", "svg", "webp":
-		appArgs = []string{"-quality", quality, "-resize", fmt.Sprintf("x%d", sizeWidth),
-			fmt.Sprintf("%s", src), dst}
+		appArgs = []string{src, "-resize", fmt.Sprintf("x%d", sizeWidth), "-quality", quality, dst}
 
 	// gif thumbnail, [0] defines first frame of GIF
 	case "gif":
-		appArgs = []string{"-quality", quality, "-resize", fmt.Sprintf("x%d", sizeWidth),
-			fmt.Sprintf("%s[0]", src), dst}
+		appArgs = []string{fmt.Sprintf("%s[0]", src), "-resize", fmt.Sprintf("x%d", sizeWidth), "-quality", quality, dst}
 
 	// GIMP merged layer thumbnail
 	case "xcf":
-		appArgs = []string{"-background", "none", "-alpha", "on", "-layers", "merge",
-			"-scale", "50%", fmt.Sprintf("%s", src), dst}
+		appArgs = []string{src, "-scale", "50%", "-background", "none", "-alpha", "on", "-layers", "merge", dst}
 
 	// Photoshop merged layer thumbnail
 	case "psd":
-		appArgs = []string{"-auto-orient", "-strip", "-colorspace", "sRGB",
-			"-density", "72", "-quality", quality, "-resize", fmt.Sprintf("x%d", sizeWidth),
-			fmt.Sprintf("%s[0]", src), dst}
+		appArgs = []string{fmt.Sprintf("%s[0]", src), "-resize", fmt.Sprintf("x%d", sizeWidth),
+			"-auto-orient", "-strip", "-density", "72", "-quality", quality, dst}
 
 	// PDF rastered thumbnail, GhostScript is required as external dependency
 	case "pdf":
 		// [0] defines first page of PDF document
-		appArgs = []string{"-background", "white", "-alpha", "off", "-density", "200",
-			"-resize", fmt.Sprintf("x%d", sizeWidth), fmt.Sprintf("%s[0]", src), dst}
+		appArgs = []string{fmt.Sprintf("%s[0]", src), "-resize", fmt.Sprintf("x%d", sizeWidth),
+			"-background", "white", "-alpha", "remove", "-alpha", "off", "-density", "200", dst}
 
 	// text based, drawn thumbnails
 	case "cfg", "conf", "css", "csv", "go", "html", "ini", "java", "js",
@@ -174,10 +170,13 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 			return
 		}
 
+		// font must be available to generate file
+		// issue: OS might not have specific font and we currently only bundle fonts inside GO binary (not reachable by imagemagick)
+		// current approach: offer widely available font per OS (Windows: Verdana, Linux: DejaVu-Sans)
 		appArgs = []string{"-size", fmt.Sprintf("%dx%d", sizeWidth, sizeWidth),
-			"-quality", quality, "xc:white", "-font", "Verdana",
+			"-quality", quality, "xc:white", "-font", fontForTextImage,
 			"-pointsize", "12", "-fill", "black", "-gravity", "NorthWest",
-			"-annotate", "+10+40", fmt.Sprintf("%s", textThumb), dst}
+			"-annotate", "+10+40", textThumb, dst}
 
 	default:
 		log.Info(log.ContextImager, fmt.Sprintf("skipped unsupported file extension '%s'", ext))

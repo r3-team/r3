@@ -4,9 +4,11 @@ package data_image
 
 import "os/exec"
 
+const fontForTextImage = "DejaVu-Sans"
+
 func setCheckConvertPath(filePathOverwrite string) bool {
 
-	convertPath = "convert"
+	convertPath = "magick"
 	if filePathOverwrite != "" {
 		convertPath = filePathOverwrite
 	}

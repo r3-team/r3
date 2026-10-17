@@ -6,9 +6,11 @@ import (
 	"r3/tools"
 )
 
+const fontForTextImage = "Verdana"
+
 func setCheckConvertPath(filePathOverwrite string) bool {
 
-	convertPath = "imagemagick/convert.exe"
+	convertPath = "imagemagick/magick.exe"
 	if filePathOverwrite != "" {
 		convertPath = filePathOverwrite
 	}
