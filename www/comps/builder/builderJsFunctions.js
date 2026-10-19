@@ -49,11 +49,17 @@ export default {
 								[{{ f.captions.jsFunctionTitle[builderLanguage] }}]
 							</span>
 						</div>
-						<div class="row">
-							<my-button image="fileText.png"
-								v-if="f.formId !== null"
+						<div class="row gap">
+							<my-button image="modulePlay.png"
+								v-if="f.id === module.jsFunctionIdOnLogin"
 								:active="false"
-								:captionTitle="capApp.form"
+								:captionTitle="capGen.sessionStart"
+								:naked="true"
+							/>
+							<my-button
+								:active="false"
+								:captionTitle="f.formId !== null ? capApp.form : capGen.global"
+								:image="f.formId !== null ? 'fileText.png' : 'globe.png'"
 								:naked="true"
 							/>
 						</div>
@@ -94,11 +100,11 @@ export default {
 						/>
 					</div>
 
-					<my-builder-filter-pair-input image="fileText.png"
+					<my-builder-filter-pair-input image="globe.png"
 						@update="updateFilterArgs"
-						v-model:value0="filters.form0"
-						v-model:value1="filters.form1"
-						:caption="capGen.forms"
+						v-model:value0="filters.global0"
+						v-model:value1="filters.global1"
+						:caption="capGen.global"
 					/>
 					<my-builder-filter-pair-input image="modulePlay.png"
 						@update="updateFilterArgs"
@@ -122,8 +128,8 @@ export default {
 			filterTagIds: [],
 			filterText: '',
 			filters: {
-				form0: false,
-				form1: false,
+				global0: false,
+				global1: false,
 				session0: false,
 				session1: false
 			},
@@ -144,8 +150,8 @@ export default {
 							&& s.formIdMap[f.formId].name.toLowerCase().includes(filterName)
 						)
 					)
-					&& (!s.filters.form0 || f.formId === null)
-					&& (!s.filters.form1 || f.formId !== null)
+					&& (!s.filters.global0 || f.formId !== null)
+					&& (!s.filters.global1 || f.formId === null)
 					&& (!s.filters.session0 || s.module.jsFunctionIdOnLogin !== f.id)
 					&& (!s.filters.session1 || s.module.jsFunctionIdOnLogin === f.id)
 					&& (s.filterTagIds.length === 0 || (

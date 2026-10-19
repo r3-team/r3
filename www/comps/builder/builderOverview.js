@@ -77,13 +77,13 @@ export default {
 
 					<!-- JS functions -->
 					<div class="row wrap gap-large" v-if="isJsFunctions">
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/js-functions/'+id+'/form1'">
-							<my-label :caption="capGen.forms + ' (' + module.jsFunctions.filter(v => v.formId !== null).length + ')'" />
-							<img class="preview" src="images/fileText.png" />
-						</router-link>
-						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/js-functions/'+id+'/form0'">
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/js-functions/'+id+'/global1'">
 							<my-label :caption="capGen.global + ' (' + module.jsFunctions.filter(v => v.formId === null).length + ')'" />
 							<img class="preview" src="images/globe.png" />
+						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/js-functions/'+id+'/global0'">
+							<my-label :caption="capGen.forms + ' (' + module.jsFunctions.filter(v => v.formId !== null).length + ')'" />
+							<img class="preview" src="images/fileText.png" />
 						</router-link>
 						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/js-functions/'+id+'/session1'">
 							<my-label :caption="capGen.sessionStart + ' (' + module.jsFunctions.filter(v => module.jsFunctionIdOnLogin === v.id).length + ')'" />
