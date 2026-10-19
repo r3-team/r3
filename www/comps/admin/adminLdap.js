@@ -191,7 +191,7 @@ export default {
 				<div class="column gap">
 					<div class="row space-between centered">
 						<span>{{ capApp.filterDnExclude }}</span>
-						<my-button image="add.png" @trigger="filterDnAdd(true)" :active="licenseValid && ldap.filterDnInclude.length === 0" />
+						<my-button image="add.png" @trigger="filterDnAdd(true)" :active="licenseValid" />
 					</div>
 					<div class="row gap centered" v-for="(f,i) in ldap.filterDnExclude">
 						<input class="dynamic" v-model="ldap.filterDnExclude[i]" :disabled="!licenseValid" :placeholder="capApp.searchDnHint" />
@@ -201,7 +201,7 @@ export default {
 				<div class="column gap">
 					<div class="row space-between centered">
 						<span>{{ capApp.filterDnInclude }}</span>
-						<my-button image="add.png" @trigger="filterDnAdd(false)" :active="licenseValid && ldap.filterDnExclude.length === 0" />
+						<my-button image="add.png" @trigger="filterDnAdd(false)" :active="licenseValid" />
 					</div>
 					<div class="row gap centered" v-for="(f,i) in ldap.filterDnInclude">
 						<input class="dynamic" v-model="ldap.filterDnInclude[i]" :disabled="!licenseValid" :placeholder="capApp.searchDnHint" />

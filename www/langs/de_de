@@ -244,9 +244,9 @@
 			"filterDnExclude": "Benutzer ausschließen, die mit diesen DNs übereinstimmen (Blacklisting)",
 			"filterDnHint": [
 				"Wenn Filter genutzt werden, wird der Distinguished Name (DN) vom Benutzer mit den Ein-/Ausschließ-Konditionen verglichen.",
-				"Eine Übereinstimmung liegt vor, falls der DN vom Benutzer den Filter-DN beinhaltet. Für eine Übereinstimmung aller Benutzer in einer OU, wird der DN der spezifischen OU verwendet.",
-				"Für eine Übereinstimmung mit Benutzern in manchen aber nicht allen Unter-OUs, nicht die OU darüber, sondern die relevanten Unter-OUs als Konditionen verwenden.",
-				"Grundsätzlich sind Einschließen-Filter (aka Whitelisting) sicherer, da bei Änderungen von DNs (durch Umbenennen oder Verschieben von LDAP-Entitäten) es weniger wahrscheinlich ist, dass ungewollte Benutzer importiert werden."
+				"Eine Übereinstimmung liegt vor, falls der DN vom Benutzer auf den Filter-DN endet. Für eine Übereinstimmung aller Benutzer in einer OU, den DN der spezifischen OU verwenden.",
+				"Für eine Übereinstimmung mit Benutzern in manchen aber nicht allen Unter-OUs, nicht die OU darüber, sondern relevante Unter-OUs als Konditionen verwenden.",
+				"Grundsätzlich sind Einschließen-Filter (aka Whitelisting) sicherer, da bei Änderungen von DNs (durch Umbenennen oder Verschieben von LDAP-Entitäten) der Import ungewollter Benutzer weniger wahrscheinlich ist."
 			],
 			"filterDnInclude": "Benutzer einschließen, die mit diesen DNs übereinstimmen (Whitelisting)",
 			"groupDnHint": "Beispiel: CN=Admin_User,OU=Group,DC=mycompany,DC=local",
