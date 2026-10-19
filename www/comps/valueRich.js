@@ -1,25 +1,15 @@
-import srcBase64Icon from './shared/image.js';
+
+import { getAttributeFileThumbHref, getAttributeFileVersionHref } from './shared/attribute.js';
 import {
-	getAttributeFileThumbHref,
-	getAttributeFileVersionHref
-} from './shared/attribute.js';
-import {
-	getUnixFormat,
-	getUnixShifted,
-	getUtcTimeStringFromUnix
-} from './shared/time.js';
-import {
-	colorAdjustBg,
-	getHtmlStripped,
-	getLinkMeta,
-	openDataImageAsNewTag,
-	getNumberFormatted,
-	openLink
+	colorAdjustBg, getHtmlStripped, getLinkMeta,
+	getNumberFormatted, openDataImageAsNewTag, openLink
 } from './shared/generic.js';
+import srcBase64Icon from './shared/image.js';
+import { getUnixFormat, getUnixShifted, getUtcTimeStringFromUnix } from './shared/time.js';
 
 export default {
-	name:'my-value-rich',
-	template:`<div class="value-rich"
+	name: 'my-value-rich',
+	template: `<div class="value-rich"
 		v-if="active"
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
@@ -110,80 +100,80 @@ export default {
 			</div>
 		</template>
 	</div>`,
-	props:{
-		alignEnd:      { type:Boolean,       required:false, default:false },
-		alignMid:      { type:Boolean,       required:false, default:false },
-		attributeId:   { type:[String,null], required:true },
-		basis:         { type:Number,        required:false, default:0 },         // size basis (usually column width)
-		bold:          { type:Boolean,       required:false, default:false },
-		boolAtrIcon:   { type:Boolean,       required:false, default:false },     // show attribute icon if boolean is true
-		clipboard:     { type:Boolean,       required:false, default:false },     // copy-to-clipboard action
-		display:       { type:String,        required:false, default:'default' }, // variant (url, gallery, password ...)
-		italic:        { type:Boolean,       required:false, default:false },
-		length:        { type:Number,        required:false, default:0 },         // max. length if string, max. entries shown if files
-		monospace:     { type:Boolean,       required:false, default:false },
-		noShrink:      { type:Boolean,       required:false, default:false },
-		noThousandsSep:{ type:Boolean,       required:false, default:false },
-		previewLarge:  { type:Boolean,       required:false, default:false },
-		value:         { required:true },
-		wrap:          { type:Boolean,       required:false, default:false }      // wrap string value
+	props: {
+		alignEnd: { type: Boolean, required: false, default: false },
+		alignMid: { type: Boolean, required: false, default: false },
+		attributeId: { type: [String, null], required: true },
+		basis: { type: Number, required: false, default: 0 },         // size basis (usually column width)
+		bold: { type: Boolean, required: false, default: false },
+		boolAtrIcon: { type: Boolean, required: false, default: false },     // show attribute icon if boolean is true
+		clipboard: { type: Boolean, required: false, default: false },     // copy-to-clipboard action
+		display: { type: String, required: false, default: 'default' }, // variant (url, gallery, password ...)
+		italic: { type: Boolean, required: false, default: false },
+		length: { type: Number, required: false, default: 0 },         // max. length if string, max. entries shown if files
+		monospace: { type: Boolean, required: false, default: false },
+		noShrink: { type: Boolean, required: false, default: false },
+		noThousandsSep: { type: Boolean, required: false, default: false },
+		previewLarge: { type: Boolean, required: false, default: false },
+		value: { required: true },
+		wrap: { type: Boolean, required: false, default: false }      // wrap string value
 	},
-	emits:['clipboard','focus','trigger'],
-	watch:{
-		value:{
+	emits: ['clipboard', 'focus', 'trigger'],
+	watch: {
+		value: {
 			handler() { this.setValue(); },
-			immediate:true
+			immediate: true
 		}
 	},
 	data() {
 		return {
-			isBarcode:false,
-			isBoolean:false,
-			isColor:false,
-			isDrawing:false,
-			isFiles:false,
-			isGallery:false,
-			isLink:false,
-			isPassword:false,
-			isRating:false,
-			isString:false,
-			stringValue:'',    // processed value, shown directly
-			stringValueFull:'' // processed value, shown as title, no length limit
+			isBarcode: false,
+			isBoolean: false,
+			isColor: false,
+			isDrawing: false,
+			isFiles: false,
+			isGallery: false,
+			isLink: false,
+			isPassword: false,
+			isRating: false,
+			isString: false,
+			stringValue: '',    // processed value, shown directly
+			stringValueFull: '' // processed value, shown as title, no length limit
 		};
 	},
-	computed:{
-		active:   s => s.value !== null && (!s.boolAtrIcon || s.value !== false),
-		attribute:s => s.attributeId !== null ? s.attributeIdMap[s.attributeId] : false,
-		files:    s => !s.isFiles || s.value === null ? []    : s.value,
-		link:     s => !s.isLink  || s.value === null ? false : s.getLinkMeta(s.display, s.isBarcode ? JSON.parse(s.value).text : s.value),
+	computed: {
+		active: s => s.value !== null && (!s.boolAtrIcon || s.value !== false),
+		attribute: s => s.attributeId !== null ? s.attributeIdMap[s.attributeId] : false,
+		files: s => !s.isFiles || s.value === null ? [] : s.value,
+		link: s => !s.isLink || s.value === null ? false : s.getLinkMeta(s.display, s.isBarcode ? JSON.parse(s.value).text : s.value),
 
 		// styles
-		iconBoolean:s => {
+		iconBoolean: s => {
 			// if attribute icon is used for bool, it takes precedence, even if nothing is shown
-			if(s.boolAtrIcon)
+			if (s.boolAtrIcon)
 				return s.value && s.attribute.iconId !== null ? s.srcBase64Icon(s.attribute.iconId, '') : null;
 
 			return s.settings.boolAsIcon ? (s.value ? 'images/ok.png' : 'images/cancel.png') : null;
 		},
-		style:s => {
-			let out = [];
-			if(s.basis !== 0) out.push(`max-width:${s.basis}px`);
+		style: s => {
+			const out = [];
+			if (s.basis !== 0) out.push(`max-width:${s.basis}px`);
 
-			if(s.isColor)
+			if (s.isColor)
 				out.push(`background-color:${s.colorAdjustBg(s.value)}`);
 
 			return out.join(';');
 		},
-		styleImage:s => `width:${100 / (s.length === 0 || s.files.length < s.length ? s.files.length : s.length)}%`,
+		styleImage: s => `width:${100 / (s.length === 0 || s.files.length < s.length ? s.files.length : s.length)}%`,
 
 		// store
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
-		token:         s => s.$store.getters['local/token'],
-		capGen:        s => s.$store.getters.captions.generic,
-		settings:      s => s.$store.getters.settings
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		token: s => s.$store.getters['local/token'],
+		capGen: s => s.$store.getters.captions.generic,
+		settings: s => s.$store.getters.settings
 	},
-	methods:{
+	methods: {
 		// externals
 		colorAdjustBg,
 		getAttributeFileThumbHref,
@@ -201,31 +191,36 @@ export default {
 		copyToClipboard() {
 			let value = !this.isPassword ? this.stringValueFull : this.value;
 
-			if(this.isBarcode && this.value !== null)
+			if (this.isBarcode && this.value !== null)
 				value = JSON.parse(this.value).text;
 
 			navigator.clipboard.writeText(value);
 			this.$emit('clipboard');
 		},
 		setValue() {
-			let directValue = this.attribute === false;
-
-			if(this.attribute !== false) {
-				switch(this.attribute.content) {
+			if (this.attribute === false) {
+				// non-attributes (scalar/PG functions) currently only support string values
+				this.stringValueFull = this.value !== null ? this.value : '';
+			}
+			else {
+				// some attribute content/content use combinations show something other than a regular string
+				switch (this.attribute.content) {
 					case 'boolean':
-						return this.isBoolean = true;
-					break;
+						this.isBoolean = true;
+						return;
 					case 'files':
 						this.isGallery = this.display === 'gallery';
-						return this.isFiles = true;
-					break;
+						this.isFiles = true;
+						return;
 
 					// text
 					case 'text': // fallthrough
 					case 'varchar':
-
 						// handle different uses and display options
-						switch(this.attribute.contentUse) {
+						switch (this.attribute.contentUse) {
+							case 'color': this.isColor = true; return;
+							case 'drawing': this.isDrawing = true; return;
+
 							case 'barcode': // fallthrough
 							case 'barcode_codabar': // fallthrough
 							case 'barcode_code39': // fallthrough
@@ -237,72 +232,68 @@ export default {
 							case 'barcode_upc_a': // fallthrough
 							case 'barcode_upc_e':
 								this.isBarcode = true;
-
-								if(this.value !== null)
-									this.stringValueFull = JSON.parse(this.value).text;
-							break;
-							case 'color':   return this.isColor   = true; break;
-							case 'drawing': return this.isDrawing = true; break;
+								this.stringValueFull = this.value !== null ? JSON.parse(this.value).text : '';
+								break;
 							case 'richtext':
-								if(this.value !== null)
-									this.stringValueFull = this.getHtmlStripped(this.value);
-							break;
-							default: directValue = true; break;
+								this.stringValueFull = this.value !== null ? this.getHtmlStripped(this.value) : '';
+								break;
+							default:
+								this.stringValueFull = this.value !== null ? this.value : '';
+								break;
 						}
-						switch(this.display) {
-							case 'gallery': return this.isGallery = this.display === 'gallery'; break;
-							case 'password':
-								this.isPassword      = true;
-								this.stringValueFull = '**********';
-								directValue = false;
-							break;
-							case 'email': // fallthrough
-							case 'phone': // fallthrough
-							case 'url': this.isLink = true; break;
-						}
-					break;
+						break;
 
 					// integers
 					case 'integer': // fallthrough
 					case 'bigint':
-						switch(this.attribute.contentUse) {
+						switch (this.attribute.contentUse) {
 							case 'date': // shift to local offset to show correct date
 								this.stringValueFull = this.value === null ? ''
-									: this.getUnixFormat(this.getUnixShifted(this.value,true),this.settings.dateFormat);
-							break;
-							case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
-							case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
+									: this.getUnixFormat(this.getUnixShifted(this.value, true), this.settings.dateFormat);
+								break;
+							case 'datetime': this.stringValueFull = this.getUnixFormat(this.value, `${this.settings.dateFormat} H:i`); break;
+							case 'time': this.stringValueFull = this.getUtcTimeStringFromUnix(this.value); break;
 							default:
-								this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value,this.attribute.length,this.attribute.lengthFract);
-							break;
+								this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value, this.attribute.length, this.attribute.lengthFract);
+								break;
 						}
-						if(this.display === 'rating')
-							this.isRating = true;
-					break;
+						break;
 
 					// decimals
 					case 'numeric': // fallthrough
 					case 'double precision':
 					case 'real':
-						this.stringValueFull = this.getNumberFormatted(this.value,this.attribute.length,this.attribute.lengthFract);
-					break;
+						this.stringValueFull = this.getNumberFormatted(this.value, this.attribute.length, this.attribute.lengthFract);
+						break;
 
 					// others (UUID)
-					default: directValue = true; break;
+					default: this.stringValueFull = this.value !== null ? this.value : ''; break;
 				}
+			}
+
+			// display options
+			switch (this.display) {
+				case 'gallery':
+					// gallery option is available for barcode attributes, does not show string
+					this.isGallery = true;
+					return;
+				case 'password':
+					this.isPassword = true;
+					this.stringValueFull = '**********';
+					break;
+				case 'email': // fallthrough
+				case 'phone': // fallthrough
+				case 'url': this.isLink = true; break;
+				case 'rating': this.isRating = true; break;
 			}
 
 			// only string values left
 			this.isString = true;
 
-			if(directValue && this.value !== null)
-				this.stringValueFull = this.value;
-
 			// set final string value with applied text length limit
-			if(this.length !== 0 && this.stringValueFull.length > this.length)
-				this.stringValue = `${this.stringValueFull.substring(0,this.length-3)}...`;
-			else
-				this.stringValue = this.stringValueFull;
+			this.stringValue = this.length !== 0 && this.stringValueFull.length > this.length
+				? `${this.stringValueFull.substring(0, this.length - 3)}...`
+				: this.stringValueFull;
 		}
 	}
 };

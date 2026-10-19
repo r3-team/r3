@@ -337,8 +337,7 @@ export default {
 	},
 	emits: ['close', 'set'],
 	computed: {
-		attribute: s => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
-			? false : s.attributeIdMap[s.column.attributeId],
+		attribute: s => s.attributeIdMap[s.column.attributeId] ?? false,
 		module: s => s.moduleIdMap[s.moduleId],
 		query: s => s.isSubQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		indexAttributeIds: s => !s.isSubQuery && s.column.query !== null
@@ -364,15 +363,16 @@ export default {
 		},
 
 		// simple
-		isBarcode: s => s.isString && s.attribute.contentUse.includes('barcode'),
+		isBarcode: s => s.isStringAttribute && s.attribute.contentUse.includes('barcode'),
 		isBoolean: s => s.isAttributeBoolean(s.attribute.content),
-		isColor: s => s.isString && s.attribute.contentUse === 'color',
-		isDrawing: s => s.isString && s.attribute.contentUse === 'drawing',
+		isColor: s => s.isStringAttribute && s.attribute.contentUse === 'color',
+		isDrawing: s => s.isStringAttribute && s.attribute.contentUse === 'drawing',
 		isFiles: s => s.isAttributeFiles(s.attribute.content),
 		isFncPg: s => s.column.content === 'fnc_pg',
 		isFncScalar: s => s.column.content === 'fnc_scalar',
 		isInteger: s => s.isAttributeInteger(s.attribute.content),
-		isString: s => s.isAttributeString(s.attribute.content),
+		isString: s => s.isStringAttribute || s.isFncScalar || s.isFncPg,
+		isStringAttribute: s => s.attribute !== false && s.isAttributeString(s.attribute.content),
 		isSubQuery: s => s.column.content === 'query',
 		isUuid: s => s.isAttributeUuid(s.attribute.content),
 		isWithArgs: s => s.isFncScalar || s.isFncPg,
