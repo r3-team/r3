@@ -1,68 +1,59 @@
-import MyBuilderQuery                      from './builder/builderQuery.js';
-import MyInputDateWrap                     from './inputDateWrap.js';
-import MyInputDictionary                   from './inputDictionary.js';
-import {isAttributeString}                 from './shared/attribute.js';
-import {getTemplateQuery}                  from './shared/builderTemplate.js';
-import {getNestedIndexAttributeIdsByJoins} from './shared/query.js';
-import {
-	getDependentModules,
-	getItemTitleColumn,
-	getItemTitleNoRelationship
-} from './shared/builder.js';
-import {
-	getColumnIsFilterable,
-	getColumnTitleFallback
-} from './shared/column.js';
-import {
-	getCaption,
-	getDictByLang
-} from './shared/language.js';
+import MyBuilderQuery from './builder/builderQuery.js';
+import MyInputDateWrap from './inputDateWrap.js';
+import MyInputDictionary from './inputDictionary.js';
 
-const operatorsArray = ['@>','<@','&&'];
-const operatorsFts   = ['@@'];
-const operatorsNull  = ['IS NULL','IS NOT NULL'];
-const operatorsRegex = ['~','~*','!~','!~*'];
-const operatorsSets  = ['= ANY','<> ALL'];
-const operatorsSize  = ['<','>','<=','>='];
-const operatorsText  = ['ILIKE','LIKE','NOT ILIKE','NOT LIKE'];
+import { isAttributeString } from './shared/attribute.js';
+import { getDependentModules, getItemTitleColumn, getItemTitleNoRelationship } from './shared/builder.js';
+import { getTemplateQuery } from './shared/builderTemplate.js';
+import { getColumnIsFilterable, getColumnTitleFallback } from './shared/column.js';
+import { getCaption, getDictByLang } from './shared/language.js';
+import { getNestedIndexAttributeIdsByJoins } from './shared/query.js';
+
+const operatorsArray = ['@>', '<@', '&&'];
+const operatorsFts = ['@@'];
+const operatorsNull = ['IS NULL', 'IS NOT NULL'];
+const operatorsRegex = ['~', '~*', '!~', '!~*'];
+const operatorsSets = ['= ANY', '<> ALL'];
+const operatorsSize = ['<', '>', '<=', '>='];
+const operatorsText = ['ILIKE', 'LIKE', 'NOT ILIKE', 'NOT LIKE'];
 
 const MyFilterBrackets = {
-	name:'my-filter-brackets',
-	template:`<my-button
+	name: 'my-filter-brackets',
+	template: `<my-button
 		@trigger="add(true)"
 		@trigger-right="add(false)"
 		:active="!readonly"
 		:caption="display(1)"
 	/>`,
-	props:{
-		left:      { type:Boolean, required:true },
-		modelValue:{ type:Number,  required:true },
-		readonly:  { type:Boolean, required:true }
+	props: {
+		left: { type: Boolean, required: true },
+		modelValue: { type: Number, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		value:{
-			get()  { return this.modelValue; },
-			set(v) { this.$emit('update:modelValue',v); }
+	emits: ['update:modelValue'],
+	computed: {
+		value: {
+			get() { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue', v); }
 		}
 	},
-	methods:{
+	methods: {
 		add(increase) {
 			let v = this.value;
 
-			if(increase) v++;
-			else         v--;
+			if (increase) v++;
+			else v--;
 
-			if(v < 0) v = 3;
-			if(v > 3) v = 0;
+			if (v < 0) v = 3;
+			if (v > 3) v = 0;
 
 			this.value = v;
 		},
 		display() {
 			let out = '';
-			let brk = this.left ? '(' : ')';
+			const brk = this.left ? '(' : ')';
 
-			for(let cnt = this.value; cnt > 0; cnt--) {
+			for (let cnt = this.value; cnt > 0; cnt--) {
 				out += brk;
 			}
 			return out !== '' ? out : '-';
@@ -71,8 +62,8 @@ const MyFilterBrackets = {
 };
 
 const MyFilterOperator = {
-	name:'my-filter-operator',
-	template:`<select v-model="value" :disabled="readonly">
+	name: 'my-filter-operator',
+	template: `<select v-model="value" :disabled="readonly">
 
 		<!-- operators in Builder mode -->
 		<template v-if="builderMode">
@@ -89,93 +80,93 @@ const MyFilterOperator = {
 			v-for="op in optionsUser" :value="op"
 		>{{ getTitle(op) }}</option>
 	</select>`,
-	watch:{
+	watch: {
 		onlyDates(v) {
-			if(v && (this.value === 'ILIKE' || this.value === 'LIKE'))
-				this.$emit('update:modelValue','=');
+			if (v && (this.value === 'ILIKE' || this.value === 'LIKE'))
+				this.$emit('update:modelValue', '=');
 		}
 	},
-	props:{
-		builderMode:     { type:Boolean, required:true },                 // only show in Builder mode (e. g. not for regular users)
-		disableOperators:{ type:Array,   required:true },
-		hasFts:          { type:Boolean, required:false, default:false }, // show full text search operators
-		modelValue:      { type:String,  required:true },
-		onlyDates:       { type:Boolean, required:false, default:false }, // only show operators that can be used for date values (e. g. unix time)
-		onlyString:      { type:Boolean, required:false, default:false }, // only show string operators
-		readonly:        { type:Boolean, required:true }
+	props: {
+		builderMode: { type: Boolean, required: true },                 // only show in Builder mode (e. g. not for regular users)
+		disableOperators: { type: Array, required: true },
+		hasFts: { type: Boolean, required: false, default: false }, // show full text search operators
+		modelValue: { type: String, required: true },
+		onlyDates: { type: Boolean, required: false, default: false }, // only show operators that can be used for date values (e. g. unix time)
+		onlyString: { type: Boolean, required: false, default: false }, // only show string operators
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		value:{
-			get()  { return this.modelValue; },
-			set(v) { this.$emit('update:modelValue',v); }
+	emits: ['update:modelValue'],
+	computed: {
+		value: {
+			get() { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue', v); }
 		},
-		optionsEqual:s => ['=','<>'],
+		optionsEqual: s => ['=', '<>'],
 		optionsUser: s => {
 			// default options
-			let out = ['=', '<>'];
-			if(!s.onlyString)             out.push('<','>','<=','>=');
-			if(!s.onlyDates)              out.push('ILIKE','LIKE','NOT ILIKE','NOT LIKE');
-			if(!s.onlyDates && s.hasFts)  out.push('@@');
+			const out = ['=', '<>'];
+			if (!s.onlyString) out.push('<', '>', '<=', '>=');
+			if (!s.onlyDates) out.push('ILIKE', 'LIKE', 'NOT ILIKE', 'NOT LIKE');
+			if (!s.onlyDates && s.hasFts) out.push('@@');
 
-			out.push('IS NULL','IS NOT NULL');
+			out.push('IS NULL', 'IS NOT NULL');
 
 			// expert options
-			if(!s.onlyDates)
+			if (!s.onlyDates)
 				out.push('~*', '!~*');
 
 			return out;
 		},
-		optionGroupsBuilder:s => {
-			let out = {};
-			const add = (label,operators) => {
-				let group = [];
-				for(const op of operators) {
-					if(!s.disableOperators.includes(op))
+		optionGroupsBuilder: s => {
+			const out = {};
+			const add = (label, operators) => {
+				const group = [];
+				for (const op of operators) {
+					if (!s.disableOperators.includes(op))
 						group.push(op);
 				}
-				if(group.length !== 0)
+				if (group.length !== 0)
 					out[label] = group;
 			};
 
-			add(s.capApp.operatorsSize,operatorsSize);
-			add(s.capApp.operatorsText,operatorsText);
-			add(s.capApp.operatorsNull,operatorsNull);
-			add(s.capApp.operatorsSets,operatorsSets);
-			add(s.capApp.operatorsRegex,operatorsRegex);
-			add(s.capApp.operatorsArray,operatorsArray);
-			add(s.capApp.operatorsFts,operatorsFts);
+			add(s.capApp.operatorsSize, operatorsSize);
+			add(s.capApp.operatorsText, operatorsText);
+			add(s.capApp.operatorsNull, operatorsNull);
+			add(s.capApp.operatorsSets, operatorsSets);
+			add(s.capApp.operatorsRegex, operatorsRegex);
+			add(s.capApp.operatorsArray, operatorsArray);
+			add(s.capApp.operatorsFts, operatorsFts);
 			return out;
 		},
 
 		// stores
-		capApp:s => s.$store.getters.captions.filter
+		capApp: s => s.$store.getters.captions.filter
 	},
-	methods:{
+	methods: {
 		getTitle(op) {
-			switch(op) {
-				case '=':           return this.capApp.option.operator.eq; break;
-				case '<>':          return this.capApp.option.operator.ne; break;
-				case '<':           return this.capApp.option.operator.st; break;
-				case '>':           return this.capApp.option.operator.lt; break;
-				case '<=':          return this.capApp.option.operator.se; break;
-				case '>=':          return this.capApp.option.operator.le; break;
-				case 'ILIKE':       return this.capApp.option.operator.ilike; break;
-				case 'LIKE':        return this.capApp.option.operator.like; break;
-				case 'NOT ILIKE':   return this.capApp.option.operator.not_ilike; break;
-				case 'NOT LIKE':    return this.capApp.option.operator.not_like; break;
-				case 'IS NULL':     return this.capApp.option.operator.null; break;
-				case 'IS NOT NULL': return this.capApp.option.operator.not_null; break;
-				case '= ANY':       return this.capApp.option.operator.eqAny; break;
-				case '<> ALL':      return this.capApp.option.operator.neAll; break;
-				case '~':           return this.capApp.option.operator.rxMatch; break;
-				case '~*':          return this.capApp.option.operator.rxMatchI; break;
-				case '!~':          return this.capApp.option.operator.rxMatchNo; break;
-				case '!~*':         return this.capApp.option.operator.rxMatchNoI; break;
-				case '@>':          return this.capApp.option.operator.arrContains; break;
-				case '<@':          return this.capApp.option.operator.arrContained; break;
-				case '&&':          return this.capApp.option.operator.arrOverlap; break;
-				case '@@':          return this.capApp.option.operator.fts; break;
+			switch (op) {
+				case '=': return this.capApp.option.operator.eq;
+				case '<>': return this.capApp.option.operator.ne;
+				case '<': return this.capApp.option.operator.st;
+				case '>': return this.capApp.option.operator.lt;
+				case '<=': return this.capApp.option.operator.se;
+				case '>=': return this.capApp.option.operator.le;
+				case 'ILIKE': return this.capApp.option.operator.ilike;
+				case 'LIKE': return this.capApp.option.operator.like;
+				case 'NOT ILIKE': return this.capApp.option.operator.not_ilike;
+				case 'NOT LIKE': return this.capApp.option.operator.not_like;
+				case 'IS NULL': return this.capApp.option.operator.null;
+				case 'IS NOT NULL': return this.capApp.option.operator.not_null;
+				case '= ANY': return this.capApp.option.operator.eqAny;
+				case '<> ALL': return this.capApp.option.operator.neAll;
+				case '~': return this.capApp.option.operator.rxMatch;
+				case '~*': return this.capApp.option.operator.rxMatchI;
+				case '!~': return this.capApp.option.operator.rxMatchNo;
+				case '!~*': return this.capApp.option.operator.rxMatchNoI;
+				case '@>': return this.capApp.option.operator.arrContains;
+				case '<@': return this.capApp.option.operator.arrContained;
+				case '&&': return this.capApp.option.operator.arrOverlap;
+				case '@@': return this.capApp.option.operator.fts;
 			}
 			return '';
 		}
@@ -183,28 +174,28 @@ const MyFilterOperator = {
 };
 
 const MyFilterConnector = {
-	name:'my-filter-connector',
-	template:`<select class="and" :disabled="readonly" v-model="value">
+	name: 'my-filter-connector',
+	template: `<select class="and" :disabled="readonly" v-model="value">
 		<option value="AND">{{ capApp.option.connector.AND }}</option>
 		<option value="OR">{{ capApp.option.connector.OR }}</option>
 	</select>`,
-	props:{
-		modelValue:{ type:String,  required:true },
-		readonly:  { type:Boolean, required:true }
+	props: {
+		modelValue: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		value:{
-			get()  { return this.modelValue; },
-			set(v) { this.$emit('update:modelValue',v); }
+	emits: ['update:modelValue'],
+	computed: {
+		value: {
+			get() { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue', v); }
 		},
-		capApp:s => s.$store.getters.captions.filter
+		capApp: s => s.$store.getters.captions.filter
 	}
 };
 
 const MyFilterAttribute = {
-	name:'my-filter-attribute',
-	template:`<select v-model="value" :disabled="readonly">
+	name: 'my-filter-attribute',
+	template: `<select v-model="value" :disabled="readonly">
 		<option
 			v-if="!groupQueriesNested"
 			v-for="nia in nestedIndexAttributeIds"
@@ -222,46 +213,46 @@ const MyFilterAttribute = {
 			</option>
 		</optgroup>
 	</select>`,
-	props:{
-		groupQueriesNested:     { type:Boolean, required:false, default:false },
-		modelValue:             { type:String,  required:true },
-		nestedIndexAttributeIds:{ type:Array,   required:true },
-		nestingLevels:          { type:Number,  required:true },
-		readonly:               { type:Boolean, required:true }
+	props: {
+		groupQueriesNested: { type: Boolean, required: false, default: false },
+		modelValue: { type: String, required: true },
+		nestedIndexAttributeIds: { type: Array, required: true },
+		nestingLevels: { type: Number, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		value:{
-			get()  { return this.modelValue; },
-			set(v) { this.$emit('update:modelValue',v); }
+	emits: ['update:modelValue'],
+	computed: {
+		value: {
+			get() { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue', v); }
 		},
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capApp:        s => s.$store.getters.captions.filter,
-		capGen:        s => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.filter,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
 		getItemTitleNoRelationship,
 
 		getNestedIndexAttributeCaption(nestedIndexAttributeId) {
-			const v   = nestedIndexAttributeId.split('_');
+			const v = nestedIndexAttributeId.split('_');
 			const atr = this.attributeIdMap[v[2]];
-			return this.getItemTitleNoRelationship(atr.id,v[1]);
+			return this.getItemTitleNoRelationship(atr.id, v[1]);
 		},
 		getQueryLabel(nestingLevel) {
 			return nestingLevel === 0
 				? this.capGen.queryMain
-				: this.capGen.querySub + ' ' + nestingLevel;
+				: `${this.capGen.querySub} ${nestingLevel}`;
 		}
 	}
 };
 
 const MyFilterColumn = {
-	name:'my-filter-column',
-	template:`<select v-model="value" :disabled="readonly">
+	name: 'my-filter-column',
+	template: `<select v-model="value" :disabled="readonly">
 		<template v-for="b in columnBatches">
 
 			<!-- single column batch -->
@@ -283,24 +274,24 @@ const MyFilterColumn = {
 			</optgroup>
 		</template>
 	</select>`,
-	props:{
-		columns:       { type:Array,   required:true },
-		columnBatches: { type:Array,   required:true },
-		modelValue:    { type:Object,  required:true }, // entire filter side (required as we update different parts of it)
-		moduleId:      { type:String,  required:true },
-		readonly:      { type:Boolean, required:true }
+	props: {
+		columns: { type: Array, required: true },
+		columnBatches: { type: Array, required: true },
+		modelValue: { type: Object, required: true }, // entire filter side (required as we update different parts of it)
+		moduleId: { type: String, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		value:{ // value = column index selected as filter
+	emits: ['update:modelValue'],
+	computed: {
+		value: { // value = column index selected as filter
 			get() {
 				const v = this.modelValue;
-				for(let i = 0, j = this.columns.length; i < j; i++) {
+				for (let i = 0, j = this.columns.length; i < j; i++) {
 					const c = this.columns[i];
-					if(
-						(c.content === 'attribute'  && c.attributeId  === v.attributeId  && c.index === v.attributeIndex) ||
-						(c.content === 'fnc_pg'     && c.pgFunctionId === v.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(v.arguments)) ||
-						(c.content === 'fnc_scalar' && c.scalar       === v.scalar       && JSON.stringify(c.arguments) === JSON.stringify(v.arguments))
+					if (
+						(c.content === 'attribute' && c.attributeId === v.attributeId && c.index === v.attributeIndex) ||
+						(c.content === 'fnc_pg' && c.pgFunctionId === v.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(v.arguments)) ||
+						(c.content === 'fnc_scalar' && c.scalar === v.scalar && JSON.stringify(c.arguments) === JSON.stringify(v.arguments))
 					) {
 						return String(i);
 					}
@@ -308,52 +299,52 @@ const MyFilterColumn = {
 				return null;
 			},
 			set(v) {
-				let   n = JSON.parse(JSON.stringify(this.modelValue));
-				const c = this.columns[parseInt(v)];
+				const n = JSON.parse(JSON.stringify(this.modelValue));
+				const c = this.columns[parseInt(v, 10)];
 
 				// clear invalid filter side values based on column content
-				if(c.content !== 'attribute') {
-					n.attributeId    = null;
+				if (c.content !== 'attribute') {
+					n.attributeId = null;
 					n.attributeIndex = 0;
 				}
 
-				if(c.content !== 'fnc_pg')
+				if (c.content !== 'fnc_pg')
 					n.pgFunctionId = null;
 
-				if(c.content !== 'fnc_scalar')
+				if (c.content !== 'fnc_scalar')
 					n.scalar = null;
 
-				if(c.content !== 'fnc_pg' && c.content !== 'fnc_scalar')
+				if (c.content !== 'fnc_pg' && c.content !== 'fnc_scalar')
 					n.arguments = [];
 
 				// set filter side values
-				switch(c.content) {
+				switch (c.content) {
 					case 'attribute':
-						n.attributeId    = c.attributeId;
+						n.attributeId = c.attributeId;
 						n.attributeIndex = c.index;
-					break;
+						break;
 					case 'fnc_pg':
 						n.pgFunctionId = c.pgFunctionId;
-						n.arguments    = c.arguments;
-					break;
-					case 'fnc_scalar':
-						n.scalar    = c.scalar;
 						n.arguments = c.arguments;
-					break;
+						break;
+					case 'fnc_scalar':
+						n.scalar = c.scalar;
+						n.arguments = c.arguments;
+						break;
 				}
-				this.$emit('update:modelValue',n);
+				this.$emit('update:modelValue', n);
 			}
 		}
 	},
-	methods:{
+	methods: {
 		// externals
 		getColumnIsFilterable,
 		getColumnTitleFallback,
 
 		getColumnBatchIndexesValid(columnBatch) {
-			let out = [];
-			for(const columnIndex of columnBatch.columnIndexes) {
-				if(this.getColumnIsFilterable(this.columns[columnIndex]))
+			const out = [];
+			for (const columnIndex of columnBatch.columnIndexes) {
+				if (this.getColumnIsFilterable(this.columns[columnIndex]))
 					out.push(columnIndex);
 			}
 			return out;
@@ -362,14 +353,9 @@ const MyFilterColumn = {
 };
 
 const MyFilterSide = {
-	name:'my-filter-side',
-	components:{
-		MyBuilderQuery,
-		MyFilterAttribute,
-		MyFilterColumn,
-		MyInputDateWrap
-	},
-	template:`<div class="filter-side">
+	name: 'my-filter-side',
+	components: { MyBuilderQuery, MyFilterAttribute, MyFilterColumn, MyInputDateWrap },
+	template: `<div class="filter-side">
 		<div class="filter-side-inputs default-inputs">
 			<template v-if="!isNullPartner">
 
@@ -634,37 +620,37 @@ const MyFilterSide = {
 			</template>
 		</div>
 	</div>`,
-	props:{
-		builderMode:   { type:Boolean, required:true },
-		columnDate:    { type:Boolean, required:false, default:false },
-		columnTime:    { type:Boolean, required:false, default:false },
-		columns:       { type:Array,   required:true },
-		columnBatches: { type:Array,   required:true },
-		disableContent:{ type:Array,   required:true },
-		entityIdMapRef:{ type:Object,  required:true },
-		fieldIdMap:    { type:Object,  required:true },
-		formId:        { type:String,  required:true },
-		isNullOperator:{ type:Boolean, required:true },
-		joins:         { type:Array,   required:true },
-		joinsParents:  { type:Array,   required:true },
-		leftSide:      { type:Boolean, required:true },
-		modelValue:    { type:Object,  required:true },
-		moduleId:      { type:String,  required:true },
-		nestedIndexAttributeIds:{ type:Array, required:true },
-		nestingLevels: { type:Number,  required:true },
-		readonly:      { type:Boolean, required:true }
+	props: {
+		builderMode: { type: Boolean, required: true },
+		columnDate: { type: Boolean, required: false, default: false },
+		columnTime: { type: Boolean, required: false, default: false },
+		columns: { type: Array, required: true },
+		columnBatches: { type: Array, required: true },
+		disableContent: { type: Array, required: true },
+		entityIdMapRef: { type: Object, required: true },
+		fieldIdMap: { type: Object, required: true },
+		formId: { type: String, required: true },
+		isNullOperator: { type: Boolean, required: true },
+		joins: { type: Array, required: true },
+		joinsParents: { type: Array, required: true },
+		leftSide: { type: Boolean, required: true },
+		modelValue: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		nestedIndexAttributeIds: { type: Array, required: true },
+		nestingLevels: { type: Number, required: true },
+		readonly: { type: Boolean, required: true }
 	},
-	emits:['apply-value','update:modelValue'],
+	emits: ['apply-value', 'update:modelValue'],
 	data() {
 		return {
-			nowOffsetMode:'seconds', // mode for date/time offset (days, hours, minutes, seconds)
-			showQuery:false          // show existing sub query
+			nowOffsetMode: 'seconds', // mode for date/time offset (days, hours, minutes, seconds)
+			showQuery: false          // show existing sub query
 		};
 	},
-	computed:{
+	computed: {
 		// entities
-		nestedIndexAttributeIdsSubQuery:s => {
-			if(!s.isSubQuery) return [];
+		nestedIndexAttributeIdsSubQuery: s => {
+			if (!s.isSubQuery) return [];
 
 			return s.getNestedIndexAttributeIdsByJoins(
 				s.query.joins,
@@ -674,63 +660,63 @@ const MyFilterSide = {
 		},
 
 		// presentation
-		fixedValuePlaceholder:s => {
-			if(s.isValue)      return s.capApp.valueHint;
-			if(s.isGetter)     return s.capApp.getterHint;
-			if(s.isJavascript) return s.capApp.javascriptHint;
+		fixedValuePlaceholder: s => {
+			if (s.isValue) return s.capApp.valueHint;
+			if (s.isGetter) return s.capApp.getterHint;
+			if (s.isJavascript) return s.capApp.javascriptHint;
 			return '';
 		},
 
 		// inputs
-		brackets:{
-			get()  { return this.modelValue.brackets; },
-			set(v) { this.set('brackets',v); }
+		brackets: {
+			get() { return this.modelValue.brackets; },
+			set(v) { this.set('brackets', v); }
 		},
-		content:{ // getter only
+		content: { // getter only
 			get() { return this.modelValue.content; }
 		},
-		collectionId:{
-			get()  { return this.modelValue.collectionId; },
-			set(v) { this.set('collectionId',v); }
+		collectionId: {
+			get() { return this.modelValue.collectionId; },
+			set(v) { this.set('collectionId', v); }
 		},
-		columnId:{
-			get()  { return this.modelValue.columnId; },
-			set(v) { this.set('columnId',v); }
+		columnId: {
+			get() { return this.modelValue.columnId; },
+			set(v) { this.set('columnId', v); }
 		},
-		fieldId:{
-			get()  { return this.modelValue.fieldId; },
-			set(v) { this.set('fieldId',v); }
+		fieldId: {
+			get() { return this.modelValue.fieldId; },
+			set(v) { this.set('fieldId', v); }
 		},
-		formStateId:{ // form state IDs only exist in context of filters as form state conditions
-			get()  { return this.modelValue.formStateId !== undefined ? this.modelValue.formStateId : null; },
-			set(v) { this.set('formStateId',v); }
+		formStateId: { // form state IDs only exist in context of filters as form state conditions
+			get() { return this.modelValue.formStateId !== undefined ? this.modelValue.formStateId : null; },
+			set(v) { this.set('formStateId', v); }
 		},
-		nestedIndexAttribute:{
-			get()  {
-				return `${this.modelValue.attributeNested}`+
-					`_${this.modelValue.attributeIndex}`+
+		nestedIndexAttribute: {
+			get() {
+				return `${this.modelValue.attributeNested}` +
+					`_${this.modelValue.attributeIndex}` +
 					`_${this.modelValue.attributeId}`;
 			},
 			set(v) {
-				if(typeof v === 'undefined')
+				if (typeof v === 'undefined')
 					return;
 
-				let vs = v.split('_');
-				this.setAttribute(vs[2],parseInt(vs[1]),parseInt(vs[0]));
+				const vs = v.split('_');
+				this.setAttribute(vs[2], parseInt(vs[1], 10), parseInt(vs[0], 10));
 			}
 		},
-		nowOffset:{
-			get()  {
-				if(this.modelValue.nowOffset !== null) {
-					if(this.modelValue.nowOffset % 86400 === 0) {
+		nowOffset: {
+			get() {
+				if (this.modelValue.nowOffset !== null) {
+					if (this.modelValue.nowOffset % 86400 === 0) {
 						this.nowOffsetMode = 'days';
 						return this.modelValue.nowOffset / 86400;
 					}
-					if(this.modelValue.nowOffset % 3600 === 0) {
+					if (this.modelValue.nowOffset % 3600 === 0) {
 						this.nowOffsetMode = 'hours';
 						return this.modelValue.nowOffset / 3600;
 					}
-					if(this.modelValue.nowOffset % 60 === 0) {
+					if (this.modelValue.nowOffset % 60 === 0) {
 						this.nowOffsetMode = 'minutes';
 						return this.modelValue.nowOffset / 60;
 					}
@@ -738,81 +724,81 @@ const MyFilterSide = {
 				return this.modelValue.nowOffset;
 			},
 			set(v) {
-				if(v !== '') {
-					switch(this.nowOffsetMode) {
+				if (v !== '') {
+					switch (this.nowOffsetMode) {
 						case 'days': v = v * 86400; break;
 						case 'hours': v = v * 3600; break;
 						case 'minutes': v = v * 60; break;
 					}
 				}
-				this.set('nowOffset',v === '' ? null : v);
+				this.set('nowOffset', v === '' ? null : v);
 			}
 		},
-		presetId:{
-			get()  { return this.modelValue.presetId; },
-			set(v) { this.set('presetId',v); }
+		presetId: {
+			get() { return this.modelValue.presetId; },
+			set(v) { this.set('presetId', v); }
 		},
-		query:{
-			get()  { return this.modelValue.query !== null ? this.modelValue.query : this.getTemplateQuery(); },
-			set(v) { this.set('query',v); }
+		query: {
+			get() { return this.modelValue.query !== null ? this.modelValue.query : this.getTemplateQuery(); },
+			set(v) { this.set('query', v); }
 		},
-		queryAggregator:{
-			get()  { let v = this.modelValue.queryAggregator; return v !== null ? v : ''; },
-			set(v) { this.set('queryAggregator',v === '' ? null : v); }
+		queryAggregator: {
+			get() { let v = this.modelValue.queryAggregator; return v !== null ? v : ''; },
+			set(v) { this.set('queryAggregator', v === '' ? null : v); }
 		},
-		roleId:{
-			get()  { return this.modelValue.roleId; },
-			set(v) { this.set('roleId',v); }
+		roleId: {
+			get() { return this.modelValue.roleId; },
+			set(v) { this.set('roleId', v); }
 		},
-		variableId:{
-			get()  { return this.modelValue.variableId; },
-			set(v) { this.set('variableId',v); }
+		variableId: {
+			get() { return this.modelValue.variableId; },
+			set(v) { this.set('variableId', v); }
 		},
-		valueFixText:{
-			get()  { return this.modelValue.value; },
-			set(v) { this.set('value',v); }
+		valueFixText: {
+			get() { return this.modelValue.value; },
+			set(v) { this.set('value', v); }
 		},
-		valueFixTextDate:{
-			get()  { return this.valueFixText === '' ? null : this.valueFixText; },
+		valueFixTextDate: {
+			get() { return this.valueFixText === '' ? null : this.valueFixText; },
 			set(v) {
-				if(v === null) v = '';
+				if (v === null) v = '';
 				this.valueFixText = String(v);
 			}
 		},
 
 		// simple
-		columnsMode:  s => s.columns.length !== 0,
-		contentApi:   s => ['getter'].filter(v => !s.disableContent.includes(v)),
-		contentData:  s => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
-		contentDate:  s => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm:  s => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
-		contentLogin: s => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
-		contentSearch:s => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
-		module:       s => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		columnsMode: s => s.columns.length !== 0,
+		contentApi: s => ['getter'].filter(v => !s.disableContent.includes(v)),
+		contentData: s => ['attribute', 'collection', 'preset', 'subQuery', 'value', 'true', 'variable'].filter(v => !s.disableContent.includes(v)),
+		contentDate: s => ['nowDate', 'nowDatetime', 'nowTime'].filter(v => !s.disableContent.includes(v)),
+		contentForm: s => ['formChanged', 'formState', 'field', 'fieldChanged', 'fieldValid', 'javascript', 'record', 'recordMayCreate', 'recordMayDelete', 'recordMayUpdate', 'recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentLogin: s => ['languageCode', 'login', 'role'].filter(v => !s.disableContent.includes(v)),
+		contentSearch: s => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
+		module: s => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 
 		// states
-		isAnyDate:    s => ['nowDate','nowDatetime','nowTime'].includes(s.content),
-		isAttribute:  s => s.content === 'attribute',
+		isAnyDate: s => ['nowDate', 'nowDatetime', 'nowTime'].includes(s.content),
+		isAttribute: s => s.content === 'attribute',
 		isCollection: s => s.content === 'collection',
-		isField:      s => ['field','fieldChanged','fieldValid'].includes(s.content),
-		isFormState:  s => s.content === 'formState',
-		isGetter:     s => s.content === 'getter',
+		isField: s => ['field', 'fieldChanged', 'fieldValid'].includes(s.content),
+		isFormState: s => s.content === 'formState',
+		isGetter: s => s.content === 'getter',
 		isJavascript: s => s.content === 'javascript',
-		isNullPartner:s => !s.leftSide && s.isNullOperator,
-		isPreset:     s => s.content === 'preset',
-		isRole:       s => s.content === 'role',
-		isSubQuery:   s => s.content === 'subQuery',
-		isValue:      s => s.content === 'value',
-		isVariable:   s => s.content === 'variable',
+		isNullPartner: s => !s.leftSide && s.isNullOperator,
+		isPreset: s => s.content === 'preset',
+		isRole: s => s.content === 'role',
+		isSubQuery: s => s.content === 'subQuery',
+		isValue: s => s.content === 'value',
+		isVariable: s => s.content === 'variable',
 
 		// stores
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:      s => s.$store.getters['schema/formIdMap'],
-		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
-		capApp:         s => s.$store.getters.captions.filter,
-		capGen:         s => s.$store.getters.captions.generic
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap: s => s.$store.getters['schema/formIdMap'],
+		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
+		capApp: s => s.$store.getters.captions.filter,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getDependentModules,
 		getItemTitleColumn,
@@ -820,76 +806,76 @@ const MyFilterSide = {
 		getTemplateQuery,
 
 		// actions
-		set(name,newValue) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+		set(name, newValue) {
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = newValue;
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		},
-		setAttribute(attributeId,index,nested) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
-			v.attributeId     = attributeId;
-			v.attributeIndex  = index;
+		setAttribute(attributeId, index, nested) {
+			const v = JSON.parse(JSON.stringify(this.modelValue));
+			v.attributeId = attributeId;
+			v.attributeIndex = index;
 			v.attributeNested = nested;
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		},
 		setContent(evt) {
-			let v     = JSON.parse(JSON.stringify(this.modelValue));
+			const v = JSON.parse(JSON.stringify(this.modelValue));
 			v.content = evt.target.value;
 
 			// clean up content related values
-			if(v.content !== 'attribute') {
-				v.attributeId     = null;
-				v.attributeIndex  = 0;
+			if (v.content !== 'attribute') {
+				v.attributeId = null;
+				v.attributeIndex = 0;
 				v.attributeNested = 0;
 			}
 
 			// remove unneeded date offset
-			if(!['nowDate','nowDatetime','nowTime'].includes(v.content))
+			if (!['nowDate', 'nowDatetime', 'nowTime'].includes(v.content))
 				v.nowOffset = null;
 
 			// remove invalid references
-			if(v.content !== 'collection') {
+			if (v.content !== 'collection') {
 				v.collectionId = null;
-				v.columnId     = null;
+				v.columnId = null;
 			}
-			if(!['field','fieldChanged','fieldValid'].includes(v.content))
-				v.fieldId  = null;
+			if (!['field', 'fieldChanged', 'fieldValid'].includes(v.content))
+				v.fieldId = null;
 
-			if(!['formState'].includes(v.content))
+			if (!['formState'].includes(v.content))
 				v.formStateId = null;
 
-			if(v.content !== 'preset')   v.presetId   = null;
-			if(v.content !== 'role')     v.roleId     = null;
-			if(v.content !== 'value')    v.value      = null;
-			if(v.content !== 'variable') v.variableId = null;
+			if (v.content !== 'preset') v.presetId = null;
+			if (v.content !== 'role') v.roleId = null;
+			if (v.content !== 'value') v.value = null;
+			if (v.content !== 'variable') v.variableId = null;
 
-			if(v.content !== 'subQuery') {
-				v.query           = null;
+			if (v.content !== 'subQuery') {
+				v.query = null;
 				v.queryAggregator = null;
 			}
 			else {
 				v.query = this.getTemplateQuery();
 				this.showQuery = true;
 			}
-			this.$emit('update:modelValue',v);
+			this.$emit('update:modelValue', v);
 		},
 		changeOffsetMode() {
-			if(this.nowOffset !== 0 && this.nowOffset !== null)
+			if (this.nowOffset !== 0 && this.nowOffset !== null)
 				this.nowOffset = this.nowOffset;
 		}
 	}
 };
 
 const MyFilter = {
-	name:'my-filter',
-	components:{
+	name: 'my-filter',
+	components: {
 		MyFilterBrackets,
 		MyFilterConnector,
 		MyFilterOperator,
 		MyFilterSide,
 		MyInputDictionary
 	},
-	template:`<div class="filter">
+	template: `<div class="filter">
 		<img v-if="multipleFilters && !readonly" class="dragAnchor" src="images/drag.png" />
 
 		<div class="filter-side-indentation" :style="'width:' + (indentation*8) + 'px'"></div>
@@ -978,108 +964,108 @@ const MyFilter = {
 			:cancel="true"
 		/>
 	</div>`,
-	props:{
-		builderMode:            { type:Boolean, required:true },
-		columns:                { type:Array,   required:true },
-		columnBatches:          { type:Array,   required:true },
-		disableContent:         { type:Array,   required:true },
-		disableOperators:       { type:Array,   required:true },
-		entityIdMapRef:         { type:Object,  required:true },
-		fieldIdMap:             { type:Object,  required:true },
-		formId:                 { type:String,  required:true },
-		indentation:            { type:Number,  required:true },
-		joins:                  { type:Array,   required:true },
-		joinsParents:           { type:Array,   required:true },
-		moduleId:               { type:String,  required:true },
-		multipleFilters:        { type:Boolean, required:true },
-		nestedIndexAttributeIds:{ type:Array,   required:true },
-		nestingLevels:          { type:Number,  required:true },
-		readonly:               { type:Boolean, required:true },
+	props: {
+		builderMode: { type: Boolean, required: true },
+		columns: { type: Array, required: true },
+		columnBatches: { type: Array, required: true },
+		disableContent: { type: Array, required: true },
+		disableOperators: { type: Array, required: true },
+		entityIdMapRef: { type: Object, required: true },
+		fieldIdMap: { type: Object, required: true },
+		formId: { type: String, required: true },
+		indentation: { type: Number, required: true },
+		joins: { type: Array, required: true },
+		joinsParents: { type: Array, required: true },
+		moduleId: { type: String, required: true },
+		multipleFilters: { type: Boolean, required: true },
+		nestedIndexAttributeIds: { type: Array, required: true },
+		nestingLevels: { type: Number, required: true },
+		readonly: { type: Boolean, required: true },
 
 		// filter inputs
-		connector:{ type:String, required:true },
-		operator: { type:String, required:true },
-		position: { type:Number, required:true },
-		side0:    { type:Object, required:true },
-		side1:    { type:Object, required:true }
+		connector: { type: String, required: true },
+		operator: { type: String, required: true },
+		position: { type: Number, required: true },
+		side0: { type: Object, required: true },
+		side1: { type: Object, required: true }
 	},
-	emits:['apply-value','remove','update'],
-	watch:{
-		side0ColumFtsMode:{
+	emits: ['apply-value', 'remove', 'update'],
+	watch: {
+		side0ColumFtsMode: {
 			handler(ftsMode) {
-				if(ftsMode === null && this.operator === '@@')
-					return this.operatorInput = '=';
+				if (ftsMode === null && this.operator === '@@')
+					this.operatorInput = '=';
 			},
-			immediate:false
+			immediate: false
 		}
 	},
-	computed:{
+	computed: {
 		// inputs
-		brackets0Input:{
+		brackets0Input: {
 			get() { return this.side0.brackets; },
 			set(vNew) {
-				let v = JSON.parse(JSON.stringify(this.side0));
+				const v = JSON.parse(JSON.stringify(this.side0));
 				v.brackets = vNew;
 				this.side0Input = v;
 			}
 		},
-		brackets1Input:{
+		brackets1Input: {
 			get() { return this.side1.brackets; },
 			set(vNew) {
-				let v = JSON.parse(JSON.stringify(this.side1));
+				const v = JSON.parse(JSON.stringify(this.side1));
 				v.brackets = vNew;
 				this.side1Input = v;
 			}
 		},
-		connectorInput:{
-			get()  { return this.connector; },
-			set(v) { this.$emit('update',this.position,'connector',v); }
+		connectorInput: {
+			get() { return this.connector; },
+			set(v) { this.$emit('update', this.position, 'connector', v); }
 		},
-		operatorInput:{
-			get()  { return this.operator; },
+		operatorInput: {
+			get() { return this.operator; },
 			set(v) {
-				this.$emit('update',this.position,'operator',v);
+				this.$emit('update', this.position, 'operator', v);
 
-				if(v !== '@@') {
+				if (v !== '@@') {
 					this.side1Input.ftsDict = null;
 				}
-				if(v === '@@' && this.side1Input.ftsDict === null) {
+				if (v === '@@' && this.side1Input.ftsDict === null) {
 					this.side1Input.ftsDict = this.getDictByLang();
 				}
-				this.$emit('update',this.position,'side1',this.side1Input);
+				this.$emit('update', this.position, 'side1', this.side1Input);
 			}
 		},
-		searchDictionaryInput:{
-			get()  { return this.side1.ftsDict; },
+		searchDictionaryInput: {
+			get() { return this.side1.ftsDict; },
 			set(v) {
 				this.side1Input.ftsDict = v;
-				this.$emit('update',this.position,'side1',this.side1Input);
+				this.$emit('update', this.position, 'side1', this.side1Input);
 			}
 		},
-		side0Input:{
-			get()  { return this.side0; },
-			set(v) { this.$emit('update',this.position,'side0',v); }
+		side0Input: {
+			get() { return this.side0; },
+			set(v) { this.$emit('update', this.position, 'side0', v); }
 		},
-		side1Input:{
-			get()  { return this.side1; },
-			set(v) { this.$emit('update',this.position,'side1',v); }
+		side1Input: {
+			get() { return this.side1; },
+			set(v) { this.$emit('update', this.position, 'side1', v); }
 		},
 
 		// states
-		side0Column:s => {
-			for(const c of s.columns) {
-				if(c.index === s.side0.attributeIndex && c.attributeId === s.side0.attributeId)
+		side0Column: s => {
+			for (const c of s.columns) {
+				if (c.index === s.side0.attributeIndex && c.attributeId === s.side0.attributeId)
 					return c;
 			}
 			return false;
 		},
-		side0ColumFtsMode:s => {
-			if(!s.side0Column) return null;
+		side0ColumFtsMode: s => {
+			if (!s.side0Column) return null;
 
 			const atr = s.attributeIdMap[s.side0Column.attributeId];
 			const rel = s.relationIdMap[atr.relationId];
-			for(const ind of rel.indexes) {
-				if(ind.method === 'GIN' && ind.attributes.length === 1
+			for (const ind of rel.indexes) {
+				if (ind.method === 'GIN' && ind.attributes.length === 1
 					&& ind.attributes[0].attributeId === s.side0Column.attributeId) {
 
 					return ind.attributeIdDict !== null ? 'dict' : 'simple';
@@ -1087,37 +1073,37 @@ const MyFilter = {
 			}
 			return null;
 		},
-		side0ColumDate:  s => s.side0Column && ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
-		side0ColumTime:  s => s.side0Column && ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
-		isAnyBracketsSet:s => s.brackets0Input !== 0 || s.brackets1Input !== 0,
-		isNullOperator:  s => ['IS NULL','IS NOT NULL'].includes(s.operator),
-		isStringInput:   s => (
+		side0ColumDate: s => s.side0Column && ['date', 'datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		side0ColumTime: s => s.side0Column && ['datetime', 'time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		isAnyBracketsSet: s => s.brackets0Input !== 0 || s.brackets1Input !== 0,
+		isNullOperator: s => ['IS NULL', 'IS NOT NULL'].includes(s.operator),
+		isStringInput: s => (
 			typeof s.side0.attributeId !== 'undefined' &&
 			s.side0.attributeId !== null &&
 			s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
 		) || (
-			typeof s.side1.attributeId !== 'undefined' &&
-			s.side1.attributeId !== null &&
-			s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
-		),
+				typeof s.side1.attributeId !== 'undefined' &&
+				s.side1.attributeId !== null &&
+				s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
+			),
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		capApp:        s => s.$store.getters.captions.filter,
-		capGen:        s => s.$store.getters.captions.generic
+		capApp: s => s.$store.getters.captions.filter,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getDictByLang,
 		isAttributeString,
 
 		// actions
-		showHelp(msg,width) {
-			this.$store.commit('dialog',{
-				captionBody:msg,
-				captionTop:this.capGen.contextHelp,
-				image:'question.png',
+		showHelp(msg, width) {
+			this.$store.commit('dialog', {
+				captionBody: msg,
+				captionTop: this.capGen.contextHelp,
+				image: 'question.png',
 				width
 			});
 		}
@@ -1125,9 +1111,9 @@ const MyFilter = {
 };
 
 export default {
-	name:'my-filters',
-	components:{MyFilter},
-	template:`<div class="filters">
+	name: 'my-filters',
+	components: { MyFilter },
+	template: `<div class="filters">
 		<draggable handle=".dragAnchor" itemKey="id" animation="100"
 			@change="set"
 			:fallbackOnBody="true"
@@ -1165,70 +1151,70 @@ export default {
 			</template>
 		</draggable>
 	</div>`,
-	props:{
-		builderMode:     { type:Boolean, required:false, default:false },
-		columns:         { type:Array,   required:false, default:() => [] },
-		columnBatches:   { type:Array,   required:false, default:() => [] },
-		disableContent:  { type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
-		disableOperators:{ type:Array,   required:false, default:() => [] },
-		entityIdMapRef:  { type:Object,  required:false, default:() => {return {}} },
-		fieldIdMap:      { type:Object,  required:false, default:() => {return {}} },
-		formId:          { type:String,  required:false, default:'' },
-		indexTarget:     { type:Number,  required:false, default:0 },
-		joins:           { type:Array,   required:false, default:() => [] },
-		joinsParents:    { type:Array,   required:false, default:() => [] },
-		modelValue:      { type:Array,   required:true },
-		moduleId:        { type:String,  required:true },
-		readonly:        { type:Boolean, required:false, default:false }
+	props: {
+		builderMode: { type: Boolean, required: false, default: false },
+		columns: { type: Array, required: false, default: () => [] },
+		columnBatches: { type: Array, required: false, default: () => [] },
+		disableContent: { type: Array, required: false, default: () => [] }, // content to disable (attribute, record, field, true, ...)
+		disableOperators: { type: Array, required: false, default: () => [] },
+		entityIdMapRef: { type: Object, required: false, default: () => { return {} } },
+		fieldIdMap: { type: Object, required: false, default: () => { return {} } },
+		formId: { type: String, required: false, default: '' },
+		indexTarget: { type: Number, required: false, default: 0 },
+		joins: { type: Array, required: false, default: () => [] },
+		joinsParents: { type: Array, required: false, default: () => [] },
+		modelValue: { type: Array, required: true },
+		moduleId: { type: String, required: true },
+		readonly: { type: Boolean, required: false, default: false }
 	},
-	emits:['apply','update:modelValue'],
-	watch:{
-		modelValue:{
+	emits: ['apply', 'update:modelValue'],
+	watch: {
+		modelValue: {
 			handler() { this.reset(); },
-			immediate:true
+			immediate: true
 		}
 	},
 	data() {
 		return {
-			filters:[]
+			filters: []
 		};
 	},
-	computed:{
+	computed: {
 		// composite ID of
 		//  nesting level (0=main query, 1=1st sub query)
 		//  relation join index
 		//  attribute ID
-		nestedIndexAttributeIds:s => {
-			if(s.columnsMode)
+		nestedIndexAttributeIds: s => {
+			if (s.columnsMode)
 				return []; // not required if filtered by columns/column batches
 
 			// no columns defined, provide filter criteria based on attributes from joined relation
 			//  as filters can be used in sub queries, we access all joins from all parent queries
 			// used for pre-defining list filters for queries
 			let out = [];
-			out = s.getNestedIndexAttributeIdsByJoins(s.joins,s.joinsParents.length,false);
-			for(let i = 0, j = s.joinsParents.length; i < j; i++) {
-				out = out.concat(s.getNestedIndexAttributeIdsByJoins(s.joinsParents[i],i,false));
+			out = s.getNestedIndexAttributeIdsByJoins(s.joins, s.joinsParents.length, false);
+			for (let i = 0, j = s.joinsParents.length; i < j; i++) {
+				out = out.concat(s.getNestedIndexAttributeIdsByJoins(s.joinsParents[i], i, false));
 			}
 			return out;
 		},
 
 		// simple states
 		anyFilters: s => s.filters.length !== 0,
-		columnsMode:s => s.columns.length !== 0,
+		columnsMode: s => s.columns.length !== 0,
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capGen:        s => s.$store.getters.captions.generic
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getNestedIndexAttributeIdsByJoins,
 
 		// presentation
 		getIndentation(filterIndex) {
 			let indentation = 0;
-			for(let i = 0; i < filterIndex; i++) {
+			for (let i = 0; i < filterIndex; i++) {
 				indentation += this.filters[i].side0.brackets - this.filters[i].side1.brackets;
 			}
 			return indentation;
@@ -1239,11 +1225,11 @@ export default {
 			this.$emit('apply');
 		},
 		remove(position) {
-			this.filters.splice(position,1);
+			this.filters.splice(position, 1);
 			this.set();
 
 			// inform parent when filter has been reset
-			if(this.filters.length === 0)
+			if (this.filters.length === 0)
 				this.$emit('apply');
 		},
 		reset() {
@@ -1251,12 +1237,12 @@ export default {
 		},
 		set() {
 			// overwrite first filter with only valid connector
-			if(this.filters.length > 0)
+			if (this.filters.length > 0)
 				this.filters[0].connector = 'AND';
 
-			this.$emit('update:modelValue',JSON.parse(JSON.stringify(this.filters)));
+			this.$emit('update:modelValue', JSON.parse(JSON.stringify(this.filters)));
 		},
-		setValue(position,name,value) {
+		setValue(position, name, value) {
 			this.filters[position][name] = value;
 			this.set();
 		}

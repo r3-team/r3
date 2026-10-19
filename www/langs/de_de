@@ -764,7 +764,7 @@
 				"noData": "Damit die API arbeiten kann, muss mindestens 1 Relation ausgewählt (Tab \"Inhalt\") und 1 Spalte aktiv sein.",
 				"postFunction": "POST-Aufrufe schlagen fehl wenn Spalten mit mehreren Werten oder mit Backend-Funktionen genutzt werden.",
 				"postNoUpdate": "POST-Aufrufe können ohne Datensatzerkennung keine Datensätze aktualisieren (Tab \"Inhalt\"). Mindestens 1 Relation hat die Option \"Aktualisieren\" ohne Datensatzerkennung.",
-				"postSubQuery": "POST-Aufrufe schlagen fehl wenn eine SubQuery genutzt wird. Mindestens 1 Spalte ist eine SubQuery."
+				"postSubQuery": "POST-Aufrufe schlagen fehl wenn eine Unterabfrage genutzt wird. Mindestens 1 Spalte ist eine Unterabfrage."
 			},
 			"warnings": "Warnungen"
 		},
@@ -1205,7 +1205,7 @@
 			"titleOne": "Formular \"{NAME}\"",
 			"warning": {
 				"calendarNoDateFromTo": "Kein Attribut ausgewählt für \"Datum von\" oder \"Datum zu\". Beide sind notwendig, damit ein Kalenderfeld arbeiten kann.",
-				"columnNoSubQueryAttribute": "Keine Relation & Attribut ausgewählt für eine Sub-Query-Spalte.",
+				"columnNoSubQueryAttribute": "Keine Relation & Attribut ausgewählt für eine Unterabfragen-Spalte.",
 				"joinN1": "Relationen zu verbinden dient der gleichzeitigen Bearbeitung mehrerer, assoziierter Datensätze. Ein Formular kann aber immer nur einen Datensatz je Relation verarbeiten.<br /><br />Wenn eine 1:n-Beziehung zur Verbindung genutzt wird, können mehrere Datensätze für eine Relation existieren. Falls dies geschieht, zeigt das Formular einen Fehler.<br /><br />1:n-Beziehungen zu verwenden ist valide, solange der Formularinhalt so gefiltert wird, dass jede Relation maximal 1 Datensatz haben kann.",
 				"joinN1Hint": "Warnung! 1:n-Verbindung im Formularinhalt erkannt",
 				"queryColumnsNotSet": "Keine angezeigten Spalten. Eine Spalte hinzufügen, um Daten anzuzeigen.",
@@ -2321,7 +2321,7 @@
 				"recordMayUpdate": "Datensatz darf aktualisiert werden",
 				"recordNew": "Datensatz ist neu",
 				"role": "Benutzer hat Rolle",
-				"subQuery": "sub query",
+				"subQuery": "Unterabfrage",
 				"true": "Wahrheitswert",
 				"value": "Fester Wert",
 				"variable": "Wert einer Variable"
@@ -2349,7 +2349,7 @@
 				"recordMayUpdate": "WAHR wenn offene Datensätze aktualisiert werden dürfen (basierend auf Relationsberechtigungen, Join-Einstellungen, Richtlinien)",
 				"recordNew": "WAHR/FALSCH, abhängig davon, ob der aktuelle Datensatz auf dem Formular neu ist.",
 				"role": "WAHR/FALSCH, abhängig davon, ob der aktuelle Benutzer die gewählte Rolle zugewiesen ist.",
-				"subQuery": "Rückgabewert der gewählten Sub-Query.",
+				"subQuery": "Rückgabewert der gewählten Unterabfrage.",
 				"true": "WAHR-Wert zum Vergleich mit anderen WAHR-Werten.",
 				"value": "Ein statischer Wert zum Vergleich.",
 				"variable": "Aktueller Wert einer Variable"
@@ -2386,7 +2386,7 @@
 			}
 		},
 		"queryAggregatorNull": "keine Aggregation",
-		"queryShow": "Sub-Query anzeigen",
+		"queryShow": "Unterabfrage anzeigen",
 		"searchDictionaryHint": "Verwendetes Wörterbuch - sollte der Sucheingabe und den erwarteten Textergebnissen entsprechen. Weitere Wörterbücher können in den Benutzereinstellungen hinzugefügt werden.",
 		"searchDictionarySimple": "[Kein Wörterbuch]",
 		"searchDictionarySimpleHint": "Diese Option ist für wenn die erwarteten Textergebnisse kein Wörterbuch zugewiesen haben.",
