@@ -738,13 +738,15 @@ export default {
 				case 'collection_update':
 					col = s.collectionIdMap[s.entityId];
 					mod = s.moduleIdMap[col.moduleId];
-					let columns = [];
-					for (let i = 0, j = col.columns.length; i < j; i++) {
-						columns.push(`{column:${i}}`);
-					}
-					switch (s.entity) {
-						case 'collection_read': text = `${prefix}.collection_read({${mod.name}.${col.name}},[${columns.join(',')}])`; break;
-						case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
+					{
+						const columns = [];
+						for (let i = 0, j = col.columns.length; i < j; i++) {
+							columns.push(`{column:${i}}`);
+						}
+						switch (s.entity) {
+							case 'collection_read': text = `${prefix}.collection_read({${mod.name}.${col.name}},[${columns.join(',')}])`; break;
+							case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
+						}
 					}
 					break;
 				case 'field_id_get': text = `${prefix}.get_field_id({${s.displayFieldName(s.entityId)}})`; break;
@@ -1011,7 +1013,7 @@ export default {
 
 			// replace collection & column placeholders
 			// stored as: app.collection_read({module.collection},[column1,column2,...])
-			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbChars})\.(${dbChars})\}(,\\[(.*)\\])?`, 'g');
+			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbChars})\.([^\.\}]+)\}(,\\[(.*)\\])?`, 'g');
 			body = body.replace(pat, (match, mode, modName, colName, optional, columnArray) => {
 				if (this.moduleNameMap[modName] === undefined)
 					return match;
