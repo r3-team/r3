@@ -1,5 +1,5 @@
 import {
-	getAttributeContentUse, getAttributeIcon, isAttributeBoolean, isAttributeFiles, isAttributeFloat,
+	getAttributeContentUsedFor, getAttributeIcon, isAttributeBoolean, isAttributeFiles, isAttributeFloat,
 	isAttributeGeometry, isAttributeInteger, isAttributeNumeric, isAttributeRegconfig, isAttributeRelationship,
 	isAttributeRelationship11, isAttributeRelationshipN1, isAttributeString, isAttributeUuid
 } from '../shared/attribute.js';
@@ -15,11 +15,7 @@ import MyBuilderSchemaLookup from './builderSchemaLookup.js';
 
 export default {
 	name: 'my-builder-attribute',
-	components: {
-		MyBuilderCaption,
-		MyBuilderIconInput,
-		MyBuilderSchemaLookup
-	},
+	components: { MyBuilderCaption, MyBuilderIconInput, MyBuilderSchemaLookup },
 	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-attribute float" v-if="values !== null">
 			<div class="top">
@@ -361,7 +357,7 @@ export default {
 			set(v) { this.values.content = v ? 'double precision' : 'real'; }
 		},
 		usedFor: {
-			get() { return this.getAttributeContentUse(this.values.content, this.values.contentUse); },
+			get() { return this.getAttributeContentUsedFor(this.values.content, this.values.contentUse); },
 			set(v) {
 				switch (v) {
 					// text uses
@@ -550,7 +546,7 @@ export default {
 		// external
 		copyValueDialog,
 		dialogDeleteAsk,
-		getAttributeContentUse,
+		getAttributeContentUsedFor,
 		getAttributeIcon,
 		getDependentModules,
 		getHasAnyReferences,

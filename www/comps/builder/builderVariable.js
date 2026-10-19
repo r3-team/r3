@@ -1,5 +1,5 @@
 import MyCodeEditor from '../codeEditor.js';
-import { getAttributeContentsByUse, getAttributeContentUse, getAttributeIcon } from '../shared/attribute.js';
+import { getAttributeContentsByUsedFor, getAttributeContentUsedFor, getAttributeIcon } from '../shared/attribute.js';
 import { dialogDeleteAsk } from '../shared/dialog.js';
 import { copyValueDialog } from '../shared/generic.js';
 import { variableValueGet } from '../shared/variable.js';
@@ -189,9 +189,9 @@ export default {
 			return false;
 		},
 		usedFor: {
-			get() { return this.getAttributeContentUse(this.values.content, this.values.contentUse); },
+			get() { return this.getAttributeContentUsedFor(this.values.content, this.values.contentUse); },
 			set(v) {
-				const p = this.getAttributeContentsByUse(v, 0, true);
+				const p = this.getAttributeContentsByUsedFor(v, 0, true);
 				this.values.content = p.content;
 				this.values.contentUse = p.contentUse;
 			}
@@ -222,8 +222,8 @@ export default {
 		// external
 		copyValueDialog,
 		dialogDeleteAsk,
-		getAttributeContentUse,
-		getAttributeContentsByUse,
+		getAttributeContentUsedFor,
+		getAttributeContentsByUsedFor,
 		getAttributeIcon,
 		variableValueGet,
 

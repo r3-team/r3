@@ -173,12 +173,12 @@ export function getAttributeIcon(content, contentUse, outsideIn, isNm) {
 	return 'noPic.png';
 };
 
-export function getAttributeContentUse(content, use) {
+export function getAttributeContentUsedFor(content, use) {
 	if (isAttributeString(content))
 		return use === 'default' ? 'text' : use;
 
 	if (isAttributeInteger(content))
-		return use;
+		return use === 'default' ? 'number' : use;
 
 	if (isAttributeBoolean(content)) return 'boolean';
 	if (isAttributeGeometry(content)) return 'geometry';
@@ -193,7 +193,7 @@ export function getAttributeContentUse(content, use) {
 
 	return 'text';
 }
-export function getAttributeContentsByUse(usedFor, length, largeNumbers) {
+export function getAttributeContentsByUsedFor(usedFor, length, largeNumbers) {
 	if (usedFor.includes('barcode'))
 		return { content: 'text', contentUse: usedFor };
 
