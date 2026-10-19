@@ -100,6 +100,12 @@ export default {
 						v-model:value1="filters.form1"
 						:caption="capGen.forms"
 					/>
+					<my-builder-filter-pair-input image="modulePlay.png"
+						@update="updateFilterArgs"
+						v-model:value0="filters.session0"
+						v-model:value1="filters.session1"
+						:caption="capGen.sessionStart"
+					/>
 				</div>
 			</div>
 		</div>
@@ -117,7 +123,9 @@ export default {
 			filterText: '',
 			filters: {
 				form0: false,
-				form1: false
+				form1: false,
+				session0: false,
+				session1: false
 			},
 			showSidebar: true,
 		};
@@ -138,6 +146,8 @@ export default {
 					)
 					&& (!s.filters.form0 || f.formId === null)
 					&& (!s.filters.form1 || f.formId !== null)
+					&& (!s.filters.session0 || s.module.jsFunctionIdOnLogin !== f.id)
+					&& (!s.filters.session1 || s.module.jsFunctionIdOnLogin === f.id)
 					&& (s.filterTagIds.length === 0 || (
 						(s.filterTagsAnd && s.filterTagIds.every(v => f.tagIds.includes(v)))
 						|| (!s.filterTagsAnd && s.filterTagIds.some(v => f.tagIds.includes(v)))

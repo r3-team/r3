@@ -85,6 +85,10 @@ export default {
 							<my-label :caption="capGen.global + ' (' + module.jsFunctions.filter(v => v.formId === null).length + ')'" />
 							<img class="preview" src="images/globe.png" />
 						</router-link>
+						<router-link class="builder-startscreen-box clickable" tag="div" :to="'/builder/js-functions/'+id+'/session1'">
+							<my-label :caption="capGen.sessionStart + ' (' + module.jsFunctions.filter(v => module.jsFunctionIdOnLogin === v.id).length + ')'" />
+							<img class="preview" src="images/modulePlay.png" />
+						</router-link>
 					</div>
 
 					<!-- PG functions -->
