@@ -1,38 +1,27 @@
-import MyCalendarDays     from './calendarDays.js';
-import MyCalendarMonth    from './calendarMonth.js';
-import MyForm             from './form.js';
-import MyInputCollection  from './inputCollection.js';
-import {checkDataOptions} from './shared/generic.js';
-import {srcBase64}        from './shared/image.js';
-import {getCaption}       from './shared/language.js';
+import MyCalendarDays from './calendarDays.js';
+import MyCalendarMonth from './calendarMonth.js';
+import MyForm from './form.js';
+import MyInputCollection from './inputCollection.js';
+
+import { getCalendarCutOff0, getCalendarCutOff1 } from './shared/calendar.js';
+import { checkDataOptions } from './shared/generic.js';
+import { srcBase64 } from './shared/image.js';
+import { getCaption } from './shared/language.js';
 import {
-	getDateAtUtcZero,
-	getDateFormatNoYear,
-	getDateFromWeek,
-	getUnixFromDate,
-	getWeeksInYear,
-	getWeek
-} from './shared/time.js';
-import {
-	getCalendarCutOff0,
-	getCalendarCutOff1
-} from './shared/calendar.js';
-import {
-	getQueryExpressions,
-	getQueryExpressionsDateRange,
-	getQueryFiltersDateRange,
-	getRelationsJoined
+	getQueryExpressions, getQueryExpressionsDateRange,
+	getQueryFiltersDateRange, getRelationsJoined
 } from './shared/query.js';
+import { routeChangeFieldReload, routeParseParams } from './shared/router.js';
 import {
-	routeChangeFieldReload,
-	routeParseParams
-} from './shared/router.js';
-export {MyCalendar as default};
-export {MyCalendarDateSelect};
+	getDateAtUtcZero, getDateFormatNoYear, getDateFromWeek,
+	getUnixFromDate, getWeek, getWeeksInYear
+} from './shared/time.js';
+
+export { MyCalendar as default, MyCalendarDateSelect };
 
 const MyCalendarDateSelect = {
-	name:'my-calendar-date-select',
-	template:`<div class="calendar-select row gap">
+	name: 'my-calendar-date-select',
+	template: `<div class="calendar-select row gap">
 		<my-button image="pagePrev.png"
 			@trigger="pageMove(false)"
 			:naked="true"
@@ -79,71 +68,71 @@ const MyCalendarDateSelect = {
 			:naked="true"
 		/>
 	</div>`,
-	props:{
-		daysShow:  { type:Number,  required:true },
-		modelValue:{ type:Date,    required:true },
-		useHotkeys:{ type:Boolean, required:false, default:false }
+	props: {
+		daysShow: { type: Number, required: true },
+		modelValue: { type: Date, required: true },
+		useHotkeys: { type: Boolean, required: false, default: false }
 	},
-	computed:{
-		dayInput:{
-			get()  { return this.modelValue.getDate(); },
+	computed: {
+		dayInput: {
+			get() { return this.modelValue.getDate(); },
 			set(v) {
-				let d = new Date(this.modelValue.valueOf());
+				const d = new Date(this.modelValue.valueOf());
 				d.setDate(v);
-				this.$emit('update:modelValue',d);
+				this.$emit('update:modelValue', d);
 			}
 		},
-		monthInput:{
-			get()  { return this.modelValue.getMonth(); },
+		monthInput: {
+			get() { return this.modelValue.getMonth(); },
 			set(v) {
-				let d = new Date(this.modelValue.valueOf());
+				const d = new Date(this.modelValue.valueOf());
 
-				if(this.isMonth)
+				if (this.isMonth)
 					d.setDate(1); // set to 1st to add month correctly
 
 				d.setMonth(v);
-				this.$emit('update:modelValue',d);
+				this.$emit('update:modelValue', d);
 			}
 		},
-		weekInput:{
-			get()  { return this.getWeek(this.modelValue); },
+		weekInput: {
+			get() { return this.getWeek(this.modelValue); },
 			set(v) {
 				let d = new Date(this.modelValue.valueOf());
-				d = this.getDateFromWeek(v,d.getFullYear());
-				this.$emit('update:modelValue',d);
+				d = this.getDateFromWeek(v, d.getFullYear());
+				this.$emit('update:modelValue', d);
 			}
 		},
-		yearInput:{
-			get()  { return this.modelValue.getFullYear(); },
+		yearInput: {
+			get() { return this.modelValue.getFullYear(); },
 			set(v) {
-				if(v.length !== 4) return;
+				if (v.length !== 4) return;
 
-				let d = new Date(this.modelValue.valueOf());
+				const d = new Date(this.modelValue.valueOf());
 				d.setFullYear(v);
-				this.$emit('update:modelValue',d);
+				this.$emit('update:modelValue', d);
 			}
 		},
 
 		// simple
-		isDays:     s => s.daysShow === 1 || s.daysShow === 3,
-		isMonth:    s => s.daysShow === 42,
-		isWeek:     s => s.daysShow === 5 || s.daysShow === 7,
-		weeksInYear:s => s.isWeek ? s.getWeeksInYear(s.modelValue.getFullYear()) : 0,
+		isDays: s => s.daysShow === 1 || s.daysShow === 3,
+		isMonth: s => s.daysShow === 42,
+		isWeek: s => s.daysShow === 5 || s.daysShow === 7,
+		weeksInYear: s => s.isWeek ? s.getWeeksInYear(s.modelValue.getFullYear()) : 0,
 
 		// stores
-		capApp:  s => s.$store.getters.captions.calendar,
-		settings:s => s.$store.getters.settings
+		capApp: s => s.$store.getters.captions.calendar,
+		settings: s => s.$store.getters.settings
 	},
-	emits:['update:modelValue'],
+	emits: ['update:modelValue'],
 	mounted() {
-		if(this.useHotkeys)
-			window.addEventListener('keydown',this.handleHotkeys);
+		if (this.useHotkeys)
+			window.addEventListener('keydown', this.handleHotkeys);
 	},
 	unmounted() {
-		if(this.useHotkeys)
-			window.removeEventListener('keydown',this.handleHotkeys);
+		if (this.useHotkeys)
+			window.removeEventListener('keydown', this.handleHotkeys);
 	},
-	methods:{
+	methods: {
 		// external
 		getDateFormatNoYear,
 		getDateFromWeek,
@@ -151,47 +140,44 @@ const MyCalendarDateSelect = {
 		getWeeksInYear,
 
 		// presentation
-		weekInputTitle(week,year) {
-			const d0 = getDateFromWeek(week,year);
-			if(this.settings.sundayFirstDow)
-				d0.setDate(d0.getDate()-1);
+		weekInputTitle(week, year) {
+			const d0 = getDateFromWeek(week, year);
+			if (this.settings.sundayFirstDow)
+				d0.setDate(d0.getDate() - 1);
 
 			const d1 = new Date(d0.getTime())
-			d1.setDate(d1.getDate()+6);
-			return `${this.getDateFormatNoYear(d0,this.settings.dateFormat)} - ${this.getDateFormatNoYear(d1,this.settings.dateFormat)}`;
+			d1.setDate(d1.getDate() + 6);
+			return `${this.getDateFormatNoYear(d0, this.settings.dateFormat)} - ${this.getDateFormatNoYear(d1, this.settings.dateFormat)}`;
 		},
 
 		// actions
 		handleHotkeys(e) {
-			switch(e.key) {
-				case 'ArrowLeft':  this.pageMove(false); break;
-				case 'ArrowRight': this.pageMove(true);  break;
+			switch (e.key) {
+				case 'ArrowLeft': this.pageMove(false); break;
+				case 'ArrowRight': this.pageMove(true); break;
 			}
 		},
 		pageMove(forward) {
-			if(this.isMonth)
-				return this.monthInput = forward ? this.monthInput + 1 : this.monthInput - 1;
+			if (this.isMonth) {
+				this.monthInput = forward ? this.monthInput + 1 : this.monthInput - 1;
+				return;
+			}
 
-			let d = new Date(this.modelValue.valueOf());
+			const d = new Date(this.modelValue.valueOf());
 
 			// 5-days view (Mo-Fr) moves full week
-			let dOffset = this.daysShow !== 5 ? this.daysShow : 7;
+			const dOffset = this.daysShow !== 5 ? this.daysShow : 7;
 
 			d.setDate(d.getDate() + (forward ? dOffset : dOffset - (dOffset * 2)));
-			this.$emit('update:modelValue',d);
+			this.$emit('update:modelValue', d);
 		}
 	}
 };
 
 const MyCalendar = {
-	name:'my-calendar',
-	components:{
-		MyCalendarDays,
-		MyCalendarMonth,
-		MyCalendarDateSelect,
-		MyInputCollection
-	},
-	template:`<div class="calendar" :class="{ isSingleField:isSingleField, overflow:!isMonth }" v-if="ready">
+	name: 'my-calendar',
+	components: { MyCalendarDays, MyCalendarMonth, MyCalendarDateSelect, MyInputCollection },
+	template: `<div class="calendar" :class="{ isSingleField:isSingleField, overflow:!isMonth }" v-if="ready">
 
 		<div class="app-sub-window under-header"
 			v-if="showIcs"
@@ -372,7 +358,6 @@ const MyCalendar = {
 				@records-open="popUpFormInline.recordIds = $event"
 				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
 				:formId="popUpFormInline.formId"
-				:hasHelp="false"
 				:hasLog="false"
 				:isPopUp="true"
 				:isPopUpFloating="false"
@@ -382,89 +367,89 @@ const MyCalendar = {
 			/>
 		</div>
 	</div>`,
-	props:{
-		attributeIdColor:{ required:true },
-		attributeIdDate0:{ type:String,  required:true },
-		attributeIdDate1:{ type:String,  required:true },
-		choices:         { type:Array,   required:false, default:() => [] },
-		columns:         { type:Array,   required:true },
-		collections:     { type:Array,   required:true },
-		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		dataOptions:     { type:Number,  required:false, default:0 },
-		daysShowDef:     { type:Number,  required:true },
-		daysShowToggle:  { type:Boolean, required:true },
-		fieldId:         { type:String,  required:false, default:'' },
-		filters:         { type:Array,   required:true },
-		formLoading:     { type:Boolean, required:false, default:false },
-		hasOpenForm:     { type:Boolean, required:false, default:false },
-		iconId:          { required:false, default:null },
-		ics:             { type:Boolean, required:false, default:false },
-		indexColor:      { required:true },
-		indexDate0:      { type:Number,  required:true },
-		indexDate1:      { type:Number,  required:true },
-		isHidden:        { type:Boolean, required:false, default:false },
-		isSingleField:   { type:Boolean, required:false, default:false },
-		loadWhileHidden: { type:Boolean, required:false, default:false },
-		loginOptions:    { type:Object,  required:true },
-		moduleId:        { type:String,  required:true },
-		popUpFormInline: { required:true },
-		query:           { type:Object,  required:true },
-		usesPageHistory: { type:Boolean, required:true }
+	props: {
+		attributeIdColor: { required: true },
+		attributeIdDate0: { type: String, required: true },
+		attributeIdDate1: { type: String, required: true },
+		choices: { type: Array, required: false, default: () => [] },
+		columns: { type: Array, required: true },
+		collections: { type: Array, required: true },
+		collectionIdMapIndexes: { type: Object, required: false, default: () => { return {} } },
+		dataOptions: { type: Number, required: false, default: 0 },
+		daysShowDef: { type: Number, required: true },
+		daysShowToggle: { type: Boolean, required: true },
+		fieldId: { type: String, required: false, default: '' },
+		filters: { type: Array, required: true },
+		formLoading: { type: Boolean, required: false, default: false },
+		hasOpenForm: { type: Boolean, required: false, default: false },
+		iconId: { required: false, default: null },
+		ics: { type: Boolean, required: false, default: false },
+		indexColor: { required: true },
+		indexDate0: { type: Number, required: true },
+		indexDate1: { type: Number, required: true },
+		isHidden: { type: Boolean, required: false, default: false },
+		isSingleField: { type: Boolean, required: false, default: false },
+		loadWhileHidden: { type: Boolean, required: false, default: false },
+		loginOptions: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		popUpFormInline: { required: true },
+		query: { type: Object, required: true },
+		usesPageHistory: { type: Boolean, required: true }
 	},
-	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes','set-login-option'],
+	emits: ['close-inline', 'open-form', 'record-count-change', 'set-args', 'set-collection-indexes', 'set-login-option'],
 	data() {
 		return {
 			// calendar state
-			date:null,        // date base that the calendar moves around (by default now(), at 00:00:00)
-			dateSelect0:null, // for date range selection, start date
-			dateSelect1:null, // for date range selection, end date
-			ready:false,
-			showIcs:false,
-			zoomDefault:5,
+			date: null,        // date base that the calendar moves around (by default now(), at 00:00:00)
+			dateSelect0: null, // for date range selection, start date
+			dateSelect1: null, // for date range selection, end date
+			ready: false,
+			showIcs: false,
+			zoomDefault: 5,
 
 			// ICS access
-			icsToken:'',
-			icsTokenName:'',
+			icsToken: '',
+			icsTokenName: '',
 
 			// calendar data
-			rows:[]
+			rows: []
 		};
 	},
-	computed:{
+	computed: {
 		// special date range expressions + regular column expressions
-		expressions:s => s.getQueryExpressionsDateRange(
-			s.attributeIdDate0,s.indexDate0,
-			s.attributeIdDate1,s.indexDate1,
-			s.attributeIdColor,s.indexColor
+		expressions: s => s.getQueryExpressionsDateRange(
+			s.attributeIdDate0, s.indexDate0,
+			s.attributeIdDate1, s.indexDate1,
+			s.attributeIdColor, s.indexColor
 		).concat(s.getQueryExpressions(s.columns)),
 
 		// simple
-		hasChoices:s => s.choices.length > 1,
-		hasCreate: s => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
-		hasUpdate: s => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		isDays:    s => s.daysShow === 1 || s.daysShow === 3,
-		isMonth:   s => s.daysShow === 42,
-		isWeek:    s => s.daysShow === 5 || s.daysShow === 7,
-		icsUrl:    s => `${location.protocol}//${location.host}/ics/download/cal.ics?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
+		hasChoices: s => s.choices.length > 1,
+		hasCreate: s => s.checkDataOptions(4, s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate: s => s.checkDataOptions(2, s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		isDays: s => s.daysShow === 1 || s.daysShow === 3,
+		isMonth: s => s.daysShow === 42,
+		isWeek: s => s.daysShow === 5 || s.daysShow === 7,
+		icsUrl: s => `${location.protocol}//${location.host}/ics/download/cal.ics?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
 
 		// start/end date of calendar
-		date0:s => s.getCalendarCutOff0(s.daysShow,new Date(s.date.valueOf())),
-		date1:s => s.getCalendarCutOff1(s.daysShow,new Date(s.date.valueOf()),s.date0),
+		date0: s => s.getCalendarCutOff0(s.daysShow, new Date(s.date.valueOf())),
+		date1: s => s.getCalendarCutOff1(s.daysShow, new Date(s.date.valueOf()), s.date0),
 
 		// login options
-		choiceId:s => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		daysShow:s => !s.daysShowToggle ? s.daysShowDef : s.$root.getOrFallback(s.loginOptions,'daysShow',s.daysShowDef),
-		zoom:    s => s.$root.getOrFallback(s.loginOptions,'zoom',s.zoomDefault),
+		choiceId: s => s.$root.getOrFallback(s.loginOptions, 'choiceId', s.choices.length === 0 ? null : s.choices[0].id),
+		daysShow: s => !s.daysShowToggle ? s.daysShowDef : s.$root.getOrFallback(s.loginOptions, 'daysShow', s.daysShowDef),
+		zoom: s => s.$root.getOrFallback(s.loginOptions, 'zoom', s.zoomDefault),
 
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
-		capApp:        s => s.$store.getters.captions.calendar,
-		capGen:        s => s.$store.getters.captions.generic,
-		isMobile:      s => s.$store.getters.isMobile,
-		loginId:       s => s.$store.getters.loginId,
-		settings:      s => s.$store.getters.settings
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		capApp: s => s.$store.getters.captions.calendar,
+		capGen: s => s.$store.getters.captions.generic,
+		isMobile: s => s.$store.getters.isMobile,
+		loginId: s => s.$store.getters.loginId,
+		settings: s => s.$store.getters.settings
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
@@ -473,26 +458,26 @@ const MyCalendar = {
 	mounted() {
 		// initialize dates (most occur before initial paramsUpdated())
 		this.date = new Date();
-		this.date.setHours(0,0,0);
+		this.date.setHours(0, 0, 0);
 
 		// setup watchers
-		this.$watch('formLoading',v => { if(!v) this.get(); });
-		this.$watch('isHidden',v => { if(!v) this.get(); });
-		this.$watch('columns',(valOld,valNew) => {
-			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
+		this.$watch('formLoading', v => { if (!v) this.get(); });
+		this.$watch('isHidden', v => { if (!v) this.get(); });
+		this.$watch('columns', (valOld, valNew) => {
+			if (JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.rows = [];
 				this.get();
 			}
 		});
-		this.$watch(() => [this.choices,this.daysShow,this.filters],(newVals, oldVals) => {
-			for(let i = 0, j = newVals.length; i < j; i++) {
-				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
+		this.$watch(() => [this.choices, this.daysShow, this.filters], (newVals, oldVals) => {
+			for (let i = 0, j = newVals.length; i < j; i++) {
+				if (JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
 					return this.get();
 			}
 		});
-		if(this.usesPageHistory) {
-			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals))
+		if (this.usesPageHistory) {
+			this.$watch(() => [this.$route.path, this.$route.query], (newVals, oldVals) => {
+				if (this.routeChangeFieldReload(newVals, oldVals))
 					this.paramsUpdated(true);
 			});
 
@@ -501,7 +486,7 @@ const MyCalendar = {
 		}
 		this.ready = true;
 	},
-	methods:{
+	methods: {
 		// externals
 		checkDataOptions,
 		getCalendarCutOff0,
@@ -521,28 +506,28 @@ const MyCalendar = {
 
 		// actions
 		dateSet(d) {
-			if(d !== this.date) {
-				d.setHours(0,0,0);
+			if (d !== this.date) {
+				d.setHours(0, 0, 0);
 				this.date = d;
 				this.paramsUpdate(true);
 				this.get();
 			}
 		},
-		dateSelected(unix0,unix1,middleClick) {
-			let attributes = [
+		dateSelected(unix0, unix1, middleClick) {
+			const attributes = [
 				`${this.attributeIdDate0}_${unix0}`,
 				`${this.attributeIdDate1}_${unix1}`
 			];
-			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form', [], [`attributes=${attributes.join(',')}`], middleClick);
 		},
 		goToToday() {
-			let now = new Date();
-			if(!this.isMonth) {
-				if(now < this.date0 || now > this.date1)
+			const now = new Date();
+			if (!this.isMonth) {
+				if (now < this.date0 || now > this.date1)
 					return this.dateSet(now);
 
 			} else {
-				if(now.getMonth() !== this.date.getMonth()
+				if (now.getMonth() !== this.date.getMonth()
 					|| now.getFullYear() !== this.date.getFullYear()) {
 
 					return this.dateSet(now);
@@ -550,9 +535,9 @@ const MyCalendar = {
 			}
 
 			// if today is already visible, open 'today'
-			if(this.hasCreate) {
+			if (this.hasCreate) {
 				const u = this.getUnixFromDate(this.getDateAtUtcZero(now));
-				this.dateSelected(u,u,false);
+				this.dateSelected(u, u, false);
 			}
 		},
 		icsCopyToClipboard() {
@@ -561,43 +546,43 @@ const MyCalendar = {
 
 		// page routing
 		paramsUpdate(pushHistory) {
-			if(!this.usesPageHistory) return;
+			if (!this.usesPageHistory) return;
 
-			let args = [ `daysShow=${this.daysShow}`, `year=${this.date.getFullYear()}` ];
+			const args = [`daysShow=${this.daysShow}`, `year=${this.date.getFullYear()}`];
 
-			if(this.isMonth || this.isDays) args.push(`month=${this.date.getMonth()}`);
-			if(this.isWeek)                 args.push(`week=${this.getWeek(this.date)}`);
-			if(this.isDays)                 args.push(`day=${this.date.getDate()}`);
+			if (this.isMonth || this.isDays) args.push(`month=${this.date.getMonth()}`);
+			if (this.isWeek) args.push(`week=${this.getWeek(this.date)}`);
+			if (this.isDays) args.push(`day=${this.date.getDate()}`);
 
-			this.$emit('set-args',args,pushHistory);
+			this.$emit('set-args', args, pushHistory);
 		},
 		paramsUpdated(reloadIfChanged) {
-			let params = {
-				day:  { parse:'int', value:this.date.getDate() },
-				month:{ parse:'int', value:this.date.getMonth() },
-				week: { parse:'int', value:this.getWeek(this.date) },
-				year: { parse:'int', value:this.date.getFullYear() }
+			const params = {
+				day: { parse: 'int', value: this.date.getDate() },
+				month: { parse: 'int', value: this.date.getMonth() },
+				week: { parse: 'int', value: this.getWeek(this.date) },
+				year: { parse: 'int', value: this.date.getFullYear() }
 			};
 			this.routeParseParams(params);
 
 			let d = new Date(this.date.getTime());
 			d.setFullYear(params.year.value);
 
-			if(this.isDays || this.isMonth) d.setMonth(params.month.value);
-			if(this.isDays)                 d.setDate(params.day.value);
-			if(this.isWeek)                 d = this.getDateFromWeek(params.week.value,d.getFullYear());
+			if (this.isDays || this.isMonth) d.setMonth(params.month.value);
+			if (this.isDays) d.setDate(params.day.value);
+			if (this.isWeek) d = this.getDateFromWeek(params.week.value, d.getFullYear());
 
-			if(d.getTime() !== this.date.getTime()) {
+			if (d.getTime() !== this.date.getTime()) {
 				this.date = d;
 
-				if(reloadIfChanged)
+				if (reloadIfChanged)
 					this.get();
 			}
 		},
 
 		// backend calls
 		get() {
-			if(this.query.relationId === null || (this.isHidden && !this.loadWhileHidden))
+			if (this.query.relationId === null || (this.isHidden && !this.loadWhileHidden))
 				return;
 
 			// when switching date, empty rows
@@ -605,39 +590,39 @@ const MyCalendar = {
 			this.rows = [];
 
 			// sort by start date then defined query sorting
-			let orders = [{
-				attributeId:this.attributeIdDate0,
-				index:this.indexDate0,
-				ascending:true
+			const orders = [{
+				attributeId: this.attributeIdDate0,
+				index: this.indexDate0,
+				ascending: true
 			}];
-			for(let i = 0, j = this.query.orders.length; i < j; i++) {
+			for (let i = 0, j = this.query.orders.length; i < j; i++) {
 				orders.push(this.query.orders[i]);
 			}
 
-			ws.send('data','get',{
-				relationId:this.query.relationId,
-				joins:this.getRelationsJoined(this.query.joins),
-				expressions:this.expressions,
-				filters:this.filters.concat(this.getQueryFiltersDateRange(
+			ws.send('data', 'get', {
+				relationId: this.query.relationId,
+				joins: this.getRelationsJoined(this.query.joins),
+				expressions: this.expressions,
+				filters: this.filters.concat(this.getQueryFiltersDateRange(
 					false, true,
 					this.attributeIdDate0, this.indexDate0, this.getUnixFromDate(this.date0),
 					this.attributeIdDate1, this.indexDate1, this.getUnixFromDate(this.date1)
 				)),
-				orders:orders,
-				getIds:true
-			},true).then(
+				orders: orders,
+				getIds: true
+			}, true).then(
 				res => {
 					this.rows = res.payload.rows;
-					this.$emit('record-count-change',this.rows.length);
+					this.$emit('record-count-change', this.rows.length);
 				},
 				this.$root.genericError
 			);
 		},
 		setIcsTokenFixed() {
-			ws.send('login','setTokenFixed',{
-				name:this.icsTokenName,
-				context:'ics'
-			},true).then(
+			ws.send('login', 'setTokenFixed', {
+				name: this.icsTokenName,
+				context: 'ics'
+			}, true).then(
 				res => this.icsToken = res.payload.tokenFixed,
 				this.$root.genericError
 			);

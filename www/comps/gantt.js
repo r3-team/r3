@@ -355,8 +355,6 @@ const MyGantt = {
 				@records-open="popUpFormInline.recordIds = $event"
 				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
 				:formId="popUpFormInline.formId"
-				:hasHelp="false"
-				:hasLog="false"
 				:isPopUp="true"
 				:isPopUpFloating="false"
 				:moduleId="popUpFormInline.moduleId"

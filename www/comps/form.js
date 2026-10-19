@@ -89,7 +89,9 @@ export default {
 				</div>
 
 				<!-- record title -->
-				<div class="form-record-title" v-if="recordTitle !== ''">{{ recordTitle }}</div>
+				<div class="form-record-title" v-if="recordTitle !== '' && layoutElementsUpper.includes('recordTitle')">
+					{{ recordTitle }}
+				</div>
 
 				<my-form-actions
 					v-if="!hasBarLower && hasFormActions"
@@ -101,21 +103,21 @@ export default {
 					:formId
 					:joinsIndexMap
 					:moduleId
-					:noSpace="!layoutElements.includes('formActions')"
+					:noSpace="!layoutElementsUpper.includes('formActions')"
 				/>
 
 				<div class="form-bar-layout-check" ref="formBarUpperCheck" />
 				<div class="area nowrap">
 					<template v-if="!isBulkUpdate">
 						<my-button image="refresh.png"
-							v-if="isData && !isMobile"
+							v-if="isData && !isMobile && layoutElementsUpper.includes('btnRefresh')"
 							@trigger="get"
 							@trigger-middle="openForm(recordIds,null,null,true)"
 							:active="!isNew"
 							:captionTitle="capGen.button.refreshHint"
 						/>
 						<my-button image="time.png"
-							v-if="hasLog"
+							v-if="layoutElementsUpper.includes('btnLogs')"
 							@trigger="toggleLog"
 							:active="!isNew || !isData"
 							:captionTitle="capApp.button.logHint"
@@ -123,26 +125,26 @@ export default {
 					</template>
 
 					<my-button image="star1.png"
-						v-if="!isBulkUpdate && !isNoAuth"
+						v-if="!isBulkUpdate && !isNoAuth && layoutElementsUpper.includes('btnFav')"
 						@trigger="makeFavorite"
 						:active="!isAtFavoritesEdit"
 						:captionTitle="capApp.button.favorite"
 					/>
 					<my-button image="link.png"
-						v-if="isPopUp && !isBulkUpdate && !isMobile"
+						v-if="isPopUp && !isBulkUpdate && !isMobile && layoutElementsUpper.includes('btnLink')"
 						@trigger="copyFormUrlToClipboard(false)"
 						@trigger-middle="copyFormUrlToClipboard(true)"
 						:captionTitle="capApp.button.urlHint"
 					/>
 					<my-button image="question.png"
-						v-if="hasHelp"
+						v-if="layoutElementsUpper.includes('btnHelp')"
 						@trigger="toggleHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
 					/>
 					<my-button
 						v-if="isPopUp && !isMobile"
-						@trigger="popUpFullscreen = !popUpFullscreen"
+						@trigger="popUpFullscreen = !popUpFullscreen;resized()"
 						:captionTitle="capGen.fullscreenSwitchTo"
 						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
 					/>
@@ -169,7 +171,7 @@ export default {
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
 						:active="buttonNewUsable"
-						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.new : ''"
+						:caption="layoutElementsLower.includes('dataActionLabels') ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button-group
@@ -180,7 +182,7 @@ export default {
 						v-if="buttonSaveShownBulk"
 						@trigger="setBulkUpdate"
 						:active="buttonSaveUsableBulk"
-						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length)) : ''"
+						:caption="layoutElementsLower.includes('dataActionLabels') ? capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length)) : ''"
 						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="warning.png"
@@ -205,7 +207,7 @@ export default {
 					:formId
 					:joinsIndexMap
 					:moduleId
-					:noSpace="!layoutElements.includes('formActions')"
+					:noSpace="!layoutElementsLower.includes('formActions')"
 				/>
 				<div class="form-bar-layout-check" ref="formBarLowerCheck" />
 				<div class="area">
@@ -299,8 +301,6 @@ export default {
 		attributeIdMapDef: { type: Object, required: false, default: () => { return {}; } }, // map of attribute default values
 		favoriteId: { required: false, default: null },
 		formId: { type: String, required: true },
-		hasHelp: { type: Boolean, required: false, default: true },
-		hasLog: { type: Boolean, required: false, default: true },
 		isPopUp: { type: Boolean, required: false, default: false }, // form pop-ups from another element (either floating or inline)
 		isPopUpFloating: { type: Boolean, required: false, default: false }, // this form is a floating pop-up
 		isWidget: { type: Boolean, required: false, default: false },
@@ -340,11 +340,21 @@ export default {
 			firstLoad: true,         // form was not used before
 			lastFormId: '',          // when routing occurs: if ID is the same, no need to rebuild form
 			layoutCheckTimer: null,  // layout resize timer
-			layoutElements: [],        // elements that are shown, based on available space
-			layoutElementsAvailable: [ // elements that can be shown, in order of priority
+			layoutElementsLower: [],        // elements in lower bar that are shown, based on available space
+			layoutElementsLowerAvailable: [ // elements in lower bar that can be shown, in order of priority
 				'formActions',        // form action as buttons
 				'dataActionLabels',   // data action labels
 				'dataActionReadonly'  // data actions if inactive
+			],
+			layoutElementsUpper: [],        // elements in upper bar that are shown, based on available space
+			layoutElementsUpperAvailable: [ // elements in upper bar that can be shown, in order of priorit
+				'formActions', // form action as buttons
+				'recordTitle', // record title display
+				'btnHelp',     // form help articles
+				'btnLink',     // copy link to form to clipboard
+				'btnFav',      // store form as favorite
+				'btnLogs',     // show form logs
+				'btnRefresh',  // refresh form
 			],
 			loading: false,          // form is currently loading, informs sub components when form is ready
 			message: null,           // form message
@@ -466,7 +476,7 @@ export default {
 		// presentation
 		buttonGroupDelete: s => {
 			const group = [{
-				caption: s.layoutElements.includes('dataActionLabels') ? s.capGen.button.delete : '',
+				caption: s.layoutElementsLower.includes('dataActionLabels') ? s.capGen.button.delete : '',
 				captionTitle: s.capGen.button.deleteHint,
 				image: 'shred.png',
 				isCancel: true,
@@ -486,7 +496,7 @@ export default {
 		},
 		buttonGroupSave: s => {
 			const group = [{
-				caption: s.layoutElements.includes('dataActionLabels') ? s.capGen.button.save : '',
+				caption: s.layoutElementsLower.includes('dataActionLabels') ? s.capGen.button.save : '',
 				captionTitle: s.capGen.button.saveHint,
 				image: 'save.png',
 				isReadonly: !s.buttonSaveUsable,
@@ -622,7 +632,7 @@ export default {
 					if (fld === undefined || val === null || !Array.isArray(val))
 						return null;
 
-					let out = [];
+					const out = [];
 					for (const f of val) {
 						out.push(s.getAttributeFileVersionHref(fld.attributeId, f.id, f.name, f.version, s.token));
 					}
@@ -670,25 +680,25 @@ export default {
 		entityIdMapEffect: s => {
 			const getValueFromConditionSide = (side, operator, recursionLevel) => {
 				switch (side.content) {
-					case 'collection': return getCollectionValues(side.collectionId, side.columnId, s.filterOperatorIsSingleValue(operator)); break;
-					case 'field': return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId], false)]; break;
-					case 'fieldChanged': return s.fieldIdsChanged.includes(side.fieldId); break;
-					case 'fieldValid': return !s.fieldIdsInvalid.includes(side.fieldId); break;
-					case 'formChanged': return s.hasChanges; break;
-					case 'formState': return isFormStateActive(s.formStateIdMap[side.formStateId], recursionLevel + 1); break;
-					case 'languageCode': return s.settings.languageCode; break;
-					case 'login': return s.loginId; break;
-					case 'preset': return s.presetIdMapRecordId[side.presetId]; break;
-					case 'recordNew': return s.isNew; break;
-					case 'role': return s.access.roleIds.includes(side.roleId); break;
-					case 'true': return true; break;
-					case 'variable': return s.variableValueGet(side.variableId, s.variableIdMapLocal); break;
+					case 'collection': return getCollectionValues(side.collectionId, side.columnId, s.filterOperatorIsSingleValue(operator));
+					case 'field': return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId], false)];
+					case 'fieldChanged': return s.fieldIdsChanged.includes(side.fieldId);
+					case 'fieldValid': return !s.fieldIdsInvalid.includes(side.fieldId);
+					case 'formChanged': return s.hasChanges;
+					case 'formState': return isFormStateActive(s.formStateIdMap[side.formStateId], recursionLevel + 1);
+					case 'languageCode': return s.settings.languageCode;
+					case 'login': return s.loginId;
+					case 'preset': return s.presetIdMapRecordId[side.presetId];
+					case 'recordNew': return s.isNew;
+					case 'role': return s.access.roleIds.includes(side.roleId);
+					case 'true': return true;
+					case 'variable': return s.variableValueGet(side.variableId, s.variableIdMapLocal);
 
 					// use joins index map that does not use form data options overwrite, as it can be set via form state (circular dependency!)
-					case 'record': return s.joinsIndexMapNoOpt?.['0'] !== undefined ? s.joinsIndexMapNoOpt['0'].recordId : false; break;
-					case 'recordMayCreate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordCreate).length > 0; break;
-					case 'recordMayDelete': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordDelete).length > 0; break;
-					case 'recordMayUpdate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordUpdate).length > 0; break;
+					case 'record': return s.joinsIndexMapNoOpt?.['0'] !== undefined ? s.joinsIndexMapNoOpt['0'].recordId : false;
+					case 'recordMayCreate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordCreate).length > 0;
+					case 'recordMayDelete': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordDelete).length > 0;
+					case 'recordMayUpdate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordUpdate).length > 0;
 
 					case 'value':
 						// compatibility fix, true value should be used instead
@@ -697,7 +707,6 @@ export default {
 							if (side.value.toLowerCase() === 'false') return false;
 						}
 						return side.value;
-						break;
 				}
 				return false;
 			};
@@ -736,7 +745,7 @@ export default {
 				return Function(line)();
 			};
 
-			let out = { form: { data: 0, state: 'default' }, field: {}, formAction: {}, tab: {} };
+			const out = { form: { data: 0, state: 'default' }, field: {}, formAction: {}, tab: {} };
 			for (const state of s.form.states) {
 				if (!isFormStateActive(state, 0)) continue;
 
@@ -751,7 +760,7 @@ export default {
 			return out;
 		},
 		fieldIdsChanged: s => {
-			let out = [];
+			const out = [];
 			for (const fieldId in s.fieldIdMapData) {
 				const f = s.fieldIdMapData[fieldId];
 				let ia = s.getIndexAttributeIdByField(f, false);
@@ -866,14 +875,14 @@ export default {
 		mayUpdate: s => !s.badLoad && s.joinsIndexesSet.length !== 0,
 
 		// buttons
-		buttonDelShown: s => !s.isBulkUpdate && s.showButtonDel && (s.buttonDelUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonDelShown: s => !s.isBulkUpdate && s.showButtonDel && (s.buttonDelUsable || s.layoutElementsLower.includes('dataActionReadonly')),
 		buttonDelUsable: s => !s.buttonsReadonly && s.mayDelete,
 		buttonGoBackShown: s => s.isData && !s.isMobile && !s.isPopUp,
 		buttonGoBackUsable: s => !s.buttonsReadonly && !s.isAtHistoryStart,
-		buttonNewShown: s => !s.isBulkUpdate && s.showButtonNew && (s.buttonNewUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonNewShown: s => !s.isBulkUpdate && s.showButtonNew && (s.buttonNewUsable || s.layoutElementsLower.includes('dataActionReadonly')),
 		buttonNewUsable: s => !s.buttonsReadonly && s.mayNew && (!s.isNew || s.hasChanges),
-		buttonSaveShown: s => !s.isBulkUpdate && (s.buttonSaveUsable || s.layoutElements.includes('dataActionReadonly')),
-		buttonSaveShownBulk: s => s.isBulkUpdate && (s.buttonSaveUsableBulk || s.layoutElements.includes('dataActionReadonly')),
+		buttonSaveShown: s => !s.isBulkUpdate && (s.buttonSaveUsable || s.layoutElementsLower.includes('dataActionReadonly')),
+		buttonSaveShownBulk: s => s.isBulkUpdate && (s.buttonSaveUsableBulk || s.layoutElementsLower.includes('dataActionReadonly')),
 		buttonSaveShownClose: s => s.buttonSaveShown && !s.isAtHistoryStart && !s.isMobile,
 		buttonSaveShownNew: s => s.buttonSaveShown && s.buttonNewShown && !s.isMobile,
 		buttonSaveUsable: s => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate) && s.hasChanges,
@@ -1086,9 +1095,10 @@ export default {
 				clearTimeout(this.layoutCheckTimer);
 
 			this.layoutCheckTimer = setTimeout(() => {
-				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailable));
-				this.$nextTick(() => this.layoutSettleSpace(this.layoutElements,
-					this.hasBarLower ? this.$refs.formBarLowerCheck : this.$refs.formBarUpperCheck));
+				this.layoutElementsLower = JSON.parse(JSON.stringify(this.layoutElementsLowerAvailable));
+				this.layoutElementsUpper = JSON.parse(JSON.stringify(this.layoutElementsUpperAvailable));
+				this.$nextTick(() => this.layoutSettleSpace(this.layoutElementsLower, this.$refs.formBarLowerCheck));
+				this.$nextTick(() => this.layoutSettleSpace(this.layoutElementsUpper, this.$refs.formBarUpperCheck));
 			}, initialWaitMs === undefined ? 300 : initialWaitMs);
 		},
 		routingGuard() {
@@ -1132,7 +1142,7 @@ export default {
 				if (d.outsideIn) return;
 
 				// get data from sub joins if relationship attribute value has changed
-				for (let k in this.joinsIndexMap) {
+				for (const k in this.joinsIndexMap) {
 					if (this.joinsIndexMap[k].attributeId === d.attributeId && this.joinsIndexMap[k].indexFrom === d.index)
 						this.getFromSubJoin(this.joinsIndexMap[k], value);
 				}
@@ -1418,7 +1428,7 @@ export default {
 			}
 		},
 		timerClearAll() {
-			for (let k in this.timers) {
+			for (const k in this.timers) {
 				this.timerClear(k);
 			}
 		},
@@ -1684,7 +1694,7 @@ export default {
 
 			// collect which values from connected joins can be retrieved
 			const expressions = [];
-			for (let ia in this.values) {
+			for (const ia in this.values) {
 				const d = this.getDetailsFromIndexAttributeId(ia);
 
 				if (joinIndexes.includes(d.index))
@@ -1991,7 +2001,7 @@ export default {
 				if (this.fieldIdMapData[fieldId] === undefined)
 					continue;
 
-				let f = this.fieldIdMapData[fieldId];
+				const f = this.fieldIdMapData[fieldId];
 				let err = null;
 
 				if (f.index !== 0)
@@ -2042,7 +2052,7 @@ export default {
 			}
 
 			ws.sendMultiple(requests, true).then(
-				res => {
+				() => {
 					this.$emit('record-updated');
 					this.triggerEventAfter('save');
 					this.close();
