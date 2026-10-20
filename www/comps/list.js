@@ -130,13 +130,13 @@ export default {
 			@showHelp="$emit('showHelp')"
 			:columns
 			:columnBatches
-			:hasGalleryIcon="hasGalleryIcon"
+			:hasGalleryIcon
 			:isWithHelp="inputIsWithHelp && !showInputAddLine"
 			:multiInput="inputMulti"
 			:readonly="inputIsReadonly"
 			:recordIdsSelected="inputRecordIds"
 			:rows="rowsInput"
-			:showAllValues="showAllValues"
+			:showAllValues
 			:showOpen="hasUpdate"
 		>
 			<template #input-icon><slot name="input-icon" /></template>
@@ -314,14 +314,15 @@ export default {
 											@set-order="setOrder(b,$event,false)"
 											@set-order-only="setOrder(b,$event,true)"
 											:columnBatch="b"
-											:columnIdMapAggr="columnIdMapAggr"
-											:columns="columns"
+											:columnIdMapAggr
+											:columns
 											:filters="filtersCombined"
-											:filtersColumn="filtersColumn"
-											:isOrderedOrginal="isOrderedOrginal"
+											:filtersColumn
+											:isOrderedByUser
+											:isOrderedOrginal
 											:joins="relationsJoined"
 											:key="b.key"
-											:orders="orders"
+											:orders
 											:relationId="query.relationId"
 											:rowCount="count"
 											:simpleSortOnly="columnsSortOnly"
@@ -448,9 +449,9 @@ export default {
 							<tfoot>
 								<!-- result aggregations -->
 								<my-list-aggregate ref="aggregations"
-									:columnBatches="columnBatches"
-									:columnIdMapAggr="columnIdMapAggr"
-									:columns="columns"
+									:columnBatches
+									:columnIdMapAggr
+									:columns
 									:filters="filtersCombined"
 									:leaveOneEmpty="hasBulkActions"
 									:joins="relationsJoined"
@@ -661,6 +662,7 @@ export default {
 			filtersQuick: '',            // current user quick text filter
 			focused: false,
 			inputAutoSelectDone: false,
+			isOrderedByUser: false,      // list order was changed by user
 			rowsFetching: false,         // row values are being fetched
 			selectedRows: [],            // bulk selected rows by row index
 			showCsv: false,              // show UI for CSV import/export
@@ -820,13 +822,13 @@ export default {
 		cardsCaptions: s => s.$root.getOrFallback(s.loginOptions, 'cardsCaptions', true),
 		choiceId: s => s.$root.getOrFallback(s.loginOptions, 'choiceId', s.choices.length === 0 ? null : s.choices[0].id),
 		columnBatchSort: s => s.$root.getOrFallback(s.loginOptions, 'columnBatchSort', [[], []]),
-		columnIdMapAggr: s => s.$root.getOrFallback(s.loginOptions, 'columnIdMapAggr', {}),      // aggregators by column ID
-		filtersColumn: s => s.$root.getOrFallback(s.loginOptions, 'filtersColumn', []),        // column filters
-		filtersUser: s => s.$root.getOrFallback(s.loginOptions, 'filtersUser', []),          // user filters
+		columnIdMapAggr: s => s.$root.getOrFallback(s.loginOptions, 'columnIdMapAggr', {}), // aggregators by column ID
+		filtersColumn: s => s.$root.getOrFallback(s.loginOptions, 'filtersColumn', []),     // column filters
+		filtersUser: s => s.$root.getOrFallback(s.loginOptions, 'filtersUser', []),         // user filters
 		showHeader: s => s.$root.getOrFallback(s.loginOptions, 'header', true),             // show UI for list header
-		limit: s => s.$root.getOrFallback(s.loginOptions, 'limit', s.limitDefault),    // result limit
-		layout: s => s.$root.getOrFallback(s.loginOptions, 'layout', s.layoutDefault),  // list layout (table, cards)
-		orders: s => s.$root.getOrFallback(s.loginOptions, 'orders', s.ordersOriginal), // order by definitions for query
+		limit: s => s.$root.getOrFallback(s.loginOptions, 'limit', s.limitDefault),         // result limit
+		layout: s => s.$root.getOrFallback(s.loginOptions, 'layout', s.layoutDefault),      // list layout (table, cards)
+		orders: s => s.$root.getOrFallback(s.loginOptions, 'orders', s.ordersOriginal),     // order by definitions for query
 
 		// stores
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
@@ -1164,10 +1166,8 @@ export default {
 		},
 		setOrder(columnBatch, directionAsc, clearAllBefore) {
 			// remove initial sorting (if active) when changing anything
-			let orders = this.isOrderedOrginal ? [] : JSON.parse(JSON.stringify(this.orders));
-
-			if (clearAllBefore)
-				orders = [];
+			let orders = clearAllBefore || (this.isOrderedOrginal && !this.isOrderedByUser)
+				? [] : JSON.parse(JSON.stringify(this.orders));
 
 			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch, this.columns, orders);
 			const notOrdered = orderIndexesUsed.length === 0;
@@ -1201,11 +1201,14 @@ export default {
 					}
 				}
 			}
-			// when last order is removed, revert to original
-			this.setOrders(orders.length === 0 ? this.ordersOriginal : orders);
+			// when last order is removed, reset to original definition
+			const orderReset = orders.length === 0;
+			this.setOrders(orderReset ? this.ordersOriginal : orders, !orderReset, orderReset);
 		},
-		setOrders(v) {
+		setOrders(v, ordersSetByUser, ordersResetByUser) {
 			this.$emit('set-login-option', 'orders', v);
+			if (ordersResetByUser) this.isOrderedByUser = false;
+			else if (ordersSetByUser) this.isOrderedByUser = true;
 		},
 		setUserFilters(v) {
 			this.$emit('set-login-option', 'filtersUser', v);
@@ -1249,10 +1252,11 @@ export default {
 		cardsSetOrderBy(columnBatchIndexStr) {
 			const columnBatchIndex = parseInt(columnBatchIndexStr, 10);
 			this.cardsOrderByColumnBatchIndex = columnBatchIndex;
+
 			if (columnBatchIndex !== -1)
-				this.setOrder(this.columnBatches[columnBatchIndex], true, true);
-			else
-				this.setOrders(this.ordersOriginal);
+				return this.setOrder(this.columnBatches[columnBatchIndex], true, true);
+
+			this.setOrders(this.ordersOriginal, true, false);
 		},
 		cardsToggleOrderBy() {
 			const wasAsc = this.orders[0].ascending;
@@ -1316,7 +1320,7 @@ export default {
 
 					// order is invalid, if column index does not exist or column is a attribute
 					if (o.expressionPos > this.columns.length - 1 || this.columns[o.expressionPos].content === 'attribute')
-						return this.setOrders(this.ordersOriginal);
+						return this.setOrders(this.ordersOriginal, false, false);
 
 					continue;
 				}
@@ -1333,7 +1337,7 @@ export default {
 
 				// order is invalid if corresponding column is not displayed
 				if (!columnFound)
-					return this.setOrders(this.ordersOriginal);
+					return this.setOrders(this.ordersOriginal, false, false);
 			}
 		},
 

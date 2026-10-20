@@ -1,14 +1,10 @@
-import {isAttributeFiles}                 from './shared/attribute.js';
-import {getFirstColumnUsableAsAggregator} from './shared/column.js';
-import {
-	getUnixFormat,
-	getUnixShifted,
-	getUtcTimeStringFromUnix
-} from './shared/time.js';
+import { isAttributeFiles } from './shared/attribute.js';
+import { getFirstColumnUsableAsAggregator } from './shared/column.js';
+import { getUnixFormat, getUnixShifted, getUtcTimeStringFromUnix } from './shared/time.js';
 
 export default {
-	name:'my-list-column-batch',
-	template:`<div class="columnBatchHeader" ref="content">
+	name: 'my-list-column-batch',
+	template: `<div class="columnBatchHeader" ref="content">
 		<my-button image="filter.png"
 			v-if="showIconFilter"
 			@trigger="click"
@@ -141,104 +137,107 @@ export default {
 			</div>
 		</teleport>
 	</div>`,
-	props:{
-		columnBatch:     { type:Object,  required:true }, // column batch to show options for
-		columnIdMapAggr: { type:Object,  required:true },
-		columns:         { type:Array,   required:true }, // list columns
-		filters:         { type:Array,   required:true }, // list filters all combined (columns, list, quick, user, choices, ...)
-		filtersColumn:   { type:Array,   required:true }, // list filters from users column batch selections
-		isOrderedOrginal:{ type:Boolean, required:true }, // list orders are the same as original defined
-		joins:           { type:Array,   required:true }, // list joins
-		orders:          { type:Array,   required:true }, // list orders
-		relationId:      { type:String,  required:true }, // list query base relation ID
-		rowCount:        { type:Number,  required:true }, // list total row count
-		simpleSortOnly:  { type:Boolean, required:true }  // list column can only sort, does not dropdown or offer any other option
+	props: {
+		columnBatch: { type: Object, required: true }, // column batch to show options for
+		columnIdMapAggr: { type: Object, required: true },
+		columns: { type: Array, required: true }, // list columns
+		filters: { type: Array, required: true }, // list filters all combined (columns, list, quick, user, choices, ...)
+		filtersColumn: { type: Array, required: true }, // list filters from users column batch selections
+		isOrderedByUser: { type: Boolean, required: true }, // list orders was changed by user (can fit original definition at the same time)
+		isOrderedOrginal: { type: Boolean, required: true }, // list orders follow author definition
+		joins: { type: Array, required: true }, // list joins
+		orders: { type: Array, required: true }, // list orders
+		relationId: { type: String, required: true }, // list query base relation ID
+		rowCount: { type: Number, required: true }, // list total row count
+		simpleSortOnly: { type: Boolean, required: true }  // list column can only sort, does not dropdown or offer any other option
 	},
-	emits:['del-aggregator','del-order','set-aggregator','set-filters','set-order','set-order-only'],
+	emits: ['del-aggregator', 'del-order', 'set-aggregator', 'set-filters', 'set-order', 'set-order-only'],
 	data() {
 		return {
-			inputSel:[],     // value input for selection filter
+			inputSel: [],     // value input for selection filter
 			inputTxt: '',    // value input for text filter
-			values:[],       // values available to filter with (all values a list could have for column)
-			valueLimit:1000, // max. number of values loaded
-			zeroSelection:false
+			values: [],       // values available to filter with (all values a list could have for column)
+			valueLimit: 1000, // max. number of values loaded
+			zeroSelection: false
 		};
 	},
-	watch:{
-		columnFilterIndexes:{
+	watch: {
+		columnFilterIndexes: {
 			handler(v) {
-				if(v.length < 1)
+				if (v.length < 1)
 					return;
 
 				// apply input selection from column filter (must be first index)
 				const f = this.filtersColumn[v[0]];
-				if(f.side1.content === 'value') {
-					switch(f.operator) {
-						case 'ILIKE':  this.inputTxt = f.side1.value;                             break;
+				if (f.side1.content === 'value') {
+					switch (f.operator) {
+						case 'ILIKE': this.inputTxt = f.side1.value; break;
 						case '<> ALL': this.inputSel = JSON.parse(JSON.stringify(f.side1.value)); break;
-						case '= ANY':  this.migrateFilter(f.side1.value);                         break;
+						case '= ANY': this.migrateFilter(f.side1.value); break;
 					}
 				}
 
 				// apply NULL from filter to selection input
-				if(f.operator === '<> ALL' && v.length > 1 && this.filtersColumn[v[1]].operator === 'IS NOT NULL')
+				if (f.operator === '<> ALL' && v.length > 1 && this.filtersColumn[v[1]].operator === 'IS NOT NULL')
 					this.inputSel.push(null);
 			},
-			immediate:true
+			immediate: true
 		},
 		dropdownShow(v) {
-			if(v) this.loadSelectionValues();
+			if (v) this.loadSelectionValues();
 		}
 	},
-	computed:{
-		aggregatorInput:{
-			get()  {
+	computed: {
+		aggregatorInput: {
+			get() {
 				return this.aggrColumn !== null &&
 					typeof this.columnIdMapAggr[this.aggrColumn.id] !== 'undefined'
 					? this.columnIdMapAggr[this.aggrColumn.id] : '';
 			},
 			set(v) {
-				if(v === '') this.$emit('del-aggregator',this.aggrColumn.id,null);
-				else         this.$emit('set-aggregator',this.aggrColumn.id,v);
+				if (v === '') this.$emit('del-aggregator', this.aggrColumn.id, null);
+				else this.$emit('set-aggregator', this.aggrColumn.id, v);
 			}
 		},
 
 		// returns column of the column batch that is used for filtering (null if none is available)
-		columnUsedFilter:s => {
-			for(const ind of s.columnBatch.columnIndexes) {
+		columnUsedFilter: s => {
+			for (const ind of s.columnBatch.columnIndexes) {
 				const c = s.columns[ind];
 
-				switch(c.content) {
-					case 'fnc_pg':     return c; break; // any PG function column can be used
-					case 'fnc_scalar': return c; break; // any scalar function column can be used
+				switch (c.content) {
+					case 'fnc_pg': return c;     // any PG function column can be used
+					case 'fnc_scalar': return c; // any scalar function column can be used
 					case 'attribute':
 						// ignore color/drawing display, sub query, aggregator, encrypted and file attribute columns
-						const a = s.attributeIdMap[c.attributeId];
-						if(a.contentUse !== 'color' && a.contentUse !== 'drawing' && c.query === null && c.aggregator === null &&
-							!a.encrypted && !s.isAttributeFiles(a.content)) {
+						{
+							const a = s.attributeIdMap[c.attributeId];
+							if (a.contentUse !== 'color' && a.contentUse !== 'drawing' && c.query === null && c.aggregator === null &&
+								!a.encrypted && !s.isAttributeFiles(a.content)) {
 
-							return c;
+								return c;
+							}
 						}
-					break;
+						break;
 				}
 			}
 			return null;
 		},
 
 		// indexes of column user filters that this column is responsible for
-		columnFilterIndexes:s => {
-			if(!s.isValidFilter)
+		columnFilterIndexes: s => {
+			if (!s.isValidFilter)
 				return [];
 
 			const c = s.columnUsedFilter;
-			let out = [];
+			const out = [];
 
-			for(let i = 0, j = s.filtersColumn.length; i < j; i++) {
+			for (let i = 0, j = s.filtersColumn.length; i < j; i++) {
 				const f = s.filtersColumn[i];
 
-				if(
-					(c.content === 'attribute'  && c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) ||
-					(c.content === 'fnc_pg'     && c.pgFunctionId === f.side0.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments)) ||
+				if (
+					(c.content === 'attribute' && c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) ||
+					(c.content === 'fnc_pg' && c.pgFunctionId === f.side0.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments)) ||
 					(c.content === 'fnc_scalar' && c.scalar === f.side0.scalar && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments))
 				) {
 					out.push(i);
@@ -248,31 +247,31 @@ export default {
 		},
 
 		// simple
-		aggrColumn:       s => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
-		canOpen:          s => s.rowCount > 1 || s.isFiltered,
-		canOrder:         s => s.columnBatch.columnIndexesSortBy.length !== 0,
-		dropdownShow:     s => s.dropdownElm === s.$refs.content,
-		filtersColumnThis:s => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
-		isDateOrTime:     s => s.isValidFilter && s.columnUsedFilter.attributeId !== null && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
-		isFiltered:       s => s.columnFilterIndexes.length !== 0,
-		isOrdered:        s => s.columnBatch.orderIndexesUsed.length !== 0 && !s.isOrderedOrginal,
-		isOrderedAsc:     s => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
-		isValidFilter:    s => s.columnUsedFilter !== null,
+		aggrColumn: s => s.getFirstColumnUsableAsAggregator(s.columnBatch, s.columns),
+		canOpen: s => s.rowCount > 1 || s.isFiltered,
+		canOrder: s => s.columnBatch.columnIndexesSortBy.length !== 0,
+		dropdownShow: s => s.dropdownElm === s.$refs.content,
+		filtersColumnThis: s => s.filtersColumn.filter((v, i) => s.columnFilterIndexes.includes(i)),
+		isDateOrTime: s => s.isValidFilter && s.columnUsedFilter.attributeId !== null && ['datetime', 'date', 'time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
+		isFiltered: s => s.columnFilterIndexes.length !== 0,
+		isOrdered: s => s.columnBatch.orderIndexesUsed.length !== 0 && (!s.isOrderedOrginal || s.isOrderedByUser),
+		isOrderedAsc: s => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
+		isValidFilter: s => s.columnUsedFilter !== null,
 		isValueLimitFull: s => s.values.length === s.valueLimit,
-		showFilterAny:    s => s.showFilterItems || s.showFilterText,
-		showFilterItems:  s => s.values.length !== 0,
-		showFilterText:   s => !s.isDateOrTime && s.isValidFilter,
-		showIconFilter:   s => s.isValidFilter && s.isFiltered,
-		showIconOrder:    s => s.isOrdered && !s.isOrderedOrginal,
+		showFilterAny: s => s.showFilterItems || s.showFilterText,
+		showFilterItems: s => s.values.length !== 0,
+		showFilterText: s => !s.isDateOrTime && s.isValidFilter,
+		showIconFilter: s => s.isValidFilter && s.isFiltered,
+		showIconOrder: s => s.isOrdered,
 
 		// stores
-		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capApp:        s => s.$store.getters.captions.list,
-		capGen:        s => s.$store.getters.captions.generic,
-		dateFormat:    s => s.$store.getters.settings.dateFormat,
-		dropdownElm:   s => s.$store.getters.dropdownElm
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		capApp: s => s.$store.getters.captions.list,
+		capGen: s => s.$store.getters.captions.generic,
+		dateFormat: s => s.$store.getters.settings.dateFormat,
+		dropdownElm: s => s.$store.getters.dropdownElm
 	},
-	methods:{
+	methods: {
 		// externals
 		getFirstColumnUsableAsAggregator,
 		getUnixFormat,
@@ -282,21 +281,21 @@ export default {
 
 		// presentation
 		displayValue(v) {
-			if(v === null)
-				return '[' + this.capGen.button.empty + ']';
+			if (v === null)
+				return `[${this.capGen.button.empty}]`;
 
 			if (this.columnUsedFilter.attributeId === null)
 				return String(v);
 
 			const atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
 
-			if(atr.content === 'boolean')
+			if (atr.content === 'boolean')
 				return v ? this.capGen.option.yes : this.capGen.option.no;
 
-			switch(atr.contentUse) {
-				case 'date':     return this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
-				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
-				case 'time':     return this.getUtcTimeStringFromUnix(v);                                break;
+			switch (atr.contentUse) {
+				case 'date': return this.getUnixFormat(this.getUnixShifted(v, true), this.dateFormat);
+				case 'datetime': return this.getUnixFormat(v, `${this.dateFormat} H:i`);
+				case 'time': return this.getUtcTimeStringFromUnix(v);
 			}
 			return String(v);
 		},
@@ -304,47 +303,47 @@ export default {
 		// helper
 		prepareDataGet() {
 			let expr = null;
-			switch(this.columnUsedFilter.content) {
+			switch (this.columnUsedFilter.content) {
 				case 'attribute':
 					expr = {
-						attributeId:this.columnUsedFilter.attributeId,
-						index:this.columnUsedFilter.index,
-						aggregator:'first',
-						distincted:true
+						attributeId: this.columnUsedFilter.attributeId,
+						index: this.columnUsedFilter.index,
+						aggregator: 'first',
+						distincted: true
 					};
-				break;
+					break;
 				case 'fnc_pg':
 					expr = {
-						arguments:this.columnUsedFilter.arguments,
-						pgFunctionId:this.columnUsedFilter.pgFunctionId,
-						aggregator:'first',
-						distincted:true
+						arguments: this.columnUsedFilter.arguments,
+						pgFunctionId: this.columnUsedFilter.pgFunctionId,
+						aggregator: 'first',
+						distincted: true
 					};
-				break;
+					break;
 				case 'fnc_scalar':
 					expr = {
-						arguments:this.columnUsedFilter.arguments,
-						scalar:this.columnUsedFilter.scalar,
-						aggregator:'first',
-						distincted:true
+						arguments: this.columnUsedFilter.arguments,
+						scalar: this.columnUsedFilter.scalar,
+						aggregator: 'first',
+						distincted: true
 					};
-				break;
+					break;
 			}
 
 			return {
-				relationId:this.relationId,
-				joins:this.joins,
-				expressions:[expr],
-				filters:this.filters.filter(v => {
+				relationId: this.relationId,
+				joins: this.joins,
+				expressions: [expr],
+				filters: this.filters.filter(v => {
 					// remove filters coming from this column batch
-					for(const f of this.filtersColumnThis) {
-						if(JSON.stringify(f) === JSON.stringify(v))
+					for (const f of this.filtersColumnThis) {
+						if (JSON.stringify(f) === JSON.stringify(v))
 							return false;
 					}
 					return true;
 				}),
-				orders:[{ascending:true,expressionPos:0}],
-				limit:this.valueLimit
+				orders: [{ ascending: true, expressionPos: 0 }],
+				limit: this.valueLimit
 			};
 		},
 
@@ -356,22 +355,22 @@ export default {
 			this.loadSelectionValues();
 		},
 		click() {
-			if(this.simpleSortOnly) {
-				if(this.isOrdered)
-					return this.$emit('set-order',!this.isOrderedAsc);
+			if (this.simpleSortOnly) {
+				if (this.isOrdered)
+					return this.$emit('set-order', !this.isOrderedAsc);
 
-				return this.$emit('set-order-only',true);
+				return this.$emit('set-order-only', true);
 			}
 
-			if(this.canOpen)
+			if (this.canOpen)
 				this.dropdownSet(!this.dropdownShow);
 		},
 		clickOutside() {
 			this.dropdownSet(false);
 		},
 		dropdownSet(state) {
-			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
-			if(!state && this.dropdownShow) this.$store.commit('dropdownElm',null);
+			if (state && !this.dropdownShow) this.$store.commit('dropdownElm', this.$refs.content);
+			if (!state && this.dropdownShow) this.$store.commit('dropdownElm', null);
 		},
 		useTextInput() {
 			this.inputSel = [];
@@ -381,19 +380,19 @@ export default {
 		valueToggle(v) {
 			this.inputTxt = '';
 
-			if(this.zeroSelection && this.inputSel.length === 0)
+			if (this.zeroSelection && this.inputSel.length === 0)
 				this.inputSel = JSON.parse(JSON.stringify(this.values));
 
 			const p = this.inputSel.indexOf(v);
-			if(p !== -1) this.inputSel.splice(p,1);
-			else         this.inputSel.push(v);
+			if (p !== -1) this.inputSel.splice(p, 1);
+			else this.inputSel.push(v);
 
 			this.zeroSelection = false;
 			this.set();
 		},
 		valueToggleAll() {
 			this.inputTxt = '';
-			if(this.inputSel.length !== 0 || this.zeroSelection) {
+			if (this.inputSel.length !== 0 || this.zeroSelection) {
 				this.zeroSelection = false;
 				this.inputSel = [];
 			}
@@ -405,12 +404,12 @@ export default {
 
 		// migrate filter (< r3.10.3) from outdated '= ANY' filter to current '<> ALL' filter
 		migrateFilter(valuesIncl) {
-			ws.send('data','get',this.prepareDataGet(),false).then(
+			ws.send('data', 'get', this.prepareDataGet(), false).then(
 				res => {
 					// exclude any value that is not in outdated inclusion filter
 					this.inputSel = [];
-					for(const row of res.payload.rows) {
-						if(!valuesIncl.includes(row.values[0]))
+					for (const row of res.payload.rows) {
+						if (!valuesIncl.includes(row.values[0]))
 							this.inputSel.push(row.values[0]);
 					}
 					this.set();
@@ -421,13 +420,13 @@ export default {
 
 		// retrieval
 		loadSelectionValues() {
-			if(!this.dropdownShow || !this.isValidFilter)
+			if (!this.dropdownShow || !this.isValidFilter)
 				return;
 
-			ws.send('data','get',this.prepareDataGet(),false).then(
+			ws.send('data', 'get', this.prepareDataGet(), false).then(
 				res => {
 					this.values = [];
-					for(const row of res.payload.rows) {
+					for (const row of res.payload.rows) {
 						this.values.push(row.values[0]);
 					}
 				},
@@ -437,53 +436,53 @@ export default {
 
 		// updates
 		set() {
-			if(!this.isValidFilter)
+			if (!this.isValidFilter)
 				return;
 
 			// remove existing filters for this column
-			let filters = JSON.parse(JSON.stringify(this.filtersColumn))
-				.filter((v,i) => !this.columnFilterIndexes.includes(i));
+			const filters = JSON.parse(JSON.stringify(this.filtersColumn))
+				.filter((v, i) => !this.columnFilterIndexes.includes(i));
 
-			if(this.inputTxt !== '' || this.inputSel.length !== 0) {
+			if (this.inputTxt !== '' || this.inputSel.length !== 0) {
 
 				// add new filters for this column, if active
 				// NULL values are not allowed in '<> ALL' operator, will make entire set NULL if included
 				// remove NULL from original filter condition but add second NULL/NOT NULL condition to filter with it
 				const filterTxt = this.inputTxt !== '';
-				const column    = this.columnUsedFilter;
-				let   side0     = null;
+				const column = this.columnUsedFilter;
+				let side0 = null;
 
-				switch(column.content) {
-					case 'attribute':  side0 = { attributeId:column.attributeId, attributeIndex:column.index };  break;
-					case 'fnc_pg':     side0 = { arguments:column.arguments, pgFunctionId:column.pgFunctionId }; break;
-					case 'fnc_scalar': side0 = { arguments:column.arguments, scalar:column.scalar };             break;
+				switch (column.content) {
+					case 'attribute': side0 = { attributeId: column.attributeId, attributeIndex: column.index }; break;
+					case 'fnc_pg': side0 = { arguments: column.arguments, pgFunctionId: column.pgFunctionId }; break;
+					case 'fnc_scalar': side0 = { arguments: column.arguments, scalar: column.scalar }; break;
 				}
 
 				filters.push({
-					connector:'AND',
-					index:0,
-					operator:filterTxt ? 'ILIKE' : '<> ALL',
-					side0:{...side0, ...{ brackets:1 } },
-					side1:{
-						brackets:filterTxt ? 1 : 0,
-						content:'value',
-						value:filterTxt ? this.inputTxt : this.inputSel.filter(v => v !== null)
+					connector: 'AND',
+					index: 0,
+					operator: filterTxt ? 'ILIKE' : '<> ALL',
+					side0: { ...side0, ...{ brackets: 1 } },
+					side1: {
+						brackets: filterTxt ? 1 : 0,
+						content: 'value',
+						value: filterTxt ? this.inputTxt : this.inputSel.filter(v => v !== null)
 					}
 				});
 
-				if(!filterTxt) {
+				if (!filterTxt) {
 					// item filter requires NULL/NOT NULL OR condition
 					const exclNull = this.inputSel.includes(null);
 					filters.push({
-						connector:exclNull ? 'AND' : 'OR',
-						index:0,
-						operator:exclNull ? 'IS NOT NULL' : 'IS NULL',
-						side0:{...side0, ...{ brackets:0 } },
-						side1:{ brackets:1 }
+						connector: exclNull ? 'AND' : 'OR',
+						index: 0,
+						operator: exclNull ? 'IS NOT NULL' : 'IS NULL',
+						side0: { ...side0, ...{ brackets: 0 } },
+						side1: { brackets: 1 }
 					});
 				}
 			}
-			this.$emit('set-filters',filters);
+			this.$emit('set-filters', filters);
 		}
 	}
 };
