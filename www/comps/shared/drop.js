@@ -1,40 +1,40 @@
 export function getFilesFromDataItems(dataItems) {
-	let files = [];
-	
+	const files = [];
+
 	function traverse(entry, path = '') {
 		return new Promise(resolve => {
-			if(!entry)
+			if (!entry)
 				resolve();
-			
-			if(entry.isFile)
+
+			if (entry.isFile)
 				return entry.file(file => {
 					files.push(file);
 					resolve();
 				});
-			
-			if(!entry.isDirectory)
+
+			if (!entry.isDirectory)
 				resolve();
-			
+
 			// entry is directory, start reader
-			let reader = entry.createReader();
-			
+			const reader = entry.createReader();
+
 			new Promise(resolveSub => {
-				let subEntriesPromises = [];
-				let readEntries = () => {
+				const subEntriesPromises = [];
+				const readEntries = () => {
 					reader.readEntries(subEntries => {
-						
-						if(subEntries.length === 0) {
+
+						if (subEntries.length === 0) {
 							// no more sub entries available, resolve
 							resolveSub(Promise.all(subEntriesPromises));
 						}
 						else {
 							// traverse any sub entry in the current directory
-							for(let subEntry of subEntries) {
+							for (const subEntry of subEntries) {
 								subEntriesPromises.push(
-									traverse(subEntry, path + entry.name + '/')
+									traverse(subEntry, `${path}${entry.name}/`)
 								);
 							}
-							
+
 							// readEntries can in some cases deliver subsets of results
 							// chrome only ever delivers 100 results at once
 							// needs to be called as long as results are not 0
@@ -44,16 +44,15 @@ export function getFilesFromDataItems(dataItems) {
 				}
 				// initial read of directory
 				readEntries();
-				
+
 			}).then(resolve);
 		});
 	}
-	
+
 	return new Promise(resolve => {
-		let entriesPromises = [];
-		
-		for(let i = 0, j = dataItems.length; i < j; i++) {
-			entriesPromises.push(traverse(dataItems[i].webkitGetAsEntry()));
+		const entriesPromises = [];
+		for (const di of dataItems) {
+			entriesPromises.push(traverse(di.webkitGetAsEntry()));
 		}
 		Promise.all(entriesPromises).then(() => {
 			resolve(files);

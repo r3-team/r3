@@ -346,7 +346,7 @@ const MyInputFiles = {
 			],
 
 			extRegex: /(?:\.([^.]+))?$/,
-			noSpace: false,         // if input field is tiny, reduces clutter,
+			noSpace: false, // if input field is tiny, reduces clutter,
 			progress: 100,
 			viewModes: ['listCompact', 'listComfort', 'gallery'],
 
@@ -458,7 +458,7 @@ const MyInputFiles = {
 			// * array of files, initial attribute value -> initialize input
 			// * object with file changes (removed, renamed, ...)
 			if (this.modelValue === null || Array.isArray(this.modelValue)) {
-				let v = JSON.parse(JSON.stringify(this.modelValue));
+				const v = JSON.parse(JSON.stringify(this.modelValue));
 				this.files = v !== null ? v : [];
 				this.fileIdMapChange = {};
 				this.$emit('file-count-change', this.files.length);
@@ -553,7 +553,7 @@ const MyInputFiles = {
 
 		// actions
 		copyFilesSelected() {
-			let v = {
+			const v = {
 				attributeId: this.attributeId,
 				fileIds: this.fileIdsSelected,
 				recordId: this.recordId
@@ -651,11 +651,7 @@ const MyInputFiles = {
 		},
 		update(fileId, action, name) {
 			if (this.fileIdMapChange[fileId] === undefined) {
-				this.fileIdMapChange[fileId] = {
-					action: action,
-					name: name,
-					version: -1
-				};
+				this.fileIdMapChange[fileId] = { action, name, version: -1 };
 			} else {
 				// delete action always takes priority, even if another already existed
 				if (action === 'delete')
@@ -698,7 +694,13 @@ const MyInputFiles = {
 		upload(files, inputTarget) {
 			const maxSize = this.attributeIdMap[this.attributeId].length;
 
-			for (const file of files) {
+			for (let i = 0, j = files.length; i < j; i++) {
+				const file = files[i];
+
+				if (this.countAllowed !== 0 && this.countAllowed < this.files.length + i + 1) {
+					file.hasProgress = 100;
+					continue;
+				}
 				if (maxSize !== 0 && Math.floor(file.size / 1024) > maxSize) {
 					file.hasProgress = 100;
 					this.$root.genericError(this.capApp.tooLarge.replace(
@@ -713,8 +715,7 @@ const MyInputFiles = {
 
 				xhr.addEventListener('load', () => {
 					const res = JSON.parse(xhr.response);
-
-					if (typeof res.error !== 'undefined')
+					if (res.error !== undefined)
 						return this.$root.genericError('import failed');
 
 					this.updateCreate([{
@@ -737,7 +738,8 @@ const MyInputFiles = {
 					for (const f of files) {
 						total += f.hasProgress;
 					}
-					this.progress = Math.floor(total / files.length);
+					const progressAvg = Math.floor(total / files.length);
+					this.progress = Number.isNaN(progressAvg) ? 100 : progressAvg;
 				});
 
 				const formData = new FormData();
