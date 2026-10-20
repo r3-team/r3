@@ -644,7 +644,7 @@ export default {
 			</div>
 
 			<!-- bulk notice -->
-			<div class="captionSub" v-if="isBulkUpdate && isTouched">
+			<div class="captionSub" v-if="isBulkUpdate && isTouched && !isVariable">
 				{{ capApp.bulkTouched }}
 			</div>
 
