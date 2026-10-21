@@ -94,11 +94,18 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.column             ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
-		ALTER TABLE app.doc_column         ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
-		ALTER TABLE instance_mail.template ALTER COLUMN content TYPE instance_mail.template_content USING content::TEXT::instance_mail.template_content;
+		nothing so far
 	*/
 
+	"3.13": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.column             ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
+			ALTER TABLE app.doc_column         ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
+			ALTER TABLE instance_mail.template ALTER COLUMN content TYPE instance_mail.template_content USING content::TEXT::instance_mail.template_content;
+		`)
+		return "3.14", err
+	},
 	"3.12": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
