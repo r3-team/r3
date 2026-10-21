@@ -1,4 +1,4 @@
-import { MyCalendarDateSelect } from './calendar.js';
+import MyCalendarDateSelect from './calendarDateSelect.js';
 import MyCalendarDays from './calendarDays.js';
 import MyCalendarMonth from './calendarMonth.js';
 

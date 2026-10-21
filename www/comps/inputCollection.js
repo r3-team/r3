@@ -1,14 +1,10 @@
-import {getColumnTitle} from './shared/column.js';
-import {srcBase64}      from './shared/image.js';
-import {
-	getCollectionColumn,
-	getCollectionColumnIndex
-} from './shared/collection.js';
+import { getCollectionColumn, getCollectionColumnIndex } from './shared/collection.js';
+import { getColumnTitle } from './shared/column.js';
+import { srcBase64 } from './shared/image.js';
 
 export default {
-	name:'my-input-collection',
-	template:`<div class="input-collection input-custom" @keyup.esc="escape">
-	
+	name: 'my-input-collection',
+	template: `<div class="input-collection input-custom" @keyup.esc="escape">
 		<my-button
 			@trigger="click"
 			:active="!readonly"
@@ -17,7 +13,7 @@ export default {
 			:imageBase64="hasIcon ? srcBase64(iconIdMap[collection.iconId].file) : ''"
 			:naked="true"
 		/>
-		
+
 		<!-- value previews -->
 		<div class="preview row gap centered">
 			<template v-for="(recIndex,i) in rowIndexesSelected">
@@ -29,7 +25,7 @@ export default {
 				</div>
 			</template>
 		</div>
-		
+
 		<!-- hover input -->
 		<div class="app-sub-window under-header"
 			v-if="showHover"
@@ -53,7 +49,7 @@ export default {
 					</div>
 				</div>
 				<div class="content grow input-collection-sides">
-					
+
 					<!-- available -->
 					<div class="input-collection-side">
 						<div class="row gap centered space-between default-inputs">
@@ -73,7 +69,7 @@ export default {
 							</div>
 						</div>
 					</div>
-					
+
 					<!-- active selections -->
 					<div class="input-collection-side">
 						<div class="row gap centered space-between">
@@ -98,37 +94,37 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		collectionId:   { type:String,  required:true },
-		columnIdDisplay:{ type:String,  required:true },
-		modelValue:     { required:true }, // indexes of selected rows in collection
-		multiValue:     { type:Boolean, required:false, default:false },
-		previewCount:   { type:Number,  required:true },
-		readonly:       { type:Boolean, required:false, default:false },
-		showTitle:      { type:Boolean, required:false, default:true }
+	props: {
+		collectionId: { type: String, required: true },
+		columnIdDisplay: { type: String, required: true },
+		modelValue: { required: true }, // indexes of selected rows in collection
+		multiValue: { type: Boolean, required: false, default: false },
+		previewCount: { type: Number, required: true },
+		readonly: { type: Boolean, required: false, default: false },
+		showTitle: { type: Boolean, required: false, default: true }
 	},
-	emits:['update:modelValue'],
+	emits: ['update:modelValue'],
 	data() {
 		return {
-			textInput:'', // text line input
-			showHover:false
+			textInput: '', // text line input
+			showHover: false
 		};
 	},
-	computed:{
-		titleAction:(s) => {
-			const cnt         = (s.previewCount === 0 ? '' : '+') + (s.rowIndexesSelected.length - s.previewCount).toString();
+	computed: {
+		titleAction: s => {
+			const cnt = (s.previewCount === 0 ? '' : '+') + (s.rowIndexesSelected.length - s.previewCount).toString();
 			const enoughSpace = s.rowIndexesSelected.length <= s.previewCount;
-			
-			if(!s.showTitle && s.hasIcon)
+
+			if (!s.showTitle && s.hasIcon)
 				return enoughSpace ? '' : cnt;
-			
-			return enoughSpace ? s.title : `${s.title} (${ cnt })`;
+
+			return enoughSpace ? s.title : `${s.title} (${cnt})`;
 		},
-		rowIndexesSelected:(s) => typeof s.modelValue === 'undefined' ? [] : s.modelValue,
-		rowIndexesVisible: (s) => {
-			let out = [];
-			for(let i = 0, j = s.rows.length; i < j; i++) {
-				if(!s.rowIndexesSelected.includes(i)
+		rowIndexesSelected: s => typeof s.modelValue === 'undefined' ? [] : s.modelValue,
+		rowIndexesVisible: s => {
+			const out = [];
+			for (let i = 0, j = s.rows.length; i < j; i++) {
+				if (!s.rowIndexesSelected.includes(i)
 					&& (
 						s.textInput === ''
 						|| s.rows[i].values[s.valueIndexDisplay].toLowerCase().includes(s.textInput.toLowerCase())
@@ -137,52 +133,51 @@ export default {
 			}
 			return out;
 		},
-		
+
 		// simple states
-		collection:       (s) => s.collectionIdMapSchema[s.collectionId],
-		hasIcon:          (s) => s.collection.iconId !== null,
-		hasSelections:    (s) => s.rowIndexesSelected.length !== 0,
-		rows:             (s) => s.collectionIdMap[s.collectionId],
-		title:            (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay),s.collection.moduleId),
-		valueIndexDisplay:(s) => s.getCollectionColumnIndex(s.collectionId,s.columnIdDisplay),
-		
+		collection: s => s.collectionIdMapSchema[s.collectionId],
+		hasIcon: s => s.collection.iconId !== null,
+		hasSelections: s => s.rowIndexesSelected.length !== 0,
+		rows: s => s.collectionIdMap[s.collectionId],
+		title: s => s.getColumnTitle(s.getCollectionColumn(s.collectionId, s.columnIdDisplay), s.collection.moduleId),
+		valueIndexDisplay: s => s.getCollectionColumnIndex(s.collectionId, s.columnIdDisplay),
+
 		// stores
-		collectionIdMap:      (s) => s.$store.getters['collectionIdMap'],
-		collectionIdMapSchema:(s) => s.$store.getters['schema/collectionIdMap'],
-		iconIdMap:            (s) => s.$store.getters['schema/iconIdMap'],
-		capGen:               (s) => s.$store.getters.captions.generic,
-		isMobile:             (s) => s.$store.getters.isMobile
+		collectionIdMap: s => s.$store.getters.collectionIdMap,
+		collectionIdMapSchema: s => s.$store.getters['schema/collectionIdMap'],
+		iconIdMap: s => s.$store.getters['schema/iconIdMap'],
+		capGen: s => s.$store.getters.captions.generic,
+		isMobile: s => s.$store.getters.isMobile
 	},
-	methods:{
+	methods: {
 		// externals
 		getCollectionColumn,
 		getCollectionColumnIndex,
 		getColumnTitle,
 		srcBase64,
-		
+
 		// actions
 		click() {
-			if(!this.readonly)
+			if (!this.readonly)
 				this.showHover = true;
 		},
 		entryRemove(i) {
 			const pos = this.rowIndexesSelected.indexOf(i);
-			if(pos === -1)
+			if (pos === -1)
 				return;
-			
-			let rowIndexes = JSON.parse(JSON.stringify(this.rowIndexesSelected));
-			rowIndexes.splice(pos,1);
-			this.$emit('update:modelValue',rowIndexes);
+
+			const rowIndexes = JSON.parse(JSON.stringify(this.rowIndexesSelected));
+			rowIndexes.splice(pos, 1);
+			this.$emit('update:modelValue', rowIndexes);
 		},
 		entrySelect(i) {
-			let rowIndexes = JSON.parse(JSON.stringify(this.rowIndexesSelected));
-			
-			if(!this.multiValue) rowIndexes = [];
-			
+			const rowIndexes = !this.multiValue ? [] : JSON.parse(JSON.stringify(this.rowIndexesSelected));
 			this.textInput = '';
 			rowIndexes.push(i);
-			this.$emit('update:modelValue',rowIndexes);
+			this.$emit('update:modelValue', rowIndexes);
 		},
-		escape() { this.showHover = false; }
+		escape() {
+			this.showHover = false;
+		}
 	}
 };

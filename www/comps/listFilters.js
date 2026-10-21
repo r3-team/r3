@@ -1,9 +1,11 @@
-import {getColumnIsFilterable}  from './shared/column.js';
-import {getTemplateQueryFilter} from './shared/builderTemplate.js';
+import MyFilters from './filters.js';
+import { getTemplateQueryFilter } from './shared/builderTemplate.js';
+import { getColumnIsFilterable } from './shared/column.js';
 
 export default {
-	name:'my-list-filters',
-	template:`<div class="list-filters">
+	name: 'my-list-filters',
+	components: { MyFilters },
+	template: `<div class="list-filters">
 		<div class="list-filters-content">
 			<my-filters class="default-inputs"
 				v-model="values"
@@ -37,30 +39,30 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		columns:      { type:Array,  required:true },
-		columnBatches:{ type:Array,  required:true },
-		filters:      { type:Array,  required:true },
-		joins:        { type:Array,  required:true },
-		moduleId:     { type:String, required:true }
+	props: {
+		columns: { type: Array, required: true },
+		columnBatches: { type: Array, required: true },
+		filters: { type: Array, required: true },
+		joins: { type: Array, required: true },
+		moduleId: { type: String, required: true }
 	},
-	emits:['set-filters'],
+	emits: ['set-filters'],
 	data() {
 		return {
-			values:[]
+			values: []
 		};
 	},
-	watch:{
-		filters:{
+	watch: {
+		filters: {
 			handler(v) { this.values = JSON.parse(JSON.stringify(v)); },
-			immediate:true
+			immediate: true
 		}
 	},
-	computed:{
-		bracketsEqual:s => {
+	computed: {
+		bracketsEqual: s => {
 			let cnt0 = 0;
 			let cnt1 = 0;
-			for(const f of s.values) {
+			for (const f of s.values) {
 				cnt0 += f.side0.brackets;
 				cnt1 += f.side1.brackets;
 			}
@@ -68,55 +70,55 @@ export default {
 		},
 
 		// stores
-		capGen:s => s.$store.getters.captions.generic
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getColumnIsFilterable,
 		getTemplateQueryFilter,
 
 		// actions
 		add() {
-			let f     = this.getTemplateQueryFilter();
+			const f = this.getTemplateQueryFilter();
 			let isSet = false;
 			f.operator = 'ILIKE';
-			
+
 			// apply first available column
-			for(const b of this.columnBatches) {
-				for(const ci of b.columnIndexes) {
+			for (const b of this.columnBatches) {
+				for (const ci of b.columnIndexes) {
 					const c = this.columns[ci];
-					if(this.getColumnIsFilterable(c)) {
-						switch(c.content) {
+					if (this.getColumnIsFilterable(c)) {
+						switch (c.content) {
 							case 'attribute':
-								f.side0.attributeId    = c.attributeId;
+								f.side0.attributeId = c.attributeId;
 								f.side0.attributeIndex = c.index;
-							break;
+								break;
 							case 'fnc_pg':
 								f.side0.pgFunctionId = c.pgFunctionId;
-								f.side0.arguments    = c.arguments;
-							break;
-							case 'fnc_scalar':
-								f.side0.scalar    = c.scalar;
 								f.side0.arguments = c.arguments;
-							break;
+								break;
+							case 'fnc_scalar':
+								f.side0.scalar = c.scalar;
+								f.side0.arguments = c.arguments;
+								break;
 						}
 						isSet = true;
 						break;
 					}
 				}
-				if(isSet)
+				if (isSet)
 					break;
 			}
-			let v = JSON.parse(JSON.stringify(this.values));
+			const v = JSON.parse(JSON.stringify(this.values));
 			v.push(f);
 			this.values = v;
 		},
 		removeAll() {
-			this.$emit('set-filters',[]);
+			this.$emit('set-filters', []);
 		},
 		set() {
-			if(this.bracketsEqual)
-				this.$emit('set-filters',JSON.parse(JSON.stringify(this.values)));
+			if (this.bracketsEqual)
+				this.$emit('set-filters', JSON.parse(JSON.stringify(this.values)));
 		}
 	}
 };

@@ -1,4 +1,4 @@
-
+import MyFilters from '../filters.js';
 import { getIndexAttributeIdsByJoins, isAttributeRelationship, isAttributeRelationship11 } from '../shared/attribute.js';
 import { builderOptionGet, builderOptionSet, getDependentAttributes, getDependentModules, getItemTitleRelation } from '../shared/builder.js';
 import { getTemplateQueryChoice, getTemplateQueryFilter } from '../shared/builderTemplate.js';
@@ -103,6 +103,10 @@ const MyBuilderQueryFilter = {
 		// stores
 		capApp: s => s.$store.getters.captions.builder.query,
 		capGen: s => s.$store.getters.captions.generic
+	},
+	beforeCreate() {
+		// import at runtime due to circular dependencies
+		this.$options.components.MyFilters = MyFilters;
 	},
 	methods: {
 		// externals
@@ -300,14 +304,14 @@ const MyBuilderQueryLookups = {
 	},
 	methods: {
 		getValueForJoin(join) {
-			for (let lookup of this.lookups) {
+			for (const lookup of this.lookups) {
 				if (lookup.index === join.index)
 					return lookup.pgIndexId;
 			}
 			return null;
 		},
 		setValueForJoin(join, pgIndexId) {
-			let lookups = JSON.parse(JSON.stringify(this.lookups));
+			const lookups = JSON.parse(JSON.stringify(this.lookups));
 			for (let i = 0, j = lookups.length; i < j; i++) {
 				if (lookups[i].index === join.index) {
 					lookups.splice(i, 1);
@@ -548,7 +552,7 @@ const MyBuilderQueryNestedJoin = {
 	emits: ['relation-add', 'relation-apply-toggle', 'relation-connector-set', 'relation-remove'],
 	computed: {
 		attributesUnused: s => {
-			let atrs = [];
+			const atrs = [];
 			for (const atr of s.getDependentAttributes(s.module)) {
 				if (!s.isAttributeRelationship(atr.content))
 					continue;
@@ -564,10 +568,10 @@ const MyBuilderQueryNestedJoin = {
 		hasNoJoinOptions: s => s.attributesUnused.length === 0,
 		iconJoin: s => {
 			switch (s.connector) {
-				case 'INNER': return 'images/joinInner.png'; break;
-				case 'LEFT': return 'images/joinLeft.png'; break;
-				case 'RIGHT': return 'images/joinRight.png'; break;
-				case 'FULL': return 'images/joinOuter.png'; break;
+				case 'INNER': return 'images/joinInner.png';
+				case 'LEFT': return 'images/joinLeft.png';
+				case 'RIGHT': return 'images/joinRight.png';
+				case 'FULL': return 'images/joinOuter.png';
 			}
 			return 'images/clear.png';
 		},

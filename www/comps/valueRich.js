@@ -1,4 +1,3 @@
-
 import { getAttributeFileThumbHref, getAttributeFileVersionHref } from './shared/attribute.js';
 import {
 	colorAdjustBg, getHtmlStripped, getLinkMeta,
