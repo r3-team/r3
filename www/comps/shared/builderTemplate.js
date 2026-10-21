@@ -663,19 +663,6 @@ export function getTemplateJsFunction(moduleId, formId, name, tagIds) {
 		}
 	};
 };
-export function getTemplateLoginForm(moduleId) {
-	return {
-		id: getUuidV4(),
-		moduleId: moduleId,
-		attributeIdLogin: null,
-		attributeIdLookup: null,
-		formId: null,
-		name: '',
-		captions: {
-			loginFormTitle: {}
-		}
-	};
-};
 export function getTemplateMenu() {
 	return {
 		id: getUuidV4(),

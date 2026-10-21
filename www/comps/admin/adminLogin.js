@@ -1,13 +1,9 @@
-
-import MyForm from '../form.js';
 import MyInputDecimal from '../inputDecimal.js';
 import MyInputSelect from '../inputSelect.js';
 
 import { getLoginIcon } from '../shared/admin.js';
 import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
 import { deepIsEqual } from '../shared/generic.js';
-import srcBase64Icon from '../shared/image.js';
-import { getCaption } from '../shared/language.js';
 
 import MyAdminLoginMeta from './adminLoginMeta.js';
 import MyAdminLoginRoles from './adminLoginRoles.js';
@@ -19,28 +15,9 @@ export default {
 	name: 'my-admin-login',
 	components: {
 		MyAdminLoginMeta, MyAdminLoginRoles, MyAdminLoginTemplateInput, MyAdminMailAccountInput,
-		MyAdminMailTemplateInput, MyForm, MyInputDecimal, MyInputSelect
+		MyAdminMailTemplateInput, MyInputDecimal, MyInputSelect
 	},
 	template: `<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
-
-		<!-- login record form -->
-		<div class="app-sub-window under-header"
-			v-if="isFormOpen"
-			@mousedown.self="$refs.popUpForm.closeAsk()"
-		>
-			<my-form ref="popUpForm"
-				@close="loginFormIndexOpen = null"
-				@record-updated="updateLoginRecord(loginFormIndexOpen,$event);loginFormIndexOpen = null"
-				:formId="loginForms[loginFormIndexOpen].formId"
-				:isPopUp="true"
-				:isPopUpFloating="true"
-				:moduleId="formIdMap[loginForms[loginFormIndexOpen].formId].moduleId"
-				:recordIds="loginFormRecords"
-				:showButtonDel="false"
-				:showButtonNew="false"
-			/>
-		</div>
-
 		<div class="contentBox admin-login float" v-if="ready">
 			<div class="top">
 				<div class="area nowrap">
@@ -200,38 +177,6 @@ export default {
 									<td><my-bool v-model="inputs.admin" /></td>
 									<td>{{ capApp.hint.admin }}</td>
 								</tr>
-
-								<!-- login records -->
-								<tr v-for="(lf,lfi) in loginForms">
-									<td>
-										<div class="title-cell">
-											<img :src="srcBase64Icon(moduleIdMap[lf.moduleId].iconId,'images/module.png')" />
-											<span>{{ getCaption('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
-										</div>
-									</td>
-									<td>
-										<div class="field login-details-login-form-input">
-											<div class="field-content data intent" :class="{ dropdown:loginFormIndexesDropdown.includes(lfi) }">
-												<my-input-select
-													@dropdown-show="openLoginFormDropdown(lfi,$event)"
-													@open="openLoginForm(lfi)"
-													@request-data="getRecords(lfi)"
-													@updated-text-input="recordInput = $event"
-													@update:selected="updateLoginRecord(lfi,$event)"
-													:dropdownShow="loginFormIndexesDropdown.includes(lfi)"
-													:nakedIcons="true"
-													:options="recordList"
-													:placeholder="capGen.threeDots"
-													:selected="inputs.records[lfi].id"
-													:showOpen="true"
-													:inputTextSet="inputs.records[lfi].label"
-												/>
-											</div>
-										</div>
-									</td>
-									<td></td>
-								</tr>
-
 								<tr>
 									<td>
 										<div class="title-cell">
@@ -402,8 +347,6 @@ export default {
 	props: {
 		ldaps: { type: Array, required: true },
 		loginId: { type: Number, required: true }, // login ID to load, 0 if new
-		loginForms: { type: Array, required: true },
-		loginFormLookups: { type: Array, required: true },
 		oauthClients: { type: Array, required: true }
 	},
 	emits: ['close', 'set-login-id'],
@@ -415,16 +358,9 @@ export default {
 			notUniqueEmail: false,
 			notUniqueName: false,
 			ready: false,
-			recordInput: '',    // record lookup input
-			recordList: [],     // record lookup dropdown values
 			tabTarget: 'meta',
 			templateId: null,   // login template for new login
 			timerNotUniqueCheck: null,
-
-			// login form
-			loginFormIndexesDropdown: [],
-			loginFormIndexOpen: null,
-			loginFormRecords: null,
 
 			// PW set action
 			passSet: '',
@@ -476,7 +412,6 @@ export default {
 		isAuthPublic: s => s.inputs.noAuth,
 		isChanged: s => s.ready && !s.deepIsEqual(s.inputsOrg, s.inputs),
 		isExtRole: s => s.isLdapAssignedRoles || s.isOauthClientAssignedRoles,
-		isFormOpen: s => s.loginFormIndexOpen !== null,
 		isLdap: s => s.inputs.ldapId !== null,
 		isLdapAssignedRoles: s => s.ldaps.filter(v => v.assignRoles && v.id === s.inputs.ldapId).length !== 0,
 		isLimited: s => s.activated && s.inputs.roleIds.length < 2 && !s.inputs.admin && !s.inputs.noAuth,
@@ -488,8 +423,6 @@ export default {
 		// stores
 		activated: s => s.$store.getters['local/activated'],
 		modules: s => s.$store.getters['schema/modules'],
-		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
-		formIdMap: s => s.$store.getters['schema/formIdMap'],
 		roleIdMap: s => s.$store.getters['schema/roleIdMap'],
 		capApp: s => s.$store.getters.captions.admin.login,
 		capGen: s => s.$store.getters.captions.generic,
@@ -502,13 +435,6 @@ export default {
 
 		if (!this.isNew)
 			this.get();
-
-		if (this.isNew) {
-			// set defaults
-			for (const lf of this.loginForms) {
-				this.inputs.records.push({ id: null, label: '' });
-			}
-		}
 	},
 	unmounted() {
 		window.removeEventListener('keydown', this.handleHotkeys);
@@ -518,9 +444,7 @@ export default {
 		deepIsEqual,
 		dialogCloseAsk,
 		dialogDeleteAsk,
-		getCaption,
 		getLoginIcon,
-		srcBase64Icon,
 
 		handleHotkeys(e) {
 			if (e.ctrlKey && e.key === 's') {
@@ -529,7 +453,7 @@ export default {
 
 				e.preventDefault();
 			}
-			if (e.key === 'Escape' && !this.isFormOpen) {
+			if (e.key === 'Escape') {
 				this.closeAsk();
 				e.preventDefault();
 			}
@@ -545,16 +469,6 @@ export default {
 		copyToClipboard() {
 			navigator.clipboard.writeText(this.noAuthUrl);
 		},
-		openLoginForm(index) {
-			this.loginFormIndexOpen = index;
-			this.loginFormRecords = this.inputs.records[index].id !== null
-				? [this.inputs.records[index].id] : [];
-		},
-		openLoginFormDropdown(index, state) {
-			const pos = this.loginFormIndexesDropdown.indexOf(index);
-			if (pos === -1 && state) this.loginFormIndexesDropdown.push(index);
-			if (pos !== -1 && !state) this.loginFormIndexesDropdown.splice(pos, 1);
-		},
 		reset(initNew) {
 			if (initNew) {
 				this.inputs = {
@@ -568,7 +482,6 @@ export default {
 					noAuth: false,
 					pass: '',
 					tokenExpiryHours: null,
-					records: [],
 					roleIds: []
 				};
 			} else {
@@ -588,13 +501,6 @@ export default {
 			clearInterval(this.timerNotUniqueCheck);
 			this.timerNotUniqueCheck = setTimeout(() => this.getIsNotUnique(content, value), 750);
 		},
-		updateLoginRecord(loginFormIndex, recordId) {
-			this.recordInput = '';
-			this.inputs.records[loginFormIndex].id = recordId;
-
-			if (recordId !== null) this.getRecords(loginFormIndex);
-			else this.inputs.records[loginFormIndex].label = '';
-		},
 
 		// backend calls
 		del() {
@@ -609,12 +515,7 @@ export default {
 			);
 		},
 		get() {
-			ws.send('login', 'get', {
-				byId: this.loginId,
-				meta: true,
-				roles: true,
-				recordRequests: this.loginFormLookups
-			}, true).then(
+			ws.send('login', 'get', { byId: this.loginId, meta: true, roles: true }, true).then(
 				res => {
 					if (res.payload.logins.length !== 1) return;
 
@@ -644,35 +545,7 @@ export default {
 				this.$root.genericError
 			);
 		},
-		getRecords(loginFormIndex) {
-			this.recordList = [];
-			const isIdLookup = this.inputs.records[loginFormIndex].id !== null;
-
-			ws.send('login', 'getRecords', {
-				attributeIdLookup: this.loginForms[loginFormIndex].attributeIdLookup,
-				byId: isIdLookup ? this.inputs.records[loginFormIndex].id : 0,
-				byString: isIdLookup ? '' : this.recordInput
-			}, true).then(
-				res => {
-					if (!isIdLookup) {
-						this.recordList = res.payload;
-						return;
-					}
-					if (res.payload.length === 1)
-						this.inputs.records[loginFormIndex].label = res.payload[0].name;
-				},
-				this.$root.genericError
-			);
-		},
 		set() {
-			const records = [];
-			for (let i = 0, j = this.loginForms.length; i < j; i++) {
-				records.push({
-					attributeId: this.loginForms[i].attributeIdLogin,
-					recordId: this.inputs.records[i].id
-				});
-			}
-
 			ws.send('login', 'set', {
 				id: this.loginId,
 				templateId: this.templateId,
@@ -684,8 +557,7 @@ export default {
 				mfaRequired: this.inputs.mfaRequired,
 				noAuth: this.inputs.noAuth,
 				tokenExpiryHours: this.inputs.tokenExpiryHours,
-				roleIds: this.inputs.roleIds,
-				records
+				roleIds: this.inputs.roleIds
 			}, true).then(
 				res => {
 					// if login was changed, reauth. or kick client

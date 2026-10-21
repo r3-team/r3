@@ -129,11 +129,6 @@ export default {
 						<span>{{ capGen.collections }}</span>
 					</router-link>
 
-					<router-link class="entry clickable" v-if="hasLoginForms" :to="'/builder/login-forms/'+module.id">
-						<img src="images/personCog.png" />
-						<span>{{ capGen.loginForms }}</span>
-					</router-link>
-
 					<router-link class="entry clickable" :to="'/builder/apis/'+module.id">
 						<img src="images/api.png" />
 						<span>{{ capGen.apis }}</span>
@@ -512,7 +507,6 @@ export default {
 
 		// simple
 		createNewOpen: s => s.createNewEntity !== null,
-		hasLoginForms: s => !s.isNew && s.module.loginForms.length !== 0,
 		isNew: s => s.moduleId === '',
 		jsFunctions: s => s.getJsFunctionsProcessed(s.module.jsFunctions, s.filter),
 		module: s => s.isNew ? false : s.moduleIdMap[s.moduleId],

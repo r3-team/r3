@@ -31,7 +31,6 @@ export function getCaptionMapName(content) {
 		case 'formActionTitle': return 'formActionIdMap';
 		case 'formTitle': return 'formIdMap';
 		case 'jsFunctionTitle': return 'jsFunctionIdMap';
-		case 'loginFormTitle': return 'loginFormIdMap';
 		case 'menuTitle': return 'menuIdMap';
 		case 'menuTabTitle': return 'menuTabIdMap';
 		case 'moduleTitle': return 'moduleIdMap';

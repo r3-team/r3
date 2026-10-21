@@ -33,7 +33,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 	caps.FormIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FormActionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.JsFunctionIdMap = make(map[uuid.UUID]types.CaptionMap)
-	caps.LoginFormIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.MenuIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.MenuTabIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.ModuleIdMap = make(map[uuid.UUID]types.CaptionMap)
@@ -58,7 +57,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		WHEN form_action_id  IS NOT NULL THEN 'formAction'
 		WHEN form_id         IS NOT NULL THEN 'form'
 		WHEN js_function_id  IS NOT NULL THEN 'jsFunction'
-		WHEN login_form_id   IS NOT NULL THEN 'loginForm'
 		WHEN menu_id         IS NOT NULL THEN 'menu'
 		WHEN menu_tab_id     IS NOT NULL THEN 'menuTab'
 		WHEN module_id       IS NOT NULL THEN 'module'
@@ -83,7 +81,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		form_id,
 		form_action_id,
 		js_function_id,
-		login_form_id,
 		menu_id,
 		menu_tab_id,
 		module_id,
@@ -192,7 +189,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			OR doc_id          IN (SELECT id FROM app.doc          WHERE module_id = $1)
 			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $1)
 			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $1)
-			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $1)
 			OR menu_tab_id     IN (SELECT id FROM app.menu_tab     WHERE module_id = $1)
 			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $1)
 			OR relation_id     IN (SELECT id FROM app.relation     WHERE module_id = $1)
@@ -245,8 +241,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			captionMap, exists = caps.FormActionIdMap[entityId]
 		case "jsFunction":
 			captionMap, exists = caps.JsFunctionIdMap[entityId]
-		case "loginForm":
-			captionMap, exists = caps.LoginFormIdMap[entityId]
 		case "menu":
 			captionMap, exists = caps.MenuIdMap[entityId]
 		case "menuTab":
@@ -299,8 +293,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			caps.FormActionIdMap[entityId] = captionMap
 		case "jsFunction":
 			caps.JsFunctionIdMap[entityId] = captionMap
-		case "loginForm":
-			caps.LoginFormIdMap[entityId] = captionMap
 		case "menu":
 			caps.MenuIdMap[entityId] = captionMap
 		case "menuTab":

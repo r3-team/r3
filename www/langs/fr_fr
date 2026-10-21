@@ -1714,14 +1714,6 @@
 		},
 		"language": "Traduction",
 		"languageNextHint": "Passer à la langue suivante (raccourci : CTRL + q)",
-		"loginForm": {
-			"attributeLogin": "Attribut de connexion",
-			"attributeLookup": "Attribut de recherche",
-			"formOpen": "Formulaire à ouvrir",
-			"newLoginForm": "Nouveau formulaire de connexion",
-			"title": "Formulaires de connexion",
-			"titleDepr": "Les formulaires de connexion sont obsolètes depuis REI3.9. Bien qu'ils continuent de fonctionner pour le moment, veuillez envisager de passer au mécanisme de synchronisation des utilisateurs (voir la documentation du Builder)."
-		},
 		"menu": {
 			"button": {
 				"add": "Ajouter une entrée",
@@ -2752,8 +2744,6 @@
 		"listFullpage": "Liste pleine page",
 		"loading": "Chargement...",
 		"login": "Se connecter",
-		"loginForm": "Formulaire de connexion",
-		"loginForms": "Formulaires de connexion",
 		"loginTemplate": "Modèle utilisateur",
 		"loginTemplateHint": "Les paramètres prédéfinis sont appliqués une seule fois à partir du modèle sélectionné lors de la création d'un nouvel utilisateur. Si aucune sélection n'est effectuée ici, le modèle global est utilisé.",
 		"mailAccount": "Compte de messagerie",

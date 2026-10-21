@@ -24,32 +24,19 @@ type Log struct {
 }
 
 type LoginAdmin struct {
-	Id               int64              `json:"id"`
-	LdapId           pgtype.Int4        `json:"ldapId"`
-	OauthClientId    pgtype.Int4        `json:"oauthClientId"`
-	Name             string             `json:"name"`
-	Active           bool               `json:"active"`
-	Admin            bool               `json:"admin"`
-	Meta             LoginMeta          `json:"meta"`
-	NoAuth           bool               `json:"noAuth"`
-	LanguageCode     string             `json:"languageCode"`
-	Limited          bool               `json:"limited"`
-	MfaRequired      pgtype.Bool        `json:"mfaRequired"`
-	TokenExpiryHours pgtype.Int4        `json:"tokenExpiryHours"`
-	Records          []LoginAdminRecord `json:"records"`
-	RoleIds          []uuid.UUID        `json:"roleIds"`
-}
-type LoginAdminRecord struct {
-	Id    pgtype.Int8 `json:"id"`    // record ID
-	Label string      `json:"label"` // record label
-}
-type LoginAdminRecordGet struct {
-	AttributeIdLogin  uuid.UUID `json:"attributeIdLogin"`
-	AttributeIdLookup uuid.UUID `json:"attributeIdLookup"`
-}
-type LoginAdminRecordSet struct {
-	AttributeId uuid.UUID `json:"attributeId"` // login attribute
-	RecordId    int64     `json:"recordId"`
+	Id               int64       `json:"id"`
+	LdapId           pgtype.Int4 `json:"ldapId"`
+	OauthClientId    pgtype.Int4 `json:"oauthClientId"`
+	Name             string      `json:"name"`
+	Active           bool        `json:"active"`
+	Admin            bool        `json:"admin"`
+	Meta             LoginMeta   `json:"meta"`
+	NoAuth           bool        `json:"noAuth"`
+	LanguageCode     string      `json:"languageCode"`
+	Limited          bool        `json:"limited"`
+	MfaRequired      pgtype.Bool `json:"mfaRequired"`
+	TokenExpiryHours pgtype.Int4 `json:"tokenExpiryHours"`
+	RoleIds          []uuid.UUID `json:"roleIds"`
 }
 type LoginTemplateAdmin struct {
 	Id       int64       `json:"id"`

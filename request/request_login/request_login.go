@@ -77,15 +77,14 @@ func Get_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error
 
 	var (
 		req struct {
-			ById           int64                       `json:"byId"`
-			ByString       string                      `json:"byString"`
-			Limit          int                         `json:"limit"`
-			Offset         int                         `json:"offset"`
-			OrderAsc       bool                        `json:"orderAsc"`
-			OrderBy        string                      `json:"orderBy"`
-			Meta           bool                        `json:"meta"`
-			Roles          bool                        `json:"roles"`
-			RecordRequests []types.LoginAdminRecordGet `json:"recordRequests"`
+			ById     int64  `json:"byId"`
+			ByString string `json:"byString"`
+			Limit    int    `json:"limit"`
+			Offset   int    `json:"offset"`
+			OrderAsc bool   `json:"orderAsc"`
+			OrderBy  string `json:"orderBy"`
+			Meta     bool   `json:"meta"`
+			Roles    bool   `json:"roles"`
 		}
 		res struct {
 			Total  int                `json:"total"`
@@ -98,7 +97,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error
 		return nil, err
 	}
 	res.Logins, res.Total, err = login.Get_tx(ctx, tx, req.ById, req.ByString, req.OrderBy,
-		req.OrderAsc, req.Limit, req.Offset, req.Meta, req.Roles, req.RecordRequests)
+		req.OrderAsc, req.Limit, req.Offset, req.Meta, req.Roles)
 
 	return res, err
 }
@@ -135,35 +134,20 @@ func GetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any
 	}
 	return res, nil
 }
-func GetRecords_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
-
-	var req struct {
-		AttributeIdLookup uuid.UUID `json:"attributeIdLookup"`
-		ById              int64     `json:"byId"`
-		ByString          string    `json:"byString"`
-		IdsExclude        []int64   `json:"idsExclude"`
-	}
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return login.GetRecords_tx(ctx, tx, req.AttributeIdLookup, req.IdsExclude, req.ById, req.ByString)
-}
 func Set_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
-		Id               int64                       `json:"id"`
-		Name             string                      `json:"name"`
-		Pass             string                      `json:"pass"`
-		Active           bool                        `json:"active"`
-		Admin            bool                        `json:"admin"`
-		NoAuth           bool                        `json:"noAuth"`
-		TokenExpiryHours pgtype.Int4                 `json:"tokenExpiryHours"`
-		Meta             types.LoginMeta             `json:"meta"`
-		MfaRequired      pgtype.Bool                 `json:"mfaRequired"`
-		RoleIds          []uuid.UUID                 `json:"roleIds"`
-		Records          []types.LoginAdminRecordSet `json:"records"`
-		TemplateId       pgtype.Int8                 `json:"templateId"`
+		Id               int64           `json:"id"`
+		Name             string          `json:"name"`
+		Pass             string          `json:"pass"`
+		Active           bool            `json:"active"`
+		Admin            bool            `json:"admin"`
+		NoAuth           bool            `json:"noAuth"`
+		TokenExpiryHours pgtype.Int4     `json:"tokenExpiryHours"`
+		Meta             types.LoginMeta `json:"meta"`
+		MfaRequired      pgtype.Bool     `json:"mfaRequired"`
+		RoleIds          []uuid.UUID     `json:"roleIds"`
+		TemplateId       pgtype.Int8     `json:"templateId"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -172,7 +156,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error
 	// LDAP / OAUTH details are only used during login creation, which happens during LDAP import or OAUTH authentication
 	return login.Set_tx(ctx, tx, req.Id, req.TemplateId, pgtype.Int4{}, pgtype.Text{},
 		pgtype.Int4{}, pgtype.Text{}, pgtype.Text{}, req.Name, req.Pass, req.Admin, req.NoAuth,
-		req.Active, req.TokenExpiryHours, req.MfaRequired, req.Meta, req.RoleIds, req.Records)
+		req.Active, req.TokenExpiryHours, req.MfaRequired, req.Meta, req.RoleIds)
 }
 func SetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 

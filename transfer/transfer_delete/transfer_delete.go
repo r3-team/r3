@@ -17,7 +17,6 @@ import (
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
-	"r3/schema/loginForm"
 	"r3/schema/menuTab"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
@@ -45,11 +44,6 @@ func NotExisting_tx(ctx context.Context, tx pgx.Tx, module types.Module) error {
 	// PG triggers are deleted before import, known issues:
 	// * DB error if preset changes fire triggers that are deleted later
 	// * DB error if PG functions are deleted before referring triggers
-
-	// login forms
-	if err := deleteLoginForms_tx(ctx, tx, module.Id, module.LoginForms); err != nil {
-		return err
-	}
 
 	// relations, its PG indexes, attributes and presets
 	if err := deleteRelations_tx(ctx, tx, module.Id, module.Relations); err != nil {
@@ -146,23 +140,6 @@ func NotExistingPgTriggers_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID
 }
 
 // deletions
-func deleteLoginForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, loginForms []types.LoginForm) error {
-	idsKeep := make([]uuid.UUID, 0)
-	for _, entity := range loginForms {
-		idsKeep = append(idsKeep, entity.Id)
-	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, constants.DbLoginForm, moduleId, idsKeep)
-	if err != nil {
-		return err
-	}
-	for _, id := range idsDelete {
-		log.Info(log.ContextTransfer, fmt.Sprintf("del login form %s", id.String()))
-		if err := loginForm.Del_tx(ctx, tx, id); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 func deletePgTriggers_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pgTriggers []types.PgTrigger) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, trg := range pgTriggers {

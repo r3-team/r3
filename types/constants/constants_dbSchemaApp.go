@@ -37,7 +37,6 @@ const (
 	DbFormState             types.DbSchemaApp = "form_state"
 	DbIcon                  types.DbSchemaApp = "icon"
 	DbJsFunction            types.DbSchemaApp = "js_function"
-	DbLoginForm             types.DbSchemaApp = "login_form"
 	DbMenu                  types.DbSchemaApp = "menu"
 	DbMenuTab               types.DbSchemaApp = "menu_tab"
 	DbModule                types.DbSchemaApp = "module"
@@ -167,7 +166,6 @@ var (
 		DbForm,
 		DbIcon,
 		DbJsFunction,
-		DbLoginForm,
 		DbMenu,
 		DbMenuTab,
 		DbPgFunction,

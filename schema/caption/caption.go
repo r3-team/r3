@@ -129,10 +129,6 @@ func GetDefaultContent(entity string) types.CaptionMap {
 			"jsFunctionDesc":  make(map[string]string),
 			"jsFunctionTitle": make(map[string]string),
 		}
-	case "loginForm":
-		return types.CaptionMap{
-			"loginFormTitle": make(map[string]string),
-		}
 	case "menu":
 		return types.CaptionMap{
 			"menuTitle": make(map[string]string),
@@ -217,9 +213,6 @@ func GetEntityName(content string) (types.DbSchemaApp, error) {
 
 	case "jsFunctionTitle", "jsFunctionDesc":
 		return constants.DbJsFunction, nil
-
-	case "loginFormTitle":
-		return constants.DbLoginForm, nil
 
 	case "menuTitle":
 		return constants.DbMenu, nil

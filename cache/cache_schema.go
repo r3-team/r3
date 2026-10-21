@@ -20,7 +20,6 @@ import (
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
-	"r3/schema/loginForm"
 	"r3/schema/menuTab"
 	"r3/schema/module"
 	"r3/schema/pgFunction"
@@ -411,7 +410,6 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		mod.Icons = make([]types.Icon, 0)
 		mod.Roles = make([]types.Role, 0)
 		mod.Articles = make([]types.Article, 0)
-		mod.LoginForms = make([]types.LoginForm, 0)
 		mod.PgFunctions = make([]types.PgFunction, 0)
 		mod.JsFunctions = make([]types.JsFunction, 0)
 		mod.Collections = make([]types.Collection, 0)
@@ -506,14 +504,6 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		for _, rol := range mod.Roles {
 			// store role
 			roleIdMap[rol.Id] = rol
-		}
-
-		// get login forms
-		log.Info(log.ContextCache, "load login forms")
-
-		mod.LoginForms, err = loginForm.Get_tx(ctx, tx, mod.Id)
-		if err != nil {
-			return err
 		}
 
 		// get triggers

@@ -15,7 +15,6 @@ export default {
 		iconIdMap: {},
 		indexIdMap: {},
 		jsFunctionIdMap: {},
-		loginFormIdMap: {},
 		moduleIdMap: {},
 		moduleNameMap: {},
 		pgFunctionIdMap: {},
@@ -149,11 +148,6 @@ export default {
 				for (const jsFunc of mod.jsFunctions) {
 					s.jsFunctionIdMap[jsFunc.id] = jsFunc;
 				}
-
-				// process login forms
-				for (const loginForm of mod.loginForms) {
-					s.loginFormIdMap[loginForm.id] = loginForm;
-				}
 			}
 		},
 		languageCodes: (s, p) => s.languageCodes = p,
@@ -172,7 +166,6 @@ export default {
 		indexIdMap: s => s.indexIdMap,
 		jsFunctionIdMap: s => s.jsFunctionIdMap,
 		languageCodes: s => s.languageCodes,
-		loginFormIdMap: s => s.loginFormIdMap,
 		moduleIdMap: s => s.moduleIdMap,
 		moduleNameMap: s => s.moduleNameMap,
 		pgFunctionIdMap: s => s.pgFunctionIdMap,

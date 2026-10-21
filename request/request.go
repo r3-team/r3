@@ -466,8 +466,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return request_login.GetIsNotUnique_tx(ctx, tx, reqJson)
 		case "getMembers":
 			return request_login.GetMembers_tx(ctx, tx, reqJson)
-		case "getRecords":
-			return request_login.GetRecords_tx(ctx, tx, reqJson)
 		case "kick":
 			return nil, request_login.Kick(ctx, tx, reqJson)
 		case "reauth":
@@ -491,13 +489,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return request_login.ExportKeyGet_tx(ctx, tx, loginId)
 		case "set":
 			return nil, request_login.ExportKeySet_tx(ctx, tx, reqJson, loginId)
-		}
-	case "loginForm":
-		switch action {
-		case "del":
-			return nil, request_login.FormDel_tx(ctx, tx, reqJson)
-		case "set":
-			return nil, request_login.FormSet_tx(ctx, tx, reqJson)
 		}
 	case "loginInvitation":
 		switch action {

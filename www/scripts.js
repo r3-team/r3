@@ -45,7 +45,6 @@ import MyBuilderForms from './comps/builder/builderForms.js';
 import MyBuilderIcons from './comps/builder/builderIcons.js';
 import MyBuilderJsFunction from './comps/builder/builderJsFunction.js';
 import MyBuilderJsFunctions from './comps/builder/builderJsFunctions.js';
-import MyBuilderLoginForms from './comps/builder/builderLoginForms.js';
 import MyBuilderMenu from './comps/builder/builderMenu.js';
 import MyBuilderModule from './comps/builder/builderModule.js';
 import MyBuilderModules from './comps/builder/builderModules.js';
@@ -236,11 +235,6 @@ const MyRouter = VueRouter.createRouter({
 				path: 'search-bar/:id',
 				meta: { nav: 'search-bars', target: 'search-bar' },
 				component: MyBuilderSearchBar,
-				props: true
-			}, {
-				path: 'login-forms/:id',
-				meta: { nav: 'login-forms', target: 'module' },
-				component: MyBuilderLoginForms,
 				props: true
 			}, {
 				path: 'articles/:id',

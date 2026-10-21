@@ -1714,14 +1714,6 @@
 		},
 		"language": "翻译",
 		"languageNextHint": "切换到下一个语言（快捷键：CTRL + q）",
-		"loginForm": {
-			"attributeLogin": "登录属性",
-			"attributeLookup": "查找属性",
-			"formOpen": "打开的表单",
-			"newLoginForm": "新建登录表单",
-			"title": "登录表单",
-			"titleDepr": "Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the user sync mechanism (s. Builder documentation)."
-		},
 		"menu": {
 			"button": {
 				"add": "添加条目",
@@ -2752,8 +2744,6 @@
 		"listFullpage": "Fullpage list",
 		"loading": "Loading...",
 		"login": "Login",
-		"loginForm": "登录表单",
-		"loginForms": "登录表单",
 		"loginTemplate": "User template",
 		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
 		"mailAccount": "Email account",

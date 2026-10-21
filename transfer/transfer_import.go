@@ -25,7 +25,6 @@ import (
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
-	"r3/schema/loginForm"
 	"r3/schema/menuTab"
 	"r3/schema/module"
 	"r3/schema/pgFunction"
@@ -496,25 +495,6 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		log.Info(log.ContextTransfer, fmt.Sprintf("set form %s", e.Id))
 
 		if err := importCheckResultAndApply(ctx, tx, form.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
-			return err
-		}
-	}
-
-	// login forms, refer to forms/attributes
-	for _, e := range mod.LoginForms {
-		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
-		if err != nil {
-			return err
-		}
-		if !run {
-			continue
-		}
-		log.Info(log.ContextTransfer, fmt.Sprintf("set login form %s", e.Id))
-
-		if err := importCheckResultAndApply(ctx, tx, loginForm.Set_tx(
-			ctx, tx, e.ModuleId, e.Id, e.AttributeIdLogin, e.AttributeIdLookup,
-			e.FormId, e.Name, e.Captions), e.Id, idMapSkipped); err != nil {
-
 			return err
 		}
 	}

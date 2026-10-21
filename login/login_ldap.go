@@ -97,7 +97,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 
 	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, pgtype.Int4{},
 		pgtype.Text{}, pgtype.Text{}, name, "", adminEx, false, active, pgtype.Int4{}, pgtype.Bool{},
-		metaEx, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
+		metaEx, roleIdsEx); err != nil {
 
 		return err
 	}

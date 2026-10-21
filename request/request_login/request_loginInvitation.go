@@ -45,7 +45,7 @@ func SetWithIntivation_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 
 		loginId, err := login.Set_tx(ctx, tx, 0, req.LoginTemplateId, pgtype.Int4{}, pgtype.Text{},
 			pgtype.Int4{}, pgtype.Text{}, pgtype.Text{}, l.Name, pass, admin, noAuth,
-			active, tokenExpiryHours, req.MfaRequired, l.Meta, req.RoleIds, []types.LoginAdminRecordSet{})
+			active, tokenExpiryHours, req.MfaRequired, l.Meta, req.RoleIds)
 
 		if err != nil {
 			return nil, err

@@ -96,11 +96,9 @@ export default {
 				v-if="loginIdOpen !== null"
 				@close="loginIdOpen = null;get()"
 				@set-login-id="loginIdOpen = $event"
-				:ldaps="ldaps"
+				:ldaps
 				:loginId="loginIdOpen"
-				:loginForms="loginForms"
-				:loginFormLookups="loginFormLookups"
-				:oauthClients="oauthClients"
+				:oauthClients
 			/>
 		</div>
 	</div>`,
@@ -130,25 +128,6 @@ export default {
 			const out = [];
 			for (const k in s.oauthClientIdMap) {
 				out.push(s.oauthClientIdMap[k]);
-			}
-			return out;
-		},
-		loginForms: s => {
-			const out = [];
-			for (const m of s.modules) {
-				for (const lf of m.loginForms) {
-					out.push(lf);
-				}
-			}
-			return out;
-		},
-		loginFormLookups: s => {
-			const out = [];
-			for (const lf of s.loginForms) {
-				out.push({
-					attributeIdLogin: lf.attributeIdLogin,
-					attributeIdLookup: lf.attributeIdLookup
-				});
 			}
 			return out;
 		},
@@ -206,8 +185,7 @@ export default {
 				orderAsc: ['active', 'admin', 'limited', 'noAuth'].includes(this.orderBy) ? !this.orderAsc : this.orderAsc,
 				orderBy: this.orderBy,
 				meta: false,
-				roles: false,
-				recordRequests: this.loginFormLookups
+				roles: false
 			}, true).then(
 				res => {
 					this.logins = res.payload.logins;

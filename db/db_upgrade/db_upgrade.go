@@ -103,6 +103,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.column             ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
 			ALTER TABLE app.doc_column         ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
 			ALTER TABLE instance_mail.template ALTER COLUMN content TYPE instance_mail.template_content USING content::TEXT::instance_mail.template_content;
+
+			-- remove login forms
+			ALTER TABLE app.caption      DROP COLUMN login_form_id;
+			ALTER TABLE instance.caption DROP COLUMN login_form_id;
+			DROP  TABLE app.login_form;
 		`)
 		return "3.14", err
 	},

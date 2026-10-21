@@ -456,15 +456,6 @@ type JsFunction struct {
 	IsClientEventExec bool        `json:"isClientEventExec"` // can be executed from client events
 	Captions          CaptionMap  `json:"captions"`
 }
-type LoginForm struct {
-	Id                uuid.UUID  `json:"id"`
-	ModuleId          uuid.UUID  `json:"moduleId"`
-	FormId            uuid.UUID  `json:"formId"`            // form to open
-	AttributeIdLogin  uuid.UUID  `json:"attributeIdLogin"`  // attribute containing login ID (integer)
-	AttributeIdLookup uuid.UUID  `json:"attributeIdLookup"` // attribute used for text lookup
-	Name              string     `json:"name"`
-	Captions          CaptionMap `json:"captions"`
-}
 type Menu struct {
 	Id           uuid.UUID            `json:"id"`
 	FormId       pgtype.UUID          `json:"formId"`
@@ -514,7 +505,6 @@ type Module struct {
 	Icons                []Icon            `json:"icons"`
 	JsFunctions          []JsFunction      `json:"jsFunctions"`
 	Languages            []string          `json:"languages"` // language codes that this module supports
-	LoginForms           []LoginForm       `json:"loginForms"`
 	MenuTabs             []MenuTab         `json:"menuTabs"`
 	PgFunctions          []PgFunction      `json:"pgFunctions"`
 	PgTriggers           []PgTrigger       `json:"pgTriggers"`

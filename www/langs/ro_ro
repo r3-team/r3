@@ -1714,14 +1714,6 @@
 		},
 		"language": "Traduceri",
 		"languageNextHint": "Comutați la următoarea limbă (tasta rapidă: CTRL + q)",
-		"loginForm": {
-			"attributeLogin": "Atributul de autentificare",
-			"attributeLookup": "Atribut de căutare",
-			"formOpen": "Formular pentru deschidere",
-			"newLoginForm": "Formular nou de autentificare",
-			"title": "Formulare de autentificare",
-			"titleDepr": "Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the user sync mechanism (s. Builder documentation)."
-		},
 		"menu": {
 			"button": {
 				"add": "Adaugă înregistrare",
@@ -2752,8 +2744,6 @@
 		"listFullpage": "Fullpage list",
 		"loading": "Loading...",
 		"login": "Login",
-		"loginForm": "Login form",
-		"loginForms": "Formular conectare",
 		"loginTemplate": "User template",
 		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
 		"mailAccount": "Email account",

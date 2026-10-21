@@ -12,11 +12,9 @@ import (
 	"r3/login/login_meta"
 	"r3/login/login_role"
 	"r3/login/login_setting"
-	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
@@ -65,8 +63,8 @@ func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, loginProvider type
 }
 
 // get logins with meta data and total count
-func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy string, orderAsc bool, limit int, offset int,
-	meta bool, roles bool, recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString, orderBy string, orderAsc bool,
+	limit, offset int, meta, roles bool) ([]types.LoginAdmin, int, error) {
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
@@ -74,28 +72,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 		"l.admin", "l.limited", "l.no_auth", "l.active", "l.token_expiry_hours", "l.mfa_required"})
 
 	qb.SetFrom("instance.login AS l")
-
-	// resolve requests for login records (records connected to logins via login attribute)
-	parts := make([]string, 0)
-	separator := "<|-|>"
-
-	for _, r := range recordRequests {
-		modName, relName, atrName, err := cache.GetAttributeDbNames(r.AttributeIdLogin)
-		if err != nil {
-			return nil, 0, err
-		}
-		atrLookupName, err := cache.GetAttributeDbName(r.AttributeIdLookup)
-		if err != nil {
-			return nil, 0, err
-		}
-		parts = append(parts, fmt.Sprintf(`SELECT COALESCE((SELECT CONCAT("%s",'%s',"%s") FROM "%s"."%s" WHERE "%s" = l.id),'')`,
-			schema.PkName, separator, atrLookupName, modName, relName, atrName))
-	}
-	if len(parts) != 0 {
-		qb.Add("SELECT", fmt.Sprintf("ARRAY(%s)", strings.Join(parts, "\nUNION ALL\n")))
-	} else {
-		qb.Add("SELECT", "NULL")
-	}
 
 	// prepare filters
 	if byString != "" {
@@ -146,35 +122,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	logins := make([]types.LoginAdmin, 0)
 	for rows.Next() {
 		var l types.LoginAdmin
-		var records []string
 
 		if err := rows.Scan(&l.Id, &l.LdapId, &l.OauthClientId, &l.Name, &l.Admin, &l.Limited,
-			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &l.MfaRequired, &records); err != nil {
+			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &l.MfaRequired); err != nil {
 
 			return nil, 0, err
-		}
-
-		// process looked up login records
-		l.Records = make([]types.LoginAdminRecord, 0)
-		for _, r := range records {
-			if r == "" {
-				l.Records = append(l.Records, types.LoginAdminRecord{Id: pgtype.Int8{}, Label: ""})
-				continue
-			}
-
-			parts = strings.Split(r, separator)
-			if len(parts) != 2 {
-				return nil, 0, errors.New("failed to separate login record ID from lookup attribute value")
-			}
-
-			id, err := strconv.ParseInt(parts[0], 10, 64)
-			if err != nil {
-				return nil, 0, err
-			}
-			l.Records = append(l.Records, types.LoginAdminRecord{
-				Id:    pgtype.Int8{Int64: id, Valid: true},
-				Label: parts[1],
-			})
 		}
 		logins = append(logins, l)
 	}
@@ -233,7 +185,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
 	ldapKey pgtype.Text, oauthClientId pgtype.Int4, oauthIss pgtype.Text, oauthSub pgtype.Text, name string,
 	pass string, admin bool, noAuth bool, active bool, tokenExpiryHours pgtype.Int4, mfaRequired pgtype.Bool,
-	meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
+	meta types.LoginMeta, roleIds []uuid.UUID) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")
@@ -305,34 +257,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	// set meta data
 	if err := login_meta.Set_tx(ctx, tx, id, meta); err != nil {
 		return 0, err
-	}
-
-	// set records
-	for _, record := range records {
-
-		modName, relName, atrName, err := cache.GetAttributeDbNames(record.AttributeId)
-		if err != nil {
-			return 0, err
-		}
-		if !isNew {
-			// remove old record (first to free up unique index)
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				UPDATE "%s"."%s"
-				SET "%s" = null
-				WHERE "%s" = $1
-			`, modName, relName, atrName, atrName), id); err != nil {
-				return 0, err
-			}
-		}
-
-		// set new record
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			UPDATE "%s"."%s"
-			SET "%s" = $1
-			WHERE "%s" = $2
-		`, modName, relName, atrName, schema.PkName), id, record.RecordId); err != nil {
-			return 0, err
-		}
 	}
 
 	// set roles
@@ -516,7 +440,7 @@ func CreateAdmin(username string, password string) error {
 	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{},
 		pgtype.Text{}, pgtype.Text{}, username, password, true, false, true, pgtype.Int4{},
 		pgtype.Bool{}, types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
-		[]uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
+		[]uuid.UUID{}); err != nil {
 
 		return err
 	}
