@@ -201,6 +201,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) 
 				Length:         0,
 				Nullable:       false,
 				Encrypted:      false,
+				AutoTrim:       false,
 				Def:            "",
 				OnUpdate:       "",
 				OnDelete:       "",

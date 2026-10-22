@@ -780,6 +780,8 @@
 			"titleOne": "Hilfe-Artikel \"{NAME}\""
 		},
 		"attribute": {
+			"autoTrim": "Leerzeichen entfernen",
+			"autoTrimHint": "Führende und nachfolgende Leerzeichen werden bei Änderungen automatisch entfernt. Ignoriert, wenn Änderungen über Backendfunktionen gemacht werden.",
 			"barcodes": "Barcodes/QR-Codes",
 			"bigint": "Große Werte",
 			"bigintDates": "Datumswerte nach 2038",

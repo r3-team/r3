@@ -69,8 +69,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 	var onDeleteNull pgtype.Text
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, relationship_id, icon_id, name, content, content_use,
-			length, length_fract, nullable, encrypted, def, on_update, on_delete
+		SELECT id, relationship_id, icon_id, name, content, content_use, length,
+			length_fract, nullable, encrypted, auto_trim, def, on_update, on_delete
 		FROM app.attribute
 		WHERE relation_id = $1
 		ORDER BY CASE WHEN name = 'id' THEN 0 END, name ASC
@@ -85,7 +85,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 		var atr types.Attribute
 		if err := rows.Scan(&atr.Id, &atr.RelationshipId, &atr.IconId, &atr.Name,
 			&atr.Content, &atr.ContentUse, &atr.Length, &atr.LengthFract, &atr.Nullable,
-			&atr.Encrypted, &atr.Def, &onUpdateNull, &onDeleteNull); err != nil {
+			&atr.Encrypted, &atr.AutoTrim, &atr.Def, &onUpdateNull, &onDeleteNull); err != nil {
 
 			return nil, err
 		}
@@ -135,11 +135,18 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 
 	isRel := schema.IsContentRelationship(atr.Content)
 	isFiles := schema.IsContentFiles(atr.Content)
+	isText := schema.IsContentText(atr.Content)
 	known, err := schema.CheckId_tx(ctx, tx, atr.Id, constants.DbAttribute, "id")
 	if err != nil {
 		return err
 	}
 	isNew := fromLocal && !known
+
+	// disable auto-trim for non-text attributes and richtext
+	// whitespace in richtext is usually encapsuled in HTML tags
+	if !isText || atr.ContentUse == "richtext" {
+		atr.AutoTrim = false
+	}
 
 	// prepare onUpdate / onDelete values
 	var onUpdateNull = pgtype.Text{}
@@ -321,10 +328,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.attribute
 			SET icon_id = $1, content = $2, content_use = $3, length = $4, length_fract = $5,
-				nullable = $6, def = $7, on_update = $8, on_delete = $9
-			WHERE id = $10
+				nullable = $6, auto_trim = $7, def = $8, on_update = $9, on_delete = $10
+			WHERE id = $11
 		`, atr.IconId, atr.Content, atr.ContentUse, atr.Length, atr.LengthFract, atr.Nullable,
-			atr.Def, onUpdateNull, onDeleteNull, atr.Id); err != nil {
+			atr.AutoTrim, atr.Def, onUpdateNull, onDeleteNull, atr.Id); err != nil {
 
 			return err
 		}
@@ -396,11 +403,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.attribute (id, relation_id, relationship_id,
 				icon_id, name, content, content_use, length, length_fract,
-				nullable, encrypted, def, on_update, on_delete)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+				nullable, encrypted, auto_trim, def, on_update, on_delete)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 		`, atr.Id, atr.RelationId, atr.RelationshipId, atr.IconId, atr.Name,
 			atr.Content, atr.ContentUse, atr.Length, atr.LengthFract, atr.Nullable,
-			atr.Encrypted, atr.Def, onUpdateNull, onDeleteNull); err != nil {
+			atr.Encrypted, atr.AutoTrim, atr.Def, onUpdateNull, onDeleteNull); err != nil {
 
 			return err
 		}

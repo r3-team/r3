@@ -287,6 +287,13 @@ export default {
 							<td>{{ capApp.nullableHint }}</td>
 						</tr>
 
+						<!-- auto-trim -->
+						<tr v-if="hasAutoTrim">
+							<td>{{ capApp.autoTrim }}</td>
+							<td><my-bool v-model="values.autoTrim" :readonly /></td>
+							<td>{{ capApp.autoTrimHint }}</td>
+						</tr>
+
 						<!-- defaults -->
 						<tr v-if="!isId && !isFiles && !isRelationship">
 							<td>{{ capApp.defaults }}</td>
@@ -489,6 +496,7 @@ export default {
 		// simple
 		canEncrypt: s => s.relation.encryption && s.values.content === 'text',
 		canSave: s => !s.readonly && s.hasChanges && !s.nameTaken,
+		hasAutoTrim: s => s.isText || s.isTextarea, // not relevant to richtext as whitespace is usually encapsuled in HTML tags
 		hasChanges: s => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
 		hasLength: s => ['decimal', 'files', 'richtext', 'text', 'textarea'].includes(s.usedFor),
 		hasLengthFract: s => ['decimal'].includes(s.usedFor),

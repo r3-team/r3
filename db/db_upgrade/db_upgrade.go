@@ -108,6 +108,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.caption      DROP COLUMN login_form_id;
 			ALTER TABLE instance.caption DROP COLUMN login_form_id;
 			DROP  TABLE app.login_form;
+
+			-- auto trim option
+			ALTER TABLE app.attribute ADD   COLUMN auto_trim BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.attribute ALTER COLUMN auto_trim DROP DEFAULT;
 		`)
 		return "3.14", err
 	},

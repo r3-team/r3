@@ -8,6 +8,7 @@ import MyBuilderCaption from './builderCaption.js';
 
 const MyBuilderQueryFilter = {
 	name: 'my-builder-query-filter',
+	components: {},
 	template: `<div class="query-title">
 		<my-button
 			@trigger="show = !show"

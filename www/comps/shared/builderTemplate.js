@@ -44,6 +44,7 @@ export function getTemplateAttribute(moduleId, relationId, name) {
 		name,
 		nullable: true,
 		encrypted: false,
+		autoTrim: true,
 		def: '',
 		onUpdate: 'NO ACTION',
 		onDelete: 'NO ACTION',

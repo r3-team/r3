@@ -88,6 +88,24 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			}
 		}
 
+		// auto trim for non-nil text attribute values
+		for _, atr := range rel.Attributes {
+			if !atr.AutoTrim {
+				continue
+			}
+			for i, ai := range dataSet.Attributes {
+				if ai.AttributeId == atr.Id && ai.Value != nil {
+					valueText := fmt.Sprintf("%s", ai.Value)
+					valueTrim := strings.TrimSpace(valueText)
+
+					if valueTrim != valueText {
+						dataSet.Attributes[i].Value = valueTrim
+						dataSetsByIndex[index] = dataSet
+					}
+				}
+			}
+		}
+
 		// set data for record of given relation index
 
 		// log data changes if retention is enabled

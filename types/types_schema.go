@@ -40,6 +40,7 @@ type Attribute struct {
 	LengthFract    int         `json:"lengthFract"`    // numeric scale (digits fractions)
 	Nullable       bool        `json:"nullable"`       // value is nullable
 	Encrypted      bool        `json:"encrypted"`      // value is encrypted (end-to-end for logins)
+	AutoTrim       bool        `json:"autoTrim"`       // value is automatically trimmed (text only)
 	Def            string      `json:"def"`            // default value
 	OnUpdate       string      `json:"onUpdate"`       // relationship attribute, action on 'UPDATE'
 	OnDelete       string      `json:"onDelete"`       // relationship attribute, action on 'DELETE'

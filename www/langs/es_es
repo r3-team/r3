@@ -780,6 +780,8 @@
 			"titleOne": "Help article '{NAME}'"
 		},
 		"attribute": {
+			"autoTrim": "Trim spaces",
+			"autoTrimHint": "Leading & trailing spaces are removed automatically on change. Ignored when changes are done via backend functions.",
 			"barcodes": "Barcodes/QR codes",
 			"bigint": "Valores grandes",
 			"bigintDates": "Soportar fechas después de 2038",
