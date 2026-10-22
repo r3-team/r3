@@ -2,7 +2,6 @@ package field
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -125,7 +124,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 		var content string
 		var state string
 		var onMobile bool
-		var atrContent sql.NullString
+		var atrContent pgtype.Text
 
 		var alignItems, alignContent, chartOption, def, direction, display,
 			ganttSteps, justifyContent, layout, regexCheck pgtype.Text
@@ -247,7 +246,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 			posParentLookup = append(posParentLookup, pos)
 
 		case "data":
-			if schema.IsContentRelationship(atrContent.String) {
+			if schema.IsContentRelationship(types.DbSchemaAppAttributeContent(atrContent.String)) {
 				fields = append(fields, types.FieldDataRelationship{
 					Id:             fieldId,
 					TabId:          tabId,

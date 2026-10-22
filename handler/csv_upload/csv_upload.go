@@ -266,10 +266,10 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 
 		// parse values if set
 		switch atr.Content {
-		case "integer", "bigint":
+		case constants.DbAttributeContentInteger, constants.DbAttributeContentBigint:
 
 			switch atr.ContentUse {
-			case "date", "datetime":
+			case constants.DbAttributeContentUseDate, constants.DbAttributeContentUseDatetime:
 				// date values are always stored as UTC at midnight
 				loc := time.UTC
 				format := "2006-01-02"
@@ -288,7 +288,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 				}
 
 				// datetime values are in context of user timezone
-				if atr.ContentUse == "datetime" {
+				if atr.ContentUse == constants.DbAttributeContentUseDatetime {
 					loc = locUser
 					format = fmt.Sprintf("%s 15:04:05", format)
 				}
@@ -302,7 +302,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 				}
 				valuesIn[i] = t.Unix()
 
-			case "time":
+			case constants.DbAttributeContentUseTime:
 				// time values are always stored at UTC zero date
 				// UTC date must be set in parse string, otherwise year 0 will be used
 				t, err := time.Parse("2006-01-02 15:04:05 MST",
@@ -325,7 +325,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 				}
 			}
 
-		case "real", "double precision":
+		case constants.DbAttributeContentReal, constants.DbAttributeContentDouble:
 			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharThou, "")
 			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharDec, ".")
 			valuesIn[i], err = strconv.ParseFloat(valuesString[i], 64)
@@ -336,17 +336,20 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 			}
 
 		// numeric must be handled as text as conversion to float is not 1:1
-		case "numeric", "text", "uuid", "varchar":
+		case constants.DbAttributeContentNumeric:
 			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharThou, "")
 			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharDec, ".")
 			valuesIn[i] = valuesString[i]
 
-		case "boolean":
+		case constants.DbAttributeContentText, constants.DbAttributeContentVarchar, constants.DbAttributeContentUuid:
+			valuesIn[i] = valuesString[i]
+
+		case constants.DbAttributeContentBoolean:
 			valuesIn[i] = valuesString[i] == opt.BoolTrue
 
 		case "default":
 			return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvBadAttributeType, struct {
-				Value string `json:"value"`
+				Value types.DbSchemaAppAttributeContent `json:"value"`
 			}{atr.Content})
 		}
 	}

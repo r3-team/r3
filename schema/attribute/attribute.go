@@ -19,13 +19,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var contentTypes = []string{"integer", "bigint", "numeric", "real",
-	"double precision", "varchar", "text", "boolean", "regconfig", "uuid",
-	"1:1", "n:1", "files", "geometry"}
+var contentTypes = []types.DbSchemaAppAttributeContent{
+	constants.DbAttributeContentBigint, constants.DbAttributeContentBoolean,
+	constants.DbAttributeContentDouble, constants.DbAttributeContentFiles,
+	constants.DbAttributeContentGeometry, constants.DbAttributeContentInteger,
+	constants.DbAttributeContentNumeric, constants.DbAttributeContentReal,
+	constants.DbAttributeContentRegconfig, constants.DbAttributeContentRel11,
+	constants.DbAttributeContentRelN1, constants.DbAttributeContentText,
+	constants.DbAttributeContentUuid, constants.DbAttributeContentVarchar}
 
-var contentUseTypes = []string{"default", "textarea", "richtext", "date", "datetime", "time",
-	"color", "iframe", "drawing", "barcode", "barcode_codabar", "barcode_code39", "barcode_code128",
-	"barcode_ean8", "barcode_ean13", "barcode_itf", "barcode_qrcode", "barcode_upc_a", "barcode_upc_e"}
+var contentUseTypes = []types.DbSchemaAppAttributeContentUse{
+	constants.DbAttributeContentUseBarcode, constants.DbAttributeContentUseBarcodeCodabar,
+	constants.DbAttributeContentUseBarcodeCode39, constants.DbAttributeContentUseBarcodeCode128,
+	constants.DbAttributeContentUseBarcodeEan8, constants.DbAttributeContentUseBarcodeEan13,
+	constants.DbAttributeContentUseBarcodeItf, constants.DbAttributeContentUseBarcodeQrcode,
+	constants.DbAttributeContentUseBarcodeUpcA, constants.DbAttributeContentUseBarcodeUpcE,
+	constants.DbAttributeContentUseCode, constants.DbAttributeContentUseColor,
+	constants.DbAttributeContentUseDate, constants.DbAttributeContentUseDatetime,
+	constants.DbAttributeContentUseDefault, constants.DbAttributeContentUseDrawing,
+	constants.DbAttributeContentUseIFrame, constants.DbAttributeContentUseRichtext,
+	constants.DbAttributeContentUseTextarea, constants.DbAttributeContentUseTime,
+}
 
 var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL", "SET DEFAULT"}
 
@@ -114,7 +128,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 	// fix imports < 3.3: Empty content use
 	atr.ContentUse = compatible.FixAttributeContentUse(atr.ContentUse)
 
-	if atr.Encrypted && atr.Content != "text" {
+	if atr.Encrypted && atr.Content != constants.DbAttributeContentText {
 		return fmt.Errorf("only text attributes can be encrypted")
 	}
 	if !slices.Contains(contentTypes, atr.Content) {
@@ -165,7 +179,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 	if known {
 		// get existing attribute info
 		var nameEx string
-		var contentEx string
+		var contentEx types.DbSchemaAppAttributeContent
 		var lengthEx int
 		var lengthFractEx int
 		var nullableEx bool
@@ -195,35 +209,35 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 		contentUpdateOk := false
 		switch contentEx {
 
-		case "integer", "bigint": // keep integer/bigint or downgrade/upgrade
-			contentUpdateOk = slices.Contains([]string{"integer", "bigint"}, atr.Content)
+		case constants.DbAttributeContentInteger, constants.DbAttributeContentBigint: // keep integer/bigint or downgrade/upgrade
+			contentUpdateOk = atr.Content == constants.DbAttributeContentInteger || atr.Content == constants.DbAttributeContentBigint
 
-		case "numeric": // keep numeric
-			contentUpdateOk = atr.Content == "numeric"
+		case constants.DbAttributeContentNumeric: // keep numeric
+			contentUpdateOk = atr.Content == constants.DbAttributeContentNumeric
 
-		case "geometry": // keep geometry
-			contentUpdateOk = atr.Content == "geometry"
+		case constants.DbAttributeContentGeometry: // keep geometry
+			contentUpdateOk = atr.Content == constants.DbAttributeContentGeometry
 
-		case "real", "double precision": // keep real/double or downgrade/upgrade
-			contentUpdateOk = slices.Contains([]string{"real", "double precision"}, atr.Content)
+		case constants.DbAttributeContentReal, constants.DbAttributeContentDouble: // keep real/double or downgrade/upgrade
+			contentUpdateOk = atr.Content == constants.DbAttributeContentReal || atr.Content == constants.DbAttributeContentDouble
 
-		case "varchar", "text": // keep varchar/text or downgrade/upgrade
-			contentUpdateOk = slices.Contains([]string{"varchar", "text"}, atr.Content)
+		case constants.DbAttributeContentVarchar, constants.DbAttributeContentText: // keep varchar/text or downgrade/upgrade
+			contentUpdateOk = atr.Content == constants.DbAttributeContentVarchar || atr.Content == constants.DbAttributeContentText
 
-		case "boolean": // keep boolean
-			contentUpdateOk = atr.Content == "boolean"
+		case constants.DbAttributeContentBoolean: // keep boolean
+			contentUpdateOk = atr.Content == constants.DbAttributeContentBoolean
 
-		case "regconfig": // keep regconfig
-			contentUpdateOk = atr.Content == "regconfig"
+		case constants.DbAttributeContentRegconfig: // keep regconfig
+			contentUpdateOk = atr.Content == constants.DbAttributeContentRegconfig
 
-		case "uuid": // keep UUID
-			contentUpdateOk = atr.Content == "uuid"
+		case constants.DbAttributeContentUuid: // keep UUID
+			contentUpdateOk = atr.Content == constants.DbAttributeContentUuid
 
-		case "1:1", "n:1": // keep 1:1/n:1 or switch between
-			contentUpdateOk = slices.Contains([]string{"1:1", "n:1"}, atr.Content)
+		case constants.DbAttributeContentRel11, constants.DbAttributeContentRelN1: // keep 1:1/n:1 or switch between
+			contentUpdateOk = atr.Content == constants.DbAttributeContentRel11 || atr.Content == constants.DbAttributeContentRelN1
 
-		case "files": // keep files
-			contentUpdateOk = atr.Content == "files"
+		case constants.DbAttributeContentFiles: // keep files
+			contentUpdateOk = atr.Content == constants.DbAttributeContentFiles
 		}
 
 		if !contentUpdateOk {
@@ -250,8 +264,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 
 		// update attribute column definition (not for files attributes: no column)
 		if !isFiles && (contentEx != atr.Content || nullableEx != atr.Nullable || defEx != atr.Def ||
-			(atr.Content == "varchar" && lengthEx != atr.Length) ||
-			(atr.Content == "numeric" && (lengthEx != atr.Length || lengthFractEx != atr.LengthFract))) {
+			(atr.Content == constants.DbAttributeContentVarchar && lengthEx != atr.Length) ||
+			(atr.Content == constants.DbAttributeContentNumeric && (lengthEx != atr.Length || lengthFractEx != atr.LengthFract))) {
 
 			// handle relationship attribute
 			var contentRel string
@@ -516,14 +530,14 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 	return nil
 }
 
-func getContentColumnDefinition(content string, length int, lengthFract int, contentRel string) (string, error) {
+func getContentColumnDefinition(content types.DbSchemaAppAttributeContent, length int, lengthFract int, contentRel string) (string, error) {
 
 	// by default content is named after column definition
-	columnDef := content
+	columnDef := string(content)
 
 	// special cases
 	switch content {
-	case "numeric":
+	case constants.DbAttributeContentNumeric:
 		if length != 0 {
 			if lengthFract != 0 {
 				columnDef = fmt.Sprintf("numeric(%d,%d)", length, lengthFract)
@@ -531,7 +545,7 @@ func getContentColumnDefinition(content string, length int, lengthFract int, con
 				columnDef = fmt.Sprintf("numeric(%d)", length)
 			}
 		}
-	case "varchar":
+	case constants.DbAttributeContentVarchar:
 		if length == 0 {
 			return "", fmt.Errorf("varchar requires defined length")
 		}
@@ -569,7 +583,7 @@ func createPK_tx(ctx context.Context, tx pgx.Tx, moduleName string, relationName
 	return err
 }
 func updatePK_tx(ctx context.Context, tx pgx.Tx, moduleName string, relationName string,
-	relationId uuid.UUID, content string) error {
+	relationId uuid.UUID, content types.DbSchemaAppAttributeContent) error {
 
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		ALTER TABLE "%s"."%s"
@@ -631,7 +645,7 @@ func deleteFK_tx(ctx context.Context, tx pgx.Tx, moduleName string, relationName
 }
 
 // update all foreign keys referring to specified relation via relationship attribute
-func updateReferingFKs_tx(ctx context.Context, tx pgx.Tx, relationshipId uuid.UUID, content string) error {
+func updateReferingFKs_tx(ctx context.Context, tx pgx.Tx, relationshipId uuid.UUID, content types.DbSchemaAppAttributeContent) error {
 
 	type update struct {
 		ModName string

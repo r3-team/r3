@@ -818,6 +818,7 @@
 			"option": {
 				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "Evet/hayır",
+				"code": "Source code",
 				"color": "Renk",
 				"date": "Tarih",
 				"datetime": "Tarih + saat",
@@ -857,6 +858,7 @@
 			"usedForHint": {
 				"barcode": "Bir barkod veya QR kodu değeri. Çeşitli formatları saklayabilir. İlgili girişler, barkodları / QR kodlarını taramak için kullanılabilir, aynı zamanda bunları mevcut değere göre de oluşturabilir.",
 				"boolean": "Doğru/yanlış değeri. Basit evet/hayır değerleri için kullanılır. Boş bir değere izin verilirse 3 olası değer bulunur: doğru/yanlış/boş.",
+				"code": "A source code value. Used for written source code in various languages. Inputs support syntax highlighting for languages, such as JS, SQL, HTML or CSS.",
 				"color": "Renk değerleri. Çoğu görünümde, atanmış bir kategoriye göre bir kaydın önemi gibi özelliklerini göstermek için çıktıları biçimlendirmek için kullanılabilir.",
 				"date": "Bir tarih değeri. Doğum tarihi veya satın alma tarihi gibi yalnızca tarih değerleri için kullanılır.",
 				"datetime": "Zaman bileşenli bir tarih değeri. Etkinlikler, randevular vb. için kullanılır. Takvimlerde kullanılması halinde tam veya kısmi günlük etkinlikler yönetilebilir.",

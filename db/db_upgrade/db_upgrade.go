@@ -12,6 +12,7 @@ import (
 	"r3/schema/pgIndex"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"strconv"
 	"strings"
 
@@ -112,6 +113,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- auto trim option
 			ALTER TABLE app.attribute ADD   COLUMN auto_trim BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.attribute ALTER COLUMN auto_trim DROP DEFAULT;
+
+			-- code attribute use
+			ALTER TYPE app.attribute_content_use ADD VALUE 'code';
 		`)
 		return "3.14", err
 	},
@@ -7894,9 +7898,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 		for _, r := range rels {
 
-			content := "integer"
+			content := constants.DbAttributeContentInteger
 			if r.PkeyType == "large" {
-				content = "bigint"
+				content = constants.DbAttributeContentBigint
 			}
 
 			id, err := uuid.NewV4()

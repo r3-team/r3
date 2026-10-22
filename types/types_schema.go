@@ -29,22 +29,22 @@ type Article struct {
 	Captions CaptionMap `json:"captions"`
 }
 type Attribute struct {
-	Id             uuid.UUID   `json:"id"`
-	RelationId     uuid.UUID   `json:"relationId"`     // attribute belongs to this relation
-	RelationshipId pgtype.UUID `json:"relationshipId"` // ID of target relation
-	IconId         pgtype.UUID `json:"iconId"`         // default icon
-	Name           string      `json:"name"`           // name, used as table column
-	Content        string      `json:"content"`        // content (integer, varchar, text, real, uuid, files, n:1, ...)
-	ContentUse     string      `json:"contentUse"`     // content use (default, richtext, color, datetime, ...)
-	Length         int         `json:"length"`         // numeric precision (digits number + fractions) / varchar length / max file size in KB
-	LengthFract    int         `json:"lengthFract"`    // numeric scale (digits fractions)
-	Nullable       bool        `json:"nullable"`       // value is nullable
-	Encrypted      bool        `json:"encrypted"`      // value is encrypted (end-to-end for logins)
-	AutoTrim       bool        `json:"autoTrim"`       // value is automatically trimmed (text only)
-	Def            string      `json:"def"`            // default value
-	OnUpdate       string      `json:"onUpdate"`       // relationship attribute, action on 'UPDATE'
-	OnDelete       string      `json:"onDelete"`       // relationship attribute, action on 'DELETE'
-	Captions       CaptionMap  `json:"captions"`
+	Id             uuid.UUID                      `json:"id"`
+	RelationId     uuid.UUID                      `json:"relationId"`     // attribute belongs to this relation
+	RelationshipId pgtype.UUID                    `json:"relationshipId"` // ID of target relation
+	IconId         pgtype.UUID                    `json:"iconId"`         // default icon
+	Name           string                         `json:"name"`           // name, used as table column
+	Content        DbSchemaAppAttributeContent    `json:"content"`        // content (integer, varchar, text, real, uuid, files, n:1, ...)
+	ContentUse     DbSchemaAppAttributeContentUse `json:"contentUse"`     // content use (default, richtext, color, datetime, ...)
+	Length         int                            `json:"length"`         // numeric precision (digits number + fractions) / varchar length / max file size in KB
+	LengthFract    int                            `json:"lengthFract"`    // numeric scale (digits fractions)
+	Nullable       bool                           `json:"nullable"`       // value is nullable
+	Encrypted      bool                           `json:"encrypted"`      // value is encrypted (end-to-end for logins)
+	AutoTrim       bool                           `json:"autoTrim"`       // value is automatically trimmed (text only)
+	Def            string                         `json:"def"`            // default value
+	OnUpdate       string                         `json:"onUpdate"`       // relationship attribute, action on 'UPDATE'
+	OnDelete       string                         `json:"onDelete"`       // relationship attribute, action on 'DELETE'
+	Captions       CaptionMap                     `json:"captions"`
 }
 type CaptionMap map[string]map[string]string // content->language_code->value
 type ClientEvent struct {

@@ -408,7 +408,7 @@ export default {
 				notData: !s.isData,
 				noGrow: s.flexDirParent === 'column' && (s.isHeader || s.isVariable || (
 					s.isData && !s.isRelationship1N && !s.isRichtext && !s.isBarcode &&
-					!s.isTextarea && !s.isDrawing && !s.isFiles && !s.isIframe)
+					!s.isTextarea && !s.isDrawing && !s.isFiles && !s.isIframe && !s.isCode)
 				),
 				selected: s.isOptionsShow,
 				tabs: s.isTabs
@@ -505,6 +505,7 @@ export default {
 		isButton: s => s.field.content === 'button',
 		isCalendar: s => s.field.content === 'calendar',
 		isChart: s => s.field.content === 'chart',
+		isCode: s => s.isData && s.attribute.contentUse === 'code',
 		isContainer: s => s.field.content === 'container',
 		isData: s => s.field.content === 'data',
 		isDrawing: s => s.isData && s.attribute.contentUse === 'drawing',

@@ -15,8 +15,8 @@ import (
 )
 
 type cell struct {
-	content    string
-	contentUse string
+	content    types.DbSchemaAppAttributeContent
+	contentUse types.DbSchemaAppAttributeContentUse
 	font       types.DocFont
 	text       string
 	length     int
@@ -27,9 +27,9 @@ type cell struct {
 	width      float64
 }
 type columnMeta struct {
-	content    string // content from expression (text, integer, boolean, ...)
-	contentUse string // content use from attribute expressions (richtext, iframe, ...)
-	decCount   int    // count of decimals (numeric expression only)
+	content    types.DbSchemaAppAttributeContent    // content from expression (text, integer, boolean, ...)
+	contentUse types.DbSchemaAppAttributeContentUse // content use from attribute expressions (richtext, iframe, ...)
+	decCount   int                                  // count of decimals (numeric expression only)
 	fontBody   types.DocFont
 	fontFooter types.DocFont
 	fontHeader types.DocFont
@@ -134,8 +134,8 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 		// parse & store column meta data
 		column = applyToColumn(column.SetsHeader, column)
 		meta := columnMeta{
-			content:    "text",
-			contentUse: "default",
+			content:    constants.DbAttributeContentText,
+			contentUse: constants.DbAttributeContentUseDefault,
 			decCount:   0,
 			fontBody:   applyToFont(getSetDataResolved(doc, column.SetsBody), font),
 			fontFooter: applyToFont(getSetDataResolved(doc, column.SetsFooter), font),
@@ -233,7 +233,7 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 				columnIndexMapAggValueCnt[i]++
 
 				switch meta.content {
-				case "numeric":
+				case constants.DbAttributeContentNumeric:
 					if _, exists := columnIndexMapAggValueNum[i]; !exists {
 						columnIndexMapAggValueNum[i] = 0
 					}
@@ -255,7 +255,7 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 							columnIndexMapAggValueNum[i] = value
 						}
 					}
-				case "integer", "bigint":
+				case constants.DbAttributeContentInteger, constants.DbAttributeContentBigint:
 					if _, exists := columnIndexMapAggValueInt[i]; !exists {
 						columnIndexMapAggValueInt[i] = 0
 					}
@@ -353,7 +353,7 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 					text = fmt.Sprintf("%d", columnIndexMapAggValueCnt[i])
 				} else {
 					switch meta.content {
-					case "numeric":
+					case constants.DbAttributeContentNumeric:
 						switch column.AggregatorRow.String {
 						case "avg":
 							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i]/float64(columnIndexMapAggValueCnt[i]),
@@ -362,7 +362,7 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i], meta.decCount,
 								meta.fontFooter.NumberSepDec, meta.fontFooter.NumberSepTho)
 						}
-					case "integer", "bigint":
+					case constants.DbAttributeContentInteger, constants.DbAttributeContentBigint:
 						switch column.AggregatorRow.String {
 						case "avg":
 							text = fmt.Sprintf("%d", columnIndexMapAggValueInt[i]/int64(columnIndexMapAggValueCnt[i]))

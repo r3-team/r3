@@ -738,7 +738,7 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 
 			// (I)LIKE comparison needs attribute cast as TEXT (relevant for integers/floats/etc.)
 			// REGCONFIG attributes must be cast as TEXT
-			if isOpLike || atr.Content == "regconfig" {
+			if isOpLike || atr.Content == constants.DbAttributeContentRegconfig {
 				return fmt.Sprintf("%s::TEXT", atrExpr), nil
 			}
 			return atrExpr, nil

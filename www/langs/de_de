@@ -818,6 +818,7 @@
 			"option": {
 				"barcode": "Barcode/QR-Code (gemischt)",
 				"boolean": "Ja/nein",
+				"code": "Quelltext",
 				"color": "Farbe",
 				"date": "Datum",
 				"datetime": "Datum + Zeit",
@@ -857,6 +858,7 @@
 			"usedForHint": {
 				"barcode": "Ein Barcode oder QR-Code-Wert. Kann verschiedene Formate haben. Eingabefelder können Codes per Kamera einlesen und diese aus Werten erzeugen.",
 				"boolean": "Wahr/Falsch-Wert. Wird für einfache Ja/Nein-Werte verwendet. Wenn ein leerer Wert erlaubt ist, gibt es 3 mögliche Werte: wahr/falsch/leer.",
+				"code": "Ein Quelltextwert. Wird für Quelltexte in verschiedenen Sprachen verwendet. Eingaben unterstützen Syntax-Highlighting für Sprachen wie JS, SQL, HTML und CSS.",
 				"color": "Farbwerte. Kann in Ansichten zur Gestaltung von Ausgaben verwendet werden, um Merkmale eines Datensatzes darzustellen. Beispielsweise kann eine Priorität anhand einer zugewiesenen Kategorie farblich sichtbar gemacht werden.",
 				"date": "Ein Datumswert. Wird für reine Datumswerte verwendet, wie z. B. einem Geburts- oder Kaufdatum.",
 				"datetime": "Ein Datumswert mit Zeitkomponente. Wird für Ereignisse, Termine usw. verwendet. Bei Nutzung in Kalendern können ganz- oder teiltägige Ereignisse verwaltet werden.",

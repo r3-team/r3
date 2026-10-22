@@ -107,16 +107,17 @@ export default {
 								<div class="row centered gap">
 									<select v-model="usedFor" :disabled="readonly" @change="changedUsedFor">
 										<optgroup :label="capGen.standard">
-											<option value="text"     :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.text }}</option>
-											<option value="textarea" :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.textarea }}</option>
-											<option value="richtext" :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.richtext }}</option>
+											<option value="text"     :disabled="!isNew && (!isString || isDrawing || isBarcode || isCode)">{{ capApp.option.text }}</option>
+											<option value="textarea" :disabled="!isNew && (!isString || isDrawing || isBarcode || isCode)">{{ capApp.option.textarea }}</option>
+											<option value="richtext" :disabled="!isNew && (!isString || isDrawing || isBarcode || isCode)">{{ capApp.option.richtext }}</option>
 											<option value="number"   :disabled="!isNew && !isInteger">{{ capApp.option.number }}</option>
 											<option value="decimal"  :disabled="!isNew && !isNumeric">{{ capApp.option.decimal }}</option>
-											<option value="color"    :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.color }}</option>
-											<option value="iframe"   :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.iframe }}</option>
+											<option value="color"    :disabled="!isNew && (!isString || isDrawing || isBarcode || isCode)">{{ capApp.option.color }}</option>
+											<option value="iframe"   :disabled="!isNew && (!isString || isDrawing || isBarcode || isCode)">{{ capApp.option.iframe }}</option>
 											<option value="drawing"  :disabled="!isNew && !isDrawing">{{ capApp.option.drawing }}</option>
 											<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
 											<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
+											<option value="code"     :disabled="!isNew && !isCode">{{ capApp.option.code }}</option>
 										</optgroup>
 										<optgroup :label="capApp.datetimes" :disabled="!isNew && !isInteger">
 											<option value="datetime">{{ capApp.option.datetime }}</option>
@@ -378,6 +379,11 @@ export default {
 						// textarea/richtext are specific content uses
 						this.values.contentUse = v === 'text' ? 'default' : v;
 						break;
+					case 'code':
+						this.values.content = 'text';
+						this.values.contentUse = 'code';
+						this.values.length = 0;
+						break;
 					case 'color':
 						this.values.content = 'varchar';
 						this.values.contentUse = 'color';
@@ -520,6 +526,7 @@ export default {
 
 		// content use
 		isBarcode: s => s.isString && s.values.contentUse.includes('barcode'),
+		isCode: s => s.isString && s.values.contentUse === 'code',
 		isColor: s => s.isString && s.values.contentUse === 'color',
 		isDate: s => s.isInteger && s.values.contentUse === 'date',
 		isDatetime: s => s.isInteger && s.values.contentUse === 'datetime',

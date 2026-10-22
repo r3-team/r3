@@ -9,6 +9,7 @@ import (
 	"r3/data"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"strings"
 
@@ -29,22 +30,31 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY float64, content string, contentUse string, valueIf any) error {
+func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY float64,
+	content types.DbSchemaAppAttributeContent, contentUse types.DbSchemaAppAttributeContentUse, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
 	}
 
 	switch content {
-	case "text", "varchar":
+	case constants.DbAttributeContentText, constants.DbAttributeContentVarchar:
 		v, ok := valueIf.(string)
 		if !ok {
 			return fmt.Errorf("failed to parse text attribute value")
 		}
 
 		switch contentUse {
-		case "barcode", "barcode_codabar", "barcode_code39", "barcode_code128", "barcode_ean8",
-			"barcode_ean13", "barcode_itf", "barcode_qrcode", "barcode_upc_a", "barcode_upc_e":
+		case constants.DbAttributeContentUseBarcode,
+			constants.DbAttributeContentUseBarcodeCodabar,
+			constants.DbAttributeContentUseBarcodeCode39,
+			constants.DbAttributeContentUseBarcodeCode128,
+			constants.DbAttributeContentUseBarcodeEan8,
+			constants.DbAttributeContentUseBarcodeEan13,
+			constants.DbAttributeContentUseBarcodeItf,
+			constants.DbAttributeContentUseBarcodeQrcode,
+			constants.DbAttributeContentUseBarcodeUpcA,
+			constants.DbAttributeContentUseBarcodeUpcE:
 
 			var b textBarcode
 			if err := json.Unmarshal([]byte(v), &b); err != nil {
@@ -53,7 +63,7 @@ func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY flo
 			if err := drawImageBase64(doc, b.Image, sizeX, sizeY); err != nil {
 				return err
 			}
-		case "drawing":
+		case constants.DbAttributeContentUseDrawing:
 			var d textDrawing
 			if err := json.Unmarshal([]byte(v), &d); err != nil {
 				return err
@@ -61,7 +71,7 @@ func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY flo
 			if err := drawImageBase64(doc, d.Image, sizeX, sizeY); err != nil {
 				return err
 			}
-		case "richtext":
+		case constants.DbAttributeContentUseRichtext:
 			// set page margins to reflect dimensions of the current field
 			// this way content can wrap at the correct positions
 			pageMarginL, pageMarginT, pageMarginR, _ := doc.p.GetMargins()
@@ -75,7 +85,7 @@ func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY flo
 			// reset page margins
 			doc.p.SetMargins(pageMarginL, pageMarginT, pageMarginR)
 		}
-	case "files":
+	case constants.DbAttributeContentFiles:
 		valueJson, err := json.Marshal(valueIf)
 		if err != nil {
 			return err

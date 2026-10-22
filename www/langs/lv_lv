@@ -818,6 +818,7 @@
 			"option": {
 				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "Yes/no",
+				"code": "Source code",
 				"color": "Color",
 				"date": "Date",
 				"datetime": "Date + time",
@@ -857,6 +858,7 @@
 			"usedForHint": {
 				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "True/false value. Used for simple yes/no values. If an empty value is allowed, 3 possible values exist: true/false/empty.",
+				"code": "A source code value. Used for written source code in various languages. Inputs support syntax highlighting for languages, such as JS, SQL, HTML or CSS.",
 				"color": "Color values. Can be used in most views to style outputs to show characteristics of a record, like its importance, based on an assigned category.",
 				"date": "A date value. Used for date-only values, like date of birth or purchase date.",
 				"datetime": "A date value with time component. Used for events, appointments and so on. If used in calendars, full or partial day events can be managed.",

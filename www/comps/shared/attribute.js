@@ -143,6 +143,7 @@ export function getAttributeIcon(content, contentUse, outsideIn, isNm) {
 			case 'richtext': return 'text_rich.png';
 			case 'textarea': return 'text_lines.png';
 			case 'color': return 'colors.png';
+			case 'code': return 'code.png';
 			case 'drawing': return 'drawing.png';
 			case 'iframe': return 'iframe.png';
 		}
@@ -216,6 +217,7 @@ export function getAttributeContentsByUsedFor(usedFor, length, largeNumbers) {
 		case 'color': return { content: 'varchar', contentUse: 'color' };
 		case 'drawing': return { content: 'text', contentUse: 'drawing' };
 		case 'iframe': return { content: 'text', contentUse: 'iframe' };
+		case 'code': return { content: length === 0 ? 'text' : 'varchar', contentUse: 'code' };
 		case 'richtext': return { content: length === 0 ? 'text' : 'varchar', contentUse: 'richtext' };
 		case 'textarea': return { content: length === 0 ? 'text' : 'varchar', contentUse: 'textarea' };
 

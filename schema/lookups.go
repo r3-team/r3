@@ -66,9 +66,10 @@ func GetRelationDetailsById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (st
 }
 
 // returns module, relation and attribute names as well as attribute content for given attribute ID
-func GetAttributeDetailsById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, string, string, string, error) {
+func GetAttributeDetailsById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, string, string, types.DbSchemaAppAttributeContent, error) {
 
-	var moduleName, relationName, name, content string
+	var moduleName, relationName, name string
+	var content types.DbSchemaAppAttributeContent
 	if err := tx.QueryRow(ctx, `
 		SELECT m.name, r.name, a.name, a.content
 		FROM app.attribute AS a

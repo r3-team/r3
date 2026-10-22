@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"r3/types"
+	"r3/types/constants"
+	"slices"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -17,35 +19,40 @@ func CheckId_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity types.DbSch
 }
 
 // attribute checks
-func IsContentFiles(content string) bool {
-	return content == "files"
+func IsContentFiles(content types.DbSchemaAppAttributeContent) bool {
+	return content == constants.DbAttributeContentFiles
 }
-func IsContentGeometry(content string) bool {
-	return content == "geometry"
+func IsContentGeometry(content types.DbSchemaAppAttributeContent) bool {
+	return content == constants.DbAttributeContentGeometry
 }
-func IsContentNumeric(content string) bool {
-	return content == "numeric"
+func IsContentNumeric(content types.DbSchemaAppAttributeContent) bool {
+	return content == constants.DbAttributeContentNumeric
 }
-func IsContentRegconfig(content string) bool {
-	return content == "regconfig"
+func IsContentRegconfig(content types.DbSchemaAppAttributeContent) bool {
+	return content == constants.DbAttributeContentRegconfig
 }
-func IsContentRelationship(content string) bool {
-	return content == "1:1" || content == "n:1"
+func IsContentRelationship(content types.DbSchemaAppAttributeContent) bool {
+	return content == constants.DbAttributeContentRel11 || content == constants.DbAttributeContentRelN1
 }
-func IsContentRelationship11(content string) bool {
-	return content == "1:1"
+func IsContentRelationship11(content types.DbSchemaAppAttributeContent) bool {
+	return content == constants.DbAttributeContentRel11
 }
-func IsContentText(content string) bool {
-	return content == "varchar" || content == "text"
+func IsContentText(content types.DbSchemaAppAttributeContent) bool {
+	return content == constants.DbAttributeContentVarchar || content == constants.DbAttributeContentText
 }
-func GetPgTypeByAttributeContent(content string) (string, error) {
-	switch content {
-	case "integer", "bigint", "numeric", "real", "double precision", "text", "varchar", "boolean", "regconfig", "uuid", "geometry":
-		return content, nil
-	case "1:1", "n:1":
-		return "bigint", nil
-	}
-	return "", fmt.Errorf("attribute content '%s' cannot be mapped to a native Postgres type", content)
+func IsContentUseBarcodeAny(content types.DbSchemaAppAttributeContentUse) bool {
+	return slices.Contains([]types.DbSchemaAppAttributeContentUse{
+		constants.DbAttributeContentUseBarcode,
+		constants.DbAttributeContentUseBarcodeCodabar,
+		constants.DbAttributeContentUseBarcodeCode39,
+		constants.DbAttributeContentUseBarcodeCode128,
+		constants.DbAttributeContentUseBarcodeEan8,
+		constants.DbAttributeContentUseBarcodeEan13,
+		constants.DbAttributeContentUseBarcodeItf,
+		constants.DbAttributeContentUseBarcodeQrcode,
+		constants.DbAttributeContentUseBarcodeUpcA,
+		constants.DbAttributeContentUseBarcodeUpcE},
+		content)
 }
 
 // scheduler checks

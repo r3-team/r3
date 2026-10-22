@@ -818,6 +818,7 @@
 			"option": {
 				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "نعم/لا",
+				"code": "Source code",
 				"color": "لون",
 				"date": "تاريخ",
 				"datetime": "التاريخ + الوقت",
@@ -857,6 +858,7 @@
 			"usedForHint": {
 				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "قيمة صحيحة/خطأ. ",
+				"code": "A source code value. Used for written source code in various languages. Inputs support syntax highlighting for languages, such as JS, SQL, HTML or CSS.",
 				"color": "قيم اللون. ",
 				"date": "قيمة التاريخ. ",
 				"datetime": "قيمة تاريخ مع مكون الوقت. ",

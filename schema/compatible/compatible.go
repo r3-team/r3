@@ -229,9 +229,9 @@ func FixPgIndexMethod(method string) string {
 
 // < 3.3
 // migrate attribute content use
-func FixAttributeContentUse(contentUse string) string {
+func FixAttributeContentUse(contentUse types.DbSchemaAppAttributeContentUse) types.DbSchemaAppAttributeContentUse {
 	if contentUse == "" {
-		return "default"
+		return constants.DbAttributeContentUseDefault
 	}
 	return contentUse
 }

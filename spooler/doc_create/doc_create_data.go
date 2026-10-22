@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
@@ -61,29 +62,30 @@ func getDataDoc(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64,
 }
 
 // returns whether an attribute value can be returned as string and the string value itself if valid
-func getAttributeString(font types.DocFont, content string, contentUse string, decCount int, convertHtmlToString bool, valueIf any) (bool, string, error) {
+func getAttributeString(font types.DocFont, content types.DbSchemaAppAttributeContent,
+	contentUse types.DbSchemaAppAttributeContentUse, decCount int, convertHtmlToString bool, valueIf any) (bool, string, error) {
 
 	if valueIf == nil {
 		return true, "", nil
 	}
 
 	switch content {
-	case "real", "double precision":
+	case constants.DbAttributeContentReal, constants.DbAttributeContentDouble:
 		return true, fmt.Sprintf("%f", valueIf), nil
-	case "regconfig":
+	case constants.DbAttributeContentRegconfig:
 		return true, fmt.Sprintf("%s", valueIf), nil
-	case "text", "varchar":
+	case constants.DbAttributeContentText, constants.DbAttributeContentVarchar:
 		v, ok := valueIf.(string)
 		if !ok {
 			return false, "", fmt.Errorf("failed to parse text attribute value")
 		}
 
 		switch contentUse {
-		case "default", "iframe", "textarea":
+		case constants.DbAttributeContentUseDefault, constants.DbAttributeContentUseIFrame, constants.DbAttributeContentUseTextarea:
 			return true, v, nil
-		case "color":
+		case constants.DbAttributeContentUseColor:
 			return true, fmt.Sprintf("#%s", v), nil
-		case "richtext":
+		case constants.DbAttributeContentUseRichtext:
 			if convertHtmlToString {
 				s, err := getTextFromHtml(v)
 				if err != nil {
@@ -92,12 +94,21 @@ func getAttributeString(font types.DocFont, content string, contentUse string, d
 				return true, s, nil
 			}
 			return false, "", nil
-		case "barcode", "barcode_codabar", "barcode_code39", "barcode_code128", "barcode_ean8",
-			"barcode_ean13", "barcode_itf", "barcode_qrcode", "barcode_upc_a", "barcode_upc_e", "drawing":
+		case constants.DbAttributeContentUseBarcode,
+			constants.DbAttributeContentUseBarcodeCodabar,
+			constants.DbAttributeContentUseBarcodeCode39,
+			constants.DbAttributeContentUseBarcodeCode128,
+			constants.DbAttributeContentUseBarcodeEan8,
+			constants.DbAttributeContentUseBarcodeEan13,
+			constants.DbAttributeContentUseBarcodeItf,
+			constants.DbAttributeContentUseBarcodeQrcode,
+			constants.DbAttributeContentUseBarcodeUpcA,
+			constants.DbAttributeContentUseBarcodeUpcE,
+			constants.DbAttributeContentUseDrawing:
 
 			return false, "", nil
 		}
-	case "boolean":
+	case constants.DbAttributeContentBoolean:
 		v, ok := valueIf.(bool)
 		if !ok {
 			return false, "", fmt.Errorf("failed to parse boolean attribute value")
@@ -107,13 +118,13 @@ func getAttributeString(font types.DocFont, content string, contentUse string, d
 		} else {
 			return true, font.BoolFalse, nil
 		}
-	case "files":
+	case constants.DbAttributeContentFiles:
 		return false, "", nil
-	case "integer", "bigint":
+	case constants.DbAttributeContentInteger, constants.DbAttributeContentBigint:
 		switch contentUse {
-		case "default":
+		case constants.DbAttributeContentUseDefault:
 			return true, tools.FormatStringNumber(fmt.Sprintf("%d", valueIf), font.NumberSepDec, font.NumberSepTho), nil
-		case "date", "datetime":
+		case constants.DbAttributeContentUseDate, constants.DbAttributeContentUseDatetime:
 			tUnix, err := getInt64FromInterface(valueIf)
 			if err != nil {
 				return false, "", err
@@ -125,7 +136,7 @@ func getAttributeString(font types.DocFont, content string, contentUse string, d
 				// print date at UTC
 				return true, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)), nil
 			}
-		case "time":
+		case constants.DbAttributeContentUseTime:
 			v, ok := valueIf.(int32)
 			if !ok {
 				return false, "", fmt.Errorf("failed to parse time attribute value")
@@ -135,7 +146,7 @@ func getAttributeString(font types.DocFont, content string, contentUse string, d
 			ss := int32(v - (hh * 3600) - (mm * 60))
 			return true, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss), nil
 		}
-	case "numeric":
+	case constants.DbAttributeContentNumeric:
 		v, ok := valueIf.(pgtype.Numeric)
 		if !ok {
 			return false, "", fmt.Errorf("failed to parse numeric attribute value")

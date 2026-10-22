@@ -818,6 +818,7 @@
 			"option": {
 				"barcode": "Barcode/QR code (mixed)",
 				"boolean": "Sí/no",
+				"code": "Source code",
 				"color": "Color",
 				"date": "Fecha",
 				"datetime": "Fecha y hora",
@@ -857,6 +858,7 @@
 			"usedForHint": {
 				"barcode": "Un valor de código de barras o código QR. Puede almacenar varios formatos. Las entradas correspondientes se pueden usar para escanear códigos de barras/códigos QR, pero también para generarlos en función del valor actual.",
 				"boolean": "Valor verdadero/falso. Se usa para valores simples de sí/no. Si se permite un valor vacío, existen 3 valores posibles: verdadero/falso/vacío.",
+				"code": "A source code value. Used for written source code in various languages. Inputs support syntax highlighting for languages, such as JS, SQL, HTML or CSS.",
 				"color": "Valores de color. Se pueden usar en la mayoría de las vistas para estilizar salidas para mostrar características de un registro, como su importancia, en función de una categoría asignada.",
 				"date": "Un valor de fecha. Se usa para valores solo de fecha, como fecha de nacimiento o fecha de compra.",
 				"datetime": "Un valor de fecha con componente de hora. Se usa para eventos, citas, etc. Si se usa en calendarios, se pueden gestionar eventos de día completo o parcial.",

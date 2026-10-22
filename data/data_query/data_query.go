@@ -288,7 +288,7 @@ func ConvertQueryToDataOrders(orders []types.QueryOrder) []types.DataGetOrder {
 }
 
 // returns usable content type (integer, text, boolean, ...) as well as decimal count if numeric, based on return of PG function
-func GetContentFromPgFunctionReturn(fncId pgtype.UUID) (string, int, error) {
+func GetContentFromPgFunctionReturn(fncId pgtype.UUID) (types.DbSchemaAppAttributeContent, int, error) {
 
 	if !fncId.Valid {
 		return "", 0, fmt.Errorf("no backend function set in column")
@@ -303,13 +303,13 @@ func GetContentFromPgFunctionReturn(fncId pgtype.UUID) (string, int, error) {
 	// simple types
 	switch returnCode {
 	case "smallint", "integer", "int":
-		return "integer", 0, nil
+		return constants.DbAttributeContentInteger, 0, nil
 	case "bigint":
-		return "bigint", 0, nil
+		return constants.DbAttributeContentBigint, 0, nil
 	case "boolean", "bool":
-		return "boolean", 0, nil
+		return constants.DbAttributeContentBoolean, 0, nil
 	case "text":
-		return "text", 0, nil
+		return constants.DbAttributeContentText, 0, nil
 	}
 
 	// numerics
@@ -319,30 +319,30 @@ func GetContentFromPgFunctionReturn(fncId pgtype.UUID) (string, int, error) {
 			// "numeric(12,2)" (precision, scale)
 			decCount, err := strconv.Atoi(matches[3])
 			if err != nil {
-				return "", 0, err
+				return constants.DbAttributeContentNumeric, 0, err
 			}
 			if decCount < 0 {
 				// postgres 15 allows negative scales, which result in rounding before the decimal
-				return "numeric", 0, nil
+				return constants.DbAttributeContentNumeric, 0, nil
 			}
-			return "numeric", decCount, nil
+			return constants.DbAttributeContentNumeric, decCount, nil
 		} else {
 			// "numeric" (undefined) or "numeric(3)" (precision, no scale)
-			return "numeric", 0, nil
+			return constants.DbAttributeContentNumeric, 0, nil
 		}
 	}
 
 	// varchar, character varying, char, character, ...
 	if strings.Contains(returnCode, "char") {
-		return "text", 0, nil
+		return constants.DbAttributeContentText, 0, nil
 	}
 
 	// fallback to text if not supported or irrelevant
-	return "text", 0, nil
+	return constants.DbAttributeContentText, 0, nil
 }
 
 // returns usable content type (integer, text, boolean, ...), content use (default, richtext, iframe, ...) and decimal count (case: numeric), based on attribute types in scalar function arguments
-func GetContentFromScalarArgs(scalar string, args []types.DataGetArg) (string, string, int, error) {
+func GetContentFromScalarArgs(scalar string, args []types.DataGetArg) (types.DbSchemaAppAttributeContent, types.DbSchemaAppAttributeContentUse, int, error) {
 	switch scalar {
 	case "COALESCE", "CONCAT":
 		for _, arg := range args {
@@ -357,13 +357,12 @@ func GetContentFromScalarArgs(scalar string, args []types.DataGetArg) (string, s
 			// return first usable attribute type - types in scalar functions should be compatible
 			// CONCAT however must return text, content use however might be different (richtext, iframe, ...)
 			if scalar == "CONCAT" {
-				return "text", atr.ContentUse, 0, nil
+				return constants.DbAttributeContentText, atr.ContentUse, 0, nil
 			}
 			return atr.Content, atr.ContentUse, atr.LengthFract, nil
 		}
 	}
-	return "text", "default", 0, nil
-
+	return constants.DbAttributeContentText, constants.DbAttributeContentUseDefault, 0, nil
 }
 
 func GetTitleFromExpression(expr types.DataGetExpression, languageCode string) (string, error) {

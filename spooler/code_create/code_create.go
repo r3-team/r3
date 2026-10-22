@@ -17,7 +17,6 @@ import (
 	"r3/spooler"
 	"r3/tools"
 	"r3/types"
-	"strings"
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/codabar"
@@ -135,7 +134,7 @@ func do(c codeJob) error {
 		if err := storeAsFilesAttribute(ctx, c.AttributeIdAttach, c.RecordIdAttach, code); err != nil {
 			return err
 		}
-	} else if schema.IsContentText(atr.Content) && strings.Contains(atr.ContentUse, "barcode") {
+	} else if schema.IsContentText(atr.Content) && schema.IsContentUseBarcodeAny(atr.ContentUse) {
 		if err := storeAsTextAttributeValue(ctx, c.AttributeIdAttach, c.RecordIdAttach, code, c.Format, c.TextValue); err != nil {
 			return err
 		}

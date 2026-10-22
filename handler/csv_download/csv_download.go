@@ -19,6 +19,7 @@ import (
 	"r3/login/login_auth"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -227,7 +228,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// store content use for each column for response value processing
-	expressionsContentUse := make([]string, len(get.Expressions))
+	expressionsContentUse := make([]types.DbSchemaAppAttributeContentUse, len(get.Expressions))
 	for i, expr := range get.Expressions {
 		isSubQuery := expr.Query.RelationId != uuid.Nil && len(expr.Query.Expressions) == 1
 
@@ -293,8 +294,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	os.Remove(filePath)
 }
 
-func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location,
-	opt types.CsvOptions, expressionsContentUse []string, loginId int64) (int64, error) {
+func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location, opt types.CsvOptions,
+	expressionsContentUse []types.DbSchemaAppAttributeContentUse, loginId int64) (int64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -316,19 +317,19 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 		return 0, err
 	}
 
-	parseIntegerValues := func(display string, value int64) string {
-		switch display {
-		case "date", "datetime":
+	parseIntegerValues := func(contentUse types.DbSchemaAppAttributeContentUse, value int64) string {
+		switch contentUse {
+		case constants.DbAttributeContentUseDate, constants.DbAttributeContentUseDatetime:
 			// date values are always stored as UTC at midnight
 			loc := time.UTC
-			format := tools.GetDatetimeFormat(opt.DateFormat, display == "datetime")
+			format := tools.GetDatetimeFormat(opt.DateFormat, contentUse == constants.DbAttributeContentUseDatetime)
 
 			// datetime values are in context of user timezone
-			if display == "datetime" {
+			if contentUse == constants.DbAttributeContentUseDatetime {
 				loc = locUser
 			}
 			return time.Unix(value, 0).In(loc).Format(format)
-		case "time":
+		case constants.DbAttributeContentUseTime:
 			return time.Unix(value, 0).UTC().Format("15:04:05")
 		}
 		return tools.FormatStringNumber(fmt.Sprintf("%v", value), "", opt.CharThou)
