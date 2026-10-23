@@ -17,13 +17,13 @@ const themesDark = [
 export default {
 	name: 'my-input-code',
 	template: `<div class="input-code-editor">
-		<div class="input-code-editor-field" ref="codeEditor"></div>
-		<div class="input-code-editor-options default-inputs">
+		<div class="input-toolbar default-inputs">
 
 			<!-- source language -->
-			<div class="row">
+			<div class="row gap centered">
+				<span v-if="singleLanguage || !isEmpty">{{ capGen.language }}</span>
 				<span v-if="singleLanguage"><i>{{ sourceLanguage }}</i></span>
-				<select v-if="!singleLanguage && !isEmpty" v-model="sourceLanguage">
+				<select class="dynamic" v-if="!singleLanguage && !isEmpty" v-model="sourceLanguage">
 					<option v-for="l in sourceLanguages">{{ l }}</option>
 				</select>
 			</div>
@@ -31,16 +31,17 @@ export default {
 			<!-- view options -->
 			<div class="row gap centered">
 				<my-button-check v-model="wrap" :caption="capGen.wrap" />
-				<select v-model="theme">
+				<select class="dynamic" v-model="theme">
 					<optgroup :label="capGen.bright">
-						<option v-for="t in themesBright">{{ t }}</option>
+						<option v-for="t in themesBright" :value="t">{{ getThemeTitle(t) }}</option>
 					</optgroup>
 					<optgroup :label="capGen.dark">
-						<option v-for="t in themesDark">{{ t }}</option>
+						<option v-for="t in themesDark" :value="t">{{ getThemeTitle(t) }}</option>
 					</optgroup>
 				</select>
 			</div>
 		</div>
+		<div class="input-code-editor-field" ref="codeEditor"></div>
 	</div>`,
 	props: {
 		allowNull: { type: Boolean, required: false, default: false },
@@ -139,6 +140,12 @@ export default {
 	methods: {
 		// externals
 		setSettingSingle,
+
+		// presentation
+		getThemeTitle(v) {
+			// replace underscores with spaces, make every first word character upper-case
+			return v.replaceAll('_', ' ').replaceAll(/\b\w/g, c => c.toUpperCase());
+		},
 
 		// actions
 		click() {

@@ -2,6 +2,7 @@ import MyCalendar from './calendar.js';
 import MyChart from './chart.js';
 import MyGantt from './gantt.js';
 import MyInputBarcode from './inputBarcode.js';
+import MyInputCode from './inputCode.js';
 import MyInputColor from './inputColor.js';
 import MyInputDate from './inputDate.js';
 import MyInputDecimal from './inputDecimal.js';
@@ -34,10 +35,10 @@ import { variableValueGet, variableValueSet } from './shared/variable.js';
 export default {
 	name: 'my-field',
 	components: {
-		MyCalendar, MyChart, MyGantt, MyKanban, MyInputBarcode,
-		MyInputColor, MyInputDate, MyInputDecimal, MyInputDrawing,
-		MyInputFiles, MyInputIframe, MyInputLogin, MyInputRating,
-		MyInputRichtext, MyInputSelect, MyInputUuid, MyList, MyMap
+		MyCalendar, MyChart, MyGantt, MyKanban, MyInputBarcode, MyInputCode,
+		MyInputColor, MyInputDate, MyInputDecimal, MyInputDrawing, MyInputFiles,
+		MyInputIframe, MyInputLogin, MyInputRating, MyInputRichtext,
+		MyInputSelect, MyInputUuid, MyList, MyMap
 	},
 	template: `<div class="field"
 		v-if="isActive"
@@ -422,6 +423,14 @@ export default {
 					:placeholder="capGen.threeDots"
 					:readonly="isReadonly"
 					:selected="value"
+				/>
+
+				<!-- code input -->
+				<my-input-code
+					v-if="isCode"
+					v-model="value"
+					:allowNull="true"
+					:readonly="isReadonly"
 				/>
 
 				<!-- color input -->
@@ -1074,13 +1083,14 @@ export default {
 		// bool states
 		isLineInput: s => s.isData
 			&& !s.isBoolean && !s.isColor
-			&& !s.isDateInput && !s.isDrawing
-			&& !s.isFiles && !s.isIframe
-			&& !s.isLogin && !s.isSlider
-			&& !s.isTextarea && !s.isRegconfig
-			&& !s.isRelationship && !s.isRichtext
-			&& !s.isUuid && !s.isBarcode
-			&& !s.isRating && !s.isDecimal,
+			&& !s.isCode && !s.isDateInput
+			&& !s.isDrawing && !s.isFiles
+			&& !s.isIframe && !s.isLogin
+			&& !s.isSlider && !s.isTextarea
+			&& !s.isRegconfig && !s.isRelationship
+			&& !s.isRichtext && !s.isUuid
+			&& !s.isBarcode && !s.isRating
+			&& !s.isDecimal,
 		isLineSingle: s => (s.isTabs && s.tabsCollabsed) || (
 			s.isData && (
 				s.isLineInput || s.isBoolean || s.isDecimal || s.isColor || s.isDateInput || s.isSlider ||
@@ -1167,6 +1177,7 @@ export default {
 		isButton: s => s.content === 'button',
 		isCalendar: s => s.content === 'calendar',
 		isChart: s => s.content === 'chart',
+		isCode: s => s.isData && s.contentUse === 'code',
 		isContainer: s => s.content === 'container',
 		isData: s => s.content === 'data',
 		isEncrypted: s => s.isData && s.attribute.encrypted,
@@ -1190,7 +1201,8 @@ export default {
 		isLogin: s => s.isData && s.field.display === 'login',
 		isMap: s => s.content === 'map',
 		isMonospace: s => s.field.flags.includes('monospace'),
-		isMultiline: s => s.isChart || s.isKanban || s.isCalendar || s.isTabs || s.isMap || s.isList || s.isDrawing || s.isFiles || s.isBarcode || s.isTextarea || s.isRichtext || s.isRelationshipFlow,
+		isMultiline: s => s.isChart || s.isKanban || s.isCalendar || s.isTabs || s.isMap || s.isList ||
+			s.isDrawing || s.isFiles || s.isBarcode || s.isCode || s.isTextarea || s.isRichtext || s.isRelationshipFlow,
 		isPassword: s => s.isData && s.field.display === 'password',
 		isRating: s => s.isData && s.field.display === 'rating',
 		isReadonly: s => s.stateFinal === 'readonly',
@@ -1208,7 +1220,8 @@ export default {
 		isTime: s => s.isData && s.contentUse === 'time',
 		isTouched: s => s.fieldIdsTouched.includes(s.field.id),
 		isVariable: s => s.field.content === 'variable',
-		isWithAction: s => (s.isWithActionHelp || s.isWithActionClipboard || s.isWithActionLink || s.isWithActionPassword) && (s.isRelationshipFlow || s.isLineInput || s.isDecimal || s.isBoolean || s.isTextarea || s.isSlider),
+		isWithAction: s => (s.isWithActionHelp || s.isWithActionClipboard || s.isWithActionLink || s.isWithActionPassword)
+			&& (s.isRelationshipFlow || s.isLineInput || s.isDecimal || s.isBoolean || s.isTextarea || s.isSlider),
 		isWithActionClipboard: s => s.isClipboard && !s.isFiles && !s.isIframe && !s.isBarcode && !s.isRichtext,
 		isWithActionHelp: s => s.isWithHelp,
 		isWithActionLink: s => s.link !== false,

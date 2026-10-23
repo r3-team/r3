@@ -157,6 +157,8 @@
 	--border-input: 1px solid var(--color-border);
 	--border-input-focus: 1px solid transparent;
 	--border-input-radius: 5px;
+	--border-input-radius-lower: 0px 0px var(--border-input-radius)
+		var(--border-input-radius);
 	--border-input-radius-large: calc(var(--border-input-radius) * 2);
 	--outline-input-focus: 2px solid var(--color-accent1);
 }
