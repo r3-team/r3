@@ -83,7 +83,7 @@ export default {
 		hideInputs: { type: Boolean, required: true },
 		isHidden: { type: Boolean, required: true },
 		isWithHelp: { type: Boolean, required: false, default: false },
-		modelValue: { required: true },
+		modelValue: { type: [String, null], required: true },
 		readonly: { type: Boolean, required: true }
 	},
 	watch: {

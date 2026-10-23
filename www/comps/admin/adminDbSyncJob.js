@@ -1,4 +1,4 @@
-import MyCodeEditor from '../codeEditor.js';
+import MyInputCode from '../inputCode.js';
 import MyInputDecimal from '../inputDecimal.js';
 import { dialogCloseAsk, dialogDeleteAsk } from '../shared/dialog.js';
 import { deepIsEqual } from '../shared/generic.js';
@@ -13,7 +13,7 @@ export default {
 	name: 'my-admin-db-sync-job',
 	components: {
 		MyAdminDbSyncJobJoins, MyAdminDbSyncJobLoadPreview,
-		MyAdminDbSyncJobLookups, MyCodeEditor, MyInputDecimal
+		MyAdminDbSyncJobLookups, MyInputCode, MyInputDecimal
 	},
 	template: `<div class="app-sub-window under-header at-top with-margin" v-if="isReady" @mousedown.self="closeAsk">
 
@@ -143,10 +143,11 @@ export default {
 				<div class="admin-db-sync-job-content-external" :style="styleExternal">
 					<my-label image="codeDatabase.png" :caption="labelExternal" :large="true" />
 					<div class="admin-db-sync-job-content-external-input">
-						<my-code-editor
+						<my-input-code
 							v-model="job.codeSql"
-							:mode="editorMode"
+							:allowNull="false"
 							:readonly
+							:singleLanguage="editorLanguage"
 						/>
 					</div>
 					<span>{{ labelExternalHint }}</span>
@@ -323,7 +324,7 @@ export default {
 		},
 
 		// simple
-		editorMode: s => (s.dbType === 'mssql' ? 'sqlserver' : 'sql'),
+		editorLanguage: s => (s.dbType === 'mssql' ? 'sqlserver' : 'sql'),
 		isLookupOnBaseRelation: s => s.job.lookups.some(v => v.index === 0),
 		isChanged: s => !s.deepIsEqual(s.jobOrg, s.job),
 		isJoinsMulti: s => s.job.joins.length > 1,

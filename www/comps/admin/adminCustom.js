@@ -1,5 +1,5 @@
-import MyCodeEditor from '../codeEditor.js';
 import { MyModuleSelect } from '../input.js';
+import MyInputCode from '../inputCode.js';
 import MyInputColorWrap from '../inputColorWrap.js';
 import { srcBase64 } from '../shared/image.js';
 
@@ -55,7 +55,7 @@ const MyAdminCustomLogo = {
 
 export default {
 	name: 'my-admin-custom',
-	components: { MyAdminCustomLogo, MyCodeEditor, MyInputColorWrap, MyModuleSelect },
+	components: { MyAdminCustomLogo, MyInputCode, MyInputColorWrap, MyModuleSelect },
 	template: `<div class="admin-custom contentBox grow">
 		<div class="top">
 			<div class="area">
@@ -264,8 +264,9 @@ export default {
 					<tr>
 						<td colspan="3" class="noPadding">
 							<div class="cssInput">
-								<my-code-editor mode="css"
+								<my-input-code singleLanguage="css"
 									v-model="configInput.css"
+									:allowNull="false"
 									:readonly="!activated"
 								/>
 							</div>

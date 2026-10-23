@@ -6,6 +6,8 @@ type Settings struct {
 	BoolAsIcon        bool        `json:"boolAsIcon"`   // controls display in views
 	BoolAsToggle      bool        `json:"boolAsToggle"` // controls display in inputs
 	BordersSquared    bool        `json:"bordersSquared"`
+	CodeEditorTheme   string      `json:"codeEditorTheme"`
+	CodeEditorWrap    bool        `json:"codeEditorWrap"`
 	CollapseRemember  bool        `json:"collapseRemember"`
 	ColorClassicMode  bool        `json:"colorClassicMode"`
 	ColorHeader       pgtype.Text `json:"colorHeader"`

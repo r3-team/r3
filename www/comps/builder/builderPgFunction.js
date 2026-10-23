@@ -1,4 +1,4 @@
-import MyCodeEditor from '../codeEditor.js';
+import MyInputCode from '../inputCode.js';
 import { getAttributeIcon, isAttributeFiles } from '../shared/attribute.js';
 import { getDependentModules, getFunctionHelp, getValidDbCharsForRx } from '../shared/builder.js';
 import { getTemplatePgFunctionSchedule } from '../shared/builderTemplate.js';
@@ -120,12 +120,9 @@ const MyBuilderPgFunctionItemSchedule = {
 export default {
 	name: 'my-builder-pg-function',
 	components: {
-		MyBuilderCaption,
-		MyBuilderPgFunctionItemSchedule,
-		MyBuilderPgTriggers,
-		MyBuilderSchemaLookup,
-		MyBuilderTagInput,
-		MyCodeEditor
+		MyBuilderCaption, MyBuilderPgFunctionItemSchedule,
+		MyBuilderPgTriggers, MyBuilderSchemaLookup,
+		MyBuilderTagInput, MyInputCode
 	},
 	template: `<div class="builder-function" v-if="fnc !== false">
 		<div class="contentBox left">
@@ -187,11 +184,12 @@ export default {
 			</div>
 
 			<div class="content no-padding function-details">
-				<my-code-editor mode="pgsql"
+				<my-input-code singleLanguage="pgsql"
 					v-model="fncBody"
-					@clicked="entityId = null"
-					:insertEntity="insertEntity"
-					:modelValueAlt="!showPreview ? '' : preview"
+					@textInserted="entityId = null"
+					:allowNull="false"
+					:modelValuePreview="!showPreview ? '' : preview"
+					:textInsertOnClick="insertEntity"
 					:readonly="readonly || showPreview"
 				/>
 			</div>

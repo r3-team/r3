@@ -1,16 +1,14 @@
-import MyCodeEditor from '../codeEditor.js';
+import MyInputCode from '../inputCode.js';
 import { getAttributeContentsByUsedFor, getAttributeContentUsedFor, getAttributeIcon } from '../shared/attribute.js';
 import { dialogDeleteAsk } from '../shared/dialog.js';
 import { copyValueDialog } from '../shared/generic.js';
 import { variableValueGet } from '../shared/variable.js';
+
 import MyBuilderFormInput from './builderFormInput.js';
 
 export default {
 	name: 'my-builder-variable',
-	components: {
-		MyBuilderFormInput,
-		MyCodeEditor
-	},
+	components: { MyBuilderFormInput, MyInputCode },
 	template: `<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-variable float" v-if="values !== null">
 			<div class="top">
@@ -98,7 +96,7 @@ export default {
 							<td>{{ capGen.preview }}</td>
 							<td colspan="2" v-if="values.formId === null">
 								<div class="preview">
-									<my-code-editor mode="json"
+									<my-input-code singleLanguage="json"
 										:modelValue="preview === null ? '' : JSON.stringify(preview,null,'\t')"
 										:readonly="true"
 									/>

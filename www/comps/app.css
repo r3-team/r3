@@ -1121,25 +1121,6 @@ table td.maximum {
 	color: var(--color-font-disabled);
 }
 
-/* code editor */
-.code-editor {
-	flex: 1 1 auto;
-	display: flex;
-	flex-flow: column;
-}
-.code-editor-field {
-	flex: 1 1 auto;
-	border-bottom: 1px solid var(--color-border);
-}
-.code-editor-options {
-	display: flex;
-	flex-flow: row wrap;
-	margin: calc(var(--spacing) / 2.5);
-	gap: calc(var(--spacing) / 2.5);
-	align-items: center;
-	justify-content: space-between;
-}
-
 /* feedback */
 .feedback {
 	width: 95%;

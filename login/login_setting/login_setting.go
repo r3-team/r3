@@ -32,7 +32,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 			tab_remember, list_colored, list_spaced, color_classic_mode, color_header,
 			color_header_single, color_menu, number_sep_decimal, number_sep_thousand,
 			bool_as_icon, shadows_inputs, collapse_remember, bool_as_toggle,
-			mail_spooler_stuck_sec, offset_page_no
+			mail_spooler_stuck_sec, offset_page_no, code_editor_theme, code_editor_wrap
 		FROM instance.login_setting AS ls
 		WHERE %s = $1
 	`, entryName), entryId).Scan(&s.LanguageCode, &s.DateFormat, &s.SundayFirstDow,
@@ -42,7 +42,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 		&s.ListSpaced, &s.ColorClassicMode, &s.ColorHeader, &s.ColorHeaderSingle,
 		&s.ColorMenu, &s.NumberSepDecimal, &s.NumberSepThousand, &s.BoolAsIcon,
 		&s.ShadowsInputs, &s.CollapseRemember, &s.BoolAsToggle, &s.MailSpoolerStuckSec,
-		&s.OffsetPageNo)
+		&s.OffsetPageNo, &s.CodeEditorTheme, &s.CodeEditorWrap)
 
 	return s, err
 }
@@ -69,15 +69,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 				pattern, font_family, tab_remember, list_colored, list_spaced, color_classic_mode,
 				color_header, color_header_single,color_menu, number_sep_decimal, number_sep_thousand,
 				bool_as_icon, shadows_inputs, collapse_remember, bool_as_toggle, mail_spooler_stuck_sec,
-				offset_page_no)
+				offset_page_no, code_editor_theme, code_editor_wrap)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,
-				$24,$25,$26,$27,$28,$29,$30,$31)
+				$24,$25,$26,$27,$28,$29,$30,$31,$32,$33)
 		`, entryName), entryId, s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize,
 			s.BordersSquared, s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark, s.HintUpdateVersion,
 			s.MobileScrollForm, s.FormActionsAlign, s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember,
 			s.ListColored, s.ListSpaced, s.ColorClassicMode, s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu,
 			s.NumberSepDecimal, s.NumberSepThousand, s.BoolAsIcon, s.ShadowsInputs, s.CollapseRemember,
-			s.BoolAsToggle, s.MailSpoolerStuckSec, s.OffsetPageNo); err != nil {
+			s.BoolAsToggle, s.MailSpoolerStuckSec, s.OffsetPageNo, s.CodeEditorTheme, s.CodeEditorWrap); err != nil {
 
 			return err
 		}
@@ -91,14 +91,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 				list_spaced = $18, color_classic_mode = $19, color_header = $20, color_header_single = $21,
 				color_menu = $22, number_sep_decimal = $23, number_sep_thousand = $24, bool_as_icon = $25,
 				shadows_inputs = $26, collapse_remember = $27, bool_as_toggle = $28, mail_spooler_stuck_sec = $29,
-				offset_page_no = $30
-			WHERE %s = $31
+				offset_page_no = $30, code_editor_theme = $31, code_editor_wrap = $32
+			WHERE %s = $33
 		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize, s.BordersSquared,
 			s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark, s.HintUpdateVersion, s.MobileScrollForm,
 			s.FormActionsAlign, s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember, s.ListColored,
 			s.ListSpaced, s.ColorClassicMode, s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, s.NumberSepDecimal,
 			s.NumberSepThousand, s.BoolAsIcon, s.ShadowsInputs, s.CollapseRemember, s.BoolAsToggle,
-			s.MailSpoolerStuckSec, s.OffsetPageNo, entryId); err != nil {
+			s.MailSpoolerStuckSec, s.OffsetPageNo, s.CodeEditorTheme, s.CodeEditorWrap, entryId); err != nil {
 
 			return err
 		}

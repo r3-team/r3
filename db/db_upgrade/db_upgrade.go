@@ -116,6 +116,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- code attribute use
 			ALTER TYPE app.attribute_content_use ADD VALUE 'code';
+
+			CREATE TYPE instance.code_editor_theme AS ENUM(
+				'chaos','chrome','cloud9_day','cloud9_night','eclipse','github','github_dark','gruvbox',
+				'gruvbox_dark_hard','kr_theme','merbivore','mono_industrial','monokai','terminal','textmate',
+				'tomorrow_night','twilight','vibrant_ink'
+			);
+			ALTER TABLE instance.login_setting ADD COLUMN code_editor_theme TEXT NOT NULL DEFAULT 'monokai';
+			ALTER TABLE instance.login_setting ALTER COLUMN code_editor_theme DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD COLUMN code_editor_wrap BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN code_editor_wrap DROP DEFAULT;
 		`)
 		return "3.14", err
 	},

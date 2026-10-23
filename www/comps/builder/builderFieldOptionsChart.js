@@ -1,13 +1,10 @@
-import MyCodeEditor from '../codeEditor.js';
+import MyInputCode from '../inputCode.js';
 import { getValueFromJson, setValueInJson } from '../shared/builder.js';
 import MyBuilderFieldOptionsChartSerie from './builderFieldOptionsChartSerie.js';
 
 export default {
 	name: 'my-builder-field-options-chart',
-	components: {
-		MyBuilderFieldOptionsChartSerie,
-		MyCodeEditor
-	},
+	components: { MyBuilderFieldOptionsChartSerie, MyInputCode },
 	template: `
 		<tr>
 			<td>{{ capApp.axisType }} X</td>
@@ -55,8 +52,9 @@ export default {
 			<td colspan="999">
 				<p v-html="capApp.help"></p>
 				<div class="chart-option" :class="{error:jsonBad}">
-					<my-code-editor mode="json"
+					<my-input-code singleLanguage="json"
 						@update:modelValue="optionInput($event)"
+						:allowNull="false"
 						:modelValue="jsonInput"
 					/>
 				</div>
@@ -118,8 +116,7 @@ export default {
 		// actions
 		optionInput(v) {
 			try {
-				let o = JSON.parse(v);
-
+				const o = JSON.parse(v);
 				this.option = v;
 				this.jsonBad = false;
 			}
