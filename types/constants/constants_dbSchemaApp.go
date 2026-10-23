@@ -89,7 +89,7 @@ const (
 	DbAttributeContentUseDrawing        types.DbSchemaAppAttributeContentUse = "drawing"
 	DbAttributeContentUseIFrame         types.DbSchemaAppAttributeContentUse = "iframe"
 	DbAttributeContentUseRichtext       types.DbSchemaAppAttributeContentUse = "richtext"
-	DbAttributeContentUseTextarea       types.DbSchemaAppAttributeContentUse = "textare"
+	DbAttributeContentUseTextarea       types.DbSchemaAppAttributeContentUse = "textarea"
 	DbAttributeContentUseTime           types.DbSchemaAppAttributeContentUse = "time"
 
 	DbColumnContentAttribute types.DbSchemaAppColumnContent = "attribute"
