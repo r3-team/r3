@@ -6,8 +6,8 @@ export default {
 	template: `<my-input-select
 		v-if="inputText !== null"
 		v-model:selected="loginId"
-		@dropdown-show="$emit('dropdown-show',$event)"
 		@request-data="get"
+		@showDropdown="$emit('showDropdown',$event)"
 		@showHelp="$emit('showHelp')"
 		@updated-text-input="inputText = $event"
 		:dropdownShow
@@ -27,7 +27,7 @@ export default {
 		placeholder: { type: String, required: false, default: '' },
 		readonly: { type: Boolean, required: false, default: false }
 	},
-	emits: ['dropdown-show', 'showHelp', 'update:modelValue'],
+	emits: ['showDropdown', 'showHelp', 'update:modelValue'],
 	watch: {
 		loginId: {
 			handler(valNew, valOld) {

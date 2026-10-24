@@ -2,8 +2,8 @@ export default {
 	name: 'my-input-color',
 	components: { 'chrome-picker': VueColor.Chrome },
 	template: `<div class="input-color"
-		v-click-outside="closePicker"
-		@click.left="togglePicker"
+		v-click-outside="dropdownClose"
+		@click.left="dropdownShowIfClosed"
 		:class="{ clickable:!readonly }"
 	>
 		<div class="row gap grow centered" v-if="showInput">
@@ -41,21 +41,22 @@ export default {
 				:naked="true"
 			/>
 			<my-button image="pageDown.png"
-				@trigger="togglePicker"
+				@trigger="dropdownToggle"
 				v-if="!isSet"
 				:active="!readonly"
 				:blockBubble="true"
 				:naked="true"
 			/>
 		</div>
-
-		<teleport to="#dropdown" v-if="dropdownShow">
-			<chrome-picker class="input-color-picker"
-				@update:modelValue="input = $event.hex.substr(1)"
-				:disableAlpha="true"
-				:modelValue="input"
-			/>
-		</teleport>
+		<div class="dropdown" popover="manual" ref="dropdown">
+			<div class="dropdown-content" v-if="dropdownShow">
+				<chrome-picker class="input-color-picker"
+					@update:modelValue="input = $event.hex.substr(1)"
+					:disableAlpha="true"
+					:modelValue="input"
+				/>
+			</div>
+		</div>
 	</div>`,
 	props: {
 		allowNull: { type: Boolean, required: false, default: false },
@@ -71,7 +72,7 @@ export default {
 			setValueAfterDelay: null
 		};
 	},
-	emits: ['copyToClipboard', 'dropdown-show', 'showHelp', 'update:modelValue'],
+	emits: ['copyToClipboard', 'showDropdown', 'showHelp', 'update:modelValue'],
 	computed: {
 		// inputs
 		input: {
@@ -95,10 +96,6 @@ export default {
 		// actions
 		clear() {
 			this.input = '';
-			this.$emit('dropdown-show', false);
-		},
-		closePicker() {
-			this.$emit('dropdown-show', false);
 		},
 		set() {
 			if (this.setValueAfterDelay === null || this.setValueAfterDelay === this.modelValue) {
@@ -111,9 +108,20 @@ export default {
 
 			this.setValueAfterDelay = null;
 		},
-		togglePicker() {
-			if (!this.readonly)
-				this.$emit('dropdown-show', !this.dropdownShow);
-		}
+		dropdownClose() {
+			this.$refs.dropdown.hidePopover();
+			this.$emit('showDropdown', false);
+		},
+		dropdownShowIfClosed() {
+			if (this.readonly || this.dropdownShow)
+				return;
+
+			this.$refs.dropdown.showPopover();
+			this.$emit('showDropdown', true);
+		},
+		dropdownToggle() {
+			if (this.dropdownShow) this.dropdownClose();
+			else this.dropdownShowIfClosed();
+		},
 	}
 };

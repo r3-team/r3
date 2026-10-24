@@ -54,6 +54,8 @@
 	border-radius: var(--border-input-radius);
 	box-shadow: var(--shadow-input);
 	overflow: visible;
+	anchor-name: --dropdown-parent;
+	anchor-scope: --dropdown-parent;
 }
 .field-content.data.dropdown:not(.disabled),
 .field-content.data:focus-within:not(.disabled) {

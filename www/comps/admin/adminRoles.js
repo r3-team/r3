@@ -1,14 +1,16 @@
-import srcBase64Icon    from '../shared/image.js';
-import {getCaption}     from '../shared/language.js';
-import MyInputLogin     from '../inputLogin.js';
-import {MyModuleSelect} from '../input.js';
-export {MyAdminRoles as default};
+import { MyModuleSelect } from '../input.js';
+import MyInputLogin from '../inputLogin.js';
 
-const MyAdminRoleItem = {	
-	name:'my-admin-role-item',
-	components:{MyInputLogin},
-	template:`<div class="admin-role">
-		
+import srcBase64Icon from '../shared/image.js';
+import { getCaption } from '../shared/language.js';
+
+export { MyAdminRoles as default };
+
+const MyAdminRoleItem = {
+	name: 'my-admin-role-item',
+	components: { MyInputLogin },
+	template: `<div class="admin-role">
+
 		<!-- role title -->
 		<div class="admin-role-title">
 			<my-button
@@ -19,7 +21,7 @@ const MyAdminRoleItem = {
 				:naked="true"
 			/>
 		</div>
-		
+
 		<!-- role description -->
 		<template v-if="showDesc">
 			<div class="admin-role-desc" v-if="description !== ''">
@@ -29,13 +31,13 @@ const MyAdminRoleItem = {
 				<i>{{ capApp.descriptionEmpty }}</i>
 			</div>
 		</template>
-		
+
 		<div class="admin-role-members" v-if="showMembers || showAll">
-			
+
 			<!-- login assignment input -->
 			<div class="entry" ref="content">
 				<my-input-login
-					@dropdown-show="dropdownSet"
+					@showDropdown="dropdownSet"
 					@update:modelValue="add($event)"
 					:clearInput="true"
 					:dropdownShow
@@ -45,7 +47,7 @@ const MyAdminRoleItem = {
 					:placeholder="capApp.addLogin"
 				/>
 			</div>
-			
+
 			<!-- assigned logins -->
 			<div class="entry" v-for="(l,i) in logins" :key="l.id">
 				<my-button image="cancel.png"
@@ -56,69 +58,69 @@ const MyAdminRoleItem = {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		logins:  { type:Array,   required:true },
-		module:  { type:Object,  required:true },
-		role:    { type:Object,  required:true },
-		showAll: { type:Boolean, required:true },
-		showDesc:{ type:Boolean, required:true }
+	props: {
+		logins: { type: Array, required: true },
+		module: { type: Object, required: true },
+		role: { type: Object, required: true },
+		showAll: { type: Boolean, required: true },
+		showDesc: { type: Boolean, required: true }
 	},
-	emits:['add','remove-by-index'],
+	emits: ['add', 'remove-by-index'],
 	data() {
 		return {
-			loginId:null,
-			showMembers:false
+			loginId: null,
+			showMembers: false
 		};
 	},
-	computed:{
-		loginIds:(s) => {
-			let out = [];
-			for(let l of s.logins) {
+	computed: {
+		loginIds: s => {
+			const out = [];
+			for (const l of s.logins) {
 				out.push(l.id);
 			}
 			return out;
 		},
-		
+
 		// simple
-		description: (s) => s.getCaption('roleDesc',s.module.id,s.role.id,s.role.captions),
-		dropdownShow:(s) => s.dropdownElm === s.$refs.content,
-		titleIcon:   (s) => s.showAll ? '' : (s.showMembers ? 'triangleDown.png' : 'triangleRight.png'),
-		
+		description: s => s.getCaption('roleDesc', s.module.id, s.role.id, s.role.captions),
+		dropdownShow: s => s.dropdownElm === s.$refs.content,
+		titleIcon: s => s.showAll ? '' : (s.showMembers ? 'triangleDown.png' : 'triangleRight.png'),
+
 		// stores
-		capApp:     (s) => s.$store.getters.captions.admin.roles,
-		dropdownElm:(s) => s.$store.getters.dropdownElm
+		capApp: s => s.$store.getters.captions.admin.roles,
+		dropdownElm: s => s.$store.getters.dropdownElm
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
-		
+
 		// actions
 		add(loginId) {
 			// clear login input
 			this.loginId = loginId;
-			this.$nextTick(function() {
+			this.$nextTick(function () {
 				this.loginId = null;
 			});
-			
+
 			// add, if not already in list
-			for(let i = 0, j = this.logins.length; i < j; i++) {
-				if(this.logins[i].id === loginId)
+			for (let i = 0, j = this.logins.length; i < j; i++) {
+				if (this.logins[i].id === loginId)
 					return false;
 			}
 			this.getNewName(loginId);
 		},
 		dropdownSet(state) {
-			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
-			if(!state && this.dropdownShow) this.$store.commit('dropdownElm',null);
+			if (state && !this.dropdownShow) this.$store.commit('dropdownElm', this.$refs.content);
+			if (!state && this.dropdownShow) this.$store.commit('dropdownElm', null);
 		},
 		remove(loginIndex) {
-			this.$emit('remove-by-index',loginIndex);
+			this.$emit('remove-by-index', loginIndex);
 		},
-		
+
 		// backend calls
 		getNewName(id) {
-			ws.send('login','getNames',{id:id},true).then(
-				res => this.$emit('add',{id:id,name:res.payload[0].name}),
+			ws.send('login', 'getNames', { id: id }, true).then(
+				res => this.$emit('add', { id: id, name: res.payload[0].name }),
 				this.$root.genericError
 			);
 		}
@@ -126,12 +128,9 @@ const MyAdminRoleItem = {
 };
 
 const MyAdminRoles = {
-	name:'my-admin-roles',
-	components:{
-		MyAdminRoleItem,
-		MyModuleSelect
-	},
-	template:`<div class="admin-roles contentBox grow scroll">
+	name: 'my-admin-roles',
+	components: { MyAdminRoleItem, MyModuleSelect },
+	template: `<div class="admin-roles contentBox grow scroll">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/admin.png" />
@@ -176,11 +175,11 @@ const MyAdminRoles = {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content" v-if="module === false">
 			<i>{{ capGen.nothingInstalled }}</i>
 		</div>
-		
+
 		<div class="content no-padding" v-if="module !== false">
 			<my-admin-role-item
 				v-for="r in rolesValid"
@@ -195,91 +194,91 @@ const MyAdminRoles = {
 			/>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
 	data() {
 		return {
-			loginIdsChanged:[],
-			moduleId:null,
-			roleIdMapLogins:{},
-			
+			loginIdsChanged: [],
+			moduleId: null,
+			roleIdMapLogins: {},
+
 			// states
-			ready:false,
-			showAll:true,
-			showDesc:false
+			ready: false,
+			showAll: true,
+			showDesc: false
 		};
 	},
 	mounted() {
-		this.$store.commit('pageTitle',this.menuTitle);
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('pageTitle', this.menuTitle);
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
-	computed:{
-		rolesValid:(s) => {
-			if(s.module === false) return [];
-			
-			let out = [];
-			for(let r of s.module.roles) {
-				if(!r.hidden && r.assignable && r.name !== 'everyone')
+	computed: {
+		rolesValid: s => {
+			if (s.module === false) return [];
+
+			const out = [];
+			for (const r of s.module.roles) {
+				if (!r.hidden && r.assignable && r.name !== 'everyone')
 					out.push(r);
 			}
 			return out;
 		},
-		
+
 		// simple
-		hasChanges:(s) => s.loginIdsChanged.length !== 0,
-		module:    (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
-		
+		hasChanges: s => s.loginIdsChanged.length !== 0,
+		module: s => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
+
 		// stores
-		modules:    (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.admin.roles,
-		capGen:     (s) => s.$store.getters.captions.generic
+		modules: s => s.$store.getters['schema/modules'],
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		capApp: s => s.$store.getters.captions.admin.roles,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		srcBase64Icon,
-		
+
 		// actions
-		add(roleId,login) {
-			let c = JSON.parse(JSON.stringify(this.roleIdMapLogins));
+		add(roleId, login) {
+			const c = JSON.parse(JSON.stringify(this.roleIdMapLogins));
 			c[roleId].push(login);
 			this.roleIdMapLogins = c;
-			
-			if(!this.loginIdsChanged.includes(login.id))
+
+			if (!this.loginIdsChanged.includes(login.id))
 				this.loginIdsChanged.push(login.id);
 		},
-		remove(roleId,loginIndex) {
-			let login = this.roleIdMapLogins[roleId][loginIndex];
-			
-			let c = JSON.parse(JSON.stringify(this.roleIdMapLogins));
-			c[roleId].splice(loginIndex,1);
+		remove(roleId, loginIndex) {
+			const login = this.roleIdMapLogins[roleId][loginIndex];
+
+			const c = JSON.parse(JSON.stringify(this.roleIdMapLogins));
+			c[roleId].splice(loginIndex, 1);
 			this.roleIdMapLogins = c;
-			
-			if(!this.loginIdsChanged.includes(login.id))
+
+			if (!this.loginIdsChanged.includes(login.id))
 				this.loginIdsChanged.push(login.id);
 		},
-		
+
 		// backend calls
 		get() {
 			// reset and get logins for all valid roles
 			this.roleIdMapLogins = {};
-			
-			let requests = [];
-			for(let i = 0, j = this.rolesValid.length; i < j; i++) {
+
+			const requests = [];
+			for (let i = 0, j = this.rolesValid.length; i < j; i++) {
 				this.roleIdMapLogins[this.rolesValid[i].id] = [];
-				
-				requests.push(ws.prepare('login','getMembers',{
-					roleId:this.rolesValid[i].id
+
+				requests.push(ws.prepare('login', 'getMembers', {
+					roleId: this.rolesValid[i].id
 				}));
 			}
-			
-			ws.sendMultiple(requests,true).then(
+
+			ws.sendMultiple(requests, true).then(
 				res => {
-					for(let i = 0, j = requests.length; i < j; i++) {
+					for (let i = 0, j = requests.length; i < j; i++) {
 						this.roleIdMapLogins[requests[i].payload.roleId] = res[i].payload.logins;
 					}
 					this.loginIdsChanged = [];
@@ -288,38 +287,38 @@ const MyAdminRoles = {
 			);
 		},
 		set() {
-			if(!this.hasChanges)
+			if (!this.hasChanges)
 				return;
-			
+
 			let requests = [];
-			for(let i = 0, j = this.rolesValid.length; i < j; i++) {
-				
-				let role     = this.rolesValid[i];
-				let logins   = this.roleIdMapLogins[role.id];
-				let loginIds = [];
-				
-				for(let x = 0, y = logins.length; x < y; x++) {
+			for (let i = 0, j = this.rolesValid.length; i < j; i++) {
+
+				const role = this.rolesValid[i];
+				const logins = this.roleIdMapLogins[role.id];
+				const loginIds = [];
+
+				for (let x = 0, y = logins.length; x < y; x++) {
 					loginIds.push(logins[x].id);
 				}
-				
-				requests.push(ws.prepare('login','setMembers',{
-					roleId:role.id,
-					loginIds:loginIds
+
+				requests.push(ws.prepare('login', 'setMembers', {
+					roleId: role.id,
+					loginIds: loginIds
 				}));
 			}
-			
-			ws.sendMultiple(requests,true).then(
+
+			ws.sendMultiple(requests, true).then(
 				() => {
 					// reauth all affected logins
 					requests = [];
-					for(let i = 0, j = this.loginIdsChanged.length; i < j; i++) {
-						requests.push(ws.prepare('login','reauth',{id:this.loginIdsChanged[i]}));
+					for (let i = 0, j = this.loginIdsChanged.length; i < j; i++) {
+						requests.push(ws.prepare('login', 'reauth', { id: this.loginIdsChanged[i] }));
 					}
-					ws.sendMultiple(requests,false).then(
-						() => {},
+					ws.sendMultiple(requests, false).then(
+						() => { },
 						this.$root.genericError
 					);
-					
+
 					// reload data
 					this.get();
 				},

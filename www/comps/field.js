@@ -411,11 +411,11 @@ export default {
 				<!-- regconfig input -->
 				<my-input-select
 					v-if="isRegconfig"
-					@dropdown-show="dropdownSet"
+					@showDropdown="dropdownSet"
 					@showHelp="showHelp"
 					@updated-text-input="regconfigInput = $event"
 					@update:selected="value = $event;regconfigInput = ''"
-					:dropdownShow="dropdownShow"
+					:dropdownShow
 					:inputTextSet="value"
 					:isWithHelp
 					:nakedIcons="true"
@@ -438,10 +438,10 @@ export default {
 					v-if="isColor"
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
-					@dropdown-show="dropdownSet"
+					@showDropdown="dropdownSet"
 					@showHelp="showHelp"
 					:allowNull="true"
-					:dropdownShow="dropdownShow"
+					:dropdownShow
 					:isClipboard
 					:isWithHelp
 					:readonly="isReadonly"
@@ -501,11 +501,11 @@ export default {
 
 				<!-- login input -->
 				<my-input-login
-					@dropdown-show="dropdownSet"
 					v-if="isLogin"
 					v-model="value"
+					@showDropdown="dropdownSet"
 					@showHelp="showHelp"
-					:dropdownShow="dropdownShow"
+					:dropdownShow
 					:isWithHelp
 					:readonly="isReadonly"
 					:placeholder="capGen.threeDots"
