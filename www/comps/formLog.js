@@ -1,3 +1,4 @@
+import MyInputCode from './inputCode.js';
 import MyInputRichtext from './inputRichtext.js';
 import {
 	getAttributeFileHref, getAttributeFileVersionHref, isAttributeFiles,
@@ -36,8 +37,8 @@ const myFormLogLabel = {
 
 const myFormLogValue = {
 	name: 'my-form-log-value',
-	components: { MyInputRichtext },
-	template: `<div class="form-log-value" :class="{ noGrow:showLarge && !isRichtext, large:showLarge, noPadding:isRichtext }">
+	components: { MyInputCode, MyInputRichtext },
+	template: `<div class="form-log-value" :class="{ noGrow:showLarge && !isTextbox, large:showLarge, noPadding:isTextbox }">
 		<span class="form-log-value-empty" v-if="isNull">[{{ capGen.button.empty }}]</span>
 
 		<template v-if="!isNull">
@@ -52,8 +53,9 @@ const myFormLogValue = {
 				<my-value-rich :attributeId :key="attributeId" :length="60" :value="showPassword ? value : '**************'" />
 			</div>
 
-			<div class="form-log-value-richtext" v-if="showLarge && isRichtext" :class="{ fullscreen:isFullscreen }">
-				<my-input-richtext :modelValue="value" :readonly="true" />
+			<div class="form-log-value-textbox" v-if="showLarge && isTextbox" :class="{ fullscreen:isFullscreen }">
+				<my-input-code     v-if="isCode"     :modelValue="value" :readonly="true" />
+				<my-input-richtext v-if="isRichtext" :modelValue="value" :readonly="true" />
 			</div>
 
 			<div class="row gap wrap" v-if="isRelationship">
@@ -108,10 +110,12 @@ const myFormLogValue = {
 		};
 	},
 	computed: {
-		isLarge: s => s.isRichtext,
+		isCode: s => s.attribute.contentUse === 'code',
+		isLarge: s => s.isCode || s.isRichtext,
 		isNull: s => s.value === null,
 		isRelationship: s => s.relationId !== null,
 		isRichtext: s => s.attribute.contentUse === 'richtext',
+		isTextbox: s => s.isCode || s.isRichtext,
 		isValueRegular: s => !s.isFiles && !s.isPassword && !s.isRelationship && (!s.showLarge || !s.isLarge),
 
 		// stores

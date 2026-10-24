@@ -23,7 +23,11 @@ export default {
 			<div class="row gap centered">
 				<span v-if="singleLanguage || !isEmpty">{{ capGen.language }}</span>
 				<span v-if="singleLanguage"><i>{{ sourceLanguage }}</i></span>
-				<select class="dynamic" v-if="!singleLanguage && !isEmpty" v-model="sourceLanguage">
+				<select class="dynamic"
+					v-if="!singleLanguage && !isEmpty"
+					v-model="sourceLanguage"
+					:disabled="readonly"
+				>
 					<option v-for="l in sourceLanguages">{{ l }}</option>
 				</select>
 			</div>
