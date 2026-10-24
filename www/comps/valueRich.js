@@ -128,6 +128,7 @@ export default {
 		return {
 			isBarcode: false,
 			isBoolean: false,
+			isCode: false,
 			isColor: false,
 			isDrawing: false,
 			isFiles: false,
@@ -188,10 +189,9 @@ export default {
 		srcBase64Icon,
 
 		copyToClipboard() {
-			let value = !this.isPassword ? this.stringValueFull : this.value;
-
-			if (this.isBarcode && this.value !== null)
-				value = JSON.parse(this.value).text;
+			const value = this.isBarcode || this.isCode
+				? JSON.parse(this.value).text
+				: (!this.isPassword ? this.stringValueFull : this.value);
 
 			navigator.clipboard.writeText(value);
 			this.$emit('clipboard');
@@ -199,7 +199,7 @@ export default {
 		setValue() {
 			if (this.attribute === false) {
 				// non-attributes (scalar/PG functions) currently only support string values
-				this.stringValueFull = this.value !== null ? this.value : '';
+				this.stringValueFull = this.value;
 			}
 			else {
 				// some attribute content/content use combinations show something other than a regular string
@@ -231,13 +231,17 @@ export default {
 							case 'barcode_upc_a': // fallthrough
 							case 'barcode_upc_e':
 								this.isBarcode = true;
-								this.stringValueFull = this.value !== null ? JSON.parse(this.value).text : '';
+								this.stringValueFull = JSON.parse(this.value).text;
+								break;
+							case 'code':
+								this.isCode = true;
+								this.stringValueFull = JSON.parse(this.value).text;
 								break;
 							case 'richtext':
-								this.stringValueFull = this.value !== null ? this.getHtmlStripped(this.value) : '';
+								this.stringValueFull = this.getHtmlStripped(this.value);
 								break;
 							default:
-								this.stringValueFull = this.value !== null ? this.value : '';
+								this.stringValueFull = this.value;
 								break;
 						}
 						break;
@@ -247,8 +251,7 @@ export default {
 					case 'bigint':
 						switch (this.attribute.contentUse) {
 							case 'date': // shift to local offset to show correct date
-								this.stringValueFull = this.value === null ? ''
-									: this.getUnixFormat(this.getUnixShifted(this.value, true), this.settings.dateFormat);
+								this.stringValueFull = this.getUnixFormat(this.getUnixShifted(this.value, true), this.settings.dateFormat);
 								break;
 							case 'datetime': this.stringValueFull = this.getUnixFormat(this.value, `${this.settings.dateFormat} H:i`); break;
 							case 'time': this.stringValueFull = this.getUtcTimeStringFromUnix(this.value); break;
@@ -266,7 +269,7 @@ export default {
 						break;
 
 					// others (UUID)
-					default: this.stringValueFull = this.value !== null ? this.value : ''; break;
+					default: this.stringValueFull = this.value; break;
 				}
 			}
 
