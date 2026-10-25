@@ -1,5 +1,4 @@
 import MyDialog from './dialog.js';
-import MyDropdown from './dropdown.js';
 import MyFeedback from './feedback.js';
 import MyForm from './form.js';
 import MyGlobalSearch from './globalSearch.js';
@@ -22,8 +21,8 @@ import { getCaption } from './shared/language.js';
 export default {
 	name: 'app',
 	components: {
-		MyDialog, MyDropdown, MyFeedback, MyForm, MyGlobalSearch,
-		MyHeader, MyLogin, MyPwReset, MySettings, MySettingsMfa
+		MyDialog, MyFeedback, MyForm, MyGlobalSearch, MyHeader,
+		MyLogin, MyPwReset, MySettings, MySettingsMfa
 	},
 	template: `<div :class="classes" id="app" :style="styles">
 
@@ -33,8 +32,6 @@ export default {
 			:httpMode
 			:loginReady
 		/>
-
-		<my-dropdown />
 
 		<!-- PW reset (blocks forced MFA setup & app access) -->
 		<my-pw-reset

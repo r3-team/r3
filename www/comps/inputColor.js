@@ -2,8 +2,7 @@ export default {
 	name: 'my-input-color',
 	components: { 'chrome-picker': VueColor.Chrome },
 	template: `<div class="input-color"
-		v-click-outside="dropdownClose"
-		@click.left="dropdownShowIfClosed"
+		@click.left="dropdownOpen"
 		:class="{ clickable:!readonly }"
 	>
 		<div class="row gap grow centered" v-if="showInput">
@@ -48,15 +47,16 @@ export default {
 				:naked="true"
 			/>
 		</div>
-		<div class="dropdown" popover="manual" ref="dropdown">
-			<div class="dropdown-content" v-if="dropdownShow">
-				<chrome-picker class="input-color-picker"
-					@update:modelValue="input = $event.hex.substr(1)"
-					:disableAlpha="true"
-					:modelValue="input"
-				/>
-			</div>
-		</div>
+		<my-dropdown
+			@update:modelValue="$emit('showDropdown',$event)"
+			:modelValue="dropdownShow"
+		>
+			<chrome-picker class="input-color-picker"
+				@update:modelValue="input = $event.hex.substr(1)"
+				:disableAlpha="true"
+				:modelValue="input"
+			/>
+		</my-dropdown>
 	</div>`,
 	props: {
 		allowNull: { type: Boolean, required: false, default: false },
@@ -108,20 +108,15 @@ export default {
 
 			this.setValueAfterDelay = null;
 		},
-		dropdownClose() {
-			this.$refs.dropdown.hidePopover();
-			this.$emit('showDropdown', false);
-		},
-		dropdownShowIfClosed() {
-			if (this.readonly || this.dropdownShow)
-				return;
-
-			this.$refs.dropdown.showPopover();
-			this.$emit('showDropdown', true);
+		dropdownOpen() {
+			if (!this.readonly && !this.dropdownShow)
+				this.$emit('showDropdown', true);
 		},
 		dropdownToggle() {
-			if (this.dropdownShow) this.dropdownClose();
-			else this.dropdownShowIfClosed();
+			if (this.dropdownShow)
+				return this.$emit('showDropdown', false);
+
+			this.dropdownOpen();
 		},
 	}
 };

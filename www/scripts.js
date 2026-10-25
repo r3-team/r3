@@ -65,6 +65,7 @@ import MyBuilderWidgets from './comps/builder/builderWidgets.js';
 
 import { MyButton, MyButtonCheck } from './comps/button.js';
 import MyButtonGroup from './comps/buttonGroup.js';
+import MyDropdown from './comps/dropdown.js';
 import { MyGoForm, MyGoModule } from './comps/go.js';
 import MyHome from './comps/home.js';
 import { MyBool, MyBoolStringNumber } from './comps/inputBool.js';
@@ -376,6 +377,7 @@ const app = Vue.createApp(MyApp)
 	.component('my-button', MyButton)
 	.component('my-button-check', MyButtonCheck)
 	.component('my-button-group', MyButtonGroup)
+	.component('my-dropdown', MyDropdown)
 	.component('my-label', MyLabel)
 	.component('my-tabs', MyTabs)
 	.component('my-value-rich', MyValueRich);

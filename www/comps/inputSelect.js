@@ -1,16 +1,12 @@
 export default {
 	name: 'my-input-select',
-	template: `<div class="input-select"
-		@keydown.esc="escape"
-		v-click-outside="escape"
-	>
-		<div class="part row gap" @click="dropdownToggle" :class="{ clickable:!readonly }">
+	template: `<div class="input-select">
+		<div class="part row gap" @click="dropdownOpen" :class="{ clickable:!readonly }">
 			<input class="field-input" data-is-input="1" type="text"
 				v-model="textInput"
 				@focus="$emit('focused')"
 				@keyup="inputChange"
 				@keydown.enter="enter"
-				@keydown.esc="escape"
 				:disabled="readonly"
 				:placeholder="placeholder"
 				:tabindex="!readonly ? 0 : -1"
@@ -46,24 +42,25 @@ export default {
 				/>
 			</div>
 		</div>
-		<div class="dropdown" popover="manual" ref="dropdown">
-			<div class="dropdown-content" v-if="dropdownShow">
-				<div class="input-select-entry clickable" tabindex="0"
-					v-for="(option,i) in options"
-					@click="apply(i)"
-					@keydown.enter.space="apply(i)"
-					:class="{ rowsColored:settings.listColored }"
-				>
-					{{ option.name }}
-				</div>
-				<div class="input-select-entry inactive" v-if="options.length === 0">
-					{{ capGen.resultsNone }}
-				</div>
-				<div class="input-select-entry inactive" v-if="options.length === limit">
-					{{ capGen.inputSelectMore }}
-				</div>
+		<my-dropdown
+			@update:modelValue="$emit('showDropdown',$event)"
+			:modelValue="dropdownShow"
+		>
+			<div class="input-select-entry clickable" tabindex="0"
+				v-for="(option,i) in options"
+				@click="apply(i)"
+				@keydown.enter.space="apply(i)"
+				:class="{ rowsColored:settings.listColored }"
+			>
+				{{ option.name }}
 			</div>
-		</div>
+			<div class="input-select-entry inactive" v-if="options.length === 0">
+				{{ capGen.resultsNone }}
+			</div>
+			<div class="input-select-entry inactive" v-if="options.length === limit">
+				{{ capGen.inputSelectMore }}
+			</div>
+		</my-dropdown>
 	</div>`,
 	props: {
 		dropdownShow: { type: Boolean, required: false, default: false },
@@ -97,12 +94,22 @@ export default {
 		settings: s => s.$store.getters.settings
 	},
 	methods: {
+		// actions
 		apply(i) {
 			this.$emit('update:selected', this.options[i].id);
-			this.$emit('showDropdown', false);
+			this.dropdownClose();
 		},
 		clear() {
 			this.$emit('update:selected', null);
+		},
+		dropdownClose() {
+			this.$emit('showDropdown', false);
+		},
+		dropdownOpen() {
+			if (!this.readonly && !this.dropdownShow) {
+				this.$emit('showDropdown', true);
+				this.$emit('request-data');
+			}
 		},
 		enter() {
 			if (!this.dropdownShow)
@@ -112,40 +119,11 @@ export default {
 			if (this.options.length > 0)
 				this.apply(0);
 		},
-		escape(ev) {
-			this.$emit('blurred');
-
-			if (this.dropdownShow) {
-				this.dropdownClose();
-
-				if (ev !== undefined) {
-					ev.preventDefault();
-					ev.stopPropagation();
-				}
+		inputChange(e) {
+			if (this.textInput !== '' && e.key !== 'Escape' && e.key !== 'Enter') {
+				this.$emit('updated-text-input', this.textInput);
+				this.dropdownOpen();
 			}
-		},
-		inputChange() {
-			if (!this.dropdownShow && this.textInput === '')
-				return;
-
-			this.$emit('updated-text-input', this.textInput);
-			this.dropdownOpen();
-		},
-		dropdownClose() {
-			this.$emit('showDropdown', false);
-			this.$refs.dropdown.hidePopover();
-		},
-		dropdownOpen() {
-			this.$emit('request-data');
-			this.$emit('showDropdown', true);
-			this.$refs.dropdown.showPopover();
-		},
-		dropdownToggle() {
-			if (this.readonly)
-				return;
-
-			if (this.dropdownShow) this.dropdownClose();
-			else this.dropdownOpen();
 		}
 	}
 };

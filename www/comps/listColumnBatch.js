@@ -26,13 +26,15 @@ export default {
 		/>
 
 		<div class="columBatchHeaderCaption"
-			v-click-outside="clickOutside"
 			@click.stop="click"
 			:class="{ clickable:canOpen, dropdownActive:dropdownShow, hasIcons:showIconFilter || showIconOrder }"
 			:title="columnBatch.caption"
 		>{{ columnBatch.caption }}</div>
 
-		<teleport to="#dropdown" v-if="dropdownShow">
+		<my-dropdown
+			@update:modelValue="$emit('showDropdown',$event)"
+			:modelValue="dropdownShow"
+		>
 			<div class="columnBatchOption default-inputs" data-dropdown-border-simple data-dropdown-margin-x="-4" data-dropdown-width="320">
 				<!-- sorting -->
 				<div class="columnBatchOptionItem" v-if="canOrder">
@@ -129,13 +131,13 @@ export default {
 						:caption="capGen.button.clear"
 					/>
 					<my-button image="cancel.png"
-						@trigger="dropdownSet(false)"
+						@trigger="dropdownShow = false"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
 					/>
 				</div>
 			</div>
-		</teleport>
+		</my-dropdown>
 	</div>`,
 	props: {
 		columnBatch: { type: Object, required: true }, // column batch to show options for
@@ -154,6 +156,7 @@ export default {
 	emits: ['del-aggregator', 'del-order', 'set-aggregator', 'set-filters', 'set-order', 'set-order-only'],
 	data() {
 		return {
+			dropdownShow: false,
 			inputSel: [],     // value input for selection filter
 			inputTxt: '',    // value input for text filter
 			values: [],       // values available to filter with (all values a list could have for column)
@@ -250,7 +253,6 @@ export default {
 		aggrColumn: s => s.getFirstColumnUsableAsAggregator(s.columnBatch, s.columns),
 		canOpen: s => s.rowCount > 1 || s.isFiltered,
 		canOrder: s => s.columnBatch.columnIndexesSortBy.length !== 0,
-		dropdownShow: s => s.dropdownElm === s.$refs.content,
 		filtersColumnThis: s => s.filtersColumn.filter((v, i) => s.columnFilterIndexes.includes(i)),
 		isDateOrTime: s => s.isValidFilter && s.columnUsedFilter.attributeId !== null && ['datetime', 'date', 'time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered: s => s.columnFilterIndexes.length !== 0,
@@ -268,8 +270,7 @@ export default {
 		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
 		capApp: s => s.$store.getters.captions.list,
 		capGen: s => s.$store.getters.captions.generic,
-		dateFormat: s => s.$store.getters.settings.dateFormat,
-		dropdownElm: s => s.$store.getters.dropdownElm
+		dateFormat: s => s.$store.getters.settings.dateFormat
 	},
 	methods: {
 		// externals
@@ -361,16 +362,8 @@ export default {
 
 				return this.$emit('set-order-only', true);
 			}
-
 			if (this.canOpen)
-				this.dropdownSet(!this.dropdownShow);
-		},
-		clickOutside() {
-			this.dropdownSet(false);
-		},
-		dropdownSet(state) {
-			if (state && !this.dropdownShow) this.$store.commit('dropdownElm', this.$refs.content);
-			if (!state && this.dropdownShow) this.$store.commit('dropdownElm', null);
+				this.dropdownShow = !this.dropdownShow;
 		},
 		useTextInput() {
 			this.inputSel = [];

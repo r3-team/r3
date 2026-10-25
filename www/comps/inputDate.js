@@ -439,7 +439,10 @@ export default {
 			</div>
 		</div>
 
-		<teleport to="#dropdown" v-if="dropdownShow">
+		<my-dropdown
+			@update:modelValue="dropdownSet"
+			:modelValue="dropdownShow"
+		>
 			<div class="input-date-dropdown-actions" data-dropdown-width-min="300">
 				<div></div>
 				<div class="default-inputs">
@@ -484,7 +487,7 @@ export default {
 				:isInput="true"
 				:isRange
 			/>
-		</teleport>
+		</my-dropdown>
 	</div>`,
 	props: {
 		dropdownShow: { type: Boolean, required: false, default: false },
@@ -497,7 +500,7 @@ export default {
 		unixTo: { required: false, default: null },
 		useMonth: { type: Boolean, required: false, default: false }
 	},
-	emits: ['dropdown-show', 'set-unix-from', 'set-unix-to', 'set-view-month', 'showHelp'],
+	emits: ['set-unix-from', 'set-unix-to', 'set-view-month', 'showDropdown', 'showHelp'],
 	data() {
 		return {
 			date: new Date(),  // date to control calendar navigation
@@ -568,7 +571,7 @@ export default {
 
 		// actions
 		dropdownSet(state) {
-			this.$emit('dropdown-show', state);
+			this.$emit('showDropdown', state);
 		},
 		goToToday() {
 			const now = new Date();

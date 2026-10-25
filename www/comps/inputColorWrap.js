@@ -2,10 +2,10 @@ import MyInputColor from './inputColor.js';
 
 export default {
 	components: { MyInputColor },
-	template: `<div class="input-custom row nowrap gap" ref="content" :class="{ disabled:readonly, focus:dropdownShow }">
+	template: `<div class="input-color-wrap input-custom dropdownParent row nowrap gap" ref="content" :class="{ disabled:readonly, focus:dropdownShow }">
 		<my-label v-if="image !== ''" :image />
 		<my-input-color
-			@dropdown-show="dropdownSet"
+			@showDropdown="dropdownShow = $event"
 			@update:modelValue="$emit('update:modelValue',$event)"
 			:allowNull
 			:dropdownShow
@@ -22,16 +22,9 @@ export default {
 		showInput: { type: Boolean, required: false, default: true }
 	},
 	emits: ['update:modelValue'],
-	computed: {
-		dropdownShow: s => s.dropdownElm === s.$refs.content,
-
-		// stores
-		dropdownElm: s => s.$store.getters.dropdownElm
-	},
-	methods: {
-		dropdownSet(state) {
-			if (state && !this.dropdownShow) this.$store.commit('dropdownElm', this.$refs.content);
-			if (!state && this.dropdownShow) this.$store.commit('dropdownElm', null);
-		}
+	data() {
+		return {
+			dropdownShow: false
+		};
 	}
 };

@@ -57,8 +57,7 @@ export default {
 				<span>{{ caption }}</span>
 			</div>
 
-			<div class="field-content" ref="content"
-				v-click-outside="clickOutside"
+			<div class="field-content dropdownParent" ref="content"
 				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, isMultiline }"
 			>
 				<!-- data field icon -->
@@ -411,7 +410,7 @@ export default {
 				<!-- regconfig input -->
 				<my-input-select
 					v-if="isRegconfig"
-					@showDropdown="dropdownSet"
+					@showDropdown="dropdownShow = $event"
 					@showHelp="showHelp"
 					@updated-text-input="regconfigInput = $event"
 					@update:selected="value = $event;regconfigInput = ''"
@@ -438,7 +437,7 @@ export default {
 					v-if="isColor"
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
-					@showDropdown="dropdownSet"
+					@showDropdown="dropdownShow = $event"
 					@showHelp="showHelp"
 					:allowNull="true"
 					:dropdownShow
@@ -503,7 +502,7 @@ export default {
 				<my-input-login
 					v-if="isLogin"
 					v-model="value"
-					@showDropdown="dropdownSet"
+					@showDropdown="dropdownShow = $event"
 					@showHelp="showHelp"
 					:dropdownShow
 					:isWithHelp
@@ -514,12 +513,12 @@ export default {
 				<!-- date / datetime / time input -->
 				<my-input-date
 					v-if="isDateInput"
-					@dropdown-show="dropdownSet"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
 					@set-view-month="setLoginOption('dateTimeUseMonthView', $event)"
+					@showDropdown="dropdownShow = $event"
 					@showHelp="showHelp"
-					:dropdownShow="dropdownShow"
+					:dropdownShow
 					:isDate="isDatetime || isDate"
 					:isTime="isDatetime || isTime"
 					:isRange="isDateRange"
@@ -583,12 +582,12 @@ export default {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
-					@dropdown-show="dropdownSet"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
 					@record-removed="relationshipRecordRemoved"
 					@records-selected="relationshipRecordsSelected($event,false)"
 					@records-selected-original="relationshipRecordsSelected($event,true)"
 					@set-login-option="setLoginOption"
+					@showDropdown="dropdownShow = $event"
 					@showHelp="showHelp"
 					:choices
 					:columns
@@ -756,9 +755,10 @@ export default {
 	],
 	data() {
 		return {
-			popUpFormInline: null,         // inline form for some field types (list)
+			dropdownShow: false,
+			popUpFormInline: null, // inline form for some field types (list)
 			regconfigInput: '',
-			showPassword: false,           // for password fields
+			showPassword: false,   // for password fields
 
 			// tabs field
 			tabLayoutCheckTimer: null,
@@ -1155,7 +1155,6 @@ export default {
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		dataOptions: s => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
 		dateTimeUseMonthView: s => s.isDatetime && s.$root.getOrFallback(s.loginOptions, 'dateTimeUseMonthView', false),
-		dropdownShow: s => s.dropdownElm === s.$refs.content,
 		inputRegex: s => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link: s => !s.isData ? false : s.getLinkMeta(s.field.display, s.value),
 		loginOptions: s => s.fieldIdMapOptions[s.field.id] === undefined ? {} : s.fieldIdMapOptions[s.field.id],
@@ -1240,7 +1239,6 @@ export default {
 		access: s => s.$store.getters.access,
 		capApp: s => s.$store.getters.captions.form,
 		capGen: s => s.$store.getters.captions.generic,
-		dropdownElm: s => s.$store.getters.dropdownElm,
 		isMobile: s => s.$store.getters.isMobile,
 		isNoAuth: s => s.$store.getters.isNoAuth,
 		searchDictionaries: s => s.$store.getters.searchDictionaries,
@@ -1257,10 +1255,6 @@ export default {
 			this.$watch('appResized', this.resized);
 			this.$watch('isHidden', this.resized);
 		}
-	},
-	beforeUnmount() {
-		if (this.dropdownShow)
-			this.dropdownSet(false);
 	},
 	methods: {
 		// externals
@@ -1341,15 +1335,8 @@ export default {
 			navigator.clipboard.writeText(value);
 			this.$emit('clipboard');
 		},
-		clickOutside() {
-			this.dropdownSet(false);
-		},
 		closeInline() {
 			this.popUpFormInline = null;
-		},
-		dropdownSet(state) {
-			if (state && !this.dropdownShow) this.$store.commit('dropdownElm', this.$refs.content);
-			if (!state && this.dropdownShow) this.$store.commit('dropdownElm', null);
 		},
 		openForm(rows, getterArgs, newTab, openFormContext) {
 			// set defaults

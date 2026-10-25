@@ -71,7 +71,6 @@ const MyStore = Vuex.createStore({
 		dialogImage: null,
 		dialogStyles: '',
 		dialogTextDisplay: '',          // display option (html, textarea, richtext)
-		dropdownElm: null,
 		filesCopy: {                    // meta data for file copy (filled on copy, emptied on paste)
 			attributeId: null,
 			fileIds: []
@@ -295,7 +294,6 @@ const MyStore = Vuex.createStore({
 		captions: (s, p) => s.captions = p,
 		captionMapCustom: (s, p) => s.captionMapCustom = p,
 		clusterNodeName: (s, p) => s.clusterNodeName = p,
-		dropdownElm: (s, p) => s.dropdownElm = p,
 		filesCopy: (s, p) => s.filesCopy = p,
 		geoLayerBaseIdMap: (s, p) => s.geoLayerBaseIdMap = p,
 		globalSearchInput: (s, p) => s.globalSearchInput = p,
@@ -495,7 +493,6 @@ const MyStore = Vuex.createStore({
 		dialogImage: s => s.dialogImage,
 		dialogStyles: s => s.dialogStyles,
 		dialogTextDisplay: s => s.dialogTextDisplay,
-		dropdownElm: s => s.dropdownElm,
 		filesCopy: s => s.filesCopy,
 		geoLayerBaseIdMap: s => s.geoLayerBaseIdMap,
 		globalSearchInput: s => s.globalSearchInput,

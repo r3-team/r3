@@ -1,105 +1,105 @@
 export default {
 	name: 'my-list-input-rows',
 	template: `<div class="list-input-rows-wrap">
-			<table class="list-input-rows" :class="{ clickable:!readonly, 'multi-line':showAllValues }">
-				<tbody>
-					<tr v-for="(r,i) in rows" @click.stop="clickRow(r)">
+		<table class="list-input-rows" :class="{ clickable:!readonly, 'multi-line':showAllValues }">
+			<tbody>
+				<tr v-for="(r,i) in rows" @click.stop="clickRow(r)">
 
-						<!-- icons -->
-						<td class="minimum">
-							<div class="list-input-row-items nowrap">
+					<!-- icons -->
+					<td class="minimum">
+						<div class="list-input-row-items nowrap">
 
-								<!-- either field/attribute icon or gallery file from first column -->
-								<slot name="input-icon"
-									v-if="!hasGalleryIcon || r.values[0] === null"
-								/>
+							<!-- either field/attribute icon or gallery file from first column -->
+							<slot name="input-icon"
+								v-if="!hasGalleryIcon || r.values[0] === null"
+							/>
+							<my-value-rich class="context-list-input"
+								v-else
+								@focus="$emit('focus')"
+								:alignEnd="columns[0].flags.alignEnd"
+								:alignMid="columns[0].flags.alignMid"
+								:attributeId="columns[0].attributeId"
+								:class="{ clickable:showAllValues && !readonly }"
+								:basis="columns[0].basis"
+								:bold="columns[0].bold"
+								:boolAtrIcon="columns[0].boolAtrIcon"
+								:display="columns[0].display"
+								:length="columns[0].length"
+								:monospace="columns[0].flags.monospace"
+								:noShrink="columns[0].flags.noShrink"
+								:noThousandsSep="columns[0].flags.noThousandsSep"
+								:value="r.values[0]"
+								:wrap="columns[0].flags.wrap"
+							/>
+						</div>
+					</td>
+
+					<!-- category input check box -->
+					<td class="minimum" v-if="showAllValues">
+						<div class="list-input-row-checkbox">
+							<my-label :disabled="readonly" :image="getCheckIcon(recordIdsSelected.includes(r.indexRecordIds['0']))" />
+						</div>
+					</td>
+
+					<!-- values -->
+					<td v-for="(b,bi) in columnBatches" :style="b.style">
+						<div class="list-input-row-items">
+							<template v-for="(ci,cii) in b.columnIndexes">
 								<my-value-rich class="context-list-input"
-									v-else
+									v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
 									@focus="$emit('focus')"
-									:alignEnd="columns[0].flags.alignEnd"
-									:alignMid="columns[0].flags.alignMid"
-									:attributeId="columns[0].attributeId"
-									:class="{ clickable:showAllValues && !readonly }"
-									:basis="columns[0].basis"
-									:bold="columns[0].bold"
-									:boolAtrIcon="columns[0].boolAtrIcon"
-									:display="columns[0].display"
-									:length="columns[0].length"
-									:monospace="columns[0].flags.monospace"
-									:noShrink="columns[0].flags.noShrink"
-									:noThousandsSep="columns[0].flags.noThousandsSep"
-									:value="r.values[0]"
-									:wrap="columns[0].flags.wrap"
+									:alignEnd="columns[ci].flags.alignEnd"
+									:alignMid="columns[ci].flags.alignMid"
+									:attributeId="columns[ci].attributeId"
+									:basis="columns[ci].basis"
+									:bold="columns[ci].flags.bold"
+									:boolAtrIcon="columns[ci].flags.boolAtrIcon"
+									:clipboard="columns[ci].flags.clipboard"
+									:display="columns[ci].display"
+									:italic="columns[ci].flags.italic"
+									:key="ci"
+									:length="columns[ci].length"
+									:monospace="columns[ci].flags.monospace"
+									:noShrink="columns[ci].flags.noShrink"
+									:noThousandsSep="columns[ci].flags.noThousandsSep"
+									:value="r.values[ci]"
+									:wrap="columns[ci].flags.wrap"
 								/>
-							</div>
-						</td>
+							</template>
+						</div>
+					</td>
 
-						<!-- category input check box -->
-						<td class="minimum" v-if="showAllValues">
-							<div class="list-input-row-checkbox">
-								<my-label :disabled="readonly" :image="getCheckIcon(recordIdsSelected.includes(r.indexRecordIds['0']))" />
-							</div>
-						</td>
-
-						<!-- values -->
-						<td v-for="(b,bi) in columnBatches" :style="b.style">
-							<div class="list-input-row-items">
-								<template v-for="(ci,cii) in b.columnIndexes">
-									<my-value-rich class="context-list-input"
-										v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
-										@focus="$emit('focus')"
-										:alignEnd="columns[ci].flags.alignEnd"
-										:alignMid="columns[ci].flags.alignMid"
-										:attributeId="columns[ci].attributeId"
-										:basis="columns[ci].basis"
-										:bold="columns[ci].flags.bold"
-										:boolAtrIcon="columns[ci].flags.boolAtrIcon"
-										:clipboard="columns[ci].flags.clipboard"
-										:display="columns[ci].display"
-										:italic="columns[ci].flags.italic"
-										:key="ci"
-										:length="columns[ci].length"
-										:monospace="columns[ci].flags.monospace"
-										:noShrink="columns[ci].flags.noShrink"
-										:noThousandsSep="columns[ci].flags.noThousandsSep"
-										:value="r.values[ci]"
-										:wrap="columns[ci].flags.wrap"
-									/>
-								</template>
-							</div>
-						</td>
-
-						<!-- actions -->
-						<td class="minimum">
-							<div class="list-input-row-items nowrap justifyEnd">
-								<my-button image="question.png"
-									v-if="isWithHelp"
-									@trigger="$emit('showHelp')"
-									:blockBubble="true"
-									:captionTitle="capGen.contextHelp"
-									:naked="true"
-								/>
-								<my-button image="open.png"
-									v-if="showOpen"
-									@trigger="$emit('clicked-open',r)"
-									@trigger-middle="$emit('clicked-open-middle',r)"
-									:blockBubble="true"
-									:captionTitle="capGen.recordOpen"
-									:naked="true"
-								/>
-								<my-button image="cancel.png"
-									v-if="!showAllValues"
-									@trigger="$emit('clicked-row-remove',i)"
-									:active="!readonly"
-									:blockBubble="true"
-									:captionTitle="capGen.recordRemove"
-									:naked="true"
-								/>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+					<!-- actions -->
+					<td class="minimum">
+						<div class="list-input-row-items nowrap justifyEnd">
+							<my-button image="question.png"
+								v-if="isWithHelp"
+								@trigger="$emit('showHelp')"
+								:blockBubble="true"
+								:captionTitle="capGen.contextHelp"
+								:naked="true"
+							/>
+							<my-button image="open.png"
+								v-if="showOpen"
+								@trigger="$emit('clicked-open',r)"
+								@trigger-middle="$emit('clicked-open-middle',r)"
+								:blockBubble="true"
+								:captionTitle="capGen.recordOpen"
+								:naked="true"
+							/>
+							<my-button image="cancel.png"
+								v-if="!showAllValues"
+								@trigger="$emit('clicked-row-remove',i)"
+								:active="!readonly"
+								:blockBubble="true"
+								:captionTitle="capGen.recordRemove"
+								:naked="true"
+							/>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>`,
 	props: {
 		columns: { type: Array, required: true },

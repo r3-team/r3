@@ -650,9 +650,9 @@ export default {
 		inputValid: { type: Boolean, required: false, default: true }
 	},
 	emits: [
-		'clipboard', 'close-inline', 'dropdown-show', 'open-form', 'open-form-bulk', 'record-count-change',
-		'record-removed', 'records-selected', 'records-selected-original', 'set-args', 'set-column-ids-by-user',
-		'set-collection-indexes', 'set-index-record-ids', 'set-login-option', 'showHelp'
+		'clipboard', 'close-inline', 'open-form', 'open-form-bulk', 'record-count-change', 'record-removed',
+		'records-selected', 'records-selected-original', 'set-args', 'set-column-ids-by-user',
+		'set-collection-indexes', 'set-index-record-ids', 'set-login-option', 'showDropdown', 'showHelp'
 	],
 	data() {
 		return {
@@ -958,7 +958,7 @@ export default {
 
 				if (!this.dropdownShow) {
 					ev.preventDefault();
-					return this.$emit('dropdown-show', true);
+					return this.$emit('showDropdown', true);
 				}
 
 				if (focusTarget !== null && focusTarget.tabIndex !== -1) {
@@ -1055,11 +1055,11 @@ export default {
 		},
 		clickInputEmpty() {
 			if (!this.inputIsReadonly && !this.dropdownShow)
-				this.$emit('dropdown-show', true);
+				this.$emit('showDropdown', true);
 		},
 		clickInputRow() {
 			if (!this.inputIsReadonly && !this.showAllValues && (!this.showInputAddLine || this.inputMulti))
-				this.$emit('dropdown-show', !this.dropdownShow);
+				this.$emit('showDropdown', !this.dropdownShow);
 		},
 		clickRow(row, middleClick) {
 			if (!this.isInput)
@@ -1068,7 +1068,7 @@ export default {
 			if (this.inputMulti) this.rowsInput.push(row);
 			else this.rowsInput = [row];
 
-			this.$emit('dropdown-show', false);
+			this.$emit('showDropdown', false);
 			this.filtersQuick = '';
 			this.$emit('records-selected', [row.indexRecordIds['0']]);
 		},
@@ -1079,7 +1079,7 @@ export default {
 			}
 			this.rowsInput = this.rowsInput.concat(this.rows);
 			this.filtersQuick = '';
-			this.$emit('dropdown-show', false);
+			this.$emit('showDropdown', false);
 			this.$emit('records-selected', ids);
 		},
 		closeHover() {
@@ -1093,7 +1093,7 @@ export default {
 			if (this.isInput) {
 				this.focused = false;
 				if (this.dropdownShow)
-					this.$emit('dropdown-show', false);
+					this.$emit('showDropdown', false);
 			}
 			if (this.showHover) {
 				this.showCsv = false;
@@ -1223,7 +1223,7 @@ export default {
 
 			// any input opens table (dropdown) if not open already
 			if (!this.dropdownShow) {
-				this.$emit('dropdown-show', true);
+				this.$emit('showDropdown', true);
 			}
 			else if (event.code === 'Enter') {
 
@@ -1231,7 +1231,7 @@ export default {
 				if (this.rows.length !== 0)
 					this.clickRow(this.rows[0], false);
 
-				this.$emit('dropdown-show', false);
+				this.$emit('showDropdown', false);
 			}
 			else {
 				// table already open -> reload
@@ -1240,7 +1240,7 @@ export default {
 		},
 		updatedFilterQuick() {
 			if (this.isInput && !this.dropdownShow)
-				return this.$emit('dropdown-show', true);
+				return this.$emit('showDropdown', true);
 
 			this.offset = 0;
 

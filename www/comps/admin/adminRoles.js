@@ -35,9 +35,9 @@ const MyAdminRoleItem = {
 		<div class="admin-role-members" v-if="showMembers || showAll">
 
 			<!-- login assignment input -->
-			<div class="entry" ref="content">
+			<div class="entry dropdownParent" ref="content">
 				<my-input-login
-					@showDropdown="dropdownSet"
+					@showDropdown="dropdownShow = $event"
 					@update:modelValue="add($event)"
 					:clearInput="true"
 					:dropdownShow
@@ -68,6 +68,7 @@ const MyAdminRoleItem = {
 	emits: ['add', 'remove-by-index'],
 	data() {
 		return {
+			dropdownShow: false,
 			loginId: null,
 			showMembers: false
 		};
@@ -83,12 +84,10 @@ const MyAdminRoleItem = {
 
 		// simple
 		description: s => s.getCaption('roleDesc', s.module.id, s.role.id, s.role.captions),
-		dropdownShow: s => s.dropdownElm === s.$refs.content,
 		titleIcon: s => s.showAll ? '' : (s.showMembers ? 'triangleDown.png' : 'triangleRight.png'),
 
 		// stores
-		capApp: s => s.$store.getters.captions.admin.roles,
-		dropdownElm: s => s.$store.getters.dropdownElm
+		capApp: s => s.$store.getters.captions.admin.roles
 	},
 	methods: {
 		// externals
@@ -108,10 +107,6 @@ const MyAdminRoleItem = {
 					return false;
 			}
 			this.getNewName(loginId);
-		},
-		dropdownSet(state) {
-			if (state && !this.dropdownShow) this.$store.commit('dropdownElm', this.$refs.content);
-			if (!state && this.dropdownShow) this.$store.commit('dropdownElm', null);
 		},
 		remove(loginIndex) {
 			this.$emit('remove-by-index', loginIndex);

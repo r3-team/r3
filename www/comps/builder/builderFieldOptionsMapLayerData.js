@@ -48,7 +48,6 @@ export default {
 					<td>
 						<my-input-color-wrap
 							v-model="layer.colorFill"
-							@dropdown-show="dropdownColor = $event"
 							:allowNull="false"
 							:readonly
 						/>

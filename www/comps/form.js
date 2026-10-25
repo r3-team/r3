@@ -321,7 +321,6 @@ export default {
 
 		window.addEventListener('keydown', this.handleHotkeys);
 		this.resized(null, 0);
-		this.$store.commit('dropdownElm', null);
 	},
 	unmounted() {
 		if (!this.isWidget)
