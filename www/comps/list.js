@@ -287,299 +287,301 @@ export default {
 			</div>
 
 			<!-- list content -->
-			<div class="list-content" :class="{ showsInlineForm:popUpFormInline !== null }" :id="usesPageHistory ? scrollFormId : null">
-
+			<div class="list-content"
+				:class="{ dropdown:hasDropdown, showsInlineForm:popUpFormInline !== null }"
+				:id="usesPageHistory ? scrollFormId : null"
+				:popover="hasDropdown ? 'auto' : null"
+				@toggle="dropdownToggle"
+			>
 				<!-- list results as table or card layout -->
-				<teleport to="#dropdown" :disabled="!dropdownShow">
-					<div
-						@keydown="handleKeydownLocal"
-						:class="{ 'list-cards':isCards, 'list-table':isTable, 'list-dropdown':dropdownShow, rowsColored:settings.listColored, scrolls:isSingleField}"
-					>
-						<table v-if="isTable" :class="{ asInput:isInput }">
-							<thead v-if="header && headerColumns">
-								<tr :class="{ atTop:!showHeader }">
-									<th v-if="hasBulkActions" class="minimum checkbox">
-										<img class="clickable" tabindex="0"
-											@click="selectRowsAllToggle"
-											@keyup.enter.space.stop="selectRowsAllToggle"
-											:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
+				<div
+					@keydown="handleKeydownLocal"
+					:class="{ 'dropdown-content':hasDropdown, 'list-cards':isCards, 'list-table':isTable, 'list-dropdown':dropdownShow, rowsColored:settings.listColored, scrolls:isSingleField }"
+				>
+					<table v-if="isTable" :class="{ asInput:isInput }">
+						<thead v-if="header && headerColumns">
+							<tr :class="{ atTop:!showHeader }">
+								<th v-if="hasBulkActions" class="minimum checkbox">
+									<img class="clickable" tabindex="0"
+										@click="selectRowsAllToggle"
+										@keyup.enter.space.stop="selectRowsAllToggle"
+										:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
+									/>
+								</th>
+								<th v-for="(b,i) in columnBatches" :style="b.style">
+									<my-list-column-batch
+										@del-aggregator="setAggregators"
+										@del-order="setOrder(b,null,false)"
+										@set-aggregator="setAggregators"
+										@set-filters="setLoginOption('filtersColumn',$event)"
+										@set-order="setOrder(b,$event,false)"
+										@set-order-only="setOrder(b,$event,true)"
+										:columnBatch="b"
+										:columnIdMapAggr
+										:columns
+										:filters="filtersCombined"
+										:filtersColumn
+										:isOrderedByUser
+										:isOrderedOrginal
+										:joins="relationsJoined"
+										:key="b.key"
+										:orders
+										:relationId="query.relationId"
+										:rowCount="count"
+										:simpleSortOnly="columnsSortOnly"
+									/>
+								</th>
+								<!-- empty column for taking remaining space & header toggle action -->
+								<th>
+									<div class="headerToggle" v-if="!showHeader">
+										<my-button image="toggleDown.png"
+											@trigger="toggleHeader"
+											:captionTitle="capApp.button.collapseHeader"
+											:naked="true"
 										/>
-									</th>
-									<th v-for="(b,i) in columnBatches" :style="b.style">
-										<my-list-column-batch
-											@del-aggregator="setAggregators"
-											@del-order="setOrder(b,null,false)"
-											@set-aggregator="setAggregators"
-											@set-filters="setLoginOption('filtersColumn',$event)"
-											@set-order="setOrder(b,$event,false)"
-											@set-order-only="setOrder(b,$event,true)"
-											:columnBatch="b"
-											:columnIdMapAggr
-											:columns
-											:filters="filtersCombined"
-											:filtersColumn
-											:isOrderedByUser
-											:isOrderedOrginal
-											:joins="relationsJoined"
-											:key="b.key"
-											:orders
-											:relationId="query.relationId"
-											:rowCount="count"
-											:simpleSortOnly="columnsSortOnly"
-										/>
-									</th>
-									<!-- empty column for taking remaining space & header toggle action -->
-									<th>
-										<div class="headerToggle" v-if="!showHeader">
-											<my-button image="toggleDown.png"
-												@trigger="toggleHeader"
-												:captionTitle="capApp.button.collapseHeader"
-												:naked="true"
-											/>
-										</div>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								<!-- result row actions (only available if list is input) -->
-								<tr v-if="showInputHeader" class="list-input-row-actions">
-									<td colspan="999" class="sub-actions-wrap">
-										<div class="sub-actions default-inputs">
-											<select
-												v-if="hasChoices"
-												@change="setLoginOption('choiceId',$event.target.value)"
-												:value="choiceId"
-											>
-												<option v-for="c in query.choices" :value="c.id">
-													{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
-												</option>
-											</select>
-
-											<my-input-offset
-												@input="setOffsetParamAndReload($event,true)"
-												:caption="false"
-												:inputAsPageNo="settings.offsetPageNo"
-												:limit
-												:offset
-												:total="count"
-											/>
-
-											<input autocomplete="off" class="short" enterkeyhint="send" type="text"
-												v-if="filterQuick"
-												@keyup.enter="updatedFilterQuick"
-												v-model="filtersQuick"
-												:placeholder="capGen.threeDots"
-												:title="capApp.quick"
-											/>
-
-											<my-button image="checkbox1.png"
-												v-if="showInputAddAll"
-												@trigger="clickRowAll"
-												:caption="capApp.button.all"
-												:captionTitle="capApp.button.allHint"
-												:naked="true"
-											/>
-										</div>
-									</td>
-								</tr>
-
-								<!-- result rows -->
-								<tr
-									v-for="(r,ri) in rowsClear"
-									@click.ctrl.exact="clickRow(r,true)"
-									@click.left.exact="clickRow(r,false)"
-									@click.middle.exact="clickRow(r,true)"
-									@keyup.enter.space="clickRow(r,false)"
-									:class="{ rowSelect:rowSelect && !inputIsReadonly, active:popUpFormInline !== null && popUpFormInline.recordIds.includes(r.indexRecordIds['0']) }"
-									:key="ri + '_' + r.indexRecordIds['0']"
-									:ref="refTabindex+String(ri)"
-									:tabindex="isInput ? '0' : '-1'"
-								>
-									<td v-if="hasBulkActions" @click.stop="" class="minimum checkbox">
-										<img class="clickable" tabindex="0"
-											@click="selectRow(ri)"
-											@keyup.enter.space.stop="selectRow(ri)"
-											:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
-										/>
-									</td>
-
-									<!-- row values per column batch -->
-									<td v-for="b in columnBatches">
-										<div class="columnBatch"
-											:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
-											:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
+									</div>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- result row actions (only available if list is input) -->
+							<tr v-if="showInputHeader" class="list-input-row-actions">
+								<td colspan="999" class="sub-actions-wrap">
+									<div class="sub-actions default-inputs">
+										<select
+											v-if="hasChoices"
+											@change="setLoginOption('choiceId',$event.target.value)"
+											:value="choiceId"
 										>
-											<my-value-rich
-												v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
-												@clipboard="$emit('clipboard')"
-												:alignEnd="columns[ind].flags.alignEnd"
-												:alignMid="columns[ind].flags.alignMid"
-												:attributeId="columns[ind].attributeId"
-												:basis="columns[ind].basis"
-												:bold="columns[ind].flags.bold"
-												:boolAtrIcon="columns[ind].flags.boolAtrIcon"
-												:clipboard="columns[ind].flags.clipboard"
-												:display="columns[ind].display"
-												:italic="columns[ind].flags.italic"
-												:key="ind"
-												:length="columns[ind].length"
-												:monospace="columns[ind].flags.monospace"
-												:noShrink="columns[ind].flags.noShrink"
-												:noThousandsSep="columns[ind].flags.noThousandsSep"
-												:previewLarge="columns[ind].flags.previewLarge"
-												:value="r.values[ind]"
-												:wrap="columns[ind].flags.wrap"
-											/>
-										</div>
-									</td>
-									<!-- empty column for taking remaining space -->
-									<td></td>
-								</tr>
-
-								<!-- no results message -->
-								<tr v-if="rows.length === 0">
-									<td v-if="rowsFetching" colspan="999">
-										<my-label image="load.gif" :caption="capApp.fetching" />
-									</td>
-									<td v-if="!rowsFetching" colspan="999">
-										<div class="columnBatch">{{ capGen.resultsNone }}</div>
-									</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<!-- result aggregations -->
-								<my-list-aggregate ref="aggregations"
-									:columnBatches
-									:columnIdMapAggr
-									:columns
-									:filters="filtersCombined"
-									:leaveOneEmpty="hasBulkActions"
-									:joins="relationsJoined"
-									:relationId="query.relationId"
-								/>
-							</tfoot>
-						</table>
-
-						<div class="empty-space"
-							v-if="isTable"
-							@click="clickOnEmpty"
-						></div>
-
-						<!-- list results as cards -->
-						<template v-if="isCards">
-
-							<!-- actions -->
-							<div class="list-cards-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
-								<div class="row centered">
-									<my-button
-										v-if="hasBulkActions"
-										@trigger="selectRowsAllToggle"
-										:caption="capApp.button.all"
-										:captionTitle="capApp.button.allHint"
-										:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
-										:naked="true"
-									/>
-								</div>
-
-								<div class="row centered">
-									<!-- sorting -->
-									<template v-if="hasResults">
-										<span class="select">{{ capApp.orderBy }}</span>
-										<select @change="cardsSetOrderBy($event.target.value)" :value="cardsOrderByColumnBatchIndex">
-											<option value="-1">-</option>
-											<option v-for="(b,i) in columnBatches" :value="i">{{ b.caption }}</option>
+											<option v-for="c in query.choices" :value="c.id">
+												{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
+											</option>
 										</select>
-										<my-button
-											v-if="cardsOrderByColumnBatchIndex !== -1"
-											@trigger="cardsToggleOrderBy"
-											:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
+
+										<my-input-offset
+											@input="setOffsetParamAndReload($event,true)"
+											:caption="false"
+											:inputAsPageNo="settings.offsetPageNo"
+											:limit
+											:offset
+											:total="count"
+										/>
+
+										<input autocomplete="off" class="short" enterkeyhint="send" type="text"
+											v-if="filterQuick"
+											@keyup.enter="updatedFilterQuick"
+											v-model="filtersQuick"
+											:placeholder="capGen.threeDots"
+											:title="capApp.quick"
+										/>
+
+										<my-button image="checkbox1.png"
+											v-if="showInputAddAll"
+											@trigger="clickRowAll"
+											:caption="capApp.button.all"
+											:captionTitle="capApp.button.allHint"
 											:naked="true"
 										/>
-									</template>
-								</div>
+									</div>
+								</td>
+							</tr>
 
-								<div class="row centered">
-									<my-button image="toggleDown.png"
-										v-if="!showHeader"
-										@trigger="toggleHeader"
+							<!-- result rows -->
+							<tr
+								v-for="(r,ri) in rowsClear"
+								@click.ctrl.exact="clickRow(r,true)"
+								@click.left.exact="clickRow(r,false)"
+								@click.middle.exact="clickRow(r,true)"
+								@keyup.enter.space="clickRow(r,false)"
+								:class="{ rowSelect:rowSelect && !inputIsReadonly, active:popUpFormInline !== null && popUpFormInline.recordIds.includes(r.indexRecordIds['0']) }"
+								:key="ri + '_' + r.indexRecordIds['0']"
+								:ref="refTabindex+String(ri)"
+								:tabindex="isInput ? '0' : '-1'"
+							>
+								<td v-if="hasBulkActions" @click.stop="" class="minimum checkbox">
+									<img class="clickable" tabindex="0"
+										@click="selectRow(ri)"
+										@keyup.enter.space.stop="selectRow(ri)"
+										:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
+									/>
+								</td>
+
+								<!-- row values per column batch -->
+								<td v-for="b in columnBatches">
+									<div class="columnBatch"
+										:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
+										:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
+									>
+										<my-value-rich
+											v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
+											@clipboard="$emit('clipboard')"
+											:alignEnd="columns[ind].flags.alignEnd"
+											:alignMid="columns[ind].flags.alignMid"
+											:attributeId="columns[ind].attributeId"
+											:basis="columns[ind].basis"
+											:bold="columns[ind].flags.bold"
+											:boolAtrIcon="columns[ind].flags.boolAtrIcon"
+											:clipboard="columns[ind].flags.clipboard"
+											:display="columns[ind].display"
+											:italic="columns[ind].flags.italic"
+											:key="ind"
+											:length="columns[ind].length"
+											:monospace="columns[ind].flags.monospace"
+											:noShrink="columns[ind].flags.noShrink"
+											:noThousandsSep="columns[ind].flags.noThousandsSep"
+											:previewLarge="columns[ind].flags.previewLarge"
+											:value="r.values[ind]"
+											:wrap="columns[ind].flags.wrap"
+										/>
+									</div>
+								</td>
+								<!-- empty column for taking remaining space -->
+								<td></td>
+							</tr>
+
+							<!-- no results message -->
+							<tr v-if="rows.length === 0">
+								<td v-if="rowsFetching" colspan="999">
+									<my-label image="load.gif" :caption="capApp.fetching" />
+								</td>
+								<td v-if="!rowsFetching" colspan="999">
+									<div class="columnBatch">{{ capGen.resultsNone }}</div>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<!-- result aggregations -->
+							<my-list-aggregate ref="aggregations"
+								:columnBatches
+								:columnIdMapAggr
+								:columns
+								:filters="filtersCombined"
+								:leaveOneEmpty="hasBulkActions"
+								:joins="relationsJoined"
+								:relationId="query.relationId"
+							/>
+						</tfoot>
+					</table>
+
+					<div class="empty-space"
+						v-if="isTable"
+						@click="clickOnEmpty"
+					></div>
+
+					<!-- list results as cards -->
+					<template v-if="isCards">
+
+						<!-- actions -->
+						<div class="list-cards-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
+							<div class="row centered">
+								<my-button
+									v-if="hasBulkActions"
+									@trigger="selectRowsAllToggle"
+									:caption="capApp.button.all"
+									:captionTitle="capApp.button.allHint"
+									:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
+									:naked="true"
+								/>
+							</div>
+
+							<div class="row centered">
+								<!-- sorting -->
+								<template v-if="hasResults">
+									<span class="select">{{ capApp.orderBy }}</span>
+									<select @change="cardsSetOrderBy($event.target.value)" :value="cardsOrderByColumnBatchIndex">
+										<option value="-1">-</option>
+										<option v-for="(b,i) in columnBatches" :value="i">{{ b.caption }}</option>
+									</select>
+									<my-button
+										v-if="cardsOrderByColumnBatchIndex !== -1"
+										@trigger="cardsToggleOrderBy"
+										:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
+										:naked="true"
+									/>
+								</template>
+							</div>
+
+							<div class="row centered">
+								<my-button image="toggleDown.png"
+									v-if="!showHeader"
+									@trigger="toggleHeader"
+									:naked="true"
+								/>
+							</div>
+						</div>
+
+						<div class="list-cards-entries" @click="clickOnEmpty" :id="usesPageHistory ? scrollFormId : null">
+
+							<!-- no results message -->
+							<template v-if="!hasResults">
+								<div class="list-cards-entry no-results" v-if="!rowsFetching">
+									{{ capGen.resultsNone }}
+								</div>
+								<div class="list-cards-entry no-results" v-if="rowsFetching">
+									<my-label image="load.gif" :caption="capApp.fetching" />
+								</div>
+							</template>
+
+							<div class="list-cards-entry"
+								v-for="(r,ri) in rowsClear"
+								@click.ctrl.exact.stop="clickRow(r,true)"
+								@click.left.stop.exact="clickRow(r,false)"
+								@click.middle.exact.stop="clickRow(r,true)"
+								@keyup.enter.space.stop="clickRow(r,false)"
+								:class="{ rowSelect:rowSelect && !inputIsReadonly }"
+								:key="ri + '_' + r.indexRecordIds['0']"
+								:ref="refTabindex+String(ri)"
+								:tabindex="isInput ? '0' : '-1'"
+							>
+								<div class="actions" v-if="hasBulkActions" @click.stop="">
+									<my-button
+										@trigger="selectRow(ri)"
+										:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
+										:naked="true"
+									/>
+									<my-button image="delete.png"
+										@trigger="delAsk([ri])"
 										:naked="true"
 									/>
 								</div>
+
+								<!-- row values per column batch -->
+								<table>
+									<tbody>
+										<tr v-for="b in columnBatches">
+											<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
+											<td>
+												<div class="columnBatch listCards" :class="{ vertical:b.vertical }">
+													<my-value-rich
+														v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
+														@clipboard="$emit('clipboard')"
+														:alignEnd="columns[ind].flags.alignEnd"
+														:alignMid="columns[ind].flags.alignMid"
+														:attributeId="columns[ind].attributeId"
+														:basis="columns[ind].basis"
+														:bold="columns[ind].flags.bold"
+														:boolAtrIcon="columns[ind].flags.boolAtrIcon"
+														:clipboard="columns[ind].flags.clipboard"
+														:display="columns[ind].display"
+														:italic="columns[ind].flags.italic"
+														:key="ind"
+														:length="columns[ind].length"
+														:monospace="columns[ind].flags.monospace"
+														:noShrink="columns[ind].flags.noShrink"
+														:noThousandsSep="columns[ind].flags.noThousandsSep"
+														:previewLarge="columns[ind].flags.previewLarge"
+														:value="r.values[ind]"
+														:wrap="columns[ind].flags.wrap"
+													/>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
 							</div>
-
-							<div class="list-cards-entries" @click="clickOnEmpty" :id="usesPageHistory ? scrollFormId : null">
-
-								<!-- no results message -->
-								<template v-if="!hasResults">
-									<div class="list-cards-entry no-results" v-if="!rowsFetching">
-										{{ capGen.resultsNone }}
-									</div>
-									<div class="list-cards-entry no-results" v-if="rowsFetching">
-										<my-label image="load.gif" :caption="capApp.fetching" />
-									</div>
-								</template>
-
-								<div class="list-cards-entry"
-									v-for="(r,ri) in rowsClear"
-									@click.ctrl.exact.stop="clickRow(r,true)"
-									@click.left.stop.exact="clickRow(r,false)"
-									@click.middle.exact.stop="clickRow(r,true)"
-									@keyup.enter.space.stop="clickRow(r,false)"
-									:class="{ rowSelect:rowSelect && !inputIsReadonly }"
-									:key="ri + '_' + r.indexRecordIds['0']"
-									:ref="refTabindex+String(ri)"
-									:tabindex="isInput ? '0' : '-1'"
-								>
-									<div class="actions" v-if="hasBulkActions" @click.stop="">
-										<my-button
-											@trigger="selectRow(ri)"
-											:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
-											:naked="true"
-										/>
-										<my-button image="delete.png"
-											@trigger="delAsk([ri])"
-											:naked="true"
-										/>
-									</div>
-
-									<!-- row values per column batch -->
-									<table>
-										<tbody>
-											<tr v-for="b in columnBatches">
-												<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
-												<td>
-													<div class="columnBatch listCards" :class="{ vertical:b.vertical }">
-														<my-value-rich
-															v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
-															@clipboard="$emit('clipboard')"
-															:alignEnd="columns[ind].flags.alignEnd"
-															:alignMid="columns[ind].flags.alignMid"
-															:attributeId="columns[ind].attributeId"
-															:basis="columns[ind].basis"
-															:bold="columns[ind].flags.bold"
-															:boolAtrIcon="columns[ind].flags.boolAtrIcon"
-															:clipboard="columns[ind].flags.clipboard"
-															:display="columns[ind].display"
-															:italic="columns[ind].flags.italic"
-															:key="ind"
-															:length="columns[ind].length"
-															:monospace="columns[ind].flags.monospace"
-															:noShrink="columns[ind].flags.noShrink"
-															:noThousandsSep="columns[ind].flags.noThousandsSep"
-															:previewLarge="columns[ind].flags.previewLarge"
-															:value="r.values[ind]"
-															:wrap="columns[ind].flags.wrap"
-														/>
-													</div>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</template>
-					</div>
-				</teleport>
+						</div>
+					</template>
+				</div>
 
 				<!-- inline form -->
 				<my-form class="inline list-inline-form"
@@ -788,6 +790,7 @@ export default {
 		hasBulkActions: s => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices: s => s.query.choices.length > 1,
 		hasCreate: s => s.checkDataOptions(4, s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
+		hasDropdown: s => s.isInput && !s.showAllValues,
 		hasPaging: s => s.query.fixedLimit === 0,
 		hasResults: s => s.rowsClear.length !== 0,
 		hasUpdate: s => s.checkDataOptions(2, s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
@@ -1086,6 +1089,11 @@ export default {
 			this.showCsv = false;
 			this.showFilters = false;
 			this.showOptions = false;
+		},
+		dropdownToggle(e) {
+			console.log('toggle', e);
+			if (e.newState === 'closed')
+				this.$emit('showDropdown', false);
 		},
 		escape(ev) {
 			const somethingToClose = (this.isInput && this.dropdownShow) || this.showHover;

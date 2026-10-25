@@ -4,7 +4,7 @@ import { getUnixFormat, getUnixShifted, getUtcTimeStringFromUnix } from './share
 
 export default {
 	name: 'my-list-column-batch',
-	template: `<div class="columnBatchHeader" ref="content">
+	template: `<div class="columnBatchHeader dropdownParent" ref="content">
 		<my-button image="filter.png"
 			v-if="showIconFilter"
 			@trigger="click"
@@ -27,15 +27,15 @@ export default {
 
 		<div class="columBatchHeaderCaption"
 			@click.stop="click"
-			:class="{ clickable:canOpen, dropdownActive:dropdownShow, hasIcons:showIconFilter || showIconOrder }"
+			:class="{ clickable:canOpen, dropdownShow, hasIcons:showIconFilter || showIconOrder }"
 			:title="columnBatch.caption"
 		>{{ columnBatch.caption }}</div>
 
 		<my-dropdown
-			@update:modelValue="$emit('showDropdown',$event)"
+			@update:modelValue="dropdownShow = $event"
 			:modelValue="dropdownShow"
 		>
-			<div class="columnBatchOption default-inputs" data-dropdown-border-simple data-dropdown-margin-x="-4" data-dropdown-width="320">
+			<div class="columnBatchOption default-inputs">
 				<!-- sorting -->
 				<div class="columnBatchOptionItem" v-if="canOrder">
 					<my-button image="sort.png"

@@ -379,10 +379,7 @@ const MyInputDateEntry = {
 export default {
 	name: 'my-input-date',
 	components: { MyCalendarDateSelect, MyCalendarDays, MyCalendarMonth, MyInputDateEntry },
-	template: `<div class="input-date"
-		@keyup.esc="escaped"
-		v-click-outside="escaped"
-	>
+	template: `<div class="input-date">
 		<div class="content-wrap">
 
 			<div class="entries">
@@ -443,7 +440,7 @@ export default {
 			@update:modelValue="dropdownSet"
 			:modelValue="dropdownShow"
 		>
-			<div class="input-date-dropdown-actions" data-dropdown-width-min="300">
+			<div class="input-date-dropdown-actions">
 				<div></div>
 				<div class="default-inputs">
 					<my-calendar-date-select v-model="date" :daysShow="viewMonth ? 42 : 7" />
@@ -563,11 +560,6 @@ export default {
 		getUnixFromDate,
 		getUnixNowDatetime,
 		isUnixUtcZero,
-
-		// events
-		escaped() {
-			this.dropdownSet(false);
-		},
 
 		// actions
 		dropdownSet(state) {

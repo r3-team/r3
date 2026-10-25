@@ -58,7 +58,7 @@ export default {
 			</div>
 
 			<div class="field-content dropdownParent" ref="content"
-				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, isMultiline }"
+				:class="{ data:isData, dropdownShow, disabled:isReadonly, isSingleField:isAlone, isMultiline }"
 			>
 				<!-- data field icon -->
 				<div class="field-icon" v-if="isWithIcon">

@@ -1,7 +1,7 @@
 export default {
 	name: 'my-dropdown',
-	template: `<div class="my-dropdown" popover="auto" ref="content" @toggle="toggle">
-		<div class="my-dropdown-content" v-if="modelValue">
+	template: `<div class="dropdown" popover="auto" ref="content" @toggle="toggle">
+		<div class="dropdown-content" v-if="modelValue">
 			<slot />
 		</div>
 	</div>`,
