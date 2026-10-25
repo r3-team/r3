@@ -34,6 +34,7 @@ export default {
 		<my-dropdown
 			@update:modelValue="dropdownShow = $event"
 			:modelValue="dropdownShow"
+			:isInput="false"
 		>
 			<div class="columnBatchOption default-inputs">
 				<!-- sorting -->

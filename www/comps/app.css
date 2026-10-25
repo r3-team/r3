@@ -668,25 +668,30 @@ hr {
 	position-try-fallbacks: --dropdown-top;
 	container-type: anchored;
 }
-.dropdown-content {
+.dropdownContent {
 	/* additional element is required for container query to work */
 	overflow: auto;
-	border: 2px solid var(--color-accent1);
 	border-radius: 0px 0px var(--border-input-radius) var(--border-input-radius);
-	border-top: 1px solid var(--color-border);
 	box-shadow: 1px 3px 3px var(--color-shade);
 	background-color: var(--color-input);
+}
+.dropdownContent.isInput {
+	max-height: calc(var(--row-height) * 11);
+	border: 2px solid var(--color-accent1);
+	border-top: 1px solid var(--color-border);
 }
 @position-try --dropdown-top {
 	position-area: top;
 }
 @container anchored(fallback: --dropdown-top) {
-	.dropdown-content {
+	.dropdownContent {
 		border-radius: var(--border-input-radius) var(--border-input-radius) 0px
 			0px;
+		box-shadow: 1px -2px 2px var(--color-shade);
+	}
+	.dropdownContent.isInput {
 		border-top: 2px solid var(--color-accent1);
 		border-bottom: 1px solid var(--color-border);
-		box-shadow: 1px -2px 2px var(--color-shade);
 	}
 }
 
