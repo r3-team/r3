@@ -80,6 +80,9 @@ type Ldap struct {
 	Starttls         bool              `json:"starttls"`         // upgrade unencrypted LDAP connection with TLS (STARTTLS)
 	Tls              bool              `json:"tls"`              // connect to LDAP via SSL/TLS (LDAPS)
 	TlsVerify        bool              `json:"tlsVerify"`        // verify TLS connection, can be used to allow non-trusted certificates
+
+	// options
+	MigrateByName bool `json:"migrateByName"` // migrates existing login from other provider, if login name matches
 }
 
 type OauthClient struct {
@@ -104,6 +107,9 @@ type OauthClient struct {
 	ClaimUsername    pgtype.Text       `json:"claimUsername"`
 	ProviderUrl      pgtype.Text       `json:"providerUrl"`
 	RedirectUrl      pgtype.Text       `json:"redirectUrl"`
+
+	// options
+	MigrateByName bool `json:"migrateByName"` // migrates existing login from other provider, if login name matches
 }
 
 // public reference for OAUTH client for Open ID Connect authentication

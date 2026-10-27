@@ -26,7 +26,7 @@ import (
 
 // performs authentication for login by using Open ID Connect
 // if login is not known but authentication succeeds, login is created
-func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier string) (types.LoginAuthResult, error) {
+func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string) (types.LoginAuthResult, error) {
 
 	c, err := cache.GetOauthClient(oauthClientId)
 	if err != nil {
@@ -81,6 +81,20 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		return types.LoginAuthResult{}, err
 	}
 
+	// read claims from ID token
+	var claimsIf any
+	if err := idToken.Claims(&claimsIf); err != nil {
+		return types.LoginAuthResult{}, err
+	}
+	claims, ok := claimsIf.(map[string]any)
+	if !ok {
+		return types.LoginAuthResult{}, errors.New("ID token is not a key/value JSON object")
+	}
+	username, err := getStringFromIdTokenClaims(c.ClaimUsername.String, claims)
+	if err != nil {
+		return types.LoginAuthResult{}, err
+	}
+
 	// get known login details, unknown login is created
 	var l = types.LoginAuthResult{
 		Admin:     false,
@@ -94,12 +108,16 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	var metaEx types.LoginMeta
 	var limited = false
 	var newLogin = false
+	var loginMigrate = false
 	var adminChanged = false
 	var metaChanged = false
+	var nameChanged = false
 	var rolesChanged = false
 
 	if err := db.Pool.QueryRow(ctx, `
-		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, l.active, ARRAY(
+		SELECT l.id, l.name, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, l.active,
+			l.oauth_client_id IS DISTINCT FROM $1,
+			ARRAY(
 				SELECT role_id
 				FROM instance.login_role
 				WHERE login_id = l.id
@@ -118,12 +136,25 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 			COALESCE(m.phone_mobile, '')
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS m ON m.login_id = l.id
-		WHERE l.oauth_client_id = $1
-		AND   l.oauth_iss       = $2
-		AND   l.oauth_sub       = $3
-	`, oauthClientId, idToken.Issuer, idToken.Subject).Scan(&l.Id, &l.SaltKdf, &l.Admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
-		&metaEx.Department, &metaEx.Email, &metaEx.Location, &metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur,
-		&metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax, &metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
+		WHERE (
+			-- known login for this OAuth client
+			l.oauth_client_id = $1 AND
+			l.oauth_iss       = $2 AND
+			l.oauth_sub       = $3
+		)
+		OR (
+			-- migration option: login matched by username
+			l.oauth_client_id IS DISTINCT FROM $1 AND
+			l.oauth_iss       IS DISTINCT FROM $2 AND
+			l.oauth_sub       IS DISTINCT FROM $3 AND
+			TRUE              = $4 AND
+			l.name            = $5
+		)
+		LIMIT 1
+	`, oauthClientId, idToken.Issuer, idToken.Subject, c.MigrateByName, username).Scan(&l.Id, &l.Name, &l.SaltKdf, &l.Admin,
+		&limited, &tokenExpiryHours, &active, &loginMigrate, &roleIdsEx, &metaEx.Department, &metaEx.Email, &metaEx.Location,
+		&metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur, &metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax,
+		&metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
 
 		if err == pgx.ErrNoRows {
 			newLogin = true
@@ -131,15 +162,12 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 			return types.LoginAuthResult{}, err
 		}
 	}
+	if !loginMigrate && l.Name != username {
+		l.Name = username
+		nameChanged = true
+	}
+
 	// read mapped login meta data from ID token claims
-	var claimsIf any
-	if err := idToken.Claims(&claimsIf); err != nil {
-		return types.LoginAuthResult{}, err
-	}
-	claims, ok := claimsIf.(map[string]any)
-	if !ok {
-		return types.LoginAuthResult{}, errors.New("ID token is not a key/value JSON object")
-	}
 	meta := login_metaMap.ReadMetaFromMapIf(c.LoginMetaMap, claims)
 	if newLogin {
 		metaEx = meta
@@ -154,25 +182,11 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	}
 	log.Info(log.ContextOauth, fmt.Sprintf("Open ID Connect authentication successful, received claims:\n%s", claimsReadable))
 
-	// read username from ID token claim
-	usernameIf, ok := claims[c.ClaimUsername.String]
-	if !ok {
-		return types.LoginAuthResult{}, fmt.Errorf("ID token does not contain username claim '%s'", c.ClaimUsername.String)
-	}
-	l.Name, ok = usernameIf.(string)
-	if !ok {
-		return types.LoginAuthResult{}, fmt.Errorf("username claim '%s' cannot be read as string", c.ClaimUsername.String)
-	}
-
-	// read admin value from ID token claim, if active
+	// read admin value from ID token claim, if used
 	if c.ClaimAdmin.Valid && c.ClaimAdminValue.Valid {
-		claimAdminIf, ok := claims[c.ClaimAdmin.String]
-		if !ok {
-			return types.LoginAuthResult{}, fmt.Errorf("ID token does not contain admin claim '%s'", c.ClaimAdmin.String)
-		}
-		claimAdmin, ok := claimAdminIf.(string)
-		if !ok {
-			return types.LoginAuthResult{}, fmt.Errorf("admin claim '%s' cannot be read as string", c.ClaimAdmin.String)
+		claimAdmin, err := getStringFromIdTokenClaims(c.ClaimAdmin.String, claims)
+		if err != nil {
+			return types.LoginAuthResult{}, err
 		}
 		adminNew := claimAdmin == c.ClaimAdminValue.String
 		if l.Admin != adminNew {
@@ -217,7 +231,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	// set login if new or anything changed
 	// inactive users cannot authenticate via Open ID, so there is no way to disable users this way
 	//  but if the current active state is disabled, it must re-enable the user
-	if newLogin || adminChanged || metaChanged || rolesChanged || !active {
+	if newLogin || adminChanged || loginMigrate || metaChanged || nameChanged || rolesChanged || !active {
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return types.LoginAuthResult{}, err
@@ -231,6 +245,17 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 
 		if err != nil {
 			return types.LoginAuthResult{}, err
+		}
+		if loginMigrate {
+			log.Info(log.ContextOauth, fmt.Sprintf("migrating user '%s' to client '%s'", l.Name, c.Name))
+
+			if err := login.MigrateProviderOpenId_tx(
+				ctx, tx, l.Id, pgtype.Int4{Int32: c.Id, Valid: true},
+				pgtype.Text{String: idToken.Issuer, Valid: true},
+				pgtype.Text{String: idToken.Subject, Valid: true}); err != nil {
+
+				return types.LoginAuthResult{}, err
+			}
 		}
 		if active && rolesChanged {
 			login_clusterEvent.Reauth_tx(ctx, tx, l.Id, l.Name)
@@ -253,4 +278,16 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		l.Name = meta.NameDisplay
 	}
 	return l, nil
+}
+
+func getStringFromIdTokenClaims(claimFind string, claims map[string]any) (string, error) {
+	valueIf, ok := claims[claimFind]
+	if !ok {
+		return "", fmt.Errorf("ID token does not contain required claim '%s'", claimFind)
+	}
+	value, ok := valueIf.(string)
+	if !ok {
+		return "", fmt.Errorf("required claim '%s' cannot be read as string", claimFind)
+	}
+	return value, nil
 }
