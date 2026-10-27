@@ -7,6 +7,7 @@ import (
 	"r3/login/login_roleAssign"
 	"r3/types"
 	"r3/types/constants"
+	"strings"
 	"sync"
 
 	"github.com/jackc/pgx/v5"
@@ -67,6 +68,10 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 			return err
 		}
+
+		// TEMP: migration option via command in client name
+		c.MigrateByName = strings.Contains(c.Name, "{MGR_UN}")
+
 		oauthClientIdMap[c.Id] = c
 
 		// store open ID clients in reference map

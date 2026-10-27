@@ -16,19 +16,14 @@ import (
 )
 
 // updates internal login backend with logins from LDAP
-// uses unique key value to update login record
-// can optionally update login roles
-func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
-	active bool, meta types.LoginMeta, roleIds []uuid.UUID) error {
-
-	// existing login details
+// uses unique LDAP key value to update login record
+func SetLdapLogin(ldap types.Ldap, ldapKey, name string, active bool, meta types.LoginMeta, roleIds []uuid.UUID) error {
 	var loginId int64
+	var loginMigrate bool
 	var adminEx, activeEx bool
 	var metaEx types.LoginMeta
 	var nameEx string
 	var roleIdsEx []uuid.UUID
-
-	// get login details and check whether roles could be updated
 	var rolesEqual pgtype.Bool
 
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
@@ -40,9 +35,15 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	}
 	defer tx.Rollback(ctx)
 
+	// get login details and check whether roles could be updated
 	err = tx.QueryRow(ctx, `
-		SELECT r1.id, r1.name, r1.admin, r1.active, r1.roles,
-			(r1.roles <@ r2.roles AND r1.roles @> r2.roles) AS equal
+		SELECT r1.id, r1.name, r1.admin, r1.active,
+			(
+				r1.ldap_id  IS DISTINCT FROM $1::integer AND
+				r1.ldap_key IS DISTINCT FROM $2::text    AND
+				TRUE        = $3
+			) AS login_migrate,
+			r1.roles, (r1.roles <@ r2.roles AND r1.roles @> r2.roles) AS equal
 		FROM (
 			SELECT *, (
 				SELECT ARRAY_AGG(lr.role_id)
@@ -50,15 +51,28 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 				WHERE lr.login_id = l.id
 			) AS roles
 			FROM instance.login AS l
-			WHERE l.ldap_id  = $1::integer
-			AND   l.ldap_key = $2::text
+			WHERE (
+				-- known login for this LDAP connection
+				l.ldap_id  = $1::integer AND
+				l.ldap_key = $2::text
+			)
+			OR (
+				-- migration option: login matched by username
+				l.ldap_id  IS DISTINCT FROM $1::integer AND
+				l.ldap_key IS DISTINCT FROM $2::text    AND
+				TRUE       = $3 AND
+				l.name     = $4
+			)
+			-- order by LDAP ID to get valid login first (edge case: both known LDAP and other login with same name exist)
+			ORDER BY CASE WHEN l.ldap_id = $1 THEN 0 ELSE 1 END
+			LIMIT 1
 		) AS r1
 
 		INNER JOIN (
-			SELECT $3::uuid[] AS roles
+			SELECT $5::uuid[] AS roles
 		) AS r2 ON true
-	`, ldap.Id, ldapKey, roleIds).Scan(&loginId, &nameEx,
-		&adminEx, &activeEx, &roleIdsEx, &rolesEqual)
+	`, ldap.Id, ldapKey, ldap.MigrateByName, name, roleIds).Scan(
+		&loginId, &nameEx, &adminEx, &activeEx, &loginMigrate, &roleIdsEx, &rolesEqual)
 
 	if err != nil && err != pgx.ErrNoRows {
 		return err
@@ -81,14 +95,12 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	}
 
 	// abort if no changes are there to apply
-	if !newLogin && nameEx == name && activeEx == active && !rolesChanged && !metaChanged {
+	if !newLogin && nameEx == name && activeEx == active && !rolesChanged && !metaChanged && !loginMigrate {
 		return nil
 	}
 
-	// update if name, active state or roles changed
 	ldapIdSql := pgtype.Int4{Int32: ldap.Id, Valid: true}
 	ldapKeySql := pgtype.Text{String: ldapKey, Valid: true}
-
 	if rolesChanged {
 		roleIdsEx = roleIds
 	}
@@ -102,6 +114,13 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		return err
 	}
 
+	if !newLogin && loginMigrate {
+		log.Info(log.ContextLdap, fmt.Sprintf("migrating user '%s' to LDAP '%s'", name, ldap.Name))
+
+		if err := MigrateProviderLdap_tx(ctx, tx, loginId, ldapIdSql, ldapKeySql); err != nil {
+			return err
+		}
+	}
 	if active && rolesChanged {
 		login_clusterEvent.Reauth_tx(ctx, tx, loginId, name)
 	}
