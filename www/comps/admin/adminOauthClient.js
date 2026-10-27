@@ -67,73 +67,93 @@ export default {
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}*</td>
-							<td><input v-model="inputs.name" :disabled="readonly" v-focus /></td>
-							<td>{{ capApp.nameHint }}</td>
+							<td>
+								<div class="row gap centered">
+									<input v-model="inputs.name" :disabled="readonly" v-focus />
+									<my-button image="question.png" @trigger="showHelp(capApp.nameHint)" />
+								</div>
+							</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.flow }}*</td>
-							<td colspan="2">
-								<div class="column">
+							<td>
+								<div class="row gap centered">
 									<select v-model="inputs.flow" :disabled="readonly || !isNew">
 										<option value="authCodePkce">{{ capApp.option.flow.authCodePkce }}</option>
 										<option value="clientCreds">{{ capApp.option.flow.clientCreds }}</option>
 									</select>
-									<span v-html="capApp.option.flowHint[inputs.flow]" />
+									<my-button image="question.png" @trigger="showHelp(capApp.option.flowHint[inputs.flow])" />
 								</div>
 							</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.clientId }}*</td>
-							<td><input v-model="inputs.clientId" :disabled="readonly" /></td>
-							<td>{{ capApp.clientIdHint }}</td>
+							<td>
+								<div class="row gap centered">
+									<input v-model="inputs.clientId" :disabled="readonly" />
+									<my-button image="question.png" @trigger="showHelp(capApp.clientIdHint)" />
+								</div>
+							</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.clientSecret }}*</td>
-							<td><input v-model="inputs.clientSecret" :disabled="readonly" type="password" /></td>
-							<td>{{ capApp.clientSecretHint }}</td>
+							<td>
+								<div class="row gap centered">
+									<input v-model="inputs.clientSecret" :disabled="readonly" type="password" />
+									<my-button image="question.png" @trigger="showHelp(capApp.clientSecretHint)" />
+								</div>
+							</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.dateExpiry }}</td>
 							<td>
-								<my-input-date-wrap
-									@set-unix-from="inputs.dateExpiry = $event"
-									:isDate="true"
-									:isTime="false"
-									:isReadonly="readonly"
-									:isValid="true"
-									:unixFrom="inputs.dateExpiry"
-								/>
+								<div class="row gap centered">
+									<my-input-date-wrap
+										@set-unix-from="inputs.dateExpiry = $event"
+										:isDate="true"
+										:isTime="false"
+										:isReadonly="readonly"
+										:isValid="true"
+										:unixFrom="inputs.dateExpiry"
+									/>
+									<my-button image="question.png" @trigger="showHelp(capApp.dateExpiryHint)" />
+								</div>
 							</td>
-							<td>{{ capApp.dateExpiryHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.scopes }}*</td>
-							<td colspan="2">
+							<td>
 								<div class="column gap">
-									<my-button image="cancel.png"
-										v-for="(s,i) in inputs.scopes"
-										@trigger="inputs.scopes.splice(i,1)"
-										:active="!readonly"
-										:caption="s"
-										:naked="true"
-									/>
 									<div class="row gap centered">
 										<input v-model="scopeLine" :disabled="readonly" />
+										<my-button image="question.png" @trigger="showHelp(capApp.scopesHint)" />
 										<my-button image="add.png"
 											@trigger="inputs.scopes.push(scopeLine);scopeLine = ''"
 											:active="scopeLine !== ''"
 										/>
 									</div>
-									<span v-html="capApp.scopesHint" />
-									<div class="row gap">
-										<my-button image="add.png"
-											@trigger="applyTemplate('o365')"
-											:caption="capApp.button.defaultO365"
+									<div class="row gap wrap">
+										<my-button image="cancel.png"
+											v-for="(s,i) in inputs.scopes"
+											@trigger="inputs.scopes.splice(i,1)"
+											:active="!readonly"
+											:caption="s"
+											:naked="true"
 										/>
-										<my-button image="add.png"
-											@trigger="applyTemplate('openId')"
-											:caption="capApp.button.defaultOpenId"
-										/>
+									</div>
+									<div class="column gap">
+										<div class="row">
+											<my-button image="ok.png"
+												@trigger="applyTemplate('o365')"
+												:caption="capApp.button.defaultO365"
+											/>
+										</div>
+										<div class="row">
+											<my-button image="ok.png"
+												@trigger="applyTemplate('openId')"
+												:caption="capApp.button.defaultOpenId"
+											/>
+										</div>
 									</div>
 								</div>
 							</td>
@@ -141,33 +161,50 @@ export default {
 						<template v-if="isFlowAuthCodePkce">
 							<tr>
 								<td>{{ capApp.providerUrl }}*</td>
-								<td><input v-model="inputs.providerUrl" :disabled="readonly" /></td>
-								<td>{{ capApp.providerUrlHint }}</td>
+								<td>
+									<div class="row gap centered">
+										<input v-model="inputs.providerUrl" :disabled="readonly" />
+										<my-button image="question.png" @trigger="showHelp(capApp.providerUrlHint)" />
+									</div>
+								</td>
 							</tr>
 							<tr>
 								<td>{{ capApp.redirectUrl }}*</td>
-								<td><input v-model="inputs.redirectUrl" :disabled="readonly" /></td>
-								<td>{{ capApp.redirectUrlHint }}</td>
+								<td>
+									<div class="row gap centered">
+										<input v-model="inputs.redirectUrl" :disabled="readonly" />
+										<my-button image="question.png" @trigger="showHelp(capApp.redirectUrlHint)" />
+									</div>
+								</td>
 							</tr>
 							<tr>
 								<td>{{ capGen.loginTemplate }}</td>
 								<td>
-									<select v-model="inputs.loginTemplateId" :disabled="readonly">
-										<option v-for="t in loginTemplates" :title="t.comment" :value="t.id">{{ t.name }}</option>
-									</select>
+									<div class="row gap centered">
+										<select v-model="inputs.loginTemplateId" :disabled="readonly">
+											<option v-for="t in loginTemplates" :title="t.comment" :value="t.id">{{ t.name }}</option>
+										</select>
+										<my-button image="question.png" @trigger="showHelp(capGen.loginTemplateHint)" />
+									</div>
 								</td>
-								<td>{{ capGen.loginTemplateHint }}</td>
 							</tr>
 							<tr>
 								<td>{{ capApp.claimUsername }}*</td>
-								<td><input v-model="inputs.claimUsername" :disabled="readonly" /></td>
-								<td>{{ capApp.claimUsernameHint }}</td>
+								<td>
+									<div class="row gap centered">
+										<input v-model="inputs.claimUsername" :disabled="readonly" />
+										<my-button image="question.png" @trigger="showHelp(capApp.claimUsernameHint)" />
+									</div>
+								</td>
 							</tr>
 							<tr>
 								<td>{{ capApp.claimAdmin }}</td>
 								<td>
 									<div class="column gap">
-										<input v-model="inputs.claimAdmin"      :disabled="readonly" :placeholder="capGen.name" />
+										<div class="row gap centered">
+											<input v-model="inputs.claimAdmin" :disabled="readonly" :placeholder="capGen.name" />
+											<my-button image="question.png" @trigger="showHelp(capApp.claimAdminHint)" />
+										</div>
 										<input v-model="inputs.claimAdminValue" :disabled="readonly" :placeholder="capGen.valueExpected" />
 										<div class="row">
 											<my-button image="cancel.png"
@@ -179,12 +216,20 @@ export default {
 										</div>
 									</div>
 								</td>
-								<td>{{ capApp.claimAdminHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.migrateByName }}</td>
+								<td>
+									<div class="row gap centered">
+										<my-bool v-model="inputs.migrateByName" :grow="false" :readonly />
+										<my-button image="question.png" @trigger="showHelp(capApp.migrateByNameHint)" />
+									</div>
+								</td>
 							</tr>
 						</template>
 						<tr v-if="isFlowClientCreds">
 							<td>{{ capApp.tokenUrl }}*</td>
-							<td colspan="2">
+							<td>
 								<div class="column gap">
 									<input v-model="inputs.tokenUrl" :disabled="readonly" />
 									<span>{{ capApp.tokenUrlHint }}</span>
@@ -267,6 +312,7 @@ export default {
 			claimAdminValue: null,
 			claimRoles: null,
 			claimUsername: null,
+			migrateByName: false,
 			providerUrl: null,
 			redirectUrl: null,
 			tokenUrl: null
@@ -336,6 +382,9 @@ export default {
 				this.inputs.loginTemplateId = this.loginTemplates[0].id;
 
 			this.ready = true;
+		},
+		showHelp(msg) {
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });
 		},
 
 		// backend calls

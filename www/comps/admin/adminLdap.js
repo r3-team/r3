@@ -106,21 +106,25 @@ export default {
 						</tr>
 						<tr>
 							<td>{{ capApp.tls }}</td>
-							<td><my-bool v-model="ldap.tls" :readonly="!licenseValid || ldap.starttls" /></td>
+							<td><div class="row"><my-bool v-model="ldap.tls" :grow="false" :readonly="!licenseValid || ldap.starttls" /></div></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.starttls }}</td>
-							<td><my-bool v-model="ldap.starttls" :readonly="!licenseValid || ldap.tls" /></td>
+							<td><div class="row"><my-bool v-model="ldap.starttls" :grow="false" :readonly="!licenseValid || ldap.tls" /></div></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.tlsVerify }}</td>
-							<td><my-bool v-model="ldap.tlsVerify" :readonly="!licenseValid || (!ldap.tls && !ldap.starttls)" /></td>
+							<td><div class="row"><my-bool v-model="ldap.tlsVerify" :grow="false" :readonly="!licenseValid || (!ldap.tls && !ldap.starttls)" /></div></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.msAdExt }}</td>
 							<td>
-								<my-bool v-model="ldap.msAdExt" :readonly="!licenseValid" />
-								<span>{{ capApp.msAdExtHint }}</span>
+								<div class="column gap">
+									<div class="row">
+										<my-bool v-model="ldap.msAdExt" :grow="false" :readonly="!licenseValid" />
+									</div>
+									<span>{{ capApp.msAdExtHint }}</span>
+								</div>
 							</td>
 						</tr>
 						<tr>
@@ -134,6 +138,15 @@ export default {
 						<tr>
 							<td>{{ capApp.loginAttribute }}</td>
 							<td><input v-model="ldap.loginAttribute" :disabled="!licenseValid" :placeholder="capApp.loginAttributeHint" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.migrateByName }}</td>
+							<td>
+								<div class="row centered gap">
+									<my-bool v-model="ldap.migrateByName" :grow="false" :readonly="!licenseValid" />
+									<my-button image="question.png" @trigger="showHelp(capApp.migrateByNameHint)" />
+								</div>
+							</td>
 						</tr>
 					</tbody>
 				</table>

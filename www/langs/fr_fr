@@ -234,7 +234,6 @@
 				"new": "Ajouter une connexion",
 				"test": "Tester la connexion"
 			},
-			"description": "Cette connexion LDAP importe les noms d'utilisateur et permet l'authentification avec les identifiants LDAP.<br />Les appartenances à des groupes LDAP peuvent être utilisées pour attribuer automatiquement des rôles.",
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cette connexion LDAP?",
 				"importPlanned": "La tâche d'importation a été planifiée pour une exécution immédiate",
@@ -259,6 +258,8 @@
 			"loginMetaMap": "Associer les détails de l'utilisateur aux attributs LDAP",
 			"memberAttribute": "Attribut membre",
 			"memberAttributeHint": "Exemple : memberOf",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this LDAP connection, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"msAdExt": "Extensions Microsoft AD",
 			"msAdExtHint": "Appartenances à des groupes imbriqués, contrôle de compte utilisateur",
 			"nameHint": "Nom unique",
@@ -591,6 +592,8 @@
 			},
 			"flow": "Flux OAuth",
 			"loginMetaMap": "Mettre à jour les informations de l'utilisateur via des revendications (claims)",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this OAuth client, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"nameHint": "Un nom interne pour désigner ce client OAuth au sein de REI3.",
 			"option": {
 				"flow": {

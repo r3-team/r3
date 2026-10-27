@@ -234,7 +234,6 @@
 				"new": "Adicionar ligação",
 				"test": "Testar ligação"
 			},
-			"description": "Esta ligação LDAP importa utilizadores e permite a autenticação com credenciais LDAP.<br />As associações a grupos LDAP podem ser usadas para atribuir funções automaticamente.",
 			"dialog": {
 				"delete": "Tem a certeza de que deseja eliminar esta ligação LDAP?",
 				"importPlanned": "A tarefa de importação foi agendada para execução imediata",
@@ -259,6 +258,8 @@
 			"loginMetaMap": "Mapear detalhes do utilizador para atributos LDAP",
 			"memberAttribute": "Atributo de membro",
 			"memberAttributeHint": "Exemplo: memberOf",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this LDAP connection, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"msAdExt": "Extensões do Microsoft AD",
 			"msAdExtHint": "Associações a grupos aninhados, controlo de contas de utilizador",
 			"nameHint": "Nome único",
@@ -591,6 +592,8 @@
 			},
 			"flow": "Fluxo OAuth",
 			"loginMetaMap": "Atualizar detalhes do utilizador via declarações",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this OAuth client, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"nameHint": "Um nome interno para referenciar este cliente OAuth dentro do REI3.",
 			"option": {
 				"flow": {

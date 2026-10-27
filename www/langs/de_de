@@ -234,7 +234,6 @@
 				"new": "Verbindung hinzufügen",
 				"test": "Verbindung testen"
 			},
-			"description": "Diese LDAP-Verbindung importiert Benutzer und ermöglicht die Authentifizierung über LDAP-Zugangsdaten.<br />Gruppenzuweisungen in LDAP können genutzt werden, um automatisch Rollen zuzuweisen.",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diese LDAP-Verbindung löschen möchtest?",
 				"importPlanned": "Importaufgabe wurde zur sofortigen Ausführung eingeplant",
@@ -259,6 +258,8 @@
 			"loginMetaMap": "Benutzer-Details zu LDAP-Attribute zuordnen",
 			"memberAttribute": "Mitgliedschaftsattribut",
 			"memberAttributeHint": "Beispiel: memberOf",
+			"migrateByName": "Benutzer über Namen migrieren",
+			"migrateByNameHint": "When ein Benutzer über diese LDAP-Verbindung angelegt werden soll, prüft das System auf bestehende Benutzer mit gleichem Benutzernamen. Wenn diese Option aktiviert ist, wird der Import wegen doppelten Bentzernamen nicht abgebrochen, stattdessen wird der bestehende Benutzer migriert. Sollte nur temporär aktiviert werden, bspw. während der Migration zu einem neuen Identitätsanbieter.",
 			"msAdExt": "Microsoft AD-Erweiterungen",
 			"msAdExtHint": "Verschachtelte Gruppenzugehör., Benutzer-Account-Kontrolle",
 			"nameHint": "Einzigartiger Name",
@@ -591,6 +592,8 @@
 			},
 			"flow": "OAuth-Flow",
 			"loginMetaMap": "Benutzer-Details über Claims aktualisieren",
+			"migrateByName": "Benutzer über Namen migrieren",
+			"migrateByNameHint": "When ein Benutzer über diesen OAuth-Client angelegt werden soll, prüft das System auf bestehende Benutzer mit gleichem Benutzernamen. Wenn diese Option aktiviert ist, wird die Anlage wegen doppelten Bentzernamen nicht abgebrochen, stattdessen wird der bestehende Benutzer migriert. Sollte nur temporär aktiviert werden, bspw. während der Migration zu einem neuen Identitätsanbieter.",
 			"nameHint": "Ein interner Name, um auf diesen OAuth-Client innerhalb von REI3 zu referenzieren.",
 			"option": {
 				"flow": {

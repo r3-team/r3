@@ -126,6 +126,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_setting ALTER COLUMN code_editor_theme DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD COLUMN code_editor_wrap BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN code_editor_wrap DROP DEFAULT;
+
+			-- identity provider migrate option
+			ALTER TABLE instance.ldap ADD   COLUMN migrate_by_name BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.ldap ALTER COLUMN migrate_by_name DROP DEFAULT;
+
+			ALTER TABLE instance.oauth_client ADD   COLUMN migrate_by_name BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.oauth_client ALTER COLUMN migrate_by_name DROP DEFAULT;
 		`)
 		return "3.14", err
 	},

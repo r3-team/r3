@@ -234,7 +234,6 @@
 				"new": "Add connection",
 				"test": "Test connection"
 			},
-			"description": "This LDAP connection imports users and enables authentication with LDAP credentials.<br />LDAP group memberships can be used to automatically assign roles.",
 			"dialog": {
 				"delete": "Are you sure you want to delete this LDAP connection?",
 				"importPlanned": "Import job has been scheduled for immediate execution",
@@ -257,6 +256,8 @@
 			"loginAttribute": "Username attribute",
 			"loginAttributeHint": "Example: sAMAccountName",
 			"loginMetaMap": "Map user details to LDAP attributes",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this LDAP connection, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"memberAttribute": "Member attribute",
 			"memberAttributeHint": "Example: memberOf",
 			"msAdExt": "Microsoft AD extensions",
@@ -591,6 +592,8 @@
 			},
 			"flow": "OAuth flow",
 			"loginMetaMap": "Update user details via claims",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this OAuth client, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"nameHint": "An internal name to reference this OAuth client inside of REI3.",
 			"option": {
 				"flow": {

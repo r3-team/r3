@@ -30,22 +30,10 @@ export default {
 					:caption="capApp.button.import"
 				/>
 			</div>
-			<div class="area">
-				<my-button image="question.png"
-					v-if="isAnyLdaps"
-					@trigger="showHelp(capApp.description)"
-					:caption="capGen.information"
-				/>
-			</div>
+			<div class="area"></div>
 		</div>
 
 		<div class="content grow">
-			<div class="contentPart long" v-if="!isAnyLdaps">
-				<div class="column gap">
-					<span v-html="capApp.description"></span>
-				</div>
-			</div>
-
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
 					v-for="l in ldaps"
@@ -83,7 +71,6 @@ export default {
 		};
 	},
 	computed: {
-		isAnyLdaps: s => s.ldaps.length !== 0,
 		licenseValid: s => s.$store.getters.licenseValid,
 
 		// stores
@@ -118,9 +105,6 @@ export default {
 				() => this.$store.commit('dialog', { captionBody: this.capApp.dialog.importPlanned }),
 				this.$root.genericError
 			);
-		},
-		showHelp(msg) {
-			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });
 		},
 
 		// backend calls

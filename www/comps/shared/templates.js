@@ -101,6 +101,7 @@ export function getTemplateLdap() {
 		filterDnExclude: [],
 		filterDnInclude: [],
 		assignRoles: false,
+		migrateByName: false,
 		msAdExt: true,
 		starttls: false,
 		tls: true,

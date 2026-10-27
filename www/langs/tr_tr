@@ -234,7 +234,6 @@
 				"new": "Bağlantı ekle",
 				"test": "Bağlantıyı test edin"
 			},
-			"description": "Bu LDAP bağlantısı, kullanıcıları içe aktarır ve LDAP kimlik bilgileriyle kimlik doğrulamayı etkinleştirir. <br />LDAP grup üyelikleri, rolleri otomatik olarak atamak için kullanılabilir.",
 			"dialog": {
 				"delete": "Bu LDAP bağlantısını silmek istediğinizden emin misiniz?",
 				"importPlanned": "İçe aktarma işinin hemen yürütülmesi planlandı",
@@ -259,6 +258,8 @@
 			"loginMetaMap": "Kullanıcı ayrıntılarını LDAP öznitelikleriyle eşleyin",
 			"memberAttribute": "Üye özelliği",
 			"memberAttributeHint": "Örnek: memberOf",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this LDAP connection, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"msAdExt": "Microsoft AD uzantıları",
 			"msAdExtHint": "İç içe grup üyelikleri, kullanıcı hesabı kontrolü",
 			"nameHint": "Benzersiz ad",
@@ -591,6 +592,8 @@
 			},
 			"flow": "OAuth akışı",
 			"loginMetaMap": "Talepler yoluyla kullanıcı ayrıntılarını güncelleme",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this OAuth client, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"nameHint": "REI3 içindeki bu OAuth istemcisine başvuruda bulunacak dahili bir ad.",
 			"option": {
 				"flow": {

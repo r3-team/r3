@@ -234,7 +234,6 @@
 				"new": "Adăugați conexiune",
 				"test": "Test conexiune"
 			},
-			"description": "This LDAP connection imports users and enables authentication with LDAP credentials.<br />LDAP group memberships can be used to automatically assign roles.",
 			"dialog": {
 				"delete": "Ești sigur că vrei să ștergi această conexiune LDAP?",
 				"importPlanned": "Import job has been scheduled for immediate execution",
@@ -259,6 +258,8 @@
 			"loginMetaMap": "Map user details to LDAP attributes",
 			"memberAttribute": "Atributul de membru",
 			"memberAttributeHint": "Exemplu: memberOf",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this LDAP connection, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"msAdExt": "Extensii Microsoft AD",
 			"msAdExtHint": "Apartenența la grupuri imbricate, controlul contului de utilizator",
 			"nameHint": "Nume unic",
@@ -591,6 +592,8 @@
 			},
 			"flow": "OAuth flow",
 			"loginMetaMap": "Update user details via claims",
+			"migrateByName": "Migrate users by name",
+			"migrateByNameHint": "When a user is to be created through this OAuth client, the system checks for existing users with the same username. If this option is enabled, instead of failing due to overlapping usernames, the existing user will be migrated instead. Should only be enabled temporarily, during migration to a new identity provider.",
 			"nameHint": "An internal name to reference this OAuth client inside of REI3.",
 			"option": {
 				"flow": {

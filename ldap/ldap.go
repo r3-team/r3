@@ -8,7 +8,6 @@ import (
 	"r3/login/login_roleAssign"
 	"r3/types"
 	"r3/types/constants"
-	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -48,6 +47,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 			l.starttls,
 			l.tls,
 			l.tls_verify,
+			l.migrate_by_name,
 			COALESCE(m.department, ''),
 			COALESCE(m.email, ''),
 			COALESCE(m.location, ''),
@@ -75,15 +75,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 		if err := rows.Scan(&l.Id, &l.LoginTemplateId, &l.Name, &l.Host, &l.Port, &l.BindUserDn,
 			&l.BindUserPw, &l.SearchClass, &l.SearchDn, &l.FilterDnExclude, &l.FilterDnInclude,
 			&l.KeyAttribute, &l.LoginAttribute, &l.MemberAttribute, &l.AssignRoles, &l.MsAdExt,
-			&l.Starttls, &l.Tls, &l.TlsVerify, &m.Department, &m.Email, &m.Location,
+			&l.Starttls, &l.Tls, &l.TlsVerify, &l.MigrateByName, &m.Department, &m.Email, &m.Location,
 			&m.NameDisplay, &m.NameFore, &m.NameSur, &m.Notes, &m.Organization, &m.PhoneFax,
 			&m.PhoneLandline, &m.PhoneMobile); err != nil {
 
 			return nil, err
 		}
-
-		// TEMP: migration option via command in client name
-		l.MigrateByName = strings.Contains(l.Name, "{MGR_UN}")
 
 		if l.FilterDnExclude == nil {
 			l.FilterDnExclude = make([]string, 0)
@@ -111,14 +108,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 				login_template_id, name, host, port, bind_user_dn, bind_user_pw,
 				search_class, search_dn, filter_dn_exclude, filter_dn_include,
 				key_attribute, login_attribute, member_attribute, assign_roles,
-				ms_ad_ext, starttls, tls, tls_verify
+				ms_ad_ext, starttls, tls, tls_verify, migrate_by_name
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
 			RETURNING id
 		`, l.LoginTemplateId, l.Name, l.Host, l.Port, l.BindUserDn, l.BindUserPw,
 			l.SearchClass, l.SearchDn, l.FilterDnExclude, l.FilterDnInclude, l.KeyAttribute,
 			l.LoginAttribute, l.MemberAttribute, l.AssignRoles, l.MsAdExt, l.Starttls,
-			l.Tls, l.TlsVerify).Scan(&l.Id); err != nil {
+			l.Tls, l.TlsVerify, l.MigrateByName).Scan(&l.Id); err != nil {
 
 			return err
 		}
@@ -130,12 +127,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 				search_dn = $8, filter_dn_exclude = $9, filter_dn_include = $10,
 				key_attribute = $11, login_attribute = $12, member_attribute = $13,
 				assign_roles = $14, ms_ad_ext = $15, starttls = $16, tls = $17,
-				tls_verify = $18
-			WHERE id = $19
+				tls_verify = $18, migrate_by_name = $19
+			WHERE id = $20
 		`, l.LoginTemplateId, l.Name, l.Host, l.Port, l.BindUserDn, l.BindUserPw,
 			l.SearchClass, l.SearchDn, l.FilterDnExclude, l.FilterDnInclude, l.KeyAttribute,
 			l.LoginAttribute, l.MemberAttribute, l.AssignRoles, l.MsAdExt, l.Starttls, l.Tls,
-			l.TlsVerify, l.Id); err != nil {
+			l.TlsVerify, l.MigrateByName, l.Id); err != nil {
 
 			return err
 		}
