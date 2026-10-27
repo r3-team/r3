@@ -114,9 +114,20 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 	var nameChanged = false
 	var rolesChanged = false
 
-	if err := db.Pool.QueryRow(ctx, `
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return types.LoginAuthResult{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := tx.QueryRow(ctx, `
 		SELECT l.id, l.name, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, l.active,
-			l.oauth_client_id IS DISTINCT FROM $1,
+			(
+				l.oauth_client_id IS DISTINCT FROM $1 AND
+				l.oauth_iss       IS DISTINCT FROM $2 AND
+				l.oauth_sub       IS DISTINCT FROM $3 AND
+				TRUE              = $4
+			) AS login_migrate,
 			ARRAY(
 				SELECT role_id
 				FROM instance.login_role
@@ -150,6 +161,8 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 			TRUE              = $4 AND
 			l.name            = $5
 		)
+		-- order by client ID to get valid login first (edge case: both client and other login with same name exist)
+		ORDER BY CASE WHEN l.oauth_client_id = $1 THEN 0 ELSE 1 END
 		LIMIT 1
 	`, oauthClientId, idToken.Issuer, idToken.Subject, c.MigrateByName, username).Scan(&l.Id, &l.Name, &l.SaltKdf, &l.Admin,
 		&limited, &tokenExpiryHours, &active, &loginMigrate, &roleIdsEx, &metaEx.Department, &metaEx.Email, &metaEx.Location,
@@ -231,12 +244,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 	// set login if new or anything changed
 	// inactive users cannot authenticate via Open ID, so there is no way to disable users this way
 	//  but if the current active state is disabled, it must re-enable the user
-	if newLogin || adminChanged || loginMigrate || metaChanged || nameChanged || rolesChanged || !active {
-		tx, err := db.Pool.Begin(ctx)
-		if err != nil {
-			return types.LoginAuthResult{}, err
-		}
-		defer tx.Rollback(ctx)
+	if newLogin || adminChanged || metaChanged || nameChanged || rolesChanged || !active {
 
 		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{},
 			pgtype.Int4{Int32: c.Id, Valid: true}, pgtype.Text{String: idToken.Issuer, Valid: true},
@@ -246,23 +254,20 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 		if err != nil {
 			return types.LoginAuthResult{}, err
 		}
-		if loginMigrate {
-			log.Info(log.ContextOauth, fmt.Sprintf("migrating user '%s' to client '%s'", l.Name, c.Name))
+	}
+	if !newLogin && loginMigrate {
+		log.Info(log.ContextOauth, fmt.Sprintf("migrating user '%s' to client '%s'", l.Name, c.Name))
 
-			if err := login.MigrateProviderOpenId_tx(
-				ctx, tx, l.Id, pgtype.Int4{Int32: c.Id, Valid: true},
-				pgtype.Text{String: idToken.Issuer, Valid: true},
-				pgtype.Text{String: idToken.Subject, Valid: true}); err != nil {
+		if err := login.MigrateProviderOpenId_tx(
+			ctx, tx, l.Id, pgtype.Int4{Int32: c.Id, Valid: true},
+			pgtype.Text{String: idToken.Issuer, Valid: true},
+			pgtype.Text{String: idToken.Subject, Valid: true}); err != nil {
 
-				return types.LoginAuthResult{}, err
-			}
-		}
-		if active && rolesChanged {
-			login_clusterEvent.Reauth_tx(ctx, tx, l.Id, l.Name)
-		}
-		if err := tx.Commit(ctx); err != nil {
 			return types.LoginAuthResult{}, err
 		}
+	}
+	if active && rolesChanged {
+		login_clusterEvent.Reauth_tx(ctx, tx, l.Id, l.Name)
 	}
 
 	// everything in order, auth successful
@@ -273,11 +278,10 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 	if err := cache.LoadAccessIfUnknown(l.Id); err != nil {
 		return types.LoginAuthResult{}, err
 	}
-
 	if meta.NameDisplay != "" {
 		l.Name = meta.NameDisplay
 	}
-	return l, nil
+	return l, tx.Commit(ctx)
 }
 
 func getStringFromIdTokenClaims(claimFind string, claims map[string]any) (string, error) {

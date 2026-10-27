@@ -8,6 +8,7 @@ import (
 	"r3/login/login_roleAssign"
 	"r3/types"
 	"r3/types/constants"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -80,6 +81,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 
 			return nil, err
 		}
+
+		// TEMP: migration option via command in client name
+		l.MigrateByName = strings.Contains(l.Name, "{MGR_UN}")
+
 		if l.FilterDnExclude == nil {
 			l.FilterDnExclude = make([]string, 0)
 		}
