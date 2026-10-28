@@ -257,9 +257,10 @@ const MyBuilderApiPreview = {
 						value = arg.attributeId !== null ? this.attributeIdMap[arg.attributeId].content : 'text';
 					}
 					break;
-				case 'query': // fallthrough
+				case 'query':
+					contentDisplay = column.attributeId === null ? '' : this.attributeIdMap[column.attributeId].content;
+					break;
 				case 'attribute':
-					// return content of returned attribute
 					contentDisplay = this.attributeIdMap[column.attributeId].content;
 					break;
 			}
