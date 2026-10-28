@@ -523,6 +523,10 @@
 	cursor: pointer;
 	background-color: transparent !important;
 }
+.input-richtext .tox .tox-tbtn--enabled {
+	cursor: pointer;
+	background-color: var(--color-action-bright) !important;
+}
 .input-decimal {
 	width: 100%;
 	color: inherit;
