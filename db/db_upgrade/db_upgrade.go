@@ -105,6 +105,27 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.doc_column         ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
 			ALTER TABLE instance_mail.template ALTER COLUMN content TYPE instance_mail.template_content USING content::TEXT::instance_mail.template_content;
 
+			-- fix missing DB sync foreign keys & indexes
+			DELETE FROM instance_db_sync.job_column WHERE job_id NOT IN (
+				SELECT id FROM instance_db_sync.job
+			);
+
+			ALTER TABLE instance_db_sync.job_column ADD CONSTRAINT job_column_job_id_fkey FOREIGN KEY (job_id)
+		        REFERENCES instance_db_sync.job (id) MATCH SIMPLE
+		        ON UPDATE CASCADE
+		        ON DELETE CASCADE
+		        DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX IF NOT EXISTS fki_job_column_job_id_fkey ON instance_db_sync.job_column USING btree (job_id ASC NULLS LAST);
+
+			ALTER TABLE instance_db_sync.job ADD CONSTRAINT job_host_id_fkey FOREIGN KEY (host_id)
+		        REFERENCES instance_db_sync.host (id) MATCH SIMPLE
+		        ON UPDATE NO ACTION
+		        ON DELETE NO ACTION
+		        DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX IF NOT EXISTS fki_job_host_id_fkey ON instance_db_sync.job USING btree (host_id ASC NULLS LAST);
+
 			-- remove login forms
 			ALTER TABLE app.caption      DROP COLUMN login_form_id;
 			ALTER TABLE instance.caption DROP COLUMN login_form_id;

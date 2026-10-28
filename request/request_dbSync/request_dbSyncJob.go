@@ -160,12 +160,6 @@ func jobDeleteById(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
-	// temporary fix introduced in REI3.13.2
-	// job_column is missing a CASCADE FK
-	if _, err := tx.Exec(ctx, `DELETE FROM instance_db_sync.job_column WHERE job_id = $1`, id); err != nil {
-		return err
-	}
-
 	if _, err := tx.Exec(ctx, `DELETE FROM instance_db_sync.job WHERE id = $1`, id); err != nil {
 		return err
 	}
