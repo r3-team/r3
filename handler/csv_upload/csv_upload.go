@@ -336,9 +336,12 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64, opt types.CsvO
 			}
 
 		// numeric must be handled as text as conversion to float is not 1:1
-		case "numeric", "text", "uuid", "varchar":
+		case "numeric":
 			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharThou, "")
 			valuesString[i] = strings.ReplaceAll(valuesString[i], opt.CharDec, ".")
+			valuesIn[i] = valuesString[i]
+
+		case "text", "uuid", "varchar":
 			valuesIn[i] = valuesString[i]
 
 		case "boolean":
