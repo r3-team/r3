@@ -1,8 +1,10 @@
+import MyFilters from './filters.js';
 import { getTemplateQueryFilter } from './shared/builderTemplate.js';
 import { getColumnIsFilterable } from './shared/column.js';
 
 export default {
 	name: 'my-list-filters',
+	components: { MyFilters },
 	template: `<div class="list-filters">
 		<div class="list-filters-content">
 			<my-filters class="default-inputs"
