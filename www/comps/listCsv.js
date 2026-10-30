@@ -1,9 +1,8 @@
 import MyInputNumberSep from './inputNumberSep.js';
 
 import { isAttributeDecimal } from './shared/attribute.js';
-import { getColumnTitleFallback } from './shared/column.js';
+import { getColumnTitle } from './shared/column.js';
 import { resolveErrCode } from './shared/error.js';
-import { getCaption } from './shared/language.js';
 import { getQueryExpressions } from './shared/query.js';
 
 export default {
@@ -171,8 +170,7 @@ export default {
 		columnCaptions: s => {
 			const out = [];
 			for (const c of s.columnsSorted) {
-				const cap = s.getCaption('columnTitle', s.moduleId, c.id, c.captions, '');
-				out.push(cap !== '' ? cap : s.getColumnTitleFallback(c, s.moduleId));
+				out.push(s.getColumnTitle(c, s.moduleId));
 			}
 			return out;
 		},
@@ -227,8 +225,7 @@ export default {
 	},
 	methods: {
 		// externals
-		getCaption,
-		getColumnTitleFallback,
+		getColumnTitle,
 		getQueryExpressions,
 		isAttributeDecimal,
 		resolveErrCode,

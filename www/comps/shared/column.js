@@ -1,93 +1,86 @@
-import MyStore                    from '../../stores/store.js';
-import {getQueryFiltersProcessed} from './query.js';
-import {
-	getAttributeIcon,
-	isAttributeBoolean,
-	isAttributeFiles,
-	isAttributeString
-} from './attribute.js';
-import {
-	getCaption,
-	getCaptionForLang
-} from './language.js';
+import MyStore from '../../stores/store.js';
 
-export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,globalSearch,globalSearchDict,dataFieldIdMap,
-	fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate,variableIdMapLocal) {
+import { getAttributeIcon, isAttributeBoolean, isAttributeFiles, isAttributeString } from './attribute.js';
+import { getCaption, getCaptionForLang } from './language.js';
+import { getQueryFiltersProcessed } from './query.js';
+
+export function getColumnsProcessed(columns, columnIdsByUser, joinsIndexMap, globalSearch, globalSearchDict, dataFieldIdMap,
+	fieldIdsChanged, fieldIdsInvalid, fieldValues, recordMayCreate, recordMayDelete, recordMayUpdate, variableIdMapLocal) {
 
 	columns = JSON.parse(JSON.stringify(columns));
 
-	let batchMapCaptions = {};
-	let out = [];
-	for(const c of columns) {
+	const batchMapCaptions = {};
+	const out = [];
+	for (const c of columns) {
 		// apply captions of first batch column to other batch columns (to display if first batch column is hidden)
-		if(c.batch !== null) {
-			if(batchMapCaptions[c.batch] === undefined)
+		if (c.batch !== null) {
+			if (batchMapCaptions[c.batch] === undefined)
 				batchMapCaptions[c.batch] = c.captions;
 			else
 				c.captions = batchMapCaptions[c.batch];
 		}
 
 		// skip if columns are defined by user and its not included
-		if(columnIdsByUser.length !== 0 && !columnIdsByUser.includes(c.id))
+		if (columnIdsByUser.length !== 0 && !columnIdsByUser.includes(c.id))
 			continue;
 
 		// not defined by user, apply defaults
-		if(columnIdsByUser.length === 0 && (c.hidden || (!c.onMobile && MyStore.getters.isMobile)))
+		if (columnIdsByUser.length === 0 && (c.hidden || (!c.onMobile && MyStore.getters.isMobile)))
 			continue;
 
 		// optimize style options access
 		c.flags = {
-			alignEnd:c.styles.includes('alignEnd'),
-			alignMid:c.styles.includes('alignMid'),
-			bold:c.styles.includes('bold'),
-			boolAtrIcon:c.styles.includes('boolAtrIcon'),
-			clipboard:c.styles.includes('clipboard'),
-			italic:c.styles.includes('italic'),
-			monospace:c.styles.includes('monospace'),
-			noShrink:c.styles.includes('noShrink'),
-			noThousandsSep:c.styles.includes('noThousandsSep'),
-			previewLarge:c.styles.includes('previewLarge'),
-			vertical:c.styles.includes('vertical'),
-			wrap:c.styles.includes('wrap')
+			alignEnd: c.styles.includes('alignEnd'),
+			alignMid: c.styles.includes('alignMid'),
+			bold: c.styles.includes('bold'),
+			boolAtrIcon: c.styles.includes('boolAtrIcon'),
+			clipboard: c.styles.includes('clipboard'),
+			italic: c.styles.includes('italic'),
+			monospace: c.styles.includes('monospace'),
+			noShrink: c.styles.includes('noShrink'),
+			noThousandsSep: c.styles.includes('noThousandsSep'),
+			previewLarge: c.styles.includes('previewLarge'),
+			vertical: c.styles.includes('vertical'),
+			wrap: c.styles.includes('wrap')
 		};
 
 		// resolve sub query filters
-		if(c.content === 'query') {
-			c.query.filters = getQueryFiltersProcessed(c.query.filters,joinsIndexMap,globalSearch,
-				globalSearchDict,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,
-				recordMayCreate,recordMayDelete,recordMayUpdate,{},variableIdMapLocal);
+		if (c.content === 'query') {
+			c.query.filters = getQueryFiltersProcessed(c.query.filters, joinsIndexMap, globalSearch,
+				globalSearchDict, dataFieldIdMap, fieldIdsChanged, fieldIdsInvalid, fieldValues,
+				recordMayCreate, recordMayDelete, recordMayUpdate, {}, variableIdMapLocal);
 		}
 		out.push(c);
 	}
 	return out;
 };
 
-export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sortByIndex,showCaptions) {
-	let batches = [];
+export function getColumnBatches(moduleId, columns, columnIndexesIgnore, orders, sortByIndex, showCaptions) {
+	const batches = [];
 
-	let addColumn = (column,index) => {
+	const addColumn = (column, index) => {
 		// first non-encrypted/non-file attribute in batch can be sorted by
-		const isAtr   = column.content === 'attribute';
-		const atr     = isAtr ? MyStore.getters['schema/attributeIdMap'][column.attributeId] : null;
+		const isAtr = column.content === 'attribute';
+		const atr = isAtr ? MyStore.getters['schema/attributeIdMap'][column.attributeId] : null;
 		const isColor = isAtr ? atr.contentUse === 'color' : false;
-		const isSort  = isAtr ? !atr.encrypted && !isAttributeFiles(atr.content) : true;
+		const isSort = isAtr ? !atr.encrypted && !isAttributeFiles(atr.content) : true;
 
-		if(column.batch !== null) {
+		if (column.batch !== null) {
 			// assign column to existing batch if available
-			for(let i = 0, j = batches.length; i < j; i++) {
-				if(batches[i].batch !== column.batch)
+			for (let i = 0, j = batches.length; i < j; i++) {
+				if (batches[i].batch !== column.batch)
 					continue;
 
 				// add its own column index + sort setting + width to batch
 				batches[i].columnIndexes.push(index);
 
-				if(isSort)  batches[i].columnIndexesSortBy.push(index);
-				if(isColor) batches[i].columnIndexColor = index;
+				if (isSort) batches[i].columnIndexesSortBy.push(index);
+				if (isColor) batches[i].columnIndexColor = index;
 
-				if(!batches[i].vertical)
+				if (!batches[i].vertical)
 					batches[i].basis += column.basis;
 
-				if(batches[i].vertical && column.basis > batches[i].basis)
+				if (batches[i].vertical && column.basis > batches[i].basis)
 					batches[i].basis = column.basis;
 
 				return;
@@ -96,131 +89,130 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 
 		// create new column batch with itself as first column
 		batches.push({
-			basis:column.basis,
-			batch:column.batch,
-			batchOrderIndex:batches.length,
-			caption:showCaptions && moduleId !== null ? getColumnTitle(column,moduleId) : null,
-			columnIndexes:[index],
-			columnIndexesSortBy:isSort ? [index] : [],
-			columnIndexColor:!isColor ? -1 : index,
-			key:column.id,          // key is used to redo column batch components on change
-			orderIndexesSmallest:0, // smallest order index used to sort this column batch by
-			orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
-			orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
-			style:'',
-			vertical:column.flags?.vertical !== undefined ? column.flags.vertical : false
+			basis: column.basis,
+			batch: column.batch,
+			batchOrderIndex: batches.length,
+			caption: showCaptions && moduleId !== null ? getColumnTitle(column, moduleId) : null,
+			columnIndexes: [index],
+			columnIndexesSortBy: isSort ? [index] : [],
+			columnIndexColor: !isColor ? -1 : index,
+			key: column.id,          // key is used to redo column batch components on change
+			orderIndexesSmallest: 0, // smallest order index used to sort this column batch by
+			orderIndexesUsed: [],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
+			orderPosition: 0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
+			style: '',
+			vertical: column.flags?.vertical !== undefined ? column.flags.vertical : false
 		});
 	};
 
-	for(let i = 0, j = columns.length; i < j; i++) {
-		if(!columnIndexesIgnore.includes(i))
-			addColumn(columns[i],i);
+	for (let i = 0, j = columns.length; i < j; i++) {
+		if (!columnIndexesIgnore.includes(i))
+			addColumn(columns[i], i);
 	}
 
 	// process finished batches
-	for(let i = 0, j = batches.length; i < j; i++) {
-		if(batches[i].basis !== 0)
+	for (let i = 0, j = batches.length; i < j; i++) {
+		if (batches[i].basis !== 0)
 			batches[i].style = `width:${batches[i].basis}px`;
 
-		batches[i].orderIndexesUsed     = getOrderIndexesFromColumnBatch(batches[i],columns,orders);
+		batches[i].orderIndexesUsed = getOrderIndexesFromColumnBatch(batches[i], columns, orders);
 		batches[i].orderIndexesSmallest = batches[i].orderIndexesUsed.length !== 0 ? Math.min(...batches[i].orderIndexesUsed) : 999;
 	}
 
 	// calculate which batch is sorted by in order (to show sort order indicators)
 	const batchesSortedBySmallestOrderIndex =
-		[...batches].sort((a,b) => a.orderIndexesSmallest > b.orderIndexesSmallest ? 1 : -1);
+		[...batches].sort((a, b) => a.orderIndexesSmallest > b.orderIndexesSmallest ? 1 : -1);
 
-	for(let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
+	for (let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
 		batches[batchesSortedBySmallestOrderIndex[i].batchOrderIndex].orderPosition = i;
 	}
 
 	// apply sort order
-	if(sortByIndex.length !== 0)
-		batches.sort((a,b) => sortByIndex.indexOf(a.batchOrderIndex) - sortByIndex.indexOf(b.batchOrderIndex));
+	if (sortByIndex.length !== 0)
+		batches.sort((a, b) => sortByIndex.indexOf(a.batchOrderIndex) - sortByIndex.indexOf(b.batchOrderIndex));
 
 	// return all batches that have at least 1 column
 	return batches.filter(v => v.columnIndexes.length !== 0);
 };
 
 export function getColumnIcon(column) {
-	switch(column.content) {
+	switch (column.content) {
 		case 'attribute':
-			const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-			return `${getAttributeIcon(atr.content,atr.contentUse,false,false)}`;
-		break;
-		case 'query':      return 'database.png';     break;
-		case 'fnc_pg':     return 'codeDatabase.png'; break;
-		case 'fnc_scalar': return 'code.png';         break;
+			{
+				const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+				return `${getAttributeIcon(atr.content, atr.contentUse, false, false)}`;
+			}
+		case 'query': return 'database.png';
+		case 'fnc_pg': return 'codeDatabase.png';
+		case 'fnc_scalar': return 'code.png';
 	}
 	return 'code.png';
 };
 
 export function getColumnIsFilterable(c) {
-	if(c.content === 'query' || (c.aggregator !== null && c.aggregator !== 'record'))
+	if (c.content === 'query' || (c.aggregator !== null && c.aggregator !== 'record'))
 		return false;
 
-	if(c.content === 'attribute') {
+	if (c.content === 'attribute') {
 		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-		if(isAttributeFiles(atr.content) || atr.encrypted || atr.contentUse === 'color')
+		if (isAttributeFiles(atr.content) || atr.encrypted || atr.contentUse === 'color')
 			return false;
 	}
 	return true;
 };
 
-export function getColumnTitle(c,moduleId,languageForce) {
+export function getColumnTitle(c, moduleId, languageForce) {
 	const captionColumn = languageForce !== undefined
-		? getCaptionForLang('columnTitle',languageForce,c.id,c.captions)
-		: getCaption('columnTitle',moduleId,c.id,c.captions);
+		? getCaptionForLang('columnTitle', languageForce, c.id, c.captions)
+		: getCaption('columnTitle', moduleId, c.id, c.captions);
 
-	return captionColumn !== '' ? captionColumn : getColumnTitleFallback(c,moduleId,languageForce);
+	return captionColumn !== '' ? captionColumn : getColumnTitleFallback(c, moduleId, languageForce);
 };
 
-export function getColumnTitleFallback(c,moduleId,languageForce) {
+export function getColumnTitleFallback(c, moduleId, languageForce) {
+	const getAttributeTitle = atrId => {
+		if (atrId === null)
+			return '';
+
+		const atr = MyStore.getters['schema/attributeIdMap'][atrId];
+		return languageForce !== undefined
+			? getCaptionForLang('attributeTitle', languageForce, atr.id, atr.captions, atr.name)
+			: getCaption('attributeTitle', moduleId, atr.id, atr.captions, atr.name);
+	};
 	const getAttributeTitlesFromArguments = args => {
-		let parts = [];
-		for(const arg of args) {
-			if(arg.attributeId === null)
-				continue;
-
-			const atr = MyStore.getters['schema/attributeIdMap'][arg.attributeId];
-
-			if(languageForce !== undefined)
-				parts.push(getCaptionForLang('attributeTitle',languageForce,atr.id,atr.captions,atr.name));
-			else
-				parts.push(getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
+		const parts = [];
+		for (const arg of args) {
+			if (arg.attributeId !== null)
+				parts.push(getAttributeTitle(arg.attributeId));
 		}
 		return parts;
 	};
 
-	if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
-		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-
-		if(languageForce !== undefined)
-			return getCaptionForLang('attributeTitle',languageForce,atr.id,atr.captions,atr.name);
-		else
-			return getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name);
+	if (c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
+		return getAttributeTitle(c.attributeId);
 	}
-	if(c.content === 'fnc_scalar') {
-		switch(c.scalar) {
-			case 'COALESCE': return getAttributeTitlesFromArguments(c.arguments).join('/'); break;
-			case 'CONCAT':   return getAttributeTitlesFromArguments(c.arguments).join('+'); break;
-			default:         return getAttributeTitlesFromArguments(c.arguments).join(','); break;
+	if (c.content === 'fnc_scalar') {
+		switch (c.scalar) {
+			// COALESCE shows title only of first argument, everything else is a fallback
+			case 'COALESCE': return c.arguments.length < 1 ? '' : getAttributeTitle(c.arguments[0].attributeId);
+			case 'CONCAT': return getAttributeTitlesFromArguments(c.arguments).join('+');
+			default: return getAttributeTitlesFromArguments(c.arguments).join(',');
 		}
 	}
-	if(c.content === 'fnc_pg') {
+	if (c.content === 'fnc_pg') {
 		return getAttributeTitlesFromArguments(c.arguments).join(',');
 	}
 	return '';
 };
 
-export function getFirstColumnUsableAsAggregator(batch,columns) {
-	for(let ind of batch.columnIndexes) {
+export function getFirstColumnUsableAsAggregator(batch, columns) {
+	for (const ind of batch.columnIndexes) {
 		const c = columns[ind];
 		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 
 		// anything that can be counted can serve as aggregation
 		// sub queries and already aggregated columns are not supported
-		if(c.content === 'attribute'
+		if (c.content === 'attribute'
 			&& c.aggregator === null
 			&& !a.encrypted
 			&& a.contentUse !== 'color'
@@ -234,18 +226,18 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 	return null;
 };
 
-export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
-	if(columnBatch.columnIndexesSortBy.length === 0)
+export function getOrderIndexesFromColumnBatch(columnBatch, columns, orders) {
+	if (columnBatch.columnIndexesSortBy.length === 0)
 		return [];
 
-	let orderIndexesUsed = [];
-	for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
+	const orderIndexesUsed = [];
+	for (const columnIndexSort of columnBatch.columnIndexesSortBy) {
 		const col = columns[columnIndexSort];
 
-		for(let i = 0, j = orders.length; i < j; i++) {
+		for (let i = 0, j = orders.length; i < j; i++) {
 			const order = orders[i];
 
-			if((col.content === 'attribute' && order.attributeId === col.attributeId && order.index === col.index) ||
+			if ((col.content === 'attribute' && order.attributeId === col.attributeId && order.index === col.index) ||
 				(col.content !== 'attribute' && order.expressionPos === columnIndexSort)
 			) {
 				orderIndexesUsed.push(i);
