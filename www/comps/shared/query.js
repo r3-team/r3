@@ -95,17 +95,19 @@ export function getQueryExpressions(columns) {
 			case 'fnc_pg': out.push(getForFncPg(c)); break;
 			case 'fnc_scalar': out.push(getForFncScalar(c)); break;
 			case 'query':
-				// move expression aggregator to query (allows ORDER BY in aggregation)
 				{
-					const expr = getForAttribute(c);
-					expr.aggregator = null;
+					// apply aggregator/grouping to query result (allows ORDER BY / GROUP BY)
+					const queryExpr = getForAttribute(c);
+					queryExpr.aggregator = null;
+					queryExpr.groupBy = false;
 					out.push({
 						aggregator: c.aggregator,
+						groupBy: c.groupBy,
 						query: {
 							relationId: c.query.relationId,
 							limit: c.query.fixedLimit,
 							joins: c.query.joins,
-							expressions: [expr],
+							expressions: [queryExpr],
 							filters: c.query.filters,
 							orders: c.query.orders
 						}
