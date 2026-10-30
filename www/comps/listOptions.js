@@ -97,7 +97,7 @@ export default {
 						<br />
 						<div class="list-options-column-config" v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">
 							<span>{{ capGen.notShown }}</span>
-							<template v-for="(b,bi) in columnBatchesAll">
+							<template v-for="b in columnBatchesAll">
 								<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
 
 									<!-- batch/columns -->

@@ -344,6 +344,15 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 	// add expressions
 	for pos, expr := range data.Expressions {
 
+		// handle group by
+		if expr.GroupBy {
+			groupByItems = append(groupByItems, data_sql.GetExpressionAlias(pos))
+
+			if !slices.Contains(relationIndexesHasGroupBy, expr.Index) {
+				relationIndexesHasGroupBy = append(relationIndexesHasGroupBy, expr.Index)
+			}
+		}
+
 		// NULL expression
 		if expr.ReturnNull {
 			inSelect = append(inSelect, data_sql.GetExpression(expr, "null", data_sql.GetExpressionAlias(pos)))
@@ -405,13 +414,6 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 				if expr.Aggregator.String == "record" && !slices.Contains(relationIndexesRecordAggr, expr.Index) {
 					relationIndexesRecordAggr = append(relationIndexesRecordAggr, expr.Index)
-				}
-			}
-			if expr.GroupBy {
-				groupByItems = append(groupByItems, data_sql.GetExpressionAlias(pos))
-
-				if !slices.Contains(relationIndexesHasGroupBy, expr.Index) {
-					relationIndexesHasGroupBy = append(relationIndexesHasGroupBy, expr.Index)
 				}
 			}
 		}

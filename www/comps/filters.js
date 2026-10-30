@@ -1052,29 +1052,29 @@ const MyFilter = {
 		},
 
 		// states
-		side0Column: s => {
+		side0ColumnAsAtr: s => {
 			for (const c of s.columns) {
-				if (c.index === s.side0.attributeIndex && c.attributeId === s.side0.attributeId)
+				if (c.content === 'attribute' && c.index === s.side0.attributeIndex && c.attributeId === s.side0.attributeId)
 					return c;
 			}
 			return false;
 		},
 		side0ColumFtsMode: s => {
-			if (!s.side0Column) return null;
+			if (!s.side0ColumnAsAtr) return null;
 
-			const atr = s.attributeIdMap[s.side0Column.attributeId];
+			const atr = s.attributeIdMap[s.side0ColumnAsAtr.attributeId];
 			const rel = s.relationIdMap[atr.relationId];
 			for (const ind of rel.indexes) {
 				if (ind.method === 'GIN' && ind.attributes.length === 1
-					&& ind.attributes[0].attributeId === s.side0Column.attributeId) {
+					&& ind.attributes[0].attributeId === s.side0ColumnAsAtr.attributeId) {
 
 					return ind.attributeIdDict !== null ? 'dict' : 'simple';
 				}
 			}
 			return null;
 		},
-		side0ColumDate: s => s.side0Column && ['date', 'datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
-		side0ColumTime: s => s.side0Column && ['datetime', 'time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		side0ColumDate: s => s.side0ColumnAsAtr && ['date', 'datetime'].includes(s.attributeIdMap[s.side0ColumnAsAtr.attributeId].contentUse),
+		side0ColumTime: s => s.side0ColumnAsAtr && ['datetime', 'time'].includes(s.attributeIdMap[s.side0ColumnAsAtr.attributeId].contentUse),
 		isAnyBracketsSet: s => s.brackets0Input !== 0 || s.brackets1Input !== 0,
 		isNullOperator: s => ['IS NULL', 'IS NOT NULL'].includes(s.operator),
 		isStringInput: s => (
