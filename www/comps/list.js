@@ -204,18 +204,16 @@ export default {
 			<!-- empty element for header collapse calculation -->
 			<div ref="empty" class="empty"></div>
 
-			<div class="row gap nowrap">
-				<my-input-offset
-					v-if="hasPaging"
-					@input="setOffsetParamAndReload($event,true)"
-					:arrows="showOffsetArrows"
-					:caption="showResultsCount && (count > limit || count > 50)"
-					:inputAsPageNo="settings.offsetPageNo"
-					:limit
-					:offset
-					:total="count"
-				/>
-			</div>
+			<my-input-offset
+				v-if="hasPaging"
+				@input="setOffsetParamAndReload($event,true)"
+				:arrows="showOffsetArrows"
+				:caption="showResultsCount && (count > limit || count > 50)"
+				:inputAsPageNo="settings.offsetPageNo"
+				:limit
+				:offset
+				:total="count"
+			/>
 
 			<!-- empty element for header collapse calculation (2nd element for space-between layout) -->
 			<div class="empty"></div>
@@ -734,6 +732,7 @@ export default {
 		hasGalleryIcon: s => {
 			return s.columns.length !== 0 &&
 				s.columns[0].display === 'gallery' &&
+				!s.columns[0].flags.relHide &&
 				(s.columns[0].onMobile || !s.isMobile) &&
 				(!s.isInput || s.rowsInput.length !== 0) &&
 				s.attributeIdMap[s.columns[0].attributeId].content === 'files';

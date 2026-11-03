@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "إزالة العمود من الدفعة",
 			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "الحافظة",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "File count",
 			"columnNoShrink": "Does not shrink",
 			"columnNoThousandsSep": "No thousands separator",

@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "Sütunu gruptan kaldır",
 			"columnBoolAtrIcon": "DOĞRU ise özellik simgesini göster",
 			"columnClipboard": "Pano",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "Dosya sayısı",
 			"columnNoShrink": "Küçülmez",
 			"columnNoThousandsSep": "Binlik ayırıcı yok",

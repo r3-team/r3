@@ -40,6 +40,7 @@ export function getColumnsProcessed(columns, columnIdsByUser, joinsIndexMap, glo
 			noShrink: c.styles.includes('noShrink'),
 			noThousandsSep: c.styles.includes('noThousandsSep'),
 			previewLarge: c.styles.includes('previewLarge'),
+			relHide: c.styles.includes('relHide'),
 			vertical: c.styles.includes('vertical'),
 			wrap: c.styles.includes('wrap')
 		};

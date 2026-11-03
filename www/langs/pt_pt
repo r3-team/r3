@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "Remover coluna do lote",
 			"columnBoolAtrIcon": "Mostrar ícone de atributo se VERDADEIRO",
 			"columnClipboard": "Área de transferência",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "Contagem de ficheiros",
 			"columnNoShrink": "Não encolhe",
 			"columnNoThousandsSep": "Sem separador de milhares",

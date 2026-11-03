@@ -333,6 +333,7 @@ export default {
 					:filtersDisable="['formState','getter','globalSearch']"
 					:formId
 					:hasCaptions="field.content === 'list'"
+					:isInput="isRelationship"
 					:joinsParents="[query.joins]"
 					:moduleId
 					:onlyData="false"

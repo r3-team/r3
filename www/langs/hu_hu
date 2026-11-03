@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "Oszlop Távolítása a Csomagból",
 			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "Vágólap",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "File count",
 			"columnNoShrink": "Does not shrink",
 			"columnNoThousandsSep": "No thousands separator",

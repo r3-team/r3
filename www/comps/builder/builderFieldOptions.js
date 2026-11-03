@@ -307,12 +307,12 @@ export default {
 						<tr>
 							<td>{{ capApp.autoSelect }}</td>
 							<td>
-							<input
-								@input="setInt('autoSelect',$event.target.value,false)"
-								:disabled="readonly"
-								:placeholder="capApp.autoSelectHint"
-								:value="field.autoSelect"
-							/>
+								<input
+									@input="setInt('autoSelect',$event.target.value,false)"
+									:disabled="readonly"
+									:placeholder="capApp.autoSelectHint"
+									:value="field.autoSelect"
+								/>
 							</td>
 						</tr>
 					</template>

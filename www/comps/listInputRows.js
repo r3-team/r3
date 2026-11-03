@@ -46,7 +46,7 @@ export default {
 						<div class="list-input-row-items">
 							<template v-for="(ci,cii) in b.columnIndexes">
 								<my-value-rich class="context-list-input"
-									v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
+									v-if="r.values[ci] !== null && !columns[ci].flags.relHide && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
 									@focus="$emit('focus')"
 									:alignEnd="columns[ci].flags.alignEnd"
 									:alignMid="columns[ci].flags.alignMid"

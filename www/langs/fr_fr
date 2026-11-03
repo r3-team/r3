@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "Supprimer la colonne du lot",
 			"columnBoolAtrIcon": "Afficher l'icône de l'attribut si VRAI (TRUE)",
 			"columnClipboard": "Presse-papiers",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "Nombre de fichiers",
 			"columnNoShrink": "Ne rétrécit pas",
 			"columnNoThousandsSep": "Pas de séparateur de milliers",

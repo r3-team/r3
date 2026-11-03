@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "从批处理中移除列",
 			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "剪贴板",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "File count",
 			"columnNoShrink": "Does not shrink",
 			"columnNoThousandsSep": "No thousands separator",

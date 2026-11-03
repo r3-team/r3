@@ -160,6 +160,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.field_flag ADD VALUE 'noOptions';
 			ALTER TYPE app.field_flag ADD VALUE 'noOrders';
 			ALTER TYPE app.field_flag ADD VALUE 'collapseHeader';
+
+			-- relationship input column styles
+			ALTER TYPE app.column_style ADD VALUE 'relHide';
 		`)
 		return "3.14", err
 	},

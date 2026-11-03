@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "Spalte vom Stapel entfernen",
 			"columnBoolAtrIcon": "Attribut-Icon anzeigen wenn WAHR",
 			"columnClipboard": "Zwischenablage",
+			"columnHideInRelInput": "In Eingabe verstecken",
 			"columnLengthFiles": "Dateianzahl",
 			"columnNoShrink": "Schrumpft nicht",
 			"columnNoThousandsSep": "Kein Tausendertrennzeichen",

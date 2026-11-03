@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "Eliminar columna del lote",
 			"columnBoolAtrIcon": "Mostrar icono de atributo si es VERDADERO",
 			"columnClipboard": "Portapapeles",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "Recuento de archivos",
 			"columnNoShrink": "Does not shrink",
 			"columnNoThousandsSep": "No thousands separator",

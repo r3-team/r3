@@ -1036,6 +1036,7 @@
 			"columnBatchOff": "Remove column from batch",
 			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "Clipboard",
+			"columnHideInRelInput": "Hide in input",
 			"columnLengthFiles": "File count",
 			"columnNoShrink": "Does not shrink",
 			"columnNoThousandsSep": "No thousands separator",

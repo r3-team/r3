@@ -115,64 +115,73 @@ export default {
 				<tr>
 					<td>{{ capGen.options }}</td>
 					<td>
-						<div class="row gap wrap" style="max-width:300px;">
-							<my-button-check
-								@update:modelValue="setStyle('bold',$event)"
-								:caption="capApp.option.style.bold"
-								:modelValue="column.styles.includes('bold')"
-								:readonly
-							/>
-							<my-button-check
-								@update:modelValue="setStyle('italic',$event)"
-								:caption="capApp.option.style.italic"
-								:modelValue="column.styles.includes('italic')"
-								:readonly
-							/>
-							<my-button-check
-								@update:modelValue="setStyle('monospace',$event)"
-								:caption="capGen.monospace"
-								:modelValue="column.styles.includes('monospace')"
-								:readonly
-							/>
-							<my-button-check
-								@update:modelValue="setStyle('clipboard',$event)"
-								:caption="capApp.columnClipboard"
-								:modelValue="column.styles.includes('clipboard')"
-								:readonly
-							/>
-							<my-button-check
-								@update:modelValue="setStyle('wrap',$event)"
-								:caption="capApp.columnWrap"
-								:modelValue="column.styles.includes('wrap')"
-								:readonly
-							/>
-							<my-button-check
-								v-if="isBarcode || isDrawing || (isFiles && column.display === 'gallery')"
-								@update:modelValue="setStyle('previewLarge',$event)"
-								:caption="capApp.columnPreviewLarge"
-								:modelValue="column.styles.includes('previewLarge')"
-								:readonly
-							/>
-							<my-button-check
-								v-if="isBoolean"
-								@update:modelValue="setStyle('boolAtrIcon',$event)"
-								:caption="capApp.columnBoolAtrIcon"
-								:modelValue="column.styles.includes('boolAtrIcon')"
-								:readonly
-							/>
-							<my-button-check
-								@update:modelValue="setStyle('noShrink',$event)"
-								:caption="capApp.columnNoShrink"
-								:modelValue="column.styles.includes('noShrink')"
-								:readonly
-							/>
-							<my-button-check
-								v-if="isInteger"
-								@update:modelValue="setStyle('noThousandsSep',$event)"
-								:caption="capApp.columnNoThousandsSep"
-								:modelValue="column.styles.includes('noThousandsSep')"
-								:readonly
-							/>
+						<div class="input-custom item-box">
+							<div class="row gap wrap">
+								<my-button-check
+									@update:modelValue="setStyle('bold',$event)"
+									:caption="capApp.option.style.bold"
+									:modelValue="column.styles.includes('bold')"
+									:readonly
+								/>
+								<my-button-check
+									@update:modelValue="setStyle('italic',$event)"
+									:caption="capApp.option.style.italic"
+									:modelValue="column.styles.includes('italic')"
+									:readonly
+								/>
+								<my-button-check
+									@update:modelValue="setStyle('monospace',$event)"
+									:caption="capGen.monospace"
+									:modelValue="column.styles.includes('monospace')"
+									:readonly
+								/>
+								<my-button-check
+									@update:modelValue="setStyle('clipboard',$event)"
+									:caption="capApp.columnClipboard"
+									:modelValue="column.styles.includes('clipboard')"
+									:readonly
+								/>
+								<my-button-check
+									@update:modelValue="setStyle('wrap',$event)"
+									:caption="capApp.columnWrap"
+									:modelValue="column.styles.includes('wrap')"
+									:readonly
+								/>
+								<my-button-check
+									v-if="isBarcode || isDrawing || (isFiles && column.display === 'gallery')"
+									@update:modelValue="setStyle('previewLarge',$event)"
+									:caption="capApp.columnPreviewLarge"
+									:modelValue="column.styles.includes('previewLarge')"
+									:readonly
+								/>
+								<my-button-check
+									v-if="isBoolean"
+									@update:modelValue="setStyle('boolAtrIcon',$event)"
+									:caption="capApp.columnBoolAtrIcon"
+									:modelValue="column.styles.includes('boolAtrIcon')"
+									:readonly
+								/>
+								<my-button-check
+									@update:modelValue="setStyle('noShrink',$event)"
+									:caption="capApp.columnNoShrink"
+									:modelValue="column.styles.includes('noShrink')"
+									:readonly
+								/>
+								<my-button-check
+									v-if="isInteger"
+									@update:modelValue="setStyle('noThousandsSep',$event)"
+									:caption="capApp.columnNoThousandsSep"
+									:modelValue="column.styles.includes('noThousandsSep')"
+									:readonly
+								/>
+								<my-button-check
+									v-if="isInput"
+									@update:modelValue="setStyle('relHide',$event)"
+									:caption="capApp.columnHideInRelInput"
+									:modelValue="column.styles.includes('relHide')"
+									:readonly
+								/>
+							</div>
 						</div>
 					</td>
 				</tr>
@@ -304,19 +313,21 @@ export default {
 			<tr>
 				<td>{{ capGen.options }}</td>
 				<td>
-					<div class="row gap wrap">
-						<my-button-check
-							@update:modelValue="set('distincted',$event)"
-							:caption="capGen.distincted"
-							:modelValue="column.distincted"
-							:readonly
-						/>
-						<my-button-check
-							@update:modelValue="set('groupBy',$event)"
-							:caption="capGen.groupBy"
-							:modelValue="column.groupBy"
-							:readonly
-						/>
+					<div class="input-custom item-box">
+						<div class="row gap wrap">
+							<my-button-check
+								@update:modelValue="set('distincted',$event)"
+								:caption="capGen.distincted"
+								:modelValue="column.distincted"
+								:readonly
+							/>
+							<my-button-check
+								@update:modelValue="set('groupBy',$event)"
+								:caption="capGen.groupBy"
+								:modelValue="column.groupBy"
+								:readonly
+							/>
+						</div>
 					</div>
 				</td>
 			</tr>
@@ -330,6 +341,7 @@ export default {
 		filtersDisable: { type: Array, required: false, default: [] },
 		formId: { type: String, required: false, default: '' },
 		hasCaptions: { type: Boolean, required: true },
+		isInput: { type: Boolean, required: false, default: false },
 		joinsParents: { type: Array, required: false, default: [] },
 		moduleId: { type: String, required: true },
 		onlyData: { type: Boolean, required: true }, // no display/formatting options
