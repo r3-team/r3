@@ -1079,7 +1079,11 @@
 			"fieldDefault": "Varsayılan değer",
 			"fieldDefaultPresetIds": "Varsayılan ön ayar(lar)",
 			"fieldFlags": {
+				"collapseHeader": "Collapse header by default",
 				"hideInputs": "Girişleri gizle",
+				"noFilters": "Disable user filters",
+				"noOptions": "Disable user options",
+				"noOrders": "Disable user sorting",
 				"relCategory": "Kategori ekranı",
 				"relFlow": "İlerleme akışı ekranı"
 			},

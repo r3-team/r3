@@ -1093,7 +1093,11 @@
 			"fieldSize0": "automatic",
 			"fieldsEditInputs": "Edit inputs",
 			"fieldFlags":{
+				"collapseHeader": "Collapse header by default",
 				"hideInputs": "Hide inputs",
+				"noFilters": "Disable user filters",
+				"noOptions": "Disable user options",
+				"noOrders": "Disable user sorting",
 				"relCategory": "Category display",
 				"relFlow": "Progress flow display"
 			},

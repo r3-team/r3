@@ -1079,7 +1079,11 @@
 			"fieldDefault": "Valeur par défaut",
 			"fieldDefaultPresetIds": "Préréglage(s) par défaut",
 			"fieldFlags": {
+				"collapseHeader": "Collapse header by default",
 				"hideInputs": "Masquer les champs de saisie",
+				"noFilters": "Disable user filters",
+				"noOptions": "Disable user options",
+				"noOrders": "Disable user sorting",
 				"relCategory": "Affichage des catégories",
 				"relFlow": "Affichage de la progression du flux"
 			},

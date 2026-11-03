@@ -1079,7 +1079,11 @@
 			"fieldDefault": "Standardwert",
 			"fieldDefaultPresetIds": "Standard vord. Datensätze",
 			"fieldFlags": {
+				"collapseHeader": "Kopfzeile standardm. einklappen",
 				"hideInputs": "Eingaben verstecken",
+				"noFilters": "Benutzerfilterung deaktivieren",
+				"noOptions": "Benutzeroptionen deaktivieren",
+				"noOrders": "Benutzersortierung deaktivieren",
 				"relCategory": "Kategorieanzeige",
 				"relFlow": "Fortschrittsanzeige"
 			},

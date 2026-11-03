@@ -1079,7 +1079,11 @@
 			"fieldDefault": "Valor predefinido",
 			"fieldDefaultPresetIds": "Pré-definição(ões) predefinida(s)",
 			"fieldFlags": {
+				"collapseHeader": "Collapse header by default",
 				"hideInputs": "Ocultar entradas",
+				"noFilters": "Disable user filters",
+				"noOptions": "Disable user options",
+				"noOrders": "Disable user sorting",
 				"relCategory": "Exibição de categoria",
 				"relFlow": "Exibição de fluxo de progresso"
 			},

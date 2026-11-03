@@ -154,6 +154,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE instance.oauth_client ADD   COLUMN migrate_by_name BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.oauth_client ALTER COLUMN migrate_by_name DROP DEFAULT;
+
+			-- list field flags
+			ALTER TYPE app.field_flag ADD VALUE 'noFilters';
+			ALTER TYPE app.field_flag ADD VALUE 'noOptions';
+			ALTER TYPE app.field_flag ADD VALUE 'noOrders';
+			ALTER TYPE app.field_flag ADD VALUE 'collapseHeader';
 		`)
 		return "3.14", err
 	},

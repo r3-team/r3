@@ -59,14 +59,9 @@
 }
 .list-header .empty {
 	flex: 1 1 auto;
-	max-width: 11px;
+	max-width: 8px;
 }
-.list-header-title > img {
-	width: auto;
-	height: 24px;
-	filter: var(--image-filter);
-}
-.list-header-title > span {
+.list-header-title {
 	font-size: 120%;
 	text-wrap: nowrap;
 }

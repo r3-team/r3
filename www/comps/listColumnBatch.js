@@ -122,7 +122,7 @@ export default {
 					/>
 				</template>
 
-				<!-- filter actions -->
+				<!-- actions -->
 				<div class="row space-between">
 					<my-button image="remove.png"
 						v-if="showFilterAny"
@@ -146,13 +146,15 @@ export default {
 		columns: { type: Array, required: true }, // list columns
 		filters: { type: Array, required: true }, // list filters all combined (columns, list, quick, user, choices, ...)
 		filtersColumn: { type: Array, required: true }, // list filters from users column batch selections
+		filtersEnable: { type: Boolean, required: true },  // any filtering enabled
 		isOrderedByUser: { type: Boolean, required: true }, // list orders was changed by user (can fit original definition at the same time)
 		isOrderedOrginal: { type: Boolean, required: true }, // list orders follow author definition
 		joins: { type: Array, required: true }, // list joins
 		orders: { type: Array, required: true }, // list orders
+		ordersEnable: { type: Boolean, required: true }, // any ordering allowed
 		relationId: { type: String, required: true }, // list query base relation ID
 		rowCount: { type: Number, required: true }, // list total row count
-		simpleSortOnly: { type: Boolean, required: true }  // list column can only sort, does not dropdown or offer any other option
+		simpleSortOnly: { type: Boolean, required: true },  // list column can only sort, does not dropdown or offer any other option
 	},
 	emits: ['del-aggregator', 'del-order', 'set-aggregator', 'set-filters', 'set-order', 'set-order-only'],
 	data() {
@@ -252,8 +254,9 @@ export default {
 
 		// simple
 		aggrColumn: s => s.getFirstColumnUsableAsAggregator(s.columnBatch, s.columns),
-		canOpen: s => s.rowCount > 1 || s.isFiltered,
-		canOrder: s => s.columnBatch.columnIndexesSortBy.length !== 0,
+		canFilter: s => s.filtersEnable,
+		canOpen: s => s.rowCount > 1 && (s.canOrder || s.canFilter) || s.isFiltered,
+		canOrder: s => s.ordersEnable && s.columnBatch.columnIndexesSortBy.length !== 0,
 		filtersColumnThis: s => s.filtersColumn.filter((v, i) => s.columnFilterIndexes.includes(i)),
 		isDateOrTime: s => s.isValidFilter && s.columnUsedFilter.attributeId !== null && ['datetime', 'date', 'time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered: s => s.columnFilterIndexes.length !== 0,
@@ -262,8 +265,8 @@ export default {
 		isValidFilter: s => s.columnUsedFilter !== null,
 		isValueLimitFull: s => s.values.length === s.valueLimit,
 		showFilterAny: s => s.showFilterItems || s.showFilterText,
-		showFilterItems: s => s.values.length !== 0,
-		showFilterText: s => !s.isDateOrTime && s.isValidFilter,
+		showFilterItems: s => s.canFilter && s.values.length !== 0,
+		showFilterText: s => s.canFilter && !s.isDateOrTime && s.isValidFilter,
 		showIconFilter: s => s.isValidFilter && s.isFiltered,
 		showIconOrder: s => s.isOrdered,
 

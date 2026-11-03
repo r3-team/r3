@@ -222,6 +222,7 @@ export default {
 					:formLoading
 					:hasOpenForm="field.openForm !== null"
 					:hasOpenFormBulk="field.openFormBulk !== null"
+					:headerShowDef="!field.flags.includes('collapseHeader')"
 					:isHidden
 					:isSingleField="isAlone"
 					:layoutDefault="field.layout"
@@ -231,6 +232,9 @@ export default {
 					:moduleId
 					:popUpFormInline
 					:query
+					:userFilters="!field.flags.includes('noFilters')"
+					:userOptions="!field.flags.includes('noOptions')"
+					:userOrders="!field.flags.includes('noOrders')"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				>
 					<template #input-icon>

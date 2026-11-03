@@ -20,12 +20,8 @@ import MyBuilderOpenForm from './builderOpenForm.js';
 export default {
 	name: 'my-builder-field-options',
 	components: {
-		MyBuilderCaption,
-		MyBuilderCollectionInput,
-		MyBuilderFieldOptionsChart,
-		MyBuilderFieldOptionsMapLayerData,
-		MyBuilderIconInput,
-		MyBuilderOpenDoc,
+		MyBuilderCaption, MyBuilderCollectionInput, MyBuilderFieldOptionsChart,
+		MyBuilderFieldOptionsMapLayerData, MyBuilderIconInput, MyBuilderOpenDoc,
 		MyBuilderOpenForm
 	},
 	template: `<div class="builder-field-options">
@@ -322,55 +318,83 @@ export default {
 					</template>
 				</template>
 
-				<!-- general field options -->
-				<tr v-if="isData && !isFiles && !isDate && !isDatetime && !isTime">
+				<!-- field options -->
+				<tr v-if="isList || (isData && !isFiles && !isDate && !isDatetime && !isTime)">
 					<td>{{ capGen.options }}</td>
 					<td>
-						<div class="row gap wrap">
-							<template v-if="!isRelationship">
-								<my-button-check
-									v-if="!isDrawing"
-									@update:modelValue="setFlags('clipboard',$event)"
-									:caption="capGen.clipboard"
-									:modelValue="field.flags.includes('clipboard')"
-									:readonly
-								/>
-								<my-button-check
-									v-if="!isDrawing"
-									@update:modelValue="setFlags('monospace',$event)"
-									:caption="capGen.monospace"
-									:modelValue="field.flags.includes('monospace')"
-									:readonly
-								/>
-								<my-button-check
-									v-if="isIFrame || isBarcode || isDrawing"
-									@update:modelValue="setFlags('hideInputs',$event)"
-									:caption="capApp.fieldFlags.hideInputs"
-									:modelValue="field.flags.includes('hideInputs')"
-									:readonly
-								/>
-							</template>
-							<template v-if="isRelationship">
-								<my-button-check
-									@update:modelValue="setFlags('relCategory',$event)"
-									:caption="capApp.fieldFlags.relCategory"
-									:modelValue="field.flags.includes('relCategory')"
-									:readonly="field.flags.includes('relFlow') || readonly"
-								/>
-								<my-button-check
-									@update:modelValue="setFlags('relFlow',$event)"
-									:caption="capApp.fieldFlags.relFlow"
-									:modelValue="field.flags.includes('relFlow')"
-									:readonly="field.flags.includes('relCategory') || isRelationship1N || readonly"
-								/>
-								<my-button-check
-									v-if="!isVariable"
-									@update:modelValue="set('filterQuick',$event)"
-									:caption="capApp.filterQuick"
-									:modelValue="field.filterQuick"
-									:readonly
-								/>
-							</template>
+						<div class="input-custom item-box">
+							<div class="row gap wrap">
+								<template v-if="isList">
+									<my-button-check
+										@update:modelValue="setFlags('noOrders',$event)"
+										:caption="capApp.fieldFlags.noOrders"
+										:modelValue="field.flags.includes('noOrders')"
+										:readonly
+									/>
+									<my-button-check
+										@update:modelValue="setFlags('noFilters',$event)"
+										:caption="capApp.fieldFlags.noFilters"
+										:modelValue="field.flags.includes('noFilters')"
+										:readonly
+									/>
+									<my-button-check
+										@update:modelValue="setFlags('noOptions',$event)"
+										:caption="capApp.fieldFlags.noOptions"
+										:modelValue="field.flags.includes('noOptions')"
+										:readonly
+									/>
+									<my-button-check
+										@update:modelValue="setFlags('collapseHeader',$event)"
+										:caption="capApp.fieldFlags.collapseHeader"
+										:modelValue="field.flags.includes('collapseHeader')"
+										:readonly
+									/>
+								</template>
+								<template v-if="isData && !isRelationship">
+									<my-button-check
+										v-if="!isDrawing"
+										@update:modelValue="setFlags('clipboard',$event)"
+										:caption="capGen.clipboard"
+										:modelValue="field.flags.includes('clipboard')"
+										:readonly
+									/>
+									<my-button-check
+										v-if="!isDrawing"
+										@update:modelValue="setFlags('monospace',$event)"
+										:caption="capGen.monospace"
+										:modelValue="field.flags.includes('monospace')"
+										:readonly
+									/>
+									<my-button-check
+										v-if="isIFrame || isBarcode || isDrawing"
+										@update:modelValue="setFlags('hideInputs',$event)"
+										:caption="capApp.fieldFlags.hideInputs"
+										:modelValue="field.flags.includes('hideInputs')"
+										:readonly
+									/>
+								</template>
+								<template v-if="isData && isRelationship">
+									<my-button-check
+										@update:modelValue="setFlags('relCategory',$event)"
+										:caption="capApp.fieldFlags.relCategory"
+										:modelValue="field.flags.includes('relCategory')"
+										:readonly="field.flags.includes('relFlow') || readonly"
+									/>
+									<my-button-check
+										@update:modelValue="setFlags('relFlow',$event)"
+										:caption="capApp.fieldFlags.relFlow"
+										:modelValue="field.flags.includes('relFlow')"
+										:readonly="field.flags.includes('relCategory') || isRelationship1N || readonly"
+									/>
+									<my-button-check
+										v-if="!isVariable"
+										@update:modelValue="set('filterQuick',$event)"
+										:caption="capApp.filterQuick"
+										:modelValue="field.filterQuick"
+										:readonly
+									/>
+								</template>
+							</div>
 						</div>
 					</td>
 				</tr>

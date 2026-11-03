@@ -26,7 +26,7 @@ const MyGlobalSearchModuleSearchBar = {
 			:filterQuick="true"
 			:formLoading="!ready"
 			:hasOpenForm="searchBar.openForm !== null"
-			:headerActions="false"
+			:headerCollapse="false"
 			:headerColumns="options.showHeader"
 			:isDynamicSize="true"
 			:isSingleField="true"
@@ -34,6 +34,8 @@ const MyGlobalSearchModuleSearchBar = {
 			:loginOptions="listOptions"
 			:moduleId="searchBar.moduleId"
 			:query="searchBar.query"
+			:userFilters="false"
+			:userOptions="false"
 		>
 			<template #input-icon>
 				<my-label

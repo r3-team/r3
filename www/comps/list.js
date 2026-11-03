@@ -198,14 +198,11 @@ export default {
 					:caption="showActionTitles ? capGen.button.delete : ''"
 					:captionTitle="capGen.button.deleteHint"
 				/>
+				<div class="list-header-title" v-if="showTitle">{{ caption }}</div>
 			</div>
 
 			<!-- empty element for header collapse calculation -->
 			<div ref="empty" class="empty"></div>
-
-			<div class="row gap nowrap centered list-header-title" v-if="showTitle">
-				<span v-if="caption !== ''">{{ caption }}</span>
-			</div>
 
 			<div class="row gap nowrap">
 				<my-input-offset
@@ -220,6 +217,9 @@ export default {
 				/>
 			</div>
 
+			<!-- empty element for header collapse calculation (2nd element for space-between layout) -->
+			<div class="empty"></div>
+
 			<div class="row gap nowrap default-inputs">
 				<my-button
 					v-if="showRefresh"
@@ -231,7 +231,7 @@ export default {
 				/>
 
 				<my-button image="filterCog.png"
-					v-if="headerActions"
+					v-if="userFilters"
 					@trigger="showFilters = !showFilters"
 					@trigger-right="setUserFilters([])"
 					:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
@@ -271,13 +271,13 @@ export default {
 				</select>
 
 				<my-button image="listCog.png"
-					v-if="headerActions"
+					v-if="userOptions"
 					@trigger="showOptions = !showOptions"
 					:captionTitle="capGen.options"
 					:naked="true"
 				/>
 				<my-button image="toggleUp.png"
-					v-if="!isCards && headerActions && headerElements.includes('headerCollapse')"
+					v-if="!isCards && headerCollapse && headerElements.includes('headerCollapse')"
 					@trigger="toggleHeader"
 					:captionTitle="capApp.button.collapseHeader"
 					:naked="true"
@@ -321,11 +321,13 @@ export default {
 									:columns
 									:filters="filtersCombined"
 									:filtersColumn
+									:filtersEnable="userFilters"
 									:isOrderedByUser
 									:isOrderedOrginal
 									:joins="relationsJoined"
 									:key="b.key"
 									:orders
+									:ordersEnable="userOrders"
 									:relationId="query.relationId"
 									:rowCount="count"
 									:simpleSortOnly="columnsSortOnly"
@@ -630,13 +632,17 @@ export default {
 		hasOpenForm: { type: Boolean, required: false, default: false },     // list can open record in form
 		hasOpenFormBulk: { type: Boolean, required: false, default: false }, // list can open records in bulk form
 		header: { type: Boolean, required: false, default: true },           // show list header
-		headerActions: { type: Boolean, required: false, default: true },    // show list header actions (complex filters, list options, header collapse)
+		headerCollapse: { type: Boolean, required: false, default: true },   // show list header collapse option
 		headerColumns: { type: Boolean, required: false, default: true },    // show list column headers
+		headerShowDef: { type: Boolean, required: false, default: true },    // show header by default
 		isDynamicSize: { type: Boolean, required: false, default: false },   // list does not have minimum fixed height
 		isInput: { type: Boolean, required: false, default: false },         // list is used as input
 		isHidden: { type: Boolean, required: false, default: false },        // list is not visible and therefore not loaded/updated
 		isSingleField: { type: Boolean, required: false, default: false },   // list is single field within a parent (form/tab - not container!)
 		loadWhileHidden: { type: Boolean, required: false, default: false },
+		userFilters: { type: Boolean, required: false, default: true },      // enable user filters (complex, column - quick search is its own option though)
+		userOptions: { type: Boolean, required: false, default: true },      // enable access to user options
+		userOrders: { type: Boolean, required: false, default: true },       // enable user sorting
 		usesPageHistory: { type: Boolean, required: false, default: false }, // list uses page getters for filtering/sorting/etc.
 
 		// list as input field
@@ -812,7 +818,7 @@ export default {
 		showOffsetArrows: s => s.headerElements.includes('offsetArrows'),
 		showRefresh: s => s.headerElements.includes('refresh'),
 		showResultsCount: s => s.headerElements.includes('resultsCount'),
-		showTitle: s => s.headerElements.includes('listTitle'),
+		showTitle: s => s.caption !== '' && s.headerElements.includes('listTitle'),
 		showCollectionCnt: s => {
 			if (s.headerElements.includes('collectionValuesAll')) return 999;
 			if (s.headerElements.includes('collectionValuesFew')) return 2;
@@ -827,7 +833,7 @@ export default {
 		columnIdMapAggr: s => s.$root.getOrFallback(s.loginOptions, 'columnIdMapAggr', {}), // aggregators by column ID
 		filtersColumn: s => s.$root.getOrFallback(s.loginOptions, 'filtersColumn', []),     // column filters
 		filtersUser: s => s.$root.getOrFallback(s.loginOptions, 'filtersUser', []),         // user filters
-		showHeader: s => s.$root.getOrFallback(s.loginOptions, 'header', true),             // show UI for list header
+		showHeader: s => s.$root.getOrFallback(s.loginOptions, 'header', s.headerShowDef),  // show UI for list header
 		limit: s => s.$root.getOrFallback(s.loginOptions, 'limit', s.limitDefault),         // result limit
 		layout: s => s.$root.getOrFallback(s.loginOptions, 'layout', s.layoutDefault),      // list layout (table, cards)
 		orders: s => s.$root.getOrFallback(s.loginOptions, 'orders', s.ordersOriginal),     // order by definitions for query

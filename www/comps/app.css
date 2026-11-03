@@ -292,6 +292,9 @@ hr {
 .row.wrap {
 	flex-wrap: wrap;
 }
+.hideIfEmpty:empty {
+	display: none;
+}
 .shade {
 	box-shadow: 1px 1px 2px var(--color-shade);
 }
