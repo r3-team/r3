@@ -204,6 +204,8 @@ h3 {
 hr {
 	border-top: 1px solid var(--color-border);
 	border-bottom: none;
+}
+hr.grow {
 	width: 100%;
 }
 *:disabled,

@@ -107,7 +107,7 @@ export default {
 								<option value="restFileAttachViaREI3API">{{ capApp.template.restFileAttachViaREI3API }}</option>
 							</select>
 						</div>
-						<hr />
+						<hr class="grow" />
 
 						<div class="row centered">
 							<span>{{ capApp.pgFunctionTrigger }}</span>

@@ -187,7 +187,7 @@ export default {
 					</div>
 					<template v-if="job.joins.length !== 0">
 						<div class="column gap" v-if="isLoad">
-							<hr />
+							<hr class="grow" />
 							<my-label image="databaseAsterisk.png" :caption="capApp.loadUniqueIndex" />
 							<my-admin-db-sync-job-lookups
 								v-if="job.joins.length !== 0"
@@ -203,7 +203,7 @@ export default {
 							/>
 						</div>
 						<div class="column gap">
-							<hr />
+							<hr class="grow" />
 							<div class="row gap centered space-between">
 								<my-label image="files_list2.png" :caption="labelAttributes" />
 								<my-button image="add.png"
@@ -235,7 +235,7 @@ export default {
 						</div>
 
 						<template v-if="isPageLimit">
-							<hr />
+							<hr class="grow" />
 							<div class="column gap">
 								<my-label image="code.png" :caption="capGen.placeholders" />
 								<span v-for="(p,k) in placeholdersLoad">{{ k }} <b>{{ p }}</b></span>
@@ -243,7 +243,7 @@ export default {
 						</template>
 
 						<template v-if="warnings.length !== 0">
-							<hr />
+							<hr class="grow" />
 							<my-label image="warning.png" :caption="capGen.warnings" :error="true" :large="true" />
 							<my-label image="warning.png" v-for="w in warnings" :caption="w" />
 						</template>
