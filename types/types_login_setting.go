@@ -5,7 +5,7 @@ import "github.com/jackc/pgx/v5/pgtype"
 type Settings struct {
 	BoolAsIcon        bool        `json:"boolAsIcon"`   // controls display in views
 	BoolAsToggle      bool        `json:"boolAsToggle"` // controls display in inputs
-	BordersSquared    bool        `json:"bordersSquared"`
+	BorderRadius      int         `json:"borderRadius"`
 	CodeEditorTheme   string      `json:"codeEditorTheme"`
 	CodeEditorWrap    bool        `json:"codeEditorWrap"`
 	CollapseRemember  bool        `json:"collapseRemember"`

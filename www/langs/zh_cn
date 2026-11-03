@@ -2514,6 +2514,7 @@
 		"boolFalse": "False",
 		"boolTrue": "True",
 		"border": "Border",
+		"borderRadius": "Border radius",
 		"bright": "Bright",
 		"busy": "工作中 - 点击此处中止",
 		"button": {
@@ -3127,7 +3128,6 @@
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "边框",
-		"bordersSquared": "方形",
 		"button": {
 			"loginOptionsDel": "Reset all field settings",
 			"logout": "登出"

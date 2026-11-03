@@ -2514,6 +2514,7 @@
 		"boolFalse": "False",
 		"boolTrue": "True",
 		"border": "Bordure",
+		"borderRadius": "Border radius",
 		"bright": "Bright",
 		"busy": "En cours - Cliquez ici pour annuler",
 		"button": {
@@ -3127,7 +3128,6 @@
 		"boolAsIcon": "Valeurs booléennes sous forme d'icônes",
 		"boolAsToggle": "Entrées booléennes sous forme de commutateurs",
 		"borders": "Bordures",
-		"bordersSquared": "Carrées",
 		"button": {
 			"loginOptionsDel": "Réinitialiser tous les paramètres des champs",
 			"logout": "Déconnexion"

@@ -1622,10 +1622,6 @@ table td.maximum {
 	--shadow-input: 1px 1px 3px var(--color-shade);
 }
 
-.user-bordersSquared {
-	--border-input-radius: 0px;
-	--border-input-radius-large: 0px;
-}
 .user-shadowsInputs {
 	--border-input: 1px solid transparent;
 	--shadow-input: 1px 1px 3px var(--color-shade);
@@ -1666,19 +1662,48 @@ table td.maximum {
 	font-family: Verdana, Arial, sans-serif;
 }
 
-.user-spacing.spacing-value1 {
+.user-border-radius0 {
+	--border-input-radius: 0px;
+	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+}
+.user-border-radius1 {
+	--border-input-radius: 2px;
+	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+}
+.user-border-radius2 {
+	--border-input-radius: 3px;
+	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+}
+.user-border-radius3 {
+	--border-input-radius: 5px;
+	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+}
+.user-border-radius4 {
+	--border-input-radius: 7px;
+	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+}
+.user-border-radius5 {
+	--border-input-radius: 9px;
+	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+}
+.user-border-radius6 {
+	--border-input-radius: 11px;
+	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+}
+
+.user-spacing1 {
 	--spacing: 10px;
 }
-.user-spacing.spacing-value2 {
+.user-spacing2 {
 	--spacing: 13px;
 }
-.user-spacing.spacing-value3 {
+.user-spacing3 {
 	--spacing: 16px;
 }
-.user-spacing.spacing-value4 {
+.user-spacing4 {
 	--spacing: 19px;
 }
-.user-spacing.spacing-value5 {
+.user-spacing5 {
 	--spacing: 22px;
 }
 .user-spacing {

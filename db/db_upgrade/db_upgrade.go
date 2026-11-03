@@ -163,6 +163,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- relationship input column styles
 			ALTER TYPE app.column_style ADD VALUE 'relHide';
+
+			-- border radius setting
+			ALTER TABLE instance.login_setting ADD   COLUMN border_radius SMALLINT NOT NULL DEFAULT 3;
+			ALTER TABLE instance.login_setting ALTER COLUMN border_radius DROP DEFAULT;
+
+			UPDATE instance.login_setting SET border_radius = 0 WHERE borders_squared;
+
+			ALTER TABLE instance.login_setting DROP COLUMN borders_squared;
 		`)
 		return "3.14", err
 	},

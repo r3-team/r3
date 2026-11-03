@@ -154,12 +154,7 @@ export default {
 						</tr>
 						<tr>
 							<td>{{ capGen.inputs }}</td>
-							<td>
-								<div class="row gap">
-									<my-button-check v-model="settings.shadowsInputs"  :caption="capGen.shadows" />
-									<my-button-check v-model="settings.bordersSquared" :caption="capAppSet.bordersSquared" />
-								</div>
-							</td>
+							<td><my-button-check v-model="settings.shadowsInputs" :caption="capGen.shadows" /></td>
 						</tr>
 						<tr>
 							<td>{{ capAppSet.fontFamily }}</td>
@@ -205,6 +200,15 @@ export default {
 									<option :value="4">{{ capGen.option.size3 }}</option>
 									<option :value="5">{{ capGen.option.size4 }}</option>
 								</select>
+							</td>
+						</tr>
+						<tr class="default-inputs">
+							<td class="maximum">{{ capGen.borderRadius }}</td>
+							<td>
+								<input class="input-custom" type="range" min="0" max="6"
+									@input="settings.borderRadius = parseInt($event.target.value)"
+									:value="settings.borderRadius"
+								/>
 							</td>
 						</tr>
 						<tr class="default-inputs">
@@ -368,7 +372,7 @@ export default {
 		this.settings = {
 			boolAsIcon: true,
 			boolAsToggle: true,
-			bordersSquared: false,
+			borderRadius: 3,
 			collapseRemember: true,
 			colorClassicMode: false,
 			colorHeader: null,

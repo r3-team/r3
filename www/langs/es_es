@@ -2514,6 +2514,7 @@
 		"boolFalse": "False",
 		"boolTrue": "True",
 		"border": "Border",
+		"borderRadius": "Border radius",
 		"bright": "Claro",
 		"busy": "Trabajando - Haga clic aquí para abortar",
 		"button": {
@@ -3127,7 +3128,6 @@
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Bordes",
-		"bordersSquared": "Cuadrados",
 		"button": {
 			"loginOptionsDel": "Reset all field settings",
 			"logout": "Cerrar sesión"

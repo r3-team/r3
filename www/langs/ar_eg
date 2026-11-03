@@ -2514,6 +2514,7 @@
 		"boolFalse": "False",
 		"boolTrue": "True",
 		"border": "Border",
+		"borderRadius": "Border radius",
 		"bright": "ساطع",
 		"busy": "العمل - انقر هنا للإلغاء",
 		"button": {
@@ -3127,7 +3128,6 @@
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "الحدود",
-		"bordersSquared": "تربيع",
 		"button": {
 			"loginOptionsDel": "Reset all field settings",
 			"logout": "تسجيل الخروج"

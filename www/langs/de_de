@@ -2514,6 +2514,7 @@
 		"boolFalse": "False",
 		"boolTrue": "True",
 		"border": "Rahmen",
+		"borderRadius": "Rahmenradius",
 		"bright": "Hell",
 		"busy": "Arbeitet - Zum Abbrechen hier klicken",
 		"button": {
@@ -3127,7 +3128,6 @@
 		"boolAsIcon": "Icons für Wahrheitswerte in Sichten",
 		"boolAsToggle": "Schalter für Wahrheitswerte in Eingaben",
 		"borders": "Rahmen",
-		"bordersSquared": "Eckig",
 		"button": {
 			"loginOptionsDel": "Alle Feldeinstellungen zurücksetzen",
 			"logout": "Abmelden"

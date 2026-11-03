@@ -262,11 +262,10 @@ export default {
 				return 'login-visible';
 
 			const classes = [
-				'user-spacing', `spacing-value${s.settings.spacing}`,
+				`user-border-radius${s.settings.borderRadius}`,
+				`user-spacing${s.settings.spacing}`,
 				'user-font', s.settings.fontFamily
 			];
-
-			if (s.settings.bordersSquared) classes.push('user-bordersSquared');
 			if (s.settings.dark) classes.push('user-dark');
 			if (s.settings.mobileScrollForm) classes.push('user-mobileScrollForm');
 			if (s.settings.listSpaced) classes.push('user-listSpaced');

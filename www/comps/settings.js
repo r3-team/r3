@@ -558,17 +558,12 @@ export default {
 					<tbody>
 						<tr>
 							<td class="maximum">{{ capGen.inputs }}</td>
-							<td>
-								<div class="row gap">
-									<my-button-check v-model="settingsInput.shadowsInputs"  :caption="capGen.shadows" />
-									<my-button-check v-model="settingsInput.bordersSquared" :caption="capApp.bordersSquared" />
-								</div>
-							</td>
+							<td><my-button-check v-model="settingsInput.shadowsInputs"  :caption="capGen.shadows" /></td>
 						</tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.fontFamily }}</td>
 							<td>
-								<div class="row gap wrap">
+								<div class="row gap">
 									<select v-model="settingsInput.fontFamily">
 										<optgroup label="sans-serif">
 											<option value="calibri">Calibri</option>
@@ -591,7 +586,7 @@ export default {
 										</optgroup>
 									</select>
 
-									<select v-model="settingsInput.fontSize" :title="capApp.fontSize">
+									<select class="short" v-model="settingsInput.fontSize" :title="capApp.fontSize">
 										<option v-for="i in 11"
 											:value="70 + (i*5)"
 										>{{ (70 + (i*5)) + '%' }}</option>
@@ -609,6 +604,15 @@ export default {
 									<option :value="4">{{ capGen.option.size3 }}</option>
 									<option :value="5">{{ capGen.option.size4 }}</option>
 								</select>
+							</td>
+						</tr>
+						<tr class="default-inputs">
+							<td class="maximum">{{ capGen.borderRadius }}</td>
+							<td>
+								<input class="input-custom" type="range" min="0" max="6"
+									@input="settingsInput.borderRadius = parseInt($event.target.value)"
+									:value="settingsInput.borderRadius"
+								/>
 							</td>
 						</tr>
 						<tr class="default-inputs">

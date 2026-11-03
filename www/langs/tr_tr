@@ -2514,6 +2514,7 @@
 		"boolFalse": "YANLIŞ",
 		"boolTrue": "Doğru",
 		"border": "Sınır",
+		"borderRadius": "Border radius",
 		"bright": "Parlak",
 		"busy": "Çalışıyor - İptal etmek için burayı tıklayın",
 		"button": {
@@ -3127,7 +3128,6 @@
 		"boolAsIcon": "Boolean values as icons in views",
 		"boolAsToggle": "Boolean inputs as toggles",
 		"borders": "Kenarlıklar",
-		"bordersSquared": "Kare",
 		"button": {
 			"loginOptionsDel": "Tüm saha ayarlarını sıfırla",
 			"logout": "Oturumu kapat"
