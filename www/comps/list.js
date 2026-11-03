@@ -209,7 +209,7 @@ export default {
 					v-if="hasPaging"
 					@input="setOffsetParamAndReload($event,true)"
 					:arrows="showOffsetArrows"
-					:caption="showResultsCount && count > 1"
+					:caption="showResultsCount && (count > limit || count > 50)"
 					:inputAsPageNo="settings.offsetPageNo"
 					:limit
 					:offset
