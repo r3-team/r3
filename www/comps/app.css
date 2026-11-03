@@ -668,7 +668,7 @@ hr.grow {
 	overflow: visible;
 
 	position: absolute;
-	position-area: bottom span-right;
+	position-area: bottom;
 	position-anchor: --dropdown-parent;
 	position-try-fallbacks: --dropdown-top;
 	container-type: anchored;
@@ -686,6 +686,7 @@ hr.grow {
 	border-top: 1px solid var(--color-border);
 }
 @position-try --dropdown-top {
+	/* 1st fallback: attach to top of parent instead */
 	position-area: top;
 }
 @container anchored(fallback: --dropdown-top) {
