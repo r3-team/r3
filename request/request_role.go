@@ -24,5 +24,5 @@ func RoleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return role.Set_tx(ctx, tx, req)
+	return role.Set_tx(ctx, tx, false, req)
 }

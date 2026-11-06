@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/log"
 	"r3/schema/compatible"
 	"r3/types"
 	"r3/types/constants"
@@ -50,10 +51,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UU
 	return f, err
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UUID, f types.OpenForm, context pgtype.Text) error {
+func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, id uuid.UUID, onlyCreate bool, f types.OpenForm, context pgtype.Text) {
 
 	if !slices.Contains(constants.DbAssignedOpenForm, entity) {
-		return errors.New("invalid open form entity")
+		log.Error(log.ContextTransfer, "cannot store open form", errors.New(fmt.Sprintf("invalid assigned entity '%s'", entity)))
+		return
 	}
 
 	// fix imports < 3.4: Legacy pop-up option
@@ -62,35 +64,31 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UU
 	// fix imports < 3.5: Relation index for applying record relationship value
 	f = compatible.FixOpenFormRelationIndexApply(f)
 
-	sqlArgs := make([]any, 0)
-	sqlArgs = append(sqlArgs, id)
+	if !onlyCreate {
+		sqlArgs := make([]any, 0)
+		sqlArgs = append(sqlArgs, id)
 
-	sqlWhere := "AND context IS NULL"
-	if context.Valid {
-		sqlArgs = append(sqlArgs, context.String)
-		sqlWhere = "AND context = $2"
+		sqlWhere := "AND context IS NULL"
+		if context.Valid {
+			sqlArgs = append(sqlArgs, context.String)
+			sqlWhere = "AND context = $2"
+		}
+
+		bt.Queue(fmt.Sprintf(`
+			DELETE FROM app.open_form
+			WHERE %s_id = $1
+			%s
+		`, entity, sqlWhere), sqlArgs...)
 	}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM app.open_form
-		WHERE %s_id = $1
-		%s
-	`, entity, sqlWhere), sqlArgs...); err != nil {
-		return err
+	if f.FormIdOpen != uuid.Nil {
+		bt.Queue(fmt.Sprintf(`
+			INSERT INTO app.open_form (
+				%s_id, context, form_id_open, relation_index_open, attribute_id_apply,
+				relation_index_apply, pop_up_type, max_height, max_width
+			)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		`, entity), id, context, f.FormIdOpen, f.RelationIndexOpen, f.AttributeIdApply,
+			f.RelationIndexApply, f.PopUpType, f.MaxHeight, f.MaxWidth)
 	}
-
-	if f.FormIdOpen == uuid.Nil {
-		return nil
-	}
-
-	_, err := tx.Exec(ctx, fmt.Sprintf(`
-		INSERT INTO app.open_form (
-			%s_id, context, form_id_open, relation_index_open, attribute_id_apply,
-			relation_index_apply, pop_up_type, max_height, max_width
-		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-	`, entity), id, context, f.FormIdOpen, f.RelationIndexOpen, f.AttributeIdApply,
-		f.RelationIndexApply, f.PopUpType, f.MaxHeight, f.MaxWidth)
-
-	return err
 }

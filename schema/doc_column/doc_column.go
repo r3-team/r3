@@ -76,7 +76,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 	return columns, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []types.DocColumn) error {
+func Set_bt(bt *pgx.Batch, docFieldId uuid.UUID, onlyCreate bool, columns []types.DocColumn) error {
 
 	columnIds := make([]uuid.UUID, 0)
 	for i, c := range columns {
@@ -84,7 +84,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 		// fix imports < 3.13: Set empty content
 		c = compatible.FixMissingDocColumnContent(c)
 
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.doc_column (id, doc_field_id, content, pg_function_id_call, attribute_id, attribute_index,
 				aggregator, aggregator_row, length, distincted, group_by, scalar_function, size_x, text_postfix,
 				text_prefix, position)
@@ -95,48 +95,34 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 				length = $9, distincted = $10, group_by = $11, scalar_function = $12, size_x = $13, text_postfix = $14,
 				text_prefix = $15, position = $16
 		`, c.Id, docFieldId, c.Content, c.PgFunctionId, c.AttributeId, c.AttributeIndex, c.Aggregator, c.AggregatorRow,
-			c.Length, c.Distincted, c.GroupBy, c.Scalar, c.SizeX, c.TextPostfix, c.TextPrefix, i); err != nil {
+			c.Length, c.Distincted, c.GroupBy, c.Scalar, c.SizeX, c.TextPostfix, c.TextPrefix, i)
 
-			return err
-		}
 		columnIds = append(columnIds, c.Id)
 
-		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
+		caption.Set_bt(bt, c.Id, onlyCreate, c.Captions)
+		if err := doc_set.Set_bt(bt, c.Id, constants.DbDocColumn, constants.DbDocContextBody, onlyCreate, c.SetsBody); err != nil {
 			return err
 		}
-		if err := doc_set.Set_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextBody, c.SetsBody); err != nil {
+		if err := doc_set.Set_bt(bt, c.Id, constants.DbDocColumn, constants.DbDocContextFooter, onlyCreate, c.SetsFooter); err != nil {
 			return err
 		}
-		if err := doc_set.Set_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextFooter, c.SetsFooter); err != nil {
-			return err
-		}
-		if err := doc_set.Set_tx(ctx, tx, c.Id, constants.DbDocColumn, constants.DbDocContextHeader, c.SetsHeader); err != nil {
+		if err := doc_set.Set_bt(bt, c.Id, constants.DbDocColumn, constants.DbDocContextHeader, onlyCreate, c.SetsHeader); err != nil {
 			return err
 		}
 
 		switch c.Content {
 		case constants.DbColumnContentQuery:
-			if err := query.Set_tx(ctx, tx, constants.DbDocColumn, c.Id, 0, 0, 0, c.Query); err != nil {
-				return err
-			}
+			query.Set_bt(bt, constants.DbDocColumn, c.Id, onlyCreate, 0, 0, 0, c.Query)
 		case constants.DbColumnContentFncPg, constants.DbColumnContentFncScalar:
-			if err := setArguments_tx(ctx, tx, c.Id, c.Arguments); err != nil {
-				return err
-			}
+			setArguments_bt(bt, c.Id, onlyCreate, c.Arguments)
 		}
 	}
 
-	if len(columnIds) == 0 {
-		if _, err := tx.Exec(ctx, `DELETE FROM app.doc_column WHERE doc_field_id = $1`, docFieldId); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			DELETE FROM app.doc_column
-			WHERE doc_field_id =  $1
-			AND   id           <> ALL($2)
-		`, docFieldId, columnIds); err != nil {
-			return err
+	if !onlyCreate {
+		if len(columnIds) == 0 {
+			bt.Queue(`DELETE FROM app.doc_column WHERE doc_field_id = $1`, docFieldId)
+		} else {
+			bt.Queue(`DELETE FROM app.doc_column WHERE doc_field_id = $1 AND id <> ALL($2)`, docFieldId, columnIds)
 		}
 	}
 	return nil

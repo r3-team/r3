@@ -26,5 +26,5 @@ func MenuTabSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) erro
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return menuTab.Set_tx(ctx, tx, req.Position, req.MenuTab)
+	return menuTab.Set_tx(ctx, tx, req.Position, false, req.MenuTab)
 }

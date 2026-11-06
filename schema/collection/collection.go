@@ -60,22 +60,20 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collect
 	return collections, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, name string,
-	columns []types.Column, queryIn types.Query, inHeader []types.CollectionConsumer) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, onlyCreate bool, iconId pgtype.UUID,
+	name string, columns []types.Column, queryIn types.Query, inHeader []types.CollectionConsumer) error {
 
-	if _, err := tx.Exec(ctx, `
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.collection (id,module_id,icon_id,name)
 		VALUES ($1,$2,$3,$4)
 		ON CONFLICT (id)
 		DO UPDATE SET icon_id = $3, name = $4
-	`, id, moduleId, iconId, name); err != nil {
-		return err
-	}
-	if err := query.Set_tx(ctx, tx, constants.DbCollection, id, 0, 0, 0, queryIn); err != nil {
-		return err
-	}
-	if err := column.Set_tx(ctx, tx, constants.DbCollection, id, columns); err != nil {
-		return err
-	}
-	return consumer.Set_tx(ctx, tx, constants.DbCollection, id, "headerDisplay", inHeader)
+	`, id, moduleId, iconId, name)
+
+	query.Set_bt(bt, constants.DbCollection, id, onlyCreate, 0, 0, 0, queryIn)
+	column.Set_bt(bt, constants.DbCollection, id, onlyCreate, columns)
+	consumer.Set_bt(bt, constants.DbCollection, id, onlyCreate, "headerDisplay", inHeader)
+
+	return tx.SendBatch(ctx, bt).Close()
 }

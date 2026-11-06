@@ -3,7 +3,9 @@ package doc_set
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"r3/log"
 	"r3/types"
 	"r3/types/constants"
 	"slices"
@@ -44,21 +46,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity types.DbSchemaA
 	return sets, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity types.DbSchemaApp, context types.DbSchemaApp, sets []types.DocSet) error {
+func Set_bt(bt *pgx.Batch, id uuid.UUID, entity types.DbSchemaApp, context types.DbSchemaApp, onlyCreate bool, sets []types.DocSet) error {
 
 	if !slices.Contains(constants.DbDocContextsValid, context) {
-		return fmt.Errorf("invalid document set context '%s'", context)
+		log.Error(log.ContextTransfer, "cannot store document set", errors.New(fmt.Sprintf("invalid context '%s'", context)))
+		return nil
 	}
 	if !slices.Contains(constants.DbAssignedDocSet, entity) {
-		return fmt.Errorf("invalid document set entity '%s'", entity)
+		log.Error(log.ContextTransfer, "cannot store document set", errors.New(fmt.Sprintf("invalid entity '%s'", entity)))
+		return nil
 	}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM app.doc_set
-		WHERE %s_id   = $1
-		AND   context = $2
-	`, entity), id, context); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(fmt.Sprintf(`DELETE FROM app.doc_set WHERE %s_id = $1 AND context = $2`, entity), id, context)
 	}
 
 	for _, s := range sets {
@@ -72,7 +72,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity types.DbSchemaA
 				return err
 			}
 		}
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
+		bt.Queue(fmt.Sprintf(`
 			INSERT INTO app.doc_set (%s_id, context, target, attribute_id, attribute_index, value)
 			VALUES ($1,$2,$3,$4,$5,$6)
 			ON CONFLICT(%s_id, context, target)
@@ -80,9 +80,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity types.DbSchemaA
 				attribute_id    = $4,
 				attribute_index = $5,
 				value           = $6
-		`, entity, entity), id, context, s.Target, s.AttributeId, s.AttributeIndex, vIf); err != nil {
-			return err
-		}
+		`, entity, entity), id, context, s.Target, s.AttributeId, s.AttributeIndex, vIf)
 	}
 	return nil
 }

@@ -137,7 +137,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 			}
 		}
 	}
-	return Set_tx(ctx, tx, form)
+	return Set_tx(ctx, tx, true, form)
 }
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
@@ -228,7 +228,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	return forms, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, frm types.Form) error {
 
 	// remove only invalid character (dot), used for form function references
 	frm.Name = strings.Replace(frm.Name, ".", "", -1)
@@ -245,39 +245,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 
 		return err
 	}
-	if err := query.Set_tx(ctx, tx, constants.DbForm, frm.Id, 0, 0, 0, frm.Query); err != nil {
-		return err
-	}
-
-	// set fields (recursive)
-	fieldIdMapQuery := make(map[uuid.UUID]types.Query)
-	if err := field.Set_tx(ctx, tx, frm.Id, pgtype.UUID{}, pgtype.UUID{}, frm.Fields, fieldIdMapQuery); err != nil {
-		return err
-	}
-
-	// set field queries after fields themselves
-	// query filters can reference fields so they must all exist
-	for fieldId, queryIn := range fieldIdMapQuery {
-		if err := query.Set_tx(ctx, tx, constants.DbField, fieldId, 0, 0, 0, queryIn); err != nil {
-			return err
-		}
-	}
-
-	if err := setActions_tx(ctx, tx, frm.Id, frm.Actions); err != nil {
-		return err
-	}
-	if err := setFunctions_tx(ctx, tx, frm.Id, frm.Functions); err != nil {
-		return err
-	}
-	if err := setStates_tx(ctx, tx, frm.Id, frm.States); err != nil {
-		return err
-	}
-	if err := article.Assign_tx(ctx, tx, constants.DbForm, frm.Id, frm.ArticleIdsHelp); err != nil {
-		return err
-	}
-	if err := tag.SetAssign_tx(ctx, tx, constants.DbForm, frm.Id, frm.TagIds); err != nil {
-		return err
-	}
 
 	// fix imports < 3.2: Migration from help captions to help articles
 	var err error
@@ -285,7 +252,29 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	if err != nil {
 		return err
 	}
-	return caption.Set_tx(ctx, tx, frm.Id, frm.Captions)
+
+	bt := &pgx.Batch{}
+	query.Set_bt(bt, constants.DbForm, frm.Id, onlyCreate, 0, 0, 0, frm.Query)
+
+	// set fields (recursive)
+	fieldIdMapQuery := make(map[uuid.UUID]types.Query)
+	if err := field.Set_bt(bt, frm.Id, pgtype.UUID{}, pgtype.UUID{}, onlyCreate, frm.Fields, fieldIdMapQuery); err != nil {
+		return err
+	}
+
+	// set field queries after fields themselves
+	// query filters can reference fields so they must all exist
+	for fieldId, queryIn := range fieldIdMapQuery {
+		query.Set_bt(bt, constants.DbField, fieldId, onlyCreate, 0, 0, 0, queryIn)
+	}
+
+	setActions_bt(bt, frm.Id, onlyCreate, frm.Actions)
+	setFunctions_bt(bt, frm.Id, onlyCreate, frm.Functions)
+	setStates_bt(bt, frm.Id, onlyCreate, frm.States)
+	article.Assign_bt(bt, constants.DbForm, frm.Id, onlyCreate, frm.ArticleIdsHelp)
+	tag.SetAssign_bt(bt, constants.DbForm, frm.Id, onlyCreate, frm.TagIds)
+	caption.Set_bt(bt, frm.Id, onlyCreate, frm.Captions)
+	return tx.SendBatch(ctx, bt).Close()
 }
 
 // form duplication

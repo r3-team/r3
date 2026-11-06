@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/log"
 	"r3/types"
 	"r3/types/constants"
 	"slices"
@@ -31,27 +32,21 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UU
 	return d, err
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UUID, d types.OpenDoc) error {
+func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, id uuid.UUID, onlyCreate bool, d types.OpenDoc) {
 
 	if !slices.Contains(constants.DbAssignedOpenDoc, entity) {
-		return errors.New("invalid open doc entity")
+		log.Error(log.ContextTransfer, "cannot store open doc", errors.New(fmt.Sprintf("invalid assigned entity '%s'", entity)))
+		return
 	}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM app.open_doc
-		WHERE %s_id = $1
-	`, entity), id); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(fmt.Sprintf(`DELETE FROM app.open_doc WHERE %s_id = $1`, entity), id)
 	}
 
-	if d.DocIdOpen == uuid.Nil {
-		return nil
+	if d.DocIdOpen != uuid.Nil {
+		bt.Queue(fmt.Sprintf(`
+			INSERT INTO app.open_doc (%s_id, doc_id_open, field_id_add_to, relation_index_open)
+			VALUES ($1,$2,$3,$4)
+		`, entity), id, d.DocIdOpen, d.FieldIdAddTo, d.RelationIndexOpen)
 	}
-
-	_, err := tx.Exec(ctx, fmt.Sprintf(`
-		INSERT INTO app.open_doc (%s_id, doc_id_open, field_id_add_to, relation_index_open)
-		VALUES ($1,$2,$3,$4)
-	`, entity), id, d.DocIdOpen, d.FieldIdAddTo, d.RelationIndexOpen)
-
-	return err
 }

@@ -38,5 +38,5 @@ func ApiSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return api.Set_tx(ctx, tx, req)
+	return api.Set_tx(ctx, tx, false, req)
 }

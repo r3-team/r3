@@ -64,62 +64,55 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunct
 	}
 	return functions, nil
 }
-func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, fnc types.JsFunction) error {
 
 	// remove only invalid character (dot), used for form function references
 	fnc.Name = strings.Replace(fnc.Name, ".", "", -1)
-
 	if fnc.Name == "" {
 		return fmt.Errorf("function name must not be empty")
 	}
-	if _, err := tx.Exec(ctx, `
+
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.js_function (id, module_id, form_id, name,
 			code_args, code_function, code_returns, is_client_event_exec)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 		ON CONFLICT (id)
 		DO UPDATE SET name = $4, code_args = $5, code_function = $6, code_returns = $7, is_client_event_exec = $8
-	`, fnc.Id, fnc.ModuleId, fnc.FormId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec); err != nil {
-		return err
-	}
-	if err := tag.SetAssign_tx(ctx, tx, constants.DbJsFunction, fnc.Id, fnc.TagIds); err != nil {
-		return err
-	}
-	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
-		return err
-	}
+	`, fnc.Id, fnc.ModuleId, fnc.FormId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec)
+
+	tag.SetAssign_bt(bt, constants.DbJsFunction, fnc.Id, onlyCreate, fnc.TagIds)
+	caption.Set_bt(bt, fnc.Id, onlyCreate, fnc.Captions)
 
 	// set dependencies
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.js_function_depends
-		WHERE js_function_id = $1
-	`, fnc.Id); err != nil {
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.js_function_depends WHERE js_function_id = $1`, fnc.Id)
+	}
+	if err := storeDependencies_bt(bt, fnc.Id, constants.DbCollection, fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbCollection, fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_bt(bt, fnc.Id, constants.DbField, fmt.Sprintf(`%s\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\('(%s)'`, rxPrefix, rxUuid), 3, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbField, fmt.Sprintf(`%s\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\('(%s)'`, rxPrefix, rxUuid), 3, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_bt(bt, fnc.Id, constants.DbForm, fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbForm, fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_bt(bt, fnc.Id, constants.DbJsFunction, fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbJsFunction, fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_bt(bt, fnc.Id, constants.DbPgFunction, fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbPgFunction, fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_bt(bt, fnc.Id, constants.DbRole, fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbRole, fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_bt(bt, fnc.Id, constants.DbVariable, fmt.Sprintf(`%s\.(get|set)_variable\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, constants.DbVariable, fmt.Sprintf(`%s\.(get|set)_variable\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
-		return err
-	}
-	return nil
+	return tx.SendBatch(ctx, bt).Close()
 }
 
-func storeDependencies_tx(ctx context.Context, tx pgx.Tx, functionId uuid.UUID, entity types.DbSchemaApp, regex string, submatchIndexId int, body string) error {
+func storeDependencies_bt(bt *pgx.Batch, functionId uuid.UUID, entity types.DbSchemaApp, regex string, submatchIndexId int, body string) error {
 
 	if !slices.Contains(constants.DbDependsJsFunction, entity) {
 		return fmt.Errorf("unknown JS function dependency '%s'", entity)
@@ -140,18 +133,15 @@ func storeDependencies_tx(ctx context.Context, tx pgx.Tx, functionId uuid.UUID, 
 		if err != nil {
 			return err
 		}
-
 		if _, exists := idMap[id]; exists {
 			continue
 		}
 		idMap[id] = true
 
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
+		bt.Queue(fmt.Sprintf(`
 			INSERT INTO app.js_function_depends (js_function_id, %s_id_on)
 			VALUES ($1,$2)
-		`, entity), functionId, id); err != nil {
-			return err
-		}
+		`, entity), functionId, id)
 	}
 	return nil
 }

@@ -128,7 +128,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relatio
 	return relations, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, rel types.Relation, fromLocal bool) error {
 
 	if err := db_check.DbIdentifier(rel.Name); err != nil {
 		return err
@@ -190,7 +190,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) 
 				return err
 			}
 
-			if err := attribute.Set_tx(ctx, tx, types.Attribute{
+			if err := attribute.Set_tx(ctx, tx, onlyCreate, types.Attribute{
 				Id:             idAtr,
 				RelationId:     rel.Id,
 				RelationshipId: pgtype.UUID{},
@@ -213,28 +213,25 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) 
 	}
 
 	// update record title attributes
+	bt := &pgx.Batch{}
 	for i, id := range rel.AttributeIdsTitle {
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.relation_record_title (relation_id, position, attribute_id)
 			VALUES ($1,$2,$3)
 			ON CONFLICT (relation_id, position)
 			DO UPDATE SET attribute_id = $3
-		`, rel.Id, i, id); err != nil {
-			return err
-		}
+		`, rel.Id, i, id)
 	}
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.relation_record_title
-		WHERE relation_id =  $1
-		AND   position    >= $2
-	`, rel.Id, len(rel.AttributeIdsTitle)); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(`
+			DELETE FROM app.relation_record_title
+			WHERE relation_id =  $1
+			AND   position    >= $2
+		`, rel.Id, len(rel.AttributeIdsTitle))
 	}
-	if err := tag.SetAssign_tx(ctx, tx, constants.DbRelation, rel.Id, rel.TagIds); err != nil {
-		return err
-	}
-	if err := caption.Set_tx(ctx, tx, rel.Id, rel.Captions); err != nil {
-		return err
-	}
-	return setPolicies_tx(ctx, tx, rel.Id, rel.Policies)
+	setPolicies_bt(bt, rel.Id, onlyCreate, rel.Policies)
+	tag.SetAssign_bt(bt, constants.DbRelation, rel.Id, onlyCreate, rel.TagIds)
+	caption.Set_bt(bt, rel.Id, onlyCreate, rel.Captions)
+
+	return tx.SendBatch(ctx, bt).Close()
 }

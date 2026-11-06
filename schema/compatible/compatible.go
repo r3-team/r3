@@ -235,18 +235,17 @@ func FixAttributeContentUse(contentUse types.DbSchemaAppAttributeContentUse) typ
 	}
 	return contentUse
 }
-func MigrateDisplayToContentUse_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID, display string) (string, error) {
-
+func MigrateDisplayToContentUse_bt(bt *pgx.Batch, attributeId uuid.UUID, display string) string {
 	if slices.Contains([]string{"textarea", "richtext", "date", "datetime", "time", "color"}, display) {
-		_, err := tx.Exec(ctx, `
+		bt.Queue(`
 			UPDATE app.attribute
 			SET content_use = $1
 			WHERE id = $2
 		`, display, attributeId)
 
-		return "default", err
+		return "default"
 	}
-	return display, nil
+	return display
 }
 
 // < 3.2

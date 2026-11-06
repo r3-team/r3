@@ -1,9 +1,9 @@
 package tag
 
 import (
-	"context"
 	"errors"
 	"fmt"
+	"r3/log"
 	"r3/types"
 	"r3/types/constants"
 	"slices"
@@ -12,21 +12,21 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func SetAssign_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, tagIds []uuid.UUID) error {
-
+func SetAssign_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCreate bool, tagIds []uuid.UUID) {
 	if !slices.Contains(constants.DbAssignedTag, entity) {
-		return errors.New("bad entity")
+		log.Error(log.ContextTransfer, "cannot store tag assignment", errors.New(fmt.Sprintf("invalid parent entity '%s'", entity)))
+		return
 	}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM app.tag_assign
-		WHERE %s_id = $1
-		AND tag_id <> ALL($2)
-	`, entity), entityId, tagIds); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(fmt.Sprintf(`
+			DELETE FROM app.tag_assign
+			WHERE %s_id = $1
+			AND tag_id <> ALL($2)
+		`, entity), entityId, tagIds)
 	}
 
-	_, err := tx.Exec(ctx, fmt.Sprintf(`
+	bt.Queue(fmt.Sprintf(`
 		INSERT INTO app.tag_assign (tag_id, %s_id)
 		SELECT id, $1
 		FROM app.tag
@@ -37,6 +37,4 @@ func SetAssign_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, enti
 			WHERE %s_id = $1
 		)
 	`, entity, entity), entityId, tagIds)
-
-	return err
 }

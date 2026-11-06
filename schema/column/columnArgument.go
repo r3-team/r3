@@ -8,15 +8,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func delArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) error {
-	_, err := tx.Exec(ctx, `
-		DELETE FROM app.column_argument
-		WHERE column_id = $1
-	`, columnId)
-
-	return err
-}
-
 func getArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) ([]types.DataGetArg, error) {
 
 	rows, err := tx.Query(ctx, `
@@ -43,18 +34,14 @@ func getArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) ([]type
 	return args, nil
 }
 
-func setArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID, args []types.DataGetArg) error {
-
-	if err := delArguments_tx(ctx, tx, columnId); err != nil {
-		return err
+func setArguments_bt(bt *pgx.Batch, columnId uuid.UUID, onlyCreate bool, args []types.DataGetArg) {
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.column_argument WHERE column_id = $1`, columnId)
 	}
 	for i, a := range args {
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.column_argument (column_id, position, attribute_id, attribute_index, value)
 			VALUES ($1,$2,$3,$4,$5)
-		`, columnId, i, a.AttributeId, a.AttributeIndex, a.Value); err != nil {
-			return err
-		}
+		`, columnId, i, a.AttributeId, a.AttributeIndex, a.Value)
 	}
-	return nil
 }

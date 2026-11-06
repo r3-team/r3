@@ -35,5 +35,5 @@ func PgFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) e
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return pgFunction.Set_tx(ctx, tx, req)
+	return pgFunction.Set_tx(ctx, tx, false, req)
 }

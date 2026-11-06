@@ -121,13 +121,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 	return pages, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPage) error {
+func Set_bt(bt *pgx.Batch, docId uuid.UUID, onlyCreate bool, pages []types.DocPage) error {
 
 	pageIds := make([]uuid.UUID, 0)
 	for i, p := range pages {
 		pageIds = append(pageIds, p.Id)
 
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.doc_page (id, doc_id, size, size_custom_x, size_custom_y, orientation,
 				margins, state, doc_page_id_footer_inherit, doc_page_id_header_inherit, position)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
@@ -136,71 +136,53 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 				size = $3, size_custom_x = $4, size_custom_y = $5, orientation = $6, margins = $7, state = $8,
 				doc_page_id_footer_inherit = $9, doc_page_id_header_inherit = $10, position = $11
 		`, p.Id, docId, p.Size, p.SizeCustomX, p.SizeCustomY, p.Orientation, []float64{p.Margin.T, p.Margin.R,
-			p.Margin.B, p.Margin.L}, p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i); err != nil {
-
-			return err
-		}
+			p.Margin.B, p.Margin.L}, p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i)
 
 		// set fields
 		fieldIds := make([]uuid.UUID, 0)
 
 		// set grid field for page header & footer
 		if p.Footer.Active && !p.Footer.DocPageIdInherit.Valid {
-			if err := doc_field.Set_tx(ctx, tx, p.Id, pgtype.UUID{}, []any{p.Footer.FieldGrid}, &fieldIds); err != nil {
+			if err := doc_field.Set_bt(bt, p.Id, pgtype.UUID{}, onlyCreate, []any{p.Footer.FieldGrid}, &fieldIds); err != nil {
 				return err
 			}
 		}
 		if p.Header.Active && !p.Header.DocPageIdInherit.Valid {
-			if err := doc_field.Set_tx(ctx, tx, p.Id, pgtype.UUID{}, []any{p.Header.FieldGrid}, &fieldIds); err != nil {
+			if err := doc_field.Set_bt(bt, p.Id, pgtype.UUID{}, onlyCreate, []any{p.Header.FieldGrid}, &fieldIds); err != nil {
 				return err
 			}
 		}
 
 		// set flow field for page body
-		if err := doc_field.Set_tx(ctx, tx, p.Id, pgtype.UUID{}, []any{p.FieldFlow}, &fieldIds); err != nil {
+		if err := doc_field.Set_bt(bt, p.Id, pgtype.UUID{}, onlyCreate, []any{p.FieldFlow}, &fieldIds); err != nil {
 			return err
 		}
 
 		// remove unused fields
-		if len(fieldIds) == 0 {
-			if _, err := tx.Exec(ctx, `DELETE FROM app.doc_field WHERE doc_page_id = $1`, p.Id); err != nil {
-				return err
-			}
-		} else {
-			if _, err := tx.Exec(ctx, `
-				DELETE FROM app.doc_field
-				WHERE doc_page_id =  $1
-				AND   id          <> ALL($2)
-			`, p.Id, fieldIds); err != nil {
-				return err
+		if !onlyCreate {
+			if len(fieldIds) == 0 {
+				bt.Queue(`DELETE FROM app.doc_field WHERE doc_page_id = $1`, p.Id)
+			} else {
+				bt.Queue(`DELETE FROM app.doc_field WHERE doc_page_id = $1 AND id <> ALL($2)`, p.Id, fieldIds)
 			}
 		}
 
 		// remove unused header/footer fields
 		if !p.Footer.Active || p.Footer.DocPageIdInherit.Valid {
-			if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridFooter"); err != nil {
-				return err
-			}
+			doc_field.DelByPage_bt(bt, p.Id, "gridFooter")
 		}
 		if !p.Header.Active || p.Header.DocPageIdInherit.Valid {
-			if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridHeader"); err != nil {
-				return err
-			}
+			doc_field.DelByPage_bt(bt, p.Id, "gridHeader")
 		}
 
 		// set overwrites
-		if err := doc_set.Set_tx(ctx, tx, p.Id, constants.DbDocPage, constants.DbDocContextDefault, p.Sets); err != nil {
+		if err := doc_set.Set_bt(bt, p.Id, constants.DbDocPage, constants.DbDocContextDefault, onlyCreate, p.Sets); err != nil {
 			return err
 		}
 	}
 
-	// delete unused pages
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.doc_page
-		WHERE doc_id =  $1
-		AND   id     <> ALL($2)
-	`, docId, pageIds); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.doc_page WHERE doc_id = $1 AND id <> ALL($2)`, docId, pageIds)
 	}
 	return nil
 }

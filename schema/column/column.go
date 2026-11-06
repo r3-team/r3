@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/log"
 	"r3/schema/caption"
 	"r3/schema/compatible"
 	"r3/schema/query"
@@ -80,24 +81,24 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 	return columns, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, columns []types.Column) error {
+func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCreate bool, columns []types.Column) {
 
 	if !slices.Contains(constants.DbAssignedColumn, entity) {
-		return errors.New("bad entity")
+		log.Error(log.ContextTransfer, "cannot store column", errors.New(fmt.Sprintf("invalid parent entity '%s'", entity)))
+		return
 	}
 
-	// delete removed columns
-	idsKeep := make([]uuid.UUID, 0)
-	for _, c := range columns {
-		idsKeep = append(idsKeep, c.Id)
-	}
+	if !onlyCreate {
+		idsKeep := make([]uuid.UUID, 0)
+		for _, c := range columns {
+			idsKeep = append(idsKeep, c.Id)
+		}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM app.column
-		WHERE %s_id = $1
-		AND id <> ALL($2)
-	`, entity), entityId, idsKeep); err != nil {
-		return err
+		bt.Queue(fmt.Sprintf(`
+			DELETE FROM app.column
+			WHERE %s_id = $1
+			AND id <> ALL($2)
+		`, entity), entityId, idsKeep)
 	}
 
 	// insert new/update existing columns
@@ -105,11 +106,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 
 		// fix imports < 3.3: Migrate display option to attribute content use
 		if c.AttributeId.Valid {
-			var err error
-			c.Display, err = compatible.MigrateDisplayToContentUse_tx(ctx, tx, c.AttributeId.Bytes, c.Display)
-			if err != nil {
-				return err
-			}
+			c.Display = compatible.MigrateDisplayToContentUse_bt(bt, c.AttributeId.Bytes, c.Display)
 		}
 
 		// fix imports < 3.8: Convert to new styles
@@ -118,7 +115,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 		// fix imports < 3.13: Set empty content
 		c = compatible.FixMissingColumnContent(c)
 
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
+		bt.Queue(fmt.Sprintf(`
 			INSERT INTO app.column (
 				id, %s_id, content, pg_function_id_call, attribute_id, index, position, batch, basis, length, display,
 				group_by, aggregator, scalar_function, distincted, hidden, on_mobile, styles
@@ -129,23 +126,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 				basis = $9, length = $10, display = $11, group_by = $12, aggregator = $13, scalar_function = $14, distincted = $15,
 				hidden = $16, on_mobile = $17, styles = $18
 		`, entity), c.Id, entityId, c.Content, c.PgFunctionId, c.AttributeId, c.Index, position, c.Batch, c.Basis,
-			c.Length, c.Display, c.GroupBy, c.Aggregator, c.Scalar, c.Distincted, c.Hidden, c.OnMobile, c.Styles); err != nil {
+			c.Length, c.Display, c.GroupBy, c.Aggregator, c.Scalar, c.Distincted, c.Hidden, c.OnMobile, c.Styles)
 
-			return err
-		}
 		switch c.Content {
 		case constants.DbColumnContentQuery:
-			if err := query.Set_tx(ctx, tx, constants.DbColumn, c.Id, 0, 0, 0, c.Query); err != nil {
-				return err
-			}
+			query.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, 0, 0, 0, c.Query)
 		case constants.DbColumnContentFncPg, constants.DbColumnContentFncScalar:
-			if err := setArguments_tx(ctx, tx, c.Id, c.Arguments); err != nil {
-				return err
-			}
+			setArguments_bt(bt, c.Id, onlyCreate, c.Arguments)
 		}
-		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
-			return err
-		}
+		caption.Set_bt(bt, c.Id, onlyCreate, c.Captions)
 	}
-	return nil
 }

@@ -53,40 +53,29 @@ func getActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.Fo
 	return actions, nil
 }
 
-func setActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, actions []types.FormAction) error {
+func setActions_bt(bt *pgx.Batch, formId uuid.UUID, onlyCreate bool, actions []types.FormAction) {
 
-	actionIds := make([]uuid.UUID, 0)
+	idsKeep := make([]uuid.UUID, 0)
 	for i, a := range actions {
-		if err := setAction_tx(ctx, tx, formId, a, i); err != nil {
-			return err
-		}
-		actionIds = append(actionIds, a.Id)
+		idsKeep = append(idsKeep, a.Id)
+		setAction_bt(bt, formId, onlyCreate, a, i)
 	}
 
 	// remove non-specified actions
-	_, err := tx.Exec(ctx, `
-		DELETE FROM app.form_action
-		WHERE form_id = $1
-		AND id <> ALL($2)
-	`, formId, actionIds)
-
-	return err
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.form_action WHERE form_id = $1 AND id <> ALL($2)`, formId, idsKeep)
+	}
 }
 
-func setAction_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, a types.FormAction, position int) error {
-	if _, err := tx.Exec(ctx, `
+func setAction_bt(bt *pgx.Batch, formId uuid.UUID, onlyCreate bool, a types.FormAction, position int) {
+	bt.Queue(`
 		INSERT INTO app.form_action (id, form_id, js_function_id, icon_id, position, state, color)
 		VALUES ($1,$2,$3,$4,$5,$6,$7)
 		ON CONFLICT (id)
 		DO UPDATE SET js_function_id = $3, icon_id = $4, position = $5, state = $6, color = $7
-	`, a.Id, formId, a.JsFunctionId, a.IconId, position, a.State, a.Color); err != nil {
-		return err
-	}
-	if err := openDoc.Set_tx(ctx, tx, constants.DbFormAction, a.Id, a.OpenDoc); err != nil {
-		return err
-	}
-	if err := openForm.Set_tx(ctx, tx, constants.DbFormAction, a.Id, a.OpenForm, pgtype.Text{}); err != nil {
-		return err
-	}
-	return caption.Set_tx(ctx, tx, a.Id, a.Captions)
+	`, a.Id, formId, a.JsFunctionId, a.IconId, position, a.State, a.Color)
+
+	openDoc.Set_bt(bt, constants.DbFormAction, a.Id, onlyCreate, a.OpenDoc)
+	openForm.Set_bt(bt, constants.DbFormAction, a.Id, onlyCreate, a.OpenForm, pgtype.Text{})
+	caption.Set_bt(bt, a.Id, onlyCreate, a.Captions)
 }

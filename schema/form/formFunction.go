@@ -32,22 +32,16 @@ func getFunctions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.
 	return fncs, nil
 }
 
-func setFunctions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, fncs []types.FormFunction) error {
+func setFunctions_bt(bt *pgx.Batch, formId uuid.UUID, onlyCreate bool, fncs []types.FormFunction) {
 
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.form_function
-		WHERE form_id = $1
-	`, formId); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.form_function WHERE form_id = $1`, formId)
 	}
 
 	for i, f := range fncs {
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.form_function (form_id, position, js_function_id, event, event_before)
 			VALUES ($1,$2,$3,$4,$5)
-		`, formId, i, f.JsFunctionId, f.Event, f.EventBefore); err != nil {
-			return err
-		}
+		`, formId, i, f.JsFunctionId, f.Event, f.EventBefore)
 	}
-	return nil
 }

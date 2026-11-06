@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/log"
 	"r3/schema/caption"
 	"r3/types"
 	"r3/types/constants"
@@ -54,17 +55,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 	return tabs, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, position int, tab types.Tab) error {
+func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCreate bool, position int, tab types.Tab) {
 	if !slices.Contains(constants.DbAssignedTab, entity) {
-		return errors.New("bad entity")
+		log.Error(log.ContextTransfer, "cannot store tab", errors.New(fmt.Sprintf("invalid parent entity '%s'", entity)))
+		return
 	}
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
+	bt.Queue(fmt.Sprintf(`
 		INSERT INTO app.tab (id, %s_id, position, icon_id, content_counter, state)
 		VALUES ($1,$2,$3,$4,$5,$6)
 		ON CONFLICT (id)
 		DO UPDATE SET position = $3, icon_id = $4, content_counter = $5, state = $6
-	`, entity), tab.Id, entityId, position, tab.IconId, tab.ContentCounter, tab.State); err != nil {
-		return err
-	}
-	return caption.Set_tx(ctx, tx, tab.Id, tab.Captions)
+	`, entity), tab.Id, entityId, position, tab.IconId, tab.ContentCounter, tab.State)
+
+	caption.Set_bt(bt, tab.Id, onlyCreate, tab.Captions)
 }

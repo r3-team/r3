@@ -197,7 +197,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 			}
 		}
 	}
-	return Set_tx(ctx, tx, doc)
+	return Set_tx(ctx, tx, true, doc)
 }
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
@@ -280,18 +280,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	return docs, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, d types.Doc) error {
 
-	if _, err := tx.Exec(ctx, `
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.doc (id, module_id, name, comment, filename, author, language)
 		VALUES ($1,$2,$3,$4,$5,$6,$7)
 		ON CONFLICT (id)
 		DO UPDATE SET name = $3, comment = $4, filename = $5, author = $6, language = $7
-	`, d.Id, d.ModuleId, d.Name, d.Comment, d.Filename, d.Author, d.Language); err != nil {
-		return err
-	}
+	`, d.Id, d.ModuleId, d.Name, d.Comment, d.Filename, d.Author, d.Language)
 
-	if _, err := tx.Exec(ctx, `
+	bt.Queue(`
 		INSERT INTO app.doc_font (doc_id, align, bool_false, bool_true, color, date_format,
 			family, line_factor, number_sep_dec, number_sep_tho, size, style)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
@@ -299,25 +298,18 @@ func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 		DO UPDATE SET align = $2, bool_false = $3, bool_true = $4, color = $5, date_format = $6,
 			family = $7, line_factor = $8, number_sep_dec = $9, number_sep_tho = $10, size = $11, style = $12
 	`, d.Id, d.Font.Align, d.Font.BoolFalse, d.Font.BoolTrue, d.Font.Color, d.Font.DateFormat, d.Font.Family,
-		d.Font.LineFactor, d.Font.NumberSepDec, d.Font.NumberSepTho, d.Font.Size, d.Font.Style); err != nil {
+		d.Font.LineFactor, d.Font.NumberSepDec, d.Font.NumberSepTho, d.Font.Size, d.Font.Style)
 
+	query.Set_bt(bt, constants.DbDoc, d.Id, onlyCreate, 0, 0, 0, d.Query)
+	if err := doc_page.Set_bt(bt, d.Id, onlyCreate, d.Pages); err != nil {
 		return err
 	}
+	if err := doc_set.Set_bt(bt, d.Id, constants.DbDoc, constants.DbDocContextDefault, onlyCreate, d.Sets); err != nil {
+		return err
+	}
+	setStates_bt(bt, d.Id, onlyCreate, d.States)
+	tag.SetAssign_bt(bt, constants.DbDoc, d.Id, onlyCreate, d.TagIds)
+	caption.Set_bt(bt, d.Id, onlyCreate, d.Captions)
 
-	if err := query.Set_tx(ctx, tx, constants.DbDoc, d.Id, 0, 0, 0, d.Query); err != nil {
-		return err
-	}
-	if err := doc_page.Set_tx(ctx, tx, d.Id, d.Pages); err != nil {
-		return err
-	}
-	if err := doc_set.Set_tx(ctx, tx, d.Id, constants.DbDoc, constants.DbDocContextDefault, d.Sets); err != nil {
-		return err
-	}
-	if err := setStates_tx(ctx, tx, d.Id, d.States); err != nil {
-		return err
-	}
-	if err := tag.SetAssign_tx(ctx, tx, constants.DbDoc, d.Id, d.TagIds); err != nil {
-		return err
-	}
-	return caption.Set_tx(ctx, tx, d.Id, d.Captions)
+	return tx.SendBatch(ctx, bt).Close()
 }

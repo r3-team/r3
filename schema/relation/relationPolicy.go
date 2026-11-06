@@ -8,14 +8,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func delPolicies_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) error {
-	_, err := tx.Exec(ctx, `
-		DELETE FROM app.relation_policy
-		WHERE relation_id = $1
-	`, relationId)
-	return err
-}
-
 func getPolicies_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.RelationPolicy, error) {
 	policies := make([]types.RelationPolicy, 0)
 
@@ -44,26 +36,16 @@ func getPolicies_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]typ
 	return policies, nil
 }
 
-func setPolicies_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, policies []types.RelationPolicy) error {
+func setPolicies_bt(bt *pgx.Batch, relationId uuid.UUID, onlyCreate bool, policies []types.RelationPolicy) {
 
-	if err := delPolicies_tx(ctx, tx, relationId); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.relation_policy WHERE relation_id = $1`, relationId)
 	}
-
 	for i, p := range policies {
-		_, err := tx.Exec(ctx, `
-			INSERT INTO app.relation_policy (
-				relation_id, position, role_id,
-				pg_function_id_excl, pg_function_id_incl, 
-				action_delete, action_select, action_update
-			)
+		bt.Queue(`
+			INSERT INTO app.relation_policy (relation_id, position, role_id, pg_function_id_excl,
+				pg_function_id_incl, action_delete, action_select, action_update)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		`, relationId, i, p.RoleId, p.PgFunctionIdExcl, p.PgFunctionIdIncl,
-			p.ActionDelete, p.ActionSelect, p.ActionUpdate)
-
-		if err != nil {
-			return err
-		}
+		`, relationId, i, p.RoleId, p.PgFunctionIdExcl, p.PgFunctionIdIncl, p.ActionDelete, p.ActionSelect, p.ActionUpdate)
 	}
-	return nil
 }

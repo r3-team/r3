@@ -54,11 +54,13 @@ func getLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID) ([]types
 	return layers, nil
 }
 
-func setLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, layers []types.FieldMapLayerData) error {
+func setLayerData_bt(bt *pgx.Batch, fieldId uuid.UUID, onlyCreate bool, layers []types.FieldMapLayerData) {
 
 	idsKeep := make([]uuid.UUID, len(layers))
 	for i, l := range layers {
-		if _, err := tx.Exec(ctx, `
+		idsKeep[i] = l.Id
+
+		bt.Queue(`
 			INSERT INTO app.field_map_layer_data (
 				field_id, position, id, attribute_id_data, attribute_id_data_color,
 				index_data, index_data_color, color_fill
@@ -68,27 +70,14 @@ func setLayerData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, layers [
 			DO UPDATE SET
 				position = $2, attribute_id_data = $4, attribute_id_data_color = $5,
 				index_data = $6, index_data_color = $7, color_fill = $8
-		`, fieldId, i, l.Id, l.AttributeIdData, l.AttributeIdDataColor, l.IndexData, l.IndexDataColor, l.ColorFill); err != nil {
-			return err
-		}
-		idsKeep[i] = l.Id
+		`, fieldId, i, l.Id, l.AttributeIdData, l.AttributeIdDataColor, l.IndexData, l.IndexDataColor, l.ColorFill)
 
-		if err := openForm.Set_tx(ctx, tx, constants.DbFieldMapLayerData, l.Id, l.OpenForm, pgtype.Text{}); err != nil {
-			return err
-		}
-		if err := query.Set_tx(ctx, tx, constants.DbFieldMapLayerData, l.Id, 0, 0, 0, l.Query); err != nil {
-			return err
-		}
-		if err := caption.Set_tx(ctx, tx, l.Id, l.Captions); err != nil {
-			return err
-		}
+		openForm.Set_bt(bt, constants.DbFieldMapLayerData, l.Id, onlyCreate, l.OpenForm, pgtype.Text{})
+		query.Set_bt(bt, constants.DbFieldMapLayerData, l.Id, onlyCreate, 0, 0, 0, l.Query)
+		caption.Set_bt(bt, l.Id, onlyCreate, l.Captions)
 	}
 
-	_, err := tx.Exec(ctx, `
-		DELETE FROM app.field_map_layer_data
-		WHERE field_id = $1
-		AND   id <> ALL($2)
-	`, fieldId, idsKeep)
-
-	return err
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.field_map_layer_data WHERE field_id = $1 AND id <> ALL($2)`, fieldId, idsKeep)
+	}
 }

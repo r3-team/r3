@@ -14,7 +14,7 @@ func getStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.For
 		SELECT id, description
 		FROM app.form_state
 		WHERE form_id = $1
-		
+
 		-- also order by ID in case description is empty (fixed order is important for transfer)
 		ORDER BY description, id ASC
 	`, formId)
@@ -124,83 +124,54 @@ func getStateEffects_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) (
 }
 
 // set given form states, deletes non-specified states
-func setStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, states []types.FormState) error {
+func setStates_bt(bt *pgx.Batch, formId uuid.UUID, onlyCreate bool, states []types.FormState) {
 
-	stateIds := make([]uuid.UUID, 0)
+	idsKeep := make([]uuid.UUID, 0)
 	for _, s := range states {
-		if err := setState_tx(ctx, tx, formId, s); err != nil {
-			return err
-		}
-		stateIds = append(stateIds, s.Id)
+		idsKeep = append(idsKeep, s.Id)
+		setState_bt(bt, formId, onlyCreate, s)
 	}
 
-	// remove non-specified states
-	_, err := tx.Exec(ctx, `
-		DELETE FROM app.form_state
-		WHERE form_id = $1
-		AND id <> ALL($2)
-	`, formId, stateIds)
-
-	return err
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.form_state WHERE form_id = $1 AND id <> ALL($2)`, formId, idsKeep)
+	}
 }
 
 // sets new/existing form state, returns form state ID
-func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.FormState) error {
+func setState_bt(bt *pgx.Batch, formId uuid.UUID, onlyCreate bool, state types.FormState) {
 
-	if _, err := tx.Exec(ctx, `
+	bt.Queue(`
 		INSERT INTO app.form_state (id, form_id, description)
 		VALUES ($1,$2,$3)
 		ON CONFLICT (id)
 		DO UPDATE SET description = $3
-	`, state.Id, formId, state.Description); err != nil {
-		return err
+	`, state.Id, formId, state.Description)
+
+	// delete existing sub entities
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.form_state_condition WHERE form_state_id = $1`, state.Id)
+		bt.Queue(`DELETE FROM app.form_state_effect    WHERE form_state_id = $1`, state.Id)
 	}
 
-	// reset conditions
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.form_state_condition
-		WHERE form_state_id = $1
-	`, state.Id); err != nil {
-		return err
-	}
-
+	// conditions/effects
 	for i, c := range state.Conditions {
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.form_state_condition (form_state_id, position, connector, operator)
 			VALUES ($1,$2,$3,$4)
-		`, state.Id, i, c.Connector, c.Operator); err != nil {
-			return err
-		}
-		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 0, c.Side0); err != nil {
-			return err
-		}
-		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 1, c.Side1); err != nil {
-			return err
-		}
-	}
+		`, state.Id, i, c.Connector, c.Operator)
 
-	// reset effects
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.form_state_effect
-		WHERE form_state_id = $1
-	`, state.Id); err != nil {
-		return err
+		setStateConditionSide_bt(bt, state.Id, i, 0, c.Side0)
+		setStateConditionSide_bt(bt, state.Id, i, 1, c.Side1)
 	}
-
 	for _, e := range state.Effects {
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.form_state_effect (form_state_id, field_id, form_action_id, tab_id, new_data, new_state)
 			VALUES ($1,$2,$3,$4,$5,$6)
-		`, state.Id, e.FieldId, e.FormActionId, e.TabId, e.NewData, e.NewState); err != nil {
-			return err
-		}
+		`, state.Id, e.FieldId, e.FormActionId, e.TabId, e.NewData, e.NewState)
 	}
-	return nil
 }
-func setStateConditionSide_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID,
-	position int, side int, s types.FormStateConditionSide) error {
-
-	_, err := tx.Exec(ctx, `
+func setStateConditionSide_bt(bt *pgx.Batch, formStateId uuid.UUID, position int, side int, s types.FormStateConditionSide) {
+	bt.Queue(`
 		INSERT INTO app.form_state_condition_side (
 			form_state_id, form_state_condition_position, side, collection_id,
 			column_id, field_id, form_state_id_result, preset_id, role_id,
@@ -209,6 +180,4 @@ func setStateConditionSide_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.U
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 	`, formStateId, position, side, s.CollectionId, s.ColumnId, s.FieldId, s.FormStateId,
 		s.PresetId, s.RoleId, s.VariableId, s.Brackets, s.Content, s.Value)
-
-	return err
 }

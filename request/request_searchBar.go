@@ -23,5 +23,5 @@ func SearchBarSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) er
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return searchBar.Set_tx(ctx, tx, req)
+	return searchBar.Set_tx(ctx, tx, false, req)
 }

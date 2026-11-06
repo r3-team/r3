@@ -19,13 +19,12 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func DelByPage_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, content string) error {
-	_, err := tx.Exec(ctx, `
+func DelByPage_bt(bt *pgx.Batch, docPageId uuid.UUID, content string) {
+	bt.Queue(`
 		DELETE FROM app.doc_field
 		WHERE doc_page_id = $1
 		AND   content     = $2
 	`, docPageId, content)
-	return err
 }
 
 // retrieve one or many fields
@@ -329,7 +328,7 @@ func GetSingleGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, field
 	return field, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype.UUID, fields []any, fieldIds *[]uuid.UUID) error {
+func Set_bt(bt *pgx.Batch, docPageId uuid.UUID, parentId pgtype.UUID, onlyCreate bool, fields []any, fieldIds *[]uuid.UUID) error {
 
 	for pos, fieldIf := range fields {
 
@@ -345,57 +344,39 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 
 		*fieldIds = append(*fieldIds, f.Id)
 
-		if err := setGeneric_tx(ctx, tx, docPageId, parentId, f, pos); err != nil {
-			return err
-		}
+		setGeneric_bt(bt, docPageId, parentId, onlyCreate, f, pos)
 
 		switch f.Content {
-
 		case "data":
 			var f types.DocFieldData
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setData_tx(ctx, tx, f); err != nil {
-				return err
-			}
-
+			setData_bt(bt, f)
 		case "flow", "flowBody":
 			var f types.DocFieldFlow
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setFlow_tx(ctx, tx, docPageId, f, fieldIds); err != nil {
-				return err
-			}
-
+			setFlow_bt(bt, docPageId, onlyCreate, f, fieldIds)
 		case "grid", "gridFooter", "gridHeader":
 			var f types.DocFieldGrid
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setGrid_tx(ctx, tx, docPageId, f, fieldIds); err != nil {
-				return err
-			}
-
+			setGrid_bt(bt, docPageId, onlyCreate, f, fieldIds)
 		case "list":
 			var f types.DocFieldList
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setList_tx(ctx, tx, f); err != nil {
-				return err
-			}
-
+			setList_bt(bt, onlyCreate, f)
 		case "text":
 			var f types.DocFieldText
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setText_tx(ctx, tx, f); err != nil {
-				return err
-			}
-
+			setText_bt(bt, onlyCreate, f)
 		default:
 			return errors.New("unknown document field content")
 		}
@@ -403,9 +384,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 	return nil
 }
 
-func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype.UUID, f types.DocField, position int) error {
+func setGeneric_bt(bt *pgx.Batch, docPageId uuid.UUID, parentId pgtype.UUID, onlyCreate bool, f types.DocField, position int) {
 	// field content cannot be changed after creation
-	if _, err := tx.Exec(ctx, `
+	bt.Queue(`
 		INSERT INTO app.doc_field (id, doc_page_id, parent_id, content, pos_x, pos_y, size_x, size_y, state, position)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
 		ON CONFLICT (id)
@@ -418,54 +399,46 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId
 			size_y      = $8,
 			state       = $9,
 			position    = $10
-	`, f.Id, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
-		return err
-	}
-	return doc_set.Set_tx(ctx, tx, f.Id, constants.DbDocField, constants.DbDocContextDefault, f.Sets)
+	`, f.Id, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position)
+
+	doc_set.Set_bt(bt, f.Id, constants.DbDocField, constants.DbDocContextDefault, onlyCreate, f.Sets)
 }
 
-func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
-	_, err := tx.Exec(ctx, `
+func setData_bt(bt *pgx.Batch, f types.DocFieldData) {
+	bt.Queue(`
 		INSERT INTO app.doc_field_data (doc_field_id, attribute_id, attribute_index, length, text_postfix, text_prefix)
 		VALUES ($1,$2,$3,$4,$5,$6)
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET length = $4, text_postfix = $5, text_prefix = $6
 	`, f.Id, f.AttributeId, f.AttributeIndex, f.Length, f.TextPostfix, f.TextPrefix)
-	return err
 }
 
-func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldFlow, fieldIds *[]uuid.UUID) error {
-	if _, err := tx.Exec(ctx, `
+func setFlow_bt(bt *pgx.Batch, docPageId uuid.UUID, onlyCreate bool, f types.DocFieldFlow, fieldIds *[]uuid.UUID) {
+	bt.Queue(`
 		INSERT INTO app.doc_field_flow (doc_field_id, direction, gap, paddings, shrink_y)
 		VALUES ($1,$2,$3,$4,$5)
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET direction = $2, gap = $3, paddings = $4, shrink_y = $5
-	`, f.Id, f.Direction, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}, f.ShrinkY); err != nil {
-		return err
-	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextDefault, f.Border); err != nil {
-		return err
-	}
-	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
+	`, f.Id, f.Direction, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}, f.ShrinkY)
+
+	doc_border.Set_bt(bt, f.Id, constants.DbDocContextDefault, f.Border)
+	Set_bt(bt, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, onlyCreate, f.Fields, fieldIds)
 }
 
-func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldGrid, fieldIds *[]uuid.UUID) error {
-	if _, err := tx.Exec(ctx, `
+func setGrid_bt(bt *pgx.Batch, docPageId uuid.UUID, onlyCreate bool, f types.DocFieldGrid, fieldIds *[]uuid.UUID) error {
+	bt.Queue(`
 		INSERT INTO app.doc_field_grid (doc_field_id, shrink_y, size_snap)
 		VALUES ($1,$2,$3)
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET shrink_y = $2, size_snap = $3
-	`, f.Id, f.ShrinkY, f.SizeSnap); err != nil {
-		return err
-	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextDefault, f.Border); err != nil {
-		return err
-	}
-	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
+	`, f.Id, f.ShrinkY, f.SizeSnap)
+
+	doc_border.Set_bt(bt, f.Id, constants.DbDocContextDefault, f.Border)
+	return Set_bt(bt, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, onlyCreate, f.Fields, fieldIds)
 }
 
-func setList_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldList) error {
-	if _, err := tx.Exec(ctx, `
+func setList_bt(bt *pgx.Batch, onlyCreate bool, f types.DocFieldList) error {
+	bt.Queue(`
 		INSERT INTO app.doc_field_list (doc_field_id, body_row_color_fill_even, body_row_color_fill_odd, body_row_size_y,
 			footer_row_color_fill, header_row_color_fill, header_row_repeat, header_row_show, paddings)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -480,25 +453,16 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldList) error {
 			header_row_show          = $8,
 			paddings                 = $9
 	`, f.Id, f.BodyRowColorFillEven, f.BodyRowColorFillOdd, f.BodyRowSizeY, f.FooterRowColorFill, f.HeaderRowColorFill,
-		f.HeaderRowRepeat, f.HeaderRowShow, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
+		f.HeaderRowRepeat, f.HeaderRowShow, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L})
 
-		return err
-	}
-	if err := query.Set_tx(ctx, tx, constants.DbDocField, f.Id, 0, 0, 0, f.Query); err != nil {
-		return err
-	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextBody, f.BodyBorder); err != nil {
-		return err
-	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextFooter, f.FooterBorder); err != nil {
-		return err
-	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, constants.DbDocContextHeader, f.HeaderBorder); err != nil {
-		return err
-	}
-	return doc_column.Set_tx(ctx, tx, f.Id, f.Columns)
+	query.Set_bt(bt, constants.DbDocField, f.Id, onlyCreate, 0, 0, 0, f.Query)
+
+	doc_border.Set_bt(bt, f.Id, constants.DbDocContextBody, f.BodyBorder)
+	doc_border.Set_bt(bt, f.Id, constants.DbDocContextFooter, f.FooterBorder)
+	doc_border.Set_bt(bt, f.Id, constants.DbDocContextHeader, f.HeaderBorder)
+	return doc_column.Set_bt(bt, f.Id, onlyCreate, f.Columns)
 }
 
-func setText_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldText) error {
-	return caption.Set_tx(ctx, tx, f.Id, f.Captions)
+func setText_bt(bt *pgx.Batch, onlyCreate bool, f types.DocFieldText) {
+	caption.Set_bt(bt, f.Id, onlyCreate, f.Captions)
 }

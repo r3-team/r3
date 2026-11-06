@@ -23,5 +23,5 @@ func JsFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) e
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return jsFunction.Set_tx(ctx, tx, req)
+	return jsFunction.Set_tx(ctx, tx, false, req)
 }

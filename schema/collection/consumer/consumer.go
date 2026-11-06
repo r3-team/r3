@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/log"
 	"r3/schema/compatible"
 	"r3/schema/openForm"
 	"r3/types"
@@ -73,18 +74,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 	}
 	return consumers, nil
 }
-func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId uuid.UUID, content string, consumers []types.CollectionConsumer) error {
+func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCreate bool, content string, consumers []types.CollectionConsumer) {
 
 	if !slices.Contains(constants.DbAssignedCollectionConsumers, entity) {
-		return errors.New("invalid collection consumer entity")
+		log.Error(log.ContextTransfer, "cannot store collection consumer", errors.New(fmt.Sprintf("invalid assigned entity '%s'", entity)))
+		return
 	}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM app.collection_consumer
-		WHERE %s_id   = $1
-		AND   content = $2
-	`, entity), entityId, content); err != nil {
-		return err
+	if !onlyCreate {
+		bt.Queue(fmt.Sprintf(`
+			DELETE FROM app.collection_consumer
+			WHERE %s_id   = $1
+			AND   content = $2
+		`, entity), entityId, content)
 	}
 
 	for _, c := range consumers {
@@ -96,23 +98,16 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 		c = compatible.FixCollectionConsumerFlags(c)
 
 		if entity == "collection" {
-			if _, err := tx.Exec(ctx, `
+			bt.Queue(`
 				INSERT INTO app.collection_consumer (id, collection_id, column_id_display, content, flags, on_mobile)
 				VALUES ($1,$2,$3,$4,$5,$6)
-			`, c.Id, c.CollectionId, c.ColumnIdDisplay, content, c.Flags, c.OnMobile); err != nil {
-				return err
-			}
+			`, c.Id, c.CollectionId, c.ColumnIdDisplay, content, c.Flags, c.OnMobile)
 		} else {
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
+			bt.Queue(fmt.Sprintf(`
 				INSERT INTO app.collection_consumer (id, collection_id, %s_id, column_id_display, content, flags, on_mobile)
 				VALUES ($1,$2,$3,$4,$5,$6,$7)
-			`, entity), c.Id, c.CollectionId, entityId, c.ColumnIdDisplay, content, c.Flags, c.OnMobile); err != nil {
-				return err
-			}
+			`, entity), c.Id, c.CollectionId, entityId, c.ColumnIdDisplay, content, c.Flags, c.OnMobile)
 		}
-		if err := openForm.Set_tx(ctx, tx, constants.DbCollectionConsumer, c.Id, c.OpenForm, pgtype.Text{}); err != nil {
-			return err
-		}
+		openForm.Set_bt(bt, constants.DbCollectionConsumer, c.Id, onlyCreate, c.OpenForm, pgtype.Text{})
 	}
-	return nil
 }

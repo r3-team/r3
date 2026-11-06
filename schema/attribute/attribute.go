@@ -119,7 +119,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 	return attributes, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, atr types.Attribute, fromLocal bool) error {
 
 	if err := db_check.DbIdentifier(atr.Name); err != nil {
 		return err
@@ -488,9 +488,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool)
 			}
 		}
 	}
-
-	// set captions
-	return caption.Set_tx(ctx, tx, atr.Id, atr.Captions)
+	bt := &pgx.Batch{}
+	caption.Set_bt(bt, atr.Id, onlyCreate, atr.Captions)
+	return tx.SendBatch(ctx, bt).Close()
 }
 
 func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool, isFiles bool) error {

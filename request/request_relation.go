@@ -23,7 +23,7 @@ func RelationSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) err
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return relation.Set_tx(ctx, tx, req, true)
+	return relation.Set_tx(ctx, tx, false, req, true)
 }
 
 func RelationPreview_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {

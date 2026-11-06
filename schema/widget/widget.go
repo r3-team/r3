@@ -53,18 +53,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Widget,
 	return widgets, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, widget types.Widget) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, widget types.Widget) error {
 
-	if _, err := tx.Exec(ctx, `
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.widget (id,module_id,form_id,name,size)
 		VALUES ($1,$2,$3,$4,$5)
 		ON CONFLICT (id)
 		DO UPDATE SET form_id = $3, name = $4, size = $5
-	`, widget.Id, widget.ModuleId, widget.FormId, widget.Name, widget.Size); err != nil {
-		return err
-	}
-	if err := consumer.Set_tx(ctx, tx, constants.DbWidget, widget.Id, "widgetDisplay", []types.CollectionConsumer{widget.Collection}); err != nil {
-		return err
-	}
-	return caption.Set_tx(ctx, tx, widget.Id, widget.Captions)
+	`, widget.Id, widget.ModuleId, widget.FormId, widget.Name, widget.Size)
+
+	consumer.Set_bt(bt, constants.DbWidget, widget.Id, onlyCreate, "widgetDisplay", []types.CollectionConsumer{widget.Collection})
+	caption.Set_bt(bt, widget.Id, onlyCreate, widget.Captions)
+	return tx.SendBatch(ctx, bt).Close()
 }

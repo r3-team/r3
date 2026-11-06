@@ -23,5 +23,5 @@ func ArticleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) erro
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return article.Set_tx(ctx, tx, req.ModuleId, req.Id, req.Name, req.Captions)
+	return article.Set_tx(ctx, tx, req.ModuleId, false, req.Id, req.Name, req.Captions)
 }

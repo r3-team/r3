@@ -3,6 +3,7 @@ package caption
 import (
 	"context"
 	"fmt"
+	"r3/log"
 	"r3/types"
 	"r3/types/constants"
 
@@ -43,40 +44,34 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, id uuid.UU
 	return caps, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
+func Set_bt(bt *pgx.Batch, id uuid.UUID, onlyCreate bool, captions types.CaptionMap) {
 
 	for content, codes := range captions {
 
 		entity, err := GetEntityName(content)
 		if err != nil {
-			return err
+			log.Error(log.ContextTransfer, "cannot store caption", fmt.Errorf("no entity found for content '%s'", content))
+			return
 		}
 
-		// delete captions for this content
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			DELETE FROM app.caption
-			WHERE %s_id = $1
-			AND content = $2
-		`, entity), id, content); err != nil {
-			return err
+		if !onlyCreate {
+			bt.Queue(fmt.Sprintf(`
+				DELETE FROM app.caption
+				WHERE %s_id = $1
+				AND content = $2
+			`, entity), id, content)
 		}
 
 		// set captions for this content and all provided language codes
 		for code, value := range codes {
-
-			if value == "" {
-				continue
-			}
-
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				INSERT INTO app.caption (language_code, %s_id, value, content)
-				VALUES ($1,$2,$3,$4)
-			`, entity), code, id, value, content); err != nil {
-				return err
+			if value != "" {
+				bt.Queue(fmt.Sprintf(`
+					INSERT INTO app.caption (language_code, %s_id, value, content)
+					VALUES ($1,$2,$3,$4)
+				`, entity), code, id, value, content)
 			}
 		}
 	}
-	return nil
 }
 
 // helpers

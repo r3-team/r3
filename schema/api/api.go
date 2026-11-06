@@ -54,7 +54,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	return Set_tx(ctx, tx, api)
+	return Set_tx(ctx, tx, true, api)
 }
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
@@ -115,12 +115,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([
 	return apis, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
-
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, api types.Api) error {
 	if err := db_check.DbIdentifier(api.Name); err != nil {
 		return err
 	}
-	if _, err := tx.Exec(ctx, `
+
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.api (id, module_id, name, comment, has_delete,
 			has_get, has_post, limit_def, limit_max, verbose_def, version)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
@@ -129,12 +130,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 			has_post = $7, limit_def = $8, limit_max = $9, verbose_def = $10,
 			version = $11
 	`, api.Id, api.ModuleId, api.Name, api.Comment, api.HasDelete, api.HasGet,
-		api.HasPost, api.LimitDef, api.LimitMax, api.VerboseDef, api.Version); err != nil {
+		api.HasPost, api.LimitDef, api.LimitMax, api.VerboseDef, api.Version)
 
-		return err
-	}
-	if err := query.Set_tx(ctx, tx, constants.DbApi, api.Id, 0, 0, 0, api.Query); err != nil {
-		return err
-	}
-	return column.Set_tx(ctx, tx, constants.DbApi, api.Id, api.Columns)
+	query.Set_bt(bt, constants.DbApi, api.Id, onlyCreate, 0, 0, 0, api.Query)
+	column.Set_bt(bt, constants.DbApi, api.Id, onlyCreate, api.Columns)
+	return tx.SendBatch(ctx, bt).Close()
 }

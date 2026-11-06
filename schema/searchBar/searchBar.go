@@ -66,25 +66,20 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.SearchB
 	return bars, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, bar types.SearchBar) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, bar types.SearchBar) error {
 
-	if _, err := tx.Exec(ctx, `
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.search_bar (id,module_id,icon_id,name)
 		VALUES ($1,$2,$3,$4)
 		ON CONFLICT (id)
 		DO UPDATE SET icon_id = $3, name = $4
-	`, bar.Id, bar.ModuleId, bar.IconId, bar.Name); err != nil {
-		return err
-	}
+	`, bar.Id, bar.ModuleId, bar.IconId, bar.Name)
 
-	if err := caption.Set_tx(ctx, tx, bar.Id, bar.Captions); err != nil {
-		return err
-	}
-	if err := openForm.Set_tx(ctx, tx, constants.DbSearchBar, bar.Id, bar.OpenForm, pgtype.Text{}); err != nil {
-		return err
-	}
-	if err := query.Set_tx(ctx, tx, constants.DbSearchBar, bar.Id, 0, 0, 0, bar.Query); err != nil {
-		return err
-	}
-	return column.Set_tx(ctx, tx, constants.DbSearchBar, bar.Id, bar.Columns)
+	caption.Set_bt(bt, bar.Id, onlyCreate, bar.Captions)
+	openForm.Set_bt(bt, constants.DbSearchBar, bar.Id, onlyCreate, bar.OpenForm, pgtype.Text{})
+	query.Set_bt(bt, constants.DbSearchBar, bar.Id, onlyCreate, 0, 0, 0, bar.Query)
+	column.Set_bt(bt, constants.DbSearchBar, bar.Id, onlyCreate, bar.Columns)
+
+	return tx.SendBatch(ctx, bt).Close()
 }

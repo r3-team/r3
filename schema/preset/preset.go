@@ -89,7 +89,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Prese
 // presets are stored in the schema but also created in the instance
 // doing anything in the instance is dangerous as the instance state is fickle
 // depending on the protection setting of the preset, not every preset record must be created/updated in the instance
-func Set_tx(ctx context.Context, tx pgx.Tx, preset types.Preset, onlySchema bool) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, preset types.Preset, onlySchema bool) error {
 
 	if len(preset.Values) == 0 {
 		return errors.New("cannot set preset with zero values")
@@ -126,7 +126,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, preset types.Preset, onlySchema bool
 	}
 
 	// set new preset values
-	if err := setValues_tx(ctx, tx, preset.RelationId, preset.Id, preset.Values); err != nil {
+	if err := setValues_tx(ctx, tx, preset.RelationId, preset.Id, onlyCreate, preset.Values); err != nil {
 		return err
 	}
 
@@ -203,14 +203,16 @@ func getValues_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) ([]types.P
 	return values, nil
 }
 
-func setValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []types.PresetValue) error {
+func setValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, onlyCreate bool, values []types.PresetValue) error {
 
 	// delete old preset values
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.preset_value
-		WHERE preset_id = $1
-	`, presetId); err != nil {
-		return err
+	if !onlyCreate {
+		if _, err := tx.Exec(ctx, `
+			DELETE FROM app.preset_value
+			WHERE preset_id = $1
+		`, presetId); err != nil {
+			return err
+		}
 	}
 
 	// insert current values

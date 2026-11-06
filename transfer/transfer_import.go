@@ -43,6 +43,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -65,6 +66,7 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 	import_mx.Lock()
 	defer import_mx.Unlock()
 
+	tsAll := time.Now()
 	log.Info(log.ContextTransfer, fmt.Sprintf("start import for modules from file(s): '%s'", strings.Join(filePathsImport, "', '")))
 
 	// extract module packages
@@ -130,6 +132,7 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 		log.Info(log.ContextTransfer, fmt.Sprintf("import loop %d started", loopsRan+1))
 
 		for _, m := range modules {
+			tsMod := time.Now()
 			log.Info(log.ContextTransfer, fmt.Sprintf("import START, module '%s', %s", m.Name, m.Id))
 
 			/* execution order
@@ -140,22 +143,23 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 			3. delete all other entities after import is done
 				if other entities rely on deleted states (presets), they are applied on next loop
 			*/
-			if firstRun && !moduleIdMapImportMeta[m.Id].isNew {
+			isNew := moduleIdMapImportMeta[m.Id].isNew
+			if firstRun && !isNew {
 				if err := transfer_delete.NotExistingPgTriggers_tx(ctx, tx, m.Id, m.PgTriggers); err != nil {
 					return err
 				}
 			}
 
-			if err := importModule_tx(ctx, tx, m, firstRun, lastRun, idMapSkipped); err != nil {
+			if err := importModule_tx(ctx, tx, m, firstRun, lastRun, isNew, idMapSkipped); err != nil {
 				return err
 			}
 
-			if _, exists := idMapSkipped[m.Id]; !exists && !moduleIdMapImportMeta[m.Id].isNew {
+			if _, wasSkipped := idMapSkipped[m.Id]; !wasSkipped && !isNew {
 				if err := transfer_delete.NotExisting_tx(ctx, tx, m); err != nil {
 					return err
 				}
 			}
-			log.Info(log.ContextTransfer, fmt.Sprintf("import END, module '%s', %s", m.Name, m.Id))
+			log.Info(log.ContextTransfer, fmt.Sprintf("import END (%.3fs), module '%s', %s", time.Since(tsMod).Seconds(), m.Name, m.Id))
 		}
 	}
 
@@ -179,7 +183,7 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 		return err
 	}
 
-	log.Info(log.ContextTransfer, "module files were moved to transfer path if imported")
+	log.Info(log.ContextTransfer, fmt.Sprintf("success (%.3fs), imported module files were moved to transfer path", time.Since(tsAll).Seconds()))
 
 	// update schema cache
 	moduleIdsUpdated := make([]uuid.UUID, 0)
@@ -196,10 +200,13 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 	if err := cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+	return nil
 }
 
-func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
+func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun, lastRun, isNew bool,
 	idMapSkipped map[uuid.UUID]types.Void) error {
 
 	// we use a sensible import order to avoid conflicts but some cannot be avoided:
@@ -249,7 +256,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		log.Info(log.ContextTransfer, fmt.Sprintf("set article %s", e.Id))
 
 		if err := importCheckResultAndApply(ctx, tx, article.Set_tx(ctx, tx, e.ModuleId,
-			e.Id, e.Name, e.Captions), e.Id, idMapSkipped); err != nil {
+			isNew, e.Id, e.Name, e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -284,7 +291,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set relation %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, relation.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, relation.Set_tx(ctx, tx, isNew, e, false), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -306,7 +313,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 			}
 			log.Info(log.ContextTransfer, fmt.Sprintf("set PK attribute %s", e.Id))
 
-			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
+			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, isNew, e, false), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}
@@ -328,7 +335,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 			}
 			log.Info(log.ContextTransfer, fmt.Sprintf("set attribute %s", e.Id))
 
-			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
+			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, isNew, e, false), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}
@@ -345,9 +352,8 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set collection %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, collection.Set_tx(ctx, tx,
-			e.ModuleId, e.Id, e.IconId, e.Name, e.Columns, e.Query, e.InHeader),
-			e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, collection.Set_tx(ctx, tx, e.ModuleId,
+			e.Id, isNew, e.IconId, e.Name, e.Columns, e.Query, e.InHeader), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -364,7 +370,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set API %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, api.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, api.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -380,7 +386,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set document %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, doc.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, doc.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -396,7 +402,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set search bar %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, searchBar.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, searchBar.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -428,7 +434,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set widget %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, widget.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, widget.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -444,7 +450,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set PG function %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, pgFunction.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, pgFunction.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -494,7 +500,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set form %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, form.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, form.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -510,7 +516,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set menu tab %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, menuTab.Set_tx(ctx, tx, i, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, menuTab.Set_tx(ctx, tx, i, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -526,7 +532,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set role %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, role.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, role.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -542,7 +548,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set JS function %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, jsFunction.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, jsFunction.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -559,7 +565,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set client event %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, clientEvent.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, clientEvent.Set_tx(ctx, tx, isNew, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -585,12 +591,12 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 			// if preset itself is unprotected, we just update the schema
 			if lastRun && !e.Protected {
 				log.Info(log.ContextTransfer, fmt.Sprintf("import failed to create or update unprotected preset '%s' until last loop, it will be ignored", e.Id))
-				if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e, true), e.Id, idMapSkipped); err != nil {
+				if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, isNew, e, true), e.Id, idMapSkipped); err != nil {
 					return err
 				}
 				continue
 			}
-			if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
+			if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, isNew, e, false), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}

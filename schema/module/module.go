@@ -100,9 +100,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 	}
 	rows.Close()
 
-	// get sub entities
 	for i, mod := range modules {
-
 		mod.StartForms, err = getStartForms_tx(ctx, tx, mod.Id)
 		if err != nil {
 			return nil, err
@@ -320,21 +318,20 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 		}
 	}
 
-	// set sub entities
-	if err := article.Assign_tx(ctx, tx, constants.DbModule, mod.Id, mod.ArticleIdsHelp); err != nil {
-		return mod.Id, err
-	}
-	if err := setReleases_tx(ctx, tx, mod.Id, mod.Releases); err != nil {
-		return mod.Id, err
-	}
-
 	// set captions
 	// fix imports < 3.2: Migration from help captions to help articles
 	mod.Captions, err = compatible.FixCaptions_tx(ctx, tx, "module", mod.Id, mod.Captions)
 	if err != nil {
 		return mod.Id, err
 	}
-	return mod.Id, caption.Set_tx(ctx, tx, mod.Id, mod.Captions)
+
+	// set sub entities
+	bt := &pgx.Batch{}
+	caption.Set_bt(bt, mod.Id, isNew, mod.Captions)
+	article.Assign_bt(bt, constants.DbModule, mod.Id, isNew, mod.ArticleIdsHelp)
+	setReleases_bt(bt, mod.Id, mod.Releases)
+
+	return mod.Id, tx.SendBatch(ctx, bt).Close()
 }
 
 func getDependsOn_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {

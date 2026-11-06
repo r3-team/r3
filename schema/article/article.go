@@ -3,6 +3,8 @@ package article
 import (
 	"context"
 	"errors"
+	"fmt"
+	"r3/log"
 	"r3/schema/caption"
 	"r3/types"
 	"r3/types/constants"
@@ -11,42 +13,31 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Assign_tx(ctx context.Context, tx pgx.Tx, target types.DbSchemaApp, targetId uuid.UUID, articleIds []uuid.UUID) error {
+func Assign_bt(bt *pgx.Batch, target types.DbSchemaApp, targetId uuid.UUID, onlyCreate bool, articleIds []uuid.UUID) {
 	switch target {
 	case constants.DbForm:
-		if _, err := tx.Exec(ctx, `
-			DELETE FROM app.article_form
-			WHERE form_id = $1
-		`, targetId); err != nil {
-			return err
+		if !onlyCreate {
+			bt.Queue(`DELETE FROM app.article_form WHERE form_id = $1`, targetId)
 		}
 		for i, articleId := range articleIds {
-			if _, err := tx.Exec(ctx, `
+			bt.Queue(`
 				INSERT INTO app.article_form (article_id, form_id, position)
 				VALUES ($1, $2, $3)
-			`, articleId, targetId, i); err != nil {
-				return err
-			}
+			`, articleId, targetId, i)
 		}
 	case constants.DbModule:
-		if _, err := tx.Exec(ctx, `
-			DELETE FROM app.article_help
-			WHERE module_id = $1
-		`, targetId); err != nil {
-			return err
+		if !onlyCreate {
+			bt.Queue(`DELETE FROM app.article_help WHERE module_id = $1`, targetId)
 		}
 		for i, articleId := range articleIds {
-			if _, err := tx.Exec(ctx, `
+			bt.Queue(`
 				INSERT INTO app.article_help (article_id, module_id, position)
 				VALUES ($1, $2, $3)
-			`, articleId, targetId, i); err != nil {
-				return err
-			}
+			`, articleId, targetId, i)
 		}
 	default:
-		return errors.New("invalid article assign target")
+		log.Error(log.ContextTransfer, "cannot assign article", errors.New(fmt.Sprintf("invalid target '%s'", target)))
 	}
-	return nil
 }
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
@@ -90,17 +81,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Article
 	return articles, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string, captions types.CaptionMap) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, onlyCreate bool, id uuid.UUID, name string, captions types.CaptionMap) error {
 	if name == "" {
 		return errors.New("missing name")
 	}
-	if _, err := tx.Exec(ctx, `
+
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.article (id, module_id, name)
 		VALUES ($1,$2,$3)
 		ON CONFLICT (id)
 		DO UPDATE SET name = $3
-	`, id, moduleId, name); err != nil {
-		return err
-	}
-	return caption.Set_tx(ctx, tx, id, captions)
+	`, id, moduleId, name)
+
+	caption.Set_bt(bt, id, onlyCreate, captions)
+	return tx.SendBatch(ctx, bt).Close()
 }

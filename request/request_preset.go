@@ -23,5 +23,5 @@ func PresetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return preset.Set_tx(ctx, tx, req, false)
+	return preset.Set_tx(ctx, tx, false, req, false)
 }

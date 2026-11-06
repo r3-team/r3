@@ -52,7 +52,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.ClientE
 	return clientEvents, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, ce types.ClientEvent) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, ce types.ClientEvent) error {
 
 	if ce.Action != "callJsFunction" {
 		ce.JsFunctionId = pgtype.UUID{}
@@ -60,7 +60,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, ce types.ClientEvent) error {
 	if ce.Action != "callPgFunction" {
 		ce.PgFunctionId = pgtype.UUID{}
 	}
-	if _, err := tx.Exec(ctx, `
+
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.client_event (id, module_id, action, arguments, event, hotkey_modifier1,
 			hotkey_modifier2, hotkey_char, js_function_id, pg_function_id)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -68,9 +70,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, ce types.ClientEvent) error {
 		DO UPDATE SET action = $3, arguments = $4, event = $5, hotkey_modifier1 = $6,
 			hotkey_modifier2 = $7, hotkey_char = $8, js_function_id = $9, pg_function_id = $10
 	`, ce.Id, ce.ModuleId, ce.Action, ce.Arguments, ce.Event, ce.HotkeyModifier1,
-		ce.HotkeyModifier2, ce.HotkeyChar, ce.JsFunctionId, ce.PgFunctionId); err != nil {
+		ce.HotkeyModifier2, ce.HotkeyChar, ce.JsFunctionId, ce.PgFunctionId)
 
-		return err
-	}
-	return caption.Set_tx(ctx, tx, ce.Id, ce.Captions)
+	caption.Set_bt(bt, ce.Id, onlyCreate, ce.Captions)
+
+	return tx.SendBatch(ctx, bt).Close()
 }

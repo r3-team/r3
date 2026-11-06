@@ -28,7 +28,7 @@ func clientEventSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return clientEvent.Set_tx(ctx, tx, req)
+	return clientEvent.Set_tx(ctx, tx, false, req)
 }
 
 // fat client requests

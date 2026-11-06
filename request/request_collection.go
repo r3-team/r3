@@ -23,6 +23,6 @@ func CollectionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) e
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return collection.Set_tx(ctx, tx, req.ModuleId, req.Id,
+	return collection.Set_tx(ctx, tx, req.ModuleId, req.Id, false,
 		req.IconId, req.Name, req.Columns, req.Query, req.InHeader)
 }

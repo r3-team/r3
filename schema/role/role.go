@@ -127,7 +127,7 @@ func getAccess_tx(ctx context.Context, tx pgx.Tx, role types.Role) (types.Role, 
 	return role, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, role types.Role) error {
 
 	if role.Name == "" {
 		return errors.New("missing name")
@@ -136,84 +136,72 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	// compatibility fix: missing role content <3.0
 	role = compatible.FixMissingRoleContent(role)
 
-	if _, err := tx.Exec(ctx, `
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.role (id, module_id, name, content, assignable)
 		VALUES ($1,$2,$3,$4,$5)
 		ON CONFLICT (id)
 		DO UPDATE SET name = $3, content = $4, assignable = $5
 		WHERE role.content <> 'everyone' -- cannot update default role
-	`, role.Id, role.ModuleId, role.Name, role.Content, role.Assignable); err != nil {
-		return err
+	`, role.Id, role.ModuleId, role.Name, role.Content, role.Assignable)
+
+	// sub entities
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.role_child  WHERE role_id = $1`, role.Id)
+		bt.Queue(`DELETE FROM app.role_access WHERE role_id = $1`, role.Id)
 	}
 
-	// set children
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.role_child
-		WHERE role_id = $1
-	`, role.Id); err != nil {
-		return err
-	}
 	for _, childId := range role.ChildrenIds {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.role_child (role_id, role_id_child)
-			VALUES ($1,$2)
-		`, role.Id, childId); err != nil {
-			return err
-		}
+		bt.Queue(`INSERT INTO app.role_child (role_id, role_id_child) VALUES ($1,$2)`, role.Id, childId)
 	}
 
 	// set access
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.role_access
-		WHERE role_id = $1
-	`, role.Id); err != nil {
-		return err
-	}
-
 	for trgId, access := range role.AccessApis {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbApi, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbApi, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessAttributes {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbAttribute, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbAttribute, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessClientEvents {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbClientEvent, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbClientEvent, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessCollections {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbCollection, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbCollection, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessMenus {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbMenu, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbMenu, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessRelations {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbRelation, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbRelation, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessSearchBars {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbSearchBar, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbSearchBar, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessWidgets {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, constants.DbWidget, access); err != nil {
+		if err := setAccess_bt(bt, role.Id, trgId, constants.DbWidget, access); err != nil {
 			return err
 		}
 	}
-	return caption.Set_tx(ctx, tx, role.Id, role.Captions)
+	caption.Set_bt(bt, role.Id, onlyCreate, role.Captions)
+
+	return tx.SendBatch(ctx, bt).Close()
 }
 
-func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity types.DbSchemaApp, access types.Access) error {
+func setAccess_bt(bt *pgx.Batch, roleId uuid.UUID, id uuid.UUID, entity types.DbSchemaApp, access types.Access) error {
 
 	// check valid access levels
 	switch entity {
@@ -258,10 +246,10 @@ func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID
 		return nil
 	}
 
-	_, err := tx.Exec(ctx, fmt.Sprintf(`
+	bt.Queue(fmt.Sprintf(`
 		INSERT INTO app.role_access (role_id, %s_id, access)
 		VALUES ($1,$2,$3)
 	`, entity), roleId, id, access)
 
-	return err
+	return nil
 }

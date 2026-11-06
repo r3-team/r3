@@ -104,7 +104,7 @@ func getSchedules_tx(ctx context.Context, tx pgx.Tx, pgFunctionId uuid.UUID) ([]
 	return schedules, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, onlyCreate bool, fnc types.PgFunction) error {
 
 	if err := db_check.DbIdentifier(fnc.Name); err != nil {
 		return err
@@ -203,7 +203,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	// set schedules
 	scheduleIds := make([]uuid.UUID, 0)
 	for _, s := range fnc.Schedules {
-
 		known, err = schema.CheckId_tx(ctx, tx, s.Id, constants.DbPgFunctionSchedule, "id")
 		if err != nil {
 			return err
@@ -236,17 +235,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		scheduleIds = append(scheduleIds, s.Id)
 	}
 
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.pg_function_schedule
-		WHERE pg_function_id = $1
-		AND id <> ALL($2)
-	`, fnc.Id, scheduleIds); err != nil {
-		return err
+	bt := &pgx.Batch{}
+	if !onlyCreate {
+		bt.Queue(`DELETE FROM app.pg_function_schedule WHERE pg_function_id = $1 AND id <> ALL($2)`, fnc.Id, scheduleIds)
 	}
-	if err := tag.SetAssign_tx(ctx, tx, constants.DbPgFunction, fnc.Id, fnc.TagIds); err != nil {
-		return err
-	}
-	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
+	tag.SetAssign_bt(bt, constants.DbPgFunction, fnc.Id, onlyCreate, fnc.TagIds)
+	caption.Set_bt(bt, fnc.Id, onlyCreate, fnc.Captions)
+	if err := tx.SendBatch(ctx, bt).Close(); err != nil {
 		return err
 	}
 
@@ -314,7 +309,7 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchema
 		if err != nil {
 			return err
 		}
-		if err := Set_tx(ctx, tx, f); err != nil {
+		if err := Set_tx(ctx, tx, false, f); err != nil {
 			return err
 		}
 	}

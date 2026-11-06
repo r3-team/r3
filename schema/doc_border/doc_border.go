@@ -2,7 +2,9 @@ package doc_border
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"r3/log"
 	"r3/types"
 	"r3/types/constants"
 	"slices"
@@ -29,17 +31,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context types.
 	return b, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context types.DbSchemaApp, b types.DocBorder) error {
+func Set_bt(bt *pgx.Batch, docFieldId uuid.UUID, context types.DbSchemaApp, b types.DocBorder) {
 
 	if !slices.Contains(constants.DbDocContextsValid, context) {
-		return fmt.Errorf("invalid border context '%s'", context)
+		log.Error(log.ContextTransfer, "cannot store document border", errors.New(fmt.Sprintf("invalid context '%s'", context)))
+		return
 	}
 
-	_, err := tx.Exec(ctx, `
+	bt.Queue(`
 		INSERT INTO app.doc_border (doc_field_id, context, cell, color, draw, size, style_cap, style_join)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 		ON CONFLICT (doc_field_id, context)
 		DO UPDATE SET cell = $3, color = $4, draw = $5, size = $6, style_cap = $7, style_join = $8
 	`, docFieldId, context, b.Cell, b.Color, b.Draw, b.Size, b.StyleCap, b.StyleJoin)
-	return err
 }

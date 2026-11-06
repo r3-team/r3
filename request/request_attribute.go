@@ -23,5 +23,5 @@ func AttributeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) er
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return attribute.Set_tx(ctx, tx, req, true)
+	return attribute.Set_tx(ctx, tx, false, req, true)
 }

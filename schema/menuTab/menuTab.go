@@ -60,20 +60,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.MenuTab
 	return menuTabs, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, position int, mt types.MenuTab) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, position int, onlyCreate bool, mt types.MenuTab) error {
 
-	if _, err := tx.Exec(ctx, `
+	bt := &pgx.Batch{}
+	bt.Queue(`
 		INSERT INTO app.menu_tab (id, module_id, icon_id, position)
 		VALUES ($1,$2,$3,$4)
 		ON CONFLICT (id)
 		DO UPDATE SET icon_id = $3, position = $4
-	`, mt.Id, mt.ModuleId, mt.IconId, position); err != nil {
-		return err
-	}
-	if err := setMenus_tx(ctx, tx, mt.Id, pgtype.UUID{}, mt.Menus); err != nil {
-		return err
-	}
-	return caption.Set_tx(ctx, tx, mt.Id, mt.Captions)
+	`, mt.Id, mt.ModuleId, mt.IconId, position)
+
+	setMenus_bt(bt, mt.Id, pgtype.UUID{}, onlyCreate, mt.Menus)
+	caption.Set_bt(bt, mt.Id, onlyCreate, mt.Captions)
+	return tx.SendBatch(ctx, bt).Close()
 }
 
 // menus
@@ -123,51 +122,41 @@ func getMenus_tx(ctx context.Context, tx pgx.Tx, menuTabId uuid.UUID, parentId p
 	}
 	return menus, nil
 }
-func setMenus_tx(ctx context.Context, tx pgx.Tx, menuTabId uuid.UUID, parentId pgtype.UUID, menus []types.Menu) error {
+func setMenus_bt(bt *pgx.Batch, menuTabId uuid.UUID, parentId pgtype.UUID, onlyCreate bool, menus []types.Menu) {
 
 	idsKeep := make([]uuid.UUID, 0)
 	for i, m := range menus {
 		idsKeep = append(idsKeep, m.Id)
 
-		if _, err := tx.Exec(ctx, `
+		bt.Queue(`
 			INSERT INTO app.menu (id, menu_tab_id, parent_id,
 				form_id, icon_id, position, show_children, color)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 			ON CONFLICT (id)
 			DO UPDATE SET menu_tab_id = $2, parent_id = $3, form_id = $4, icon_id = $5,
 				position = $6, show_children = $7, color = $8
-		`, m.Id, menuTabId, parentId, m.FormId, m.IconId, i, m.ShowChildren, m.Color); err != nil {
-			return err
-		}
-		if err := setMenus_tx(ctx, tx, menuTabId, pgtype.UUID{Bytes: m.Id, Valid: true}, m.Menus); err != nil {
-			return err
-		}
-		if err := consumer.Set_tx(ctx, tx, constants.DbMenu, m.Id, "menuDisplay", m.Collections); err != nil {
-			return err
-		}
-		if err := caption.Set_tx(ctx, tx, m.Id, m.Captions); err != nil {
-			return err
-		}
+		`, m.Id, menuTabId, parentId, m.FormId, m.IconId, i, m.ShowChildren, m.Color)
+
+		setMenus_bt(bt, menuTabId, pgtype.UUID{Bytes: m.Id, Valid: true}, onlyCreate, m.Menus)
+		consumer.Set_bt(bt, constants.DbMenu, m.Id, onlyCreate, "menuDisplay", m.Collections)
+		caption.Set_bt(bt, m.Id, onlyCreate, m.Captions)
 	}
 
-	if parentId.Valid {
-		if _, err := tx.Exec(ctx, `
-			DELETE FROM app.menu
-			WHERE menu_tab_id = $1
-			AND   parent_id   = $2
-			AND   id <> ALL($3)
-		`, menuTabId, parentId.Bytes, idsKeep); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			DELETE FROM app.menu
-			WHERE menu_tab_id = $1
-			AND   parent_id IS NULL
-			AND   id <> ALL($2)
-		`, menuTabId, idsKeep); err != nil {
-			return err
+	if !onlyCreate {
+		if parentId.Valid {
+			bt.Queue(`
+				DELETE FROM app.menu
+				WHERE menu_tab_id = $1
+				AND   parent_id   = $2
+				AND   id <> ALL($3)
+			`, menuTabId, parentId.Bytes, idsKeep)
+		} else {
+			bt.Queue(`
+				DELETE FROM app.menu
+				WHERE menu_tab_id = $1
+				AND   parent_id IS NULL
+				AND   id <> ALL($2)
+			`, menuTabId, idsKeep)
 		}
 	}
-	return nil
 }
