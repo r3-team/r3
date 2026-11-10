@@ -7,6 +7,8 @@ import (
 	"r3/log"
 	"r3/schema/caption"
 	"r3/schema/compatible"
+	"r3/schema/openDoc"
+	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/types"
 	"r3/types/constants"
@@ -66,6 +68,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 		c.Captions, err = caption.Get_tx(ctx, tx, constants.DbColumn, c.Id, []string{"columnTitle"})
 		if err != nil {
 			return nil, err
+		}
+
+		if c.Display == "action" {
+			c.OpenDoc, err = openDoc.Get_tx(ctx, tx, constants.DbColumn, c.Id)
+			if err != nil {
+				return nil, err
+			}
+			c.OpenForm, err = openForm.Get_tx(ctx, tx, constants.DbColumn, c.Id, pgtype.Text{})
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if c.PgFunctionId.Valid || c.Scalar.Valid {
@@ -133,6 +146,10 @@ func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCre
 			query.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, 0, 0, 0, c.Query)
 		case constants.DbColumnContentFncPg, constants.DbColumnContentFncScalar:
 			setArguments_bt(bt, c.Id, onlyCreate, c.Arguments)
+		}
+		if c.Display == "action" {
+			openDoc.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, c.OpenDoc)
+			openForm.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, c.OpenForm, pgtype.Text{})
 		}
 		caption.Set_bt(bt, c.Id, onlyCreate, c.Captions)
 	}

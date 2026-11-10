@@ -171,6 +171,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			UPDATE instance.login_setting SET border_radius = 0 WHERE borders_squared;
 
 			ALTER TABLE instance.login_setting DROP COLUMN borders_squared;
+
+			-- column actions
+			ALTER TYPE app.data_display ADD VALUE 'action';
+
+			ALTER TABLE app.open_doc ADD COLUMN column_id UUID;
+			ALTER TABLE app.open_doc ADD CONSTRAINT open_doc_column_id_fkey FOREIGN KEY (column_id)
+				REFERENCES app.column (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_open_doc_column_id_fkey ON app.open_doc USING btree (column_id ASC NULLS LAST);
 		`)
 		return "3.14", err
 	},

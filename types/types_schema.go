@@ -110,11 +110,15 @@ type Column struct {
 	Captions CaptionMap  `json:"captions"` // column titles
 	Basis    int         `json:"basis"`    // size basis (usually width)
 	Batch    pgtype.Int4 `json:"batch"`    // index of column batch (multiple columns as one)
-	Display  string      `json:"display"`  // how to display value (email, gallery, etc.)
+	Display  string      `json:"display"`  // how to display value (email, gallery, action, etc.)
 	Hidden   bool        `json:"hidden"`   // hide column by default?
 	Length   int         `json:"length"`   // text length limit (in characters)
 	OnMobile bool        `json:"onMobile"` // display column on mobile by default?
 	Styles   []string    `json:"styles"`   // alignEnd, alignMid, bold, clipboard, hide, italic, vertical, wrap
+
+	// action options
+	OpenDoc  OpenDoc  `json:"openDoc"`
+	OpenForm OpenForm `json:"openForm"`
 
 	// legacy
 	BatchVertical bool `json:"batchVertical"`

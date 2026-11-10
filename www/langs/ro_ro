@@ -1170,8 +1170,6 @@
 			"new": "Formular nou",
 			"noDataActions": "No data actions",
 			"onMobile": "Vizualizare dispozitiv mobil",
-			"openForm": "Deschideți formularul",
-			"openFormBulk": "Deschideți formularul<br />(bulk editing)",
 			"option": {
 				"dataOptions": "Overwrite relation settings",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Notă",
 		"numberSepDecimal": "Decimal separator",
 		"numberSepThousand": "Thousands separator",
+		"openForm": "Deschideți formularul",
+		"openFormBulk": "Deschideți formularul<br />(bulk editing)",
 		"option": {
 			"all": "all",
 			"modifierKey": {

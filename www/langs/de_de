@@ -1170,8 +1170,6 @@
 			"new": "Neues Formular",
 			"noDataActions": "Keine Datenaktionen",
 			"onMobile": "In mobiler Ansicht",
-			"openForm": "Formular öffnen",
-			"openFormBulk": "Formular öffnen<br />(Massenbearbeitung)",
 			"option": {
 				"dataOptions": "Relationseinstellungen überschreiben",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Hinweis",
 		"numberSepDecimal": "Dezimal-Trennzeichen",
 		"numberSepThousand": "Tausender-Trennzeichen",
+		"openForm": "Formular öffnen",
+		"openFormBulk": "Formular öffnen<br />(Massenbearbeitung)",
 		"option": {
 			"all": "alle",
 			"modifierKey": {

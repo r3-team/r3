@@ -10,13 +10,15 @@ import { getCaptionByIndexAttributeId } from '../shared/query.js';
 import MyBuilderAggregatorInput from './builderAggregatorInput.js';
 import MyBuilderCaption from './builderCaption.js';
 import MyBuilderColumnArguments from './builderColumnArguments.js';
+import MyBuilderOpenDoc from './builderOpenDoc.js';
+import MyBuilderOpenForm from './builderOpenForm.js';
 import MyBuilderQuery from './builderQuery.js';
 
 export default {
 	name: 'my-builder-column-options',
 	components: {
-		MyBuilderAggregatorInput, MyBuilderCaption,
-		MyBuilderColumnArguments, MyBuilderQuery
+		MyBuilderAggregatorInput, MyBuilderCaption, MyBuilderColumnArguments,
+		MyBuilderOpenDoc, MyBuilderOpenForm, MyBuilderQuery
 	},
 	template: `<div class="top lower">
 		<div class="area">
@@ -200,10 +202,36 @@ export default {
 							<option v-if="isString"             value="phone"   >{{ capApp.option.display.phone }}</option>
 							<option v-if="isString"             value="url"     >{{ capApp.option.display.url }}</option>
 							<option v-if="isFiles || isBarcode" value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option v-if="allowActions"         value="action"  >{{ capGen.action }}</option>
 						</select>
 					</td>
 				</tr>
 			</template>
+			<tr v-if="isAction">
+				<td>{{ capGen.openForm }}</td>
+				<td>
+					<my-builder-open-form
+						@update:modelValue="set('openForm',$event)"
+						:joinsIndexMapField
+						:modelValue="column.openForm"
+						:module
+						:readonly
+					/>
+				</td>
+			</tr>
+			<tr v-if="isAction">
+				<td>{{ capGen.button.pdfCreate }}</td>
+				<td>
+					<my-builder-open-doc
+						@update:modelValue="set('openDoc',$event)"
+						:dataFields="[]"
+						:joinsIndexMap="joinsIndexMapField"
+						:modelValue="column.openDoc"
+						:module
+						:readonly
+					/>
+				</td>
+			</tr>
 			<tr>
 				<td colspan="999"><b>{{ capGen.dataAccess }}</b></td>
 			</tr>
@@ -334,6 +362,7 @@ export default {
 		</tbody>
 	</table>`,
 	props: {
+		allowActions: { type: Boolean, required: false, default: false },
 		builderLanguage: { type: String, required: true },
 		column: { type: Object, required: true },
 		entityIdMapRef: { type: Object, required: false, default: () => { return {} } },
@@ -342,6 +371,7 @@ export default {
 		formId: { type: String, required: false, default: '' },
 		hasCaptions: { type: Boolean, required: true },
 		isInput: { type: Boolean, required: false, default: false },
+		joinsIndexMapField: { type: Object, required: false, default: () => { return {} } },
 		joinsParents: { type: Array, required: false, default: [] },
 		moduleId: { type: String, required: true },
 		onlyData: { type: Boolean, required: true }, // no display/formatting options
@@ -375,6 +405,7 @@ export default {
 		},
 
 		// simple
+		isAction: s => s.column.display === 'action',
 		isBarcode: s => s.isStringAttribute && s.attribute.contentUse.includes('barcode'),
 		isBoolean: s => s.isAttributeBoolean(s.attribute.content),
 		isColor: s => s.isStringAttribute && s.attribute.contentUse === 'color',

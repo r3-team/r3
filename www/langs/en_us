@@ -1170,8 +1170,6 @@
 			"new": "New form",
 			"noDataActions": "No data actions",
 			"onMobile": "In mobile view",
-			"openForm": "Open form",
-			"openFormBulk": "Open form<br />(bulk editing)",
 			"option": {
 				"display": {
 					"color": "color",
@@ -2783,6 +2781,8 @@
 		"notice": "Notice",
 		"numberSepDecimal": "Decimal separator",
 		"numberSepThousand": "Thousands separator",
+		"openForm": "Open form",
+		"openFormBulk": "Open form<br />(bulk editing)",
 		"option": {
 			"all": "all",
 			"modifierKey": {

@@ -1172,7 +1172,7 @@ export default {
 
 				<!-- open form & open form bulk -->
 				<tr v-if="hasOpenForm">
-					<td>{{ capApp.openForm }}</td>
+					<td>{{ capGen.openForm }}</td>
 					<td>
 						<my-builder-open-form
 							@update:modelValue="set('openForm',$event)"
@@ -1188,7 +1188,7 @@ export default {
 					</td>
 				</tr>
 				<tr v-if="isList && query.relationId !== null">
-					<td v-html="capApp.openFormBulk"></td>
+					<td v-html="capGen.openFormBulk"></td>
 					<td>
 						<my-builder-open-form
 							@update:modelValue="set('openFormBulk',$event)"

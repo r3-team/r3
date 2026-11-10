@@ -119,6 +119,7 @@ var (
 		DbDocPage,
 	}
 	DbAssignedOpenDoc = []types.DbSchemaApp{
+		DbColumn,
 		DbFormAction,
 		DbField,
 	}

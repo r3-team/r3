@@ -1170,8 +1170,6 @@
 			"new": "Nouveau formulaire",
 			"noDataActions": "Pas d'actions sur les données",
 			"onMobile": "En vue mobile",
-			"openForm": "Ouvrir le formulaire",
-			"openFormBulk": "Ouvrir le formulaire<br />(édition en masse)",
 			"option": {
 				"dataOptions": "Overwrite relation settings",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Avis",
 		"numberSepDecimal": "Séparateur décimal",
 		"numberSepThousand": "Séparateur de milliers",
+		"openForm": "Ouvrir le formulaire",
+		"openFormBulk": "Ouvrir le formulaire<br />(édition en masse)",
 		"option": {
 			"all": "tous",
 			"modifierKey": {

@@ -1170,8 +1170,6 @@
 			"new": "Novo formulário",
 			"noDataActions": "Ações sem dados",
 			"onMobile": "Em vista móvel",
-			"openForm": "Abrir formulário",
-			"openFormBulk": "Abrir formulário<br />(edição em massa)",
 			"option": {
 				"dataOptions": "Substituir configuração de relação",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Aviso",
 		"numberSepDecimal": "Separador decimal",
 		"numberSepThousand": "Separador de milhares",
+		"openForm": "Abrir formulário",
+		"openFormBulk": "Abrir formulário<br />(edição em massa)",
 		"option": {
 			"all": "todos",
 			"modifierKey": {

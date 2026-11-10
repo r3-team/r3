@@ -1170,8 +1170,6 @@
 			"new": "شكل جديد",
 			"noDataActions": "لا توجد إجراءات البيانات",
 			"onMobile": "في عرض الجوال",
-			"openForm": "فتح النموذج",
-			"openFormBulk": "فتح النموذج<br />(التحرير بالجملة)",
 			"option": {
 				"dataOptions": "Overwrite relation settings",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "يلاحظ",
 		"numberSepDecimal": "فاصل عشري",
 		"numberSepThousand": "فاصل الآلاف",
+		"openForm": "فتح النموذج",
+		"openFormBulk": "فتح النموذج<br />(التحرير بالجملة)",
 		"option": {
 			"all": "الجميع",
 			"modifierKey": {

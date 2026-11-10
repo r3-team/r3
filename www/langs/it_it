@@ -1170,8 +1170,6 @@
 			"new": "Nuovo modulo",
 			"noDataActions": "No data actions",
 			"onMobile": "Nella vista mobile",
-			"openForm": "Apri modulo",
-			"openFormBulk": "Apri modulo<br />(bulk editing)",
 			"option": {
 				"dataOptions": "Overwrite relation settings",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Avviso",
 		"numberSepDecimal": "Decimal separator",
 		"numberSepThousand": "Thousands separator",
+		"openForm": "Apri modulo",
+		"openFormBulk": "Apri modulo<br />(bulk editing)",
 		"option": {
 			"all": "all",
 			"modifierKey": {

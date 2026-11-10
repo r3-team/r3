@@ -326,6 +326,7 @@ export default {
 				<my-builder-column-options
 					@close="columnIdShow = null"
 					@set="(...args) => columnPropertySet(args[0],args[1])"
+					:allowActions="true"
 					:builderLanguage
 					:column="columnShow"
 					:entityIdMapRef
@@ -334,6 +335,7 @@ export default {
 					:formId
 					:hasCaptions="field.content === 'list'"
 					:isInput="isRelationship"
+					:joinsIndexMapField
 					:joinsParents="[query.joins]"
 					:moduleId
 					:onlyData="false"
@@ -378,9 +380,8 @@ export default {
 		columnBatchIndexTitle: s => {
 			if (s.isGantt) return [s.capApp.ganttBatch];
 			if (s.isKanban) {
-				const joinsIndexMap = s.getJoinsIndexMap(s.query.joins);
 				const getCaption = relationIndex => {
-					const j = joinsIndexMap[relationIndex];
+					const j = s.joinsIndexMapField[relationIndex];
 					return `${relationIndex} ${s.relationIdMap[j.relationId].name}`;
 				};
 
@@ -523,6 +524,7 @@ export default {
 		isRelationship: s => s.isData && s.isAttributeRelationship(s.attribute.content),
 		isRelationship1N: s => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
 		isVariable: s => s.field.content === 'variable',
+		joinsIndexMapField: s => s.hasQuery ? s.getJoinsIndexMap(s.query.joins) : {},
 		moveActive: s => s.fieldMoveList !== null,
 		parentChildren: s => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
 		query: s => s.hasQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),

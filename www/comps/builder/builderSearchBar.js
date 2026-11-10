@@ -202,6 +202,7 @@ export default {
 				v-if="columnShow !== false"
 				@close="columnIdShow = null"
 				@set="(...args) => columnSet(args[0],args[1])"
+				:allowActions="true"
 				:builderLanguage
 				:column="columnShow"
 				:filtersDisable

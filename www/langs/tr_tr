@@ -1170,8 +1170,6 @@
 			"new": "Yeni form",
 			"noDataActions": "Veri işlemi yok",
 			"onMobile": "Mobil görünümde",
-			"openForm": "Formu aç",
-			"openFormBulk": "Formu aç<br />(toplu düzenleme)",
 			"option": {
 				"dataOptions": "İlişki ayarlarının üzerine yaz",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Fark etme",
 		"numberSepDecimal": "Ondalık ayırıcı",
 		"numberSepThousand": "Binlik ayırıcı",
+		"openForm": "Formu aç",
+		"openFormBulk": "Formu aç<br />(toplu düzenleme)",
 		"option": {
 			"all": "Tümü",
 			"modifierKey": {

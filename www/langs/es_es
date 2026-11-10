@@ -1170,8 +1170,6 @@
 			"new": "Nuevo formulario",
 			"noDataActions": "Acciones sin datos",
 			"onMobile": "En vista móvil",
-			"openForm": "Abrir formulario",
-			"openFormBulk": "Abrir formulario<br />(edición masiva)",
 			"option": {
 				"dataOptions": "Sobrescribir configuración de relación",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Aviso",
 		"numberSepDecimal": "Separador decimal",
 		"numberSepThousand": "Separador de miles",
+		"openForm": "Abrir formulario",
+		"openFormBulk": "Abrir formulario<br />(edición masiva)",
 		"option": {
 			"all": "todos",
 			"modifierKey": {

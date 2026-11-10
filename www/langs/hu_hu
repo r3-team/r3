@@ -1170,8 +1170,6 @@
 			"new": "Új űrlap",
 			"noDataActions": "Nincsenek adatműveletek",
 			"onMobile": "Mobil nézetben",
-			"openForm": "Űrlap megnyitása",
-			"openFormBulk": "Űrlap megnyitása (Tömeges szerkesztés)",
 			"option": {
 				"dataOptions": "Overwrite relation settings",
 				"display": {
@@ -2783,6 +2781,8 @@
 		"notice": "Értesítés",
 		"numberSepDecimal": "Decimal separator",
 		"numberSepThousand": "Thousands separator",
+		"openForm": "Űrlap megnyitása",
+		"openFormBulk": "Űrlap megnyitása (Tömeges szerkesztés)",
 		"option": {
 			"all": "mind",
 			"modifierKey": {

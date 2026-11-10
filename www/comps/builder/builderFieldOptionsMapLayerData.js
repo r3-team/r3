@@ -78,7 +78,7 @@ export default {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.openForm }}</td>
+					<td>{{ capGen.openForm }}</td>
 					<td>
 						<my-builder-open-form
 							v-model="layer.openForm"
