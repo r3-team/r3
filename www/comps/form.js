@@ -95,9 +95,9 @@ export default {
 
 				<my-form-actions
 					v-if="!hasBarLower && hasFormActions"
-					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-					@open-doc="openDoc"
-					@open-form="openForm"
+					@executeFunction="jsFunctionRun($event,[],exposedFunctions)"
+					@openDoc="openDoc"
+					@openForm="openForm"
 					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
@@ -199,9 +199,9 @@ export default {
 				</div>
 				<my-form-actions
 					v-if="hasFormActions"
-					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-					@open-doc="openDoc"
-					@open-form="openForm"
+					@executeFunction="jsFunctionRun($event,[],exposedFunctions)"
+					@openDoc="openDoc"
+					@openForm="openForm"
 					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
@@ -221,9 +221,9 @@ export default {
 			<!-- title bar widget -->
 			<div class="top lower" v-if="hasBarWidget">
 				<my-form-actions
-					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-					@open-doc="openDoc"
-					@open-form="openForm"
+					@executeFunction="jsFunctionRun($event,[],exposedFunctions)"
+					@openDoc="openDoc"
+					@openForm="openForm"
 					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
@@ -1443,8 +1443,11 @@ export default {
 		},
 
 		// navigation
-		openDoc(openDoc) {
-			const recordId = this.indexMapRecordId[openDoc.relationIndexOpen] !== undefined ? this.indexMapRecordId[openDoc.relationIndexOpen] : 0;
+		openDoc(recordId, openDoc) {
+			// if record is not set, use form record
+			if (recordId === null)
+				recordId = this.indexMapRecordId[openDoc.relationIndexOpen] !== undefined ? this.indexMapRecordId[openDoc.relationIndexOpen] : 0;
+
 			if (openDoc.fieldIdAddTo === null || this.fieldIdMapData[openDoc.fieldIdAddTo] === undefined)
 				return this.openLinkNoCache(`/doc/download/file.pdf?doc_id=${openDoc.docIdOpen}&record_id=${recordId}&token=${this.token}`, true);
 
@@ -1463,7 +1466,7 @@ export default {
 						v = { fileCount: 1, fileIdMapChange: {} };
 
 					v.fileIdMapChange[res.payload.id] = {
-						action: "create",
+						action: 'create',
 						name: res.payload.name,
 						version: -1
 					};

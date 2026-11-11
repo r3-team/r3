@@ -198,6 +198,7 @@ export default {
 					v-if="isList"
 					@clipboard="$emit('clipboard')"
 					@close-inline="closeInline"
+					@open-doc="openDoc"
 					@open-form="(...args) => openForm(args[0],[],args[1],null,args[2])"
 					@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk',args[2])"
 					@record-count-change="$emit('set-counter',field.id,$event)"
@@ -305,7 +306,7 @@ export default {
 							v-for="f in t.fields"
 							@clipboard="$emit('clipboard')"
 							@execute-function="$emit('execute-function',$event)"
-							@open-doc="$emit('open-doc',$event)"
+							@open-doc="openDoc"
 							@open-form="(...args) => $emit('open-form',...args)"
 							@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 							@set-form-args="(...args) => $emit('set-form-args',...args)"
@@ -586,6 +587,7 @@ export default {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
+					@open-doc="openDoc"
 					@open-form="(...args) => openForm(args[0],[],args[1],null,args[2])"
 					@record-removed="relationshipRecordRemoved"
 					@records-selected="relationshipRecordsSelected($event,false)"
@@ -694,7 +696,7 @@ export default {
 			v-for="f in field.fields"
 			@clipboard="$emit('clipboard')"
 			@execute-function="$emit('execute-function',$event)"
-			@open-doc="$emit('open-doc',$event)"
+			@open-doc="(...args) => $emit('open-doc',...args)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
@@ -1342,6 +1344,14 @@ export default {
 		closeInline() {
 			this.popUpFormInline = null;
 		},
+		openDoc(recordId, openDocOverwrite) {
+			// set defaults
+			if (recordId === undefined) recordId = null;
+			if (openDocOverwrite === undefined) openDocOverwrite = null;
+
+			const openDoc = openDocOverwrite !== null ? openDocOverwrite : this.field.openDoc;
+			this.$emit('open-doc', recordId, openDoc);
+		},
 		openForm(rows, getterArgs, newTab, openFormContext, openFormOverwrite) {
 			// set defaults
 			if (rows === undefined) rows = [];
@@ -1350,8 +1360,8 @@ export default {
 			if (openFormContext === undefined) openFormContext = null;
 			if (openFormOverwrite === undefined) openFormOverwrite = null;
 
-			// choose form open settings
-			// most open form actions use field definitions, ie. open record(s) from list, calender, Gantt, etc. (one record or multiple as bulk)
+			// apply open form settings
+			// most open form actions use field definitions, ie. open record from list, calender, Gantt field, etc. (bulk records in list fields as well)
 			// some open form actions are executed from nested children (currently: column actions) with their own open form definitions
 			const openForm = openFormOverwrite !== null
 				? openFormOverwrite
@@ -1378,7 +1388,7 @@ export default {
 				getterArgs = this.setGetterArgs(getterArgs, 'attributes', `${atrId}_${recordId}`);
 			}
 
-			// pop-up inline form (only inside none-inputs fields) and never on mobile
+			// pop-up inline form (only inside non-inputs fields) and never on mobile
 			// pop-up float forms are sent upwards to the parent form to deal with
 			if (openForm.popUpType === 'inline' && !this.isMobile && !newTab) {
 				this.popUpFormInline = this.getFormPopUpConfig(recordIds, openForm, getterArgs, 'attributes');
@@ -1501,7 +1511,7 @@ export default {
 		},
 		triggerButton(middleClick) {
 			if (this.field.openDoc !== null)
-				this.$emit('open-doc', this.field.openDoc);
+				this.openDoc(null, null);
 
 			if (this.field.openForm !== null)
 				this.openForm([], [], middleClick, null, null);

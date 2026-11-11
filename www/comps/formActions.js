@@ -1,10 +1,10 @@
-import {srcBase64}     from './shared/image.js';
-import {setGetterArgs} from './shared/form.js';
-import {getCaption}    from './shared/language.js';
+import { setGetterArgs } from './shared/form.js';
+import { srcBase64 } from './shared/image.js';
+import { getCaption } from './shared/language.js';
 
 const MyFormAction = {
-	name:'my-form-action',
-	template:`<my-button
+	name: 'my-form-action',
+	template: `<my-button
 		v-if="state !== 'hidden'"
 		@trigger="exec(false)"
 		@trigger-middle="exec(true)"
@@ -13,24 +13,24 @@ const MyFormAction = {
 		:imageBase64="formAction.iconId ? srcBase64(iconIdMap[formAction.iconId].file) : ''"
 		:large
 	/>`,
-	props:{
-		entityIdMapEffect:{ type:Object,  required:true },
-		formAction:       { type:Object,  required:true },
-		formId:           { type:String,  required:true },
-		joinsIndexMap:    { type:Object,  required:true },
-		large:            { type:Boolean, required:true },
-		moduleId:         { type:String,  required:true }
+	props: {
+		entityIdMapEffect: { type: Object, required: true },
+		formAction: { type: Object, required: true },
+		formId: { type: String, required: true },
+		joinsIndexMap: { type: Object, required: true },
+		large: { type: Boolean, required: true },
+		moduleId: { type: String, required: true }
 	},
-	emits:['executed','execute-function','open-doc','open-form'],
-	computed:{
-		state:s => s.entityIdMapEffect.formAction[s.formAction.id]?.state !== undefined
+	emits: ['executed', 'executeFunction', 'openDoc', 'openForm'],
+	computed: {
+		state: s => s.entityIdMapEffect.formAction[s.formAction.id]?.state !== undefined
 			? s.entityIdMapEffect.formAction[s.formAction.id].state
 			: s.formAction.state,
-		
+
 		// stores
-		iconIdMap:s => s.$store.getters['schema/iconIdMap']
+		iconIdMap: s => s.$store.getters['schema/iconIdMap']
 	},
-	methods:{
+	methods: {
 		// external
 		getCaption,
 		setGetterArgs,
@@ -39,22 +39,22 @@ const MyFormAction = {
 		// actions
 		exec(middleClick) {
 			const fa = this.formAction;
-			if(fa.jsFunctionId !== null) this.$emit('execute-function',fa.jsFunctionId);
-			if(fa.openDoc      !== null) this.$emit('open-doc',fa.openDoc);
+			if (fa.jsFunctionId !== null) this.$emit('executeFunction', fa.jsFunctionId);
+			if (fa.openDoc !== null) this.$emit('openDoc', null, fa.openDoc);
 
-			if(fa.openForm !== null) {
+			if (fa.openForm !== null) {
 				let getterArgs = [];
 
-				if(fa.openForm.attributeIdApply !== null
+				if (fa.openForm.attributeIdApply !== null
 					&& this.joinsIndexMap[fa.openForm.relationIndexApply] !== undefined
 					&& this.joinsIndexMap[fa.openForm.relationIndexApply].recordId !== 0
 				) {
-					const atrId    = fa.openForm.attributeIdApply;
+					const atrId = fa.openForm.attributeIdApply;
 					const recordId = this.joinsIndexMap[fa.openForm.relationIndexApply].recordId;
-					
-					getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
+
+					getterArgs = this.setGetterArgs(getterArgs, 'attributes', `${atrId}_${recordId}`);
 				}
-				this.$emit('open-form',[],fa.openForm,getterArgs,middleClick,null,false);
+				this.$emit('openForm', [], fa.openForm, getterArgs, middleClick, null, false);
 			}
 			this.$emit('executed');
 		}
@@ -62,17 +62,17 @@ const MyFormAction = {
 };
 
 export default {
-	name:'my-form-actions',
-	components:{ MyFormAction },
-	template:`<div class="row gap nowrap"
+	name: 'my-form-actions',
+	components: { MyFormAction },
+	template: `<div class="row gap nowrap"
 		:class="{ 'form-actions-left':settings.formActionsAlign === 'left', 'form-actions-right':settings.formActionsAlign === 'right' }"
 	>
 		<my-form-action
 			v-if="!noSpace"
 			v-for="a in formActions"
-			@execute-function="$emit('execute-function',$event)"
-			@open-doc="$emit('open-doc',$event)"
-			@open-form="(...args) => $emit('open-form',...args)"
+			@executeFunction="$emit('executeFunction',$event)"
+			@openDoc="(...args) => $emit('openDoc',...args)"
+			@openForm="(...args) => $emit('openForm',...args)"
 			:entityIdMapEffect
 			:formAction="a"
 			:formId
@@ -107,9 +107,9 @@ export default {
 						<my-form-action
 							v-for="a in formActions"
 							@executed="showPopUp = false"
-							@execute-function="$emit('execute-function',$event)"
-							@open-doc="$emit('open-doc',$event)"
-							@open-form="(...args) => $emit('open-form',...args)"
+							@executeFunction="$emit('executeFunction',$event)"
+							@openDoc="(...args) => $emit('openDoc',...args)"
+							@openForm="(...args) => $emit('openForm',...args)"
 							:entityIdMapEffect
 							:formAction="a"
 							:formId
@@ -122,22 +122,22 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		entityIdMapEffect:{ type:Object,  required:true },
-		formActions:      { type:Array,   required:true },
-		formId:           { type:String,  required:true },
-		joinsIndexMap:    { type:Object,  required:true },
-		moduleId:         { type:String,  required:true },
-		noSpace:          { type:Boolean, required:true }
+	props: {
+		entityIdMapEffect: { type: Object, required: true },
+		formActions: { type: Array, required: true },
+		formId: { type: String, required: true },
+		joinsIndexMap: { type: Object, required: true },
+		moduleId: { type: String, required: true },
+		noSpace: { type: Boolean, required: true }
 	},
-	emits:['execute-function','open-doc','open-form'],
+	emits: ['executeFunction', 'openDoc', 'openForm'],
 	data() {
 		return {
-			showPopUp:false,
+			showPopUp: false,
 		};
 	},
-	computed:{
-		capGen:  s => s.$store.getters.captions.generic,
-		settings:s => s.$store.getters.settings
+	computed: {
+		capGen: s => s.$store.getters.captions.generic,
+		settings: s => s.$store.getters.settings
 	}
 };

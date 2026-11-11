@@ -661,8 +661,8 @@ export default {
 		inputValid: { type: Boolean, required: false, default: true }
 	},
 	emits: [
-		'clipboard', 'close-inline', 'open-form', 'open-form-bulk', 'record-count-change', 'record-removed',
-		'records-selected', 'records-selected-original', 'set-args', 'set-column-ids-by-user',
+		'clipboard', 'close-inline', 'open-doc', 'open-form', 'open-form-bulk', 'record-count-change',
+		'record-removed', 'records-selected', 'records-selected-original', 'set-args', 'set-column-ids-by-user',
 		'set-collection-indexes', 'set-index-record-ids', 'set-login-option', 'showDropdown', 'showHelp'
 	],
 	data() {
@@ -1104,8 +1104,8 @@ export default {
 			this.showOptions = false;
 		},
 		columnAction(c, row, middleClick) {
-			if (c.openDoc !== null) {
-
+			if (c.openDoc !== null && row.indexRecordIds[c.openDoc.relationIndexOpen] !== undefined) {
+				this.$emit('open-doc', row.indexRecordIds[c.openDoc.relationIndexOpen], c.openDoc);
 			}
 			if (c.openForm !== null) {
 				this.$emit('open-form', [row], middleClick, c.openForm);
