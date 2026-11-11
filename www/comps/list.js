@@ -107,9 +107,10 @@ export default {
 		<!-- list as input field (showing record(s) from active field value) -->
 		<my-list-input-flow
 			v-if="isInput && inputAsFlow"
-			@clicked-open="clickOpen($event,false)"
-			@clicked-open-middle="clickOpen($event,true)"
-			@clicked-row="inputTriggerRow($event)"
+			@clickedColumnAction="(...args) => columnAction(...args)"
+			@clickedOpen="clickOpen($event,false)"
+			@clickedOpenMiddle="clickOpen($event,true)"
+			@clickedRow="inputTriggerRow($event)"
 			:columns
 			:columnBatches
 			:readonly="inputIsReadonly"
@@ -122,10 +123,11 @@ export default {
 
 		<my-list-input-rows
 			v-if="isInput && !inputAsFlow"
-			@clicked-open="clickOpen($event,false)"
-			@clicked-open-middle="clickOpen($event,true)"
-			@clicked-row="clickInputRow();inputTriggerRow($event)"
-			@clicked-row-remove="inputTriggerRowRemove($event)"
+			@clickedColumnAction="(...args) => columnAction(...args)"
+			@clickedOpen="clickOpen($event,false)"
+			@clickedOpenMiddle="clickOpen($event,true)"
+			@clickedRow="clickInputRow();inputTriggerRow($event)"
+			@clickedRowRemove="inputTriggerRowRemove($event)"
 			@focus="focus"
 			@showHelp="$emit('showHelp')"
 			:columns
@@ -145,8 +147,8 @@ export default {
 		<my-list-input-rows-empty
 			v-if="isInput && showInputAddLine"
 			@clicked="clickInputEmpty"
-			@clicked-open="escape();$emit('open-form',[],false)"
-			@clicked-open-middle="escape();$emit('open-form',[],true)"
+			@clicked-open="escape();$emit('open-form',[],false,null)"
+			@clicked-open-middle="escape();$emit('open-form',[],true,null)"
 			@focus="focus"
 			@key-pressed="updatedTextInput"
 			@showHelp="$emit('showHelp')"
@@ -172,8 +174,8 @@ export default {
 				<!-- record actions -->
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('open-form',[],false)"
-					@trigger-middle="$emit('open-form',[],true)"
+					@trigger="$emit('open-form',[],false,null)"
+					@trigger-middle="$emit('open-form',[],true,null)"
 					:caption="showActionTitles ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 				/>
@@ -415,6 +417,8 @@ export default {
 									<my-value-rich
 										v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
 										@clipboard="$emit('clipboard')"
+										@trigger="columnAction(columns[ind],r,false)"
+										@triggerMiddle="columnAction(columns[ind],r,true)"
 										:alignEnd="columns[ind].flags.alignEnd"
 										:alignMid="columns[ind].flags.alignMid"
 										:attributeId="columns[ind].attributeId"
@@ -555,6 +559,8 @@ export default {
 												<my-value-rich
 													v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
 													@clipboard="$emit('clipboard')"
+													@trigger="columnAction(columns[ind],r,false)"
+													@triggerMiddle="columnAction(columns[ind],r,true)"
 													:alignEnd="columns[ind].flags.alignEnd"
 													:alignMid="columns[ind].flags.alignMid"
 													:attributeId="columns[ind].attributeId"
@@ -1056,7 +1062,7 @@ export default {
 		},
 		clickOpen(row, middleClick) {
 			if (this.hasUpdate) {
-				this.$emit('open-form', [row], middleClick);
+				this.$emit('open-form', [row], middleClick, null);
 				this.escape();
 			}
 		},
@@ -1096,6 +1102,17 @@ export default {
 			this.showCsv = false;
 			this.showFilters = false;
 			this.showOptions = false;
+		},
+		columnAction(c, row, middleClick) {
+			if (c.openDoc !== null) {
+
+			}
+			if (c.openForm !== null) {
+				this.$emit('open-form', [row], middleClick, c.openForm);
+			}
+			if (c.jsFunctionId !== null) {
+
+			}
 		},
 		dropdownToggle(e) {
 			if (e.newState === 'closed')

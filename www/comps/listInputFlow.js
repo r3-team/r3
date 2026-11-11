@@ -4,7 +4,7 @@ export default {
 		<slot name="input-icon" />
 		<div class="list-input-flow-entry-wrap"
 			v-for="(r,i) in rows"
-			@click="$emit('clicked-row',r)"
+			@click="$emit('clickedRow',r)"
 			:class="{ clickable:!readonly }"
 		>
 			<div class="list-input-flow-entry" :class="{ active:i <= rowLastIndexActive, readonly }">
@@ -12,6 +12,8 @@ export default {
 					<template v-for="(ci,cii) in b.columnIndexes">
 						<my-value-rich class="context-list-input"
 							v-if="r.values[ci] !== null"
+							@trigger="$emit('clickedColumnAction',columns[ci],r,false)"
+							@triggerMiddle="$emit('clickedColumnAction',columns[ci],r,true)"
 							:alignEnd="columns[ci].flags.alignEnd"
 							:alignMid="columns[ci].flags.alignMid"
 							:attributeId="columns[ci].attributeId"
@@ -34,8 +36,8 @@ export default {
 				<div class="list-input-flow-entry-actions" v-if="anyActions">
 					<my-button image="open.png"
 						v-if="showOpen"
-						@trigger="$emit('clicked-open',r)"
-						@trigger-middle="$emit('clicked-open-middle',r)"
+						@trigger="$emit('clickedOpen',r)"
+						@trigger-middle="$emit('clickedOpenMiddle',r)"
 						:blockBubble="true"
 						:captionTitle="capGen.recordOpen"
 						:darkBg="i <= rowLastIndexActive"
@@ -53,7 +55,7 @@ export default {
 		rows: { type: Array, required: true },
 		showOpen: { type: Boolean, required: true }
 	},
-	emits: ['clicked-open', 'clicked-open-middle', 'clicked-row'],
+	emits: ['clickedColumnAction', 'clickedOpen', 'clickedOpenMiddle', 'clickedRow'],
 	computed: {
 		rowLastIndexActive: s => {
 			for (let i = s.rows.length - 1; i >= 0; i--) {

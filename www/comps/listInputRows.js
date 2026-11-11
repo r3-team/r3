@@ -48,6 +48,8 @@ export default {
 								<my-value-rich class="context-list-input"
 									v-if="r.values[ci] !== null && !columns[ci].flags.relHide && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
 									@focus="$emit('focus')"
+									@trigger="$emit('clickedColumnAction',columns[ci],r,false)"
+									@triggerMiddle="$emit('clickedColumnAction',columns[ci],r,true)"
 									:alignEnd="columns[ci].flags.alignEnd"
 									:alignMid="columns[ci].flags.alignMid"
 									:attributeId="columns[ci].attributeId"
@@ -81,15 +83,15 @@ export default {
 							/>
 							<my-button image="open.png"
 								v-if="showOpen"
-								@trigger="$emit('clicked-open',r)"
-								@trigger-middle="$emit('clicked-open-middle',r)"
+								@trigger="$emit('clickedOpen',r)"
+								@trigger-middle="$emit('clickedOpenMiddle',r)"
 								:blockBubble="true"
 								:captionTitle="capGen.recordOpen"
 								:naked="true"
 							/>
 							<my-button image="cancel.png"
 								v-if="!showAllValues"
-								@trigger="$emit('clicked-row-remove',i)"
+								@trigger="$emit('clickedRowRemove',i)"
 								:active="!readonly"
 								:blockBubble="true"
 								:captionTitle="capGen.recordRemove"
@@ -113,7 +115,7 @@ export default {
 		showAllValues: { type: Boolean, required: true }, // for category display option
 		showOpen: { type: Boolean, required: true }
 	},
-	emits: ['clicked-open', 'clicked-open-middle', 'clicked-row', 'clicked-row-remove', 'focus', 'showHelp'],
+	emits: ['clickedColumnAction', 'clickedOpen', 'clickedOpenMiddle', 'clickedRow', 'clickedRowRemove', 'focus', 'showHelp'],
 	computed: {
 		capGen: s => s.$store.getters.captions.generic
 	},
@@ -128,7 +130,7 @@ export default {
 		// actions
 		clickRow(r) {
 			if (!this.readonly)
-				this.$emit('clicked-row', r);
+				this.$emit('clickedRow', r);
 		}
 	}
 };

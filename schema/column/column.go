@@ -150,6 +150,9 @@ func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCre
 		if c.Display == "action" {
 			openDoc.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, c.OpenDoc)
 			openForm.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, c.OpenForm, pgtype.Text{})
+		} else {
+			openDoc.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, types.OpenDoc{})
+			openForm.Set_bt(bt, constants.DbColumn, c.Id, onlyCreate, types.OpenForm{}, pgtype.Text{})
 		}
 		caption.Set_bt(bt, c.Id, onlyCreate, c.Captions)
 	}

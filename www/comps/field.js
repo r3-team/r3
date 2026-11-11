@@ -70,7 +70,7 @@ export default {
 					v-if="isCalendar && !field.gantt"
 					@clipboard="$emit('clipboard')"
 					@close-inline="closeInline"
-					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
+					@open-form="(...args) => openForm(args[0],args[1],args[2],null,null)"
 					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
@@ -108,7 +108,7 @@ export default {
 				<my-gantt
 					v-if="isCalendar && field.gantt"
 					@close-inline="closeInline"
-					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
+					@open-form="(...args) => openForm(args[0],args[1],args[2],null,null)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
 					@set-login-option="setLoginOption"
@@ -147,7 +147,7 @@ export default {
 					v-if="isKanban"
 					@clipboard="$emit('clipboard')"
 					@close-inline="closeInline"
-					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
+					@open-form="(...args) => openForm(args[0],args[1],args[2],null,null)"
 					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
@@ -198,8 +198,8 @@ export default {
 					v-if="isList"
 					@clipboard="$emit('clipboard')"
 					@close-inline="closeInline"
-					@open-form="(...args) => openForm(args[0],[],args[1],null)"
-					@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk')"
+					@open-form="(...args) => openForm(args[0],[],args[1],null,args[2])"
+					@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk',args[2])"
 					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-column-ids-by-user="setColumnIdsByUser"
@@ -586,7 +586,7 @@ export default {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
-					@open-form="(...args) => openForm(args[0],[],args[1],null)"
+					@open-form="(...args) => openForm(args[0],[],args[1],null,args[2])"
 					@record-removed="relationshipRecordRemoved"
 					@records-selected="relationshipRecordsSelected($event,false)"
 					@records-selected-original="relationshipRecordsSelected($event,true)"
@@ -1342,18 +1342,22 @@ export default {
 		closeInline() {
 			this.popUpFormInline = null;
 		},
-		openForm(rows, getterArgs, newTab, openFormContext) {
+		openForm(rows, getterArgs, newTab, openFormContext, openFormOverwrite) {
 			// set defaults
 			if (rows === undefined) rows = [];
 			if (getterArgs === undefined) getterArgs = [];
 			if (newTab === undefined) newTab = false;
 			if (openFormContext === undefined) openFormContext = null;
+			if (openFormOverwrite === undefined) openFormOverwrite = null;
 
-			// form open context
-			const openForm = JSON.parse(JSON.stringify(
-				openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm
-			));
+			// choose form open settings
+			// most open form actions use field definitions, ie. open record(s) from list, calender, Gantt, etc. (one record or multiple as bulk)
+			// some open form actions are executed from nested children (currently: column actions) with their own open form definitions
+			const openForm = openFormOverwrite !== null
+				? openFormOverwrite
+				: JSON.parse(JSON.stringify(openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm));
 
+			// find record(s) to open
 			const recordIds = [];
 			for (const row of rows) {
 				const id = row.indexRecordIds[openForm.relationIndexOpen];
@@ -1500,7 +1504,7 @@ export default {
 				this.$emit('open-doc', this.field.openDoc);
 
 			if (this.field.openForm !== null)
-				this.openForm([], [], middleClick, null);
+				this.openForm([], [], middleClick, null, null);
 
 			if (this.field.jsFunctionId !== null)
 				this.$emit('execute-function', this.field.jsFunctionId);

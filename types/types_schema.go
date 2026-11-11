@@ -117,8 +117,9 @@ type Column struct {
 	Styles   []string    `json:"styles"`   // alignEnd, alignMid, bold, clipboard, hide, italic, vertical, wrap
 
 	// action options
-	OpenDoc  OpenDoc  `json:"openDoc"`
-	OpenForm OpenForm `json:"openForm"`
+	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to execute
+	OpenDoc      OpenDoc     `json:"openDoc"`      // document to open
+	OpenForm     OpenForm    `json:"openForm"`     // form to open
 
 	// legacy
 	BatchVertical bool `json:"batchVertical"`

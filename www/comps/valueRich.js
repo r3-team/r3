@@ -11,9 +11,7 @@ export default {
 	template: `<div class="value-rich"
 		v-if="active"
 		@focus="$emit('focus')"
-		@click="$emit('trigger')"
-		@keyup.space.enter="$emit('trigger')"
-		:class="{ alignEnd, alignMid, bold, color:isColor, files:isFiles, gallery:isGallery, italic, monospace, noShrink, wrap }"
+		:class="{ action:isAction, alignEnd, alignMid, bold, color:isColor, files:isFiles, gallery:isGallery, italic, monospace, noShrink, wrap }"
 		:style="style"
 	>
 		<!-- copy to clipboard action -->
@@ -45,6 +43,15 @@ export default {
 		<span v-if="isString" :title="stringValueFull">
 			{{ stringValue }}
 		</span>
+
+		<!-- action value -->
+		<my-button v-if="isAction" image="open.png"
+			@trigger="$emit('trigger')"
+			@trigger-middle="$emit('triggerMiddle')"
+			:blockBubble="true"
+			:caption="stringValue"
+			:captionTitle="stringValueFull"
+		/>
 
 		<!-- boolean value -->
 		<template v-if="isBoolean">
@@ -103,21 +110,21 @@ export default {
 		alignEnd: { type: Boolean, required: false, default: false },
 		alignMid: { type: Boolean, required: false, default: false },
 		attributeId: { type: [String, null], required: true },
-		basis: { type: Number, required: false, default: 0 },         // size basis (usually column width)
+		basis: { type: Number, required: false, default: 0 },            // size basis (usually column width)
 		bold: { type: Boolean, required: false, default: false },
-		boolAtrIcon: { type: Boolean, required: false, default: false },     // show attribute icon if boolean is true
-		clipboard: { type: Boolean, required: false, default: false },     // copy-to-clipboard action
-		display: { type: String, required: false, default: 'default' }, // variant (url, gallery, password ...)
+		boolAtrIcon: { type: Boolean, required: false, default: false }, // show attribute icon if boolean is true
+		clipboard: { type: Boolean, required: false, default: false },   // copy-to-clipboard action
+		display: { type: String, required: false, default: 'default' },  // variant (url, gallery, password, action ...)
 		italic: { type: Boolean, required: false, default: false },
-		length: { type: Number, required: false, default: 0 },         // max. length if string, max. entries shown if files
+		length: { type: Number, required: false, default: 0 },           // max. length if string, max. entries shown if files
 		monospace: { type: Boolean, required: false, default: false },
 		noShrink: { type: Boolean, required: false, default: false },
 		noThousandsSep: { type: Boolean, required: false, default: false },
 		previewLarge: { type: Boolean, required: false, default: false },
 		value: { required: true },
-		wrap: { type: Boolean, required: false, default: false }      // wrap string value
+		wrap: { type: Boolean, required: false, default: false }         // wrap string value
 	},
-	emits: ['clipboard', 'focus', 'trigger'],
+	emits: ['clipboard', 'focus', 'trigger', 'triggerMiddle'],
 	watch: {
 		value: {
 			handler() { this.setValue(); },
@@ -126,6 +133,7 @@ export default {
 	},
 	data() {
 		return {
+			isAction: false,
 			isBarcode: false,
 			isBoolean: false,
 			isCode: false,
@@ -275,6 +283,11 @@ export default {
 
 			// display options
 			switch (this.display) {
+				case 'action':
+					// action value uses string value for button caption
+					this.isAction = true;
+					this.setStringValue();
+					return;
 				case 'gallery':
 					// gallery option is available for barcode attributes, does not show string
 					this.isGallery = true;
@@ -291,8 +304,9 @@ export default {
 
 			// only string values left
 			this.isString = true;
-
-			// set final string value with applied text length limit
+			this.setStringValue();
+		},
+		setStringValue() {
 			this.stringValue = this.length !== 0 && this.stringValueFull.length > this.length
 				? `${this.stringValueFull.substring(0, this.length - 3)}...`
 				: this.stringValueFull;
