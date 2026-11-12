@@ -7,7 +7,7 @@ import { getNumberFormatted } from './shared/generic.js';
 
 export default {
 	name: 'my-input-decimal',
-	template: `<input class="input input-decimal" inputmode="decimal" type="text" ref="input"
+	template: `<input class="input input-decimal" inputmode="decimal" type="text" ref="input" data-is-input="1"
 		@input="input"
 		:class="{ 'input-decimal-embedded':embedded }"
 		:disabled="readonly"
