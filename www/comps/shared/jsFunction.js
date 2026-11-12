@@ -3,7 +3,7 @@ import { getCollectionMultiValues, updateCollections } from './collection.js';
 import { aesGcmDecryptBase64WithPhrase, rsaDecrypt } from './crypto.js';
 import { resolveErrCode } from './error.js';
 import { formOpen } from './form.js';
-import { openLink } from './generic.js';
+import { openLink, openLinkAsDownload } from './generic.js';
 import { generatePdf } from './pdf.js';
 import { variableValueGet, variableValueSet } from './variable.js';
 
@@ -28,6 +28,7 @@ const exposedFunctionsGlobal = {
 	logoff: () => MyStore.getters.appFunctions.sessionInvalid(false, true),
 
 	// URL open functions
+	url_open_as_download: (url, filenameOverwrite) => openLinkAsDownload(url, filenameOverwrite),
 	url_open_as_tab: (url) => openLink(url, true),
 	url_open_as_window: (url, width, height, top, left) => {
 		if (width === undefined || isNaN(parseInt(width, 10))) width = 800;

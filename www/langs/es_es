@@ -1278,6 +1278,7 @@
 				"timer_clear_global": "app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Aborta un temporizador global con el nombre dado, previamente creado con 'app.timer_set_global()'.",
 				"timer_set": "app.timer_set({ARGS}) => UNDEFINED<br /><br />Ejecuta una función dada después de un tiempo especificado en milisegundos. Si 'isInterval' está configurado en TRUE, la función se llama repetidamente.<br /><br />Un temporizador siempre está vinculado al formulario actual. Al restablecer o salir del formulario, los temporizadores también se restablecen.<br /><br />Cada temporizador debe tener un nombre único, que se puede usar para abortar el temporizador más tarde con 'timer_clear()'; los temporizadores con el mismo nombre se sobrescriben entre sí.",
 				"timer_set_global": "app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Ejecuta una función dada después de un tiempo especificado en milisegundos. Si 'isInterval' está configurado en TRUE, la función se llama repetidamente.<br /><br />Un temporizador global continúa incluso si el contexto actual (como un formulario desde el cual se inició) se cierra.<br /><br />Cada temporizador debe tener un nombre único, que se puede usar para abortar el temporizador más tarde con 'timer_clear_global()'; los temporizadores globales con el mismo nombre, de la misma aplicación, se sobrescriben entre sí.",
+				"url_open_as_download": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Initiates a download of the given URL. Should generally force a download within the same origin, though browsers can still choose to directly open the resource. If filename overwrite is not set, original filename is used.",
 				"url_open_as_tab": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Opens the given URL in a new browser tab.",
 				"url_open_as_window": "app.url_open_as_window({ARGS}) => UNDEFINED<br /><br />Opens the given URL in a new browser window. Whether or not the URL will actually be opened in a window depends on browser settings. The same with parameters 'width', 'height', 'top' & 'left' - these are suggestions to the browser that may be ignored."
 			},
@@ -1386,6 +1387,10 @@
 					"is_interval BOOLEAN",
 					"function FUNCTION",
 					"milliseconds NUMBER"
+				],
+				"url_open_as_download": [
+					"url STRING",
+					"filename_overwrite STRING"
 				],
 				"url_open_as_tab": [
 					"url STRING"

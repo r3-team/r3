@@ -228,6 +228,15 @@ export function openLink(href, blank) {
 	link.click();
 	document.body.removeChild(link);
 };
+export function openLinkAsDownload(href, filenameOverwrite) {
+	// 'download' attribute should force a download in most cases within same origin, but can still be overwritten by browser
+	const link = document.createElement('a');
+	link.href = href;
+	link.download = filenameOverwrite ?? ''; // filename as empty string uses filename from URL
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+};
 export function openLinkNoCache(href, blank) {
 	if (href.includes('?')) href += `&date=${Math.floor(Date.now() / 1000)}`;
 	else href += `?date=${Math.floor(Date.now() / 1000)}`;

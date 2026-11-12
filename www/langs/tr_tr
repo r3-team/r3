@@ -1278,6 +1278,7 @@
 				"timer_clear_global": "app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Adaha önce 'app.timer_set_global()' ile oluşturulmuş, verilen adla global bir zamanlayıcıyı iptal eder.",
 				"timer_set": "app.timer_set({ARGS}) => UNDEFINED<br /><br />Emilisaniye cinsinden belirtilen süreden sonra belirli bir işlevi çalıştırır. 'isInterval' TRUE olarak ayarlanırsa işlev tekrar tekrar çağrılır.<br /><br />A zamanlayıcı her zaman geçerli forma bağlıdır. Formu sıfırlarken veya formdan ayrılırken zamanlayıcılar da sıfırlanır.<br /><br />Her zamanlayıcının benzersiz bir adı olmalıdır; bu ad, daha sonra zamanlayıcıyı 'timer_clear()' ile iptal etmek için kullanılabilir; aynı ada sahip zamanlayıcılar birbirinin üzerine yazar.",
 				"timer_set_global": "app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Emilisaniye cinsinden belirtilen süreden sonra belirli bir işlevi çalıştırır. 'isInterval' TRUE olarak ayarlanırsa, işlev tekrar tekrar çağrılır. <br /><br />A genel zamanlayıcı, geçerli bağlam (başlatıldığı form gibi) kapalı olsa bile devam eder.<br /><br />Her zamanlayıcının, daha sonra zamanlayıcıyı 'timer_clear_global()' ile iptal etmek için kullanılabilecek benzersiz bir adı olmalıdır; Aynı uygulamadaki aynı ada sahip global zamanlayıcılar birbirlerinin üzerine yazar.",
+				"url_open_as_download": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Initiates a download of the given URL. Should generally force a download within the same origin, though browsers can still choose to directly open the resource. If filename overwrite is not set, original filename is used.",
 				"url_open_as_tab": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Verilen URL'yi yeni bir tarayıcı sekmesinde açar.",
 				"url_open_as_window": "app.url_open_as_window({ARGS}) => UNDEFINED<br /><br />Verilen URL'yi yeni bir tarayıcı penceresinde açar. URL'nin gerçekten bir pencerede açılıp açılmayacağı tarayıcı ayarlarına bağlıdır. Aynı şey 'genişlik', 'yükseklik', 'üst' ve 'sol' parametreleri için de geçerlidir; bunlar tarayıcıya yönelik göz ardı edilebilecek önerilerdir."
 			},
@@ -1386,6 +1387,10 @@
 					"is_interval BOOLEAN",
 					"fonksiyon İŞLEV",
 					"milisaniye NUMBER"
+				],
+				"url_open_as_download": [
+					"url STRING",
+					"filename_overwrite STRING"
 				],
 				"url_open_as_tab": [
 					"URL STRING"
