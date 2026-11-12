@@ -80,7 +80,10 @@ export default {
 					<div class="open-id-client clickable"
 						v-for="c in oauthClientIdMapOpenId"
 						@click="authenticateExternalOpenId(c)"
-					>{{ c.name.replace('{MGR_UN}','') }}</div>
+					>
+						<img src="images/open.png" />
+						<span>{{ c.name.replace('{MGR_UN}','') }}</span>
+					</div>
 				</div>
 			</template>
 
