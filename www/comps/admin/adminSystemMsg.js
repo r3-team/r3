@@ -81,6 +81,14 @@ export default {
 						<td><my-bool v-model="maintenance" :readonly="date1 === null || !activated" /></td>
 						<td>{{ capApp.maintenanceHint }}</td>
 					</tr>
+					<tr v-if="warnings.length !== 0">
+						<td>{{ capGen.warnings }}</td>
+						<td colspan="2">
+							<ul class="textError">
+								<li v-for="w in warnings">{{ w }}</li>
+							</ul>
+						</td>
+					</tr>
 					<tr>
 						<td>{{ capGen.information }}</td>
 						<td colspan="2"><span v-html="capApp.description"></span></td>
@@ -111,6 +119,13 @@ export default {
 			return s.capApp.state.datesSet
 				.replace('{DATE0}', s.getDateFormat(new Date(s.date0 * 1000), 'Y-m-d H:i'))
 				.replace('{DATE1}', s.getDateFormat(new Date(s.date1 * 1000), 'Y-m-d H:i'));
+		},
+		warnings: s => {
+			const out = [];
+			if (s.maintenance && s.date1 !== null && s.date1 < Math.floor(Date.now() / 1000))
+				out.push(s.capApp.warning.maintenanceNow);
+
+			return out;
 		},
 
 		// stores

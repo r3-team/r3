@@ -700,7 +700,10 @@
 				"datesSet": "Nachricht wird angezeigt zwischen <b>{DATE0}</b> und <b>{DATE1}</b>.",
 				"unset": "<b>Nachricht ist nicht aktiv</b>"
 			},
-			"text": "Nachricht"
+			"text": "Nachricht",
+			"warning": {
+				"maintenanceNow": "\"In Wartungsmodus wechseln\" ist aktiviert und \"anzeigen bis\" liegt in der Vergangenheit. Wenn diese Einstellungen gespeichert werden, wird der Wartungsmodus sofort aktiv."
+			}
 		},
 		"title": "Admin",
 		"titleDocs": "Admin-Dokumentation"

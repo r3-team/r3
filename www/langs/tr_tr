@@ -700,7 +700,10 @@
 				"datesSet": "Mesaj <b>{DATE0}</b> ve <b>{DATE1}</b> arasında gösterilecektir.",
 				"unset": "<b>Mesaj aktif değil</b>"
 			},
-			"text": "Mesaj"
+			"text": "Mesaj",
+			"warning": {
+				"maintenanceNow": "'Switch to maintenance' is enabled and 'show until' is in the past. When you save these settings, the maintenance mode will be enabled immediately."
+			}
 		},
 		"title": "Yönetici",
 		"titleDocs": "Yönetici belgeleri"

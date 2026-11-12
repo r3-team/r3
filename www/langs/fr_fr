@@ -700,7 +700,10 @@
 				"datesSet": "Le message s'affichera entre <b>{DATE0}</b> and <b>{DATE1}</b>.",
 				"unset": "<b>Le message n'est pas actif</b>"
 			},
-			"text": "Message"
+			"text": "Message",
+			"warning": {
+				"maintenanceNow": "'Switch to maintenance' is enabled and 'show until' is in the past. When you save these settings, the maintenance mode will be enabled immediately."
+			}
 		},
 		"title": "Admin",
 		"titleDocs": "Documentation d'administration"
