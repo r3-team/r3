@@ -2538,6 +2538,7 @@
 			"enable": "Enable",
 			"empty": "Empty",
 			"execute": "Execute",
+			"executeAction": "Execute action",
 			"expert": "Advanced",
 			"export": "Export",
 			"filter": "Filter",

@@ -1,3 +1,4 @@
+import MyInputDecimal from '../inputDecimal.js';
 import {
 	getIndexAttributeIdsByJoins, isAttributeBoolean, isAttributeFiles,
 	isAttributeInteger, isAttributeString, isAttributeUuid
@@ -18,7 +19,7 @@ export default {
 	name: 'my-builder-column-options',
 	components: {
 		MyBuilderAggregatorInput, MyBuilderCaption, MyBuilderColumnArguments,
-		MyBuilderOpenDoc, MyBuilderOpenForm, MyBuilderQuery
+		MyBuilderOpenDoc, MyBuilderOpenForm, MyBuilderQuery, MyInputDecimal
 	},
 	template: `<div class="top lower">
 		<div class="area">
@@ -71,15 +72,25 @@ export default {
 				<tr v-if="!isDrawing && !isColor">
 					<td>{{ !isFiles ? capGen.lengthChars : capApp.columnLengthFiles }}</td>
 					<td>
-						<input
-							v-if="column.length !== 0"
-							@change="setInt('length',$event.target.value,false)"
-							:disabled="readonly"
-							:value="column.length"
-						/>
+						<div class="row gap centered nowrap" v-if="column.length !== 0">
+							<my-input-decimal
+								@update:modelValue="set('length',$event)"
+								:max="32767"
+								:min="0"
+								:allowNull="false"
+								:lengthFract="0"
+								:modelValue="column.length"
+								:readonly
+							/>
+							<my-button image="cancel.png"
+								@trigger="set('length',0)"
+								:active="!readonly"
+								:naked="true"
+							/>
+						</div>
 						<my-button
-							v-else
-							@trigger="setInt('length',50,false)"
+							v-if="column.length === 0"
+							@trigger="set('length',50)"
 							:active="!readonly"
 							:caption="capGen.noLimit"
 							:naked="true"
@@ -89,15 +100,25 @@ export default {
 				<tr>
 					<td>{{ capApp.columnSize }}</td>
 					<td>
-						<input
-							v-if="column.basis !== 0"
-							@change="setInt('basis',$event.target.value,false)"
-							:disabled="readonly"
-							:value="column.basis"
-						/>
+						<div class="row gap centered nowrap" v-if="column.basis !== 0">
+							<my-input-decimal
+								@update:modelValue="set('basis',$event)"
+								:max="32767"
+								:min="0"
+								:allowNull="false"
+								:lengthFract="0"
+								:modelValue="column.basis"
+								:readonly
+							/>
+							<my-button image="cancel.png"
+								@trigger="set('basis',0)"
+								:active="!readonly"
+								:naked="true"
+							/>
+						</div>
 						<my-button
-							v-else
-							@trigger="setInt('basis',25,false)"
+							v-if="column.basis === 0"
+							@trigger="set('basis',25)"
 							:active="!readonly"
 							:caption="capGen.automatic"
 							:naked="true"
@@ -187,7 +208,17 @@ export default {
 						</div>
 					</td>
 				</tr>
-				<tr v-if="!isDrawing && !isUuid && !isColor">
+				<tr v-if="actionPossible">
+					<td>{{ capGen.button.executeAction }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('display',$event ? 'action' : 'default')"
+							:modelValue="column.display === 'action'"
+							:readonly
+						/>
+					</td>
+				</tr>
+				<tr v-if="displayOptions.length !== 0 && !isAction">
 					<td>{{ capApp.display }}</td>
 					<td>
 						<select
@@ -196,13 +227,9 @@ export default {
 							:value="column.display"
 						>
 							<option value="default">{{ capApp.option.display.default }}</option>
-							<option v-if="isInteger"            value="rating"  >{{ capApp.option.display.rating }}</option>
-							<option v-if="isString"             value="email"   >{{ capApp.option.display.email }}</option>
-							<option v-if="isString"             value="password">{{ capApp.option.display.password }}</option>
-							<option v-if="isString"             value="phone"   >{{ capApp.option.display.phone }}</option>
-							<option v-if="isString"             value="url"     >{{ capApp.option.display.url }}</option>
-							<option v-if="isFiles || isBarcode" value="gallery" >{{ capApp.option.display.gallery }}</option>
-							<option v-if="allowActions"         value="action"  >{{ capGen.action }}</option>
+							<option v-for="o in displayOptions" :value="o">
+								{{ diplayOptionLabels[o] }}
+							</option>
 						</select>
 					</td>
 				</tr>
@@ -379,6 +406,7 @@ export default {
 	},
 	emits: ['close', 'set'],
 	computed: {
+		actionPossible: s => s.allowActions && !s.isBoolean && !s.isDrawing && !s.isFiles,
 		attribute: s => s.attributeIdMap[s.column.attributeId] ?? false,
 		module: s => s.moduleIdMap[s.moduleId],
 		query: s => s.isSubQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
@@ -403,21 +431,50 @@ export default {
 				this.set('styles', styles);
 			}
 		},
+		displayOptions: s => {
+			const out = [];
+			const isDateOrTime = s.isDate || s.isDatetime || s.isTime;
+			if (s.isInteger && !isDateOrTime)
+				out.push('rating');
+
+			if (s.isString && !s.isDrawing && !s.isColor && !s.isRichtext && !s.isTextarea && !s.isBarcode)
+				out.push('email', 'password', 'phone', 'url');
+
+			if (s.isFiles || s.isBarcode)
+				out.push('gallery');
+
+			return out;
+		},
+		diplayOptionLabels: s => {
+			return {
+				email: s.capApp.option.display.email,
+				gallery: s.capApp.option.display.gallery,
+				password: s.capApp.option.display.password,
+				phone: s.capApp.option.display.phone,
+				rating: s.capApp.option.display.rating,
+				url: s.capApp.option.display.url
+			};
+		},
 
 		// simple
 		isAction: s => s.column.display === 'action',
 		isBarcode: s => s.isStringAttribute && s.attribute.contentUse.includes('barcode'),
-		isBoolean: s => s.isAttributeBoolean(s.attribute.content),
+		isBoolean: s => s.attribute !== false && s.isAttributeBoolean(s.attribute.content),
 		isColor: s => s.isStringAttribute && s.attribute.contentUse === 'color',
+		isDate: s => s.isInteger && s.attribute.contentUse === 'date',
+		isDatetime: s => s.isInteger && s.attribute.contentUse === 'datetime',
 		isDrawing: s => s.isStringAttribute && s.attribute.contentUse === 'drawing',
-		isFiles: s => s.isAttributeFiles(s.attribute.content),
+		isFiles: s => s.attribute !== false && s.isAttributeFiles(s.attribute.content),
 		isFncPg: s => s.column.content === 'fnc_pg',
 		isFncScalar: s => s.column.content === 'fnc_scalar',
-		isInteger: s => s.isAttributeInteger(s.attribute.content),
+		isInteger: s => s.attribute !== false && s.isAttributeInteger(s.attribute.content),
+		isRichtext: s => s.isStringAttribute && s.attribute.contentUse === 'richtext',
 		isString: s => s.isStringAttribute || s.isFncScalar || s.isFncPg,
 		isStringAttribute: s => s.attribute !== false && s.isAttributeString(s.attribute.content),
 		isSubQuery: s => s.column.content === 'query',
-		isUuid: s => s.isAttributeUuid(s.attribute.content),
+		isTextarea: s => s.isStringAttribute && s.attribute.contentUse === 'textarea',
+		isTime: s => s.isInteger && s.attribute.contentUse === 'time',
+		isUuid: s => s.attribute !== false && s.isAttributeUuid(s.attribute.content),
 		isWithArgs: s => s.isFncScalar || s.isFncPg,
 
 		// stores
@@ -453,13 +510,6 @@ export default {
 		set(name, val) {
 			if (val === '') val = null;
 			this.$emit('set', name, val);
-		},
-		setInt(name, val, allowNull) {
-			if (val !== '')
-				return this.$emit('set', name, parseInt(val, 10));
-
-			if (allowNull) return this.$emit('set', name, null);
-			else return this.$emit('set', name, 0);
 		},
 		setIndexAttribute(indexAttributeId) {
 			const v = indexAttributeId.split('_');

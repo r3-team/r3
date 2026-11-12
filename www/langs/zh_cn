@@ -2538,6 +2538,7 @@
 			"empty": "空",
 			"enable": "Enable",
 			"execute": "Execute",
+			"executeAction": "Execute action",
 			"expert": "高级",
 			"export": "导出",
 			"filter": "筛选器",
