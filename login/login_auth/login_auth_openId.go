@@ -224,9 +224,9 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 						nameMap[role] = true
 					}
 				}
-				// if name is used in any role assignment, assign role
+				// if name is used in any role assignment, assign role (if not already assigned)
 				for _, assign := range c.LoginRolesAssign {
-					if _, ok := nameMap[assign.SearchString]; ok {
+					if _, ok := nameMap[assign.SearchString]; ok && !slices.Contains(roleIds, assign.RoleId) {
 						roleIds = append(roleIds, assign.RoleId)
 					}
 				}

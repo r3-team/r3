@@ -703,7 +703,10 @@
 				"datesSet": "A mensagem será mostrada entre <b>{DATE0}</b> e <b>{DATE1}</b>.",
 				"unset": "<b>A mensagem não está ativa</b>"
 			},
-			"text": "Mensagem"
+			"text": "Mensagem",
+			"warning": {
+				"maintenanceNow": "'Switch to maintenance' is enabled and 'show until' is in the past. When you save these settings, the maintenance mode will be enabled immediately."
+			}
 		},
 		"title": "Admin",
 		"titleDocs": "Documentação de administração"
@@ -1285,6 +1288,7 @@
 				"timer_clear_global": "app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Aborta um temporizador global com o nome dado, previamente criado com 'app.timer_set_global()'.",
 				"timer_set": "app.timer_set({ARGS}) => UNDEFINED<br /><br />Executa uma função dada após um tempo especificado em milissegundos. Se 'isInterval' estiver definido como TRUE, a função é chamada repetidamente.<br /><br />Um temporizador está sempre ligado ao formulário atual. Ao repor ou sair do formulário, os temporizadores também são repostos.<br /><br />Cada temporizador deve ter um nome único, que pode ser usado para abortar o temporizador mais tarde com 'timer_clear()'; temporizadores com o mesmo nome substituem-se uns aos outros.",
 				"timer_set_global": "app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Executa uma função dada após um tempo especificado em milissegundos. Se 'isInterval' estiver definido como TRUE, a função é chamada repetidamente.<br /><br />Um temporizador global continua mesmo que o contexto atual (como um formulário a partir do qual foi iniciado) seja fechado.<br /><br />Cada temporizador deve ter um nome único, que pode ser usado para abortar o temporizador mais tarde com 'timer_clear_global()'; temporizadores globais com o mesmo nome, da mesma aplicação, substituem-se uns aos outros.",
+				"url_open_as_download": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Initiates a download of the given URL. Should generally force a download within the same origin, though browsers can still choose to directly open the resource. If filename overwrite is not set, original filename is used.",
 				"url_open_as_tab": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Abre o URL fornecido num novo separador do navegador.",
 				"url_open_as_window": "app.url_open_as_window({ARGS}) => UNDEFINED<br /><br />Abre o URL fornecido numa nova janela do navegador. Se o URL será realmente aberto numa janela depende das definições do navegador. O mesmo com os parâmetros 'width', 'height', 'top' e 'left' - são sugestões para o navegador que podem ser ignoradas."
 			},
@@ -1393,6 +1397,10 @@
 					"is_interval BOOLEAN",
 					"function FUNCTION",
 					"milliseconds NUMBER"
+				],
+				"url_open_as_download": [
+					"url STRING",
+					"filename_overwrite STRING"
 				],
 				"url_open_as_tab": [
 					"url STRING"

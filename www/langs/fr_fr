@@ -703,7 +703,10 @@
 				"datesSet": "Le message s'affichera entre <b>{DATE0}</b> and <b>{DATE1}</b>.",
 				"unset": "<b>Le message n'est pas actif</b>"
 			},
-			"text": "Message"
+			"text": "Message",
+			"warning": {
+				"maintenanceNow": "'Switch to maintenance' is enabled and 'show until' is in the past. When you save these settings, the maintenance mode will be enabled immediately."
+			}
 		},
 		"title": "Admin",
 		"titleDocs": "Documentation d'administration"
@@ -1285,6 +1288,7 @@
 				"timer_clear_global": "app.timer_clear_global({ARGS}) => NON DÉFINI<br /><br />Annule un minuteur global portant le nom spécifié, créé précédemment avec « app.timer_set_global() ».",
 				"timer_set": "app.timer_set({ARGS}) => NON DÉFINI<br /><br />Exécute une fonction donnée après un temps spécifié en millisecondes. Si 'isInterval' est défini sur TRUE, la fonction est appelée de manière répétée.<br /><br />Un minuteur est toujours lié au formulaire actuel. Lors de la réinitialisation ou de la sortie du formulaire, les minuteurs sont également réinitialisés.<br /><br />Chaque minuteur doit avoir un nom unique, qui peut être utilisé pour abandonner ultérieurement le minuteur avec 'timer_clear()'; les minuteurs avec le même nom s'écrasent mutuellement.",
 				"timer_set_global": "app.timer_set_global({ARGS}) => NON DÉFINI<br /><br />Exécute une fonction donnée après un délai spécifié en millisecondes. Si « isInterval » est défini sur TRUE, la fonction est appelée de manière répétée.<br /><br />Un minuteur global continue de fonctionner même si le contexte actuel (tel qu'un formulaire depuis lequel il a été lancé) est fermé.<br /><br />Chaque minuteur doit porter un nom unique, permettant de l'arrêter ultérieurement via « timer_clear_global() » ; les minuteurs globaux portant le même nom et provenant de la même application s'écrasent mutuellement.",
+				"url_open_as_download": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Initiates a download of the given URL. Should generally force a download within the same origin, though browsers can still choose to directly open the resource. If filename overwrite is not set, original filename is used.",
 				"url_open_as_tab": "app.url_open_as_tab({ARGS}) => NON DÉFINI<br /><br />Ouvre l'URL indiquée dans un nouvel onglet du navigateur.",
 				"url_open_as_window": "app.url_open_as_window({ARGS}) => NON DÉFINI<br /><br />Ouvre l'URL indiquée dans une nouvelle fenêtre de navigateur. L'ouverture effective de l'URL dans une fenêtre dépend des paramètres du navigateur. Il en va de même pour les paramètres « width », « height », « top » et « left » : il s'agit de suggestions adressées au navigateur, qui peuvent être ignorées."
 			},
@@ -1393,6 +1397,10 @@
 					"is_interval BOOLEAN",
 					"function FUNCTION",
 					"milliseconds NUMBER"
+				],
+				"url_open_as_download": [
+					"url STRING",
+					"filename_overwrite STRING"
 				],
 				"url_open_as_tab": [
 					"url STRING"

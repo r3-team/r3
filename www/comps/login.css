@@ -1,181 +1,202 @@
-.login{
-	max-width:420px;
-	min-width:320px;
-	padding:25px;
-	align-self:center;
-	display:flex;
-	flex-flow:column nowrap;
-	gap:8px;
-	border-radius:10px;
-	backdrop-filter:blur(3px);
-	-webkit-backdrop-filter:blur(3px);
-	background-color:rgba(0,0,0,0.1);
-	border:1px solid rgba(255,255,255,0.1);
-	box-shadow:1px 1px 6px rgba(0,0,0,0.8);
-    text-shadow:1px 1px 2px rgba(0,0,0,0.6);
-	color:var(--color-font-bright);
-	overflow:hidden;
-	--login-border-radius:5px;
+.login {
+	max-width: 420px;
+	min-width: 320px;
+	padding: 25px;
+	align-self: center;
+	display: flex;
+	flex-flow: column nowrap;
+	gap: 8px;
+	border-radius: 10px;
+	backdrop-filter: blur(3px);
+	-webkit-backdrop-filter: blur(3px);
+	background-color: rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.8);
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+	color: var(--color-font-bright);
+	overflow: hidden;
+	--login-border-radius: 5px;
 }
-.login .logo{
-	object-fit:contain;
-	max-width:100%;
-	height:100px;
-	margin-bottom:10px;
-	filter:drop-shadow(1px 1px 2px rgba(0,0,0,1));
+.login .logo {
+	object-fit: contain;
+	max-width: 100%;
+	height: 100px;
+	margin-bottom: 10px;
+	filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 1));
 }
-.login .header{
-	flex:0 0 auto;
-	height:32px;
-	padding:10px;
-	font-size:120%;
-	color:var(--color-font-dark);
-	border:1px solid #000;
-	border-radius:var(--login-border-radius);
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:12px;
+.login .header {
+	flex: 0 0 auto;
+	height: 32px;
+	padding: 10px;
+	font-size: 120%;
+	color: var(--color-font-dark);
+	border: 1px solid #000;
+	border-radius: var(--login-border-radius);
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	gap: 12px;
 }
-.login .header img{
-	width:30px;
-	filter:var(--image-filter-dark-shade);
+.login .header img {
+	width: 30px;
+	filter: var(--image-filter-dark-shade);
 }
-.login .header.dark{
-	color:var(--color-font-bright);
-	background-color:rgba(0,0,0,0.8);
+.login .header.dark {
+	color: var(--color-font-bright);
+	background-color: rgba(0, 0, 0, 0.8);
 }
-.login .header.dark img{
-	filter:var(--image-filter-bright-shade);
+.login .header.dark img {
+	filter: var(--image-filter-bright-shade);
 }
-.login .credentials{
-	display:flex;
-	flex-flow:column nowrap;
-	margin:4px 0px;
-	gap:8px;
+.login .credentials {
+	display: flex;
+	flex-flow: column nowrap;
+	margin: 4px 0px;
+	gap: 8px;
 }
 .login input,
-.login select{
-	height:44px;
-	font-size:110%;
-	text-indent:9px;
-    border:none;
-    outline:none;
-    color:#fff;
-    border:1px solid rgba(0,0,0,0.3);
-	border-radius:var(--login-border-radius);
-    background:rgba(0,0,0,0.3);
-    box-shadow:inset 0px -5px 45px rgba(100,100,100,0.2), 0px 1px 1px rgba(255,255,255,0.2);
+.login select {
+	height: 40px;
+	margin: 0px 6px;
+	font-size: 110%;
+	text-indent: 9px;
+	outline: none;
+	color: #fff;
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	border-radius: var(--login-border-radius);
+	background: rgba(0, 0, 0, 0.3);
+	box-shadow:
+		inset 0px -5px 45px rgba(100, 100, 100, 0.2),
+		0px 1px 1px rgba(255, 255, 255, 0.2);
 }
-.login option{
-	color:#000;
-	background-color:#fff;
+.login option {
+	color: #000;
+	background-color: #fff;
 }
-.login input:focus{
-    background:rgba(0,0,0,0.2);
-    border:1px solid rgba(0,0,0,0.9);
-    transition:background 0.2s, border 0.2s;
+.login input:focus {
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(0, 0, 0, 0.9);
+	transition:
+		background 0.2s,
+		border 0.2s;
 }
-.login.badAuth input{
-	color:var(--color-error);
+.login.badAuth input {
+	color: var(--color-error);
 }
-.login h3{
-	font-size:120%;
-	font-weight:normal;
-	margin:20px 0px 5px 0px;
+.login h3 {
+	font-size: 120%;
+	font-weight: normal;
+	margin: 20px 0px 5px 0px;
 }
 
-.login button{
-	font-size:110%;
-	padding:6px 24px;
-	border:1px solid #333;
-	border-radius:8px;
-	color:#eee;
-	background:linear-gradient(0deg, rgba(50,50,50,0.3) 0%, rgba(117,138,145,0.5) 93%);
-	box-shadow:1px 1px 1px #333;
-	box-sizing:border-box;
-	text-shadow:inherit;
-	outline:none;
+.login button {
+	font-size: 110%;
+	padding: 6px 24px;
+	border: 1px solid #333;
+	border-radius: 8px;
+	color: #eee;
+	background: linear-gradient(
+		0deg,
+		rgba(50, 50, 50, 0.3) 0%,
+		rgba(117, 138, 145, 0.5) 93%
+	);
+	box-shadow: 1px 1px 1px #333;
+	box-sizing: border-box;
+	text-shadow: inherit;
+	outline: none;
 }
-.login button.active{
-	color:#fff;
-	background:linear-gradient(0deg, rgb(34,62,83) 0%, rgb(108,150,175) 93%);
+.login button.active {
+	color: #fff;
+	background: linear-gradient(
+		0deg,
+		rgb(34, 62, 83) 0%,
+		rgb(108, 150, 175) 93%
+	);
 }
 .login button.active:focus,
-.login button.active:hover{
-	padding:5px 24px 7px 24px;
-	box-shadow:1px 1px 8px #333;
-	border-bottom:1px solid #fff;
-	transition:box-shadow 0.6s, border 0.6s;
+.login button.active:hover {
+	padding: 5px 24px 7px 24px;
+	box-shadow: 1px 1px 8px #333;
+	border-bottom: 1px solid #fff;
+	transition:
+		box-shadow 0.6s,
+		border 0.6s;
 }
-.login button.active:active{
-	margin:2px;
-	padding:3px 22px 5px 22px;
+.login button.active:active {
+	margin: 2px;
+	padding: 3px 22px 5px 22px;
 }
-.login .open-id-clients{
-	display:flex;
-	flex-flow:column nowrap;
-	gap:6px;
+.login .open-id-clients {
+	display: flex;
+	flex-flow: column nowrap;
+	gap: 6px;
 }
-.login .open-id-client{
-	padding:12px 10px;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:12px;
-	color:#fff;
-	font-size:110%;
-	background-color:rgba(53, 54, 59, 0.8);
-    border:1px solid rgba(0,0,0,0.3);
-	border-radius:var(--login-border-radius);
+.login .open-id-client {
+	padding: 6px 10px;
+	margin: 0px 6px;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	gap: 8px;
+	color: #fff;
+	font-size: 110%;
+	background-color: rgba(65, 66, 74, 0.9);
+	border: 2px solid rgba(0, 0, 0, 0.3);
+	border-radius: var(--login-border-radius);
 }
 .login .open-id-client:focus,
-.login .open-id-client:hover{
-	outline:1px solid rgba(0,0,0,0.3);
+.login .open-id-client:hover {
+	outline: 1px solid rgba(0, 0, 0, 0.3);
+	background-color: rgba(69, 70, 78, 1);
 }
-.login .message{
-	padding:6px 10px;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:12px;
-	color:#fff;
-	font-size:110%;
-	background-color:rgba(0,0,0,0.8);
-	border-radius:var(--login-border-radius);
+.login .open-id-client > img {
+	width: 24px;
+	height: 24px;
+	filter: var(--image-filter-bright-shade);
 }
-.login .message.warning{
-	background-color:rgba(125,33,33,0.8);
-	border:1px solid rgba(67,0,0,1);
+.login .message {
+	padding: 6px 10px;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	gap: 12px;
+	color: #fff;
+	font-size: 110%;
+	background-color: rgba(0, 0, 0, 0.8);
+	border-radius: var(--login-border-radius);
 }
-.login .message img{
-	width:24px;
-	margin:0px 3px;
-	filter:var(--image-filter-bright-shade);
+.login .message.warning {
+	background-color: rgba(125, 33, 33, 0.8);
+	border: 1px solid rgba(67, 0, 0, 1);
+}
+.login .message img {
+	width: 24px;
+	margin: 0px 3px;
+	filter: var(--image-filter-bright-shade);
 }
 
-.login .custom{
-	display:flex;
-	flex-flow:column nowrap;
-	margin:20px 0px 0px;
-	padding:5px;
-	background-color:rgba(0,0,0,0.6);
-    border:1px solid rgba(0,0,0,0.3);
-	border-radius:var(--login-border-radius);
+.login .custom {
+	display: flex;
+	flex-flow: column nowrap;
+	margin: 20px 0px 0px;
+	padding: 5px;
+	background-color: rgba(0, 0, 0, 0.6);
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	border-radius: var(--login-border-radius);
 }
-.login .custom .title{
-	padding:10px 7px;
-	font-size:110%;
-	border-bottom:1px solid rgba(255,255,255,0.6);
+.login .custom .title {
+	padding: 10px 7px;
+	font-size: 110%;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.6);
 }
-.login .custom .content{
-	padding:10px 7px;
+.login .custom .content {
+	padding: 10px 7px;
 }
-.login .cluster{
-	margin-top:8px;
-	align-self:flex-end;
-	font-style:italic;
+.login .cluster {
+	margin-top: 8px;
+	align-self: flex-end;
+	font-style: italic;
 }
-.login .my-button.clickable img{
-	filter:var(--image-filter-bright-shade);
+.login .my-button.clickable img {
+	filter: var(--image-filter-bright-shade);
 }

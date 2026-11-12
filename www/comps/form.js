@@ -482,7 +482,7 @@ export default {
 				isReadonly: !s.buttonDelUsable,
 				onClickLeft: () => s.delAsk(false)
 			}];
-			if (!s.isMobile) {
+			if (!s.isMobile && s.buttonNewUsable) {
 				group.push({
 					captionTitle: s.capGen.button.deleteNewHint,
 					image: 'add2.png',
@@ -509,7 +509,7 @@ export default {
 					onClickLeft: () => s.set(false, true)
 				});
 			}
-			if (s.buttonSaveShownNew) {
+			if (s.buttonSaveShownNew && s.buttonNewUsable) {
 				group.push({
 					captionTitle: s.capGen.button.saveNewHint,
 					image: 'add2.png',
