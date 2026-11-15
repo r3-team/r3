@@ -13,6 +13,7 @@ import (
 	"r3/login/login_role"
 	"r3/login/login_setting"
 	"r3/tools"
+	"r3/tools/crypt"
 	"r3/types"
 	"slices"
 	"strings"
@@ -470,7 +471,7 @@ func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
 	if pw != "" {
 		salt.String = tools.RandStringRunes(32)
 		salt.Valid = true
-		hash.String = tools.Hash(salt.String + pw)
+		hash.String = crypt.GetHash(salt.String + pw)
 		hash.Valid = true
 	}
 	return salt, hash

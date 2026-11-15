@@ -4,7 +4,7 @@ import (
 	"context"
 	"r3/config"
 	"r3/handler"
-	"r3/tools"
+	"r3/tools/crypt"
 	"regexp"
 
 	"github.com/jackc/pgx/v5"
@@ -22,7 +22,7 @@ func Password(ctx context.Context, tx pgx.Tx, loginId int64, pwOld string) error
 	`, loginId).Scan(&salt, &hash); err != nil {
 		return err
 	}
-	if hash != tools.Hash(salt+pwOld) {
+	if hash != crypt.GetHash(salt+pwOld) {
 		return handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecPwOldBad)
 	}
 	return nil

@@ -8,6 +8,7 @@ import (
 	"r3/handler"
 	"r3/login/login_meta"
 	"r3/tools"
+	"r3/tools/crypt"
 	"r3/types"
 	"strings"
 
@@ -23,7 +24,7 @@ func CheckExists_tx(ctx context.Context, tx pgx.Tx, loginId int64, code string) 
 			WHERE login_id  = $1
 			AND   code_hash = $2
 		)
-	`, loginId, tools.Hash(code)).Scan(&exists); err != nil {
+	`, loginId, crypt.GetHash(code)).Scan(&exists); err != nil {
 		return false, err
 	}
 	return exists, nil
@@ -72,7 +73,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, mailAccountId, mailTemplateId int32,
 			VALUES ($1,$2,$3,$4)
 			ON CONFLICT (login_id) DO UPDATE
 			SET code_hash = $2, date_create = $3, date_expiry = $4
-		`, loginId, tools.Hash(code), now, expireAt); err != nil {
+		`, loginId, crypt.GetHash(code), now, expireAt); err != nil {
 			return err
 		}
 	}
