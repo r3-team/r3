@@ -275,7 +275,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	if err := cache.LoadAccessIfUnknown(l.Id); err != nil {
+	if err := cache.LoadAccessIfUnknown_tx(ctx, tx, l.Id); err != nil {
 		return types.LoginAuthResult{}, err
 	}
 	if meta.NameDisplay != "" {
