@@ -4,6 +4,10 @@ import { getAttributeIcon, isAttributeBoolean, isAttributeFiles, isAttributeStri
 import { getCaption, getCaptionForLang } from './language.js';
 import { getQueryFiltersProcessed } from './query.js';
 
+
+const pgFncReturnsFloat = ['real', 'double', 'double precision', 'float', 'float4', 'float8'];
+const pgFncReturnsInt = ['smallint', 'integer', 'bigint', 'int', 'int2', 'int4', 'int8'];
+
 export function getColumnsProcessed(columns, columnIdsByUser, joinsIndexMap, globalSearch, globalSearchDict, dataFieldIdMap,
 	fieldIdsChanged, fieldIdsInvalid, fieldValues, recordMayCreate, recordMayDelete, recordMayUpdate, variableIdMapLocal) {
 
@@ -43,6 +47,35 @@ export function getColumnsProcessed(columns, columnIdsByUser, joinsIndexMap, glo
 			vertical: c.styles.includes('vertical'),
 			wrap: c.styles.includes('wrap')
 		};
+
+		// value presentation overwrites for PG functions based on return type
+		c.value = {
+			content: null,
+			length: 0,
+			lengthFract: 0
+		};
+		if (c.content === 'fnc_pg') {
+			const f = MyStore.getters['schema/pgFunctionIdMap'][c.pgFunctionId];
+			if (f !== undefined) {
+				const fReturns = f.codeReturns.toLowerCase();
+
+				if (pgFncReturnsInt.includes(fReturns)) {
+					c.value.content = 'integer';
+				}
+				else if (pgFncReturnsFloat.includes(fReturns)) {
+					c.value.content = 'numeric';
+				}
+				else {
+					const match = fReturns.match(/^(numeric|decimal)\((\d+)(?:,(\d+))?\)$/);
+					if (match) {
+						c.value.content = 'numeric';
+						c.value.length = Number(match[2]);
+						if (match[3] !== undefined)
+							c.value.lengthFract = Number(match[3]);
+					}
+				}
+			}
+		}
 
 		// resolve sub query filters
 		if (c.content === 'query') {
@@ -208,20 +241,29 @@ export function getColumnTitleFallback(c, moduleId, languageForce) {
 export function getFirstColumnUsableAsAggregator(batch, columns) {
 	for (const ind of batch.columnIndexes) {
 		const c = columns[ind];
-		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 
-		// anything that can be counted can serve as aggregation
-		// sub queries and already aggregated columns are not supported
-		if (c.content === 'attribute'
-			&& c.aggregator === null
-			&& !a.encrypted
-			&& a.contentUse !== 'color'
-			&& a.contentUse !== 'drawing'
-			&& !a.contentUse.includes('barcode')
-			&& !isAttributeFiles(a.content)
-			&& !isAttributeBoolean(a.content)
-			&& !isAttributeString(a.content)
-		) return c;
+		// only columns that are not already aggregated are supported
+		// column content must be: attribute, PG function
+		if (c.aggregator !== null && c.content !== 'attribute' && c.content !== 'fnc_pg')
+			continue;
+
+		if (c.content === 'fnc_pg' && c.valueContentSet !== null) {
+			return c;
+		}
+
+		if (c.content === 'attribute') {
+			const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+
+			// anything that can be counted can serve as aggregation
+			if (!a.encrypted
+				&& a.contentUse !== 'color'
+				&& a.contentUse !== 'drawing'
+				&& !a.contentUse.includes('barcode')
+				&& !isAttributeFiles(a.content)
+				&& !isAttributeBoolean(a.content)
+				&& !isAttributeString(a.content)
+			) return c;
+		}
 	}
 	return null;
 };

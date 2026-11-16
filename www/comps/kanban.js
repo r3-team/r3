@@ -50,6 +50,9 @@ const MyKanbanCard = {
 									:noShrink="columns[ind].flags.noShrink"
 									:noThousandsSep="columns[ind].flags.noThousandsSep"
 									:value="values[ind]"
+									:valueContent="columns[ind].value.content"
+									:valueLength="columns[ind].value.length"
+									:valueLengthFract="columns[ind].value.lengthFract"
 									:wrap="columns[ind].flags.wrap"
 								/>
 							</div>
@@ -286,6 +289,9 @@ const MyKanban = {
 										:noShrink="columns[v.columnIndex].flags.noShrink"
 										:noThousandsSep="columns[v.columnIndex].flags.noThousandsSep"
 										:value="v.value"
+										:valueContent="columns[v.columnIndex].value.content"
+										:valueLength="columns[v.columnIndex].value.length"
+										:valueLengthFract="columns[v.columnIndex].value.lengthFract"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
 								</div>
@@ -364,6 +370,9 @@ const MyKanban = {
 										:noShrink="columns[v.columnIndex].flags.noShrink"
 										:noThousandsSep="columns[v.columnIndex].flags.noThousandsSep"
 										:value="v.value"
+										:valueContent="columns[v.columnIndex].value.content"
+										:valueLength="columns[v.columnIndex].value.length"
+										:valueLengthFract="columns[v.columnIndex].value.lengthFract"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
 								</div>

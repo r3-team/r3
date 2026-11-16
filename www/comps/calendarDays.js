@@ -31,6 +31,9 @@ const MyCalendarDaysEvent = {
 					:noShrink="columns[ind].flags.noShrink"
 					:noThousandsSep="columns[ind].flags.noThousandsSep"
 					:value="values[ind]"
+					:valueContent="columns[ind].value.content"
+					:valueLength="columns[ind].value.length"
+					:valueLengthFract="columns[ind].value.lengthFract"
 					:wrap="columns[ind].flags.wrap"
 				/>
 			</div>

@@ -50,6 +50,9 @@ export default {
 									:noShrink="columns[i].flags.noShrink"
 									:noThousandsSep="columns[i].flags.noThousandsSep"
 									:value="v"
+									:valueContent="columns[i].value.content"
+									:valueLength="columns[i].value.length"
+									:valueLengthFract="columns[i].value.lengthFract"
 								/>
 							</template>
 						</span>
@@ -83,6 +86,9 @@ export default {
 							:noThousandsSep="columns[i].flags.noThousandsSep"
 							:wrap="true"
 							:value="v"
+							:valueContent="columns[i].value.content"
+							:valueLength="columns[i].value.length"
+							:valueLengthFract="columns[i].value.lengthFract"
 						/>
 					</template>
 				</div>

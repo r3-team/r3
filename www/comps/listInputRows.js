@@ -29,6 +29,9 @@ export default {
 									:noShrink="columns[0].flags.noShrink"
 									:noThousandsSep="columns[0].flags.noThousandsSep"
 									:value="r.values[0]"
+									:valueContent="columns[0].value.content"
+									:valueLength="columns[0].value.length"
+									:valueLengthFract="columns[0].value.lengthFract"
 									:wrap="columns[0].flags.wrap"
 								/>
 							</div>
@@ -63,6 +66,9 @@ export default {
 										:noShrink="columns[ci].flags.noShrink"
 										:noThousandsSep="columns[ci].flags.noThousandsSep"
 										:value="r.values[ci]"
+										:valueContent="columns[ci].value.content"
+										:valueLength="columns[ci].value.length"
+										:valueLengthFract="columns[ci].value.lengthFract"
 										:wrap="columns[ci].flags.wrap"
 									/>
 								</template>

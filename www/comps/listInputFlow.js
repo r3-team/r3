@@ -27,6 +27,9 @@ export default {
 							:noShrink="columns[ci].flags.noShrink"
 							:noThousandsSep="columns[ci].flags.noThousandsSep"
 							:value="r.values[ci]"
+							:valueContent="columns[ci].value.content"
+							:valueLength="columns[ci].value.length"
+							:valueLengthFract="columns[ci].value.lengthFract"
 							:wrap="columns[ci].flags.wrap"
 						/>
 					</template>
