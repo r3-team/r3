@@ -247,10 +247,9 @@ export function getFirstColumnUsableAsAggregator(batch, columns) {
 		if (c.aggregator !== null && c.content !== 'attribute' && c.content !== 'fnc_pg')
 			continue;
 
-		if (c.content === 'fnc_pg') {
+		if (c.content === 'fnc_pg' && (c.value.content === 'integer' || c.value.content === 'numeric')) {
 			return c;
 		}
-
 		if (c.content === 'attribute') {
 			const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 
