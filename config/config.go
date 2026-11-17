@@ -1,13 +1,17 @@
 package config
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"math/rand"
 	"os"
 	"r3/log"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"strconv"
 	"sync"
@@ -117,7 +121,7 @@ func GetTokenSecret() *jwt.HMACSHA {
 }
 
 // setters
-func SetAppVersion(versionFull string, target string) error {
+func SetAppVersion(versionFull string, target types.AppVersionTarget) error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
@@ -126,11 +130,11 @@ func SetAppVersion(versionFull string, target string) error {
 		return err
 	}
 
-	if target == "service" {
+	if target == constants.AppVersionTargetSelf {
 		appVersion.Build = build
 		appVersion.Cut = rxVersionCut.ReplaceAllString(versionFull, "")
 		appVersion.Full = versionFull
-	} else if target == "fatClient" {
+	} else if target == constants.AppVersionTargetClient {
 		appVersionClient.Build = build
 		appVersionClient.Cut = rxVersionCut.ReplaceAllString(versionFull, "")
 		appVersionClient.Full = versionFull
@@ -255,4 +259,28 @@ func ProcessTokenSecret_tx(ctx context.Context, tx pgx.Tx) error {
 
 	tokenSecret = jwt.NewHS256([]byte(secret))
 	return nil
+}
+
+// helper
+func PrintUsageInfo() {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+
+	fmt.Printf("Available parameters:\n")
+	flag.PrintDefaults()
+
+	fmt.Printf("\n################################################################################\n")
+	fmt.Printf("This is the executable of %s, the open low-code platform, v%s\n", appName, appVersion.Full)
+	fmt.Printf("Copyright (c) 2019-2026 Gabriel Victor Herbert\n\n")
+	fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n\n", appName)
+	fmt.Printf("When %s is running, use any modern browser to access it (port 443 by default).\n\n", appName)
+	fmt.Printf("For installation instructions, please refer to the included README file or visit\n")
+	fmt.Printf("https://rei3.de/en/docs/admin/ for the full admin documentation.\n")
+	fmt.Printf("################################################################################\n\n")
+
+	// wait for user input to keep console open in case it´s not opened directly in a text shell
+	fmt.Printf("See above for available parameters. Press enter to return.\n")
+
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
 }

@@ -7,6 +7,9 @@ const (
 	AccessRead   types.Access = 1
 	AccessWrite  types.Access = 2
 
+	AppVersionTargetClient types.AppVersionTarget = "client"
+	AppVersionTargetSelf   types.AppVersionTarget = "self"
+
 	LoginMfaIntervalSec int64 = 30 // MFA interval window size (in seconds)
 
 	LoginTypeFixed  types.LoginType = "fixed"  // auth via fixed token, used for ICS & fat client

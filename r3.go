@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"crypto/tls"
 	"embed"
@@ -51,6 +50,7 @@ import (
 	"r3/scheduler"
 	"r3/spooler/doc_create"
 	"r3/tools"
+	"r3/types/constants"
 	"strings"
 	"sync/atomic"
 	"syscall"
@@ -75,6 +75,7 @@ var (
 		debug            bool
 		dynamicPort      bool
 		imageMagick      string
+		help             bool
 		http             bool
 		keepWorkDir      bool
 		open             bool
@@ -85,6 +86,8 @@ var (
 		serviceInstall   bool
 		serviceUninstall bool
 		setData          string
+		version          bool
+		versionBuild     bool
 		wwwPath          string
 	}
 
@@ -106,33 +109,36 @@ type program struct {
 func main() {
 
 	// set configuration parameters
-	if err := config.SetAppVersion(appVersion, "service"); err != nil {
+	if err := config.SetAppVersion(appVersion, constants.AppVersionTargetSelf); err != nil {
 		fmt.Printf("failed to set app version, %v\n", err)
 		return
 	}
-	if err := config.SetAppVersion(appVersionClient, "fatClient"); err != nil {
+	if err := config.SetAppVersion(appVersionClient, constants.AppVersionTargetClient); err != nil {
 		fmt.Printf("failed to set app client version, %v\n", err)
 		return
 	}
 	config.SetAppName(appName, appNameShort)
 
 	// process configuration overwrites from command line
-	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
+	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user, syntax is 'username:password' (without quotes, password must not contain spaces/colons)")
 	flag.StringVar(&cli.configFile, "config", "config.json", "Location of configuration file (combined with -run)")
 	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
-	flag.StringVar(&cli.imageMagick, "imagemagick", "", "Alternative location for the ImageMagick convert utility")
-	flag.BoolVar(&cli.http, "http", false, "Start with HTTP (not encrypted, for testing/development only, combined with -run)")
-	flag.BoolVar(&cli.keepWorkDir, "keepworkdir", false, "Do not change working directory to directory of executable")
-	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
+	flag.StringVar(&cli.imageMagick, "imagemagick", "", "Alternative location for the ImageMagick utility 'magick'")
+	flag.BoolVar(&cli.help, "help", false, "Prints help with available command line parameters")
+	flag.BoolVar(&cli.http, "http", false, "Start with HTTP (for testing/development, traffic IS NOT encrypted, combined with -run)")
+	flag.BoolVar(&cli.keepWorkDir, "keepworkdir", false, "Do not change working directory to directory of executable, relevant for paths in config file")
+	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (only in graphical shell, combined with -run)", appName))
 	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console (see 'config.json' for configuration)", appName))
 	flag.BoolVar(&cli.debug, "debug", false, "Logs all events regardless of configured log level (combined with -run)")
-	flag.BoolVar(&cli.serviceInstall, "install", false, fmt.Sprintf("Install %s service", appName))
+	flag.BoolVar(&cli.serviceInstall, "install", false, fmt.Sprintf("Install %s as service (combined with -servicename to overwrite name)", appName))
 	flag.StringVar(&cli.serviceName, "servicename", appName, "Specify name of service to manage (to (un)install, start or stop service)")
-	flag.BoolVar(&cli.serviceStart, "start", false, fmt.Sprintf("Start %s service", appName))
-	flag.BoolVar(&cli.serviceStop, "stop", false, fmt.Sprintf("Stop %s service", appName))
-	flag.BoolVar(&cli.serviceUninstall, "uninstall", false, fmt.Sprintf("Uninstall %s service", appName))
+	flag.BoolVar(&cli.serviceStart, "start", false, fmt.Sprintf("Start %s service (combined with -servicename to overwrite name)", appName))
+	flag.BoolVar(&cli.serviceStop, "stop", false, fmt.Sprintf("Stop %s service (combined with -servicename to overwrite name)", appName))
+	flag.BoolVar(&cli.serviceUninstall, "uninstall", false, fmt.Sprintf("Uninstall %s as service (combined with -servicename to overwrite name)", appName))
 	flag.StringVar(&cli.setData, "setdata", "", "Write to config file: Data directory (platform files and database if stand-alone)")
-	flag.StringVar(&cli.wwwPath, "wwwpath", "", "(Development) Use web files from given path instead of embedded ones")
+	flag.BoolVar(&cli.version, "version", false, "Prints version number (such as '3.13.2.7213')")
+	flag.BoolVar(&cli.versionBuild, "versionbuild", false, "Prints version build number (such as '7213')")
+	flag.StringVar(&cli.wwwPath, "wwwpath", "", "Use web files from given path instead of embedded ones (for testing/development)")
 	flag.Parse()
 
 	// enable debug mode
@@ -162,6 +168,20 @@ func main() {
 	prg.logger, err = svc.Logger(nil)
 	if err != nil {
 		fmt.Printf("service logger could not be created, error: %v\n", err)
+		return
+	}
+
+	// early aborts with info, if requested
+	if service.Interactive() && cli.version {
+		fmt.Printf("%s", config.GetAppVersion().Full)
+		return
+	}
+	if service.Interactive() && cli.versionBuild {
+		fmt.Printf("%d", config.GetAppVersion().Build)
+		return
+	}
+	if service.Interactive() && cli.help {
+		config.PrintUsageInfo()
 		return
 	}
 
@@ -208,25 +228,9 @@ func main() {
 		cli.open = true
 	}
 
-	// print usage info if interactive and no arguments were added
-	if !config.File.Portable && service.Interactive() && len(os.Args) == 1 {
-		fmt.Printf("Available parameters:\n")
-		flag.PrintDefaults()
-
-		fmt.Printf("\n################################################################################\n")
-		fmt.Printf("This is the executable of %s, the open low-code platform, v%s\n", appName, appVersion)
-		fmt.Printf("Copyright (c) 2019-2026 Gabriel Victor Herbert\n\n")
-		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n\n", appName)
-		fmt.Printf("When %s is running, use any modern browser to access it (port 443 by default).\n\n", appName)
-		fmt.Printf("For installation instructions, please refer to the included README file or visit\n")
-		fmt.Printf("https://rei3.de/en/docs/admin/ for the full admin documentation.\n")
-		fmt.Printf("################################################################################\n\n")
-
-		// wait for user input to keep console open
-		fmt.Printf("See above for available parameters. Press enter to return.\n")
-
-		reader := bufio.NewReader(os.Stdin)
-		reader.ReadString('\n')
+	// print usage info if non-portable start without arguments
+	if service.Interactive() && !config.File.Portable && len(os.Args) == 1 {
+		config.PrintUsageInfo()
 		return
 	}
 
