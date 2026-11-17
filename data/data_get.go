@@ -768,7 +768,13 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 			if err != nil {
 				return "", err
 			}
-			return fmt.Sprintf(`"%s"."%s"(%s)`, modName, fncName, code), nil
+			fncExpr := fmt.Sprintf(`"%s"."%s"(%s)`, modName, fncName, code)
+
+			// (I)LIKE comparison needs attribute cast as TEXT (relevant for integers/floats/etc.)
+			if isOpLike {
+				return fmt.Sprintf("%s::TEXT", fncExpr), nil
+			}
+			return fncExpr, nil
 		}
 
 		// fixed value filter
