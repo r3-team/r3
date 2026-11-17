@@ -247,7 +247,7 @@ export function getFirstColumnUsableAsAggregator(batch, columns) {
 		if (c.aggregator !== null && c.content !== 'attribute' && c.content !== 'fnc_pg')
 			continue;
 
-		if (c.content === 'fnc_pg' && c.valueContentSet !== null) {
+		if (c.content === 'fnc_pg') {
 			return c;
 		}
 
