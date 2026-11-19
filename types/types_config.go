@@ -1,17 +1,13 @@
 package types
 
-type Version struct {
-	Build int    // build number of version (1023)
-	Cut   string // major+minor version (1.2), should match DB version (1.2), which is kept to the same major+minor as app
-	Full  string // full version (1.2.0.1023), syntax: major.minor.patch.build
-}
-
 type FileType struct {
 	Cluster struct {
 		NodeId string `json:"nodeId"`
 	} `json:"cluster"`
 
 	Db FileTypeDb `json:"db"`
+
+	CredentialsSecret string `json:"credentialsSecret"`
 
 	// mirror mode, eg. system mirrors other, likely productive instance
 	// disables write connectors (currently: email retrieve/send, REST call) & backups
@@ -56,4 +52,10 @@ type FileTypeDb struct {
 	// connection settings
 	ConnsMax int32 `json:"connsMax"` // ignore if 0
 	ConnsMin int32 `json:"connsMin"` // ignore if 0
+}
+
+type Version struct {
+	Build int    // build number of version (1023)
+	Cut   string // major+minor version (1.2), should match DB version (1.2), which is kept to the same major+minor as app
+	Full  string // full version (1.2.0.1023), syntax: major.minor.patch.build
 }

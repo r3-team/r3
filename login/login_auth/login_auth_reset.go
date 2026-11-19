@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/tools"
+	"r3/tools/crypt"
 	"r3/types"
 	"r3/types/constants"
 
@@ -46,7 +47,7 @@ func Reset(ctx context.Context, code string) (types.LoginAuthResult, error) {
 		AND   l.ldap_id         IS NULL
 		AND   lr.code_hash      = $1
 		AND   lr.date_expiry    > $2
-	`, tools.Hash(code), tools.GetTimeUnix()).Scan(
+	`, crypt.GetHash(code), tools.GetTimeUnix()).Scan(
 		&l.Id, &l.SaltKdf, &l.Admin, &limited, &l.Name, &tokenExpiryHours, &mfaRequiredLogin, &nameDisplay); err != nil {
 
 		if err == pgx.ErrNoRows {

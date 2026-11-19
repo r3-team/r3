@@ -2,38 +2,22 @@ package tools
 
 import (
 	"bufio"
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"fmt"
-	"io"
 	"math/big"
 	"net"
 	"os"
 	"time"
 )
 
-// hash
-func Hash(text string) string {
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(text)))
-}
-func HashAsByteArray(text string) []byte {
-	hash := sha256.Sum256([]byte(text))
-	return hash[0:]
-}
-
 // hosts can be a comma-separated list of hosts
-func CreateCertificate(hosts []string, organization string, validDays uint,
-	certFilePath string, keyFilePath string) error {
+func CreateCertificate(hosts []string, organization string, validDays uint, certFilePath, keyFilePath string) error {
 
 	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
@@ -111,60 +95,6 @@ func CreateCertificate(hosts []string, organization string, validDays uint,
 	return nil
 }
 
-// encrypt string to base64 crypto using AES
-func Encrypt(key string, text string) (string, error) {
-
-	plaintext := []byte(text)
-
-	// AES only allows certain key sizes, hash with sha256 to get 32 bytes
-	block, err := aes.NewCipher(HashAsByteArray(key))
-	if err != nil {
-		return "", err
-	}
-
-	// The IV needs to be unique, but not secure. Therefore it's common to
-	// include it at the beginning of the ciphertext.
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", err
-	}
-
-	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
-
-	// encode ciphertext to base64
-	return base64.URLEncoding.EncodeToString(ciphertext), nil
-}
-
-// decrypt from base64 to decrypted string
-func Decrypt(key string, cryptoText string) (string, error) {
-
-	// decode ciphertext from base64
-	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
-
-	// AES only allows certain key sizes, hash with sha256 to get 32 bytes
-	block, err := aes.NewCipher(HashAsByteArray(key))
-	if err != nil {
-		return "", err
-	}
-
-	// The IV needs to be unique, but not secure. Therefore it's common to
-	// include it at the beginning of the ciphertext.
-	if len(ciphertext) < aes.BlockSize {
-		return "", errors.New("ciphertext too short")
-	}
-	iv := ciphertext[:aes.BlockSize]
-	ciphertext = ciphertext[aes.BlockSize:]
-
-	stream := cipher.NewCFBDecrypter(block, iv)
-
-	// XORKeyStream can work in-place if the two arguments are the same.
-	stream.XORKeyStream(ciphertext, ciphertext)
-
-	return fmt.Sprintf("%s", ciphertext), nil
-}
-
 // key handling
 func ReadPrivKey(filePath string) (*rsa.PrivateKey, error) {
 
@@ -214,7 +144,7 @@ func readPemBlockFromFile(filePath string) (*pem.Block, error) {
 	return data, nil
 }
 
-func publicKey(priv interface{}) interface{} {
+func publicKey(priv any) any {
 
 	switch k := priv.(type) {
 	case *rsa.PrivateKey:
@@ -226,7 +156,7 @@ func publicKey(priv interface{}) interface{} {
 	}
 }
 
-func pemBlockForKey(priv interface{}) (*pem.Block, error) {
+func pemBlockForKey(priv any) (*pem.Block, error) {
 
 	switch k := priv.(type) {
 	case *rsa.PrivateKey:

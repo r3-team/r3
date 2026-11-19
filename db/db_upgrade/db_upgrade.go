@@ -11,6 +11,7 @@ import (
 	"r3/schema"
 	"r3/schema/pgIndex"
 	"r3/tools"
+	"r3/tools/cryptAesGcm"
 	"r3/types"
 	"r3/types/constants"
 	"strconv"
@@ -95,11 +96,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		nothing so far
+		ALTER TABLE instance.credential ALTER COLUMN algorithm TYPE instance.encryption_algorithm USING algorithm::TEXT::instance.encryption_algorithm;
 	*/
 
 	"3.13": func(ctx context.Context, tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			-- cleanup from last release
 			ALTER TABLE app.column             ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
 			ALTER TABLE app.doc_column         ALTER COLUMN content TYPE app.column_content USING content::TEXT::app.column_content;
@@ -172,6 +173,49 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE instance.login_setting DROP COLUMN borders_squared;
 
+			-- credential keys
+			CREATE TYPE instance.encryption_algorithm AS ENUM('aes_gcm_256');
+			CREATE TABLE instance.credential (
+				db_sync_host_id uuid,
+				ldap_id integer,
+				mail_account_id integer,
+				oauth_client_id integer,
+				algorithm text not NULL,
+				secret_enc text NOT NULL,
+				nonce text NOT NULL,
+				salt_kdf text NOT NULL,
+				CONSTRAINT credential_db_sync_host_id_fkey FOREIGN KEY (db_sync_host_id)
+					REFERENCES instance_db_sync.host (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT credential_ldap_id_fkey FOREIGN KEY (ldap_id)
+					REFERENCES instance.ldap (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT credential_mail_account_id_fkey FOREIGN KEY (mail_account_id)
+					REFERENCES instance.mail_account (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT credential_oauth_client_id_fkey FOREIGN KEY (oauth_client_id)
+					REFERENCES instance.oauth_client (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT credential_single_parent CHECK (1 = (
+					CASE WHEN db_sync_host_id IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN ldap_id         IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN mail_account_id IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN oauth_client_id IS NULL THEN 0 ELSE 1 END
+				))
+			);
+			CREATE INDEX IF NOT EXISTS fki_credential_db_sync_host_id_fkey ON instance.credential USING btree (db_sync_host_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_credential_ldap_id_fkey         ON instance.credential USING btree (ldap_id         ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_credential_mail_account_id_fkey ON instance.credential USING btree (mail_account_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_credential_oauth_client_id_fkey ON instance.credential USING btree (oauth_client_id ASC NULLS LAST);
+
 			-- column actions
 			ALTER TYPE app.data_display ADD VALUE 'action';
 
@@ -182,8 +226,68 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_open_doc_column_id_fkey ON app.open_doc USING btree (column_id ASC NULLS LAST);
+		`); err != nil {
+			return "", err
+		}
+
+		// migrate account credentials from plain to encrypted secrets
+		type cred struct {
+			IdHost      pgtype.UUID
+			IdLdap      pgtype.Int8
+			IdMail      pgtype.Int8
+			IdOauth     pgtype.Int8
+			CipherPlain string
+		}
+
+		rows, err := tx.Query(ctx, `
+			SELECT id, NULL, NULL, NULL, password      FROM instance_db_sync.host
+			UNION
+			SELECT NULL, id, NULL, NULL, bind_user_pw  FROM instance.ldap
+			UNION
+			SELECT NULL, NULL, id, NULL, password      FROM instance.mail_account
+			UNION
+			SELECT NULL, NULL, NULL, id, client_secret FROM instance.oauth_client
 		`)
-		return "3.14", err
+		if err != nil {
+			return "", err
+		}
+		defer rows.Close()
+
+		creds := make([]cred, 0)
+		for rows.Next() {
+			var c cred
+			if err := rows.Scan(&c.IdHost, &c.IdLdap, &c.IdMail, &c.IdOauth, &c.CipherPlain); err != nil {
+				return "", err
+			}
+			creds = append(creds, c)
+		}
+		rows.Close()
+
+		for _, c := range creds {
+			// use empty secret for existing, plain account credentials
+			// new secret is set via admin panel after migration to this version
+			cipherEnc, saltKdf, nonce, err := cryptAesGcm.EncryptUnknownSecret("", c.CipherPlain)
+			if err != nil {
+				return "", err
+			}
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO instance.credential (
+					db_sync_host_id, ldap_id, mail_account_id, oauth_client_id,
+					algorithm, secret_enc, nonce, salt_kdf
+				) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+			`, c.IdHost, c.IdLdap, c.IdMail, c.IdOauth, "aes_gcm_256", cipherEnc, nonce, saltKdf); err != nil {
+				return "", err
+			}
+		}
+		if _, err := tx.Exec(ctx, `
+			ALTER TABLE instance_db_sync.host DROP COLUMN password;
+			ALTER TABLE instance.ldap         DROP COLUMN bind_user_pw;
+			ALTER TABLE instance.mail_account DROP COLUMN password;
+			ALTER TABLE instance.oauth_client DROP COLUMN client_secret;
+		`); err != nil {
+			return "", err
+		}
+		return "3.14", nil
 	},
 	"3.12": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `

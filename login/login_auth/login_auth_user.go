@@ -9,7 +9,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/ldap/ldap_auth"
-	"r3/tools"
+	"r3/tools/crypt"
 	"r3/types"
 	"r3/types/constants"
 	"strings"
@@ -78,7 +78,7 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 			}
 		} else {
 			// authentication against stored hash
-			if !hash.Valid || !salt.Valid || hash.String != tools.Hash(salt.String+password) {
+			if !hash.Valid || !salt.Valid || hash.String != crypt.GetHash(salt.String+password) {
 				return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 			}
 		}
