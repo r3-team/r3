@@ -191,7 +191,7 @@ export default {
 									:readonly
 								/>
 								<my-button-check
-									v-if="isInteger"
+									v-if="isInteger || isFncPg"
 									@update:modelValue="setStyle('noThousandsSep',$event)"
 									:caption="capApp.columnNoThousandsSep"
 									:modelValue="column.styles.includes('noThousandsSep')"

@@ -101,7 +101,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 		Id:        0,
 		MfaTokens: make([]types.LoginMfaToken, 0),
 	}
-	var active bool
+	var activeEx bool
 	var tokenExpiryHours pgtype.Int4
 	var roleIds []uuid.UUID
 	var roleIdsEx []uuid.UUID
@@ -165,7 +165,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 		ORDER BY CASE WHEN l.oauth_client_id = $1 THEN 0 ELSE 1 END
 		LIMIT 1
 	`, oauthClientId, idToken.Issuer, idToken.Subject, c.MigrateByName, username).Scan(&l.Id, &l.Name, &l.SaltKdf, &l.Admin,
-		&limited, &tokenExpiryHours, &active, &loginMigrate, &roleIdsEx, &metaEx.Department, &metaEx.Email, &metaEx.Location,
+		&limited, &tokenExpiryHours, &activeEx, &loginMigrate, &roleIdsEx, &metaEx.Department, &metaEx.Email, &metaEx.Location,
 		&metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur, &metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax,
 		&metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
 
@@ -242,9 +242,8 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 	}
 
 	// set login if new or anything changed
-	// inactive users cannot authenticate via Open ID, so there is no way to disable users this way
-	//  but if the current active state is disabled, it must re-enable the user
-	if newLogin || adminChanged || metaChanged || nameChanged || rolesChanged || !active {
+	// inactive users cannot authenticate via Open ID - if the login is inactive, a successful Open ID auth reactivates it
+	if newLogin || adminChanged || metaChanged || nameChanged || rolesChanged || !activeEx {
 
 		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{},
 			pgtype.Int4{Int32: c.Id, Valid: true}, pgtype.Text{String: idToken.Issuer, Valid: true},
@@ -266,7 +265,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 			return types.LoginAuthResult{}, err
 		}
 	}
-	if active && rolesChanged {
+	if rolesChanged {
 		login_clusterEvent.Reauth_tx(ctx, tx, l.Id, l.Name)
 	}
 
@@ -275,7 +274,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	if err := cache.LoadAccessIfUnknown(l.Id); err != nil {
+	if err := cache.LoadAccessIfUnknown_tx(ctx, tx, l.Id); err != nil {
 		return types.LoginAuthResult{}, err
 	}
 	if meta.NameDisplay != "" {

@@ -52,10 +52,19 @@ func LoadAccessIfUnknown(loginId int64) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if err := load_tx(ctx, tx, loginId); err != nil {
+	if err := LoadAccessIfUnknown_tx(ctx, tx, loginId); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)
+}
+func LoadAccessIfUnknown_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
+	access_mx.RLock()
+	_, exists := loginIdMapAccess[loginId]
+	access_mx.RUnlock()
+	if exists {
+		return nil
+	}
+	return load_tx(ctx, tx, loginId)
 }
 
 // renew permissions for all known logins

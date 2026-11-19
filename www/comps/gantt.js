@@ -45,6 +45,9 @@ const MyGanttLineRecord = {
 					:noShrink="columns[i].flags.noShrink"
 					:noThousandsSep="columns[i].flags.noThousandsSep"
 					:value="v"
+					:valueContent="columns[i].value.content"
+					:valueLength="columns[i].value.length"
+					:valueLengthFract="columns[i].value.lengthFract"
 				/>
 			</template>
 		</div>
@@ -316,6 +319,9 @@ const MyGantt = {
 									:noShrink="columns[c.index].flags.noShrink"
 									:noThousandsSep="columns[c.index].flags.noThousandsSep"
 									:value="c.value"
+									:valueContent="columns[c.index].value.content"
+									:valueLength="columns[c.index].value.length"
+									:valueLengthFract="columns[c.index].value.lengthFract"
 								/>
 							</div>
 						</div>

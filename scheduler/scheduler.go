@@ -76,7 +76,7 @@ var (
 	secondsKeepNewFiles     int64          = 60 * 60 * 8     // how long to keep new files with no references (in case record is not saved yet)
 	tasks                   []task                           // all tasks
 	tasks_mx                               = &sync.RWMutex{} // control access to tasks
-	tasksDisabledMirrorMode []string       = []string{"adminMails", "backupRun", "mailAttach", "mailRetrieve", "mailSend", "restExecute"}
+	tasksDisabledMirrorMode []string       = []string{"adminMails", "backupRun", "dbSync", "mailAttach", "mailRetrieve", "mailSend", "restExecute"}
 	OsExit                  chan os.Signal = make(chan os.Signal)
 
 	// main loop

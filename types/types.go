@@ -1,6 +1,7 @@
 package types
 
 type Access int
+type AppVersionTarget string               // target for version string (self, client)
 type DbSchemaApp string                    // DB entities from app schema
 type DbSchemaAppAttributeContent string    // DB entities for attribute content in app schema
 type DbSchemaAppAttributeContentUse string // DB entities for attribute content use in app schema

@@ -1,11 +1,11 @@
-import {getStringFilled} from '../shared/generic.js';
-import srcBase64Icon     from '../shared/image.js';
-import {getUnixFormat}   from '../shared/time.js';
-import {getCaption}      from '../shared/language.js';
+import { getStringFilled } from '../shared/generic.js';
+import srcBase64Icon from '../shared/image.js';
+import { getCaption } from '../shared/language.js';
+import { getUnixFormat } from '../shared/time.js';
 
 export default {
-	name:'my-admin-scheduler',
-	template:`<div class="admin-scheduler contentBox grow">
+	name: 'my-admin-scheduler',
+	template: `<div class="admin-scheduler contentBox grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/clock.png" />
@@ -25,19 +25,19 @@ export default {
 				/>
 			</div>
 		</div>
-		
+
 		<div class="content no-padding">
 
 			<!-- mirror mode notice -->
 			<p class="message error" v-if="mirrorMode">
 				{{ capApp.mirrorMode }}
 			</p>
-		
+
 			<!-- cluster master schedules -->
 			<div class="content">
 				<my-label image="cluster.png" :caption="capApp.systemTasks" :large="true" />
 				<br />
-				
+
 				<table class="generic-table bright default-inputs shade">
 					<thead>
 						<tr>
@@ -75,12 +75,11 @@ export default {
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- cluster node schedules -->
 			<div class="content">
 				<my-label image="server.png" :caption="capApp.systemTasksNode" :large="true" />
 				<br />
-				
 				<table class="generic-table bright default-inputs shade">
 					<thead>
 						<tr>
@@ -133,12 +132,12 @@ export default {
 					</tbody>
 				</table>
 			</div>
-			
+
 			<!-- module schedules -->
 			<div class="content" v-if="hasAppSchedules">
 				<my-label image="builder.png" :caption="capApp.functions" :large="true" />
 				<br />
-				
+
 				<table class="generic-table bright shade">
 					<thead>
 						<tr>
@@ -174,175 +173,175 @@ export default {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		menuTitle:{ type:String, required:true }
+	props: {
+		menuTitle: { type: String, required: true }
 	},
 	data() {
 		return {
-			schedulers:[],
-			schedulersInput:[],    // changes to schedulers
-			schedulersExpanded:[], // indexes of schedules that show all nodes
-			tasksDisabledMirrorMode:['adminMails','backupRun','mailAttach','mailRetrieve','mailSend','restExecute']
+			schedulers: [],
+			schedulersInput: [],    // changes to schedulers
+			schedulersExpanded: [], // indexes of schedules that show all nodes
+			tasksDisabledMirrorMode: ['adminMails', 'backupRun', 'dbSync', 'mailAttach', 'mailRetrieve', 'mailSend', 'restExecute']
 		};
 	},
 	mounted() {
 		this.get();
-		this.$store.commit('pageTitle',this.menuTitle);
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('pageTitle', this.menuTitle);
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel', this.set);
 	},
-	computed:{
-		hasAppSchedules:s => {
-			for(let e of s.schedulers) {
-				if(e.taskName === '')
+	computed: {
+		hasAppSchedules: s => {
+			for (const e of s.schedulers) {
+				if (e.taskName === '')
 					return true;
 			}
 			return false;
 		},
 
 		// simple
-		hasChanges:          s => JSON.stringify(s.schedulers) !== JSON.stringify(s.schedulersInput),
-		pgFunctionSchedulers:s => s.schedulers.filter(v => v.taskName === '' && v.intervalType !== 'once'),
-		
+		hasChanges: s => JSON.stringify(s.schedulers) !== JSON.stringify(s.schedulersInput),
+		pgFunctionSchedulers: s => s.schedulers.filter(v => v.taskName === '' && v.intervalType !== 'once'),
+
 		// stores
-		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
-		capApp:         s => s.$store.getters.captions.admin.scheduler,
-		capGen:         s => s.$store.getters.captions.generic,
-		mirrorMode:     s => s.$store.getters.mirrorMode,
-		settings:       s => s.$store.getters.settings
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap: s => s.$store.getters['schema/pgFunctionIdMap'],
+		capApp: s => s.$store.getters.captions.admin.scheduler,
+		capGen: s => s.$store.getters.captions.generic,
+		mirrorMode: s => s.$store.getters.mirrorMode,
+		settings: s => s.$store.getters.settings
 	},
-	methods:{
+	methods: {
 		// externals
 		getCaption,
 		getStringFilled,
 		getUnixFormat,
 		srcBase64Icon,
-		
+
 		// presentation
 		displayTime(unixTime) {
-			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,`${this.settings.dateFormat} H:i:S`);
+			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime, `${this.settings.dateFormat} H:i:S`);
 		},
 		displayName(name) {
 			return this.capApp.names[name] === undefined ? name : this.capApp.names[name];
 		},
 		displayModuleName(pgFunctionId) {
 			const m = this.moduleIdMap[this.pgFunctionIdMap[pgFunctionId].moduleId];
-			return this.getCaption('moduleTitle',m.id,m.id,m.captions,m.name);
+			return this.getCaption('moduleTitle', m.id, m.id, m.captions, m.name);
 		},
 		displayFunctionName(pgFunctionId) {
 			const f = this.pgFunctionIdMap[pgFunctionId];
-			return this.getCaption('pgFunctionTitle',f.moduleId,f.id,f.captions,f.name);
+			return this.getCaption('pgFunctionTitle', f.moduleId, f.id, f.captions, f.name);
 		},
-		displaySchedule(pgFunctionId,pgFunctionScheduleId) {
-			let f = this.pgFunctionIdMap[pgFunctionId];
+		displaySchedule(pgFunctionId, pgFunctionScheduleId) {
+			const f = this.pgFunctionIdMap[pgFunctionId];
 			let s = null;
-			
-			for(let i = 0, j = f.schedules.length; i < j; i++) {
-				if(f.schedules[i].id === pgFunctionScheduleId) {
+
+			for (let i = 0, j = f.schedules.length; i < j; i++) {
+				if (f.schedules[i].id === pgFunctionScheduleId) {
 					s = f.schedules[i];
 					break;
 				}
 			}
-			
-			if(s === null)
+
+			if (s === null)
 				return '';
-			
-			let parts    = [];
+
+			const parts = [];
 			let typeName = '';
-			
-			switch(s.intervalType) {
-				case 'days':    typeName = this.capApp.intervalTypeDays;    break;
-				case 'hours':   typeName = this.capApp.intervalTypeHours;   break;
+
+			switch (s.intervalType) {
+				case 'days': typeName = this.capApp.intervalTypeDays; break;
+				case 'hours': typeName = this.capApp.intervalTypeHours; break;
 				case 'minutes': typeName = this.capApp.intervalTypeMinutes; break;
-				case 'months':  typeName = this.capApp.intervalTypeMonths;  break;
+				case 'months': typeName = this.capApp.intervalTypeMonths; break;
 				case 'seconds': typeName = this.capApp.intervalTypeSeconds; break;
-				case 'weeks':   typeName = this.capApp.intervalTypeWeeks;   break;
-				case 'years':   typeName = this.capApp.intervalTypeYears;   break;
+				case 'weeks': typeName = this.capApp.intervalTypeWeeks; break;
+				case 'years': typeName = this.capApp.intervalTypeYears; break;
 			}
-			
+
 			parts.push(this.capApp.scheduleLine
-				.replace('{TYPE}',typeName)
-				.replace('{VALUE}',s.intervalValue)
+				.replace('{TYPE}', typeName)
+				.replace('{VALUE}', s.intervalValue)
 			);
-			
-			switch(s.intervalType) {
-				case 'months': parts.push(this.capApp.scheduleLineDayMonths.replace('{DAY}',s.atDay)); break;
-				case 'weeks':  parts.push(this.capApp.scheduleLineDayWeeks.replace('{DAY}',s.atDay));  break;
-				case 'years':  parts.push(this.capApp.scheduleLineDayYears.replace('{DAY}',s.atDay));  break;
+
+			switch (s.intervalType) {
+				case 'months': parts.push(this.capApp.scheduleLineDayMonths.replace('{DAY}', s.atDay)); break;
+				case 'weeks': parts.push(this.capApp.scheduleLineDayWeeks.replace('{DAY}', s.atDay)); break;
+				case 'years': parts.push(this.capApp.scheduleLineDayYears.replace('{DAY}', s.atDay)); break;
 			}
-			
-			if(['days','weeks','months','years'].includes(s.intervalType))
+
+			if (['days', 'weeks', 'months', 'years'].includes(s.intervalType))
 				parts.push(this.capApp.scheduleLineTime
-					.replace('{HH}',this.getStringFilled(s.atHour,2,'0'))
-					.replace('{MM}',this.getStringFilled(s.atMinute,2,'0'))
-					.replace('{SS}',this.getStringFilled(s.atSecond,2,'0'))
+					.replace('{HH}', this.getStringFilled(s.atHour, 2, '0'))
+					.replace('{MM}', this.getStringFilled(s.atMinute, 2, '0'))
+					.replace('{SS}', this.getStringFilled(s.atSecond, 2, '0'))
 				);
-			
+
 			return parts.join(', ');
 		},
 		expandScheduler(i) {
-			let pos = this.schedulersExpanded.indexOf(i);
-			
-			if(pos === -1) this.schedulersExpanded.push(i);
-			else           this.schedulersExpanded.splice(pos,1);
+			const pos = this.schedulersExpanded.indexOf(i);
+
+			if (pos === -1) this.schedulersExpanded.push(i);
+			else this.schedulersExpanded.splice(pos, 1);
 		},
-		
+
 		// backend calls
 		get() {
-			ws.send('scheduler','get',{},true).then(
+			ws.send('scheduler', 'get', {}, true).then(
 				res => {
-					this.schedulers      = res.payload;
+					this.schedulers = res.payload;
 					this.schedulersInput = JSON.parse(JSON.stringify(this.schedulers));
 				},
 				this.$root.genericError
 			);
 		},
-		runPgFunction(pgFunctionId,pgFunctionScheduleId) {
-			ws.send('task','run',{
-				clusterMasterOnly:true,
-				pgFunctionId:pgFunctionId,
-				pgFunctionScheduleId:pgFunctionScheduleId
-			},true).then(
-				() => {},
+		runPgFunction(pgFunctionId, pgFunctionScheduleId) {
+			ws.send('task', 'run', {
+				clusterMasterOnly: true,
+				pgFunctionId: pgFunctionId,
+				pgFunctionScheduleId: pgFunctionScheduleId
+			}, true).then(
+				() => { },
 				this.$root.genericError
 			);
 		},
-		runSystemTask(name,clusterMasterOnly) {
-			ws.send('task','run',{
-				clusterMasterOnly:clusterMasterOnly,
-				taskName:name
-			},true).then(
-				() => {},
+		runSystemTask(name, clusterMasterOnly) {
+			ws.send('task', 'run', {
+				clusterMasterOnly: clusterMasterOnly,
+				taskName: name
+			}, true).then(
+				() => { },
 				this.$root.genericError
 			);
 		},
 		set() {
-			if(!this.hasChanges)
+			if (!this.hasChanges)
 				return;
-			
-			let requests = [];
-			for(let i = 0, j = this.schedulersInput.length; i < j; i++) {
-				let s = this.schedulersInput[i];
-				
-				if(s.taskName === '' || JSON.stringify(s) === JSON.stringify(this.schedulers[i]))
+
+			const requests = [];
+			for (let i = 0, j = this.schedulersInput.length; i < j; i++) {
+				const s = this.schedulersInput[i];
+
+				if (s.taskName === '' || JSON.stringify(s) === JSON.stringify(this.schedulers[i]))
 					continue;
-				
-				requests.push(ws.prepare('task','set',{
-					active:s.active,
-					interval:s.intervalValue,
-					name:s.taskName
+
+				requests.push(ws.prepare('task', 'set', {
+					active: s.active,
+					interval: s.intervalValue,
+					name: s.taskName
 				}));
 			}
-			
-			ws.sendMultiple(requests,true).then(
+
+			ws.sendMultiple(requests, true).then(
 				() => {
 					this.get();
-					
-					ws.send('task','informChanged',{},false).then(
-						() => {},
+
+					ws.send('task', 'informChanged', {}, false).then(
+						() => { },
 						this.$root.genericError
 					);
 				},

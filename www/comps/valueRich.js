@@ -122,7 +122,10 @@ export default {
 		noThousandsSep: { type: Boolean, required: false, default: false },
 		previewLarge: { type: Boolean, required: false, default: false },
 		value: { required: true },
-		wrap: { type: Boolean, required: false, default: false }         // wrap string value
+		valueContent: { type: [null, String], required: false, default: null },
+		valueLength: { type: Number, required: false, default: 0 },
+		valueLengthFract: { type: Number, required: false, default: 0 },
+		wrap: { type: Boolean, required: false, default: false }      // wrap string value
 	},
 	emits: ['clipboard', 'focus', 'trigger', 'triggerMiddle'],
 	watch: {
@@ -206,8 +209,11 @@ export default {
 		},
 		setValue() {
 			if (this.attribute === false) {
-				// non-attributes (scalar/PG functions) currently only support string values
-				this.stringValueFull = this.value;
+				switch (this.valueContent) {
+					case 'integer': this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value, 0, 0); break;
+					case 'numeric': this.stringValueFull = this.getNumberFormatted(this.value, this.valueLength, this.valueLengthFract); break;
+					default: this.stringValueFull = this.value !== null ? this.value : ''; break;
+				}
 			}
 			else {
 				// some attribute content/content use combinations show something other than a regular string
@@ -264,7 +270,7 @@ export default {
 							case 'datetime': this.stringValueFull = this.getUnixFormat(this.value, `${this.settings.dateFormat} H:i`); break;
 							case 'time': this.stringValueFull = this.getUtcTimeStringFromUnix(this.value); break;
 							default:
-								this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value, this.attribute.length, this.attribute.lengthFract);
+								this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value, 0, 0);
 								break;
 						}
 						break;

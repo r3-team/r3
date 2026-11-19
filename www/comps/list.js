@@ -435,6 +435,9 @@ export default {
 										:noThousandsSep="columns[ind].flags.noThousandsSep"
 										:previewLarge="columns[ind].flags.previewLarge"
 										:value="r.values[ind]"
+										:valueContent="columns[ind].value.content"
+										:valueLength="columns[ind].value.length"
+										:valueLengthFract="columns[ind].value.lengthFract"
 										:wrap="columns[ind].flags.wrap"
 									/>
 								</div>
@@ -577,6 +580,9 @@ export default {
 													:noThousandsSep="columns[ind].flags.noThousandsSep"
 													:previewLarge="columns[ind].flags.previewLarge"
 													:value="r.values[ind]"
+													:valueContent="columns[ind].value.content"
+													:valueLength="columns[ind].value.length"
+													:valueLengthFract="columns[ind].value.lengthFract"
 													:wrap="columns[ind].flags.wrap"
 												/>
 											</div>
