@@ -6,12 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"r3/config"
+	"r3/config/config_credential"
 	"r3/db"
 	"r3/log"
 	"r3/schema"
 	"r3/schema/pgIndex"
 	"r3/tools"
-	"r3/tools/cryptAesGcm"
 	"r3/types"
 	"r3/types/constants"
 	"strconv"
@@ -181,9 +181,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				mail_account_id integer,
 				oauth_client_id integer,
 				algorithm text not NULL,
-				secret_enc text NOT NULL,
-				nonce text NOT NULL,
-				salt_kdf text NOT NULL,
+				cipher_text_enc BYTEA NOT NULL,
+				nonce BYTEA NOT NULL,
+				salt_kdf BYTEA NOT NULL,
+				CONSTRAINT credential_db_sync_host_unique UNIQUE (db_sync_host_id),
+				CONSTRAINT credential_ldap_unique         UNIQUE (ldap_id),
+				CONSTRAINT credential_mail_account_unique UNIQUE (mail_account_id),
+				CONSTRAINT credential_oauth_client_unique UNIQUE (oauth_client_id),
 				CONSTRAINT credential_db_sync_host_id_fkey FOREIGN KEY (db_sync_host_id)
 					REFERENCES instance_db_sync.host (id) MATCH SIMPLE
 					ON UPDATE CASCADE
@@ -231,14 +235,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		}
 
 		// migrate account credentials from plain to encrypted secrets
-		type cred struct {
-			IdHost      pgtype.UUID
-			IdLdap      pgtype.Int8
-			IdMail      pgtype.Int8
-			IdOauth     pgtype.Int8
-			CipherPlain string
-		}
-
 		rows, err := tx.Query(ctx, `
 			SELECT id, NULL, NULL, NULL, password      FROM instance_db_sync.host
 			UNION
@@ -253,6 +249,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		}
 		defer rows.Close()
 
+		type cred struct {
+			IdHost      pgtype.UUID
+			IdLdap      pgtype.Int8
+			IdMail      pgtype.Int8
+			IdOauth     pgtype.Int8
+			CipherPlain string
+		}
 		creds := make([]cred, 0)
 		for rows.Next() {
 			var c cred
@@ -264,19 +267,24 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		rows.Close()
 
 		for _, c := range creds {
-			// use empty secret for existing, plain account credentials
+			// secret is empty string during initial migration (new JSON field in config file)
 			// new secret is set via admin panel after migration to this version
-			cipherEnc, saltKdf, nonce, err := cryptAesGcm.EncryptUnknownSecret("", c.CipherPlain)
-			if err != nil {
-				return "", err
-			}
-			if _, err := tx.Exec(ctx, `
-				INSERT INTO instance.credential (
-					db_sync_host_id, ldap_id, mail_account_id, oauth_client_id,
-					algorithm, secret_enc, nonce, salt_kdf
-				) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-			`, c.IdHost, c.IdLdap, c.IdMail, c.IdOauth, "aes_gcm_256", cipherEnc, nonce, saltKdf); err != nil {
-				return "", err
+			if c.IdHost.Valid {
+				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, c.IdHost.Bytes, c.CipherPlain); err != nil {
+					return "", err
+				}
+			} else if c.IdLdap.Valid {
+				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetLdap, c.IdLdap.Int64, c.CipherPlain); err != nil {
+					return "", err
+				}
+			} else if c.IdMail.Valid {
+				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetMailAccount, c.IdMail.Int64, c.CipherPlain); err != nil {
+					return "", err
+				}
+			} else if c.IdOauth.Valid {
+				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetOauthClient, c.IdOauth.Int64, c.CipherPlain); err != nil {
+					return "", err
+				}
 			}
 		}
 		if _, err := tx.Exec(ctx, `

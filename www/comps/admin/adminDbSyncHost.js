@@ -95,9 +95,9 @@ export default {
 							<td>{{ capGen.username }}*</td>
 							<td><input v-model="host.username" :disabled="readonly" /></td>
 						</tr>
-						<tr>
+						<tr v-if="isNew">
 							<td>{{ capGen.password }}*</td>
-							<td><input type="password" v-model="host.password" :disabled="readonly" /></td>
+							<td><input type="password" v-model="password" :disabled="readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.dbName }}*</td>
@@ -119,6 +119,29 @@ export default {
 							<td>{{ capGen.comments }}</td>
 							<td><textarea v-model="host.comment" :disabled="readonly" /></td>
 						</tr>
+						<template v-if="!isNew">
+							<tr>
+								<td colspan="2">
+									<br />
+									<my-label image="lock.png"
+										:caption="capGen.passwordSetNew"
+										:large="true"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div class="row gap centered">
+										<input type="password" v-model="password" :disabled="readonly" />
+										<my-button image="ok.png"
+											@trigger="setPw"
+											:active="password !== ''"
+											:caption="capGen.button.ok"
+										/>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
@@ -202,6 +225,7 @@ export default {
 		return {
 			// inputs
 			host: {},
+			password: '',
 
 			// states
 			isReady: false,
@@ -216,7 +240,7 @@ export default {
 			&& s.host.address !== ''
 			&& s.host.dbName !== ''
 			&& s.host.username !== ''
-			&& s.host.password !== '',
+			&& (s.password !== '' || !s.isNew),
 		jobs: s => {
 			const out = [];
 			for (const k in s.jobIdMap) {
@@ -301,7 +325,17 @@ export default {
 			if (!this.canSave)
 				return;
 
-			ws.send('dbSync', 'setHost', this.host, true).then(
+			const requests = [ws.prepare('dbSync', 'setHost', this.host)];
+			if (this.isNew) {
+				requests.push(ws.prepare('dbSync', 'setHostPw', { id: this.host.id, secretPlain: this.password }));
+			}
+			ws.sendMultiple(requests, true).then(
+				this.reloadAndClose,
+				this.$root.genericError
+			);
+		},
+		setPw() {
+			ws.send('dbSync', 'setHostPw', { id: this.host.id, secretPlain: this.password }, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

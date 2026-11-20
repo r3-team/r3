@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"r3/cache/cache_dbSync"
+	"r3/config/config_credential"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -32,17 +34,25 @@ func HostSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	}
 
 	_, err := tx.Exec(ctx, `
-		INSERT INTO instance_db_sync.host (id, name, comment, db_name,
-			db_type, active, address, port, username, password)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+		INSERT INTO instance_db_sync.host (id, name, comment, db_name, db_type, active, address, port, username)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
 		ON CONFLICT (id)
-		DO UPDATE SET
-			name = $2, comment = $3, db_name = $4, db_type = $5, active = $6,
-			address = $7, port = $8, username = $9, password = $10
-	`, h.Id, h.Name, h.Comment, h.DbName, h.DbType, h.Active,
-		h.Address, h.Port, h.Username, h.Password)
+		DO UPDATE SET name = $2, comment = $3, db_name = $4, db_type = $5,
+			active = $6, address = $7, port = $8, username = $9
+	`, h.Id, h.Name, h.Comment, h.DbName, h.DbType, h.Active, h.Address, h.Port, h.Username)
 
 	return err
+}
+
+func HostSetPw_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+	var req struct {
+		Id          uuid.UUID `json:"id"`
+		SecretPlain string    `json:"secretPlain"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return err
+	}
+	return config_credential.Set_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, req.Id, req.SecretPlain)
 }
 
 func HostsGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {

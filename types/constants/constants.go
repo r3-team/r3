@@ -10,6 +10,12 @@ const (
 	AppVersionTargetClient types.AppVersionTarget = "client"
 	AppVersionTargetSelf   types.AppVersionTarget = "self"
 
+	CredentialsAlgorithmAesGcm   types.CredentialsAlgorithm = "aes_gcm_256"
+	CredentialsTargetDbSyncHost  types.CredentialsTarget    = "db_sync_host"
+	CredentialsTargetLdap        types.CredentialsTarget    = "ldap"
+	CredentialsTargetMailAccount types.CredentialsTarget    = "mail_account"
+	CredentialsTargetOauthClient types.CredentialsTarget    = "oauth_client"
+
 	LoginMfaIntervalSec int64 = 30 // MFA interval window size (in seconds)
 
 	LoginTypeFixed  types.LoginType = "fixed"  // auth via fixed token, used for ICS & fat client
@@ -29,6 +35,9 @@ const (
 )
 
 var (
+	CredentialTargetsIdInt  = []types.CredentialsTarget{CredentialsTargetLdap, CredentialsTargetMailAccount, CredentialsTargetOauthClient}
+	CredentialTargetsIdUuid = []types.CredentialsTarget{CredentialsTargetDbSyncHost}
+
 	QueryJoinConnectors   = []string{"INNER", "LEFT", "RIGHT", "FULL", "CROSS"}
 	QueryFilterConnectors = []string{"AND", "OR"}
 	QueryFilterOperators  = []string{"=", "<>", "<", ">", "<=", ">=", "IS NULL",

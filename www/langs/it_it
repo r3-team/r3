@@ -2833,6 +2833,7 @@
 		"parameters": "Parameters",
 		"password": "Password",
 		"passwordReset": "Password reset",
+		"passwordSetNew": "Set new password",
 		"pdf": "PDF",
 		"pdfs": "PDFs",
 		"pgFunction": "Function (back)",

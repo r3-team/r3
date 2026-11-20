@@ -367,6 +367,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, cluster.DbSyncChanged_tx(ctx, tx, true)
 		case "setHost":
 			return nil, request_dbSync.HostSet_tx(ctx, tx, reqJson)
+		case "setHostPw":
+			return nil, request_dbSync.HostSetPw_tx(ctx, tx, reqJson)
 		case "setJob":
 			return nil, request_dbSync.JobSet_tx(ctx, tx, reqJson)
 		}
