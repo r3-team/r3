@@ -1,14 +1,11 @@
-import MyBuilderOpenForm              from './builderOpenForm.js';
-import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
-import {
-	getDependentModules,
-	getItemTitleColumn
-} from '../shared/builder.js';
+import { getDependentModules, getItemTitleColumn } from '../shared/builder.js';
+import { getTemplateCollectionConsumer } from '../shared/builderTemplate.js';
+import MyBuilderOpenForm from './builderOpenForm.js';
 
 export default {
-	name:'my-builder-collection-input',
-	components:{MyBuilderOpenForm},
-	template:`<table class="builder-collection-input">
+	name: 'my-builder-collection-input',
+	components: { MyBuilderOpenForm },
+	template: `<table class="builder-collection-input">
 		<tbody>
 			<tr>
 				<!-- collection input -->
@@ -103,74 +100,74 @@ export default {
 			</tr>
 		</tbody>
 	</table>`,
-	props:{
-		allowFormOpen:     { type:Boolean, required:true },
-		allowRemove:       { type:Boolean, required:true },
-		consumer:          { required:true },
-		flagsEnable:       { type:Array,   required:true },
-		fixedCollection:   { type:Boolean, required:true },
-		module:            { type:Object,  required:true },
-		readonly:          { type:Boolean, required:true },
-		showOnMobile:      { type:Boolean, required:true }
+	props: {
+		allowFormOpen: { type: Boolean, required: true },
+		allowRemove: { type: Boolean, required: true },
+		consumer: { required: true },
+		flagsEnable: { type: Array, required: true },
+		fixedCollection: { type: Boolean, required: true },
+		module: { type: Object, required: true },
+		readonly: { type: Boolean, required: true },
+		showOnMobile: { type: Boolean, required: true }
 	},
-	emits:['remove','update:consumer'],
-	computed:{
-		consumerInput:{
+	emits: ['remove', 'update:consumer'],
+	computed: {
+		consumerInput: {
 			get() {
 				return this.consumer !== null
 					? JSON.parse(JSON.stringify(this.consumer))
 					: this.getTemplateCollectionConsumer();
 			}
 		},
-		collectionIdInput:{
-			get()  { return this.consumerInput.collectionId },
-			set(v) { this.set('collectionId',v) }
+		collectionIdInput: {
+			get() { return this.consumerInput.collectionId },
+			set(v) { this.set('collectionId', v) }
 		},
-		columnIdInput:{
-			get()  { return this.consumerInput.columnIdDisplay },
-			set(v) { this.set('columnIdDisplay',v) }
+		columnIdInput: {
+			get() { return this.consumerInput.columnIdDisplay },
+			set(v) { this.set('columnIdDisplay', v) }
 		},
-		onMobileInput:{
-			get()  { return this.consumerInput.onMobile },
-			set(v) { this.set('onMobile',v) }
+		onMobileInput: {
+			get() { return this.consumerInput.onMobile },
+			set(v) { this.set('onMobile', v) }
 		},
-		openFormInput:{
-			get()  { return this.consumerInput.openForm },
-			set(v) { this.set('openForm',v) }
+		openFormInput: {
+			get() { return this.consumerInput.openForm },
+			set(v) { this.set('openForm', v) }
 		},
-		
+
 		// simple
-		collection:   (s) => !s.collectionSet ? false : s.collectionIdMap[s.collectionIdInput],
-		collectionSet:(s) => s.consumerInput.collectionId !== null,
-		
+		collection: s => !s.collectionSet ? false : s.collectionIdMap[s.collectionIdInput],
+		collectionSet: s => s.consumerInput.collectionId !== null,
+
 		// stores
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.collectionInput,
-		capGen:         (s) => s.$store.getters.captions.generic
+		collectionIdMap: s => s.$store.getters['schema/collectionIdMap'],
+		capApp: s => s.$store.getters.captions.builder.collectionInput,
+		capGen: s => s.$store.getters.captions.generic
 	},
-	methods:{
+	methods: {
 		// externals
 		getDependentModules,
 		getItemTitleColumn,
 		getTemplateCollectionConsumer,
-		
+
 		// actions
-		set(name,value) {
+		set(name, value) {
 			let v = JSON.parse(JSON.stringify(this.consumerInput));
 			v[name] = value;
-			
-			if(name === 'collectionId') {
-				if(value === '') v = null;
-				else             v.columnIdDisplay = null;
+
+			if (name === 'collectionId') {
+				if (value === '') v = null;
+				else v.columnIdDisplay = null;
 			}
-			this.$emit('update:consumer',v);
+			this.$emit('update:consumer', v);
 		},
-		setFlag(name,state) {
-			let flags = JSON.parse(JSON.stringify(this.consumerInput.flags));
+		setFlag(name, state) {
+			const flags = JSON.parse(JSON.stringify(this.consumerInput.flags));
 			const pos = flags.indexOf(name);
-			if(state  && pos === -1) flags.push(name);
-			if(!state && pos !== -1) flags.splice(pos,1);
-			this.set('flags',flags);
+			if (state && pos === -1) flags.push(name);
+			if (!state && pos !== -1) flags.splice(pos, 1);
+			this.set('flags', flags);
 		}
 	}
 };

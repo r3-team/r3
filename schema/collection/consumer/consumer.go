@@ -77,7 +77,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity types.DbSchemaApp, entityId u
 func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCreate bool, content string, consumers []types.CollectionConsumer) {
 
 	if !slices.Contains(constants.DbAssignedCollectionConsumers, entity) {
-		log.Error(log.ContextTransfer, "cannot store collection consumer", errors.New(fmt.Sprintf("invalid assigned entity '%s'", entity)))
+		log.Error(log.ContextTransfer, "cannot store collection consumer", fmt.Errorf("invalid assigned entity '%s'", entity))
 		return
 	}
 
@@ -97,7 +97,7 @@ func Set_bt(bt *pgx.Batch, entity types.DbSchemaApp, entityId uuid.UUID, onlyCre
 		// fix import < 3.10: add missing flags
 		c = compatible.FixCollectionConsumerFlags(c)
 
-		if entity == "collection" {
+		if entity == constants.DbCollection {
 			bt.Queue(`
 				INSERT INTO app.collection_consumer (id, collection_id, column_id_display, content, flags, on_mobile)
 				VALUES ($1,$2,$3,$4,$5,$6)
