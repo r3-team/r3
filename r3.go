@@ -15,6 +15,7 @@ import (
 	"r3/bruteforce"
 	"r3/cache"
 	"r3/cache/cache_dbSync"
+	"r3/cache/cache_mail"
 	"r3/cluster"
 	"r3/config"
 	"r3/data/data_image"
@@ -583,10 +584,10 @@ func initCaches(ctx context.Context) error {
 	if err := cache.LoadSchema_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize schema cache, %v", err)
 	}
-	if err := cache.LoadMailAccountMap_tx(ctx, tx); err != nil {
+	if err := cache_mail.LoadAccountMap_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize mail account cache, %v", err)
 	}
-	if err := cache.LoadMailTemplateMap_tx(ctx, tx); err != nil {
+	if err := cache_mail.LoadTemplateMap_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize mail template cache, %v", err)
 	}
 	if err := cache.LoadOauthClientMap_tx(ctx, tx); err != nil {

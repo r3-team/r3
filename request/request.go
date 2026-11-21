@@ -536,7 +536,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "reload":
 			return nil, cluster.MailAccountsChanged_tx(ctx, tx, true)
 		case "set":
-			return nil, request_mail.AccountSet_tx(ctx, tx, reqJson)
+			return request_mail.AccountSet_tx(ctx, tx, reqJson)
+		case "setPw":
+			return nil, request_mail.AccountSetPw_tx(ctx, tx, reqJson)
 		case "test":
 			return nil, request_mail.AccountTest_tx(ctx, tx, reqJson)
 		}

@@ -23,8 +23,8 @@ func SetWithIntivation_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 			Meta types.LoginMeta `json:"meta"`
 		} `json:"logins"`
 		LoginTemplateId pgtype.Int8 `json:"loginTemplateId"`
-		MailAccountId   int32       `json:"mailAccountId"`
-		MailTemplateId  int32       `json:"mailTemplateId"`
+		MailAccountId   int64       `json:"mailAccountId"`
+		MailTemplateId  int64       `json:"mailTemplateId"`
 		MfaRequired     pgtype.Bool `json:"mfaRequired"`
 		RoleIds         []uuid.UUID `json:"roleIds"`
 	}

@@ -19,22 +19,21 @@ type Mail struct {
 	Files        int64       `json:"files"`     // number of attachments
 	FilesSize    int64       `json:"filesSize"` // combined size in KB of all attachments
 	Outgoing     bool        `json:"outgoing"`
-	AccountId    pgtype.Int4 `json:"accountId"`   // mail account to send with / got mail from
+	AccountId    pgtype.Int8 `json:"accountId"`   // mail account to send with / got mail from
 	RecordId     pgtype.Int8 `json:"recordId"`    // record to update/get attachment of/from
 	AttributeId  pgtype.UUID `json:"attributeId"` // file attribute to update/get attachment of/from
 }
 type MailAccount struct {
-	Id            int32       `json:"id"`
-	Name          string      `json:"name"`
-	Mode          string      `json:"mode"`          // smtp/imap
-	ConnectMethod string      `json:"connectMethod"` // starttls/tls/plain
-	AuthMethod    string      `json:"authMethod"`    // plain/login/XOAUTH2/none (login is used in O365 legacy SMTP authentication)
-	Username      string      `json:"username"`
-	Password      string      `json:"password"`
-	SendAs        string      `json:"sendAs"`
-	HostName      string      `json:"hostName"`
-	HostPort      int64       `json:"hostPort"`
-	Comment       pgtype.Text `json:"comment"`
+	Id            int64             `json:"id"`
+	Name          string            `json:"name"`
+	Mode          DbMailAccountMode `json:"mode"`          // smtp/imap
+	ConnectMethod string            `json:"connectMethod"` // starttls/tls/plain
+	AuthMethod    string            `json:"authMethod"`    // plain/login/XOAUTH2/none (login is used in O365 legacy SMTP authentication)
+	Username      string            `json:"username"`
+	SendAs        string            `json:"sendAs"`
+	HostName      string            `json:"hostName"`
+	HostPort      int64             `json:"hostPort"`
+	Comment       pgtype.Text       `json:"comment"`
 
 	// authmethod XOAUTH2
 	OauthClientId pgtype.Int4 `json:"oauthClientId"`
@@ -60,7 +59,7 @@ type MailFile struct {
 	Size int64     `json:"size"`
 }
 type MailTemplate struct {
-	Id      int32               `json:"id"`
+	Id      int64               `json:"id"`
 	Content MailTemplateContent `json:"content"`
 	Name    string              `json:"name"`
 	Body    string              `json:"body"`

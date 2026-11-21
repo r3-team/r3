@@ -8,11 +8,14 @@ import (
 	"fmt"
 	"io"
 	"r3/cache"
+	"r3/cache/cache_credential"
+	"r3/cache/cache_mail"
 	"r3/config"
 	"r3/db"
 	"r3/log"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"regexp"
 	"strings"
 	"time"
@@ -23,15 +26,17 @@ import (
 	"github.com/emersion/go-message/mail"
 )
 
-var (
-	accountMode   = "imap"
+const (
 	collectPerRun = uint32(50)
 	imapFolder    = "INBOX"
-	regexCid      = regexp.MustCompile(`<img[^>]*cid\:([^\"]*)`)
+)
+
+var (
+	regexCid = regexp.MustCompile(`<img[^>]*cid\:([^\"]*)`)
 )
 
 func DoAll() error {
-	mailAccounts := cache.GetMailAccountsByMode(accountMode)
+	mailAccounts := cache_mail.GetAccountsByMode(constants.DbMailAccountModeImap)
 	if len(mailAccounts) == 0 {
 		log.Info(log.ContextMail, "cannot start retrieval, no accounts defined")
 		return nil
@@ -50,6 +55,9 @@ func DoAll() error {
 
 func do(ma types.MailAccount) error {
 
+	var pw string
+	var err error
+
 	// get OAuth client token if used
 	usesXoauth2 := ma.OauthClientId.Valid
 	if usesXoauth2 {
@@ -63,7 +71,12 @@ func do(ma types.MailAccount) error {
 		if !c.ClientSecret.Valid || !c.TokenUrl.Valid {
 			return errors.New("missing client secret or token URL in OAUTH client")
 		}
-		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.TokenUrl.String, c.Scopes)
+		pw, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.TokenUrl.String, c.Scopes)
+		if err != nil {
+			return err
+		}
+	} else {
+		pw, err = cache_credential.GetMailAccount(ma.Id, ma.Name)
 		if err != nil {
 			return err
 		}
@@ -71,7 +84,6 @@ func do(ma types.MailAccount) error {
 
 	// start IMAP client
 	var c *client.Client
-	var err error
 	var isStarttls = ma.ConnectMethod == "starttls"
 
 	if isStarttls {
@@ -94,11 +106,11 @@ func do(ma types.MailAccount) error {
 	}
 
 	if usesXoauth2 {
-		if err := c.Authenticate(newXoauth2Client(ma.Username, ma.Password)); err != nil {
+		if err := c.Authenticate(newXoauth2Client(ma.Username, pw)); err != nil {
 			return err
 		}
 	} else {
-		if err := c.Login(ma.Username, ma.Password); err != nil {
+		if err := c.Login(ma.Username, pw); err != nil {
 			return err
 		}
 	}
@@ -171,7 +183,7 @@ func do(ma types.MailAccount) error {
 	return nil
 }
 
-func processMessage(mailAccountId int32, msg *imap.Message, section *imap.BodySectionName) error {
+func processMessage(mailAccountId int64, msg *imap.Message, section *imap.BodySectionName) error {
 
 	if msg == nil {
 		return errors.New("server did not return message")

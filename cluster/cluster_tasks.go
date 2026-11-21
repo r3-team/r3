@@ -6,6 +6,7 @@ import (
 	"r3/bruteforce"
 	"r3/cache"
 	"r3/cache/cache_dbSync"
+	"r3/cache/cache_mail"
 	"r3/config"
 	"r3/db"
 	"r3/log"
@@ -285,7 +286,7 @@ func MailAccountsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) er
 			return err
 		}
 	}
-	return cache.LoadMailAccountMap_tx(ctx, tx)
+	return cache_mail.LoadAccountMap_tx(ctx, tx)
 }
 func MailTemplatesChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
@@ -293,7 +294,7 @@ func MailTemplatesChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) e
 			return err
 		}
 	}
-	return cache.LoadMailTemplateMap_tx(ctx, tx)
+	return cache_mail.LoadTemplateMap_tx(ctx, tx)
 }
 func MasterAssigned(state bool) error {
 	log.Info(log.ContextCluster, fmt.Sprintf("node has changed its master state to '%v'", state))

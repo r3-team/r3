@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"r3/cache"
+	"r3/cache/cache_credential"
+	"r3/cache/cache_mail"
 	"r3/config"
 	"r3/data"
 	"r3/db"
@@ -15,16 +17,15 @@ import (
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/wneessen/go-mail"
 )
 
-var accountMode = "smtp"
-
 func DoAll() error {
-	mailAccounts := cache.GetMailAccountsByMode(accountMode)
+	mailAccounts := cache_mail.GetAccountsByMode(constants.DbMailAccountModeSmtp)
 	if len(mailAccounts) == 0 {
 		log.Info(log.ContextMail, "cannot start sending, no accounts defined")
 		return nil
@@ -46,12 +47,10 @@ func DoAll() error {
 	log.Info(log.ContextMail, fmt.Sprintf("found %d messages to be sent", len(mails)))
 
 	for _, m := range mails {
-
 		if err := do(m); err != nil {
 
 			// unable to send, update attempt counter and date for later attempt
-			log.Error(log.ContextMail, fmt.Sprintf("is unable to send (attempt %d)",
-				m.AttemptCount+1), err)
+			log.Error(log.ContextMail, fmt.Sprintf("is unable to send (attempt %d)", m.AttemptCount+1), err)
 
 			if _, err := db.Pool.Exec(context.Background(), `
 				UPDATE instance.mail_spool
@@ -80,12 +79,13 @@ func do(m types.Mail) error {
 
 	// get mail account to send with
 	var err error
+	var pw string
 	var ma types.MailAccount
 
 	if m.AccountId.Valid {
-		ma, err = cache.GetMailAccount(m.AccountId.Int32, accountMode)
+		ma, err = cache_mail.GetAccount(m.AccountId.Int64, constants.DbMailAccountModeSmtp)
 	} else {
-		ma, err = cache.GetMailAccountAny(accountMode)
+		ma, err = cache_mail.GetAccountAny(constants.DbMailAccountModeSmtp)
 	}
 	if err != nil {
 		return err
@@ -103,7 +103,12 @@ func do(m types.Mail) error {
 		if !c.ClientSecret.Valid || !c.TokenUrl.Valid {
 			return errors.New("missing client secret or token URL in OAUTH client")
 		}
-		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.TokenUrl.String, c.Scopes)
+		pw, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.TokenUrl.String, c.Scopes)
+		if err != nil {
+			return err
+		}
+	} else {
+		pw, err = cache_credential.GetMailAccount(ma.Id, ma.Name)
 		if err != nil {
 			return err
 		}
@@ -183,14 +188,11 @@ func do(m types.Mail) error {
 			fileInfo, err := os.Stat(filePath)
 			if err != nil {
 				if os.IsNotExist(err) {
-					log.Error(log.ContextMail, "could not attach file to message",
-						fmt.Errorf("'%s' does not exist, ignoring it", filePath))
-
+					log.Error(log.ContextMail, "could not attach file to message", fmt.Errorf("'%s' does not exist, ignoring it", filePath))
 					continue
 				}
 				return err
 			}
-
 			fileList = append(fileList, fmt.Sprintf("%s (%dkb)", f.Name, fileInfo.Size()/1024))
 
 			msg.AttachFile(filePath, getAttachedFileWithName(f.Name))
@@ -234,11 +236,11 @@ func do(m types.Mail) error {
 
 	switch ma.AuthMethod {
 	case "login":
-		mailOptions = append(mailOptions, mail.WithSMTPAuth(mail.SMTPAuthLogin), mail.WithUsername(ma.Username), mail.WithPassword(ma.Password))
+		mailOptions = append(mailOptions, mail.WithSMTPAuth(mail.SMTPAuthLogin), mail.WithUsername(ma.Username), mail.WithPassword(pw))
 	case "plain":
-		mailOptions = append(mailOptions, mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(ma.Username), mail.WithPassword(ma.Password))
+		mailOptions = append(mailOptions, mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(ma.Username), mail.WithPassword(pw))
 	case "xoauth2":
-		mailOptions = append(mailOptions, mail.WithSMTPAuth(mail.SMTPAuthXOAUTH2), mail.WithUsername(ma.Username), mail.WithPassword(ma.Password))
+		mailOptions = append(mailOptions, mail.WithSMTPAuth(mail.SMTPAuthXOAUTH2), mail.WithUsername(ma.Username), mail.WithPassword(pw))
 	case "none":
 		// according to docs, if no auth is desired, SMTPAuth should not be set at all
 	default:
@@ -268,8 +270,7 @@ func do(m types.Mail) error {
 		INSERT INTO instance_mail.traffic (from_list, to_list, cc_list,
 			subject, date, files, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)
-	`, m.FromList, m.ToList, m.CcList, m.Subject,
-		tools.GetTimeUnix(), fileList, m.AccountId)
+	`, m.FromList, m.ToList, m.CcList, m.Subject, tools.GetTimeUnix(), fileList, m.AccountId)
 
 	return err
 }
@@ -314,10 +315,8 @@ func getMailsByAccount(ma types.MailAccount) ([]types.Mail, error) {
 
 	for rows.Next() {
 		var m types.Mail
-		m.AccountId = pgtype.Int4{
-			Int32: ma.Id,
-			Valid: true,
-		}
+		m.AccountId = pgtype.Int8{Int64: ma.Id, Valid: true}
+
 		if err := rows.Scan(&m.Id, &m.ToList, &m.CcList, &m.BccList, &m.Subject, &m.Body,
 			&m.AttemptCount, &m.RecordId, &m.AttributeId); err != nil {
 

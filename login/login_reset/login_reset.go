@@ -3,13 +3,14 @@ package login_reset
 import (
 	"context"
 	"fmt"
-	"r3/cache"
+	"r3/cache/cache_mail"
 	"r3/config"
 	"r3/handler"
 	"r3/login/login_meta"
 	"r3/tools"
 	"r3/tools/crypt"
 	"r3/types"
+	"r3/types/constants"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
@@ -39,19 +40,19 @@ func Del_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 	return err
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, mailAccountId, mailTemplateId int32,
+func Set_tx(ctx context.Context, tx pgx.Tx, mailAccountId, mailTemplateId int64,
 	mailTemplateContent types.MailTemplateContent, expireAfterSeconds int64, loginIdsReset []int64) error {
 
 	now := tools.GetTimeUnix()
 	expireAt := now + expireAfterSeconds
 
 	// get mail account & template
-	ma, err := cache.GetMailAccount(mailAccountId, "smtp")
+	ma, err := cache_mail.GetAccount(mailAccountId, constants.DbMailAccountModeSmtp)
 	if err != nil {
 		return err
 	}
 
-	mt, err := cache.GetMailTemplate(mailTemplateId, mailTemplateContent)
+	mt, err := cache_mail.GetTemplate(mailTemplateId, mailTemplateContent)
 	if err != nil {
 		return err
 	}

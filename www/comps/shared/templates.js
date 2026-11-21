@@ -18,8 +18,7 @@ export function getTemplateDbSyncHost() {
 		active: true,
 		address: 'localhost',
 		port: 3306,
-		username: '',
-		password: ''
+		username: ''
 	};
 };
 export function getTemplateDbSyncJob(hostId) {
@@ -117,7 +116,6 @@ export function getTemplateMailAccount() {
 		connectMethod: 'tls',
 		authMethod: 'plain',
 		username: '',
-		password: '',
 		sendAs: '',
 		hostName: '',
 		hostPort: 465,

@@ -3,7 +3,7 @@ package request_mail
 import (
 	"context"
 	"encoding/json"
-	"r3/cache"
+	"r3/cache/cache_mail"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -19,7 +19,7 @@ func TemplateDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) err
 }
 
 func TemplateGet() (any, error) {
-	return cache.GetMailTemplateMap(), nil
+	return cache_mail.GetTemplateMap(), nil
 }
 
 func TemplateSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {

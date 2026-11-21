@@ -88,9 +88,9 @@ export default {
 							<td><input v-model="account.username" /></td>
 							<td></td>
 						</tr>
-						<tr v-if="!isNoAuth && !isOauth">
+						<tr v-if="isNew && isWithPw">
 							<td>{{ capApp.accountPass }}*</td>
-							<td><input v-model="account.password" type="password" /></td>
+							<td><input v-model="password" type="password" /></td>
 							<td></td>
 						</tr>
 						<tr v-if="isOauth">
@@ -114,8 +114,12 @@ export default {
 						</tr>
 						<tr v-if="isSmtp">
 							<td>{{ capApp.accountSendAs }}*</td>
-							<td><input v-model="account.sendAs" /></td>
-							<td><span v-html="capApp.accountSendAsHint" /></td>
+							<td colspan="2">
+								<div class="row gap centered">
+									<input v-model="account.sendAs" />
+									<my-button image="question.png" @trigger="showHelp(capApp.accountSendAsHint)" />
+								</div>
+							</td>
 						</tr>
 						<tr v-if="isSmtp">
 							<td>{{ capApp.accountSmimeSign }}*</td>
@@ -181,6 +185,29 @@ export default {
 							<td>{{ capGen.comments }}</td>
 							<td colspan="2"><textarea v-model="account.comment"></textarea></td>
 						</tr>
+						<template v-if="!isNew && isWithPw">
+							<tr>
+								<td colspan="2">
+									<br />
+									<my-label image="lock.png"
+										:caption="capGen.passwordSetNew"
+										:large="true"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div class="row gap centered">
+										<input type="password" v-model="password" />
+										<my-button image="ok.png"
+											@trigger="setPw"
+											:active="password !== ''"
+											:caption="capGen.button.ok"
+										/>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
@@ -199,8 +226,11 @@ export default {
 	},
 	data() {
 		return {
+			isReady: false,
+
+			// inputs
 			account: {},
-			isReady: false
+			password: ''
 		};
 	},
 	computed: {
@@ -213,7 +243,7 @@ export default {
 			s.account.hostPort !== '' && (
 				s.isNoAuth ||
 				(s.isOauth && s.account.oauthClientId !== null && s.account.username !== '') ||
-				(s.account.password !== '' && s.account.username !== '')
+				(s.account.username !== '' && (s.password !== '' || !s.isNew))
 			) && (
 				!s.isSmtp ||
 				!s.isSmimeSign ||
@@ -230,6 +260,7 @@ export default {
 		isOauth: s => s.account.authMethod === 'xoauth2',
 		isSmimeSign: s => s.account.smimeSign,
 		isSmtp: s => s.account.mode === 'smtp',
+		isWithPw: s => !s.isNoAuth && !s.isOauth,
 
 		// stores
 		capApp: s => s.$store.getters.captions.admin.mails,
@@ -277,6 +308,9 @@ export default {
 			this.account = JSON.parse(JSON.stringify(this.accountOrg));
 			this.isReady = true;
 		},
+		showHelp(msg) {
+			this.$store.commit('dialog', { captionBody: msg, captionTop: this.capGen.information });
+		},
 
 		// backend calls
 		del() {
@@ -292,6 +326,22 @@ export default {
 			if (this.account.smimePathKey === '') this.account.smimePathKey = null;
 
 			ws.send('mailAccount', 'set', this.account, true).then(
+				res => {
+					if (!this.isNew || !this.isWithPw)
+						return this.reloadAndClose();
+
+					// set PW after new account is created, ID is unknown before
+					// close in error case as mail account component must be reloaded if new
+					ws.send('mailAccount', 'setPw', { id: res.payload, secretPlain: this.password }, true).then(
+						() => { },
+						this.$root.genericError
+					).finally(this.reloadAndClose);
+				},
+				this.$root.genericError
+			);
+		},
+		setPw() {
+			ws.send('mailAccount', 'setPw', { id: this.account.id, secretPlain: this.password }, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

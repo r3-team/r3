@@ -32,8 +32,14 @@ var (
 func GetDbSyncHost(id uuid.UUID, logName string) (string, error) {
 	return getByUuid(constants.CredentialsTargetDbSyncHost, id, logName)
 }
+func GetMailAccount(id int64, logName string) (string, error) {
+	return getByInt(constants.CredentialsTargetMailAccount, id, logName)
+}
 func ResetDbSyncHosts() {
 	resetForUuid(constants.CredentialsTargetDbSyncHost)
+}
+func ResetMailAccounts() {
+	resetForInt(constants.CredentialsTargetMailAccount)
 }
 
 // internal

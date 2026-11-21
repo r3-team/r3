@@ -11,6 +11,9 @@ const (
 	DbLoginSessionDeviceBrowser   types.DbSchemaInstanceLoginSessionDevice = "browser"
 	DbLoginSessionDeviceFatClient types.DbSchemaInstanceLoginSessionDevice = "fatClient"
 
+	DbMailAccountModeImap types.DbMailAccountMode = "imap"
+	DbMailAccountModeSmtp types.DbMailAccountMode = "smtp"
+
 	DbSyncDbTypeClickhouse types.DbSyncDbType = "clickhouse"
 	DbSyncDbTypeFirebird   types.DbSyncDbType = "firebird"
 	DbSyncDbTypePgsql      types.DbSyncDbType = "pgsql"

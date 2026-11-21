@@ -12,8 +12,8 @@ import (
 func Reset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	var req struct {
 		ExpireAfterSeconds  int64                     `json:"expireAfterSeconds"`
-		MailAccountId       int32                     `json:"mailAccountId"`
-		MailTemplateId      int32                     `json:"mailTemplateId"`
+		MailAccountId       int64                     `json:"mailAccountId"`
+		MailTemplateId      int64                     `json:"mailTemplateId"`
 		MailTemplateContent types.MailTemplateContent `json:"mailTemplateContent"`
 		LoginIdsReset       []int64                   `json:"loginIdsReset"`
 	}
