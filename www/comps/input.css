@@ -139,7 +139,7 @@
 }
 .input-code-editor-field {
 	flex: 1 1 auto;
-	border-radius: var(--border-input-radius-lower);
+	border-radius: 0px 0px var(--border-input-radius) var(--border-input-radius);
 }
 
 /* input barcode */

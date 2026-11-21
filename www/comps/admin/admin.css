@@ -376,7 +376,7 @@
 	height: 900px;
 	margin: 10px;
 	border: var(--border-input);
-	border-radius: var(--border-input-radius-large);
+	border-radius: calc(var(--border-input-radius) * 2);
 	box-shadow: var(--shadow-input);
 	overflow: hidden;
 	display: flex;

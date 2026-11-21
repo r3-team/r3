@@ -25,7 +25,7 @@
 }
 .form-wrap.isMain > .form {
 	padding-left: 1px;
-	border-radius: 20px 0px 0px 0px;
+	border-radius: calc(var(--border-input-radius-fixed) * 4) 0px 0px 0px;
 	border-left: 1px solid #000;
 }
 

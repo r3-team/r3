@@ -157,9 +157,7 @@
 	--border-input: 1px solid var(--color-border);
 	--border-input-focus: 1px solid transparent;
 	--border-input-radius: 5px;
-	--border-input-radius-lower: 0px 0px var(--border-input-radius)
-		var(--border-input-radius);
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+	--border-input-radius-fixed: 5px;
 	--outline-input-focus: 2px solid var(--color-accent1);
 }
 @-moz-document url-prefix() {
@@ -1664,31 +1662,25 @@ table td.maximum {
 
 .user-border-radius0 {
 	--border-input-radius: 0px;
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
+	--border-input-radius-fixed: 0px;
 }
 .user-border-radius1 {
 	--border-input-radius: 2px;
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
 }
 .user-border-radius2 {
 	--border-input-radius: 3px;
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
 }
 .user-border-radius3 {
 	--border-input-radius: 5px;
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
 }
 .user-border-radius4 {
 	--border-input-radius: 7px;
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
 }
 .user-border-radius5 {
 	--border-input-radius: 9px;
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
 }
 .user-border-radius6 {
 	--border-input-radius: 11px;
-	--border-input-radius-large: calc(var(--border-input-radius) * 2);
 }
 
 .user-spacing1 {
