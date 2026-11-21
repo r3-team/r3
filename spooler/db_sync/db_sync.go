@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"r3/cache/cache_credential"
 	"r3/cache/cache_dbSync"
 	"r3/db"
 	"r3/log"
@@ -58,21 +59,25 @@ func DoAll() error {
 // get DB connection to external host
 func getExtCon(ctx context.Context, host types.DbSyncHost) (*sql.DB, error) {
 
+	pw, err := cache_credential.GetDbSyncHost(host.Id, host.Name)
+	if err != nil {
+		return nil, err
+	}
+
 	// connect to external DB host
-	var err error
 	var dbExt *sql.DB
 
 	switch host.DbType {
 	case constants.DbSyncDbTypeClickhouse:
-		dbExt, err = getDbConClickhouse(host)
+		dbExt, err = getDbConClickhouse(host, pw)
 	case constants.DbSyncDbTypeFirebird:
-		dbExt, err = getDbConFirebird(host)
+		dbExt, err = getDbConFirebird(host, pw)
 	case constants.DbSyncDbTypeMssql:
-		dbExt, err = getDbConMssql(host)
+		dbExt, err = getDbConMssql(host, pw)
 	case constants.DbSyncDbTypeMysql:
-		dbExt, err = getDbConMysql(host)
+		dbExt, err = getDbConMysql(host, pw)
 	case constants.DbSyncDbTypePgsql:
-		dbExt, err = getDbConPgsql(host)
+		dbExt, err = getDbConPgsql(host, pw)
 	default:
 		return nil, fmt.Errorf("unsupport database type '%s'", host.DbType)
 	}

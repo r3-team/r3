@@ -270,19 +270,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			// secret is empty string during initial migration (new JSON field in config file)
 			// new secret is set via admin panel after migration to this version
 			if c.IdHost.Valid {
-				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, c.IdHost.Bytes, c.CipherPlain); err != nil {
+				if err := config_credential.SetUuid_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, c.IdHost.Bytes, c.CipherPlain); err != nil {
 					return "", err
 				}
 			} else if c.IdLdap.Valid {
-				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetLdap, c.IdLdap.Int64, c.CipherPlain); err != nil {
+				if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetLdap, c.IdLdap.Int64, c.CipherPlain); err != nil {
 					return "", err
 				}
 			} else if c.IdMail.Valid {
-				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetMailAccount, c.IdMail.Int64, c.CipherPlain); err != nil {
+				if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetMailAccount, c.IdMail.Int64, c.CipherPlain); err != nil {
 					return "", err
 				}
 			} else if c.IdOauth.Valid {
-				if err := config_credential.Set_tx(ctx, tx, constants.CredentialsTargetOauthClient, c.IdOauth.Int64, c.CipherPlain); err != nil {
+				if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetOauthClient, c.IdOauth.Int64, c.CipherPlain); err != nil {
 					return "", err
 				}
 			}

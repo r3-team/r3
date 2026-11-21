@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"r3/config"
+	"r3/db"
 	"r3/tools/cryptAesGcm"
 	"r3/types"
 	"r3/types/constants"
@@ -13,25 +14,44 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id any) (string, error) {
-
-	switch id.(type) {
-	case int64:
-		if !slices.Contains(constants.CredentialTargetsIdInt, target) {
-			return "", fmt.Errorf("invalid target '%s' for credentials with integer ID", target)
-		}
-	case uuid.UUID:
-		if !slices.Contains(constants.CredentialTargetsIdUuid, target) {
-			return "", fmt.Errorf("invalid target '%s' for credentials with UUID ID", target)
-		}
-	default:
-		return "", fmt.Errorf("invalid ID value type %T", id)
+func GetInt(target types.CredentialsTarget, id int64) (string, error) {
+	if !slices.Contains(constants.CredentialTargetsIdInt, target) {
+		return "", fmt.Errorf("invalid target '%s' for credentials with integer ID", target)
 	}
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTaskShort)
+	defer ctxCanc()
 
+	return get(ctx, target, id)
+}
+func GetUuid(target types.CredentialsTarget, id uuid.UUID) (string, error) {
+	if !slices.Contains(constants.CredentialTargetsIdUuid, target) {
+		return "", fmt.Errorf("invalid target '%s' for credentials with UUID ID", target)
+	}
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTaskShort)
+	defer ctxCanc()
+
+	return get(ctx, target, id)
+}
+
+func SetInt_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id int64, cipherTextPlain string) error {
+	if !slices.Contains(constants.CredentialTargetsIdInt, target) {
+		return fmt.Errorf("invalid target '%s' for credentials with integer ID", target)
+	}
+	return set_tx(ctx, tx, target, id, cipherTextPlain)
+}
+func SetUuid_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id uuid.UUID, cipherTextPlain string) error {
+	if !slices.Contains(constants.CredentialTargetsIdUuid, target) {
+		return fmt.Errorf("invalid target '%s' for credentials with UUID ID", target)
+	}
+	return set_tx(ctx, tx, target, id, cipherTextPlain)
+}
+
+// internal
+func get(ctx context.Context, target types.CredentialsTarget, id any) (string, error) {
 	var cipherTextEnc []byte
 	var nonce []byte
 	var saltKdf []byte
-	if err := tx.QueryRow(ctx, fmt.Sprintf(`
+	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 		SELECT cipher_text_enc, nonce, salt_kdf
 		FROM instance.credential
 		WHERE %s_id = $1
@@ -40,22 +60,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id a
 	}
 	return cryptAesGcm.DecryptWithWeakSecret(config.File.CredentialsSecret, cipherTextEnc, saltKdf, nonce)
 }
-
-func Set_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id any, cipherTextPlain string) error {
-
-	switch id.(type) {
-	case int64:
-		if !slices.Contains(constants.CredentialTargetsIdInt, target) {
-			return fmt.Errorf("invalid target '%s' for credentials with integer ID", target)
-		}
-	case uuid.UUID:
-		if !slices.Contains(constants.CredentialTargetsIdUuid, target) {
-			return fmt.Errorf("invalid target '%s' for credentials with UUID ID", target)
-		}
-	default:
-		return fmt.Errorf("invalid ID value type %T", id)
-	}
-
+func set_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id any, cipherTextPlain string) error {
 	cipherTextEnc, saltKdf, nonce, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsSecret, cipherTextPlain)
 	if err != nil {
 		return err

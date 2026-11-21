@@ -20,7 +20,6 @@ type DbSyncHost struct {
 	Address  string `json:"address"`
 	Port     int    `json:"port"`
 	Username string `json:"username"`
-	Password string `json:"password"`
 }
 
 // a job to LOAD from or SEND to external DB systems

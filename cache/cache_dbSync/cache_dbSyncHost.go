@@ -3,11 +3,8 @@ package cache_dbSync
 import (
 	"context"
 	"errors"
-	"fmt"
-	"r3/config/config_credential"
-	"r3/log"
+	"r3/cache/cache_credential"
 	"r3/types"
-	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -46,6 +43,7 @@ func LoadHosts_tx(ctx context.Context, tx pgx.Tx) error {
 	defer access_mx.Unlock()
 
 	hostIdMap = make(map[uuid.UUID]types.DbSyncHost)
+	cache_credential.ResetDbSyncHosts()
 
 	for rows.Next() {
 		var h types.DbSyncHost
@@ -53,17 +51,6 @@ func LoadHosts_tx(ctx context.Context, tx pgx.Tx) error {
 			return err
 		}
 		hostIdMap[h.Id] = h
-	}
-	rows.Close()
-
-	for id, h := range hostIdMap {
-		h.Password, err = config_credential.Get_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, id)
-		if err != nil {
-			log.Error(log.ContextDbSync, fmt.Sprintf("failed to retrieved credentials for DB sync host '%s'", h.Name), err)
-			delete(hostIdMap, id)
-		} else {
-			hostIdMap[h.Id] = h
-		}
 	}
 	return nil
 }

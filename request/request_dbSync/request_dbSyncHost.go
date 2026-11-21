@@ -52,7 +52,7 @@ func HostSetPw_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return config_credential.Set_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, req.Id, req.SecretPlain)
+	return config_credential.SetUuid_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, req.Id, req.SecretPlain)
 }
 
 func HostsGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {

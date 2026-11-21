@@ -9,7 +9,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-func getDbConMssql(h types.DbSyncHost) (*sql.DB, error) {
+func getDbConMssql(h types.DbSyncHost, pw string) (*sql.DB, error) {
 	q := url.Values{
 		"database": []string{h.DbName},
 	}
@@ -17,7 +17,7 @@ func getDbConMssql(h types.DbSyncHost) (*sql.DB, error) {
 		Host:     fmt.Sprintf("%s:%d", h.Address, h.Port),
 		Scheme:   "sqlserver",
 		RawQuery: q.Encode(),
-		User:     url.UserPassword(h.Username, h.Password),
+		User:     url.UserPassword(h.Username, pw),
 	}
 	return sql.Open("sqlserver", u.String())
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 )
 
-func getDbConPgsql(h types.DbSyncHost) (*sql.DB, error) {
+func getDbConPgsql(h types.DbSyncHost, pw string) (*sql.DB, error) {
 	conf, err := pgx.ParseConfig("")
 	if err != nil {
 		return nil, err
@@ -17,7 +17,7 @@ func getDbConPgsql(h types.DbSyncHost) (*sql.DB, error) {
 	conf.Port = uint16(h.Port)
 	conf.Database = h.DbName
 	conf.User = h.Username
-	conf.Password = h.Password
+	conf.Password = pw
 
 	return stdlib.OpenDB(*conf), nil
 }

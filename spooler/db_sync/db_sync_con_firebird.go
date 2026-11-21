@@ -9,7 +9,7 @@ import (
 	_ "github.com/nakagami/firebirdsql"
 )
 
-func getDbConFirebird(h types.DbSyncHost) (*sql.DB, error) {
+func getDbConFirebird(h types.DbSyncHost, pw string) (*sql.DB, error) {
 	q := url.Values{
 		"charset": []string{"UTF8"},
 	}
@@ -17,7 +17,7 @@ func getDbConFirebird(h types.DbSyncHost) (*sql.DB, error) {
 		Host:     fmt.Sprintf("%s:%d", h.Address, h.Port),
 		Path:     h.DbName,
 		RawQuery: q.Encode(),
-		User:     url.UserPassword(h.Username, h.Password),
+		User:     url.UserPassword(h.Username, pw),
 	}
 	// remove leading slashes '//' from DSN URL
 	return sql.Open("firebirdsql", u.String()[2:])

@@ -19,16 +19,17 @@ var (
 	Pool *pgxpool.Pool
 
 	// default context timeouts
-	CtxDefTimeoutDbSync      = 60 * time.Second  // DB sync operations
-	CtxDefTimeoutDbTask      = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
-	CtxDefTimeoutDocGenerate = 20 * time.Second  // document generations
-	CtxDefTimeoutDocPreview  = 20 * time.Second  // document previews
-	CtxDefTimeoutLogWrite    = 30 * time.Second  // writing to database log
-	CtxDefTimeoutPgFunc      = 240 * time.Second // executing plsql functions, to be replaced by config option
-	CtxDefTimeoutShutdown    = 10 * time.Second  // shutting down system
-	CtxDefTimeoutSysTask     = 30 * time.Second  // executing system tasks
-	CtxDefTimeoutSysStart    = 300 * time.Second // executing system startup tasks
-	CtxDefTimeoutTransfer    = 600 * time.Second // executing module transfers, to be replaced by config option
+	CtxDefTimeoutDbSync       = 60 * time.Second  // DB sync operations
+	CtxDefTimeoutDbTask       = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
+	CtxDefTimeoutDocGenerate  = 20 * time.Second  // document generations
+	CtxDefTimeoutDocPreview   = 20 * time.Second  // document previews
+	CtxDefTimeoutLogWrite     = 30 * time.Second  // writing to database log
+	CtxDefTimeoutPgFunc       = 240 * time.Second // executing plsql functions, to be replaced by config option
+	CtxDefTimeoutShutdown     = 10 * time.Second  // shutting down system
+	CtxDefTimeoutSysTask      = 30 * time.Second  // executing system tasks
+	CtxDefTimeoutSysTaskShort = 5 * time.Second   // executing system tasks that should not take long
+	CtxDefTimeoutSysStart     = 300 * time.Second // executing system startup tasks
+	CtxDefTimeoutTransfer     = 600 * time.Second // executing module transfers, to be replaced by config option
 )
 
 // attempts to open a database connection
