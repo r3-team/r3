@@ -585,6 +585,7 @@
 			"clientIdHint": "OAuth2 istemcisi oluşturulurken sağlayıcı tarafında oluşturulur.",
 			"clientSecret": "İstemci sırrı",
 			"clientSecretHint": "OAuth2 istemcisi oluşturulurken veya oluşturulduktan sonra sağlayıcı tarafında oluşturulur. Gizli olmalı, istemci sertifikaları desteklenmiyor.",
+			"clientSecretSetNew": "Set new client secret",
 			"dateExpiry": "Son kullanma tarihi",
 			"dateExpiryHint": "Son kullanma tarihi yaklaştığında yönetici kişilerine bildirimde bulunmak.",
 			"dialog": {

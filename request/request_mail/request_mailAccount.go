@@ -25,10 +25,10 @@ func AccountGet() (any, error) {
 	return cache_mail.GetAccountMap(), nil
 }
 
-func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int64, error) {
 	var req types.MailAccount
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	var err error
@@ -36,7 +36,7 @@ func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any
 
 	if req.AuthMethod == "xoauth2" {
 		if !req.OauthClientId.Valid {
-			return nil, errors.New("cannot set email account with OAuth authentication but no OAuth client")
+			return 0, errors.New("cannot set email account with OAuth authentication but no OAuth client")
 		}
 	} else {
 		req.OauthClientId.Valid = false

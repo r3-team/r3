@@ -585,6 +585,7 @@
 			"clientIdHint": "在创建 OAuth2 客户端时由提供商生成。",
 			"clientSecret": "客户端密钥",
 			"clientSecretHint": "在创建或之后创建 OAuth2 客户端时提供商生成。必须是秘密，不支持客户端证书。",
+			"clientSecretSetNew": "Set new client secret",
 			"dateExpiry": "过期日期",
 			"dateExpiryHint": "在接近到期日期时通知管理员联系人。",
 			"dialog": {

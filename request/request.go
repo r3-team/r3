@@ -601,7 +601,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "reload":
 			return nil, OauthClientReload_tx(ctx, tx)
 		case "set":
-			return nil, OauthClientSet_tx(ctx, tx, reqJson)
+			return OauthClientSet_tx(ctx, tx, reqJson)
+		case "setSecret":
+			return nil, OauthClientSetSecret_tx(ctx, tx, reqJson)
 		}
 	case "package":
 		switch action {

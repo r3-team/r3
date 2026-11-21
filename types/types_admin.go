@@ -73,13 +73,12 @@ type Ldap struct {
 }
 
 type OauthClient struct {
-	Id           int32       `json:"id"`
-	Name         string      `json:"name"`         // reference name, also shown on login page if authCodePkce
-	Flow         OauthFlow   `json:"flow"`         // clientCreds, authCodePkce
-	ClientId     string      `json:"clientId"`     // client ID, as registered at the identity provider
-	ClientSecret pgtype.Text `json:"clientSecret"` // client secret, as registered at the identity provider
-	DateExpiry   pgtype.Int8 `json:"dateExpiry"`   // for admin notification mails
-	Scopes       []string    `json:"scopes"`
+	Id         int64       `json:"id"`
+	Name       string      `json:"name"`       // reference name, also shown on login page if authCodePkce
+	Flow       OauthFlow   `json:"flow"`       // clientCreds, authCodePkce
+	ClientId   string      `json:"clientId"`   // client ID, as registered at the identity provider
+	DateExpiry pgtype.Int8 `json:"dateExpiry"` // for admin notification mails
+	Scopes     []string    `json:"scopes"`
 
 	// clientCreds
 	TokenUrl pgtype.Text `json:"tokenUrl"`
@@ -102,7 +101,7 @@ type OauthClient struct {
 // public reference for OAUTH client for Open ID Connect authentication
 // must not contain sensitive data such as client secret
 type OauthClientOpenId struct {
-	Id          int32       `json:"id"`
+	Id          int64       `json:"id"`
 	Name        string      `json:"name"`
 	ClientId    string      `json:"clientId"`
 	ProviderUrl pgtype.Text `json:"providerUrl"`

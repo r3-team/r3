@@ -64,14 +64,21 @@ func do(ma types.MailAccount) error {
 		if !config.GetLicenseActive() {
 			return errors.New("no valid license (required for OAuth clients)")
 		}
-		c, err := cache.GetOauthClient(ma.OauthClientId.Int32)
+		c, err := cache.GetOauthClient(ma.OauthClientId.Int64)
 		if err != nil {
 			return err
 		}
-		if !c.ClientSecret.Valid || !c.TokenUrl.Valid {
-			return errors.New("missing client secret or token URL in OAUTH client")
+		clientSecret, err := cache_credential.GetOauthClient(c.Id, c.Name)
+		if err != nil {
+			return err
 		}
-		pw, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.TokenUrl.String, c.Scopes)
+		if !c.TokenUrl.Valid {
+			return errors.New("missing token URL in OAUTH client")
+		}
+		if clientSecret == "" {
+			return errors.New("missing client secret in OAUTH client")
+		}
+		pw, err = tools.GetOAuthToken(c.ClientId, clientSecret, c.TokenUrl.String, c.Scopes)
 		if err != nil {
 			return err
 		}

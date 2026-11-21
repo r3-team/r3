@@ -23,7 +23,7 @@ type LoginAccess struct {
 type LoginAuthRequestOpenId struct {
 	Code          string `json:"code"`
 	CodeVerifier  string `json:"codeVerifier"`
-	OauthClientId int32  `json:"oauthClientId"`
+	OauthClientId int64  `json:"oauthClientId"`
 }
 type LoginAuthRequestTokenFixed struct {
 	LoginId    int64  `json:"loginId"`

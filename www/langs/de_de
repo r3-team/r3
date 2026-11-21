@@ -585,6 +585,7 @@
 			"clientIdHint": "Wird auf der Anbieterseite bei der Erstellung eines OAuth2-Clients erzeugt.",
 			"clientSecret": "Client-Secret",
 			"clientSecretHint": "Wird auf der Anbieterseite bei oder nach der Erstellung eines OAuth2-Clients generiert. Muss ein Geheimnis sein, Client-Zertifikate werden nicht unterstützt.",
+			"clientSecretSetNew": "Neues Client-Secret setzen",
 			"dateExpiry": "Ablaufdatum",
 			"dateExpiryHint": "Um Adminkontakte zu informieren, wenn das Ablaufdatum bevorsteht.",
 			"dialog": {

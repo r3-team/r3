@@ -155,7 +155,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error
 	}
 	// LDAP / OAUTH details are only used during login creation, which happens during LDAP import or OAUTH authentication
 	return login.Set_tx(ctx, tx, req.Id, req.TemplateId, pgtype.Int4{}, pgtype.Text{},
-		pgtype.Int4{}, pgtype.Text{}, pgtype.Text{}, req.Name, req.Pass, req.Admin, req.NoAuth,
+		pgtype.Int8{}, pgtype.Text{}, pgtype.Text{}, req.Name, req.Pass, req.Admin, req.NoAuth,
 		req.Active, req.TokenExpiryHours, req.MfaRequired, req.Meta, req.RoleIds)
 }
 func SetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {

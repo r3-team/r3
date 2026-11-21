@@ -36,7 +36,7 @@ type MailAccount struct {
 	Comment       pgtype.Text       `json:"comment"`
 
 	// authmethod XOAUTH2
-	OauthClientId pgtype.Int4 `json:"oauthClientId"`
+	OauthClientId pgtype.Int8 `json:"oauthClientId"`
 
 	// SMTP signing key/cert, in PEM format, under config->paths->certificates
 	SmimePathCrt pgtype.Text `json:"smimePathCrt"`

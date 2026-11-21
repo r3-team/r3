@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/cache/cache_credential"
 	"r3/config"
 	"r3/db"
 	"r3/log"
@@ -26,7 +27,7 @@ import (
 
 // performs authentication for login by using Open ID Connect
 // if login is not known but authentication succeeds, login is created
-func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string) (types.LoginAuthResult, error) {
+func OpenId(ctx context.Context, oauthClientId int64, code, codeVerifier string) (types.LoginAuthResult, error) {
 
 	c, err := cache.GetOauthClient(oauthClientId)
 	if err != nil {
@@ -41,6 +42,11 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 		return types.LoginAuthResult{}, errors.New("missing provider or redirect URL for OAUTH client")
 	}
 
+	clientSecret, err := cache_credential.GetOauthClient(c.Id, c.Name)
+	if err != nil {
+		return types.LoginAuthResult{}, err
+	}
+
 	httpClient, err := config.GetHttpClient(false, 10)
 	if err != nil {
 		return types.LoginAuthResult{}, err
@@ -53,15 +59,14 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 		return types.LoginAuthResult{}, err
 	}
 
-	// force at least open ID connect scope
+	// exchange authentication code for tokens
 	if !slices.Contains(c.Scopes, oidc.ScopeOpenID) {
+		// force at least open ID connect scope
 		c.Scopes = append(c.Scopes, oidc.ScopeOpenID)
 	}
-
-	// exchange authentication code for tokens
 	oauth2Config := oauth2.Config{
 		ClientID:     c.ClientId,
-		ClientSecret: c.ClientSecret.String,
+		ClientSecret: clientSecret,
 		RedirectURL:  c.RedirectUrl.String,
 		Endpoint:     provider.Endpoint(),
 		Scopes:       c.Scopes,
@@ -246,7 +251,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 	if newLogin || adminChanged || metaChanged || nameChanged || rolesChanged || !activeEx {
 
 		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{},
-			pgtype.Int4{Int32: c.Id, Valid: true}, pgtype.Text{String: idToken.Issuer, Valid: true},
+			pgtype.Int8{Int64: c.Id, Valid: true}, pgtype.Text{String: idToken.Issuer, Valid: true},
 			pgtype.Text{String: idToken.Subject, Valid: true}, l.Name, "", l.Admin, false, true,
 			tokenExpiryHours, pgtype.Bool{}, metaEx, roleIdsEx)
 
@@ -258,7 +263,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code, codeVerifier string)
 		log.Info(log.ContextOauth, fmt.Sprintf("migrating user '%s' to client '%s'", l.Name, c.Name))
 
 		if err := login.MigrateProviderOpenId_tx(
-			ctx, tx, l.Id, pgtype.Int4{Int32: c.Id, Valid: true},
+			ctx, tx, l.Id, pgtype.Int8{Int64: c.Id, Valid: true},
 			pgtype.Text{String: idToken.Issuer, Valid: true},
 			pgtype.Text{String: idToken.Subject, Valid: true}); err != nil {
 

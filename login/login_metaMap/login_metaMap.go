@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32) (types.LoginMeta, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int64) (types.LoginMeta, error) {
 
 	var m types.LoginMeta
 	err := tx.QueryRow(ctx, fmt.Sprintf(`
@@ -36,7 +36,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance
 	return m, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32, m types.LoginMeta) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int64, m types.LoginMeta) error {
 
 	var exists bool
 	if err := tx.QueryRow(ctx, fmt.Sprintf(`

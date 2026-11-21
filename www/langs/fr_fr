@@ -585,6 +585,7 @@
 			"clientIdHint": "Généré côté fournisseur lors de la création d'un client OAuth2.",
 			"clientSecret": "Client secret",
 			"clientSecretHint": "Généré côté fournisseur lors de la création d'un client OAuth2 ou ultérieurement. Doit être un secret, les certificats clients ne sont pas pris en charge.",
+			"clientSecretSetNew": "Set new client secret",
 			"dateExpiry": "Date d'expiration",
 			"dateExpiryHint": "Pour avertir les contacts administratifs à l'approche de la date d'expiration.",
 			"dialog": {

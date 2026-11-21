@@ -476,7 +476,6 @@ hr.grow {
 	position: relative;
 }
 .contentBox .top {
-	padding: 0px var(--spacing);
 	line-height: 30px;
 	background-color: var(--color-bg);
 	flex: 0 0 auto;
@@ -1404,7 +1403,6 @@ table td.maximum {
 	height: 300px;
 	padding: 5px 1%;
 	font-family: inherit;
-	border: none;
 	color: var(--color-font);
 	background-color: var(--color-input);
 	border: var(--border-input);

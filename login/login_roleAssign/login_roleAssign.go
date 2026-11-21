@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32) ([]types.LoginRoleAssign, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int64) ([]types.LoginRoleAssign, error) {
 
 	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT role_id, search_string
@@ -32,7 +32,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance
 	return roles, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32, assigns []types.LoginRoleAssign) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int64, assigns []types.LoginRoleAssign) error {
 
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM instance.login_role_assign

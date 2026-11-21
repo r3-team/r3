@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"r3/cache/cache_credential"
 	"r3/login/login_metaMap"
 	"r3/login/login_roleAssign"
 	"r3/types"
@@ -14,11 +15,11 @@ import (
 
 var (
 	oauthClient_mx         sync.RWMutex
-	oauthClientIdMap       map[int32]types.OauthClient       // full map of all Oauth clients
-	oauthClientIdMapOpenId map[int32]types.OauthClientOpenId // subset of Oauth clients for Open ID Connect (PKCE only, does not include secrets)
+	oauthClientIdMap       map[int64]types.OauthClient       // full map of all Oauth clients
+	oauthClientIdMapOpenId map[int64]types.OauthClientOpenId // subset of Oauth clients for Open ID Connect (PKCE only, does not include secrets)
 )
 
-func GetOauthClient(id int32) (types.OauthClient, error) {
+func GetOauthClient(id int64) (types.OauthClient, error) {
 	oauthClient_mx.RLock()
 	defer oauthClient_mx.RUnlock()
 
@@ -28,13 +29,13 @@ func GetOauthClient(id int32) (types.OauthClient, error) {
 	}
 	return c, nil
 }
-func GetOauthClientMap() map[int32]types.OauthClient {
+func GetOauthClientMap() map[int64]types.OauthClient {
 	oauthClient_mx.RLock()
 	defer oauthClient_mx.RUnlock()
 
 	return oauthClientIdMap
 }
-func GetOauthClientMapOpenId() map[int32]types.OauthClientOpenId {
+func GetOauthClientMapOpenId() map[int64]types.OauthClientOpenId {
 	oauthClient_mx.RLock()
 	defer oauthClient_mx.RUnlock()
 
@@ -44,8 +45,8 @@ func GetOauthClientMapOpenId() map[int32]types.OauthClientOpenId {
 func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, login_template_id, name, flow, client_id, client_secret, date_expiry,
-			scopes, provider_url, redirect_url, token_url, claim_admin, claim_admin_value,
+		SELECT id, login_template_id, name, flow, client_id, date_expiry, scopes,
+			provider_url, redirect_url, token_url, claim_admin, claim_admin_value,
 			claim_roles, claim_username, migrate_by_name
 		FROM instance.oauth_client
 	`)
@@ -56,14 +57,17 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	oauthClient_mx.Lock()
 	defer oauthClient_mx.Unlock()
-	oauthClientIdMap = make(map[int32]types.OauthClient)
-	oauthClientIdMapOpenId = make(map[int32]types.OauthClientOpenId)
+
+	oauthClientIdMap = make(map[int64]types.OauthClient)
+	oauthClientIdMapOpenId = make(map[int64]types.OauthClientOpenId)
+	cache_credential.ResetOAuthClients()
 
 	for rows.Next() {
 		var c types.OauthClient
-		if err := rows.Scan(&c.Id, &c.LoginTemplateId, &c.Name, &c.Flow, &c.ClientId, &c.ClientSecret,
-			&c.DateExpiry, &c.Scopes, &c.ProviderUrl, &c.RedirectUrl, &c.TokenUrl, &c.ClaimAdmin,
-			&c.ClaimAdminValue, &c.ClaimRoles, &c.ClaimUsername, &c.MigrateByName); err != nil {
+		if err := rows.Scan(&c.Id, &c.LoginTemplateId, &c.Name, &c.Flow, &c.ClientId,
+			&c.DateExpiry, &c.Scopes, &c.ProviderUrl, &c.RedirectUrl, &c.TokenUrl,
+			&c.ClaimAdmin, &c.ClaimAdminValue, &c.ClaimRoles, &c.ClaimUsername,
+			&c.MigrateByName); err != nil {
 
 			return err
 		}

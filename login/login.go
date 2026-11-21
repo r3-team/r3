@@ -184,7 +184,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString, orderBy string
 // set login with meta data
 // returns created login ID if new login
 func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4, ldapKey pgtype.Text,
-	oauthClientId pgtype.Int4, oauthIss pgtype.Text, oauthSub pgtype.Text, name string, pass string, admin bool, noAuth bool,
+	oauthClientId pgtype.Int8, oauthIss pgtype.Text, oauthSub pgtype.Text, name string, pass string, admin bool, noAuth bool,
 	active bool, tokenExpiryHours pgtype.Int4, mfaRequired pgtype.Bool, meta types.LoginMeta, roleIds []uuid.UUID) (int64, error) {
 
 	if name == "" {
@@ -437,7 +437,7 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{},
+	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int8{},
 		pgtype.Text{}, pgtype.Text{}, username, password, true, false, true, pgtype.Int4{},
 		pgtype.Bool{}, types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
 		[]uuid.UUID{}); err != nil {
@@ -507,7 +507,7 @@ func MigrateProviderLdap_tx(ctx context.Context, tx pgx.Tx, id int64, ldapId pgt
 
 	return err
 }
-func MigrateProviderOpenId_tx(ctx context.Context, tx pgx.Tx, id int64, oauthClientId pgtype.Int4, oauthIss, oauthSub pgtype.Text) error {
+func MigrateProviderOpenId_tx(ctx context.Context, tx pgx.Tx, id int64, oauthClientId pgtype.Int8, oauthIss, oauthSub pgtype.Text) error {
 	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
 		SET	oauth_client_id = $1, oauth_iss = $2, oauth_sub = $3, ldap_id = NULL, ldap_key = NULL

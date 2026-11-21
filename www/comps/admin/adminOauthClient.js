@@ -95,11 +95,11 @@ export default {
 								</div>
 							</td>
 						</tr>
-						<tr>
+						<tr v-if="isNew">
 							<td>{{ capApp.clientSecret }}*</td>
 							<td>
 								<div class="row gap centered">
-									<input v-model="inputs.clientSecret" :disabled="readonly" type="password" />
+									<input v-model="secret" :disabled="readonly" type="password" />
 									<my-button image="question.png" @trigger="showHelp(capApp.clientSecretHint)" />
 								</div>
 							</td>
@@ -237,6 +237,29 @@ export default {
 								</div>
 							</td>
 						</tr>
+						<template v-if="!isNew">
+							<tr>
+								<td colspan="2">
+									<br />
+									<my-label image="lock.png"
+										:caption="capApp.clientSecretSetNew"
+										:large="true"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div class="row gap centered">
+										<input type="password" v-model="secret" :disabled="readonly" />
+										<my-button image="ok.png"
+											@trigger="setSecret"
+											:active="secret !== ''"
+											:caption="capGen.button.ok"
+										/>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
@@ -278,10 +301,13 @@ export default {
 	},
 	data() {
 		return {
-			inputs: {},
 			ready: false,
-			scopeLine: '',
 			tabTarget: 'general',
+
+			// inputs
+			inputs: {},
+			scopeLine: '',
+			secret: ''
 		};
 	},
 	computed: {
@@ -291,7 +317,7 @@ export default {
 			s.isChanged &&
 			s.inputs.name !== '' &&
 			s.inputs.clientId !== '' &&
-			s.inputs.clientSecret !== '' &&
+			(s.secret !== '' || !s.isNew) &&
 			s.inputs.scopes.length !== 0 &&
 			(!s.isFlowAuthCodePkce || s.inputs.claimUsername !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.providerUrl !== '') &&
@@ -302,7 +328,6 @@ export default {
 			name: '',
 			flow: 'authCodePkce',
 			clientId: '',
-			clientSecret: '',
 			dateExpiry: s.getUnixNowDate(),
 			scopes: [],
 			loginTemplateId: null,
@@ -406,6 +431,22 @@ export default {
 			if (this.inputs.tokenUrl === '') this.inputs.tokenUrl = null;
 
 			ws.send('oauthClient', 'set', this.inputs, true).then(
+				res => {
+					if (!this.isNew)
+						return this.reloadAndClose();
+
+					// set secret after new oauth client is created, ID is unknown before
+					// close in error case as component must be reloaded if new
+					ws.send('oauthClient', 'setSecret', { id: res.payload, secretPlain: this.secret }, true).then(
+						() => { },
+						this.$root.genericError
+					).finally(this.reloadAndClose);
+				},
+				this.$root.genericError
+			);
+		},
+		setSecret() {
+			ws.send('oauthClient', 'setSecret', { id: this.inputs.id, secretPlain: this.secret }, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

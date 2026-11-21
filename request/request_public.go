@@ -40,7 +40,7 @@ func PublicGet() (any, error) {
 		LoginBackground        uint64                            `json:"loginBackground"`
 		Mirror                 bool                              `json:"mirror"`
 		ModuleIdMapMeta        map[uuid.UUID]types.ModuleMeta    `json:"moduleIdMapMeta"`
-		OauthClientIdMapOpenId map[int32]types.OauthClientOpenId `json:"oauthClientIdMapOpenId"`
+		OauthClientIdMapOpenId map[int64]types.OauthClientOpenId `json:"oauthClientIdMapOpenId"`
 		PresetIdMapRecordId    map[uuid.UUID]int64               `json:"presetIdMapRecordId"`
 		ProductionMode         uint64                            `json:"productionMode"`
 		PwaDomainMap           map[string]uuid.UUID              `json:"pwaDomainMap"`

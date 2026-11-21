@@ -585,6 +585,7 @@
 			"clientIdHint": "تم إنشاؤه من جانب الموفر عند إنشاء عميل OAuth2.",
 			"clientSecret": "سر العميل",
 			"clientSecretHint": "يتم إنشاؤه من جانب الموفر عند أو بعد إنشاء عميل OAuth2. ",
+			"clientSecretSetNew": "Set new client secret",
 			"dateExpiry": "تاريخ انتهاء الصلاحية",
 			"dateExpiryHint": "لإعلام جهات الاتصال الإدارية عند اقتراب تاريخ انتهاء الصلاحية.",
 			"dialog": {
