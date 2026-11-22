@@ -9,6 +9,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/types"
+	"r3/types/constants"
 	"syscall"
 
 	"github.com/gofrs/uuid/v5"
@@ -88,10 +89,10 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 	}
 
 	switch e.Content {
-	case types.ClusterEventContentClientEventsChanged:
+	case constants.ClusterEventContentClientEventsChanged:
 		err = cluster.ClientEventsChanged_tx(ctx, tx, false, e.Target.Address, e.Target.LoginId)
 
-	case types.ClusterEventContentCollectionUpdated:
+	case constants.ClusterEventContentCollectionUpdated:
 		var p types.ClusterEventCollectionUpdated
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
@@ -99,17 +100,17 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 		*collectionUpdates = append(*collectionUpdates, p)
 		err = nil
 
-	case types.ClusterEventContentConfigChanged:
+	case constants.ClusterEventContentConfigChanged:
 		var switchToMaintenance bool
 		if err := json.Unmarshal(jsonPayload, &switchToMaintenance); err != nil {
 			return err
 		}
 		err = cluster.ConfigChanged_tx(ctx, tx, false, true, switchToMaintenance)
 
-	case types.ClusterEventContentDbSyncChanged:
+	case constants.ClusterEventContentDbSyncChanged:
 		err = cluster.DbSyncChanged_tx(ctx, tx, false)
 
-	case types.ClusterEventContentFileRequested:
+	case constants.ClusterEventContentFileRequested:
 		var p types.ClusterEventFileRequested
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
@@ -117,7 +118,7 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 		err = cluster.FileRequested_tx(ctx, tx, false, e.Target.Address, e.Target.LoginId,
 			p.AttributeId, p.FileId, p.FileHash, p.FileName, p.ChooseApp)
 
-	case types.ClusterEventContentFilesCopied:
+	case constants.ClusterEventContentFilesCopied:
 		var p types.ClusterEventFilesCopied
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
@@ -125,7 +126,7 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 		err = cluster.FilesCopied_tx(ctx, tx, false, e.Target.Address,
 			e.Target.LoginId, p.AttributeId, p.FileIds, p.RecordId)
 
-	case types.ClusterEventContentJsFunctionCalled:
+	case constants.ClusterEventContentJsFunctionCalled:
 		var p types.ClusterEventJsFunctionCalled
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
@@ -133,52 +134,55 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 		err = cluster.JsFunctionCalled_tx(ctx, tx, false, e.Target.Address,
 			e.Target.LoginId, p.ModuleId, p.JsFunctionId, p.Arguments)
 
-	case types.ClusterEventContentKeystrokesRequested:
+	case constants.ClusterEventContentKeystrokesRequested:
 		var keystrokes string
 		if err := json.Unmarshal(jsonPayload, &keystrokes); err != nil {
 			return err
 		}
 		err = cluster.KeystrokesRequested_tx(ctx, tx, false, e.Target.Address, e.Target.LoginId, keystrokes)
 
-	case types.ClusterEventContentLoginDisabled:
+	case constants.ClusterEventContentLdapsChanged:
+		err = cluster.LdapsChanged_tx(ctx, tx, false)
+
+	case constants.ClusterEventContentLoginDisabled:
 		err = cluster.LoginDisabled_tx(ctx, tx, false, e.Target.LoginId)
 
-	case types.ClusterEventContentLoginReauthorized:
+	case constants.ClusterEventContentLoginReauthorized:
 		err = cluster.LoginReauthorized_tx(ctx, tx, false, e.Target.LoginId)
 
-	case types.ClusterEventContentLoginReauthorizedAll:
+	case constants.ClusterEventContentLoginReauthorizedAll:
 		err = cluster.LoginReauthorizedAll_tx(ctx, tx, false)
 
-	case types.ClusterEventContentMailAccountsChanged:
+	case constants.ClusterEventContentMailAccountsChanged:
 		err = cluster.MailAccountsChanged_tx(ctx, tx, false)
 
-	case types.ClusterEventContentMailTemplatesChanged:
+	case constants.ClusterEventContentMailTemplatesChanged:
 		err = cluster.MailTemplatesChanged_tx(ctx, tx, false)
 
-	case types.ClusterEventContentMasterAssigned:
+	case constants.ClusterEventContentMasterAssigned:
 		var p types.ClusterEventMasterAssigned
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err
 		}
 		err = cluster.MasterAssigned(p.State)
 
-	case types.ClusterEventContentReposChanged:
+	case constants.ClusterEventContentReposChanged:
 		err = cluster.ReposChanged(ctx, tx, false)
 
-	case types.ClusterEventContentSchemaChanged:
+	case constants.ClusterEventContentSchemaChanged:
 		var moduleIds []uuid.UUID
 		if err := json.Unmarshal(jsonPayload, &moduleIds); err != nil {
 			return err
 		}
 		err = cluster.SchemaChanged_tx(ctx, tx, false, moduleIds)
 
-	case types.ClusterEventContentShutdownTriggered:
+	case constants.ClusterEventContentShutdownTriggered:
 		OsExit <- syscall.SIGTERM
 
-	case types.ClusterEventContentTasksChanged:
+	case constants.ClusterEventContentTasksChanged:
 		err = cluster.TasksChanged_tx(ctx, tx, false)
 
-	case types.ClusterEventContentTaskTriggered:
+	case constants.ClusterEventContentTaskTriggered:
 		var p types.ClusterEventTaskTriggered
 		if err := json.Unmarshal(jsonPayload, &p); err != nil {
 			return err

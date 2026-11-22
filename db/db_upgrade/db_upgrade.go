@@ -230,6 +230,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_open_doc_column_id_fkey ON app.open_doc USING btree (column_id ASC NULLS LAST);
+
+			-- cluster events
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'ldapsChanged';
 		`); err != nil {
 			return "", err
 		}

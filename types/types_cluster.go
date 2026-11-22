@@ -6,31 +6,6 @@ import (
 
 type ClusterEventContent string
 
-const ClusterEventContentClientEventsChanged ClusterEventContent = "clientEventsChanged"
-const ClusterEventContentCollectionUpdated ClusterEventContent = "collectionUpdated"
-const ClusterEventContentConfigChanged ClusterEventContent = "configChanged"
-const ClusterEventContentDbSyncChanged ClusterEventContent = "dbSyncChanged"
-const ClusterEventContentFileRequested ClusterEventContent = "fileRequested"
-const ClusterEventContentFilesCopied ClusterEventContent = "filesCopied"
-const ClusterEventContentJsFunctionCalled ClusterEventContent = "jsFunctionCalled"
-const ClusterEventContentKeystrokesRequested ClusterEventContent = "keystrokesRequested"
-const ClusterEventContentKick ClusterEventContent = "kick"
-const ClusterEventContentKickNonAdmin ClusterEventContent = "kickNonAdmin"
-const ClusterEventContentLoginDisabled ClusterEventContent = "loginDisabled"
-const ClusterEventContentLoginReauthorized ClusterEventContent = "loginReauthorized"
-const ClusterEventContentLoginReauthorizedAll ClusterEventContent = "loginReauthorizedAll"
-const ClusterEventContentMailAccountsChanged ClusterEventContent = "mailAccountsChanged"
-const ClusterEventContentMailTemplatesChanged ClusterEventContent = "mailTemplatesChanged"
-const ClusterEventContentMasterAssigned ClusterEventContent = "masterAssigned"
-const ClusterEventContentRenew ClusterEventContent = "renew"
-const ClusterEventContentReposChanged ClusterEventContent = "reposChanged"
-const ClusterEventContentSchemaChanged ClusterEventContent = "schemaChanged"
-const ClusterEventContentSchemaLoaded ClusterEventContent = "schemaLoaded"
-const ClusterEventContentSchemaLoading ClusterEventContent = "schemaLoading"
-const ClusterEventContentShutdownTriggered ClusterEventContent = "shutdownTriggered"
-const ClusterEventContentTasksChanged ClusterEventContent = "tasksChanged"
-const ClusterEventContentTaskTriggered ClusterEventContent = "taskTriggered"
-
 // cluster node
 type ClusterNode struct {
 	ClusterMaster bool      `json:"clusterMaster"`

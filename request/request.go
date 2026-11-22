@@ -338,7 +338,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "delNode":
 			return nil, ClusterNodeDel_tx(ctx, tx, reqJson)
 		case "getNodes":
-			return ClusterNodesGet_tx(ctx, tx)
+			return cluster.GetNodes_tx(ctx, tx)
 		case "setNode":
 			return nil, ClusterNodeSet_tx(ctx, tx, reqJson)
 		case "shutdownNode":
@@ -442,7 +442,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return cache.GetLdapIdMap(), nil
 		case "reload":
-			return nil, cache.LoadLdapMap_tx(ctx, tx)
+			return nil, cluster.LdapsChanged_tx(ctx, tx, true)
 		case "set":
 			return LdapSet_tx(ctx, tx, reqJson)
 		case "setBindUserPw":

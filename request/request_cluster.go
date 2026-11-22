@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"r3/cluster"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -19,10 +20,6 @@ func ClusterNodeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 		return err
 	}
 	return cluster.DelNode_tx(ctx, tx, req.Id)
-}
-
-func ClusterNodesGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
-	return cluster.GetNodes_tx(ctx, tx)
 }
 
 func ClusterNodeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
@@ -46,5 +43,5 @@ func ClusterNodeShutdown_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMess
 		return err
 	}
 	return cluster.CreateEventForNodes_tx(ctx, tx, []uuid.UUID{req.Id},
-		types.ClusterEventContentShutdownTriggered, "{}", types.ClusterEventTarget{})
+		constants.ClusterEventContentShutdownTriggered, "{}", types.ClusterEventTarget{})
 }

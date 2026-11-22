@@ -181,29 +181,29 @@ func (hub *hubType) start() {
 			kickNonAdmin := false
 
 			switch event.Content {
-			case types.ClusterEventContentClientEventsChanged:
+			case constants.ClusterEventContentClientEventsChanged:
 				jsonMsg, err = prepareUnrequested("clientEventsChanged", nil)
-			case types.ClusterEventContentCollectionUpdated:
+			case constants.ClusterEventContentCollectionUpdated:
 				jsonMsg, err = prepareUnrequested("collectionUpdated", event.Payload)
-			case types.ClusterEventContentConfigChanged:
+			case constants.ClusterEventContentConfigChanged:
 				jsonMsg, err = prepareUnrequested("configChanged", nil)
-			case types.ClusterEventContentFilesCopied:
+			case constants.ClusterEventContentFilesCopied:
 				jsonMsg, err = prepareUnrequested("filesCopied", event.Payload)
-			case types.ClusterEventContentFileRequested:
+			case constants.ClusterEventContentFileRequested:
 				jsonMsg, err = prepareUnrequested("fileRequested", event.Payload)
-			case types.ClusterEventContentJsFunctionCalled:
+			case constants.ClusterEventContentJsFunctionCalled:
 				jsonMsg, err = prepareUnrequested("jsFunctionCalled", event.Payload)
 				singleRecipient = true
-			case types.ClusterEventContentKeystrokesRequested:
+			case constants.ClusterEventContentKeystrokesRequested:
 				jsonMsg, err = prepareUnrequested("keystrokesRequested", event.Payload)
 				singleRecipient = true
-			case types.ClusterEventContentKick:
+			case constants.ClusterEventContentKick:
 				kick = true
-			case types.ClusterEventContentKickNonAdmin:
+			case constants.ClusterEventContentKickNonAdmin:
 				kickNonAdmin = true
-			case types.ClusterEventContentRenew:
+			case constants.ClusterEventContentRenew:
 				jsonMsg, err = prepareUnrequested("reauthorized", nil)
-			case types.ClusterEventContentSchemaLoaded:
+			case constants.ClusterEventContentSchemaLoaded:
 				data := struct {
 					ModuleIdMapData     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapData"`
 					PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
@@ -214,7 +214,7 @@ func (hub *hubType) start() {
 					CaptionMapCustom:    cache.GetCaptionMapCustom(),
 				}
 				jsonMsg, err = prepareUnrequested("schemaLoaded", data)
-			case types.ClusterEventContentSchemaLoading:
+			case constants.ClusterEventContentSchemaLoading:
 				jsonMsg, err = prepareUnrequested("schemaLoading", nil)
 			}
 

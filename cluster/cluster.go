@@ -108,10 +108,7 @@ func StopNode(ctx context.Context) error {
 	return err
 }
 func DelNode_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(ctx, `
-		DELETE FROM instance_cluster.node
-		WHERE id = $1
-	`, id)
+	_, err := tx.Exec(ctx, `DELETE FROM instance_cluster.node WHERE id = $1`, id)
 	return err
 }
 func GetNodes_tx(ctx context.Context, tx pgx.Tx) ([]types.ClusterNode, error) {

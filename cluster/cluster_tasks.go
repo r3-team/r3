@@ -61,12 +61,12 @@ func ClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, ad
 	target := types.ClusterEventTarget{Address: address, Device: constants.WebsocketClientDeviceFatClient, LoginId: loginId}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentClientEventsChanged, nil, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentClientEventsChanged, nil, target); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterEvent{
-		Content: types.ClusterEventContentClientEventsChanged,
+		Content: constants.ClusterEventContentClientEventsChanged,
 		Payload: nil,
 		Target:  target,
 	}
@@ -87,7 +87,7 @@ func CollectionsUpdated(updates []types.ClusterEventCollectionUpdated) {
 			collectionIdMapGlobal[upd.CollectionId] = true
 
 			WebsocketClientEvents <- types.ClusterEvent{
-				Content: types.ClusterEventContentCollectionUpdated,
+				Content: constants.ClusterEventContentCollectionUpdated,
 				Payload: upd.CollectionId,
 				Target:  types.ClusterEventTarget{Device: constants.WebsocketClientDeviceBrowser},
 			}
@@ -115,7 +115,7 @@ func CollectionsUpdated(updates []types.ClusterEventCollectionUpdated) {
 				collectionIdMapLogins[upd.CollectionId][loginId] = true
 
 				WebsocketClientEvents <- types.ClusterEvent{
-					Content: types.ClusterEventContentCollectionUpdated,
+					Content: constants.ClusterEventContentCollectionUpdated,
 					Payload: upd.CollectionId,
 					Target:  types.ClusterEventTarget{Device: constants.WebsocketClientDeviceBrowser, LoginId: loginId},
 				}
@@ -125,7 +125,7 @@ func CollectionsUpdated(updates []types.ClusterEventCollectionUpdated) {
 }
 func ConfigChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loadConfigFromDb bool, productionModeChange bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentConfigChanged, productionModeChange, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentConfigChanged, productionModeChange, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -137,9 +137,9 @@ func ConfigChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loadConf
 
 	// inform clients about changed config
 	if productionModeChange {
-		WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentKickNonAdmin}
+		WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentKickNonAdmin}
 	}
-	WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentConfigChanged}
+	WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentConfigChanged}
 
 	// apply config to other areas
 	bruteforce.SetConfig()
@@ -149,7 +149,7 @@ func ConfigChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loadConf
 }
 func DbSyncChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentDbSyncChanged, nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentDbSyncChanged, nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -166,12 +166,12 @@ func FilesCopied_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address st
 	}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentFilesCopied, payload, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentFilesCopied, payload, target); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterEvent{
-		Content: types.ClusterEventContentFilesCopied,
+		Content: constants.ClusterEventContentFilesCopied,
 		Payload: payload,
 		Target:  target,
 	}
@@ -190,12 +190,12 @@ func FileRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address 
 	}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentFileRequested, payload, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentFileRequested, payload, target); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterEvent{
-		Content: types.ClusterEventContentFileRequested,
+		Content: constants.ClusterEventContentFileRequested,
 		Payload: payload,
 		Target:  target,
 	}
@@ -212,12 +212,12 @@ func JsFunctionCalled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, addre
 	}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentJsFunctionCalled, payload, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentJsFunctionCalled, payload, target); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterEvent{
-		Content: types.ClusterEventContentJsFunctionCalled,
+		Content: constants.ClusterEventContentJsFunctionCalled,
 		Payload: payload,
 		Target:  target,
 	}
@@ -226,31 +226,39 @@ func JsFunctionCalled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, addre
 func KeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64, keystrokes string) error {
 	target := types.ClusterEventTarget{Address: address, Device: constants.WebsocketClientDeviceFatClient, LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentKeystrokesRequested, keystrokes, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentKeystrokesRequested, keystrokes, target); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterEvent{
-		Content: types.ClusterEventContentKeystrokesRequested,
+		Content: constants.ClusterEventContentKeystrokesRequested,
 		Payload: keystrokes,
 		Target:  target,
 	}
 	return nil
 }
-func LoginDisabled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loginId int64) error {
-	target := types.ClusterEventTarget{LoginId: loginId}
+func LdapsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentLoginDisabled, nil, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentLdapsChanged, nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
-	WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentKick, Target: target}
+	return cache.LoadLdapMap_tx(ctx, tx)
+}
+func LoginDisabled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loginId int64) error {
+	target := types.ClusterEventTarget{LoginId: loginId}
+	if updateNodes {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentLoginDisabled, nil, target); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentKick, Target: target}
 	return nil
 }
 func LoginReauthorized_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loginId int64) error {
 	target := types.ClusterEventTarget{LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentLoginReauthorized, nil, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentLoginReauthorized, nil, target); err != nil {
 			return err
 		}
 	}
@@ -261,12 +269,12 @@ func LoginReauthorized_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, logi
 	}
 
 	// inform client to retrieve new access cache
-	WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentRenew, Target: target}
+	WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentRenew, Target: target}
 	return nil
 }
 func LoginReauthorizedAll_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentLoginReauthorizedAll, nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentLoginReauthorizedAll, nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -277,12 +285,12 @@ func LoginReauthorizedAll_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) e
 	}
 
 	// inform clients to retrieve new access cache
-	WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentRenew}
+	WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentRenew}
 	return nil
 }
 func MailAccountsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentMailAccountsChanged, nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentMailAccountsChanged, nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -290,7 +298,7 @@ func MailAccountsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) er
 }
 func MailTemplatesChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentMailTemplatesChanged, nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentMailTemplatesChanged, nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -313,7 +321,7 @@ func MasterAssigned(state bool) error {
 }
 func ReposChanged(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentReposChanged, nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentReposChanged, nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -323,17 +331,17 @@ func SchemaChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, moduleId
 	target := types.ClusterEventTarget{Device: constants.WebsocketClientDeviceBrowser}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentSchemaChanged, moduleIds, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentSchemaChanged, moduleIds, target); err != nil {
 			return err
 		}
 	}
 
 	// inform all clients about schema reloading
-	WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentSchemaLoading, Target: target}
+	WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentSchemaLoading, Target: target}
 
 	// inform all clients about schema loading being finished, regardless of success or error
 	defer func() {
-		WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentSchemaLoaded, Target: target}
+		WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentSchemaLoaded, Target: target}
 	}()
 
 	if len(moduleIds) != 0 {
@@ -346,7 +354,7 @@ func SchemaChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, moduleId
 		}
 
 		// inform clients to retrieve new access cache
-		WebsocketClientEvents <- types.ClusterEvent{Content: types.ClusterEventContentRenew}
+		WebsocketClientEvents <- types.ClusterEvent{Content: constants.ClusterEventContentRenew}
 	} else {
 		// no module IDs are given if modules were deleted, module options were changed, or custom captions were updated
 		if err := cache.LoadModuleIdMapMeta_tx(ctx, tx); err != nil {
@@ -363,7 +371,7 @@ func SchemaChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, moduleId
 }
 func TasksChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes_tx(ctx, tx, types.ClusterEventContentTasksChanged, nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentTasksChanged, nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
