@@ -229,6 +229,7 @@
 			"bindUserDn": "ربط الاسم المميز للمستخدم",
 			"bindUserDnHint": "على سبيل المثال: CN=للقراءة فقط،OU=المستخدم،DC=mycompany،DC=محلي",
 			"bindUserPw": "ربط كلمة مرور المستخدم",
+			"bindUserPwSetNew": "Set new bind user password",
 			"button": {
 				"import": "استيراد تسجيلات الدخول الآن",
 				"new": "إضافة اتصال",
@@ -615,8 +616,10 @@
 			"title": "عميل OAuth '{NAME}'",
 			"titleNew": "عميل OAuth الجديد",
 			"tokenUrl": "عنوان URL للرمز المميز",
-			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
-			"tokenUrlHint": "عنوان URL الخاص بمكان إنشاء رموز OAuth2. "
+			"tokenUrlHint": [
+				"عنوان URL الخاص بمكان إنشاء رموز OAuth2.",
+				"Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT/oauth2/v2.0/token"
+			]
 		},
 		"repo": {
 			"author": "بواسطة {NAME}",

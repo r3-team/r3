@@ -250,7 +250,7 @@ func OpenId(ctx context.Context, oauthClientId int64, code, codeVerifier string)
 	// inactive users cannot authenticate via Open ID - if the login is inactive, a successful Open ID auth reactivates it
 	if newLogin || adminChanged || metaChanged || nameChanged || rolesChanged || !activeEx {
 
-		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{},
+		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int8{}, pgtype.Text{},
 			pgtype.Int8{Int64: c.Id, Valid: true}, pgtype.Text{String: idToken.Issuer, Valid: true},
 			pgtype.Text{String: idToken.Subject, Valid: true}, l.Name, "", l.Admin, false, true,
 			tokenExpiryHours, pgtype.Bool{}, metaEx, roleIdsEx)

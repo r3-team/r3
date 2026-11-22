@@ -99,7 +99,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey, name string, active bool, meta types
 		return nil
 	}
 
-	ldapIdSql := pgtype.Int4{Int32: ldap.Id, Valid: true}
+	ldapIdSql := pgtype.Int8{Int64: ldap.Id, Valid: true}
 	ldapKeySql := pgtype.Text{String: ldapKey, Valid: true}
 	if rolesChanged {
 		roleIdsEx = roleIds

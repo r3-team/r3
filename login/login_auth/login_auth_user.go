@@ -33,7 +33,7 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 		Name:      strings.ToLower(username), // usernames are case insensitive
 	}
 	var err error
-	var ldapId pgtype.Int4
+	var ldapId pgtype.Int8
 	var salt sql.NullString
 	var hash sql.NullString
 	var limited bool
@@ -73,7 +73,7 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 	if !l.NoAuth {
 		if ldapId.Valid {
 			// authentication against LDAP
-			if err := ldap_auth.Check(ldapId.Int32, l.Name, password); err != nil {
+			if err := ldap_auth.Check(ldapId.Int64, l.Name, password); err != nil {
 				return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 			}
 		} else {

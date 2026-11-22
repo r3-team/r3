@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/cache/cache_mail"
 	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
-	"r3/ldap"
 	"r3/log"
 	"r3/repo"
 	"r3/request/request_dbSync"
@@ -440,11 +440,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "del":
 			return nil, LdapDel_tx(ctx, tx, reqJson)
 		case "get":
-			return LdapGet_tx(ctx, tx)
+			return cache.GetLdapIdMap(), nil
 		case "reload":
-			return nil, ldap.UpdateCache_tx(ctx, tx)
+			return nil, cache.LoadLdapMap_tx(ctx, tx)
 		case "set":
-			return nil, LdapSet_tx(ctx, tx, reqJson)
+			return LdapSet_tx(ctx, tx, reqJson)
+		case "setBindUserPw":
+			return nil, LdapSetBindUserPw_tx(ctx, tx, reqJson)
 		}
 	case "license":
 		switch action {
@@ -532,7 +534,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "del":
 			return nil, request_mail.AccountDel_tx(ctx, tx, reqJson)
 		case "get":
-			return request_mail.AccountGet()
+			return cache_mail.GetAccountMap(), nil
 		case "reload":
 			return nil, cluster.MailAccountsChanged_tx(ctx, tx, true)
 		case "set":
@@ -558,7 +560,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "del":
 			return nil, request_mail.TemplateDel_tx(ctx, tx, reqJson)
 		case "get":
-			return request_mail.TemplateGet()
+			return cache_mail.GetTemplateMap(), nil
 		case "informChanged":
 			return nil, cluster.MailTemplatesChanged_tx(ctx, tx, true)
 		case "set":
@@ -597,9 +599,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "del":
 			return nil, OauthClientDel_tx(ctx, tx, reqJson)
 		case "get":
-			return OauthClientGet()
+			return cache.GetOauthClientMap(), nil
 		case "reload":
-			return nil, OauthClientReload_tx(ctx, tx)
+			return nil, cache.LoadOauthClientMap_tx(ctx, tx)
 		case "set":
 			return OauthClientSet_tx(ctx, tx, reqJson)
 		case "setSecret":

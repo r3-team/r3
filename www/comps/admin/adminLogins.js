@@ -96,7 +96,7 @@ export default {
 				v-if="loginIdOpen !== null"
 				@close="loginIdOpen = null;get()"
 				@set-login-id="loginIdOpen = $event"
-				:ldaps
+				:ldapIdMap
 				:loginId="loginIdOpen"
 				:oauthClients
 			/>
@@ -108,7 +108,7 @@ export default {
 	data() {
 		return {
 			// data
-			ldaps: [],
+			ldapIdMap: [],
 			logins: [],
 			oauthClientIdMap: {},
 
@@ -196,7 +196,7 @@ export default {
 		},
 		getLdaps() {
 			ws.send('ldap', 'get', {}, true).then(
-				res => this.ldaps = res.payload,
+				res => this.ldapIdMap = res.payload,
 				this.$root.genericError
 			);
 		},

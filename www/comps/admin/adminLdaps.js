@@ -26,7 +26,7 @@ export default {
 			<div class="area">
 				<my-button image="download.png"
 					@trigger="runImports"
-					:active="licenseValid && ldaps.length !== 0"
+					:active="licenseValid && Object.keys(ldapIdMap).length !== 0"
 					:caption="capApp.button.import"
 				/>
 			</div>
@@ -36,7 +36,7 @@ export default {
 		<div class="content grow">
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
-					v-for="l in ldaps"
+					v-for="l in ldapIdMap"
 					@click="open(l.id)"
 					:key="l.id"
 					:title="l.name"
@@ -63,7 +63,7 @@ export default {
 	},
 	data() {
 		return {
-			ldaps: [],
+			ldapIdMap: [],
 			templates: [],
 
 			// states
@@ -92,7 +92,7 @@ export default {
 		open(id) {
 			const ldap = id === null
 				? this.getTemplateLdap()
-				: this.ldaps.find(v => v.id === id) ?? null;
+				: this.ldapIdMap[id] ?? null;
 
 			// apply global template if empty
 			if (ldap.loginTemplateId === null && this.templates.length > 0)
@@ -114,7 +114,7 @@ export default {
 				ws.prepare('loginTemplate', 'get', { byId: 0 })
 			], true).then(
 				res => {
-					this.ldaps = res[0].payload;
+					this.ldapIdMap = res[0].payload;
 					this.templates = res[1].payload;
 				},
 				this.$root.genericError

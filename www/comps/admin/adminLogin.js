@@ -123,7 +123,7 @@ export default {
 							</td>
 							<td class="default-inputs">
 								<select v-if="isLdap" v-model="inputs.ldapId" disabled="disabled">
-									<option :value="l.id" v-for="l in ldaps">{{ l.name }}</option>
+									<option :value="l.id" v-for="l in ldapIdMap">{{ l.name }}</option>
 								</select>
 								<select v-if="isOauth" v-model="inputs.oauthClientId" disabled="disabled">
 									<option :value="c.id" v-for="c in oauthClients">{{ c.name }}</option>
@@ -345,7 +345,7 @@ export default {
 		</div>
 	</div>`,
 	props: {
-		ldaps: { type: Array, required: true },
+		ldapIdMap: { type: Object, required: true },
 		loginId: { type: Number, required: true }, // login ID to load, 0 if new
 		oauthClients: { type: Array, required: true }
 	},
@@ -372,6 +372,14 @@ export default {
 		};
 	},
 	computed: {
+		isLdapAssignedRoles: s => {
+			for (const id in s.ldapIdMap) {
+				const l = s.ldapIdMap[id];
+				if (l.assignRoles && l.id === s.inputs.ldapId)
+					return true;
+			}
+			return false;
+		},
 		roleTotalNonHidden: s => {
 			let cnt = 0;
 			for (const roleId of s.inputs.roleIds) {
@@ -413,7 +421,6 @@ export default {
 		isChanged: s => s.ready && !s.deepIsEqual(s.inputsOrg, s.inputs),
 		isExtRole: s => s.isLdapAssignedRoles || s.isOauthClientAssignedRoles,
 		isLdap: s => s.inputs.ldapId !== null,
-		isLdapAssignedRoles: s => s.ldaps.filter(v => v.assignRoles && v.id === s.inputs.ldapId).length !== 0,
 		isLimited: s => s.activated && s.inputs.roleIds.length < 2 && !s.inputs.admin && !s.inputs.noAuth,
 		isNew: s => s.loginId === 0,
 		isOauth: s => s.inputs.oauthClientId !== null,

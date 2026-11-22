@@ -178,7 +178,7 @@ export default {
 								</td>
 							</tr>
 							<tr>
-								<td>{{ capGen.loginTemplate }}</td>
+								<td>{{ capGen.loginTemplate }}*</td>
 								<td>
 									<div class="row gap centered">
 										<select v-model="inputs.loginTemplateId" :disabled="readonly">
@@ -230,10 +230,9 @@ export default {
 						<tr v-if="isFlowClientCreds">
 							<td>{{ capApp.tokenUrl }}*</td>
 							<td>
-								<div class="column gap">
+								<div class="row gap centered">
 									<input v-model="inputs.tokenUrl" :disabled="readonly" />
-									<span>{{ capApp.tokenUrlHint }}</span>
-									<span>{{ capApp.tokenUrlExample }}</span>
+									<my-button image="question.png" @trigger="showHelp('<p>' + capApp.tokenUrlHint.join('</p><p>') + '</p>')" />
 								</div>
 							</td>
 						</tr>

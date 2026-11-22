@@ -229,6 +229,7 @@
 			"bindUserDn": "Kullanıcı DN'sini bağla",
 			"bindUserDnHint": "Örnek: CN=salt okunur,OU=Kullanıcı,DC=şirketim,DC=yerel",
 			"bindUserPw": "Kullanıcı şifresini bağla",
+			"bindUserPwSetNew": "Set new bind user password",
 			"button": {
 				"import": "Kullanıcıları şimdi içe aktarın",
 				"new": "Bağlantı ekle",
@@ -615,8 +616,10 @@
 			"title": "OAuth istemcisi '{NAME}'",
 			"titleNew": "Yeni OAuth istemcisi",
 			"tokenUrl": "Jeton URL",
-			"tokenUrlExample": "Exchange Online örneği: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
-			"tokenUrlHint": "OAuth2 belirteçlerinin oluşturulduğu yerin URL'si. Bunlar sağlayıcınız tarafından belgelenmiştir."
+			"tokenUrlHint": [
+				"OAuth2 belirteçlerinin oluşturulduğu yerin URL'si. Bunlar sağlayıcınız tarafından belgelenmiştir.",
+				"Exchange Online örneği: https://login.microsoftonline.com/YOUR_TENANT/oauth2/v2.0/token"
+			]
 		},
 		"repo": {
 			"author": "tarafından {NAME}",

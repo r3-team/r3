@@ -3,7 +3,6 @@ package request
 import (
 	"context"
 	"encoding/json"
-	"r3/cache"
 	"r3/config/config_credential"
 	"r3/login"
 	"r3/login/login_metaMap"
@@ -15,26 +14,16 @@ import (
 )
 
 func OauthClientDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
-	var id int32
+	var id int64
 	if err := json.Unmarshal(reqJson, &id); err != nil {
 		return err
 	}
 	if err := login.DelByExternalProvider_tx(ctx, tx, constants.DbLoginProviderOauth, id); err != nil {
 		return err
 	}
-	_, err := tx.Exec(ctx, `
-		DELETE FROM instance.oauth_client
-		WHERE id = $1
-	`, id)
+
+	_, err := tx.Exec(ctx, `DELETE FROM instance.oauth_client WHERE id = $1`, id)
 	return err
-}
-
-func OauthClientGet() (any, error) {
-	return cache.GetOauthClientMap(), nil
-}
-
-func OauthClientReload_tx(ctx context.Context, tx pgx.Tx) error {
-	return cache.LoadOauthClientMap_tx(ctx, tx)
 }
 
 func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int64, error) {

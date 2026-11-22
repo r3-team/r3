@@ -44,7 +44,6 @@ import (
 	"r3/handler/transfer_export"
 	"r3/handler/transfer_import"
 	"r3/handler/websocket"
-	"r3/ldap"
 	"r3/log"
 	"r3/login"
 	"r3/login/login_session"
@@ -605,7 +604,7 @@ func initCaches(ctx context.Context) error {
 	if err := cache_dbSync.LoadJobs_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize DB sync job cache, %v", err)
 	}
-	if err := ldap.UpdateCache_tx(ctx, tx); err != nil {
+	if err := cache.LoadLdapMap_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize LDAP cache, %v", err)
 	}
 	return tx.Commit(ctx)

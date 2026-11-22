@@ -229,6 +229,7 @@
 			"bindUserDn": "DN do utilizador de ligação",
 			"bindUserDnHint": "Exemplo: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Palavra-passe do utilizador de ligação",
+			"bindUserPwSetNew": "Set new bind user password",
 			"button": {
 				"import": "Importar utilizadores agora",
 				"new": "Adicionar ligação",
@@ -615,8 +616,10 @@
 			"title": "Cliente OAuth '{NAME}'",
 			"titleNew": "Novo cliente OAuth",
 			"tokenUrl": "URL do token",
-			"tokenUrlExample": "Exemplo para Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
-			"tokenUrlHint": "URL onde os tokens OAuth2 são gerados. Estes são documentados pelo seu fornecedor."
+			"tokenUrlHint": [
+				"URL onde os tokens OAuth2 são gerados. Estes são documentados pelo seu fornecedor.",
+				"Exemplo para Exchange Online: https://login.microsoftonline.com/YOUR_TENANT/oauth2/v2.0/token"
+			]
 		},
 		"repo": {
 			"author": "por {NAME}",

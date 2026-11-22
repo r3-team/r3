@@ -46,13 +46,12 @@ type LoginTemplateAdmin struct {
 }
 
 type Ldap struct {
-	Id               int32             `json:"id"`
+	Id               int64             `json:"id"`
 	LoginTemplateId  pgtype.Int8       `json:"loginTemplateId"` // template for new logins (applies login settings)
 	Name             string            `json:"name"`
 	Host             string            `json:"host"`
 	Port             int               `json:"port"`
 	BindUserDn       string            `json:"bindUserDn"`       // DN of bind user, example: 'CN=readonly,OU=User,DC=test,DC=local'
-	BindUserPw       string            `json:"bindUserPw"`       // password of bind user in clear text
 	SearchClass      string            `json:"searchClass"`      // object class to filter to, example: '(&(objectClass=user))'
 	SearchDn         string            `json:"searchDn"`         // root search DN, example: 'OU=User,DC=test,DC=local'
 	FilterDnExclude  []string          `json:"filterDnExclude"`  // DN blacklist, imported user DN must not include any of these filters (AND)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"r3/cache/cache_mail"
 	"r3/config/config_credential"
 	"r3/types"
 	"r3/types/constants"
@@ -19,10 +18,6 @@ func AccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) erro
 	}
 	_, err := tx.Exec(ctx, `DELETE FROM instance.mail_account WHERE id = $1`, req)
 	return err
-}
-
-func AccountGet() (any, error) {
-	return cache_mail.GetAccountMap(), nil
 }
 
 func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int64, error) {

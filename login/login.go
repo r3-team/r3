@@ -33,7 +33,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 }
 
 // delete all logins for external login provider
-func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int32) error {
+func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, loginProvider types.DbSchemaInstance, loginProviderId int64) error {
 
 	loginIds := make([]int64, 0)
 	rows, err := tx.Query(ctx, fmt.Sprintf(`
@@ -183,7 +183,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString, orderBy string
 
 // set login with meta data
 // returns created login ID if new login
-func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4, ldapKey pgtype.Text,
+func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int8, ldapKey pgtype.Text,
 	oauthClientId pgtype.Int8, oauthIss pgtype.Text, oauthSub pgtype.Text, name string, pass string, admin bool, noAuth bool,
 	active bool, tokenExpiryHours pgtype.Int4, mfaRequired pgtype.Bool, meta types.LoginMeta, roleIds []uuid.UUID) (int64, error) {
 
@@ -437,7 +437,7 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int8{},
+	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int8{}, pgtype.Text{}, pgtype.Int8{},
 		pgtype.Text{}, pgtype.Text{}, username, password, true, false, true, pgtype.Int4{},
 		pgtype.Bool{}, types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
 		[]uuid.UUID{}); err != nil {
@@ -498,7 +498,7 @@ func syncLogin_tx(ctx context.Context, tx pgx.Tx, action string, id int64) {
 }
 
 // identity provider migration
-func MigrateProviderLdap_tx(ctx context.Context, tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text) error {
+func MigrateProviderLdap_tx(ctx context.Context, tx pgx.Tx, id int64, ldapId pgtype.Int8, ldapKey pgtype.Text) error {
 	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
 		SET	ldap_id = $1, ldap_key = $2, oauth_client_id = NULL, oauth_iss = NULL, oauth_sub = NULL

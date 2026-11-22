@@ -229,6 +229,7 @@
 			"bindUserDn": "Sasaistīt lietotāja DN",
 			"bindUserDnHint": "Piemērs: CN=readonly,OU=Lietotājs,DC=manafirma,DC=locale",
 			"bindUserPw": "Sasaistīt lietotāja parole",
+			"bindUserPwSetNew": "Set new bind user password",
 			"button": {
 				"import": "Import users now",
 				"new": "Pievienot savienojumu",
@@ -615,8 +616,10 @@
 			"title": "OAuth client '{NAME}'",
 			"titleNew": "New OAuth client",
 			"tokenUrl": "Token URL",
-			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
-			"tokenUrlHint": "URL of where OAuth2 tokens are generated. These are documented by your provider."
+			"tokenUrlHint": [
+				"URL of where OAuth2 tokens are generated. These are documented by your provider.",
+				"Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT/oauth2/v2.0/token"
+			]
 		},
 		"repo": {
 			"author": "autoram {NAME}",

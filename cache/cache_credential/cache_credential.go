@@ -29,6 +29,13 @@ var (
 	targetIdMapUuid = make(map[types.CredentialsTarget]map[uuid.UUID]cred)
 )
 
+func init() {
+	targetIdMapInt[constants.CredentialsTargetLdap] = make(map[int64]cred)
+	targetIdMapInt[constants.CredentialsTargetMailAccount] = make(map[int64]cred)
+	targetIdMapInt[constants.CredentialsTargetOauthClient] = make(map[int64]cred)
+	targetIdMapUuid[constants.CredentialsTargetDbSyncHost] = make(map[uuid.UUID]cred)
+}
+
 func GetDbSyncHost(id uuid.UUID, logName string) (string, error) {
 	return getByUuid(constants.CredentialsTargetDbSyncHost, id, logName)
 }
@@ -38,6 +45,9 @@ func GetMailAccount(id int64, logName string) (string, error) {
 func GetOauthClient(id int64, logName string) (string, error) {
 	return getByInt(constants.CredentialsTargetOauthClient, id, logName)
 }
+func GetLdap(id int64, logName string) (string, error) {
+	return getByInt(constants.CredentialsTargetLdap, id, logName)
+}
 func ResetDbSyncHosts() {
 	resetForUuid(constants.CredentialsTargetDbSyncHost)
 }
@@ -46,6 +56,9 @@ func ResetMailAccounts() {
 }
 func ResetOAuthClients() {
 	resetForInt(constants.CredentialsTargetOauthClient)
+}
+func ResetLdap() {
+	resetForInt(constants.CredentialsTargetLdap)
 }
 
 // internal

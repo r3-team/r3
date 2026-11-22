@@ -229,6 +229,7 @@
 			"bindUserDn": "绑定用户 DN",
 			"bindUserDnHint": "示例：CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "绑定用户密码",
+			"bindUserPwSetNew": "Set new bind user password",
 			"button": {
 				"import": "Import users now",
 				"new": "添加连接",
@@ -615,8 +616,10 @@
 			"title": "OAuth 客户端 '{NAME}'",
 			"titleNew": "新的 OAuth 客户端",
 			"tokenUrl": "令牌 URL",
-			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
-			"tokenUrlHint": "OAuth2 令牌生成的 URL。这些将由您的提供商进行文档化。"
+			"tokenUrlHint": [
+				"OAuth2 令牌生成的 URL。这些将由您的提供商进行文档化。",
+				"Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT/oauth2/v2.0/token"
+			]
 		},
 		"repo": {
 			"author": "作者： {NAME}",

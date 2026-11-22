@@ -4,7 +4,7 @@ import (
 	"r3/ldap/ldap_conn"
 )
 
-func Run(ldapId int32) error {
+func Run(ldapId int64) error {
 
 	ldapConn, _, err := ldap_conn.ConnectAndBind(ldapId)
 	if err != nil {

@@ -3,7 +3,6 @@ package request_mail
 import (
 	"context"
 	"encoding/json"
-	"r3/cache/cache_mail"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -16,10 +15,6 @@ func TemplateDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) err
 	}
 	_, err := tx.Exec(ctx, `DELETE FROM instance_mail.template WHERE id = $1`, req)
 	return err
-}
-
-func TemplateGet() (any, error) {
-	return cache_mail.GetTemplateMap(), nil
 }
 
 func TemplateSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {

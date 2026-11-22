@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"r3/cache"
+	"r3/cache/cache_credential"
 	"r3/log"
 	"r3/types"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // connect to a LDAP profile
-func ConnectAndBind(ldapId int32) (*goldap.Conn, types.Ldap, error) {
+func ConnectAndBind(ldapId int64) (*goldap.Conn, types.Ldap, error) {
 
 	ldap, err := cache.GetLdap(ldapId)
 	if err != nil {
@@ -52,7 +53,11 @@ func ConnectAndBind(ldapId int32) (*goldap.Conn, types.Ldap, error) {
 	}
 
 	// bind with reading user
-	if err := ldapConn.Bind(ldap.BindUserDn, ldap.BindUserPw); err != nil {
+	bindUserPw, err := cache_credential.GetLdap(ldap.Id, ldap.Name)
+	if err != nil {
+		return nil, ldap, err
+	}
+	if err := ldapConn.Bind(ldap.BindUserDn, bindUserPw); err != nil {
 		return nil, ldap, err
 	}
 	return ldapConn, ldap, nil

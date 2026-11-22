@@ -43,7 +43,7 @@ func SetWithIntivation_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	for i, l := range req.Logins {
 		pass := tools.RandStringRunes(64)
 
-		loginId, err := login.Set_tx(ctx, tx, 0, req.LoginTemplateId, pgtype.Int4{}, pgtype.Text{},
+		loginId, err := login.Set_tx(ctx, tx, 0, req.LoginTemplateId, pgtype.Int8{}, pgtype.Text{},
 			pgtype.Int8{}, pgtype.Text{}, pgtype.Text{}, l.Name, pass, admin, noAuth,
 			active, tokenExpiryHours, req.MfaRequired, l.Meta, req.RoleIds)
 

@@ -10,7 +10,7 @@ import (
 )
 
 // authenticate against LDAP profile
-func Check(ldapId int32, username string, password string) error {
+func Check(ldapId int64, username string, password string) error {
 
 	ldapConn, ldap, err := ldap_conn.ConnectAndBind(ldapId)
 	if err != nil {

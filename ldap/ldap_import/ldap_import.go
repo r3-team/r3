@@ -47,7 +47,7 @@ func RunAll() error {
 	return nil
 }
 
-func run(ldapId int32) error {
+func run(ldapId int64) error {
 
 	ldapConn, ldap, err := ldap_conn.ConnectAndBind(ldapId)
 	if err != nil {

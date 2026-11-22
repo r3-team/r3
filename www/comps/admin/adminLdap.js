@@ -71,11 +71,11 @@ export default {
 				<table class="generic-table-vertical default-inputs">
 					<tbody>
 						<tr>
-							<td>{{ capGen.name }}</td>
+							<td>{{ capGen.name }}*</td>
 							<td><input v-model="ldap.name" :disabled="!licenseValid" :placeholder="capApp.nameHint" /></td>
 						</tr>
 						<tr>
-							<td>{{ capGen.loginTemplate }}</td>
+							<td>{{ capGen.loginTemplate }}*</td>
 							<td>
 								<select v-model="ldap.loginTemplateId" :disabled="!licenseValid">
 									<option v-for="t in templates" :title="t.comment" :value="t.id">
@@ -85,23 +85,23 @@ export default {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.host }}</td>
+							<td>{{ capApp.host }}*</td>
 							<td><input v-model="ldap.host" :disabled="!licenseValid" :placeholder="capApp.hostHint" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.port }}</td>
+							<td>{{ capApp.port }}*</td>
 							<td><input v-model.number="ldap.port" :disabled="!licenseValid" :placeholder="capApp.portHint" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.bindUserDn }}</td>
+							<td>{{ capApp.bindUserDn }}*</td>
 							<td><input class="long" v-model="ldap.bindUserDn" :disabled="!licenseValid" :placeholder="capApp.bindUserDnHint" /></td>
 						</tr>
-						<tr>
-							<td>{{ capApp.bindUserPw }}</td>
-							<td><input class="long" v-model="ldap.bindUserPw" :disabled="!licenseValid" type="password" /></td>
+						<tr v-if="isNew">
+							<td>{{ capApp.bindUserPw }}*</td>
+							<td><input class="long" v-model="bindUserPw" :disabled="!licenseValid" type="password" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.searchDn }}</td>
+							<td>{{ capApp.searchDn }}*</td>
 							<td><input class="long" v-model="ldap.searchDn" :disabled="!licenseValid || !isNew" :placeholder="capApp.searchDnHint" /></td>
 						</tr>
 						<tr>
@@ -128,15 +128,15 @@ export default {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.searchClass }}</td>
+							<td>{{ capApp.searchClass }}*</td>
 							<td><input v-model="ldap.searchClass" :disabled="!licenseValid" :placeholder="capApp.searchClassHint" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.keyAttribute }}</td>
+							<td>{{ capApp.keyAttribute }}*</td>
 							<td><input v-model="ldap.keyAttribute" :disabled="!licenseValid" :placeholder="capApp.keyAttributeHint" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.loginAttribute }}</td>
+							<td>{{ capApp.loginAttribute }}*</td>
 							<td><input v-model="ldap.loginAttribute" :disabled="!licenseValid" :placeholder="capApp.loginAttributeHint" /></td>
 						</tr>
 						<tr>
@@ -148,6 +148,29 @@ export default {
 								</div>
 							</td>
 						</tr>
+						<template v-if="!isNew">
+							<tr>
+								<td colspan="2">
+									<br />
+									<my-label image="lock.png"
+										:caption="capApp.bindUserPwSetNew"
+										:large="true"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div class="row gap centered">
+										<input type="password" v-model="bindUserPw" :disabled="!licenseValid" />
+										<my-button image="ok.png"
+											@trigger="setBindUserPw"
+											:active="bindUserPw !== ''"
+											:caption="capGen.button.ok"
+										/>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
@@ -239,6 +262,7 @@ export default {
 	data() {
 		return {
 			// inputs
+			bindUserPw: '',
 			ldap: {},
 
 			// states
@@ -248,7 +272,12 @@ export default {
 	},
 	computed: {
 		canSave: s => s.isReady && s.isChanged
+			&& s.ldap.keyAttribute !== ''
+			&& s.ldap.loginAttribute !== ''
+			&& s.ldap.searchClass !== ''
 			&& s.ldap.searchDn !== ''
+			&& s.ldap.bindUserDn !== ''
+			&& (s.bindUserPw !== '' || !s.isNew)
 			&& s.ldap.name !== ''
 			&& s.ldap.host !== ''
 			&& s.ldap.port !== '',
@@ -301,9 +330,13 @@ export default {
 			else this.ldap.filterDnInclude.splice(index, 1);
 		},
 		reloadAndClose() {
-			this.$emit('reload');
-			this.reloadBackendCache();
-			this.close();
+			ws.send('ldap', 'reload', null, false).then(
+				() => {
+					this.$emit('reload');
+					this.close();
+				},
+				this.$root.genericError
+			);
 		},
 		reset() {
 			this.ldap = JSON.parse(JSON.stringify(this.ldapOrg));
@@ -320,9 +353,6 @@ export default {
 				this.$root.genericError
 			);
 		},
-		reloadBackendCache() {
-			ws.send('ldap', 'reload', {}, false).then(() => { }, this.$root.genericError);
-		},
 		del() {
 			ws.send('ldap', 'del', { id: this.ldap.id }, true).then(
 				this.reloadAndClose,
@@ -334,6 +364,22 @@ export default {
 				return;
 
 			ws.send('ldap', 'set', this.ldap, true).then(
+				res => {
+					if (!this.isNew)
+						return this.reloadAndClose();
+
+					// set bind user PW after new LDAP is created, ID is unknown before
+					// close in error case as component must be reloaded if new
+					ws.send('ldap', 'setBindUserPw', { id: res.payload, secretPlain: this.bindUserPw }, true).then(
+						() => { },
+						this.$root.genericError
+					).finally(this.reloadAndClose);
+				},
+				this.$root.genericError
+			);
+		},
+		setBindUserPw() {
+			ws.send('ldap', 'setBindUserPw', { id: this.ldap.id, secretPlain: this.bindUserPw }, true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);
