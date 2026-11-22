@@ -319,6 +319,14 @@ func MasterAssigned(state bool) error {
 	SchedulerRestart <- true
 	return nil
 }
+func OauthClientsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
+	if updateNodes {
+		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentOauthClients, nil, types.ClusterEventTarget{}); err != nil {
+			return err
+		}
+	}
+	return cache.LoadOauthClientMap_tx(ctx, tx)
+}
 func ReposChanged(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
 		if err := createEventsForOtherNodes_tx(ctx, tx, constants.ClusterEventContentReposChanged, nil, types.ClusterEventTarget{}); err != nil {

@@ -166,6 +166,9 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 		}
 		err = cluster.MasterAssigned(p.State)
 
+	case constants.ClusterEventContentOauthClients:
+		err = cluster.OauthClientsChanged_tx(ctx, tx, false)
+
 	case constants.ClusterEventContentReposChanged:
 		err = cluster.ReposChanged(ctx, tx, false)
 

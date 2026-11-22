@@ -601,7 +601,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return cache.GetOauthClientMap(), nil
 		case "reload":
-			return nil, cache.LoadOauthClientMap_tx(ctx, tx)
+			return nil, cluster.OauthClientsChanged_tx(ctx, tx, true)
 		case "set":
 			return OauthClientSet_tx(ctx, tx, reqJson)
 		case "setSecret":

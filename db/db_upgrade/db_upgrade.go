@@ -233,6 +233,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'ldapsChanged';
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'oauthClientsChanged';
 		`); err != nil {
 			return "", err
 		}

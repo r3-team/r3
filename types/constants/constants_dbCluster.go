@@ -21,6 +21,7 @@ const (
 	ClusterEventContentMailAccountsChanged  types.ClusterEventContent = "mailAccountsChanged"
 	ClusterEventContentMailTemplatesChanged types.ClusterEventContent = "mailTemplatesChanged"
 	ClusterEventContentMasterAssigned       types.ClusterEventContent = "masterAssigned"
+	ClusterEventContentOauthClients         types.ClusterEventContent = "oauthClientsChanged"
 	ClusterEventContentRenew                types.ClusterEventContent = "renew"
 	ClusterEventContentReposChanged         types.ClusterEventContent = "reposChanged"
 	ClusterEventContentSchemaChanged        types.ClusterEventContent = "schemaChanged"
