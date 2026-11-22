@@ -10,11 +10,13 @@ const (
 	AppVersionTargetClient types.AppVersionTarget = "client"
 	AppVersionTargetSelf   types.AppVersionTarget = "self"
 
-	CredentialsAlgorithmAesGcm   types.CredentialsAlgorithm = "aes_gcm_256"
-	CredentialsTargetDbSyncHost  types.CredentialsTarget    = "db_sync_host"
-	CredentialsTargetLdap        types.CredentialsTarget    = "ldap"
-	CredentialsTargetMailAccount types.CredentialsTarget    = "mail_account"
-	CredentialsTargetOauthClient types.CredentialsTarget    = "oauth_client"
+	CredentialsAlgorithmAesGcm   types.CredentialsAlgorithm = "aesGcm256"
+	CredentialsSystemTokenSecret types.CredentialsSystem    = "tokenSecret"
+
+	CredentialsTargetDbSyncHost  types.CredentialsTarget = "db_sync_host"
+	CredentialsTargetLdap        types.CredentialsTarget = "ldap"
+	CredentialsTargetMailAccount types.CredentialsTarget = "mail_account"
+	CredentialsTargetOauthClient types.CredentialsTarget = "oauth_client"
 
 	LoginMfaIntervalSec int64 = 30 // MFA interval window size (in seconds)
 
@@ -35,6 +37,8 @@ const (
 )
 
 var (
+	CredentialSystemCreds = []types.CredentialsSystem{CredentialsSystemTokenSecret}
+
 	CredentialTargetsIdInt  = []types.CredentialsTarget{CredentialsTargetLdap, CredentialsTargetMailAccount, CredentialsTargetOauthClient}
 	CredentialTargetsIdUuid = []types.CredentialsTarget{CredentialsTargetDbSyncHost}
 

@@ -23,7 +23,7 @@ var (
 		"companyLogo", "companyLogoUrl", "companyName", "companyWelcome", "css",
 		"dbVersionCut", "exportPrivateKey", "iconPwa1", "iconPwa2",
 		"instanceId", "licenseFile", "publicHostName", "proxyUrl", "repoPublicKeys",
-		"systemMsgText", "tokenSecret", "updateCheckUrl", "updateCheckVersion"}
+		"systemMsgText", "updateCheckUrl", "updateCheckVersion"}
 
 	NamesStringSlice = []string{"adminMailAddresses", "hotkeyModExcl"}
 

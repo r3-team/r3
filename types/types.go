@@ -3,6 +3,7 @@ package types
 type Access int
 type AppVersionTarget string // target for version string (self, client)
 type CredentialsAlgorithm string
+type CredentialsSystem string
 type CredentialsTarget string
 type DbMailAccountMode string
 type DbSchemaApp string                    // DB entities from app schema

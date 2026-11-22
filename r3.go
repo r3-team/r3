@@ -18,6 +18,7 @@ import (
 	"r3/cache/cache_mail"
 	"r3/cluster"
 	"r3/config"
+	"r3/config/config_credential"
 	"r3/data/data_image"
 	"r3/db"
 	"r3/db/db_embedded"
@@ -548,10 +549,12 @@ func initSystem(ctx context.Context) error {
 		return fmt.Errorf("failed to set instance ID, %v", err)
 	}
 
-	// process token secret for future client authentication from database
-	if err := config.ProcessTokenSecret_tx(ctx, tx); err != nil {
-		return fmt.Errorf("failed to process token secret, %v", err)
+	// get token secret for client authentication
+	secret, err := config_credential.GetSystem_tx(ctx, tx, constants.CredentialsSystemTokenSecret)
+	if err != nil {
+		return fmt.Errorf("failed to load token secret, %v", err)
 	}
+	config.SetTokenSecret(secret)
 
 	// setup cluster node with shared database
 	if err := cluster.StartNode_tx(ctx, tx); err != nil {

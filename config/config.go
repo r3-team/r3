@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"r3/log"
 	"r3/tools"
@@ -200,6 +199,12 @@ func SetInstanceIdIfEmpty_tx(ctx context.Context, tx pgx.Tx) error {
 	}
 	return SetString_tx(ctx, tx, "instanceId", id.String())
 }
+func SetTokenSecret(secret string) {
+	access_mx.Lock()
+	defer access_mx.Unlock()
+
+	tokenSecret = jwt.NewHS256([]byte(secret))
+}
 
 // config file
 func LoadFile() error {
@@ -240,25 +245,6 @@ func WriteFile() error {
 
 	// write configuration to JSON file
 	return os.WriteFile(filePath, json, 0644)
-}
-
-// token
-func ProcessTokenSecret_tx(ctx context.Context, tx pgx.Tx) error {
-	secret := GetString("tokenSecret")
-	if secret == "" {
-		min, max := 32, 48
-		secret = tools.RandStringRunes(rand.Intn(max-min+1) + min)
-
-		if err := SetString_tx(ctx, tx, "tokenSecret", secret); err != nil {
-			return err
-		}
-	}
-
-	access_mx.Lock()
-	defer access_mx.Unlock()
-
-	tokenSecret = jwt.NewHS256([]byte(secret))
-	return nil
 }
 
 // helper

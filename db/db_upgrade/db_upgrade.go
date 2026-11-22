@@ -96,7 +96,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE instance.credential ALTER COLUMN algorithm TYPE instance.encryption_algorithm USING algorithm::TEXT::instance.encryption_algorithm;
+		ALTER TABLE instance.credential ALTER COLUMN algorithm         TYPE instance.encryption_algorithm USING algorithm::TEXT::instance.encryption_algorithm;
+		ALTER TABLE instance.credential ALTER COLUMN system_credential TYPE instance.system_credential    USING system_credential::TEXT::instance.system_credential;
 	*/
 
 	"3.13": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -173,13 +174,26 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE instance.login_setting DROP COLUMN borders_squared;
 
+			-- column actions
+			ALTER TYPE app.data_display ADD VALUE 'action';
+
+			ALTER TABLE app.open_doc ADD COLUMN column_id UUID;
+			ALTER TABLE app.open_doc ADD CONSTRAINT open_doc_column_id_fkey FOREIGN KEY (column_id)
+				REFERENCES app.column (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_open_doc_column_id_fkey ON app.open_doc USING btree (column_id ASC NULLS LAST);
+
 			-- credential keys
-			CREATE TYPE instance.encryption_algorithm AS ENUM('aes_gcm_256');
+			CREATE TYPE instance.encryption_algorithm AS ENUM('aesGcm256');
+			CREATE TYPE instance.system_credential    AS ENUM('tokenSecret');
 			CREATE TABLE instance.credential (
 				db_sync_host_id uuid,
 				ldap_id integer,
 				mail_account_id integer,
 				oauth_client_id integer,
+				system_credential TEXT,
 				algorithm text not NULL,
 				cipher_text_enc BYTEA NOT NULL,
 				nonce BYTEA NOT NULL,
@@ -188,6 +202,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CONSTRAINT credential_ldap_unique         UNIQUE (ldap_id),
 				CONSTRAINT credential_mail_account_unique UNIQUE (mail_account_id),
 				CONSTRAINT credential_oauth_client_unique UNIQUE (oauth_client_id),
+				CONSTRAINT credential_system_credential   UNIQUE (system_credential),
 				CONSTRAINT credential_db_sync_host_id_fkey FOREIGN KEY (db_sync_host_id)
 					REFERENCES instance_db_sync.host (id) MATCH SIMPLE
 					ON UPDATE CASCADE
@@ -209,27 +224,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED,
 				CONSTRAINT credential_single_parent CHECK (1 = (
-					CASE WHEN db_sync_host_id IS NULL THEN 0 ELSE 1 END +
-					CASE WHEN ldap_id         IS NULL THEN 0 ELSE 1 END +
-					CASE WHEN mail_account_id IS NULL THEN 0 ELSE 1 END +
-					CASE WHEN oauth_client_id IS NULL THEN 0 ELSE 1 END
+					CASE WHEN system_credential IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN db_sync_host_id   IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN ldap_id           IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN mail_account_id   IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN oauth_client_id   IS NULL THEN 0 ELSE 1 END
 				))
 			);
 			CREATE INDEX IF NOT EXISTS fki_credential_db_sync_host_id_fkey ON instance.credential USING btree (db_sync_host_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_credential_ldap_id_fkey         ON instance.credential USING btree (ldap_id         ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_credential_mail_account_id_fkey ON instance.credential USING btree (mail_account_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_credential_oauth_client_id_fkey ON instance.credential USING btree (oauth_client_id ASC NULLS LAST);
-
-			-- column actions
-			ALTER TYPE app.data_display ADD VALUE 'action';
-
-			ALTER TABLE app.open_doc ADD COLUMN column_id UUID;
-			ALTER TABLE app.open_doc ADD CONSTRAINT open_doc_column_id_fkey FOREIGN KEY (column_id)
-				REFERENCES app.column (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			CREATE INDEX IF NOT EXISTS fki_open_doc_column_id_fkey ON app.open_doc USING btree (column_id ASC NULLS LAST);
 
 			-- cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'ldapsChanged';
@@ -247,6 +252,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			SELECT NULL, NULL, id, NULL, password      FROM instance.mail_account
 			UNION
 			SELECT NULL, NULL, NULL, id, client_secret FROM instance.oauth_client
+			UNION
+			SELECT NULL, NULL, NULL, NULL, value       FROM instance.config
+			WHERE name = 'tokenSecret'
 		`)
 		if err != nil {
 			return "", err
@@ -289,6 +297,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetOauthClient, c.IdOauth.Int64, c.CipherPlain); err != nil {
 					return "", err
 				}
+			} else {
+				if err := config_credential.SetSystem_tx(ctx, tx, constants.CredentialsSystemTokenSecret, c.CipherPlain); err != nil {
+					return "", err
+				}
 			}
 		}
 		if _, err := tx.Exec(ctx, `
@@ -296,6 +308,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.ldap         DROP COLUMN bind_user_pw;
 			ALTER TABLE instance.mail_account DROP COLUMN password;
 			ALTER TABLE instance.oauth_client DROP COLUMN client_secret;
+			DELETE FROM instance.config WHERE name = 'tokenSecret';
 		`); err != nil {
 			return "", err
 		}

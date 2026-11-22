@@ -15,7 +15,7 @@ import (
 func ConfigGet() (any, error) {
 
 	// not directly changeable configuration options
-	ignore := []string{"dbVersionCut", "tokenSecret"}
+	ignore := []string{"dbVersionCut"}
 
 	res := make(map[string]string)
 
