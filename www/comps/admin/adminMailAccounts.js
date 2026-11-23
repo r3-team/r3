@@ -115,7 +115,7 @@ export default {
 
 		// backend calls
 		get() {
-			ws.send('mailAccount', 'get', {}, true).then(
+			ws.send('mailAccount', 'get', null, true).then(
 				res => this.$store.commit('mailAccountIdMap', res.payload),
 				this.$root.genericError
 			);

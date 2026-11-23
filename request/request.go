@@ -535,8 +535,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, request_mail.AccountDel_tx(ctx, tx, reqJson)
 		case "get":
 			return cache_mail.GetAccountMap(), nil
-		case "reload":
-			return nil, cluster.MailAccountsChanged_tx(ctx, tx, true)
 		case "set":
 			return request_mail.AccountSet_tx(ctx, tx, reqJson)
 		case "setPw":

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"r3/cluster"
 	"r3/config/config_credential"
 	"r3/types"
 	"r3/types/constants"
@@ -16,8 +17,10 @@ func AccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) erro
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	_, err := tx.Exec(ctx, `DELETE FROM instance.mail_account WHERE id = $1`, req)
-	return err
+	if _, err := tx.Exec(ctx, `DELETE FROM instance.mail_account WHERE id = $1`, req); err != nil {
+		return err
+	}
+	return cluster.MailAccountsChanged_tx(ctx, tx, true)
 }
 
 func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int64, error) {
@@ -25,8 +28,6 @@ func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return 0, err
 	}
-
-	var err error
 	newRecord := req.Id == 0
 
 	if req.AuthMethod == "xoauth2" {
@@ -38,7 +39,7 @@ func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int
 	}
 
 	if newRecord {
-		err = tx.QueryRow(ctx, `
+		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.mail_account (oauth_client_id, name, mode, connect_method, auth_method,
 				send_as, username, host_name, host_port, comment, smime_path_crt, smime_path_key,
 				smime_sign, send_count, send_seconds, resend_count, resend_seconds)
@@ -47,9 +48,12 @@ func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int
 		`, req.OauthClientId, req.Name, req.Mode, req.ConnectMethod, req.AuthMethod, req.SendAs,
 			req.Username, req.HostName, req.HostPort, req.Comment, req.SmimePathCrt,
 			req.SmimePathKey, req.SmimeSign, req.SendCount, req.SendSeconds, req.ResendCount,
-			req.ResendSeconds).Scan(&req.Id)
+			req.ResendSeconds).Scan(&req.Id); err != nil {
+
+			return 0, err
+		}
 	} else {
-		_, err = tx.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.mail_account
 			SET oauth_client_id = $1, name = $2, mode = $3, connect_method = $4, auth_method = $5,
 				send_as = $6, username = $7, host_name = $8, host_port = $9, comment = $10,
@@ -59,9 +63,12 @@ func AccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int
 		`, req.OauthClientId, req.Name, req.Mode, req.ConnectMethod, req.AuthMethod, req.SendAs,
 			req.Username, req.HostName, req.HostPort, req.Comment, req.SmimePathCrt,
 			req.SmimePathKey, req.SmimeSign, req.SendCount, req.SendSeconds, req.ResendCount,
-			req.ResendSeconds, req.Id)
+			req.ResendSeconds, req.Id); err != nil {
+
+			return 0, err
+		}
 	}
-	return req.Id, err
+	return req.Id, cluster.MailAccountsChanged_tx(ctx, tx, true)
 }
 
 func AccountSetPw_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
@@ -72,7 +79,10 @@ func AccountSetPw_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) er
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetMailAccount, req.Id, req.SecretPlain)
+	if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetMailAccount, req.Id, req.SecretPlain); err != nil {
+		return err
+	}
+	return cluster.MailAccountsChanged_tx(ctx, tx, true)
 }
 
 func AccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {

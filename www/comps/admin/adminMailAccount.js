@@ -298,12 +298,6 @@ export default {
 		close() {
 			this.$emit('close');
 		},
-		reloadAndClose() {
-			ws.send('mailAccount', 'reload', {}, true).then(
-				this.close,
-				this.$root.genericError
-			);
-		},
 		reset() {
 			this.account = JSON.parse(JSON.stringify(this.accountOrg));
 			this.isReady = true;
@@ -315,7 +309,7 @@ export default {
 		// backend calls
 		del() {
 			ws.send('mailAccount', 'del', this.account.id, true).then(
-				this.reloadAndClose,
+				this.close,
 				this.$root.genericError
 			);
 		},
@@ -328,21 +322,21 @@ export default {
 			ws.send('mailAccount', 'set', this.account, true).then(
 				res => {
 					if (!this.isNew || !this.isWithPw)
-						return this.reloadAndClose();
+						return this.close();
 
 					// set PW after new account is created, ID is unknown before
 					// close in error case as mail account component must be reloaded if new
 					ws.send('mailAccount', 'setPw', { id: res.payload, secretPlain: this.password }, true).then(
 						() => { },
 						this.$root.genericError
-					).finally(this.reloadAndClose);
+					).finally(this.close);
 				},
 				this.$root.genericError
 			);
 		},
 		setPw() {
 			ws.send('mailAccount', 'setPw', { id: this.account.id, secretPlain: this.password }, true).then(
-				this.reloadAndClose,
+				this.close,
 				this.$root.genericError
 			);
 		}
