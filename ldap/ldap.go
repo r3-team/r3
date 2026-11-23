@@ -2,6 +2,8 @@ package ldap
 
 import (
 	"context"
+	"r3/cluster"
+	"r3/config/config_credential"
 	"r3/login"
 	"r3/login/login_metaMap"
 	"r3/login/login_roleAssign"
@@ -15,9 +17,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 	if err := login.DelByExternalProvider_tx(ctx, tx, constants.DbLoginProviderLdap, id); err != nil {
 		return err
 	}
-
-	_, err := tx.Exec(ctx, `DELETE FROM instance.ldap WHERE id = $1`, id)
-	return err
+	if _, err := tx.Exec(ctx, `DELETE FROM instance.ldap WHERE id = $1`, id); err != nil {
+		return err
+	}
+	return cluster.LdapsChanged_tx(ctx, tx, true)
 }
 
 func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) (int64, error) {
@@ -59,5 +62,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) (int64, error) {
 	if err := login_roleAssign.Set_tx(ctx, tx, constants.DbLoginProviderLdap, l.Id, l.LoginRolesAssign); err != nil {
 		return 0, err
 	}
-	return l.Id, nil
+	return l.Id, cluster.LdapsChanged_tx(ctx, tx, true)
+}
+
+func SetBindUserPw_tx(ctx context.Context, tx pgx.Tx, id int64, bindUserPw string) error {
+	if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetLdap, id, bindUserPw); err != nil {
+		return err
+	}
+	return cluster.LdapsChanged_tx(ctx, tx, true)
 }

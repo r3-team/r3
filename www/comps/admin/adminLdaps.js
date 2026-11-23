@@ -51,9 +51,8 @@ export default {
 
 		<my-admin-ldap
 			v-if="ldapOpen !== null"
-			@close="close"
+			@close="close();get()"
 			@makeNew="open(null)"
-			@reload="get"
 			:ldapOrg="ldapOpen"
 			:templates
 		/>

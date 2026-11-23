@@ -441,8 +441,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, LdapDel_tx(ctx, tx, reqJson)
 		case "get":
 			return cache.GetLdapIdMap(), nil
-		case "reload":
-			return nil, cluster.LdapsChanged_tx(ctx, tx, true)
 		case "set":
 			return LdapSet_tx(ctx, tx, reqJson)
 		case "setBindUserPw":

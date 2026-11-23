@@ -45,7 +45,7 @@ export default {
 				<div class="area">
 					<my-button image="settings.png"
 						v-if="!isNew"
-						@trigger="runCheck"
+						@trigger="check"
 						:active="licenseValid"
 						:caption="capApp.button.test"
 					/>
@@ -252,7 +252,7 @@ export default {
 		ldapOrg: { type: Object, required: true },
 		templates: { type: Array, required: true },
 	},
-	emits: ['close', 'makeNew', 'reload'],
+	emits: ['close', 'makeNew'],
 	watch: {
 		ldapOrg: {
 			handler() { this.reset(); },
@@ -329,15 +329,6 @@ export default {
 			if (isExclude) this.ldap.filterDnExclude.splice(index, 1);
 			else this.ldap.filterDnInclude.splice(index, 1);
 		},
-		reloadAndClose() {
-			ws.send('ldap', 'reload', null, false).then(
-				() => {
-					this.$emit('reload');
-					this.close();
-				},
-				this.$root.genericError
-			);
-		},
 		reset() {
 			this.ldap = JSON.parse(JSON.stringify(this.ldapOrg));
 			this.isReady = true;
@@ -347,15 +338,15 @@ export default {
 		},
 
 		// backend calls
-		runCheck() {
-			ws.send('ldap', 'check', { id: this.ldap.id }, true).then(
+		check() {
+			ws.send('ldap', 'check', this.ldap.id, true).then(
 				() => this.$store.commit('dialog', { captionBody: this.capApp.dialog.testDone }),
 				this.$root.genericError
 			);
 		},
 		del() {
-			ws.send('ldap', 'del', { id: this.ldap.id }, true).then(
-				this.reloadAndClose,
+			ws.send('ldap', 'del', this.ldap.id, true).then(
+				this.close,
 				this.$root.genericError
 			);
 		},
@@ -366,21 +357,21 @@ export default {
 			ws.send('ldap', 'set', this.ldap, true).then(
 				res => {
 					if (!this.isNew)
-						return this.reloadAndClose();
+						return this.close();
 
 					// set bind user PW after new LDAP is created, ID is unknown before
 					// close in error case as component must be reloaded if new
 					ws.send('ldap', 'setBindUserPw', { id: res.payload, secretPlain: this.bindUserPw }, true).then(
 						() => { },
 						this.$root.genericError
-					).finally(this.reloadAndClose);
+					).finally(this.close);
 				},
 				this.$root.genericError
 			);
 		},
 		setBindUserPw() {
 			ws.send('ldap', 'setBindUserPw', { id: this.ldap.id, secretPlain: this.bindUserPw }, true).then(
-				this.reloadAndClose,
+				this.close,
 				this.$root.genericError
 			);
 		}
