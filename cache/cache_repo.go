@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"r3/cache/cache_credential"
 	"r3/types"
 	"sync"
 
@@ -44,8 +45,7 @@ func LoadRepos_tx(ctx context.Context, tx pgx.Tx) error {
 	defer repo_mx.Unlock()
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, name, url, fetch_user_name, fetch_user_pass,
-			skip_verify, feedback_enable, date_checked, active
+		SELECT id, name, url, fetch_user_name, skip_verify, feedback_enable, date_checked, active
 		FROM instance.repo
 		ORDER BY name
 	`)
@@ -56,11 +56,13 @@ func LoadRepos_tx(ctx context.Context, tx pgx.Tx) error {
 
 	repos = make([]types.Repo, 0)
 	reposFeedback = make([]types.RepoFeedback, 0)
+	cache_credential.ResetRepo()
 
 	for rows.Next() {
 		var r types.Repo
-		if err := rows.Scan(&r.Id, &r.Name, &r.Url, &r.FetchUserName, &r.FetchUserPass,
-			&r.SkipVerify, &r.FeedbackEnable, &r.DateChecked, &r.Active); err != nil {
+		if err := rows.Scan(&r.Id, &r.Name, &r.Url, &r.FetchUserName, &r.SkipVerify,
+			&r.FeedbackEnable, &r.DateChecked, &r.Active); err != nil {
+
 			return err
 		}
 		repos = append(repos, r)

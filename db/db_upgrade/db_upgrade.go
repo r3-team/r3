@@ -193,6 +193,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ldap_id integer,
 				mail_account_id integer,
 				oauth_client_id integer,
+				repo_id uuid,
 				system_credential TEXT,
 				algorithm text not NULL,
 				cipher_text_enc BYTEA NOT NULL,
@@ -202,6 +203,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CONSTRAINT credential_ldap_unique         UNIQUE (ldap_id),
 				CONSTRAINT credential_mail_account_unique UNIQUE (mail_account_id),
 				CONSTRAINT credential_oauth_client_unique UNIQUE (oauth_client_id),
+				CONSTRAINT credential_repo_unique         UNIQUE (repo_id),
 				CONSTRAINT credential_system_credential   UNIQUE (system_credential),
 				CONSTRAINT credential_db_sync_host_id_fkey FOREIGN KEY (db_sync_host_id)
 					REFERENCES instance_db_sync.host (id) MATCH SIMPLE
@@ -223,18 +225,25 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT credential_repo_id_fkey FOREIGN KEY (repo_id)
+					REFERENCES instance.repo (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
 				CONSTRAINT credential_single_parent CHECK (1 = (
 					CASE WHEN system_credential IS NULL THEN 0 ELSE 1 END +
 					CASE WHEN db_sync_host_id   IS NULL THEN 0 ELSE 1 END +
 					CASE WHEN ldap_id           IS NULL THEN 0 ELSE 1 END +
 					CASE WHEN mail_account_id   IS NULL THEN 0 ELSE 1 END +
-					CASE WHEN oauth_client_id   IS NULL THEN 0 ELSE 1 END
+					CASE WHEN oauth_client_id   IS NULL THEN 0 ELSE 1 END +
+					CASE WHEN repo_id           IS NULL THEN 0 ELSE 1 END
 				))
 			);
 			CREATE INDEX IF NOT EXISTS fki_credential_db_sync_host_id_fkey ON instance.credential USING btree (db_sync_host_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_credential_ldap_id_fkey         ON instance.credential USING btree (ldap_id         ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_credential_mail_account_id_fkey ON instance.credential USING btree (mail_account_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_credential_oauth_client_id_fkey ON instance.credential USING btree (oauth_client_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_credential_repo_id_fkey         ON instance.credential USING btree (repo_id         ASC NULLS LAST);
 
 			-- cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'ldapsChanged';
@@ -245,15 +254,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 		// migrate account credentials from plain to encrypted secrets
 		rows, err := tx.Query(ctx, `
-			SELECT id, NULL, NULL, NULL, password      FROM instance_db_sync.host
+			SELECT id, NULL, NULL, NULL, NULL,   password        FROM instance_db_sync.host
 			UNION
-			SELECT NULL, id, NULL, NULL, bind_user_pw  FROM instance.ldap
+			SELECT NULL, id, NULL, NULL, NULL,   bind_user_pw    FROM instance.ldap
 			UNION
-			SELECT NULL, NULL, id, NULL, password      FROM instance.mail_account
+			SELECT NULL, NULL, id, NULL, NULL,   password        FROM instance.mail_account
 			UNION
-			SELECT NULL, NULL, NULL, id, client_secret FROM instance.oauth_client
+			SELECT NULL, NULL, NULL, id, NULL,   client_secret   FROM instance.oauth_client
 			UNION
-			SELECT NULL, NULL, NULL, NULL, value       FROM instance.config
+			SELECT NULL, NULL, NULL, NULL, id,   fetch_user_pass FROM instance.repo
+			UNION
+			SELECT NULL, NULL, NULL, NULL, NULL, value           FROM instance.config
 			WHERE name = 'tokenSecret'
 		`)
 		if err != nil {
@@ -266,12 +277,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			IdLdap      pgtype.Int8
 			IdMail      pgtype.Int8
 			IdOauth     pgtype.Int8
+			IdRepo      pgtype.UUID
 			CipherPlain string
 		}
 		creds := make([]cred, 0)
 		for rows.Next() {
 			var c cred
-			if err := rows.Scan(&c.IdHost, &c.IdLdap, &c.IdMail, &c.IdOauth, &c.CipherPlain); err != nil {
+			if err := rows.Scan(&c.IdHost, &c.IdLdap, &c.IdMail, &c.IdOauth, &c.IdRepo, &c.CipherPlain); err != nil {
 				return "", err
 			}
 			creds = append(creds, c)
@@ -297,6 +309,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetOauthClient, c.IdOauth.Int64, c.CipherPlain); err != nil {
 					return "", err
 				}
+			} else if c.IdRepo.Valid {
+				if err := config_credential.SetUuid_tx(ctx, tx, constants.CredentialsTargetRepo, c.IdRepo.Bytes, c.CipherPlain); err != nil {
+					return "", err
+				}
 			} else {
 				if err := config_credential.SetSystem_tx(ctx, tx, constants.CredentialsSystemTokenSecret, c.CipherPlain); err != nil {
 					return "", err
@@ -308,6 +324,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.ldap         DROP COLUMN bind_user_pw;
 			ALTER TABLE instance.mail_account DROP COLUMN password;
 			ALTER TABLE instance.oauth_client DROP COLUMN client_secret;
+			ALTER TABLE instance.repo         DROP COLUMN fetch_user_pass;
 			DELETE FROM instance.config WHERE name = 'tokenSecret';
 		`); err != nil {
 			return "", err

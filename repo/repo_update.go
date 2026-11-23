@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/cache/cache_credential"
 	"r3/cluster"
 	"r3/db"
 	"r3/tools"
@@ -84,7 +85,11 @@ func RefreshAll_tx(ctx context.Context, tx pgx.Tx) error {
 // update internal module repository from external repository API
 func refresh_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
 
-	token, err := httpGetAuthToken(r.Url, r.FetchUserName, r.FetchUserPass, r.SkipVerify)
+	fetchUserPass, err := cache_credential.GetRepo(r.Id, r.Name)
+	if err != nil {
+		return err
+	}
+	token, err := httpGetAuthToken(r.Url, r.FetchUserName, fetchUserPass, r.SkipVerify)
 	if err != nil {
 		return err
 	}

@@ -76,7 +76,6 @@ export function getTemplateLdap() {
 		host: '',
 		port: 636,
 		bindUserDn: '',
-		bindUserPw: '',
 		keyAttribute: 'objectGUID',
 		loginMetaMap: {
 			department: 'department',
@@ -150,7 +149,6 @@ export function getTemplateRepo(id) {
 		dateChecked: 0,
 		feedbackEnable: false,
 		fetchUserName: '',
-		fetchUserPass: '',
 		skipVerify: false,
 		url: ''
 	};

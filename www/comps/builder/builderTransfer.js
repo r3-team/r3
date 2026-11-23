@@ -328,7 +328,7 @@ export default {
 	},
 	mounted() {
 		// fetch repos
-		ws.send('repo', 'get', {}, true).then(
+		ws.send('repo', 'get', null, true).then(
 			res => this.repos = res.payload,
 			this.$root.genericError
 		);

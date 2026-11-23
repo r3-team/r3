@@ -1,12 +1,12 @@
-import {dialogDeleteAsk} from '../shared/dialog.js';
-import {deepIsEqual}     from '../shared/generic.js';
-import {getTemplateRepo} from '../shared/templates.js';
-import {getUnixFormat}   from '../shared/time.js';
+import { dialogDeleteAsk } from '../shared/dialog.js';
+import { deepIsEqual } from '../shared/generic.js';
+import { getTemplateRepo } from '../shared/templates.js';
+import { getUnixFormat } from '../shared/time.js';
 
 export default {
-	name:'my-admin-repo',
-	components:{},
-	template:`<div v-if="repo !== false" class="app-sub-window under-header at-top with-margin" @mousedown.self="close">
+	name: 'my-admin-repo',
+	components: {},
+	template: `<div v-if="repo !== false" class="app-sub-window under-header at-top with-margin" @mousedown.self="close">
 		<div class="contentBox admin-repo scroll float">
 			<div class="top">
 				<div class="area nowrap">
@@ -24,7 +24,7 @@ export default {
 				<div class="area">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="isChanged"
+						:active="canSave"
 						:caption="isNew ? capGen.button.create : capGen.button.save"
 					/>
 					<my-button image="refresh.png"
@@ -48,7 +48,7 @@ export default {
 					/>
 				</div>
 			</div>
-			
+
 			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
@@ -69,9 +69,9 @@ export default {
 							<td>{{ capGen.username }}*</td>
 							<td><input v-model="repo.fetchUserName" :disabled="!repo.active" /></td>
 						</tr>
-						<tr>
+						<tr v-if="isNew">
 							<td>{{ capGen.password }}*</td>
-							<td><input type="password" v-model="repo.fetchUserPass" :disabled="!repo.active" /></td>
+							<td><input type="password" v-model="fetchUserPass" :disabled="!repo.active" /></td>
 						</tr>
 						<tr>
 							<td colspan="2"><my-button-check v-model="repo.feedbackEnable" :caption="capApp.repoFeedback" :readonly="!repo.active" /></td>
@@ -82,48 +82,79 @@ export default {
 						<tr v-if="repo.dateChecked !== 0">
 							<td colspan="2">{{ capGen.updated }}: {{ getUnixFormat(repo.dateChecked,[settings.dateFormat,'H:i:S'].join(' ')) }}</td>
 						</tr>
+						<template v-if="!isNew">
+							<tr>
+								<td colspan="2">
+									<br />
+									<my-label image="lock.png"
+										:caption="capGen.passwordSetNew"
+										:large="true"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div class="row gap centered">
+										<input type="password" v-model="fetchUserPass" />
+										<my-button image="ok.png"
+											@trigger="setFetchUserPass"
+											:active="fetchUserPass !== ''"
+											:caption="capGen.button.ok"
+										/>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>`,
-	props:{
-		id:       { type:String, required:true },
-		repoIdMap:{ type:Object, required:true }
+	props: {
+		id: { type: String, required: true },
+		repoIdMap: { type: Object, required: true }
 	},
-	emits:['close','create'],
+	emits: ['close', 'create'],
 	data() {
 		return {
-			repo:false // repo being edited
+			fetchUserPass: '',
+			repo: false // repo being edited
 		};
 	},
-	watch:{
-		id:{
+	watch: {
+		id: {
 			handler(v) { this.reset(); },
-			immediate:true
+			immediate: true
 		},
 	},
-	computed:{
-		isChanged:s => !s.deepIsEqual(s.repo,s.repoOrg),
-		isNew:    s => s.repoIdMap[s.id] === undefined,
-		repoOrg:  s => s.isNew ? s.getTemplateRepo(s.id) : s.repoIdMap[s.id],
+	computed: {
+		canSave: s => s.isChanged
+			&& s.repo.name !== ''
+			&& s.repo.fetchUserName !== ''
+			&& s.repo.url !== ''
+			&& (s.fetchUserPass !== '' || !s.isNew),
+
+		// simple
+		isChanged: s => !s.deepIsEqual(s.repo, s.repoOrg),
+		isNew: s => s.repoIdMap[s.id] === undefined,
+		repoOrg: s => s.isNew ? s.getTemplateRepo(s.id) : s.repoIdMap[s.id],
 
 		// stores
-		settings:s => s.$store.getters.settings,
-		capApp:  s => s.$store.getters.captions.admin.modules,
-		capGen:  s => s.$store.getters.captions.generic
+		settings: s => s.$store.getters.settings,
+		capApp: s => s.$store.getters.captions.admin.modules,
+		capGen: s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.set, key: 's', keyCtrl: true });
+		this.$store.commit('keyDownHandlerAdd', { fnc: this.close, key: 'Escape' });
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
-		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerDel', this.set);
+		this.$store.commit('keyDownHandlerDel', this.close);
 		this.$store.commit('keyDownHandlerWake');
 	},
-	methods:{
+	methods: {
 		// externals
 		deepIsEqual,
 		dialogDeleteAsk,
@@ -143,10 +174,23 @@ export default {
 
 		// backend calls
 		del() {
-			ws.send('repo','del',this.id,true).then(this.close,this.genericError);
+			ws.send('repo', 'del', this.id, true).then(this.close, this.genericError);
 		},
 		set() {
-			ws.send('repo','set',this.repo,true).then(this.close,this.genericError);
+			const requests = [ws.prepare('repo', 'set', this.repo)];
+			if (this.isNew) {
+				requests.push(ws.prepare('repo', 'setFetchUserPass', { id: this.id, secretPlain: this.fetchUserPass }));
+			}
+			ws.sendMultiple(requests, true).then(
+				this.close,
+				this.$root.genericError
+			);
+		},
+		setFetchUserPass() {
+			ws.send('repo', 'setFetchUserPass', { id: this.id, secretPlain: this.fetchUserPass }, true).then(
+				this.close,
+				this.$root.genericError
+			);
 		}
 	}
 };

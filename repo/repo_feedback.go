@@ -3,6 +3,7 @@ package repo
 import (
 	"fmt"
 	"r3/cache"
+	"r3/cache/cache_credential"
 	"r3/config"
 
 	"github.com/gofrs/uuid/v5"
@@ -24,7 +25,11 @@ func SendFeedback(isAdmin bool, moduleRelated bool, repoId uuid.UUID, moduleId p
 	if err != nil {
 		return err
 	}
-	token, err := httpGetAuthToken(repo.Url, repo.FetchUserName, repo.FetchUserPass, repo.SkipVerify)
+	fetchUserPass, err := cache_credential.GetRepo(repo.Id, repo.Name)
+	if err != nil {
+		return err
+	}
+	token, err := httpGetAuthToken(repo.Url, repo.FetchUserName, fetchUserPass, repo.SkipVerify)
 	if err != nil {
 		return err
 	}

@@ -670,6 +670,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, repo.RefreshAll_tx(ctx, tx)
 		case "set":
 			return nil, RepoSet_tx(ctx, tx, reqJson)
+		case "setFetchUserPass":
+			return nil, RepoSetFetchUserPass_tx(ctx, tx, reqJson)
 		}
 	case "repoModule":
 		switch action {

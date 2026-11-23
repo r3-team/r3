@@ -23,7 +23,7 @@ type cred struct {
 var (
 	access_mx sync.RWMutex
 
-	// maps for credentials per target (ldap, oauth_client, mail_account, db_sync_host, ...)
+	// maps for credentials per target (ldap, oauth_client, mail_account, db_sync_host, repo, ...)
 	// one map per different ID type for targets
 	targetIdMapInt  = make(map[types.CredentialsTarget]map[int64]cred)
 	targetIdMapUuid = make(map[types.CredentialsTarget]map[uuid.UUID]cred)
@@ -34,10 +34,14 @@ func init() {
 	targetIdMapInt[constants.CredentialsTargetMailAccount] = make(map[int64]cred)
 	targetIdMapInt[constants.CredentialsTargetOauthClient] = make(map[int64]cred)
 	targetIdMapUuid[constants.CredentialsTargetDbSyncHost] = make(map[uuid.UUID]cred)
+	targetIdMapUuid[constants.CredentialsTargetRepo] = make(map[uuid.UUID]cred)
 }
 
 func GetDbSyncHost(id uuid.UUID, logName string) (string, error) {
 	return getByUuid(constants.CredentialsTargetDbSyncHost, id, logName)
+}
+func GetLdap(id int64, logName string) (string, error) {
+	return getByInt(constants.CredentialsTargetLdap, id, logName)
 }
 func GetMailAccount(id int64, logName string) (string, error) {
 	return getByInt(constants.CredentialsTargetMailAccount, id, logName)
@@ -45,11 +49,14 @@ func GetMailAccount(id int64, logName string) (string, error) {
 func GetOauthClient(id int64, logName string) (string, error) {
 	return getByInt(constants.CredentialsTargetOauthClient, id, logName)
 }
-func GetLdap(id int64, logName string) (string, error) {
-	return getByInt(constants.CredentialsTargetLdap, id, logName)
+func GetRepo(id uuid.UUID, logName string) (string, error) {
+	return getByUuid(constants.CredentialsTargetRepo, id, logName)
 }
 func ResetDbSyncHosts() {
 	resetForUuid(constants.CredentialsTargetDbSyncHost)
+}
+func ResetLdap() {
+	resetForInt(constants.CredentialsTargetLdap)
 }
 func ResetMailAccounts() {
 	resetForInt(constants.CredentialsTargetMailAccount)
@@ -57,8 +64,8 @@ func ResetMailAccounts() {
 func ResetOAuthClients() {
 	resetForInt(constants.CredentialsTargetOauthClient)
 }
-func ResetLdap() {
-	resetForInt(constants.CredentialsTargetLdap)
+func ResetRepo() {
+	resetForUuid(constants.CredentialsTargetRepo)
 }
 
 // internal

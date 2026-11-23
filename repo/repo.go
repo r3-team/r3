@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"r3/cluster"
+	"r3/config/config_credential"
 	"r3/tools"
 	"r3/types"
+	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
@@ -20,13 +22,18 @@ func Del_Tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Set_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
 
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO instance.repo (id,name,url,fetch_user_name,fetch_user_pass,
-			skip_verify,feedback_enable,date_checked,active)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		INSERT INTO instance.repo (id,name,url,fetch_user_name,skip_verify,feedback_enable,date_checked,active)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 		ON CONFLICT (id)
-		DO UPDATE SET name = $2, url = $3, fetch_user_name = $4, fetch_user_pass = $5,
-			skip_verify = $6, feedback_enable = $7, date_checked = $8, active = $9
-	`, r.Id, r.Name, r.Url, r.FetchUserName, r.FetchUserPass, r.SkipVerify, r.FeedbackEnable, r.DateChecked, r.Active); err != nil {
+		DO UPDATE SET name = $2, url = $3, fetch_user_name = $4, skip_verify = $5,
+			feedback_enable = $6, date_checked = $7, active = $8
+	`, r.Id, r.Name, r.Url, r.FetchUserName, r.SkipVerify, r.FeedbackEnable, r.DateChecked, r.Active); err != nil {
+		return err
+	}
+	return cluster.ReposChanged(ctx, tx, true)
+}
+func SetFetchUserPass_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, fetchUserPass string) error {
+	if err := config_credential.SetUuid_tx(ctx, tx, constants.CredentialsTargetRepo, id, fetchUserPass); err != nil {
 		return err
 	}
 	return cluster.ReposChanged(ctx, tx, true)

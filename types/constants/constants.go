@@ -17,6 +17,7 @@ const (
 	CredentialsTargetLdap        types.CredentialsTarget = "ldap"
 	CredentialsTargetMailAccount types.CredentialsTarget = "mail_account"
 	CredentialsTargetOauthClient types.CredentialsTarget = "oauth_client"
+	CredentialsTargetRepo        types.CredentialsTarget = "repo"
 
 	LoginMfaIntervalSec int64 = 30 // MFA interval window size (in seconds)
 
@@ -40,7 +41,7 @@ var (
 	CredentialSystemCreds = []types.CredentialsSystem{CredentialsSystemTokenSecret}
 
 	CredentialTargetsIdInt  = []types.CredentialsTarget{CredentialsTargetLdap, CredentialsTargetMailAccount, CredentialsTargetOauthClient}
-	CredentialTargetsIdUuid = []types.CredentialsTarget{CredentialsTargetDbSyncHost}
+	CredentialTargetsIdUuid = []types.CredentialsTarget{CredentialsTargetDbSyncHost, CredentialsTargetRepo}
 
 	QueryJoinConnectors   = []string{"INNER", "LEFT", "RIGHT", "FULL", "CROSS"}
 	QueryFilterConnectors = []string{"AND", "OR"}

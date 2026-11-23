@@ -40,6 +40,17 @@ func RepoSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
 	return repo.Set_tx(ctx, tx, req)
 }
 
+func RepoSetFetchUserPass_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
+	var req struct {
+		Id          uuid.UUID `json:"id"`
+		SecretPlain string    `json:"secretPlain"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return err
+	}
+	return repo.SetFetchUserPass_tx(ctx, tx, req.Id, req.SecretPlain)
+}
+
 func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (

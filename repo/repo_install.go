@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"r3/cache"
+	"r3/cache/cache_credential"
 	"r3/config"
 	"r3/db"
 	"r3/tools"
@@ -80,7 +81,11 @@ func download(repoId, fileId uuid.UUID) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	token, err := httpGetAuthToken(repo.Url, repo.FetchUserName, repo.FetchUserPass, repo.SkipVerify)
+	fetchUserPass, err := cache_credential.GetRepo(repo.Id, repo.Name)
+	if err != nil {
+		return "", err
+	}
+	token, err := httpGetAuthToken(repo.Url, repo.FetchUserName, fetchUserPass, repo.SkipVerify)
 	if err != nil {
 		return "", err
 	}
