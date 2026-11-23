@@ -20,7 +20,6 @@ func Del_Tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return cluster.ReposChanged(ctx, tx, true)
 }
 func Set_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
-
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance.repo (id,name,url,fetch_user_name,skip_verify,feedback_enable,date_checked,active)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)

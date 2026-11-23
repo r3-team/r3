@@ -393,12 +393,6 @@ export default {
 		close() {
 			this.$emit('close');
 		},
-		reloadAndClose() {
-			ws.send('oauthClient', 'reload', {}, true).then(
-				() => this.$emit('close'),
-				this.$root.genericError
-			);
-		},
 		reset() {
 			this.inputs = JSON.parse(JSON.stringify(this.inputsOrg));
 
@@ -414,7 +408,7 @@ export default {
 		// backend calls
 		del() {
 			ws.send('oauthClient', 'del', this.id, true).then(
-				this.reloadAndClose,
+				this.close,
 				this.$root.genericError
 			);
 		},
@@ -432,21 +426,21 @@ export default {
 			ws.send('oauthClient', 'set', this.inputs, true).then(
 				res => {
 					if (!this.isNew)
-						return this.reloadAndClose();
+						return this.close();
 
 					// set secret after new oauth client is created, ID is unknown before
 					// close in error case as component must be reloaded if new
 					ws.send('oauthClient', 'setSecret', { id: res.payload, secretPlain: this.secret }, true).then(
 						() => { },
 						this.$root.genericError
-					).finally(this.reloadAndClose);
+					).finally(this.close);
 				},
 				this.$root.genericError
 			);
 		},
 		setSecret() {
 			ws.send('oauthClient', 'setSecret', { id: this.inputs.id, secretPlain: this.secret }, true).then(
-				this.reloadAndClose,
+				this.close,
 				this.$root.genericError
 			);
 		}

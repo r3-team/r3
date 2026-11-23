@@ -600,8 +600,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return nil, OauthClientDel_tx(ctx, tx, reqJson)
 		case "get":
 			return cache.GetOauthClientMap(), nil
-		case "reload":
-			return nil, cluster.OauthClientsChanged_tx(ctx, tx, true)
 		case "set":
 			return OauthClientSet_tx(ctx, tx, reqJson)
 		case "setSecret":

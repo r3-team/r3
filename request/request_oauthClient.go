@@ -3,6 +3,7 @@ package request
 import (
 	"context"
 	"encoding/json"
+	"r3/cluster"
 	"r3/config/config_credential"
 	"r3/login"
 	"r3/login/login_metaMap"
@@ -21,9 +22,10 @@ func OauthClientDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	if err := login.DelByExternalProvider_tx(ctx, tx, constants.DbLoginProviderOauth, id); err != nil {
 		return err
 	}
-
-	_, err := tx.Exec(ctx, `DELETE FROM instance.oauth_client WHERE id = $1`, id)
-	return err
+	if _, err := tx.Exec(ctx, `DELETE FROM instance.oauth_client WHERE id = $1`, id); err != nil {
+		return err
+	}
+	return cluster.OauthClientsChanged_tx(ctx, tx, true)
 }
 
 func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int64, error) {
@@ -67,7 +69,7 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	if err := login_roleAssign.Set_tx(ctx, tx, constants.DbLoginProviderOauth, req.Id, req.LoginRolesAssign); err != nil {
 		return 0, err
 	}
-	return req.Id, nil
+	return req.Id, cluster.OauthClientsChanged_tx(ctx, tx, true)
 }
 
 func OauthClientSetSecret_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) error {
@@ -78,5 +80,8 @@ func OauthClientSetSecret_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMes
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return err
 	}
-	return config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetOauthClient, req.Id, req.SecretPlain)
+	if err := config_credential.SetInt_tx(ctx, tx, constants.CredentialsTargetOauthClient, req.Id, req.SecretPlain); err != nil {
+		return err
+	}
+	return cluster.OauthClientsChanged_tx(ctx, tx, true)
 }
