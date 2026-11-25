@@ -368,6 +368,12 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// migrate credentials secret if required
+	if err := config_credential.MigrateToNewSecretIfRequired(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed credential secret migration, %v", err))
+		return
+	}
+
 	// process cli commands
 	if cli.adminCreate != "" {
 		adminInputs := strings.Split(cli.adminCreate, ":")

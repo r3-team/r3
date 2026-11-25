@@ -189,6 +189,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE instance.encryption_algorithm AS ENUM('aesGcm256');
 			CREATE TYPE instance.system_credential    AS ENUM('tokenSecret');
 			CREATE TABLE instance.credential (
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
 				db_sync_host_id uuid,
 				ldap_id integer,
 				mail_account_id integer,
@@ -199,6 +200,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				cipher_text_enc BYTEA NOT NULL,
 				nonce BYTEA NOT NULL,
 				salt_kdf BYTEA NOT NULL,
+				CONSTRAINT credential_pk PRIMARY KEY (id),
 				CONSTRAINT credential_db_sync_host_unique UNIQUE (db_sync_host_id),
 				CONSTRAINT credential_ldap_unique         UNIQUE (ldap_id),
 				CONSTRAINT credential_mail_account_unique UNIQUE (mail_account_id),

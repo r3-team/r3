@@ -2,6 +2,8 @@
 	"cluster": {
 		"nodeId": ""
 	},
+	"credentialsSecret": "",
+	"credentialsSecretNew": "",
 	"db": {
 		"embedded": true,
 		"host": "localhost",
@@ -31,6 +33,6 @@
 		"key": "cert.key",
 		"listen": "0.0.0.0",
 		"port": 443,
-		"tlsMinVersion":"1.2"
+		"tlsMinVersion": "1.2"
 	}
 }

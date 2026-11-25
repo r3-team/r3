@@ -2,76 +2,98 @@ package config_credential
 
 import (
 	"context"
-	"fmt"
 	"r3/config"
 	"r3/db"
+	"r3/log"
 	"r3/tools/cryptAesGcm"
-	"r3/types"
 	"r3/types/constants"
-	"slices"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 
-func GetInt(target types.CredentialsTarget, id int64) (string, error) {
-	if !slices.Contains(constants.CredentialTargetsIdInt, target) {
-		return "", fmt.Errorf("invalid target '%s' for credentials with integer ID", target)
+type cred struct {
+	Id            uuid.UUID `json:"id"`
+	CipherTextEnc []byte    `json:"cipherTextEnc"`
+	SaltKdf       []byte    `json:"saltKdf"`
+	Nonce         []byte    `json:"nonce"`
+}
+
+func MigrateToNewSecretIfRequired() error {
+
+	if config.File.CredentialsSecretNew == "" {
+		// no change to apply
+		return nil
 	}
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTaskShort)
+
+	// check if new credentials secret is already in use, by trying to read token secret for JWT (always available)
+	// check is important as 2nd cluster node with identical config might boot up after migration was done already
+	log.Info(log.ContextServer, "found new credentials secret in configuration file, checking state")
+
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
-	return get(ctx, target, id)
-}
-func GetUuid(target types.CredentialsTarget, id uuid.UUID) (string, error) {
-	if !slices.Contains(constants.CredentialTargetsIdUuid, target) {
-		return "", fmt.Errorf("invalid target '%s' for credentials with UUID ID", target)
-	}
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTaskShort)
-	defer ctxCanc()
-
-	return get(ctx, target, id)
-}
-
-func SetInt_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id int64, cipherTextPlain string) error {
-	if !slices.Contains(constants.CredentialTargetsIdInt, target) {
-		return fmt.Errorf("invalid target '%s' for credentials with integer ID", target)
-	}
-	return set_tx(ctx, tx, target, id, cipherTextPlain)
-}
-func SetUuid_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id uuid.UUID, cipherTextPlain string) error {
-	if !slices.Contains(constants.CredentialTargetsIdUuid, target) {
-		return fmt.Errorf("invalid target '%s' for credentials with UUID ID", target)
-	}
-	return set_tx(ctx, tx, target, id, cipherTextPlain)
-}
-
-// internal
-func get(ctx context.Context, target types.CredentialsTarget, id any) (string, error) {
-	var cipherTextEnc []byte
-	var nonce []byte
-	var saltKdf []byte
-	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
-		SELECT cipher_text_enc, nonce, salt_kdf
-		FROM instance.credential
-		WHERE %s_id = $1
-	`, target), id).Scan(&cipherTextEnc, &nonce, &saltKdf); err != nil {
-		return "", err
-	}
-	return cryptAesGcm.DecryptWithWeakSecret(config.File.CredentialsSecret, cipherTextEnc, saltKdf, nonce)
-}
-func set_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id any, cipherTextPlain string) error {
-	cipherTextEnc, saltKdf, nonce, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsSecret, cipherTextPlain)
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, fmt.Sprintf(`
-		INSERT INTO instance.credential (%s_id, algorithm, cipher_text_enc, nonce, salt_kdf)
-		VALUES ($1,$2,$3,$4,$5)
-		ON CONFLICT (%s_id)
-		DO UPDATE SET algorithm = $2, cipher_text_enc = $3, nonce = $4, salt_kdf = $5
-	`, target, target), id, constants.CredentialsAlgorithmAesGcm, cipherTextEnc, nonce, saltKdf)
+	if _, err := GetSystemSecretNew_tx(ctx, tx, constants.CredentialsSystemTokenSecret); err == nil {
+		log.Info(log.ContextServer, "validated new credentials secret already in use, updating current secret in configuration file")
+		return config.ApplyNewCredentialsSecret()
+	}
 
-	return err
+	// token secret could not be decrypted, we assume new secret has not been applied yet
+	log.Info(log.ContextServer, "validated new credentials secret not in use yet, migrating existing credentials to new secret")
+
+	rows, err := tx.Query(ctx, `SELECT id, cipher_text_enc, salt_kdf, nonce FROM instance.credential`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	creds := make([]cred, 0)
+	for rows.Next() {
+		var c cred
+		if err := rows.Scan(&c.Id, &c.CipherTextEnc, &c.SaltKdf, &c.Nonce); err != nil {
+			return err
+		}
+		creds = append(creds, c)
+	}
+	rows.Close()
+
+	// re-encrypt credentials with new secret
+	bt := &pgx.Batch{}
+
+	for _, c := range creds {
+		cipherTextPlain, err := cryptAesGcm.DecryptWithWeakSecret(config.File.CredentialsSecret, c.CipherTextEnc, c.SaltKdf, c.Nonce)
+		if err != nil {
+			return err
+		}
+		cipherTextEncNew, saltKdfNew, nonceNew, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsSecretNew, cipherTextPlain)
+		if err != nil {
+			return err
+		}
+
+		bt.Queue(`
+			UPDATE instance.credential
+			SET cipher_text_enc = $1, salt_kdf = $2, nonce = $3
+			WHERE id = $4
+		`, cipherTextEncNew, saltKdfNew, nonceNew, c.Id)
+	}
+	if err := tx.SendBatch(ctx, bt).Close(); err != nil {
+		return err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+
+	log.Info(log.ContextServer, "successfully migrated credentials to new secret, updating current secret in configuration file")
+
+	// only apply new secret to config file, if DB changes were committed
+	// even if write to config file is blocked now, it contains old & new secret (nothing is lost)
+	// as long as re-encryption is atomic, either new or old secret is valid at any time
+	// if write to config file fails mid-op, restore is required
+	return config.ApplyNewCredentialsSecret()
 }

@@ -7,7 +7,8 @@ type FileType struct {
 
 	Db FileTypeDb `json:"db"`
 
-	CredentialsSecret string `json:"credentialsSecret"`
+	CredentialsSecret    string `json:"credentialsSecret"`    // current secret, used to encrypted/decrypt credentials (OAuth clients, mail accounts, etc.)
+	CredentialsSecretNew string `json:"credentialsSecretNew"` // new secret to replace current secret, set to empty string when new secret was successfully applied
 
 	// mirror mode, eg. system mirrors other, likely productive instance
 	// disables write connectors (currently: email retrieve/send, REST call) & backups

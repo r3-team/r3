@@ -49,6 +49,13 @@ var (
 	rxVersionCut   = regexp.MustCompile(`\.\d+\.\d+$`)
 )
 
+func ApplyNewCredentialsSecret() error {
+	File.CredentialsSecret = File.CredentialsSecretNew
+	File.CredentialsSecretNew = ""
+
+	return WriteFile()
+}
+
 func GetAppVersion() types.Version {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
