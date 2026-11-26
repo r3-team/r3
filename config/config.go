@@ -49,10 +49,9 @@ var (
 	rxVersionCut   = regexp.MustCompile(`\.\d+\.\d+$`)
 )
 
-func ApplyNewCredentialsSecret() error {
+func ApplyCredentialsSecretNew() error {
 	File.CredentialsSecret = File.CredentialsSecretNew
 	File.CredentialsSecretNew = ""
-
 	return WriteFile()
 }
 

@@ -3,9 +3,7 @@ package config_credential
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"r3/config"
-	"r3/tools"
 	"r3/tools/cryptAesGcm"
 	"r3/types"
 	"r3/types/constants"
@@ -15,10 +13,10 @@ import (
 )
 
 func GetSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem) (string, error) {
-	return getSystem_tx(ctx, tx, systemCred, false)
+	return getSystem_tx(ctx, tx, systemCred, config.File.CredentialsSecret)
 }
 func GetSystemSecretNew_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem) (string, error) {
-	return getSystem_tx(ctx, tx, systemCred, true)
+	return getSystem_tx(ctx, tx, systemCred, config.File.CredentialsSecretNew)
 }
 
 func SetSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem, cipherTextPlain string) error {
@@ -42,7 +40,7 @@ func SetSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSy
 }
 
 // internal
-func getSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem, useNewSecret bool) (string, error) {
+func getSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem, secret string) (string, error) {
 	if !slices.Contains(constants.CredentialSystemCreds, systemCred) {
 		return "", fmt.Errorf("invalid system credentials '%s'", systemCred)
 	}
@@ -55,25 +53,7 @@ func getSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSy
 		FROM instance.credential
 		WHERE system_credential = $1
 	`, systemCred).Scan(&cipherTextEnc, &nonce, &saltKdf); err != nil {
-
-		if err == pgx.ErrNoRows {
-			// special cases
-			switch systemCred {
-			case constants.CredentialsSystemTokenSecret:
-				// token secret not set yet (occurs during initial setup), generate new one
-				min, max := 32, 48
-				secret := tools.RandStringRunes(rand.Intn(max-min+1) + min)
-				return secret, SetSystem_tx(ctx, tx, systemCred, secret)
-			}
-		}
 		return "", err
-	}
-
-	secret := ""
-	if useNewSecret {
-		secret = config.File.CredentialsSecretNew
-	} else {
-		secret = config.File.CredentialsSecret
 	}
 	return cryptAesGcm.DecryptWithWeakSecret(secret, cipherTextEnc, saltKdf, nonce)
 }

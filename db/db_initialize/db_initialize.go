@@ -9,65 +9,67 @@ import (
 	"r3/db/db_upgrade"
 	"r3/login"
 	"r3/tools"
+	"r3/types/constants"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func PrepareDbIfNew() error {
+// checks if DB is already populated - if not, runs initial DB setup
+// returns whether DB init was executed
+func FillIfNew() (bool, error) {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
 	defer ctxCanc()
 
 	var exists bool
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT exists(
-			SELECT FROM pg_tables
+			SELECT 1
+			FROM pg_tables
 			WHERE schemaname = 'instance'
-			AND tablename = 'config'
+			AND   tablename  = 'config'
 		)
 	`).Scan(&exists); err != nil {
-		return err
+		return false, err
 	}
 	if exists {
-		return nil
+		return false, nil
 	}
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer tx.Rollback(ctx)
 
-	if err := initAppSchema_tx(ctx, tx); err != nil {
-		return err
+	if err := fillAppSchema_tx(ctx, tx); err != nil {
+		return false, err
 	}
-
-	if err := initInstanceValues_tx(ctx, tx); err != nil {
-		return err
+	if err := fillInstanceValues_tx(ctx, tx); err != nil {
+		return false, err
 	}
 
 	// replace database password for embedded database
-	if config.File.Db.Embedded {
+	resetDbPass := config.File.Db.Embedded && config.File.Db.Pass == constants.DbEmbeddedDefaultPw
+	if resetDbPass {
 		if err := renewDbUserPw_tx(ctx, tx); err != nil {
-			return err
+			return false, err
 		}
 	}
-
-	// commit changes
 	if err := tx.Commit(ctx); err != nil {
-		return err
+		return false, err
 	}
 
 	// reconnect to database if credentials changed
-	if config.File.Db.Embedded {
+	if resetDbPass {
 		db.Close()
 		if err := db.Open(config.File.Db); err != nil {
-			return err
+			return false, err
 		}
 	}
 
 	// load config store to start work
 	if err := config.LoadFromDb(); err != nil {
-		return err
+		return false, err
 	}
 	bruteforce.SetConfig()
 	config.ActivateLicense()
@@ -75,39 +77,37 @@ func PrepareDbIfNew() error {
 
 	// before doing any more work, upgrade DB if necessary
 	if err := db_upgrade.RunIfRequired(); err != nil {
-		return err
+		return false, err
 	}
 
 	// create initial login last, in case database upgrade is required beforehand
-	return login.CreateAdmin("admin", "admin")
+	if err := login.CreateAdmin("admin", "admin"); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func renewDbUserPw_tx(ctx context.Context, tx pgx.Tx) error {
+
 	newPass := tools.RandStringRunes(48)
-
-	_, err := tx.Exec(ctx, fmt.Sprintf(`ALTER USER %s WITH PASSWORD '%s'`,
-		config.File.Db.User, newPass))
-
-	if err != nil {
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`ALTER USER %s WITH PASSWORD '%s'`, config.File.Db.User, newPass)); err != nil {
 		return err
 	}
 
 	// write new DB user password to configuration file
 	config.File.Db.Pass = newPass
-	if err := config.WriteFile(); err != nil {
-		return err
-	}
-	return nil
+	return config.WriteFile()
 }
 
 /*
-	when renewing init
-	* initial repository (instance.repo) should be called 'Official REI3 Repository'
-	* remove old repo configuration records (instance.config) - everything but 'repoPublicKeys'
+	when updating init
+	* need to create initial repository (instance.repo) - should be called 'Official REI3 Repository'
+	  * remove old repo configuration records (instance.config) - everything but 'repoPublicKeys'
+	  * set default repo cred via config_credential, using the credentials key from config file (for new instance empty string at start, migrated to strong secret afterwards)
 */
 
 // instance initalized to 3.10
-func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
+func fillInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 
 	appName, appNameShort := config.GetAppName()
 
@@ -264,7 +264,7 @@ func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 }
 
 // app initialized to 3.10
-func initAppSchema_tx(ctx context.Context, tx pgx.Tx) error {
+func fillAppSchema_tx(ctx context.Context, tx pgx.Tx) error {
 	_, err := tx.Exec(ctx, `
 --
 -- PostgreSQL database dump

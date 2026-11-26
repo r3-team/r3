@@ -347,8 +347,9 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// check for first database start
-	if err := db_initialize.PrepareDbIfNew(); err != nil {
+	// check for new/empty DB, initialize DB if required
+	isNewInstance, err := db_initialize.FillIfNew()
+	if err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize database on first start, %v", err))
 		return
 	}
@@ -368,10 +369,23 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// migrate credentials secret if required
+	// new instance, generate new secret if current one is empty (default config file)
+	if isNewInstance && config.File.CredentialsSecret == "" {
+		config.File.CredentialsSecretNew = tools.RandStringRunes(48)
+	}
+
+	// migrate credentials secret if new one is set
 	if err := config_credential.MigrateToNewSecretIfRequired(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed credential secret migration, %v", err))
+		prg.executeAborted(svc, fmt.Errorf("failed credentials secret migration, %v", err))
 		return
+	}
+
+	// new instance, create new token secret for system
+	if isNewInstance {
+		if err := config_credential.CreateNewSystemCred(constants.CredentialsSystemTokenSecret); err != nil {
+			prg.executeAborted(svc, fmt.Errorf("failed to generate token secret for JWT handling, %v", err))
+			return
+		}
 	}
 
 	// process cli commands

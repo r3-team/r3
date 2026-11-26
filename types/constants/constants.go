@@ -19,6 +19,8 @@ const (
 	CredentialsTargetOauthClient types.CredentialsTarget = "oauth_client"
 	CredentialsTargetRepo        types.CredentialsTarget = "repo"
 
+	DbEmbeddedDefaultPw string = "app"
+
 	LoginMfaIntervalSec int64 = 30 // MFA interval window size (in seconds)
 
 	LoginTypeFixed  types.LoginType = "fixed"  // auth via fixed token, used for ICS & fat client

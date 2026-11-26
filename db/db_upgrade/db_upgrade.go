@@ -256,17 +256,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 		// migrate account credentials from plain to encrypted secrets
 		rows, err := tx.Query(ctx, `
-			SELECT id, NULL, NULL, NULL, NULL,   password        FROM instance_db_sync.host
+			SELECT id::UUID,   NULL::INT, NULL::INT, NULL::INT, NULL::UUID, password        FROM instance_db_sync.host
 			UNION
-			SELECT NULL, id, NULL, NULL, NULL,   bind_user_pw    FROM instance.ldap
+			SELECT NULL::UUID, id::INT,   NULL::INT, NULL::INT, NULL::UUID, bind_user_pw    FROM instance.ldap
 			UNION
-			SELECT NULL, NULL, id, NULL, NULL,   password        FROM instance.mail_account
+			SELECT NULL::UUID, NULL::INT, id::INT,   NULL::INT, NULL::UUID, password        FROM instance.mail_account
 			UNION
-			SELECT NULL, NULL, NULL, id, NULL,   client_secret   FROM instance.oauth_client
+			SELECT NULL::UUID, NULL::INT, NULL::INT, id::INT,   NULL::UUID, client_secret   FROM instance.oauth_client
 			UNION
-			SELECT NULL, NULL, NULL, NULL, id,   fetch_user_pass FROM instance.repo
+			SELECT NULL::UUID, NULL::INT, NULL::INT, NULL::INT, id::UUID,   fetch_user_pass FROM instance.repo
 			UNION
-			SELECT NULL, NULL, NULL, NULL, NULL, value           FROM instance.config
+			SELECT NULL::UUID, NULL::INT, NULL::INT, NULL::INT, NULL::UUID, value           FROM instance.config
 			WHERE name = 'tokenSecret'
 		`)
 		if err != nil {

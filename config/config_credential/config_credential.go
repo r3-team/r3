@@ -2,10 +2,13 @@ package config_credential
 
 import (
 	"context"
+	"math/rand"
 	"r3/config"
 	"r3/db"
 	"r3/log"
+	"r3/tools"
 	"r3/tools/cryptAesGcm"
+	"r3/types"
 	"r3/types/constants"
 
 	"github.com/gofrs/uuid/v5"
@@ -19,6 +22,25 @@ type cred struct {
 	Nonce         []byte    `json:"nonce"`
 }
 
+func CreateNewSystemCred(systemCred types.CredentialsSystem) error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTaskShort)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	min, max := 32, 48
+	cipherTextPlain := tools.RandStringRunes(rand.Intn(max-min+1) + min)
+
+	if err := SetSystem_tx(ctx, tx, systemCred, cipherTextPlain); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
 func MigrateToNewSecretIfRequired() error {
 
 	if config.File.CredentialsSecretNew == "" {
@@ -26,7 +48,7 @@ func MigrateToNewSecretIfRequired() error {
 		return nil
 	}
 
-	// check if new credentials secret is already in use, by trying to read token secret for JWT (always available)
+	// check if new credentials secret is already in use, by trying to read JWT token secret (not there yet for new instance - or encrypted with old secret)
 	// check is important as 2nd cluster node with identical config might boot up after migration was done already
 	log.Info(log.ContextServer, "found new credentials secret in configuration file, checking state")
 
@@ -41,7 +63,7 @@ func MigrateToNewSecretIfRequired() error {
 
 	if _, err := GetSystemSecretNew_tx(ctx, tx, constants.CredentialsSystemTokenSecret); err == nil {
 		log.Info(log.ContextServer, "validated new credentials secret already in use, updating current secret in configuration file")
-		return config.ApplyNewCredentialsSecret()
+		return config.ApplyCredentialsSecretNew()
 	}
 
 	// token secret could not be decrypted, we assume new secret has not been applied yet
@@ -95,5 +117,5 @@ func MigrateToNewSecretIfRequired() error {
 	// even if write to config file is blocked now, it contains old & new secret (nothing is lost)
 	// as long as re-encryption is atomic, either new or old secret is valid at any time
 	// if write to config file fails mid-op, restore is required
-	return config.ApplyNewCredentialsSecret()
+	return config.ApplyCredentialsSecretNew()
 }
