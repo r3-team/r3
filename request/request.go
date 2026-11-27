@@ -330,6 +330,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		switch action {
 		case "get":
 			return ConfigGet()
+		case "getCredSecretEmpty":
+			return config.GetIsCredSecretEmpty(), nil
 		case "set":
 			return nil, ConfigSet_tx(ctx, tx, reqJson)
 		}

@@ -80,6 +80,9 @@ func GetConfigFilepath() string {
 func GetDbVersionCut() string {
 	return GetString("dbVersionCut")
 }
+func GetIsCredSecretEmpty() bool {
+	return File.CredentialsSecret == ""
+}
 func GetHostname() string {
 	access_mx.RLock()
 	defer access_mx.RUnlock()

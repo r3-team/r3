@@ -52,6 +52,16 @@
 			"button": {
 				"apply": "Änderungen übernehmen"
 			},
+			"credSecretEmpty": "Systemzugangsdaten sind noch nicht verschlüsselt.",
+			"credSecretEmptyHint": "Mit REI3.14 werden Systemzugangsdaten, wie OAuth-Client-Secrets, E-Mail-Account sowie LDAP-Bind-Passwörter, standardmäßig verschlüsselt. Für Systeme, die von vor REI3.14 updaten, bitte diese Schritte durchführen, um Systemzugangsdaten zu verschlüsseln:",
+			"credSecretEmptySteps": [
+				"Sicherstellen, dass aktuelle Backups existieren - als Vorsichtsmaßnahme.",
+				"Die REI3 Konfigurationsdatei öffnen (\"config.json\", standardmäßig im REI3-Installationsordner).",
+				"In der Konfigurationsdatei prüfen ob der Eintrag 'credentialsSecretNew' existiert. Falls nicht, diesen anlegen, auf dem gleichen Level wie Einträge \"portable\" oder \"paths\".",
+				"Einen starken Schlüssel (Sprich: ein langes, komplexes Passwort) wählen und diesen als Wert für \"credentialsSecretNew\" setzen. Es ist eine gute Idee, diesen Schlüssel in einem getrennten Passwort-Safe aufzubewahren.",
+				"Den REI3-Dienst neustarten - REI3 wird den neuen Schlüssel verwenden, um Systemzugangsdaten zu verschlüsseln.",
+				"Falls Clustering genutzt wird: Die Schritte für alle Cluster-Knoten durchführen. Den gleichen Schlüssel in der Konfigurationsdatei für jeden Knoten für \"credentialsSecretNew\" setzen. Danach REI3 auf jeden Cluster-Knoten neu starten."
+			],
 			"dbTimeoutCsv": "Datenbank-Timeout: Stabelverarbeitung (CSV)",
 			"dbTimeoutDataRest": "Datenbank-Timeout: Datenanfragen (REST)",
 			"dbTimeoutDataWs": "Datenbank-Timeout: Datenanfragen (HTTP/WS)",
@@ -2893,6 +2903,7 @@
 		"searchCompleted": "Suche abgeschlossen",
 		"searchRunning": "Suche läuft",
 		"seconds": "Sekunden",
+		"securityNotice": "Sicherheitshinweis",
 		"selected": "Ausgewählt",
 		"selectedMaxOne": "Ausgewählt (max. 1)",
 		"separator": "Trennzeichen",

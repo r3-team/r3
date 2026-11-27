@@ -95,6 +95,25 @@ export default {
 								/>
 							</td>
 						</tr>
+						<template v-if="credSecretEmpty">
+							<tr><td colspan="2"><hr /></td></tr>
+							<tr>
+								<td colspan="2">
+									<my-label image="key.png" :caption="capGen.securityNotice" />
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div class="row gap centered space-between">
+										<span>{{ capApp.credSecretEmpty }}</span>
+										<my-button image="question.png"
+											@trigger="showHelp('<p>' + capApp.credSecretEmptyHint + '</p><ul><li>' + capApp.credSecretEmptySteps.join('</li><li>') + '</li></ul>')"
+											:caption="capGen.information"
+										/>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
@@ -347,9 +366,10 @@ export default {
 	data() {
 		return {
 			adminMailInput: '',
-			configInput: {},
 			bruteforceCountBlocked: 0,
 			bruteforceCountTracked: 0,
+			configInput: {},
+			credSecretEmpty: false,
 			loginBackgroundCount: 12,
 			ready: false
 		};
@@ -458,10 +478,14 @@ export default {
 
 		// backend calls
 		get() {
-			ws.send('bruteforce', 'get', {}, true).then(
+			ws.sendMultiple([
+				ws.prepare('bruteforce', 'get', null),
+				ws.prepare('config', 'getCredSecretEmpty', null)
+			], true).then(
 				res => {
-					this.bruteforceCountBlocked = res.payload.hostsBlocked;
-					this.bruteforceCountTracked = res.payload.hostsTracked;
+					this.bruteforceCountBlocked = res[0].payload.hostsBlocked;
+					this.bruteforceCountTracked = res[0].payload.hostsTracked;
+					this.credSecretEmpty = res[1].payload;
 					this.ready = true;
 				},
 				this.$root.genericError

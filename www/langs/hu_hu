@@ -52,6 +52,16 @@
 			"button": {
 				"apply": "Változtatások mentése"
 			},
+			"credSecretEmpty": "System credentials are not yet encrypted.",
+			"credSecretEmptyHint": "Since REI3.14, system credentials, like OAuth client secrets, mail account or LDAP bind passwords, are encrypted by default. For systems upgrading from before REI3.14, please follow these steps, to encrypt system credentials:",
+			"credSecretEmptySteps": [
+				"Make sure, current backups exist - as a precaution just in case.",
+				"Open REI3s configuration file ('config.json', by default in REI3s installation directory).",
+				"In the config file, check if there is an entry called 'credentialsSecretNew'. If not, create it on the same level as entries such as 'portable' or 'paths'.",
+				"Choose a strong key (ie. a long, complex password) and enter it as value for the entry 'credentialsSecretNew'. It is a good idea to also store this key in a separate password vault.",
+				"Restart the REI3 service - REI3 will use the new key to encrypt system credentials.",
+				"If clustering is used: Repeat these steps for all cluster nodes. Set the same key in every node´s config file for 'credentialsSecretNew'. Reboot REI3 on every cluster node."
+			],
 			"dbTimeoutCsv": "Adatbázis időtúllépés: Stabil feldolgozás (CSV)",
 			"dbTimeoutDataRest": "Adatbázis időtúllépés: Adatkérések (REST)",
 			"dbTimeoutDataWs": "Adatbázis időtúllépés: Adatkérések (HTTP/WS)",
@@ -2893,6 +2903,7 @@
 		"searchCompleted": "Search completed",
 		"searchRunning": "Search is running",
 		"seconds": "Seconds",
+		"securityNotice": "Security notice",
 		"selected": "Kiválasztva",
 		"selectedMaxOne": "Kiválasztva (max. 1)",
 		"separator": "Separator",
