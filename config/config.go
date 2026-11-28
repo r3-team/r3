@@ -49,9 +49,9 @@ var (
 	rxVersionCut   = regexp.MustCompile(`\.\d+\.\d+$`)
 )
 
-func ApplyCredentialsSecretNew() error {
-	File.CredentialsSecret = File.CredentialsSecretNew
-	File.CredentialsSecretNew = ""
+func ApplyCredentialsKeyNew() error {
+	File.CredentialsKey = File.CredentialsKeyNew
+	File.CredentialsKeyNew = ""
 	return WriteFile()
 }
 
@@ -80,8 +80,8 @@ func GetConfigFilepath() string {
 func GetDbVersionCut() string {
 	return GetString("dbVersionCut")
 }
-func GetIsCredSecretEmpty() bool {
-	return File.CredentialsSecret == ""
+func GetIsCredKeyEmpty() bool {
+	return File.CredentialsKey == ""
 }
 func GetHostname() string {
 	access_mx.RLock()

@@ -58,10 +58,10 @@ func get(ctx context.Context, target types.CredentialsTarget, id any) (string, e
 	`, target), id).Scan(&cipherTextEnc, &nonce, &saltKdf); err != nil {
 		return "", err
 	}
-	return cryptAesGcm.DecryptWithWeakSecret(config.File.CredentialsSecret, cipherTextEnc, saltKdf, nonce)
+	return cryptAesGcm.DecryptWithWeakSecret(config.File.CredentialsKey, cipherTextEnc, saltKdf, nonce)
 }
 func set_tx(ctx context.Context, tx pgx.Tx, target types.CredentialsTarget, id any, cipherTextPlain string) error {
-	cipherTextEnc, saltKdf, nonce, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsSecret, cipherTextPlain)
+	cipherTextEnc, saltKdf, nonce, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsKey, cipherTextPlain)
 	if err != nil {
 		return err
 	}

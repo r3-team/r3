@@ -2,8 +2,8 @@
 	"cluster": {
 		"nodeId": ""
 	},
-	"credentialsSecret": "",
-	"credentialsSecretNew": "",
+	"credentialsKey": "",
+	"credentialsKeyNew": "",
 	"db": {
 		"embedded": false,
 		"host": "localhost",

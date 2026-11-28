@@ -293,8 +293,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		rows.Close()
 
 		for _, c := range creds {
-			// secret is empty string during initial migration (new JSON field in config file)
-			// new secret is set via admin panel after migration to this version
+			// key is empty string during initial migration (new JSON field in config file)
+			// new key is set in config file after upgrade
 			if c.IdHost.Valid {
 				if err := config_credential.SetUuid_tx(ctx, tx, constants.CredentialsTargetDbSyncHost, c.IdHost.Bytes, c.CipherPlain); err != nil {
 					return "", err

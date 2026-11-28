@@ -370,12 +370,12 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// new instance, generate new secret if current one is empty (default config file)
-	if isNewInstance && config.File.CredentialsSecret == "" {
-		config.File.CredentialsSecretNew = tools.RandStringRunes(48)
+	if isNewInstance && config.File.CredentialsKey == "" {
+		config.File.CredentialsKeyNew = tools.RandStringRunes(48)
 	}
 
 	// migrate credentials secret if new one is set
-	if err := config_credential.MigrateToNewSecretIfRequired(); err != nil {
+	if err := config_credential.MigrateToNewKeyIfRequired(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed credentials secret migration, %v", err))
 		return
 	}

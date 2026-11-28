@@ -41,16 +41,16 @@ func CreateNewSystemCred(systemCred types.CredentialsSystem) error {
 	return tx.Commit(ctx)
 }
 
-func MigrateToNewSecretIfRequired() error {
+func MigrateToNewKeyIfRequired() error {
 
-	if config.File.CredentialsSecretNew == "" {
+	if config.File.CredentialsKeyNew == "" {
 		// no change to apply
 		return nil
 	}
 
-	// check if new credentials secret is already in use, by trying to read JWT token secret (not there yet for new instance - or encrypted with old secret)
+	// check if new credentials key is already in use, by trying to read JWT token secret (not there yet for new instance - or encrypted with old key)
 	// check is important as 2nd cluster node with identical config might boot up after migration was done already
-	log.Info(log.ContextServer, "found new credentials secret in configuration file, checking state")
+	log.Info(log.ContextServer, "found new credentials key in configuration file, checking state")
 
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
@@ -62,12 +62,12 @@ func MigrateToNewSecretIfRequired() error {
 	defer tx.Rollback(ctx)
 
 	if _, err := GetSystemSecretNew_tx(ctx, tx, constants.CredentialsSystemTokenSecret); err == nil {
-		log.Info(log.ContextServer, "validated new credentials secret already in use, updating current secret in configuration file")
-		return config.ApplyCredentialsSecretNew()
+		log.Info(log.ContextServer, "validated new credentials key already in use, updating current key in configuration file")
+		return config.ApplyCredentialsKeyNew()
 	}
 
-	// token secret could not be decrypted, we assume new secret has not been applied yet
-	log.Info(log.ContextServer, "validated new credentials secret not in use yet, migrating existing credentials to new secret")
+	// token secret could not be decrypted, we assume new key has not been applied yet
+	log.Info(log.ContextServer, "validated new credentials key not in use yet, migrating existing credentials to new key")
 
 	rows, err := tx.Query(ctx, `SELECT id, cipher_text_enc, salt_kdf, nonce FROM instance.credential`)
 	if err != nil {
@@ -85,15 +85,15 @@ func MigrateToNewSecretIfRequired() error {
 	}
 	rows.Close()
 
-	// re-encrypt credentials with new secret
+	// re-encrypt credentials with new key
 	bt := &pgx.Batch{}
 
 	for _, c := range creds {
-		cipherTextPlain, err := cryptAesGcm.DecryptWithWeakSecret(config.File.CredentialsSecret, c.CipherTextEnc, c.SaltKdf, c.Nonce)
+		cipherTextPlain, err := cryptAesGcm.DecryptWithWeakSecret(config.File.CredentialsKey, c.CipherTextEnc, c.SaltKdf, c.Nonce)
 		if err != nil {
 			return err
 		}
-		cipherTextEncNew, saltKdfNew, nonceNew, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsSecretNew, cipherTextPlain)
+		cipherTextEncNew, saltKdfNew, nonceNew, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsKeyNew, cipherTextPlain)
 		if err != nil {
 			return err
 		}
@@ -111,11 +111,11 @@ func MigrateToNewSecretIfRequired() error {
 		return err
 	}
 
-	log.Info(log.ContextServer, "successfully migrated credentials to new secret, updating current secret in configuration file")
+	log.Info(log.ContextServer, "successfully migrated credentials to new key, updating current key in configuration file")
 
-	// only apply new secret to config file, if DB changes were committed
-	// even if write to config file is blocked now, it contains old & new secret (nothing is lost)
-	// as long as re-encryption is atomic, either new or old secret is valid at any time
+	// only apply new key to config file, if DB changes were committed
+	// even if write to config file is blocked now, it contains old & new key (nothing is lost)
+	// as long as re-encryption is atomic, either new or old key is valid at any time
 	// if write to config file fails mid-op, restore is required
-	return config.ApplyCredentialsSecretNew()
+	return config.ApplyCredentialsKeyNew()
 }

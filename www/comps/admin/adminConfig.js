@@ -95,7 +95,7 @@ export default {
 								/>
 							</td>
 						</tr>
-						<template v-if="credSecretEmpty">
+						<template v-if="credKeyEmpty">
 							<tr><td colspan="2"><hr /></td></tr>
 							<tr>
 								<td colspan="2">
@@ -105,9 +105,9 @@ export default {
 							<tr>
 								<td colspan="2">
 									<div class="row gap centered space-between">
-										<span>{{ capApp.credSecretEmpty }}</span>
+										<span>{{ capApp.credKeyEmpty }}</span>
 										<my-button image="question.png"
-											@trigger="showHelp('<p>' + capApp.credSecretEmptyHint + '</p><ul><li>' + capApp.credSecretEmptySteps.join('</li><li>') + '</li></ul>')"
+											@trigger="showHelp('<p>' + capApp.credKeyEmptyHint + '</p><ul><li>' + capApp.credKeyEmptySteps.join('</li><li>') + '</li></ul>')"
 											:caption="capGen.information"
 										/>
 									</div>
@@ -369,7 +369,7 @@ export default {
 			bruteforceCountBlocked: 0,
 			bruteforceCountTracked: 0,
 			configInput: {},
-			credSecretEmpty: false,
+			credKeyEmpty: false,
 			loginBackgroundCount: 12,
 			ready: false
 		};
@@ -480,12 +480,12 @@ export default {
 		get() {
 			ws.sendMultiple([
 				ws.prepare('bruteforce', 'get', null),
-				ws.prepare('config', 'getCredSecretEmpty', null)
+				ws.prepare('config', 'getCredKeyEmpty', null)
 			], true).then(
 				res => {
 					this.bruteforceCountBlocked = res[0].payload.hostsBlocked;
 					this.bruteforceCountTracked = res[0].payload.hostsTracked;
-					this.credSecretEmpty = res[1].payload;
+					this.credKeyEmpty = res[1].payload;
 					this.ready = true;
 				},
 				this.$root.genericError

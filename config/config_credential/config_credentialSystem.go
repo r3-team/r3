@@ -13,10 +13,10 @@ import (
 )
 
 func GetSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem) (string, error) {
-	return getSystem_tx(ctx, tx, systemCred, config.File.CredentialsSecret)
+	return getSystem_tx(ctx, tx, systemCred, config.File.CredentialsKey)
 }
 func GetSystemSecretNew_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem) (string, error) {
-	return getSystem_tx(ctx, tx, systemCred, config.File.CredentialsSecretNew)
+	return getSystem_tx(ctx, tx, systemCred, config.File.CredentialsKeyNew)
 }
 
 func SetSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSystem, cipherTextPlain string) error {
@@ -24,7 +24,7 @@ func SetSystem_tx(ctx context.Context, tx pgx.Tx, systemCred types.CredentialsSy
 		return fmt.Errorf("invalid system credentials '%s'", systemCred)
 	}
 
-	cipherTextEnc, saltKdf, nonce, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsSecret, cipherTextPlain)
+	cipherTextEnc, saltKdf, nonce, err := cryptAesGcm.EncryptWithWeakSecret(config.File.CredentialsKey, cipherTextPlain)
 	if err != nil {
 		return err
 	}
