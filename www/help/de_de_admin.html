@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2026-10-06</em></p>
+<p><em>Aktualisiert 2026-11-28</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -51,7 +51,7 @@
 <p>Abhängig von der verfügbaren IT-Infrastruktur und wie REI3 eingesetzt werden soll, existieren verschiedene Bereitstellungsmodelle:</p>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th></th>
 <th style="text-align: center;">Dediziert</th>
 <th style="text-align: center;">Eigenständig</th>
@@ -60,28 +60,28 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Entworfen für</td>
 <td style="text-align: center;">Produktion</td>
 <td style="text-align: center;">Produktion</td>
 <td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
 <td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Integrierte Datenbank</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Läuft unter Windows</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Läuft unter Linux</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"></td>
@@ -128,7 +128,7 @@
 <ul>
 <li>Linux-Server
 <ul>
-<li>Optional: ImageMagick (für Thumbnails)</li>
+<li>Optional: ImageMagick v7 (oder neuer, für Thumbnails)</li>
 <li>Optional: Ghostscript (für PDF-Thumbnails)</li>
 <li>Optional: PostgreSQL-Client-Werkzeuge (für integrierte Backups)</li>
 </ul></li>
@@ -162,7 +162,7 @@
 <li>Machen Sie die Datei <code>r3</code> ausführbar (<code>chmod u+x r3</code>).</li>
 <li>Kopieren Sie die Datei <code>config_template.json</code> zu <code>config.json</code> - die Datei muss im gleichen Verzeichnis sein wie die ausführbare Datei <code>r3</code>.</li>
 <li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (15.0 oder neuer) hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
-<li>Optional: Installieren Sie ImageMagick und Ghostscript falls Thumbnails erwünscht sind (<code>sudo apt install imagemagick ghostscript</code>).</li>
+<li>Optional: Installieren Sie ImageMagick (v7 oder neuer) und Ghostscript falls Thumbnails erwünscht sind (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Installieren Sie PostgreSQL-Client-Werkzeuge falls Sie die integrierte Backup-Funktion nutzen möchten (<code>sudo apt install postgresql-client</code>).</li>
 <li>Registrieren Sie REI3 im Service-Manager (<code>sudo ./r3 -install</code>).</li>
 <li>Starten Sie den REI3-Dienst (<code>systemctl start rei3</code> zum Beispiel).</li>
@@ -226,6 +226,8 @@
 </ul></li>
 <li>mirror: Deaktiviert schreibende Konnektoren (aktuell: E-Mail &amp; Rest) sowie integrierte Backups. Nützlich für REI3-Instanzen, die Produktivsysteme für Tests oder Entwicklungsarbeiten spiegeln sollen.</li>
 <li>portable: Nur relevant für portable Bereitstellung. Wenn 'true', startet REI3 im HTTP-Modus und öffnet einen Browser zur REI3-Startseite.</li>
+<li>credentialsKey: Schlüssel, der für Verschlüsselung von Systemzugangsdaten, wie z. B. E-Mail-Account-Passwörter verwendet wird. Wert wird vom System gesetzt, wenn Verschlüsselung aktualisiert wird. Sollte nicht von Hand ausgefüllt werden.</li>
+<li>credentialsKeyNew: Wenn ein nicht leerer Wert gesetzt wird, wird der aktuelle Schlüssel beim nächsten Start ausgetauscht. Wenn Clustering eingesetzt wird, den gleichen, neuen Schlüssel in der Konfigdatei aller Cluster-Knoten einfügen.</li>
 <li>cluster: Cluster-Einstellungen.
 <ul>
 <li>nodeId: Die diesem Clusterknoten zugewiesene ID. Sollte nicht von Hand ausgefüllt werden. REI3 generiert und speichert automatisch eine neue Knoten-ID, wenn sich ein Knoten zum ersten Mal mit einem Cluster verbindet.</li>

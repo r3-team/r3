@@ -1,4 +1,4 @@
-<p><em>Updated 2026-10-06</em></p>
+<p><em>Updated 2026-11-28</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -51,7 +51,7 @@
 <p>Depending on the available IT infrastructure and how REI3 is to be used, different deployment models exist:</p>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th></th>
 <th style="text-align: center;">Dedicated</th>
 <th style="text-align: center;">Stand-alone</th>
@@ -60,28 +60,28 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Designed for</td>
 <td style="text-align: center;">production</td>
 <td style="text-align: center;">production</td>
 <td style="text-align: center;">test / build REI3 apps</td>
 <td style="text-align: center;">test / build REI3 apps</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Integrated database</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Runs on Windows</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Runs on Linux</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"></td>
@@ -128,7 +128,7 @@
 <ul>
 <li>Linux server
 <ul>
-<li>Optional: ImageMagick (for thumbnails)</li>
+<li>Optional: ImageMagick v7 (or newer, for thumbnails)</li>
 <li>Optional: Ghostscript (for PDF thumbnails)</li>
 <li>Optional: PostgreSQL client tools (for integrated backups)</li>
 </ul></li>
@@ -162,7 +162,7 @@
 <li>Make the file <code>r3</code> executable (<code>chmod u+x r3</code>).</li>
 <li>Copy the file <code>config_template.json</code> to <code>config.json</code> - keep it in the same directory as the <code>r3</code> executable.</li>
 <li>Add connection details to an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> (15.0 or newer) to <code>config.json</code>. The database user must have full permissions for the chosen database.</li>
-<li>Optional: Install ImageMagick and Ghostscript if you want to have thumbnails (<code>sudo apt install imagemagick ghostscript</code>).</li>
+<li>Optional: Install ImageMagick (v7 or newer) and Ghostscript if you want to have thumbnails (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Install PostgreSQL client tools if you want to use the integrated backup feature (<code>sudo apt install postgresql-client</code>).</li>
 <li>Register REI3 with your service manager (<code>sudo ./r3 -install</code>).</li>
 <li>Start the REI3 service (<code>systemctl start rei3</code> for example).</li>
@@ -226,6 +226,8 @@
 </ul></li>
 <li>mirror: Disables writing connectors (currently: email &amp; REST) as well as integrated backups. Useful for REI3 instances that should mirror production systems for testing or development.</li>
 <li>portable: Only relevant for portable deployments. If true, REI3 will start in HTTP mode and open a browser to the REI3 start page.</li>
+<li>credentialsKey: Key used to encrypt system credentials, such as mail account passwords. Value is set by system, when encryption is updated. Should not be filled by hand.</li>
+<li>credentialsKeyNew: If a non-empty value is added here, the current credentials key will be replaced on next start. If clustering is used, the same, new key must be added to every node´s config file.</li>
 <li>cluster: Cluster settings.
 <ul>
 <li>nodeId: The ID assigned to this cluster node. Should not be filled by hand. REI3 will auto-generate and store a new node ID when a node first connects to a cluster.</li>
